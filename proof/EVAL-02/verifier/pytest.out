@@ -1,0 +1,16 @@
+........................................................................ [ 66%]
+....................................                                     [100%]
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.13.17-final-0 _______________
+
+Name                               Stmts   Miss  Cover   Missing
+----------------------------------------------------------------
+pareeksha/evaluation/__init__.py       0      0   100%
+pareeksha/evaluation/checks.py       165      7    96%   38, 141, 175, 252-254, 433
+pareeksha/evaluation/metrics.py      142      2    99%   212, 242
+pareeksha/evaluation/numbers.py      303     13    96%   307, 341-342, 352-357, 405, 415, 437, 441
+pareeksha/evaluation/pii.py           91      1    99%   71
+pareeksha/evaluation/types.py         66      1    98%   67
+----------------------------------------------------------------
+TOTAL                                767     24    97%
+108 passed in 0.44s
