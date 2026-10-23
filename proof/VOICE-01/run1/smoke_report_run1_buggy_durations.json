@@ -1,0 +1,209 @@
+{
+  "round_trips": [
+    {
+      "lang": "kn-IN",
+      "voice": "Lakshmi",
+      "tts_seconds": 134217.73,
+      "reference": "ನಮಸ್ಕಾರ, ನನ್ನ ಇಎಂಐ ಬಾಕಿ ಮೊತ್ತ ಎಷ್ಟು ಎಂದು ದಯವಿಟ್ಟು ತಿಳಿಸಿ.",
+      "hypothesis": "ನಮಸ್ಕಾರ ನನ್ನ ಇ ಎಮ್ ಐ ಬಾಕಿ ಮೊತ್ತ ಎಷ್ಟು ಎಂದು ದಯವಿಟ್ಟು ತಿಳಿಸಿ",
+      "wer": 0.3333333333333333,
+      "stt_model": "gnani-prisma-v2.5",
+      "stt_processing_time": 0.2792630195617676
+    },
+    {
+      "lang": "kn-IN",
+      "voice": "Avinash",
+      "tts_seconds": 134217.73,
+      "reference": "ನಮಸ್ಕಾರ, ನನ್ನ ಇಎಂಐ ಬಾಕಿ ಮೊತ್ತ ಎಷ್ಟು ಎಂದು ದಯವಿಟ್ಟು ತಿಳಿಸಿ.",
+      "hypothesis": "ನಮಸ್ಕಾರ ನನ್ನ ಇ ಎಮ್ ಐ ಬಾಕಿ ಮೊತ್ತ ಎಷ್ಟು ಎಂದು ದಯವಿಟ್ಟು ತಿಳಿಸಿ",
+      "wer": 0.3333333333333333,
+      "stt_model": "gnani-prisma-v2.5",
+      "stt_processing_time": 0.15187644958496094
+    },
+    {
+      "lang": "hi-IN",
+      "voice": "Shivani",
+      "tts_seconds": 134217.73,
+      "reference": "नमस्ते, मेरी ईएमआई की बकाया राशि कितनी है, कृपया बताइए।",
+      "hypothesis": "नमस्ते, मेरी ई एम आई की बकाया राशि कितनी है, कृपया बताइए।",
+      "wer": 0.3,
+      "stt_model": "gnani-prisma-v2.5",
+      "stt_processing_time": 0.14585566520690918
+    },
+    {
+      "lang": "hi-IN",
+      "voice": "Shubham",
+      "tts_seconds": 134217.73,
+      "reference": "नमस्ते, मेरी ईएमआई की बकाया राशि कितनी है, कृपया बताइए।",
+      "hypothesis": "नमस्ते, मेरी ई एम आई की बकाया राशि कितनी है, कृपया बताइये।",
+      "wer": 0.4,
+      "stt_model": "gnani-prisma-v2.5",
+      "stt_processing_time": 0.14954924583435059
+    }
+  ],
+  "stream": [
+    {
+      "text": "नमस्ते, मेरी ई एम आई की बकाया राशि कितनी है, कृपया बताइए।",
+      "audio_ms": 4896.0,
+      "latency_ms": 185
+    }
+  ],
+  "batch": {
+    "duration_s": 10.0,
+    "segments": [
+      {
+        "start": 0.0,
+        "end": 5.632,
+        "text": "ನಮಸ್ಕಾರ ನನ್ನ ಇ ಎಮ್ ಐ ಬಾಕಿ ಮೊತ್ತ ಎಷ್ಟು ಎಂದು ದಯವಿಟ್ಟು ತಿಳಿಸಿ",
+        "speaker": 1
+      },
+      {
+        "start": 5.632,
+        "end": 10.0,
+        "text": "ನಮಸ್ಕಾರ ನಿಮ್ಮ ಇ ಎಮ್ ಐ ಬಾಕಿ ಮೊತ್ತ ಎರಡು ಸಾವಿರ ರೂಪಾಯಿ",
+        "speaker": 2
+      }
+    ],
+    "speakers_seen": [
+      1,
+      2
+    ],
+    "reference_turns": [
+      "ನಮಸ್ಕಾರ, ನನ್ನ ಇಎಂಐ ಬಾಕಿ ಮೊತ್ತ ಎಷ್ಟು ಎಂದು ದಯವಿಟ್ಟು ತಿಳಿಸಿ.",
+      "ನಮಸ್ಕಾರ, ನಿಮ್ಮ ಇಎಂಐ ಬಾಕಿ ಮೊತ್ತ ಎರಡು ಸಾವಿರ ರೂಪಾಯಿ."
+    ]
+  },
+  "stream_wer": 0.3,
+  "usage_totals": {
+    "tts": {
+      "calls": 5,
+      "audio_seconds": 671088.64,
+      "chars": 273
+    },
+    "stt_rest": {
+      "calls": 4,
+      "audio_seconds": 536870.912,
+      "chars": 0
+    },
+    "stt_stream": {
+      "calls": 1,
+      "audio_seconds": 4.48,
+      "chars": 0
+    },
+    "stt_batch": {
+      "calls": 1,
+      "audio_seconds": 10.0,
+      "chars": 0
+    }
+  },
+  "usage_records": [
+    {
+      "kind": "tts",
+      "language": "kn-IN",
+      "audio_seconds": 134217.7279375,
+      "chars": 57,
+      "cached": false,
+      "latency_ms": 3144,
+      "detail": "timbre-v3.0/Lakshmi"
+    },
+    {
+      "kind": "stt_rest",
+      "language": "kn-IN",
+      "audio_seconds": 134217.7279375,
+      "chars": 0,
+      "cached": false,
+      "latency_ms": 1571,
+      "detail": ""
+    },
+    {
+      "kind": "tts",
+      "language": "kn-IN",
+      "audio_seconds": 134217.7279375,
+      "chars": 57,
+      "cached": false,
+      "latency_ms": 2684,
+      "detail": "timbre-v3.0/Avinash"
+    },
+    {
+      "kind": "stt_rest",
+      "language": "kn-IN",
+      "audio_seconds": 134217.7279375,
+      "chars": 0,
+      "cached": false,
+      "latency_ms": 1714,
+      "detail": ""
+    },
+    {
+      "kind": "tts",
+      "language": "hi-IN",
+      "audio_seconds": 134217.7279375,
+      "chars": 55,
+      "cached": false,
+      "latency_ms": 2983,
+      "detail": "timbre-v3.0/Shivani"
+    },
+    {
+      "kind": "stt_rest",
+      "language": "hi-IN",
+      "audio_seconds": 134217.7279375,
+      "chars": 0,
+      "cached": false,
+      "latency_ms": 1504,
+      "detail": ""
+    },
+    {
+      "kind": "tts",
+      "language": "hi-IN",
+      "audio_seconds": 134217.7279375,
+      "chars": 55,
+      "cached": false,
+      "latency_ms": 2520,
+      "detail": "timbre-v3.0/Shubham"
+    },
+    {
+      "kind": "stt_rest",
+      "language": "hi-IN",
+      "audio_seconds": 134217.7279375,
+      "chars": 0,
+      "cached": false,
+      "latency_ms": 1610,
+      "detail": ""
+    },
+    {
+      "kind": "stt_stream",
+      "language": "hi-IN",
+      "audio_seconds": 4.48,
+      "chars": 0,
+      "cached": false,
+      "latency_ms": 11572,
+      "detail": ""
+    },
+    {
+      "kind": "tts",
+      "language": "kn-IN",
+      "audio_seconds": 134217.7279375,
+      "chars": 57,
+      "cached": true,
+      "latency_ms": 0,
+      "detail": ""
+    },
+    {
+      "kind": "tts",
+      "language": "kn-IN",
+      "audio_seconds": 134217.7279375,
+      "chars": 49,
+      "cached": false,
+      "latency_ms": 1991,
+      "detail": "timbre-v3.0/Avinash"
+    },
+    {
+      "kind": "stt_batch",
+      "language": "kn-IN",
+      "audio_seconds": 10.0,
+      "chars": 0,
+      "cached": false,
+      "latency_ms": 16525,
+      "detail": "speakers=2"
+    }
+  ]
+}
