@@ -1,0 +1,107 @@
+$ docker compose ps -a
+NAME                                   IMAGE                                COMMAND                  SERVICE      CREATED              STATUS                          PORTS
+agent-a25b29304ffeb1a2b-api-1          agent-a25b29304ffeb1a2b-api          "uvicorn pareeksha.a…"   api          About a minute ago   Up 28 seconds (healthy)         0.0.0.0:8000->8000/tcp
+agent-a25b29304ffeb1a2b-kafka-1        apache/kafka:4.0.0                   "/__cacert_entrypoin…"   kafka        About a minute ago   Up About a minute (healthy)     9092/tcp, 0.0.0.0:9094->9094/tcp
+agent-a25b29304ffeb1a2b-kafka-init-1   apache/kafka:4.0.0                   "bash /create-topics…"   kafka-init   About a minute ago   Exited (0) 28 seconds ago       
+agent-a25b29304ffeb1a2b-migrate-1      agent-a25b29304ffeb1a2b-migrate      "sh /app/alembic_mig…"   migrate      About a minute ago   Exited (0) About a minute ago   
+agent-a25b29304ffeb1a2b-mock-agent-1   agent-a25b29304ffeb1a2b-mock-agent   "python server.py"       mock-agent   About a minute ago   Up About a minute (healthy)     0.0.0.0:8765->8765/tcp
+agent-a25b29304ffeb1a2b-postgres-1     postgres:16                          "docker-entrypoint.s…"   postgres     About a minute ago   Up About a minute (healthy)     0.0.0.0:5432->5432/tcp
+agent-a25b29304ffeb1a2b-web-1          agent-a25b29304ffeb1a2b-web          "/docker-entrypoint.…"   web          About a minute ago   Up 17 seconds                   80/tcp, 0.0.0.0:3000->3000/tcp
+
+$ curl -i localhost:8000/health
+HTTP/1.1 200 OK
+date: Fri, 23 Oct 2026 18:34:11 GMT
+server: uvicorn
+content-length: 24
+content-type: application/json
+
+{"db":"ok","kafka":"ok"}
+$ curl localhost:8765/health
+{"status":"ok","placeholder":true}
+$ curl -I localhost:3000
+HTTP/1.1 200 OK
+
+$ docker compose logs kafka-init
+kafka-init-1  | Waiting for Kafka at kafka:9092...
+kafka-init-1  | WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+kafka-init-1  | Created topic pareeksha.run.requested.v1.
+kafka-init-1  | WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+kafka-init-1  | Created topic pareeksha.call.requested.v1.
+kafka-init-1  | WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+kafka-init-1  | Created topic pareeksha.audit.requested.v1.
+kafka-init-1  | WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+kafka-init-1  | Created topic pareeksha.call.completed.v1.
+kafka-init-1  | WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+kafka-init-1  | Created topic pareeksha.evaluation.completed.v1.
+kafka-init-1  | WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+kafka-init-1  | Created topic pareeksha.run.completed.v1.
+kafka-init-1  | WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+kafka-init-1  | Created topic pareeksha.progress.v1.
+kafka-init-1  | WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+kafka-init-1  | Created topic pareeksha.scenario.generate.requested.v1.
+kafka-init-1  | WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+kafka-init-1  | Created topic pareeksha.dialect.clip.requested.v1.
+kafka-init-1  | WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+kafka-init-1  | Created topic pareeksha.retry.30s.v1.
+kafka-init-1  | WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+kafka-init-1  | Created topic pareeksha.retry.5m.v1.
+kafka-init-1  | WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+kafka-init-1  | Created topic pareeksha.dlq.v1.
+kafka-init-1  | Topics:
+kafka-init-1  | pareeksha.audit.requested.v1
+kafka-init-1  | pareeksha.call.completed.v1
+kafka-init-1  | pareeksha.call.requested.v1
+kafka-init-1  | pareeksha.dialect.clip.requested.v1
+kafka-init-1  | pareeksha.dlq.v1
+kafka-init-1  | pareeksha.evaluation.completed.v1
+kafka-init-1  | pareeksha.progress.v1
+kafka-init-1  | pareeksha.retry.30s.v1
+kafka-init-1  | pareeksha.retry.5m.v1
+kafka-init-1  | pareeksha.run.completed.v1
+kafka-init-1  | pareeksha.run.requested.v1
+kafka-init-1  | pareeksha.scenario.generate.requested.v1
+
+$ docker compose logs migrate
+migrate-1  | no alembic.ini yet (API-01 pending): nothing to migrate
+
+$ kafka-topics --describe
+Topic: pareeksha.dlq.v1	TopicId: l3GqiCBcTxOZVb97jyzQ_w	PartitionCount: 3	ReplicationFactor: 1	Configs: cleanup.policy=delete,retention.ms=2592000000
+Topic: pareeksha.call.requested.v1	TopicId: LPeuqRd6RG2j8QdXhVlaiA	PartitionCount: 6	ReplicationFactor: 1	Configs: cleanup.policy=delete,retention.ms=604800000
+Topic: pareeksha.dialect.clip.requested.v1	TopicId: InsHe8LMQLeosNzTbUXPwQ	PartitionCount: 6	ReplicationFactor: 1	Configs: cleanup.policy=delete,retention.ms=604800000
+Topic: pareeksha.progress.v1	TopicId: gHyFHNDITlWFxykT0fQfDA	PartitionCount: 3	ReplicationFactor: 1	Configs: cleanup.policy=delete,retention.ms=86400000
+Topic: pareeksha.retry.30s.v1	TopicId: U3JaaoFdSHWm06KX-sSUgw	PartitionCount: 3	ReplicationFactor: 1	Configs: cleanup.policy=delete,retention.ms=604800000
+Topic: pareeksha.retry.5m.v1	TopicId: E05KIaQGSp26EEQ9MkSXMA	PartitionCount: 3	ReplicationFactor: 1	Configs: cleanup.policy=delete,retention.ms=604800000
+Topic: pareeksha.scenario.generate.requested.v1	TopicId: hKInQTZOSMWlWWSXsqR9XA	PartitionCount: 3	ReplicationFactor: 1	Configs: cleanup.policy=delete,retention.ms=604800000
+Topic: pareeksha.run.requested.v1	TopicId: Bte6xVGmTxKzHeYUbWzU8w	PartitionCount: 6	ReplicationFactor: 1	Configs: cleanup.policy=delete,retention.ms=604800000
+Topic: pareeksha.evaluation.completed.v1	TopicId: ZXC6WU9MQNeD5jxUIOQRew	PartitionCount: 6	ReplicationFactor: 1	Configs: cleanup.policy=delete,retention.ms=604800000
+Topic: pareeksha.call.completed.v1	TopicId: P-QMFw-dR2eEtqZ0swnH_A	PartitionCount: 6	ReplicationFactor: 1	Configs: cleanup.policy=delete,retention.ms=604800000
+Topic: pareeksha.run.completed.v1	TopicId: DWPG3cNdQOOtedVCRH0pzQ	PartitionCount: 3	ReplicationFactor: 1	Configs: cleanup.policy=delete,retention.ms=604800000
+Topic: pareeksha.audit.requested.v1	TopicId: i7nkTi4GTZSF0gshrIxeTQ	PartitionCount: 6	ReplicationFactor: 1	Configs: cleanup.policy=delete,retention.ms=604800000
+
+$ pg_isready
+/var/run/postgresql:5432 - accepting connections
+
+$ docker compose run --rm kafka-init   (idempotent re-run)
+ Container agent-a25b29304ffeb1a2b-kafka-1 Running 
+ Container agent-a25b29304ffeb1a2b-kafka-1 Waiting 
+ Container agent-a25b29304ffeb1a2b-kafka-1 Healthy 
+ Container agent-a25b29304ffeb1a2b-kafka-init-run-9b6e86d3e3c4 Creating 
+ Container agent-a25b29304ffeb1a2b-kafka-init-run-9b6e86d3e3c4 Created 
+WARNING: Due to limitations in metric names, topics with a period ('.') or underscore ('_') could collide. To avoid issues it is best to use either, but not both.
+Topics:
+pareeksha.audit.requested.v1
+pareeksha.call.completed.v1
+pareeksha.call.requested.v1
+pareeksha.dialect.clip.requested.v1
+pareeksha.dlq.v1
+pareeksha.evaluation.completed.v1
+pareeksha.progress.v1
+pareeksha.retry.30s.v1
+pareeksha.retry.5m.v1
+pareeksha.run.completed.v1
+pareeksha.run.requested.v1
+pareeksha.scenario.generate.requested.v1
+exit=0
+
+$ broker api versions via host listener :9094
+localhost:9094 (id: 1 rack: null isFenced: false) -> (
