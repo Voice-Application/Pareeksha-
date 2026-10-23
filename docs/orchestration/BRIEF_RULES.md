@@ -23,3 +23,9 @@ CHANGED: <files or modules, one line>
 COMMIT: <sha> BRANCH: task/<ID>   PROOF: proof/<ID>/
 TESTS: <passed/failed counts>
 ISSUES: <one line each, max 3>
+
+COST DISCIPLINE (owner budget: $60 total cloud credit, set 2026-10-23):
+- Read only the doc sections named in your brief; don't explore the repo beyond the files you own and their direct imports.
+- No web research unless blocked; keep it to official docs, 1-2 pages.
+- Run the test suite once at the end (plus targeted tests while developing); no repeated full Docker rebuilds.
+- Verification is batched by the orchestrator at milestones; just leave a complete proof.md.
