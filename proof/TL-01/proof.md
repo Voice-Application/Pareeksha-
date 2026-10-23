@@ -1,6 +1,6 @@
 # Proof: TL-01 (freeze contracts as code)
 
-Code commit: `f38fcfd` on branch `task/TL-01` (built on `claude/amazing-einstein-agkccc` @ `42fe878`, so EVAL-02 and INFRA-01 are included). Status: done-unverified (QA verifies).
+Code commit: see `git log task/TL-01` (first commit `f38fcfd`; branch merged with `claude/amazing-einstein-agkccc` @ `bdc42df`, so EVAL-02, INFRA-01, VOICE-02 and DOC-01 are included). Status: done-unverified (QA verifies).
 
 ## What was built (all under `backend/`)
 
@@ -22,15 +22,15 @@ Also: `docs/contracts.md` (approval summary), `docs/06-api-spec.md` section 12 (
 ```
 pip install -r requirements.txt -r backend/requirements-dev.txt     # or: pip install fastapi pydantic-settings python-multipart psycopg psycopg-binary aiokafka pytest pytest-asyncio pytest-cov httpx ruff mypy
 cd backend
-python -m pytest -v --cov --cov-report=term      # expected: 455 passed (proof/TL-01/pytest.log)
+python -m pytest -v --cov --cov-report=term      # expected: 527 passed (proof/TL-01/pytest.log; about 72 s because of the VOICE-02 DSP tests)
 ruff check .                                     # expected: All checks passed! (ruff.log)
-python -m mypy                                   # expected: Success: no issues found in 61 source files (mypy.log)
+python -m mypy                                   # expected: Success: no issues found in 72 source files (mypy.log)
 python -m uvicorn pareeksha.api.main:app --port 8765   # then see live_server.txt
 ```
 
 ## Evidence in this folder
 
-- `pytest.log`: 455 passed, 98% coverage on the measured modules (includes EVAL-02's 70+ tests, unchanged).
+- `pytest.log`: 527 passed (455 from TL-01 plus the EVAL-02 and VOICE-02 suites, unchanged), 97% total coverage.
 - `ruff.log`, `mypy.log`: clean.
 - `openapi.json`: the full `/openapi.json` (75 operations, 58 paths).
 - `live_server.txt`: real HTTP against a running uvicorn: openapi operation count, `501 not_implemented` with the owner task, `401` without a key, `400 validation_error` envelope, `503` health with no DB/Kafka.
@@ -52,6 +52,6 @@ python -m uvicorn pareeksha.api.main:app --port 8765   # then see live_server.tx
 
 - DeepSeek defaults come from api-docs.deepseek.com (checked 2026-10-23); see NOTES.md. No key was used; the providers themselves are EVAL-01.
 - `backend/Dockerfile` pip line gained `python-multipart` and `pydantic-settings` (the app imports them).
-- Three type-only edits in merged EVAL-02 code (`types.py`, `numbers.py`, `checks.py`) and one in `tests/evaluation/test_checks.py` so mypy passes; behaviour unchanged, the 70+ EVAL-02 tests still pass. EVAL-02 modules are checked but exempt from `disallow_untyped_defs` (override in `pyproject.toml`).
-- When VOICE-02 merges, delete its `backend/pytest.ini` (pytest config is in `pyproject.toml`).
+- Small type-only edits in merged code so mypy passes: EVAL-02 (`evaluation/types.py`, `numbers.py`, `checks.py`, `tests/evaluation/test_checks.py`) and VOICE-02 (`audio/line_simulator.py`: one `assert p.snr_db is not None` that profile validation already guarantees, one over-long docstring line; one test annotation). Their suites still pass. EVAL-02 and VOICE-02 modules are checked but exempt from full annotations and `warn_return_any` (override in `pyproject.toml`); scipy and aiokafka have no stubs (`ignore_missing_imports`).
+- `backend/pytest.ini` from VOICE-02 was removed (it would shadow the pyproject pytest config, including `asyncio_mode = auto`).
 - INFRA-01's placeholder `api/main.py` (marked STUB(TL-01)) is replaced by this app; Compose still works because `/health` is served at the root.

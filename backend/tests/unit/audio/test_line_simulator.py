@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import audioop
 import itertools
+from typing import Any
 
 import numpy as np
 import pytest
@@ -147,7 +148,7 @@ def test_chunked_equals_whole_with_fixed_reference(speech):
     ref.flush()
     c = ref.captured
     mask = dsp.active_mask(c["speech"], 8000)
-    kw = {
+    kw: dict[str, Any] = {
         "speech_power": dsp.power(c["speech"][mask]),
         "noise_power": dsp.power(c["noise_raw"][mask]),
     }

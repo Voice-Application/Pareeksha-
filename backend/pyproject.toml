@@ -68,13 +68,18 @@ files = ["pareeksha", "tests"]
 
 # Third-party packages without type information.
 [[tool.mypy.overrides]]
-module = ["aiokafka", "aiokafka.*"]
+module = ["aiokafka", "aiokafka.*", "scipy", "scipy.*", "soundfile"]
 ignore_missing_imports = true
 
-# EVAL-02 code and tests predate the mypy setup: they are checked (check_untyped_defs) but not
-# yet required to carry full annotations. Tighten as EVAL tasks touch them; new packages are strict.
+# EVAL-02 and VOICE-02 code and tests predate the mypy setup: they are checked
+# (check_untyped_defs) but not yet required to carry full annotations. Tighten as those tasks
+# touch them; new packages are strict.
 [[tool.mypy.overrides]]
-module = ["pareeksha.evaluation.*", "tests.evaluation.*"]
+module = [
+    "pareeksha.evaluation.*", "tests.evaluation.*",
+    "pareeksha.audio.*", "tests.unit.audio.*", "tests.fixtures.*",
+]
+warn_return_any = false
 disallow_untyped_defs = false
 disallow_incomplete_defs = false
 disallow_untyped_calls = false

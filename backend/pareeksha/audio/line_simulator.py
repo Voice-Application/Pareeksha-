@@ -142,7 +142,7 @@ class LineSimulator:
     ):
         """Whole-clip convenience. Two passes calibrate speech/noise power so the
         mixed SNR is exact (the streaming path estimates it causally).
-        With capture=True returns (output, stages) where stages has speech/noise_raw/noise_applied."""
+        With capture=True returns (output, stages); stages has speech/noise_raw/noise_applied."""
         audio = np.asarray(audio, dtype=np.float32)
         kwargs: dict = {}
         if profile.background:
@@ -192,6 +192,7 @@ class LineSimulator:
                     if self._acc_n
                     else dsp.NOMINAL_SPEECH_POWER
                 )
+            assert p.snr_db is not None  # guaranteed by NoiseProfile validation
             g = dsp.noise_gain(ps, self._noise_power, p.snr_db)
             applied = (g * raw).astype(np.float32)
             if self._capture:
