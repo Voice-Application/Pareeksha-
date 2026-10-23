@@ -10,24 +10,24 @@ State values: todo / doing / blocked / review / done. Verified = QA sign-off (`y
 
 | ID | Title | Role | Depends on | State | Owner | Verified |
 |---|---|---|---|---|---|---|
-| H-01 | Keys in `.env`, Timbre v3.0 access, Gemini model ID, SECRET_KEY | Preetham (human) | — | todo | — | no |
-| PM-01 | Scope v0.2 vs PRD §7; acceptance criteria per task | PM | — | todo | — | no |
-| TL-01 | Freeze §6 contracts as code; full OpenAPI stubs | TL | PM-01 | todo | — | no |
-| INFRA-01 | Compose from `docs/starter/` runs (Kafka KRaft, Postgres, topics) | BE-INFRA | — | todo | — | no |
+| H-01 | Keys in `.env`, Timbre v3.0 access, Gemini model ID, SECRET_KEY | Preetham (human) | — | waiting on Preetham | — | no |
+| PM-01 | Scope v0.2 vs PRD §7; acceptance criteria per task | PM | — | done | — | proof/PM-01/verified.md |
+| TL-01 | Freeze §6 contracts as code; full OpenAPI stubs | TL | PM-01 | doing | — | no |
+| INFRA-01 | Compose from `docs/starter/` runs (Kafka KRaft, Postgres, topics) | BE-INFRA | — | doing | — | no |
 | INFRA-02 | Consumer framework, producer, outbox relay, retrier, DLQ recorder | BE-INFRA | TL-01 | todo | — | no |
 | API-01 | SQLAlchemy models, Alembic `0001_initial`, API-key auth | BE-API | TL-01 | todo | — | no |
 | VOICE-01 | `scripts/smoke_gnani.py`: TTS/STT round trip, voices, `COST_*` | VOICE | H-01 | todo | — | no |
-| VOICE-02 | Audio DSP + LineSimulator (8 profiles) | VOICE | — | todo | — | no |
-| DES-01 | IA, wireframe specs, tokens, score scale, states | DES | PM-01 | todo | — | no |
-| FE-01 | Next.js scaffold, Tailwind, shadcn/ui, BFF proxy, `gen:api` | FE | — | todo | — | no |
+| VOICE-02 | Audio DSP + LineSimulator (8 profiles) | VOICE | — | doing | — | no |
+| DES-01 | IA, wireframe specs, tokens, score scale, states | DES | PM-01 | doing | — | no |
+| FE-01 | Next.js scaffold, Tailwind, shadcn/ui, BFF proxy, `gen:api` | FE | — | doing | — | no |
 | QA-01 | Test plan mapping every FR/NFR to a test | QA | PM-01 | todo | — | no |
-| DOC-01 | Docs pack in `docs/`, README skeleton, STATUS, CHANGELOG | DOC | — | todo | — | no |
+| DOC-01 | Docs pack in `docs/`, README skeleton, STATUS, CHANGELOG | DOC | — | done | — | proof/DOC-01/verified.md |
 | API-02 | CRUD routers + seed script (personas, profiles, rubric, demo key) | BE-API | API-01 | todo | — | no |
 | API-03 | `POST /runs` outbox + planner + run-slot reconciler | BE-API | API-01, INFRA-02 | todo | — | no |
 | VOICE-03 | Mock EMI agent over `pareeksha-audio-v1` with 5 bugs | VOICE | VOICE-01 | todo | — | no |
 | VOICE-04 | `audio_v1` adapter + caller pipeline | VOICE | VOICE-02, VOICE-03, TL-01 | todo | — | no |
 | EVAL-01 | Gemini client, `caller_v1.j2`, caller brain wiring | EVAL | TL-01 | todo | — | no |
-| EVAL-02 | Metrics, checks, Indian numeral parser, PII masking | EVAL | — | todo | — | no |
+| EVAL-02 | Metrics, checks, Indian numeral parser, PII masking | EVAL | — | doing | — | no |
 | INT-01 | Connector registry, Fernet, HMAC, SSRF-safe fetch, webhook sink | INT | TL-01 | todo | — | no |
 | FE-02 | Agents, Scenarios, Personas, Noise profiles pages | FE | DES-01, FE-01 | todo | — | no |
 | QA-02 | Kafka integration suite green in CI | QA | INFRA-02 | todo | — | no |
@@ -39,7 +39,7 @@ State values: todo / doing / blocked / review / done. Verified = QA sign-off (`y
 | API-04 | SSE progress, run compare, DLQ endpoints, `/metrics/summary` | BE-API | API-03 | todo | — | no |
 | FE-03 | Runs list, new-run wizard, live run detail (SSE), heatmap | FE | FE-02, API-04 | todo | — | no |
 | QA-03 | Planted-bug test: at least 4 of 5 caught | QA | VOICE-05, EVAL-03 | todo | — | no |
-| H-02 | ≥ 20 consented clips per dialect group | Preetham (human) | — | todo | — | no |
+| H-02 | ≥ 20 consented clips per dialect group | Preetham (human) | — | waiting on Preetham | — | no |
 | EVAL-05 | Dialect pipeline: WER/CER, entity accuracy, HTML report | EVAL | EVAL-03 | todo | — | no |
 | VOICE-06 | Pipecat adapter + serializer + example (Must); LiveKit (Should) | VOICE | VOICE-04 | todo | — | no |
 | INT-04 | `pareeksha-sdk` + CLI, `pareeksha.yaml`, GitHub Action | INT | TL-01 | todo | — | no |
@@ -54,6 +54,8 @@ State values: todo / doing / blocked / review / done. Verified = QA sign-off (`y
 | DOC-03 | 60-second demo script; Preetham records | DOC + Preetham | QA-05 | todo | — | no |
 | PJM-01 | Release checklist, tag v1.0.0, repo public, launch post | PJM | all | todo | — | no |
 
+Notes: PM-01 issue: FR-RN-2 cost estimate is Should but required by FE-03; F19 per-run HTML export (Could) and Vapi have no board task.
+
 Ready now (no dependencies): H-01, PM-01, INFRA-01, VOICE-02, FE-01, DOC-01, EVAL-02, H-02.
 
 ## Escalations
@@ -66,7 +68,7 @@ Ready now (no dependencies): H-01, PM-01, INFRA-01, VOICE-02, FE-01, DOC-01, EVA
 ## Open STUBs
 | Marker | Owner | Replace by task |
 |---|---|---|
-- None.
+Open STUBs note: TL-01 will introduce STUB(<owner-task>) markers on API route bodies, removed by owning tasks.
 
 ## Cuts (need owner approval)
 Proposed cut order from `docs/AGENTS.md §10`, not yet approved by Preetham. Nothing is cut.

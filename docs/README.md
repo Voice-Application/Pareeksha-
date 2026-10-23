@@ -6,7 +6,7 @@
 
 **Stack:** Gnani Prisma (STT) + Timbre (TTS) · Gemini (caller brain + judge) · Pipecat · **Kafka** event backbone · Postgres · FastAPI · **Next.js** web app · Python SDK/CLI · HubSpot + webhook connectors.
 
-**What's new in v0.2:** Kafka replaces the Postgres job queue · Next.js replaces Streamlit · built for other teams to adopt (SDK, CLI, GitHub Action, adapters, one-command setup) · CRM/webhook connector framework · 5-day multi-agent build plan. Details in [CHANGELOG.md](CHANGELOG.md).
+**What's new in v0.2:** Kafka replaces the Postgres job queue · Next.js replaces Streamlit · built for other teams to adopt (SDK, CLI, GitHub Action, adapters, one-command setup) · CRM/webhook connector framework · 5-day multi-agent build plan. Details in [CHANGELOG.md](../CHANGELOG.md).
 
 ---
 
@@ -26,11 +26,11 @@
 | 10 | [09-build-plan.md](09-build-plan.md) | 5-day plan summary + your own tasks |
 | 11 | [10-integrations-and-dx.md](10-integrations-and-dx.md) | Connector framework, HubSpot/webhook, SDK, CLI, GitHub Action, adapters |
 | — | [AGENTS.md](AGENTS.md) | **The multi-agent playbook**: roles, rules, frozen contracts, task board, cut list |
-| — | [STATUS.md](STATUS.md) | Live task board template |
-| — | [CHANGELOG.md](CHANGELOG.md) | What changed between doc versions |
+| — | [STATUS.md](../STATUS.md) | Live task board template |
+| — | [CHANGELOG.md](../CHANGELOG.md) | What changed between doc versions |
 | — | [starter/docker-compose.yml](starter/docker-compose.yml) | Full local stack (Kafka KRaft, Postgres, API, workers, web, mock agent) |
 | — | [starter/infra/kafka/create-topics.sh](starter/infra/kafka/create-topics.sh) | Idempotent topic creation |
-| — | [requirements.txt](requirements.txt) · [.env.example](.env.example) | Backend deps (+ web/SDK deps listed) · environment variables |
+| — | [requirements.txt](../requirements.txt) · [.env.example](../.env.example) | Backend deps (+ web/SDK deps listed) · environment variables |
 
 **For the orchestrator:** load `AGENTS.md` first; it references everything else by section.
 

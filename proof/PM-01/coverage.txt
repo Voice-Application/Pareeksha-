@@ -1,0 +1,4 @@
+tasks in AGENTS §7: 43
+tasks in SCOPE §2: 43
+missing:
+features-ok

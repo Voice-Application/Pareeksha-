@@ -19,3 +19,4 @@ npm-debug.log*
 
 # Runtime data
 data/runtime/
+.claude/worktrees/
