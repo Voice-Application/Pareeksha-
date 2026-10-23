@@ -1,10 +1,10 @@
-Wrote /home/user/Pareeksha-/.claude/worktrees/agent-a87f6410454a40ae1/web/lib/api/schema.d.ts from tests/fixtures/openapi.health.json
+
+> pareeksha-web@0.1.0 gen:api
+> node scripts/gen-api.mjs --from ../proof/FE-01/openapi.json
+
+Wrote /home/user/Pareeksha-/.claude/worktrees/agent-a87f6410454a40ae1/web/lib/api/schema.d.ts from ../proof/FE-01/openapi.json
+
+> pareeksha-web@0.1.0 gen:api:check
+> node scripts/gen-api.mjs --check --from ../proof/FE-01/openapi.json
+
 lib/api/schema.d.ts is up to date.
-fresh exit=0
-lib/api/schema.d.ts is stale. Run `npm run gen:api` and commit the result.
-stale exit=1
-Wrote /home/user/Pareeksha-/.claude/worktrees/agent-a87f6410454a40ae1/web/lib/api/schema.d.ts from tests/fixtures/openapi.health.json
-lib/api/schema.d.ts is up to date.
-regenerated exit=0
-gen:api failed to read OpenAPI from http://127.0.0.1:9/openapi.json: fetch failed
-unreachable exit=1

@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 
 /**
- * BFF proxy (TRD 11, FR-DB-5): the browser calls /api/proxy/<path>; this handler forwards to
+ * BFF proxy (TRD 11, FR-DB-5): the browser calls /api/proxy/<path>; this handler forwards to the origin of
  * PAREEKSHA_API_URL/<path> with the API key added from server env. The key never reaches the
  * browser. The upstream body is passed through as a stream, so SSE works unchanged.
  */
@@ -21,7 +21,7 @@ async function handle(req: NextRequest, ctx: { params: Promise<{ path: string[] 
     return Response.json({ error: "invalid path" }, { status: 400 });
   }
 
-  const target = new URL(`${base.replace(/\/+$/, "")}/${path.map(encodeURIComponent).join("/")}`);
+  const target = new URL(`${new URL(base).origin}/${path.map(encodeURIComponent).join("/")}`);
   target.search = req.nextUrl.search;
 
   const headers = new Headers();

@@ -1,45 +1,148 @@
 /*
- * DESIGN TOKENS - single source of truth for colour, type, spacing, radius.
+ * Pareeksha design tokens  -  DES-01  -  direction: "Field Instrument"
+ * See docs/design/direction.md for the reasoning behind every value.
  *
- * PLACEHOLDER VALUES: every value below is a neutral stand-in. They MUST be
- * replaced by the tokens from DES-01 (docs/design/direction.md) before any
- * page is styled. Nothing else in web/ may hard-code a colour, font or spacing
- * value; consume these variables (directly or via the Tailwind theme mapping
- * in globals.css).
+ * Light = :root.  Dark = .dark / [data-theme="dark"] (next-themes sets the class).
+ * Only the colour tokens change between themes; type, spacing, radius are shared.
+ * Colour is reserved for meaning: neutrals carry structure, the score scale and the
+ * single cobalt accent are the only chroma in the product.
+ * Validated with proof/DES-01/validate_palette.py (WCAG + colour-vision-deficiency).
  */
+
 :root {
-  /* surface + text */
-  --color-bg: #ffffff;
-  --color-surface: #f6f6f6;
-  --color-border: #d9d9d9;
-  --color-text: #1a1a1a;
-  --color-text-muted: #666666;
-  --color-accent: #1a1a1a;
-  --color-accent-text: #ffffff;
-  --color-focus: #1a1a1a;
+  /* ---------- surfaces (warm paper) ---------- */
+  --bg-canvas:   #F5F3ED;   /* app background behind panels */
+  --bg-surface:  #FCFBF8;   /* panels, tables, inputs */
+  --bg-sunken:   #EEEBE3;   /* wells: code, waveform track, table header */
+  --bg-hover:    #F0EDE5;
+  --bg-selected: #E7E3D8;
 
-  /* status (reserved for DES-01 score scale and states) */
-  --color-success: #2e7d32;
-  --color-warning: #b26a00;
-  --color-danger: #b3261e;
+  /* ---------- lines ---------- */
+  --border:        #E1DCCF;  /* hairline between and around panels */
+  --border-strong: #8C8676;  /* inputs, buttons: >= 3:1 on surface */
 
-  /* typography */
-  --font-sans: ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, monospace;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.25rem;
-  --leading-base: 1.5;
+  /* ---------- text ---------- */
+  --fg:        #1A1915;
+  --fg-muted:  #55524A;
+  --fg-subtle: #69655A;     /* captions, timestamps, still >= 4.5:1 */
 
-  /* spacing scale */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
+  /* ---------- accent: interaction only (links, focus, playhead, primary button) ---------- */
+  --accent:      #2748B5;
+  --accent-fg:   #2748B5;   /* accent as text/icon on surfaces */
+  --accent-on:   #FFFFFF;   /* text on solid accent */
+  --accent-tint: #E3E8F8;
+  --focus-ring:  #2748B5;
 
-  /* shape */
-  --radius: 0.25rem;
-  --sidebar-width: 15rem;
+  /* ---------- verdict (3-state + critical). Never colour alone: always icon + word. ---------- */
+  --pass:        #0F7A63;   --pass-fg: #0A6551;   --pass-tint: #DAEEE6;
+  --warn:        #D99A0B;   --warn-fg: #755000;   --warn-tint: #F8E9C4;
+  --fail:        #CF4A1C;   --fail-fg: #A63810;   --fail-tint: #F8DDD1;
+  --critical:    #8E1D08;   --critical-on: #FFFFFF;
+
+  /* ---------- score scale: 5 ordinal steps, worst -> best ----------
+   * Dimension score 0..4  -> step 1..5
+   * Overall 0..100        -> <40: 1 | 40-59: 2 | 60-79: 3 | 80-89: 4 | >=90: 5   (pass line = 80)
+   * -on = readable text colour on that fill.  Number is always printed in the fill. */
+  --score-1: #9E2A0A;  --score-1-on: #FFFFFF;
+  --score-2: #D9622B;  --score-2-on: #1F0C03;
+  --score-3: #E9B03A;  --score-3-on: #2B1D00;
+  --score-4: #5FB4A6;  --score-4-on: #062620;
+  --score-5: #0B6F66;  --score-5-on: #FFFFFF;
+  --score-na: #D4CFC1; --score-na-on: #3D3A32;   /* not run / not applicable */
+
+  /* ---------- speakers & chart series (never reuse score hues) ---------- */
+  --speaker-agent:  #2748B5;   /* the agent under test */
+  --speaker-caller: #7A6A4C;   /* the synthetic / real caller */
+  --series-1: #2748B5;
+  --series-2: #7A6A4C;
+  --series-3: #4F8FB8;
+  --series-4: #8C8878;
+  --grid: #E1DCCF;
+
+  /* ---------- elevation: borders first, shadow only for things that float ---------- */
+  --shadow-float: 0 1px 0 rgba(26, 25, 21, .04), 0 10px 28px -6px rgba(26, 25, 21, .16);
+  --overlay: rgba(26, 25, 21, .40);
+
+  /* ---------- type ---------- */
+  --font-sans: "Geist", "Noto Sans Kannada", "Noto Sans Devanagari", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --text-2xs: 11px;  --lh-2xs: 14px;   /* eyebrow labels, uppercase + tracking */
+  --text-xs:  12px;  --lh-xs:  16px;   /* captions, timestamps, badges */
+  --text-sm:  13px;  --lh-sm:  20px;   /* tables, dense UI */
+  --text-base:14px;  --lh-base:22px;   /* default body, transcript */
+  --text-md:  16px;  --lh-md:  24px;   /* panel titles */
+  --text-lg:  20px;  --lh-lg:  28px;   /* page section titles */
+  --text-xl:  26px;  --lh-xl:  32px;   /* page titles */
+  --text-2xl: 40px;  --lh-2xl: 44px;   /* hero numbers (pass rate) */
+  --tracking-display: -0.022em;
+  --tracking-eyebrow: 0.06em;
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-semibold:600;
+
+  /* ---------- space: 4px base ---------- */
+  --space-0: 2px;  --space-1: 4px;  --space-2: 8px;  --space-3: 12px;  --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px; --space-16: 64px;
+  --gutter: 16px;            /* phone-width page gutter */
+  --sidebar-w: 232px;
+  --row-h: 36px;             /* table / list row */
+  --control-h: 32px;         /* buttons, inputs */
+
+  /* ---------- radius ---------- */
+  --radius-xs: 3px;          /* badges, chips, heatmap cells */
+  --radius-sm: 5px;          /* buttons, inputs */
+  --radius-md: 8px;          /* panels */
+  --radius-lg: 12px;         /* dialogs */
+  --radius-pill: 999px;
+
+  /* ---------- motion ---------- */
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+}
+
+.dark,
+[data-theme="dark"] {
+  --bg-canvas:   #0D0D0B;
+  --bg-surface:  #151512;
+  --bg-sunken:   #0A0A08;
+  --bg-hover:    #1C1C18;
+  --bg-selected: #26251F;
+
+  --border:        #2B2A24;
+  --border-strong: #6C695E;
+
+  --fg:        #ECE9E0;
+  --fg-muted:  #ABA79B;
+  --fg-subtle: #928E82;
+
+  --accent:      #6F88F0;
+  --accent-fg:   #9FB1FF;
+  --accent-on:   #0A0E24;
+  --accent-tint: #1A2142;
+  --focus-ring:  #9FB1FF;
+
+  --pass:        #3BB89D;   --pass-fg: #62D4BA;   --pass-tint: #0E2B25;
+  --warn:        #E5A91C;   --warn-fg: #F0C461;   --warn-tint: #30240A;
+  --fail:        #EC6C40;   --fail-fg: #FF9670;   --fail-tint: #351A0F;
+  --critical:    #FF6F47;   --critical-on: #260A02;
+
+  --score-1: #E5583A;  --score-1-on: #1F0602;
+  --score-2: #F0954F;  --score-2-on: #231003;
+  --score-3: #EFC95A;  --score-3-on: #261B00;
+  --score-4: #66C2B2;  --score-4-on: #04211C;
+  --score-5: #1F9A8E;  --score-5-on: #03211D;
+  --score-na: #3B392F; --score-na-on: #D9D5C8;
+
+  --speaker-agent:  #8CA0F7;
+  --speaker-caller: #C2AE86;
+  --series-1: #8CA0F7;
+  --series-2: #C2AE86;
+  --series-3: #6FB3DB;
+  --series-4: #9A9686;
+  --grid: #2B2A24;
+
+  --shadow-float: 0 1px 0 rgba(255, 255, 255, .04) inset, 0 12px 32px -6px rgba(0, 0, 0, .65);
+  --overlay: rgba(0, 0, 0, .60);
 }

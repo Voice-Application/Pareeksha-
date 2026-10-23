@@ -50,7 +50,7 @@ test("sidebar links navigate client-side to every route", async ({ page }) => {
 
 test("proxy adds API key server-side and strips set-cookie", async ({ request }) => {
   seen.length = 0;
-  const res = await request.get("/api/proxy/health?x=1");
+  const res = await request.get("/api/proxy/api/v1/health?x=1");
   expect(res.status()).toBe(200);
   expect(await res.json()).toEqual({ db: "ok", kafka: "ok" });
   expect(res.headers()["set-cookie"]).toBeUndefined();
@@ -60,7 +60,7 @@ test("proxy adds API key server-side and strips set-cookie", async ({ request })
 
 test("proxy ignores a client-supplied Authorization header", async ({ request }) => {
   seen.length = 0;
-  await request.get("/api/proxy/health", { headers: { authorization: "Bearer attacker" } });
+  await request.get("/api/proxy/api/v1/health", { headers: { authorization: "Bearer attacker" } });
   expect(seen[0].headers.authorization).toBe("Bearer pk_test_fe01_secret");
 });
 
@@ -68,7 +68,7 @@ test("proxy streams SSE incrementally", async ({ page }) => {
   await page.goto("/");
   const timings = await page.evaluate(async () => {
     const t0 = performance.now();
-    const res = await fetch("/api/proxy/runs/r1/events");
+    const res = await fetch("/api/proxy/api/v1/runs/r1/events");
     const reader = res.body!.getReader();
     const marks: number[] = [];
     const dec = new TextDecoder();

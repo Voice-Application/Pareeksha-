@@ -1,20 +1,28 @@
 
+> pareeksha-web@0.1.0 lint
+> eslint .
+
+
+> pareeksha-web@0.1.0 typecheck
+> tsc --noEmit
+
+
 > pareeksha-web@0.1.0 build
 > next build
 
 ▲ Next.js 16.4.3 (Turbopack)
-✓ Running next.config.ts took 34ms
+✓ Running next.config.ts took 32ms
 
   Creating an optimized production build ...
-✓ Compiled successfully in 3.1s
+✓ Compiled successfully in 596ms
   Running TypeScript ...
-  Finished TypeScript in 4.5s ...
+  Finished TypeScript in 2.2s ...
   Collecting page data using 3 workers ...
   Generating static pages using 3 workers (0/17) ...
   Generating static pages using 3 workers (4/17) 
   Generating static pages using 3 workers (8/17) 
   Generating static pages using 3 workers (12/17) 
-✓ Generating static pages using 3 workers (17/17) in 441ms
+✓ Generating static pages using 3 workers (17/17) in 439ms
   Finalizing page optimization ...
 
 Route (app)

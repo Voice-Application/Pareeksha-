@@ -11,7 +11,7 @@ export function Sidebar() {
     <nav
       aria-label="Primary"
       className="shrink-0 border-r border-border bg-surface p-4"
-      style={{ width: "var(--sidebar-width)" }}
+      style={{ width: "var(--sidebar-w)" }}
     >
       <p className="mb-4 font-mono text-sm">Pareeksha</p>
       <ul className="flex flex-col gap-1">
@@ -23,8 +23,8 @@ export function Sidebar() {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "block rounded-base px-2 py-1 text-sm",
-                  active ? "bg-accent text-accent-text" : "text-text hover:bg-border",
+                  "block rounded-sm px-2 py-1 text-sm",
+                  active ? "bg-accent text-accent-on" : "text-fg hover:bg-hover",
                 )}
               >
                 {item.label}

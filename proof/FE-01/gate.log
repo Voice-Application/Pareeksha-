@@ -1,5 +1,5 @@
 no credentials  / -> 401
-no credentials  /api/proxy/health -> 401
+no credentials  /api/proxy/api/v1/health -> 401
 wrong password  / -> 401
 right password  / -> 200
-right password  /api/proxy/health (upstream down) -> 502
+right password  /api/proxy/api/v1/health (upstream down) -> 502
