@@ -1,0 +1,9 @@
+profile                    target  measured  len_in len_out
+clean_16k                       -       nan  64000 64000
+pstn_8k_alaw                    -       nan  64000 64000
+pstn_office_babble_15db        15    15.000  64000 64000
+pstn_street_10db               10    10.000  64000 64000
+pstn_market_5db                 5     5.000  64000 64000
+mobile_bus_5db                  5     5.000  64000 64000
+mobile_weak_signal             10    10.000  64000 64000
+auto_rickshaw_0db               0     0.000  64000 64000
