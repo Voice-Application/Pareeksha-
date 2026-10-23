@@ -25,3 +25,11 @@ docker compose up -d --build            # sandbox behind proxy: CA_BUNDLE=/root/
 ## Not covered
 - Worker containers (INFRA-02+), real api/migrate (API-01), Next.js web (FE-01), mock agent (VOICE-03).
 - `kafka-ui` profile not started.
+
+## Tracked stubs (owner replaces; none are INFRA-01s)
+| File | Marker | Replaced by |
+|---|---|---|
+| backend/pareeksha/api/main.py | STUB(TL-01) | TL-01 real FastAPI app. It must keep GET /health (no auth) with db + kafka checks: {"db":"ok","kafka":"ok"}, 503 when either is down. The compose api healthcheck and web depends_on rely on it. |
+| mock_agent/server.py | STUB(VOICE-03) | Mock EMI agent (pareeksha-audio-v1); keep /health on :8765 |
+| web/Dockerfile + web/index.html | STUB(FE-01) | Next.js app on :3000 |
+| backend/alembic_migrate.sh | STUB(API-01) | alembic upgrade head once alembic.ini exists |

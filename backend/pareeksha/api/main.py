@@ -1,4 +1,4 @@
-# STUB(INFRA-01): placeholder API exposing only GET /health (DB + Kafka metadata check, per TRD).
+# STUB(TL-01): placeholder API exposing only GET /health (DB + Kafka metadata check, per TRD).
 # BE-API replaces this module in API-01/API-02 and must keep /health semantics.
 import asyncio
 import os

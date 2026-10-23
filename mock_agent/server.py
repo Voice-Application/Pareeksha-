@@ -1,4 +1,4 @@
-# STUB(INFRA-01): placeholder for the mock EMI agent; VOICE-03 replaces it with the pareeksha-audio-v1 server.
+# STUB(VOICE-03): placeholder for the mock EMI agent; VOICE-03 replaces it with the pareeksha-audio-v1 server.
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
