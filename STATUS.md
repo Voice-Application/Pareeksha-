@@ -99,5 +99,5 @@ Never cut: mock agent with planted bugs, judge with evidence, Kafka outbox + ide
 - Tomorrow's first tasks:
 
 ## Budget & verification policy (owner, 2026-10-23)
-- Total cloud credit budget: $60. Spent ≈ $13 at 18:50 UTC (batch 1: 7 tasks built, 5 verified).
+- Total cloud credit budget: $100 (owner revised 2026-10-23; be careful, owner reviews if exceeded). Spent ≈ $13 at 18:50 UTC (batch 1: 7 tasks built, 5 verified).
 - Verification is batched at milestones (after a major build), not per task: M1 foundation (TL-01, QA-01, DES-01, FE-01, VOICE-01) → M2 pipeline end-to-end → M3 UI + integrations → M4 final `make verify`.
