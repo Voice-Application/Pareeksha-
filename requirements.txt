@@ -1,0 +1,61 @@
+# Pareeksha backend dependencies (backend/requirements.txt) — Python 3.11 or 3.12
+# v0.2: + aiokafka, cryptography, typer; Streamlit/Plotly removed (web app is Next.js, see web/package.json)
+# Versions are lower bounds checked against PyPI on 23 Oct 2026. Pin exact versions
+# (pip freeze > requirements.lock) once Day 1 smoke tests pass.
+
+# --- Speech: Gnani ---------------------------------------------------------
+gnani-vachana>=0.8.2           # official Gnani SDK: GnaniSTTClient, GnaniSTTStreamClient, batch, GnaniTTSClient
+pipecat-gnani>=0.5.12          # Pipecat services: GnaniSTTService, GnaniTTSService (import pipecat_gnani)
+
+# --- Real-time audio framework ----------------------------------------------
+pipecat-ai[silero,websocket,google]>=1.13.0   # NOTE: there is no [gnani] extra; use pipecat-gnani above
+
+# --- LLM ---------------------------------------------------------------------
+google-genai>=2.33.0           # Gemini SDK (the older google-generativeai package is deprecated)
+
+# --- Event backbone ---------------------------------------------------------------
+aiokafka>=0.14.0               # asyncio Kafka client (producer/consumer, manual commits)
+
+# --- API, DB ---------------------------------------------------------------------
+fastapi>=0.115
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9        # file uploads
+pydantic>=2.7
+pydantic-settings>=2.3
+sqlalchemy[asyncio]>=2.0.30
+psycopg[binary]>=3.2
+alembic>=1.13
+httpx>=0.27
+websockets>=12.0,<16.0         # range required by pipecat-gnani
+
+# --- Audio DSP -------------------------------------------------------------------
+numpy>=1.26
+scipy>=1.13
+soundfile>=0.12
+audioop-lts>=0.2.2; python_version >= "3.13"   # audioop was removed from the stdlib in 3.13
+
+# --- Text metrics / evaluation ----------------------------------------------------
+jiwer>=4.0
+indic-nlp-library>=0.92
+rapidfuzz>=3.9                 # fuzzy disclosure matching, repeat detection
+
+# --- Reports, config, security ------------------------------------------------------
+jinja2>=3.1
+pyyaml>=6.0
+cryptography>=46               # Fernet encryption for connector secrets
+sse-starlette>=2.1             # Server-Sent Events for live run progress
+
+# --- Ops ------------------------------------------------------------------------------
+structlog>=24.1
+
+# --- Dev (backend/requirements-dev.txt) -----------------------------------------------
+# pytest>=8  pytest-asyncio>=0.23  respx>=0.21  ruff>=0.5  testcontainers[kafka,postgres]>=4
+
+# --- SDK + CLI (sdk/python/pyproject.toml, separate package "pareeksha-sdk") ----------
+# httpx>=0.27  pydantic>=2.7  typer>=0.27  pyyaml>=6.0  websockets>=12
+
+# --- Web app (web/package.json) — versions checked on npm 23 Oct 2026 ------------------
+# next ^16, react ^19, typescript (as installed by create-next-app), tailwindcss ^4,
+# shadcn/ui (CLI), @tanstack/react-query ^5, openapi-typescript ^7, openapi-fetch ^0.17,
+# wavesurfer.js ^8, recharts ^3, zod ^4, lucide-react; dev: @playwright/test ^1.64
+# Optional: bert-score, openai-whisper (comparator ASR) — heavy, install only if needed
