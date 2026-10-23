@@ -21,3 +21,7 @@ Contract changes after Day 1 need Tech Lead approval and an entry here.
 ## Docs v0.1 — 23 Oct 2026
 - Initial PRD, requirements, TRD, system design, schema, API spec, file structure, rubric, 18-day plan.
 - Verified against packages: Gnani SDK endpoints/voices, `pipecat-gnani` (no `pipecat-ai[gnani]` extra), Timbre v2.5 has only 2 Kannada voices; Indian PSTN uses G.711 A-law.
+
+## 2026-10-23
+- Owner approval (Preetham): DES-01 design direction "Field Instrument" approved.
+- Owner decision (Preetham): DeepSeek is the default LLM provider; Gemini remains supported (contract change via TL-01).

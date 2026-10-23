@@ -10,16 +10,16 @@ State values: todo / doing / blocked / review / done. Verified = QA sign-off (`y
 
 | ID | Title | Role | Depends on | State | Owner | Verified |
 |---|---|---|---|---|---|---|
-| H-01 | Keys in `.env`, Timbre v3.0 access, Gemini model ID, SECRET_KEY | Preetham (human) | — | waiting on Preetham | — | no |
+| H-01 | Keys in `.env`, Timbre v3.0 access, Gemini model ID, SECRET_KEY | Preetham (human) | — | keys added to cloud env by Preetham; not visible in this session (needs new session) | — | no |
 | PM-01 | Scope v0.2 vs PRD §7; acceptance criteria per task | PM | — | done | — | proof/PM-01/verified.md |
 | TL-01 | Freeze §6 contracts as code; full OpenAPI stubs | TL | PM-01 | doing | — | no |
-| INFRA-01 | Compose from `docs/starter/` runs (Kafka KRaft, Postgres, topics) | BE-INFRA | — | doing | — | no |
+| INFRA-01 | Compose from `docs/starter/` runs (Kafka KRaft, Postgres, topics) | BE-INFRA | — | done | — | proof/INFRA-01/verified.md |
 | INFRA-02 | Consumer framework, producer, outbox relay, retrier, DLQ recorder | BE-INFRA | TL-01 | todo | — | no |
 | API-01 | SQLAlchemy models, Alembic `0001_initial`, API-key auth | BE-API | TL-01 | todo | — | no |
 | VOICE-01 | `scripts/smoke_gnani.py`: TTS/STT round trip, voices, `COST_*` | VOICE | H-01 | todo | — | no |
-| VOICE-02 | Audio DSP + LineSimulator (8 profiles) | VOICE | — | doing | — | no |
-| DES-01 | IA, wireframe specs, tokens, score scale, states | DES | PM-01 | doing | — | no |
-| FE-01 | Next.js scaffold, Tailwind, shadcn/ui, BFF proxy, `gen:api` | FE | — | doing | — | no |
+| VOICE-02 | Audio DSP + LineSimulator (8 profiles) | VOICE | — | done | — | proof/VOICE-02/verified.md |
+| DES-01 | IA, wireframe specs, tokens, score scale, states | DES | PM-01 | direction awaiting Preetham approval; page specs in progress | — | no |
+| FE-01 | Next.js scaffold, Tailwind, shadcn/ui, BFF proxy, `gen:api` | FE | — | built, waiting on TL-01 openapi for gen:api | — | no |
 | QA-01 | Test plan mapping every FR/NFR to a test | QA | PM-01 | todo | — | no |
 | DOC-01 | Docs pack in `docs/`, README skeleton, STATUS, CHANGELOG | DOC | — | done | — | proof/DOC-01/verified.md |
 | API-02 | CRUD routers + seed script (personas, profiles, rubric, demo key) | BE-API | API-01 | todo | — | no |
@@ -27,7 +27,7 @@ State values: todo / doing / blocked / review / done. Verified = QA sign-off (`y
 | VOICE-03 | Mock EMI agent over `pareeksha-audio-v1` with 5 bugs | VOICE | VOICE-01 | todo | — | no |
 | VOICE-04 | `audio_v1` adapter + caller pipeline | VOICE | VOICE-02, VOICE-03, TL-01 | todo | — | no |
 | EVAL-01 | Gemini client, `caller_v1.j2`, caller brain wiring | EVAL | TL-01 | todo | — | no |
-| EVAL-02 | Metrics, checks, Indian numeral parser, PII masking | EVAL | — | doing | — | no |
+| EVAL-02 | Metrics, checks, Indian numeral parser, PII masking | EVAL | — | done | — | proof/EVAL-02/verified.md |
 | INT-01 | Connector registry, Fernet, HMAC, SSRF-safe fetch, webhook sink | INT | TL-01 | todo | — | no |
 | FE-02 | Agents, Scenarios, Personas, Noise profiles pages | FE | DES-01, FE-01 | todo | — | no |
 | QA-02 | Kafka integration suite green in CI | QA | INFRA-02 | todo | — | no |
@@ -58,6 +58,11 @@ Notes: PM-01 issue: FR-RN-2 cost estimate is Should but required by FE-03; F19 p
 
 Ready now (no dependencies): H-01, PM-01, INFRA-01, VOICE-02, FE-01, DOC-01, EVAL-02, H-02.
 
+- TL-01 scope widened: includes DeepSeek LLM provider interface, plus pyproject + mypy.
+- VOICE-02: noise synthesized in code, not data/noise clips (TRD §6) — licence check under PJM-01; profiles in audio/profiles.py, API-02 seed must load these (rubric §7 names YAML).
+- Decision 2026-10-23 (Preetham): DeepSeek default LLM, Gemini optional.
+- No type checker configured yet — TL-01 adds mypy.
+
 ## Escalations
 - None.
 
@@ -68,6 +73,10 @@ Ready now (no dependencies): H-01, PM-01, INFRA-01, VOICE-02, FE-01, DOC-01, EVA
 ## Open STUBs
 | Marker | Owner | Replace by task |
 |---|---|---|
+| `STUB(TL-01)` `backend/pareeksha/api/main.py` | TL | TL-01 |
+| `STUB(VOICE-03)` `mock_agent/server.py` | VOICE | VOICE-03 |
+| `STUB(FE-01)` `web/Dockerfile` | FE | FE-01 |
+| `STUB(API-01)` `backend/alembic_migrate.sh` | BE-API | API-01 |
 Open STUBs note: TL-01 will introduce STUB(<owner-task>) markers on API route bodies, removed by owning tasks.
 
 ## Cuts (need owner approval)
@@ -88,3 +97,7 @@ Never cut: mock agent with planted bugs, judge with evidence, Kafka outbox + ide
 - Credits used (today / total):
 - Consumer lag / open DLQ:
 - Tomorrow's first tasks:
+
+## Budget & verification policy (owner, 2026-10-23)
+- Total cloud credit budget: $100 (owner revised 2026-10-23; be careful, owner reviews if exceeded). Spent ≈ $13 at 18:50 UTC (batch 1: 7 tasks built, 5 verified).
+- Verification is batched at milestones (after a major build), not per task: M1 foundation (TL-01, QA-01, DES-01, FE-01, VOICE-01) → M2 pipeline end-to-end → M3 UI + integrations → M4 final `make verify`.
