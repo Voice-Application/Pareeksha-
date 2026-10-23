@@ -1,0 +1,187 @@
+ Image verify-infra-01-mock-agent Building 
+ Image verify-infra-01-web Building 
+ Image verify-infra-01-migrate Building 
+ Image verify-infra-01-api Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 2.62kB done
+#1 DONE 0.0s
+
+#2 [web internal] load build definition from Dockerfile
+#2 DONE 0.0s
+
+#3 [mock-agent internal] load build definition from Dockerfile
+#3 transferring dockerfile: 130B done
+#3 DONE 0.0s
+
+#2 [web internal] load build definition from Dockerfile
+#2 transferring dockerfile: 274B done
+#2 DONE 0.0s
+
+#4 [api internal] load build definition from Dockerfile
+#4 transferring dockerfile: 603B done
+#4 DONE 0.0s
+
+#5 [api internal] load metadata for docker.io/library/python:3.12-slim
+#5 DONE 0.0s
+
+#6 [web internal] load metadata for docker.io/library/nginx:1.27-alpine
+#6 DONE 0.0s
+
+#7 [migrate internal] load .dockerignore
+#7 transferring context: 2B done
+#7 DONE 0.0s
+
+#8 [mock-agent internal] load .dockerignore
+#8 transferring context: 2B done
+#8 DONE 0.0s
+
+#9 [web internal] load .dockerignore
+#9 transferring context: 2B done
+#9 DONE 0.0s
+
+#10 [mock-agent internal] load build context
+#10 transferring context: 505B done
+#10 DONE 0.0s
+
+#11 [web internal] load build context
+#11 transferring context: 111B done
+#11 DONE 0.0s
+
+#12 [api internal] load build context
+#12 transferring context: 2.53kB done
+#12 DONE 0.0s
+
+#13 [migrate stage-0 3/4] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "fastapi>=0.115" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy>=2.0"
+#13 CACHED
+
+#14 [mock-agent stage-0 1/4] FROM docker.io/library/python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704
+#14 resolve docker.io/library/python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704 0.0s done
+#14 DONE 0.0s
+
+#15 [migrate stage-0 2/4] WORKDIR /app
+#15 CACHED
+
+#16 [web 1/3] FROM docker.io/library/nginx:1.27-alpine@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10
+#16 resolve docker.io/library/nginx:1.27-alpine@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10 0.0s done
+#16 DONE 0.0s
+
+#17 [web 2/3] RUN sed -i 's/listen       80;/listen 3000;/' /etc/nginx/conf.d/default.conf
+#17 CACHED
+
+#18 [web 3/3] COPY index.html /usr/share/nginx/html/index.html
+#18 CACHED
+
+#19 [mock-agent 3/3] COPY server.py /app/server.py
+#19 DONE 0.0s
+
+#20 [web] exporting to image
+#20 exporting layers done
+#20 exporting manifest sha256:b089d79b937ab0fec865cdc37d4d9fe9901d5c1bd3ffc8b038140446686493ba
+#20 exporting manifest sha256:b089d79b937ab0fec865cdc37d4d9fe9901d5c1bd3ffc8b038140446686493ba 0.0s done
+#20 exporting config sha256:a7fc1cf35ab1f5ecd0754a6ac37e75de618e03948153b95dbce5784aacabde67 done
+#20 exporting attestation manifest sha256:fcf2f81431110b652ca667fb5a20ac35c5db79754df6d27dbe6de7dceda56c2f 0.0s done
+#20 exporting manifest list sha256:c6ef8713770e0e904581fca4c9efb9a37bd2e92b82c71f634a91b136c0a3973e 0.0s done
+#20 naming to docker.io/library/verify-infra-01-web:latest done
+#20 unpacking to docker.io/library/verify-infra-01-web:latest 0.0s done
+#20 DONE 0.1s
+
+#21 [api stage-0 4/4] COPY . /app
+#21 DONE 0.0s
+
+#22 [api] exporting to image
+#22 exporting layers 0.1s done
+#22 exporting manifest sha256:8fb57d171f9163bfc5321cefbb5eca1b8c1fdafb5ac4c15a932a704b831f767b 0.0s done
+#22 exporting config sha256:8e0be56c400152fd89b0190f52a7bc6a15b13f95519c447515738f7deb7a469d
+#22 exporting config sha256:8e0be56c400152fd89b0190f52a7bc6a15b13f95519c447515738f7deb7a469d 0.0s done
+#22 exporting attestation manifest sha256:1d198d35b32d13b549e1bbbf62f50d86e856f121fd732e97ab81817240d84bab 0.0s done
+#22 exporting manifest list sha256:de5c02566abb59c32d53d8a877dbb234ea6e237f34f55431bb6ab9233cbf216b 0.0s done
+#22 naming to docker.io/library/verify-infra-01-api:latest done
+#22 unpacking to docker.io/library/verify-infra-01-api:latest
+#22 unpacking to docker.io/library/verify-infra-01-api:latest 0.0s done
+#22 DONE 0.2s
+
+#23 [web] resolving provenance for metadata file
+#23 DONE 0.0s
+
+#24 [migrate] exporting to image
+#24 exporting layers 0.1s done
+#24 exporting manifest sha256:c7603648a3c52cb3ced85e2f85fbe8da590eada733cfdf1ed12bf143915502d3 0.0s done
+#24 exporting config sha256:1b62a7f8130d305828f9bf947e64e31d7c96e18de7b5f261c1838724e2d75d23 0.0s done
+#24 exporting attestation manifest sha256:09b550976017c7c6551607a8531acc7d4194de57fa8ae989cd99d7c1f1e3e709 0.0s done
+#24 exporting manifest list sha256:3844de736f10443649fb6098846092d447b26e85b874146c3740253ee9269ec5 0.0s done
+#24 naming to docker.io/library/verify-infra-01-migrate:latest done
+#24 unpacking to docker.io/library/verify-infra-01-migrate:latest 0.0s done
+#24 DONE 0.2s
+
+#25 [mock-agent] exporting to image
+#25 exporting layers 0.1s done
+#25 exporting manifest sha256:d8cda5a9d435aca548b6778d7e2936ea4b18ac4387235b6987ae723186f793c5 0.0s done
+#25 exporting config sha256:eabf0219670e73e2863cd22b651809e2be1f46ed706d2cdf7d2895153a4f30e6 0.0s done
+#25 exporting attestation manifest sha256:d9293f9e7b124c12882f0eec9c25b3301a24dde8619ca5729de50ecccd9b512b 0.0s done
+#25 exporting manifest list sha256:698cc42ae8344b4ccffeef56530d2158412836ac0f3b4889fc8d2568b97c62bb 0.0s done
+#25 naming to docker.io/library/verify-infra-01-mock-agent:latest done
+#25 unpacking to docker.io/library/verify-infra-01-mock-agent:latest 0.0s done
+#25 DONE 0.2s
+
+#26 [mock-agent] resolving provenance for metadata file
+#26 DONE 0.1s
+
+#27 [migrate] resolving provenance for metadata file
+#27 DONE 0.0s
+
+#28 [api] resolving provenance for metadata file
+#28 DONE 0.0s
+ Image verify-infra-01-api Built 
+ Image verify-infra-01-web Built 
+ Image verify-infra-01-migrate Built 
+ Image verify-infra-01-mock-agent Built 
+ Network verify-infra-01_default Creating 
+ Network verify-infra-01_default Creating 
+ Volume verify-infra-01_kafka-data Creating 
+ Volume verify-infra-01_kafka-data Creating 
+ Volume verify-infra-01_pg-data Creating 
+ Volume verify-infra-01_pg-data Creating 
+ Volume verify-infra-01_pg-data Created 
+ Volume verify-infra-01_pg-data Created 
+ Volume verify-infra-01_kafka-data Created 
+ Volume verify-infra-01_kafka-data Created 
+ Network verify-infra-01_default Created 
+ Network verify-infra-01_default Created 
+ Container verify-infra-01-kafka-1 Creating 
+ Container verify-infra-01-postgres-1 Creating 
+ Container verify-infra-01-mock-agent-1 Creating 
+ Container verify-infra-01-mock-agent-1 Created 
+ Container verify-infra-01-kafka-1 Created 
+ Container verify-infra-01-kafka-init-1 Creating 
+ Container verify-infra-01-postgres-1 Created 
+ Container verify-infra-01-migrate-1 Creating 
+ Container verify-infra-01-kafka-init-1 Created 
+ Container verify-infra-01-migrate-1 Created 
+ Container verify-infra-01-api-1 Creating 
+ Container verify-infra-01-api-1 Created 
+ Container verify-infra-01-web-1 Creating 
+ Container verify-infra-01-web-1 Created 
+ Container verify-infra-01-mock-agent-1 Starting 
+ Container verify-infra-01-kafka-1 Starting 
+ Container verify-infra-01-postgres-1 Starting 
+ Container verify-infra-01-mock-agent-1 Started 
+ Container verify-infra-01-kafka-1 Started 
+ Container verify-infra-01-kafka-1 Waiting 
+ Container verify-infra-01-postgres-1 Started 
+ Container verify-infra-01-postgres-1 Waiting 
+ Container verify-infra-01-postgres-1 Healthy 
+ Container verify-infra-01-migrate-1 Starting 
+ Container verify-infra-01-migrate-1 Started 
+ Container verify-infra-01-kafka-1 Healthy 
+ Container verify-infra-01-kafka-init-1 Starting 
+ Container verify-infra-01-kafka-init-1 Started 
+ Container verify-infra-01-migrate-1 Waiting 
+ Container verify-infra-01-kafka-init-1 Waiting 
+ Container verify-infra-01-migrate-1 Exited 
+ Container verify-infra-01-kafka-init-1 Exited 
+ Container verify-infra-01-api-1 Starting 
+ Container verify-infra-01-api-1 Started 
+ Container verify-infra-01-api-1 Waiting 
+ Container verify-infra-01-api-1 Healthy 
+ Container verify-infra-01-web-1 Starting 
+ Container verify-infra-01-web-1 Started 

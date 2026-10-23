@@ -1,0 +1,8 @@
+# Optional overlay for builds behind a TLS-intercepting proxy:
+#   CA_BUNDLE=/path/ca-bundle.crt docker compose -f docker-compose.yml -f docker-compose.proxy.yml up -d --build
+x-ca: &ca { build: { secrets: [ca] } }
+services:
+  migrate: *ca
+  api: *ca
+secrets:
+  ca: { file: "${CA_BUNDLE}" }
