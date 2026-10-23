@@ -1,0 +1,45 @@
+/*
+ * DESIGN TOKENS - single source of truth for colour, type, spacing, radius.
+ *
+ * PLACEHOLDER VALUES: every value below is a neutral stand-in. They MUST be
+ * replaced by the tokens from DES-01 (docs/design/direction.md) before any
+ * page is styled. Nothing else in web/ may hard-code a colour, font or spacing
+ * value; consume these variables (directly or via the Tailwind theme mapping
+ * in globals.css).
+ */
+:root {
+  /* surface + text */
+  --color-bg: #ffffff;
+  --color-surface: #f6f6f6;
+  --color-border: #d9d9d9;
+  --color-text: #1a1a1a;
+  --color-text-muted: #666666;
+  --color-accent: #1a1a1a;
+  --color-accent-text: #ffffff;
+  --color-focus: #1a1a1a;
+
+  /* status (reserved for DES-01 score scale and states) */
+  --color-success: #2e7d32;
+  --color-warning: #b26a00;
+  --color-danger: #b3261e;
+
+  /* typography */
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --leading-base: 1.5;
+
+  /* spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  /* shape */
+  --radius: 0.25rem;
+  --sidebar-width: 15rem;
+}

@@ -1,0 +1,25 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "Pareeksha API (FE-01 fixture, health endpoint only, from docs/06-api-spec.md)", "version": "0.0.0" },
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "description": "Service health",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["db", "kafka"],
+                  "properties": { "db": { "type": "string" }, "kafka": { "type": "string" } }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
