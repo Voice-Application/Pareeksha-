@@ -1,0 +1,74 @@
+
+===== LIGHT =====
+  ok   --fg             on --bg-canvas      15.85:1 (need 7.0)
+  ok   --fg             on --bg-surface     17.00:1 (need 7.0)
+  ok   --fg-muted       on --bg-surface      7.54:1 (need 4.5)
+  ok   --fg-muted       on --bg-canvas       7.03:1 (need 4.5)
+  ok   --fg-subtle      on --bg-surface      5.62:1 (need 4.5)
+  ok   --fg-subtle      on --bg-canvas       5.24:1 (need 4.5)
+  ok   --accent-fg      on --bg-surface      7.57:1 (need 4.5)
+  ok   --accent-fg      on --bg-canvas       7.06:1 (need 4.5)
+  ok   --accent-on      on --accent          7.83:1 (need 4.5)
+  ok   --pass-fg        on --pass-tint       5.80:1 (need 4.5)
+  ok   --warn-fg        on --warn-tint       6.01:1 (need 4.5)
+  ok   --fail-fg        on --fail-tint       5.09:1 (need 4.5)
+  ok   --critical-on    on --critical        9.02:1 (need 4.5)
+  ok   --pass-fg        on --bg-surface      6.78:1 (need 4.5)
+  ok   --warn-fg        on --bg-surface      6.99:1 (need 4.5)
+  ok   --fail-fg        on --bg-surface      6.35:1 (need 4.5)
+  ok   --score-1-on     on --score-1         7.53:1 (need 4.5)
+  ok   --score-2-on     on --score-2         5.15:1 (need 4.5)
+  ok   --score-3-on     on --score-3         8.40:1 (need 4.5)
+  ok   --score-4-on     on --score-4         6.56:1 (need 4.5)
+  ok   --score-5-on     on --score-5         6.03:1 (need 4.5)
+  ok   --border-strong vs surface 3.51:1 (WCAG 1.4.11 need 3.0)
+  ok   --score-1 vs surface 7.28:1 (non-text >= 1.5 advisory, labels carry meaning)
+  ok   --score-2 vs surface 3.54:1 (non-text >= 1.5 advisory, labels carry meaning)
+  ok   --score-3 vs surface 1.89:1 (non-text >= 1.5 advisory, labels carry meaning)
+  ok   --score-4 vs surface 2.37:1 (non-text >= 1.5 advisory, labels carry meaning)
+  ok   --score-5 vs surface 5.83:1 (non-text >= 1.5 advisory, labels carry meaning)
+  ok   score-1->2: normal= 21.3 protan= 22.1 deutan= 21.2 tritan= 19.8 dL=19.9
+  ok   score-2->3: normal= 41.0 protan= 31.8 deutan= 20.2 tritan= 37.4 dL=19.5
+  ok   score-3->4: normal= 76.9 protan= 64.0 deutan= 68.7 tritan= 74.1 dL= 7.4
+  ok   score-4->5: normal= 26.1 protan= 26.2 deutan= 26.1 tritan= 26.0 dL=26.1
+  ok   verdict pass vs warn: protan= 61.2 deutan= 72.3 tritan= 75.4 dL=22.4
+  ok   verdict pass vs fail: protan= 35.2 deutan= 54.3 tritan=108.2 dL= 4.3
+  ok   verdict warn vs fail: protan= 32.8 deutan= 21.4 tritan= 40.1 dL=18.1
+
+===== DARK =====
+  ok   --fg             on --bg-canvas      16.02:1 (need 7.0)
+  ok   --fg             on --bg-surface     15.07:1 (need 7.0)
+  ok   --fg-muted       on --bg-surface      7.61:1 (need 4.5)
+  ok   --fg-muted       on --bg-canvas       8.09:1 (need 4.5)
+  ok   --fg-subtle      on --bg-surface      5.59:1 (need 4.5)
+  ok   --fg-subtle      on --bg-canvas       5.94:1 (need 4.5)
+  ok   --accent-fg      on --bg-surface      8.89:1 (need 4.5)
+  ok   --accent-fg      on --bg-canvas       9.46:1 (need 4.5)
+  ok   --accent-on      on --accent          5.86:1 (need 4.5)
+  ok   --pass-fg        on --pass-tint       8.37:1 (need 4.5)
+  ok   --warn-fg        on --warn-tint       9.24:1 (need 4.5)
+  ok   --fail-fg        on --fail-tint       7.54:1 (need 4.5)
+  ok   --critical-on    on --critical        6.76:1 (need 4.5)
+  ok   --pass-fg        on --bg-surface     10.15:1 (need 4.5)
+  ok   --warn-fg        on --bg-surface     11.13:1 (need 4.5)
+  ok   --fail-fg        on --bg-surface      8.58:1 (need 4.5)
+  ok   --score-1-on     on --score-1         5.33:1 (need 4.5)
+  ok   --score-2-on     on --score-2         7.95:1 (need 4.5)
+  ok   --score-3-on     on --score-3        10.63:1 (need 4.5)
+  ok   --score-4-on     on --score-4         8.01:1 (need 4.5)
+  ok   --score-5-on     on --score-5         4.90:1 (need 4.5)
+  ok   --border-strong vs surface 3.33:1 (WCAG 1.4.11 need 3.0)
+  ok   --score-1 vs surface 5.04:1 (non-text >= 1.5 advisory, labels carry meaning)
+  ok   --score-2 vs surface 7.94:1 (non-text >= 1.5 advisory, labels carry meaning)
+  ok   --score-3 vs surface 11.48:1 (non-text >= 1.5 advisory, labels carry meaning)
+  ok   --score-4 vs surface 8.65:1 (non-text >= 1.5 advisory, labels carry meaning)
+  ok   --score-5 vs surface 5.29:1 (non-text >= 1.5 advisory, labels carry meaning)
+  ok   score-1->2: normal= 29.0 protan= 20.6 deutan= 12.6 tritan= 31.3 dL=13.9
+  ok   score-2->3: normal= 31.0 protan= 20.8 deutan= 12.6 tritan= 27.9 dL=12.4
+  ok   score-3->4: normal= 68.5 protan= 57.7 deutan= 63.1 tritan= 65.5 dL= 9.7
+  ok   score-4->5: normal= 15.8 protan= 15.1 deutan= 15.7 tritan= 14.2 dL=15.2
+  ok   verdict pass vs warn: protan= 63.1 deutan= 70.8 tritan= 81.3 dL= 5.2
+  ok   verdict pass vs fail: protan= 34.5 deutan= 50.9 tritan=113.3 dL= 7.0
+  ok   verdict warn vs fail: protan= 36.5 deutan= 21.9 tritan= 34.2 dL=12.2
+
+RESULT: PASS

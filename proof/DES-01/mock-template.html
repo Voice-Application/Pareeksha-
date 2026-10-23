@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Call detail - Pareeksha design mock (SAMPLE DATA)</title>
+<meta name="description" content="DES-01 static mock of the Call Detail screen. All content is synthetic sample data.">
+<style>
+/*__FONTS__*/
+</style>
+<style>
+/*__TOKENS__*/
+</style>
+<style>
+/* ===== everything below uses tokens only: no raw colours ===== */
+*,*::before,*::after{box-sizing:border-box}
+html{color-scheme:light}
+html[data-theme="dark"]{color-scheme:dark}
+body{margin:0;background:var(--bg-canvas);color:var(--fg);font-family:var(--font-sans);font-size:var(--text-base);line-height:var(--lh-base);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+a{color:var(--accent-fg);text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px;border-radius:var(--radius-xs)}
+.num,.mono{font-family:var(--font-mono);font-feature-settings:"tnum" 1,"zero" 1}
+.eyebrow{font-size:var(--text-2xs);line-height:var(--lh-2xs);letter-spacing:var(--tracking-eyebrow);text-transform:uppercase;color:var(--fg-subtle);font-weight:var(--weight-medium)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+svg.i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+svg.i.sm{width:14px;height:14px}
+
+/* ---------- shell ---------- */
+.app{display:grid;grid-template-columns:var(--sidebar-w) minmax(0,1fr);min-height:100vh}
+.sidebar{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;border-right:1px solid var(--border);padding:var(--space-4) var(--space-3);display:flex;flex-direction:column;gap:var(--space-5)}
+.brand{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-1) var(--space-2);font-weight:var(--weight-semibold);font-size:var(--text-md);letter-spacing:var(--tracking-display)}
+.brand svg{width:22px;height:22px;color:var(--fg)}
+.navgroup{display:flex;flex-direction:column;gap:2px}
+.navgroup .eyebrow{padding:0 var(--space-2) var(--space-1)}
+.navlink{display:flex;align-items:center;gap:var(--space-2);height:30px;padding:0 var(--space-2);border-radius:var(--radius-sm);color:var(--fg-muted);font-size:var(--text-sm)}
+.navlink:hover{background:var(--bg-hover);color:var(--fg);text-decoration:none}
+.navlink[aria-current="page"]{background:var(--bg-selected);color:var(--fg);font-weight:var(--weight-medium)}
+.navlink svg{color:var(--fg-subtle)}
+.navlink[aria-current="page"] svg{color:var(--fg)}
+.navlink .count{margin-left:auto;font-family:var(--font-mono);font-size:var(--text-xs);color:var(--fg-subtle)}
+.sidebar-foot{margin-top:auto;font-size:var(--text-xs);color:var(--fg-subtle);padding:0 var(--space-2)}
+
+.topbar{display:flex;align-items:center;gap:var(--space-3);min-height:48px;padding:0 var(--space-8);border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg-canvas);z-index:5}
+.crumbs{display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-sm);color:var(--fg-subtle);min-width:0}
+.crumbs a{color:var(--fg-muted)}
+.crumbs .here{color:var(--fg);font-weight:var(--weight-medium)}
+.crumbs .sep{color:var(--border-strong)}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:var(--space-2)}
+.sample{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 var(--space-2);border:1px dashed var(--border-strong);border-radius:var(--radius-xs);font-family:var(--font-mono);font-size:var(--text-2xs);letter-spacing:var(--tracking-eyebrow);text-transform:uppercase;color:var(--fg-muted);background:var(--bg-sunken);white-space:nowrap}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);height:var(--control-h);padding:0 var(--space-3);border-radius:var(--radius-sm);border:1px solid var(--border-strong);background:var(--bg-surface);font-size:var(--text-sm);font-weight:var(--weight-medium);white-space:nowrap;transition:background var(--dur-fast) var(--ease)}
+.btn:hover{background:var(--bg-hover)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-on)}
+.btn.primary:hover{background:var(--accent);filter:brightness(1.08)}
+.btn.icon{width:var(--control-h);padding:0}
+kbd{font-family:var(--font-mono);font-size:var(--text-2xs);padding:1px 5px;border:1px solid var(--border-strong);border-bottom-width:2px;border-radius:var(--radius-xs);color:var(--fg-muted);background:var(--bg-surface)}
+
+.content{padding:var(--space-6) var(--space-8) var(--space-16);max-width:1360px}
+
+/* ---------- page header ---------- */
+.head{display:flex;gap:var(--space-6);align-items:flex-start;justify-content:space-between;margin-bottom:var(--space-5)}
+.head h1{margin:var(--space-1) 0 var(--space-2);font-size:var(--text-xl);line-height:var(--lh-xl);letter-spacing:var(--tracking-display);font-weight:var(--weight-semibold);max-width:44ch;text-wrap:balance}
+.head p{margin:0;color:var(--fg-muted);max-width:68ch;font-size:var(--text-base)}
+.meta{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg-surface);margin-bottom:var(--space-6)}
+.meta div{padding:var(--space-3) var(--space-4);border-left:1px solid var(--border);min-width:0}
+.meta div:first-child{border-left:0}
+.meta dt{margin:0 0 2px}
+.meta dd{margin:0;font-size:var(--text-sm);line-height:var(--lh-sm);font-weight:var(--weight-medium);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meta dd small{display:block;font-weight:var(--weight-regular);color:var(--fg-subtle);font-size:var(--text-xs);line-height:var(--lh-xs)}
+
+/* ---------- badges ---------- */
+.badge{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 var(--space-2);border-radius:var(--radius-xs);font-size:var(--text-xs);font-weight:var(--weight-medium);white-space:nowrap;border:1px solid transparent}
+.badge.pass{background:var(--pass-tint);color:var(--pass-fg);border-color:color-mix(in srgb,var(--pass) 35%,transparent)}
+.badge.warn{background:var(--warn-tint);color:var(--warn-fg);border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+.badge.fail{background:var(--fail-tint);color:var(--fail-fg);border-color:color-mix(in srgb,var(--fail) 40%,transparent)}
+.badge.critical{background:var(--critical);color:var(--critical-on)}
+.badge.neutral{background:var(--bg-sunken);color:var(--fg-muted);border-color:var(--border)}
+.badge.lg{height:28px;padding:0 var(--space-3);font-size:var(--text-sm)}
+.tag{font-family:var(--font-mono);font-size:var(--text-xs);letter-spacing:0}
+
+/* ---------- layout ---------- */
+.cols{display:grid;grid-template-columns:minmax(0,1fr) 408px;gap:var(--space-6);align-items:start}
+.stack{display:flex;flex-direction:column;gap:var(--space-6);min-width:0}
+.panel{background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-md);min-width:0}
+.panel>header{display:flex;align-items:center;gap:var(--space-3);min-height:44px;padding:0 var(--space-4);border-bottom:1px solid var(--border)}
+.panel>header h2{margin:0;font-size:var(--text-base);line-height:var(--lh-base);font-weight:var(--weight-semibold);letter-spacing:-0.005em}
+.panel>header .aux{margin-left:auto;display:flex;align-items:center;gap:var(--space-3);font-size:var(--text-xs);color:var(--fg-subtle)}
+.pad{padding:var(--space-4)}
+
+/* ---------- player / timeline ---------- */
+.transport{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-3) var(--space-4)}
+.play{width:36px;height:36px;border-radius:var(--radius-sm);background:var(--accent);color:var(--accent-on);display:grid;place-items:center}
+.clock{font-family:var(--font-mono);font-size:var(--text-md);font-feature-settings:"tnum" 1}
+.clock span{color:var(--fg-subtle)}
+.legend{margin-left:auto;display:flex;flex-wrap:wrap;gap:var(--space-4);font-size:var(--text-xs);color:var(--fg-muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.speed{font-family:var(--font-mono);font-size:var(--text-xs)}
+.tl{position:relative;padding:0 var(--space-4) var(--space-4) calc(var(--space-4) + 64px)}
+.tl .lane{position:relative;height:40px;border-top:1px solid var(--border)}
+.tl .lane.tall{height:76px}
+.tl .lane>span.l{position:absolute;left:-64px;top:0;height:100%;width:56px;display:flex;align-items:center;font-size:var(--text-2xs);letter-spacing:var(--tracking-eyebrow);text-transform:uppercase;color:var(--fg-subtle);font-weight:var(--weight-medium)}
+.tl svg.wave{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ruler{position:relative;height:22px;font-family:var(--font-mono);font-size:var(--text-2xs);color:var(--fg-subtle)}
+.ruler b{position:absolute;top:0;font-weight:400;transform:translateX(-50%)}
+.ruler b::after{content:"";position:absolute;left:50%;top:16px;height:6px;border-left:1px solid var(--border-strong)}
+.tl .overlay{position:absolute;top:0;bottom:var(--space-4);left:calc(var(--space-4) + 64px);right:var(--space-4);pointer-events:none}
+.evband{position:absolute;top:22px;bottom:0;background:color-mix(in srgb,var(--fail) 10%,transparent);border-left:1px solid var(--fail);border-right:1px solid var(--fail)}
+.evband em{position:absolute;top:60px;right:6px;font-style:normal;font-size:var(--text-2xs);font-family:var(--font-mono);color:var(--fail-fg);white-space:nowrap}
+.playhead{position:absolute;top:22px;bottom:0;width:0;border-left:2px solid var(--accent-fg)}
+.playhead::before{content:"";position:absolute;top:0;left:-6px;width:10px;height:10px;background:var(--accent-fg);border-radius:2px;transform:rotate(45deg) translate(1px,-1px)}
+.limit{position:absolute;left:0;right:0;border-top:1px dashed var(--fg-subtle)}
+.limit span{position:absolute;right:0;top:-14px;font-size:var(--text-2xs);font-family:var(--font-mono);color:var(--fg-subtle);background:var(--bg-surface);padding-left:4px}
+.mk{position:absolute;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;color:var(--fg)}
+.mk svg{width:14px;height:14px;display:block}
+.latbar{position:absolute;bottom:0;width:14px;margin-left:-7px;background:var(--series-3);border-radius:2px 2px 0 0}
+.latbar.over{background:var(--fail)}
+.latbar.mid{background:var(--warn)}
+.latbar b{position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-family:var(--font-mono);font-size:var(--text-2xs);font-weight:var(--weight-medium);color:var(--fg-muted);white-space:nowrap}
+
+/* ---------- transcript ---------- */
+.seg{display:inline-flex;border:1px solid var(--border-strong);border-radius:var(--radius-sm);overflow:hidden;background:var(--bg-surface)}
+.seg button{height:26px;padding:0 var(--space-3);font-size:var(--text-xs);color:var(--fg-muted);border-left:1px solid var(--border)}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed="true"]{background:var(--bg-selected);color:var(--fg);font-weight:var(--weight-medium)}
+.turn{display:grid;grid-template-columns:56px 68px minmax(0,1fr);gap:var(--space-3);padding:var(--space-3) var(--space-4);border-top:1px solid var(--border);position:relative;cursor:pointer;text-align:left;width:100%}
+.turn:first-of-type{border-top:0}
+.turn:hover{background:var(--bg-hover)}
+.turn .ts{font-family:var(--font-mono);font-size:var(--text-xs);color:var(--fg-subtle);padding-top:3px}
+.turn .who{font-size:var(--text-xs);font-weight:var(--weight-medium);padding-top:3px;display:flex;gap:6px;align-items:flex-start}
+.turn .who::before{content:"";width:8px;height:8px;border-radius:2px;margin-top:5px;flex:none}
+.turn.agent .who{color:var(--speaker-agent)}
+.turn.agent .who::before{background:var(--speaker-agent)}
+.turn.caller .who{color:var(--fg-muted)}
+.turn.caller .who::before{background:var(--speaker-caller)}
+html[data-theme="dark"] .turn.agent .who{color:var(--accent-fg)}
+.turn .say{margin:0}
+.turn .say[lang="kn"]{line-height:1.75}
+.turn .tr{display:flex;gap:var(--space-2);margin-top:2px;color:var(--fg-muted);font-size:var(--text-sm);line-height:var(--lh-sm)}
+.turn .tr::before{content:"EN";font-family:var(--font-mono);font-size:var(--text-2xs);color:var(--fg-subtle);border:1px solid var(--border);border-radius:var(--radius-xs);padding:0 4px;height:16px;line-height:14px;margin-top:2px;flex:none}
+.turn .foot{display:flex;flex-wrap:wrap;gap:var(--space-2);align-items:center;margin-top:var(--space-2)}
+.chip{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 var(--space-2);border:1px solid var(--border);border-radius:var(--radius-xs);font-size:var(--text-xs);color:var(--fg-muted);background:var(--bg-surface)}
+.chip.mono{font-family:var(--font-mono)}
+.chip.fail{background:var(--fail-tint);color:var(--fail-fg);border-color:color-mix(in srgb,var(--fail) 40%,transparent)}
+.chip.warn{background:var(--warn-tint);color:var(--warn-fg);border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+.chip.pass{background:var(--pass-tint);color:var(--pass-fg);border-color:color-mix(in srgb,var(--pass) 35%,transparent)}
+.turn.ev{background:color-mix(in srgb,var(--fail-tint) 55%,var(--bg-surface));box-shadow:inset 3px 0 0 var(--fail)}
+.turn.ev:hover{background:var(--fail-tint)}
+.turn.playing::after{content:"";position:absolute;right:var(--space-4);top:var(--space-3);width:8px;height:8px;border-radius:50%;background:var(--accent-fg);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent-fg) 25%,transparent)}
+.turn.sel{outline:2px solid var(--accent-fg);outline-offset:-2px}
+.glass{margin-top:var(--space-2);padding:var(--space-2) var(--space-3);background:var(--bg-sunken);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:var(--text-xs);line-height:var(--lh-xs);color:var(--fg-muted)}
+.glass b{font-weight:var(--weight-medium);color:var(--fg-subtle);letter-spacing:var(--tracking-eyebrow);text-transform:uppercase;font-size:var(--text-2xs);margin-right:var(--space-2)}
+.glass .bad{color:var(--fail-fg);font-weight:var(--weight-medium)}
+.barge{display:flex;align-items:center;gap:6px;font-size:var(--text-xs);color:var(--warn-fg);margin-top:var(--space-1)}
+
+/* ---------- verdict ---------- */
+.verdict .pad{display:flex;flex-direction:column;gap:var(--space-4)}
+.score-hero{display:flex;align-items:baseline;gap:var(--space-2)}
+.score-hero .big{font-size:var(--text-2xl);line-height:var(--lh-2xl);letter-spacing:var(--tracking-display);font-weight:var(--weight-semibold)}
+.score-hero .of{color:var(--fg-subtle);font-size:var(--text-md)}
+.track{position:relative;height:8px;background:var(--bg-sunken);border-radius:var(--radius-pill);border:1px solid var(--border)}
+.track>i{position:absolute;left:0;top:-1px;bottom:-1px;border-radius:var(--radius-pill)}
+.track>u{position:absolute;top:-5px;bottom:-5px;width:0;border-left:2px solid var(--fg)}
+.track-labels{display:flex;justify-content:space-between;position:relative;font-family:var(--font-mono);font-size:var(--text-2xs);color:var(--fg-subtle);margin-top:var(--space-1)}
+.reasons{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+.actions{display:flex;gap:var(--space-2);flex-wrap:wrap}
+
+/* ---------- dimensions ---------- */
+.dim{padding:var(--space-3) var(--space-4);border-top:1px solid var(--border)}
+.dim:first-of-type{border-top:0}
+.dim-top{display:flex;align-items:center;gap:var(--space-2)}
+.dim-top .name{font-size:var(--text-sm);font-weight:var(--weight-medium)}
+.dim-top .w{font-family:var(--font-mono);font-size:var(--text-xs);color:var(--fg-subtle)}
+.dim-top .pts{margin-left:auto;font-family:var(--font-mono);font-size:var(--text-xs);color:var(--fg-muted)}
+.sc{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:22px;padding:0 6px;border-radius:var(--radius-xs);font-family:var(--font-mono);font-size:var(--text-xs);font-weight:var(--weight-medium)}
+.s1{background:var(--score-1);color:var(--score-1-on)}.s2{background:var(--score-2);color:var(--score-2-on)}.s3{background:var(--score-3);color:var(--score-3-on)}.s4{background:var(--score-4);color:var(--score-4-on)}.s5{background:var(--score-5);color:var(--score-5-on)}
+.pips{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:var(--space-2)}
+.pips i{height:6px;border-radius:2px;background:var(--bg-sunken);border:1px solid var(--border)}
+.pips i.on{border-color:transparent}
+.pips.s1 i.on{background:var(--score-1)}.pips.s2 i.on{background:var(--score-2)}.pips.s3 i.on{background:var(--score-3)}.pips.s4 i.on{background:var(--score-4)}.pips.s5 i.on{background:var(--score-5)}
+.pips.s1,.pips.s2,.pips.s3,.pips.s4,.pips.s5{background:none;color:inherit}
+.dim .why{margin:var(--space-2) 0 0;font-size:var(--text-sm);line-height:var(--lh-sm);color:var(--fg-muted)}
+.dim .refs{display:flex;gap:var(--space-2);flex-wrap:wrap;margin-top:var(--space-2)}
+.ref{font-family:var(--font-mono);font-size:var(--text-xs);color:var(--accent-fg);border:1px solid var(--border);border-radius:var(--radius-xs);padding:0 6px;height:20px;display:inline-flex;align-items:center;background:var(--bg-surface)}
+.ref:hover{background:var(--accent-tint)}
+
+/* ---------- tables & stats ---------- */
+.row{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:var(--space-3);align-items:center;min-height:var(--row-h);padding:6px var(--space-4);border-top:1px solid var(--border);font-size:var(--text-sm)}
+.row:first-of-type{border-top:0}
+.row .k{font-family:var(--font-mono);font-size:var(--text-xs)}
+.row .d{display:block;color:var(--fg-subtle);font-size:var(--text-xs);line-height:var(--lh-xs)}
+.row .res{font-size:var(--text-xs);font-weight:var(--weight-medium)}
+.row.p svg,.row.p .res{color:var(--pass-fg)}
+.row.f svg,.row.f .res{color:var(--fail-fg)}
+.row.w svg,.row.w .res{color:var(--warn-fg)}
+.stats{display:grid;grid-template-columns:1fr 1fr}
+.stat{padding:var(--space-3) var(--space-4);border-top:1px solid var(--border);border-left:1px solid var(--border)}
+.stat:nth-child(odd){border-left:0}
+.stat:nth-child(-n+2){border-top:0}
+.stat .v{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:var(--text-lg);line-height:var(--lh-lg);font-weight:var(--weight-medium);letter-spacing:-0.02em}
+.stat .v svg{width:14px;height:14px}
+.stat.f .v{color:var(--fail-fg)}.stat.w .v{color:var(--warn-fg)}.stat.p .v{color:var(--pass-fg)}
+.stat .t{font-size:var(--text-xs);color:var(--fg-subtle)}
+.foot-note{font-size:var(--text-xs);color:var(--fg-subtle);padding:0 var(--space-1)}
+
+/* ---------- responsive ---------- */
+@media (max-width:1180px){.cols{grid-template-columns:minmax(0,1fr)}.meta{grid-template-columns:repeat(3,minmax(0,1fr))}.meta div:nth-child(4){border-left:0}.meta div:nth-child(n+4){border-top:1px solid var(--border)}}
+@media (max-width:860px){.app{grid-template-columns:minmax(0,1fr)}.sidebar{display:none}.topbar{padding:0 var(--gutter)}.content{padding:var(--space-5) var(--gutter) var(--space-12)}.head{flex-direction:column}}
+@media (max-width:560px){.ruler b:nth-child(even){display:none}.meta{grid-template-columns:repeat(2,minmax(0,1fr))}.meta div{border-left:0;border-top:1px solid var(--border)}.meta div:nth-child(-n+2){border-top:0}.meta div:nth-child(even){border-left:1px solid var(--border)}.turn{grid-template-columns:48px minmax(0,1fr)}.turn .who{grid-column:2;grid-row:1}.turn .body{grid-column:1/-1}.legend{display:none}.tl{padding-left:var(--space-4)}.tl .lane>span.l{display:none}.tl .overlay{left:var(--space-4)}.head h1{font-size:var(--text-lg);line-height:var(--lh-lg)}.crumbs .hide-s{display:none}.top-actions .btn span{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></symbol>
+    <symbol id="i-bot" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 14h.01M15 14h.01"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></symbol>
+    <symbol id="i-signal" viewBox="0 0 24 24"><path d="M4 18v-3M9 18V9M14 18v-6M19 18V5"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z" fill="currentColor"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
+    <symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 3v5M15 3v5M6 8h12v4a6 6 0 0 1-12 0zM12 18v3"/></symbol>
+    <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3 13l3-8h12l3 8v6H3zM3 13h5l1 3h6l1-3h5"/></symbol>
+    <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 4v16M5 20h14M5 8h14M5 8l-3 7a3 3 0 0 0 6 0zM19 8l-3 7a3 3 0 0 0 6 0z"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></symbol>
+    <symbol id="i-tri" viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/></symbol>
+    <symbol id="i-octo" viewBox="0 0 24 24"><path d="M8 3h8l5 5v8l-5 5H8l-5-5V8z"/><path d="M9 9l6 6M15 9l-6 6"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+    <symbol id="i-tool" viewBox="0 0 24 24"><path d="M14.5 6.5a4 4 0 0 0 4.9 4.9L21 13l-8 8-4-4 8-8zM3 21l4-4"/></symbol>
+    <symbol id="i-wave" viewBox="0 0 24 24"><path d="M3 12h2M7 7v10M11 4v16M15 8v8M19 10v4M21 12h.01"/></symbol>
+    <symbol id="i-tri-s" viewBox="0 0 14 14"><path d="M7 1.5l6 11H1z" fill="currentColor"/></symbol>
+    <symbol id="i-sq-s" viewBox="0 0 14 14"><rect x="2.5" y="2.5" width="9" height="9" rx="1.5" fill="currentColor"/></symbol>
+  </defs>
+</svg>
+
+<div class="app">
+  <aside class="sidebar" aria-label="Primary">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 14v-4M9.5 18V6M14.5 15V9M19 12v0"/><path d="M3.5 21.5h17" stroke-width="1.6"/></svg>
+      Pareeksha
+    </div>
+    <nav class="navgroup" aria-label="Overview">
+      <a class="navlink" href="#"><svg class="i"><use href="#i-home"/></svg>Overview</a>
+    </nav>
+    <nav class="navgroup" aria-label="Build">
+      <span class="eyebrow">Build</span>
+      <a class="navlink" href="#"><svg class="i"><use href="#i-bot"/></svg>Agents</a>
+      <a class="navlink" href="#"><svg class="i"><use href="#i-list"/></svg>Scenarios</a>
+      <a class="navlink" href="#"><svg class="i"><use href="#i-user"/></svg>Personas</a>
+      <a class="navlink" href="#"><svg class="i"><use href="#i-signal"/></svg>Noise profiles</a>
+    </nav>
+    <nav class="navgroup" aria-label="Evaluate">
+      <span class="eyebrow">Evaluate</span>
+      <a class="navlink" href="#" aria-current="page"><svg class="i"><use href="#i-play"/></svg>Runs</a>
+      <a class="navlink" href="#"><svg class="i"><use href="#i-upload"/></svg>Audits</a>
+      <a class="navlink" href="#"><svg class="i"><use href="#i-globe"/></svg>Dialect</a>
+      <a class="navlink" href="#"><svg class="i"><use href="#i-flag"/></svg>Regression</a>
+    </nav>
+    <nav class="navgroup" aria-label="Operate">
+      <span class="eyebrow">Operate</span>
+      <a class="navlink" href="#"><svg class="i"><use href="#i-plug"/></svg>Integrations</a>
+      <a class="navlink" href="#"><svg class="i"><use href="#i-inbox"/></svg>DLQ</a>
+      <a class="navlink" href="#"><svg class="i"><use href="#i-scale"/></svg>Calibration</a>
+      <a class="navlink" href="#"><svg class="i"><use href="#i-key"/></svg>API keys</a>
+    </nav>
+    <div class="sidebar-foot">rubric-2026-10-v1</div>
+  </aside>
+
+  <div>
+    <div class="topbar">
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="#">Runs</a><span class="sep">/</span><a class="hide-s" href="#">Sample run</a><span class="sep hide-s">/</span><span class="here">Call 17</span>
+      </nav>
+      <span class="sample" title="Everything on this screen is invented for design review">Sample data</span>
+      <div class="top-actions">
+        <button class="btn icon" id="theme" aria-label="Toggle light and dark theme"><svg class="i"><use href="#i-sun"/></svg></button>
+      </div>
+    </div>
+
+    <main class="content">
+      <div class="head">
+        <div>
+          <span class="eyebrow">Call 17 of 40 &middot; Synthetic caller &middot; kn-en</span>
+          <h1>Agent confirmed &#8377;&nbsp;40,000 when the caller said &#8377;&nbsp;4,000</h1>
+          <p>The agent's speech recognition heard &ldquo;forty thousand&rdquo;. It read the wrong amount back, the caller corrected it while the agent was talking, and the agent recorded the wrong amount anyway.</p>
+        </div>
+        <div style="display:flex;gap:var(--space-2);flex:none">
+          <button class="btn"><svg class="i sm"><use href="#i-link"/></svg><span>Copy link</span></button>
+          <button class="btn primary"><svg class="i sm"><use href="#i-flag"/></svg><span>Promote to regression</span></button>
+        </div>
+      </div>
+
+      <dl class="meta">
+        <div><dt class="eyebrow">Agent</dt><dd>Mock EMI agent<small>planted bug 2 on</small></dd></div>
+        <div><dt class="eyebrow">Scenario</dt><dd>EMI paid, no SMS<small>success: dispute logged</small></dd></div>
+        <div><dt class="eyebrow">Persona</dt><dd>Frustrated, 58<small>Kanglish, impatient</small></dd></div>
+        <div><dt class="eyebrow">Line</dt><dd>Market noise<small>8 kHz, SNR 8 dB</small></dd></div>
+        <div><dt class="eyebrow">Duration</dt><dd class="num">01:48<small>11 turns</small></dd></div>
+        <div><dt class="eyebrow">Judge</dt><dd>Confidence medium<small>not yet calibrated</small></dd></div>
+      </dl>
+
+      <div class="cols">
+        <div class="stack">
+
+          <section class="panel" aria-labelledby="h-audio">
+            <header><h2 id="h-audio">Audio</h2><div class="aux"><span>mixed, 8 kHz</span><span class="speed">1&times;</span></div></header>
+            <div class="transport">
+              <button class="play" aria-label="Play"><svg class="i" style="width:18px;height:18px"><use href="#i-play"/></svg></button>
+              <div class="clock" aria-live="off"><span id="now">00:52</span> <span>/ 01:48</span></div>
+              <div class="legend">
+                <span><i style="background:var(--speaker-agent)"></i>Agent</span>
+                <span><i style="background:var(--speaker-caller)"></i>Caller</span>
+                <span><i style="background:var(--fail-tint);outline:1px solid var(--fail)"></i>Evidence</span>
+                <span><svg class="i sm" style="vertical-align:-2px;fill:currentColor;stroke:none"><use href="#i-tri-s"/></svg> Barge-in</span>
+                <span><svg class="i sm" style="vertical-align:-2px;fill:currentColor;stroke:none"><use href="#i-sq-s"/></svg> Tool call</span>
+              </div>
+            </div>
+            <div class="tl" id="tl">
+              <div class="ruler" aria-hidden="true">/*__RULER__*/</div>
+              <div class="lane" role="img" aria-label="Agent speech over time"><span class="l">Agent</span>
+                <svg class="wave" viewBox="0 0 1080 40" preserveAspectRatio="none"><path d="/*__WAVE_AGENT__*/" stroke="var(--speaker-agent)" stroke-width="1.6" vector-effect="non-scaling-stroke" fill="none"/></svg>
+              </div>
+              <div class="lane" role="img" aria-label="Caller speech over time"><span class="l">Caller</span>
+                <svg class="wave" viewBox="0 0 1080 40" preserveAspectRatio="none"><path d="/*__WAVE_CALLER__*/" stroke="var(--speaker-caller)" stroke-width="1.6" vector-effect="non-scaling-stroke" fill="none"/></svg>
+              </div>
+              <div class="lane" aria-label="Events"><span class="l">Events</span>
+                <span class="mk" style="left:/*__BARGE_X__*/%;color:var(--warn-fg)" title="Caller barge-in at 00:52, agent kept talking"><svg><use href="#i-tri-s"/></svg></span>
+                <span class="mk" style="left:/*__TOOL_X__*/%;color:var(--fail-fg)" title="Tool call record_payment_claim at 01:02"><svg><use href="#i-sq-s"/></svg></span>
+              </div>
+              <div class="lane tall" aria-label="Response latency per agent turn"><span class="l">Latency</span>
+                <div class="limit" style="bottom:/*__LIMIT_Y__*/%"><span>2.0 s target</span></div>
+                /*__LATBARS__*/
+              </div>
+              <div class="overlay" aria-hidden="true">
+                <div class="evband" style="left:/*__EV_X0__*/%;width:/*__EV_W__*/%"><em>Evidence #4&ndash;6</em></div>
+                <div class="playhead" id="ph" style="left:/*__PH_X__*/%"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel" aria-labelledby="h-tr">
+            <header>
+              <h2 id="h-tr">Transcript</h2>
+              <div class="aux">
+                <div class="seg" role="group" aria-label="Filter turns">
+                  <button aria-pressed="true">All 11</button><button aria-pressed="false">Evidence 3</button><button aria-pressed="false">Agent</button><button aria-pressed="false">Caller</button>
+                </div>
+              </div>
+            </header>
+            <div id="turns">
+/*__TURNS__*/
+            </div>
+          </section>
+        </div>
+
+        <div class="stack">
+          <section class="panel verdict" aria-labelledby="h-v">
+            <header><h2 id="h-v">Verdict</h2><div class="aux"><span class="mono">rubric-2026-10-v1</span></div></header>
+            <div class="pad">
+              <div style="display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap">
+                <span class="badge critical lg"><svg class="i sm"><use href="#i-octo"/></svg>Critical failure</span>
+                <span class="badge warn lg"><svg class="i sm"><use href="#i-tri"/></svg>Needs human review</span>
+              </div>
+              <div>
+                <div class="eyebrow">Overall score</div>
+                <div class="score-hero"><span class="big num">48.75</span><span class="of num">/ 100</span></div>
+                <div class="track" style="margin-top:var(--space-3)" role="img" aria-label="Score 48.75 of 100, pass line at 80">
+                  <i style="width:48.75%;background:var(--score-2)"></i><u style="left:80%"></u>
+                </div>
+                <div class="track-labels"><span>0</span><span style="position:absolute;left:80%;transform:translateX(-50%)">pass 80</span><span>100</span></div>
+              </div>
+              <div class="reasons">
+                <span class="chip mono fail">critical_failure</span>
+                <span class="chip mono fail">check_failed:amount_confirmed</span>
+              </div>
+              <div class="actions">
+                <button class="btn"><svg class="i sm"><use href="#i-scale"/></svg>Override judge score</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel" aria-labelledby="h-f">
+            <header><h2 id="h-f">Failure tags</h2><div class="aux"><span>5 types</span></div></header>
+            <div class="pad" style="display:flex;flex-wrap:wrap;gap:var(--space-2)">
+              <span class="chip mono fail"><svg class="i sm"><use href="#i-x"/></svg>wrong_fact <a class="ref" data-seek="4" href="#t4">#4</a></span>
+              <span class="chip mono fail"><svg class="i sm"><use href="#i-x"/></svg>asr_misrecognition <a class="ref" data-seek="3" href="#t3">#3</a></span>
+              <span class="chip mono fail"><svg class="i sm"><use href="#i-x"/></svg>tool_arguments <a class="ref" data-seek="6" href="#t6">#6</a></span>
+              <span class="chip mono warn"><svg class="i sm"><use href="#i-tri"/></svg>interruption_handling <a class="ref" data-seek="5" href="#t5">#5</a></span>
+              <span class="chip mono warn"><svg class="i sm"><use href="#i-tri"/></svg>latency <a class="ref" data-seek="6" href="#t6">#6</a></span>
+            </div>
+          </section>
+
+          <section class="panel" aria-labelledby="h-d">
+            <header><h2 id="h-d">Dimension scores</h2><div class="aux"><span class="mono">weighted sum 48.75</span></div></header>
+/*__DIMS__*/
+          </section>
+
+          <section class="panel" aria-labelledby="h-c">
+            <header><h2 id="h-c">Deterministic checks</h2><div class="aux"><span>3 passed, 3 failed</span></div></header>
+/*__CHECKS__*/
+          </section>
+
+          <section class="panel" aria-labelledby="h-m">
+            <header><h2 id="h-m">Metrics</h2></header>
+/*__STATS__*/
+          </section>
+
+          <p class="foot-note">Sample data. This screen is a design mock for approval; none of it was produced by the platform.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+(function(){
+  var root=document.documentElement,btn=document.getElementById('theme');
+  var q=new URLSearchParams(location.search).get('theme'),saved=null;
+  try{saved=localStorage.getItem('pk-theme')}catch(e){}
+  var t=q||saved||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+  root.setAttribute('data-theme',t);
+  btn.addEventListener('click',function(){
+    t=root.getAttribute('data-theme')==='dark'?'light':'dark';
+    root.setAttribute('data-theme',t);
+    try{localStorage.setItem('pk-theme',t)}catch(e){}
+  });
+  /* seek demo: clicking a turn or an evidence reference moves the playhead (no audio in the mock) */
+  var D=108,ph=document.getElementById('ph'),now=document.getElementById('now');
+  function fmt(s){s=Math.round(s);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+  function seek(el){
+    var s=parseFloat(el.getAttribute('data-t'));
+    ph.style.left=(s/D*100)+'%';now.textContent=fmt(s);
+    document.querySelectorAll('.turn').forEach(function(n){n.classList.remove('playing','sel')});
+    el.classList.add('playing');
+  }
+  document.querySelectorAll('.turn').forEach(function(el){
+    el.addEventListener('click',function(){seek(el)});
+    el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();seek(el)}});
+  });
+  document.querySelectorAll('[data-seek]').forEach(function(a){
+    a.addEventListener('click',function(e){
+      e.preventDefault();
+      var el=document.getElementById('t'+a.getAttribute('data-seek'));
+      if(el){seek(el);el.classList.add('sel');el.scrollIntoView({block:'center',behavior:'smooth'})}
+    });
+  });
+})();
+</script>
+</body>
+</html>
