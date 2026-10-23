@@ -61,6 +61,7 @@ def as_turn(obj: Any) -> Turn:
     """Coerce a Turn, mapping (dict / DB row mapping) or attribute object into a Turn."""
     if isinstance(obj, Turn):
         return obj
+    data: dict[str, Any]
     if isinstance(obj, Mapping):
         data = {k: obj.get(k) for k in _FIELDS}
     else:
