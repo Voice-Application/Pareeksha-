@@ -1,0 +1,180 @@
+# Pareeksha — full local stack. Starter file for task INFRA-01 (copy to repo root).
+#   docker compose up -d            # everything
+#   docker compose --profile tools up -d kafka-ui   # optional Kafka UI on :8080
+#   docker compose --profile workers up -d          # + Kafka consumers (INFRA-02 onward)
+# Image tags verified 2026-10-23: apache/kafka:4.0.0, postgres:16, python:3.12-slim, nginx:1.27-alpine, kafbat/kafka-ui.
+# Verify the apache/kafka image tag on Docker Hub before Day 1 (Kafka 4.x is KRaft-only).
+
+x-backend: &backend
+  build: { context: ./backend }
+  env_file: [{ path: .env, required: false }]
+  environment:
+    DATABASE_URL: postgresql+psycopg://pareeksha:pareeksha@postgres:5432/pareeksha
+    KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    DATA_DIR: /data
+  volumes:
+    - ./data/runtime:/data
+  depends_on:
+    postgres: { condition: service_healthy }
+    kafka-init: { condition: service_completed_successfully }
+  restart: unless-stopped
+
+services:
+  kafka:
+    image: apache/kafka:4.0.0
+    hostname: kafka
+    ports: ["9094:9094"]                 # host access for local dev tools
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_NUM_PARTITIONS: 6
+    volumes: [kafka-data:/var/lib/kafka/data]
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+
+  kafka-init:
+    image: apache/kafka:4.0.0
+    depends_on: { kafka: { condition: service_healthy } }
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      TOPIC_PARTITIONS: ${TOPIC_PARTITIONS:-6}
+      TOPIC_RETENTION_HOURS: ${TOPIC_RETENTION_HOURS:-168}
+    volumes: ["./infra/kafka/create-topics.sh:/create-topics.sh:ro"]
+    entrypoint: ["bash", "/create-topics.sh"]
+    restart: "no"
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: pareeksha
+      POSTGRES_PASSWORD: pareeksha
+      POSTGRES_DB: pareeksha
+    ports: ["5432:5432"]
+    volumes: [pg-data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pareeksha"]
+      interval: 5s
+      retries: 20
+
+  migrate:
+    <<: *backend
+    command: ["sh", "/app/alembic_migrate.sh"]
+    restart: "no"
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  api:
+    <<: *backend
+    command: ["uvicorn", "pareeksha.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports: ["8000:8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status==200 else 1)"]
+      interval: 10s
+      retries: 12
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      kafka-init: { condition: service_completed_successfully }
+
+  outbox-relay:
+    <<: *backend
+    profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
+    command: ["python", "-m", "pareeksha.workers.outbox_relay"]
+
+  planner:
+    <<: *backend
+    profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
+    command: ["python", "-m", "pareeksha.workers.planner"]
+
+  simulator:
+    <<: *backend
+    profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
+    command: ["python", "-m", "pareeksha.workers.simulator"]
+    deploy: { replicas: "${SIMULATOR_REPLICAS:-3}" }
+
+  auditor:
+    <<: *backend
+    profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
+    command: ["python", "-m", "pareeksha.workers.auditor"]
+
+  evaluator:
+    <<: *backend
+    profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
+    command: ["python", "-m", "pareeksha.workers.evaluator"]
+    deploy: { replicas: "${EVALUATOR_REPLICAS:-2}" }
+
+  finalizer:
+    <<: *backend
+    profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
+    command: ["python", "-m", "pareeksha.workers.finalizer"]
+
+  integrations:
+    <<: *backend
+    profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
+    command: ["python", "-m", "pareeksha.workers.integrations"]
+
+  dialect:
+    <<: *backend
+    profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
+    command: ["python", "-m", "pareeksha.workers.dialect"]
+
+  generator:
+    <<: *backend
+    profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
+    command: ["python", "-m", "pareeksha.workers.generator"]
+
+  retrier:
+    <<: *backend
+    profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
+    command: ["python", "-m", "pareeksha.workers.retrier"]
+
+  dlq-recorder:
+    <<: *backend
+    profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
+    command: ["python", "-m", "pareeksha.workers.dlq_recorder"]
+
+  web:
+    build: { context: ./web }
+    environment:
+      PAREEKSHA_API_URL: http://api:8000/api/v1
+      PAREEKSHA_API_KEY: ${PAREEKSHA_API_KEY:-}
+      WEB_PASSWORD: ${WEB_PASSWORD:-}
+    ports: ["3000:3000"]
+    depends_on: { api: { condition: service_healthy } }
+    restart: unless-stopped
+
+  mock-agent:
+    build: { context: ./mock_agent }
+    env_file: [{ path: .env, required: false }]
+    ports: ["8765:8765"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8765/health').status==200 else 1)"]
+      interval: 10s
+      retries: 12
+    restart: unless-stopped
+
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:latest
+    profiles: ["tools"]
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    ports: ["8080:8080"]
+    depends_on: [kafka]
+
+volumes:
+  kafka-data:
+  pg-data:
