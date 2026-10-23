@@ -144,6 +144,8 @@ html[data-theme="dark"] .turn.agent .who{color:var(--accent-fg)}
 .chip.mono{font-family:var(--font-mono)}
 .chip.fail{background:var(--fail-tint);color:var(--fail-fg);border-color:color-mix(in srgb,var(--fail) 40%,transparent)}
 .chip.warn{background:var(--warn-tint);color:var(--warn-fg);border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+.chip.flag{height:28px;padding:0 var(--space-3);font-size:var(--text-sm);border-color:var(--border-strong);color:var(--fg)}
+.chip.flag svg{color:var(--warn-fg)}
 .chip.pass{background:var(--pass-tint);color:var(--pass-fg);border-color:color-mix(in srgb,var(--pass) 35%,transparent)}
 .turn.ev{background:color-mix(in srgb,var(--fail-tint) 55%,var(--bg-surface));box-shadow:inset 3px 0 0 var(--fail)}
 .turn.ev:hover{background:var(--fail-tint)}
@@ -366,7 +368,7 @@ html[data-theme="dark"] .turn.agent .who{color:var(--accent-fg)}
             <div class="pad">
               <div style="display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap">
                 <span class="badge critical lg"><svg class="i sm"><use href="#i-octo"/></svg>Critical failure</span>
-                <span class="badge warn lg"><svg class="i sm"><use href="#i-tri"/></svg>Needs human review</span>
+                <span class="chip flag"><svg class="i sm"><use href="#i-flag"/></svg>Needs human review</span>
               </div>
               <div>
                 <div class="eyebrow">Overall score</div>

@@ -33,14 +33,13 @@ All values live in `tokens.css`. Contrast and colour-vision checks run with `pyt
 
 `--accent` `#2748B5` light, `#6F88F0` dark. Used for: primary button, links, focus ring, play button, playhead, selected-turn outline. Never for data and never as a gradient. It is a plain cobalt, deliberately not the lavender-blue of Linear or any purple.
 
-### 2.3 Verdict colours (3 states + critical)
+### 2.3 Verdict colours (3 states)
 
 Always shown as **icon + word + colour**, never colour alone.
 
 | State | Meaning | Icon | Light solid / text / tint | Dark solid / text / tint |
 |---|---|---|---|---|
 | Pass | `passed = true` | circle-check | `#0F7A63` / `#0A6551` / `#DAEEE6` | `#3BB89D` / `#62D4BA` / `#0E2B25` |
-| Review | passes the bar's neighbourhood or flagged for review (see 2.5) | triangle | `#D99A0B` / `#755000` / `#F8E9C4` | `#E5A91C` / `#F0C461` / `#30240A` |
 | Fail | `passed = false` | circle-x | `#CF4A1C` / `#A63810` / `#F8DDD1` | `#EC6C40` / `#FF9670` / `#351A0F` |
 | Critical | `critical_failure = true` | octagon-x, solid fill | `#8E1D08` on white | `#FF6F47` on `#260A02` |
 
@@ -66,9 +65,10 @@ Design notes:
 - Dimension scores map 1:1 to the rubric anchors in `08-evaluation-rubric.md` (4 correct, 3 minor friction, 2 noticeable problem, 1 clear failure, 0 severe).
 - Fills must not be the only carrier of meaning. Heatmap cells print the value; chips print `n/4`; pip bars sit next to the number.
 
-### 2.5 Open point for PM / TL (not decided by design)
 
-The rubric defines pass, fail and critical, but not a "review/warn" state for the overall verdict. Proposal used in the mock: **Review** = `needs_human_review` is true without a critical failure, or score within 10 points below the pass line (70-79.99). If PM prefers only pass / fail / critical, delete the amber verdict and keep amber for individual checks and metrics only. Tokens support either.
+### 2.5 Verdict versus review flag (decided)
+
+Resolved by the Orchestrator (after PM-01): the verdict stays **3-state per the rubric: Pass, Fail, Critical**. `needs_human_review` is a separate **flag**, never a verdict. It is drawn as a neutral outlined chip with a flag icon and the label "Needs human review" (reasons listed as mono chips beside it), placed next to the verdict badge. Amber (`--warn`) remains for threshold warnings on individual metrics and checks (for example p50 latency 1.1 s against a 1.0 s target), for the flag icon, and for score step 3.
 
 ### 2.6 Speakers and chart series
 
@@ -113,7 +113,7 @@ Style rules for every chart FE builds:
 
 - **Flat, thin, labelled.** 1.5px lines, 2px radius bars, no gradients, no drop shadows, no 3D, no donut charts. Gridlines are `--grid` (same as `--border`), horizontal only.
 - **Direct labels over legends** where there are one or two series. Values in Geist Mono.
-- **Threshold lines are dashed and labelled** ("2.0 s target", "pass 80"). Bars past a threshold take the verdict colour (warn or fail); bars within it stay `--series-1`/steel.
+- **Threshold lines are dashed and labelled** ("2.0 s target", "pass 80"). Bars past a threshold take the warning or fail colour; bars within it stay `--series-1`/steel.
 - **Waveform** (call detail): two stacked lanes, caller and agent, one vertical stroke per 100 ms, 1.6px, with the speaker colour. Speech regions are drawn at full amplitude; silence is a flat noise-floor line, not blank. Failure evidence is a translucent `--fail` band across all lanes with a 1px edge, labelled "Evidence #4-6". Playhead is a 2px accent line with a diamond head. No gradient fills, no rounded "pill" bars.
 - **Heatmap** (run matrix, dialect x condition): square-ish cells with 3px radius and 2px gaps, fill from the score scale, value printed in the cell in mono, row and column headers in `--fg-muted`. Empty cells use `--score-na` with a dash. A thin ink tick on the legend marks the pass line. Sort rows worst-first by default.
 - **Distribution** (score histogram): 10-point bins, bars coloured by the five-step band they fall in, pass line as a vertical dashed rule.
@@ -135,9 +135,11 @@ shadcn/ui stays as the behaviour layer (Radix primitives, accessibility), but FE
 | `--destructive` | `--fail` |
 | `--radius` | `--radius-sm` (5px); cards use `--radius-md` |
 
-Overrides FE should make on first pass: no card shadows; 32px control height; 13px table text; Geist; a `Badge` variant set of `pass | review | fail | critical | neutral`; a `ScoreChip` (step colour, `n/4` or number); a `Pips` bar; a `TagChip` (mono failure tag, icon + label, optional turn reference); `EvidenceRef` (mono `#4`, seeks audio); `Meter` with pass-line tick; `Heatmap`; `Waveform` (wavesurfer.js regions styled per section 5).
+Overrides FE should make on first pass: no card shadows; 32px control height; 13px table text; Geist; a `Badge` variant set of `pass | fail | critical | neutral` (verdicts) plus a separate `FlagChip` for `needs_human_review`; a `ScoreChip` (step colour, `n/4` or number); a `Pips` bar; a `TagChip` (mono failure tag, icon + label, optional turn reference); `EvidenceRef` (mono `#4`, seeks audio); `Meter` with pass-line tick; `Heatmap`; `Waveform` (wavesurfer.js regions styled per section 5).
 
-Empty / loading / error states (all pages):
+Icons: `lucide-react` (already in the TRD), stroke 1.6, 16px (14px in dense rows). The mock draws the same shapes by hand; use lucide names `circle-check`, `circle-x`, `triangle-alert`, `octagon-x`, `flag`, `play`, `link`, `scale`.
+
+Empty / loading / error states (all pages) are specified in `pages/00-shared.md` section 5; summary:
 - **Empty:** one line saying what this page will hold and the single next action as a primary button, plus a muted one-line explanation. A small monochrome line illustration is allowed; no stock art. Example: "No runs yet. A run sends synthetic callers to your agent. Create a run."
 - **Loading:** skeletons shaped like the final content (`--bg-sunken` blocks, no shimmer sweep, a 1.2 s opacity pulse that stops under reduced motion). Live run: rows appear in place; new rows flash `--accent-tint` once for 800 ms.
 - **Error:** inline in the panel, `--fail-tint` strip with icon, one-line cause, a retry button, and the request id in mono. Never a full-page error for a single failed panel.
@@ -173,4 +175,4 @@ Empty / loading / error states (all pages):
 
 - FE-01/FE-02: import `tokens.css` once in `app/globals.css`; set `class="dark"` through `next-themes` (`defaultTheme: "system"`); do not hard-code colours in components.
 - FE-04 (call detail): `mock-call-detail.html` is the visual reference; its CSS uses tokens only. Text and structure are sample.
-- DES follow-up (not part of this task): wireframe specs per page and component list, once PM-01 confirms scope.
+- Page specs for all 17 FR-DB-1 pages, shared components and states: `docs/design/pages/` (start with `00-shared.md`). Checked by `proof/DES-01/check_specs.py`.
