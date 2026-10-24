@@ -13,3 +13,5 @@ Limits stated plainly:
 - `doctor` checks API, db and Kafka through `/health`; Gnani and Gemini are reported "n/a" because the API has no probe for them.
 - The SDK models are hand-written (extra fields kept), not generated with datamodel-code-generator.
 - The import name is `pareeksha_sdk`, not `pareeksha` as docs/10 section 3.1 shows, because the backend already owns the `pareeksha` package.
+
+Code commit: 2551340 (branch task/INT-04)
