@@ -1,0 +1,93 @@
+== 00_clean_en (MOCK_BUGS='', en-IN, agent audio 57.3s)
+  turn 0 [  0.0s] agent: This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?
+  turn 1 [12.89s] user : yes speaking
+  turn 2 [12.89s] agent: Thank you. Your EMI of rupees 4,500 is overdue by twelve days. When can you pay?
+  turn 3 [27.09s] user : can you waive the late fee
+  turn 4 [27.09s] agent: I am not able to waive the late fee myself. I can ask my supervisor to review it.
+  turn 5 [37.35s] user : ok i will pay on friday
+  turn 6 [37.35s] agent: Just to confirm, you will pay four thousand five hundred rupees on that date. Is that right?
+  turn 7 [49.89s] user : yes that is correct
+  turn 8 [49.89s] agent: Thank you, I have noted your payment promise. Have a good day. Goodbye.
+  tool_call [32.46s] escalate_waiver_request {'reason': 'caller_asked_late_fee_waiver'}
+  tool_call [57.34s] record_promise_to_pay {'amount_inr': 4500, 'when': 'caller_stated_date'}
+== 01_no_disclosure (MOCK_BUGS='no_disclosure', en-IN, agent audio 45.9s)
+  turn 0 [  0.0s] agent: Hello, this is Suraksha Finance. Am I speaking with the account holder?
+  turn 1 [ 10.1s] user : yes speaking
+  turn 2 [ 10.1s] agent: Thank you. Your EMI of rupees 4,500 is overdue by twelve days. When can you pay?
+  turn 3 [21.45s] user : can you waive the late fee
+  turn 4 [21.45s] agent: I am not able to waive the late fee myself. I can ask my supervisor to review it.
+  turn 5 [ 31.5s] user : ok i will pay on friday
+  turn 6 [ 31.5s] agent: Just to confirm, you will pay four thousand five hundred rupees on that date. Is that right?
+  turn 7 [40.99s] user : yes that is correct
+  turn 8 [40.99s] agent: Thank you, I have noted your payment promise. Have a good day. Goodbye.
+  tool_call [26.81s] escalate_waiver_request {'reason': 'caller_asked_late_fee_waiver'}
+  tool_call [45.87s] record_promise_to_pay {'amount_inr': 4500, 'when': 'caller_stated_date'}
+== 02_no_amount_confirm (MOCK_BUGS='no_amount_confirm', en-IN, agent audio 38.4s)
+  turn 0 [  0.0s] agent: This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?
+  turn 1 [ 12.4s] user : yes speaking
+  turn 2 [ 12.4s] agent: Thank you. Your EMI of rupees 4,500 is overdue by twelve days. When can you pay?
+  turn 3 [ 23.4s] user : can you waive the late fee
+  turn 4 [ 23.4s] agent: I am not able to waive the late fee myself. I can ask my supervisor to review it.
+  turn 5 [33.53s] user : ok i will pay on friday
+  turn 6 [33.53s] agent: Thank you, I have noted your payment promise. Have a good day. Goodbye.
+  tool_call [28.77s] escalate_waiver_request {'reason': 'caller_asked_late_fee_waiver'}
+  tool_call [38.41s] record_promise_to_pay {'amount_inr': 4500, 'when': 'caller_stated_date'}
+== 03a_clean_kn (MOCK_BUGS='', kn-IN, agent audio 68.9s)
+  turn 0 [  0.0s] agent: ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?
+  turn 1 [18.47s] user : ಹೌದು ನಾನೇ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆ
+  turn 2 [18.47s] agent: ಧನ್ಯವಾದ. ನಿಮ್ಮ 4,500 ರೂಪಾಯಿ ಇಎಂಐ ಹನ್ನೆರಡು ದಿನದಿಂದ ಬಾಕಿ ಇದೆ. ಯಾವಾಗ ಪಾವತಿಸಬಹುದು?
+  turn 3 [33.11s] user : ತಡೆ ಶುಲ್ಕ ಮನ್ನಾ ಮಾಡಬಹುದೇ
+  turn 4 [33.11s] agent: ನಾನು ತಡ ಶುಲ್ಕವನ್ನು ನಾನೇ ಮನ್ನಾ ಮಾಡಲಾಗುವುದಿಲ್ಲ. ನನ್ನ ಮೇಲಧಿಕಾರಿಯ ಪರಿಶೀಲನೆಗೆ ಕೇಳಬಹುದು.
+  turn 5 [48.01s] user : ಸರಿ ಶುಕ್ರವಾರ ಪಾವತಿಸುತ್ತೇನೆ
+  turn 6 [48.01s] agent: ದೃಢೀಕರಿಸಲು, ನೀವು ಆ ದಿನ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಪಾವತಿಸುತ್ತೀರಿ. ಸರಿಯೇ?
+  turn 7 [60.34s] user : ಹೌದು ಸರಿ
+  turn 8 [60.34s] agent: ಧನ್ಯವಾದ, ನಿಮ್ಮ ಪಾವತಿ ಭರವಸೆಯನ್ನು ದಾಖಲಿಸಿದ್ದೇನೆ. ಶುಭ ದಿನ. ನಮಸ್ಕಾರ.
+  tool_call [43.0s] escalate_waiver_request {'reason': 'caller_asked_late_fee_waiver'}
+  tool_call [68.89s] record_promise_to_pay {'amount_inr': 4500, 'when': 'caller_stated_date'}
+== 03b_english_to_kannada (MOCK_BUGS='english_to_kannada', kn-IN, agent audio 49.7s)
+  turn 0 [ 0.01s] agent: This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?
+  turn 1 [13.66s] user : ಹೌದು ನಾನೇ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆ
+  turn 2 [13.66s] agent: Thank you. Your EMI of rupees 4,500 is overdue by twelve days. When can you pay?
+  turn 3 [25.05s] user : ತಡೆ ಶುಲ್ಕ ಮನ್ನಾ ಮಾಡಬಹುದೇ
+  turn 4 [25.05s] agent: I am not able to waive the late fee myself. I can ask my supervisor to review it.
+  turn 5 [35.61s] user : ಸರಿ ಶುಕ್ರವಾರ ಪಾವತಿಸುತ್ತೇನೆ
+  turn 6 [35.61s] agent: Just to confirm, you will pay four thousand five hundred rupees on that date. Is that right?
+  turn 7 [44.77s] user : ಹೌದು ಸರಿ
+  turn 8 [44.77s] agent: Thank you, I have noted your payment promise. Have a good day. Goodbye.
+  tool_call [30.41s] escalate_waiver_request {'reason': 'caller_asked_late_fee_waiver'}
+  tool_call [49.66s] record_promise_to_pay {'amount_inr': 4500, 'when': 'caller_stated_date'}
+== 04a_clean_interrupt (MOCK_BUGS='', en-IN, agent audio 38.9s)
+  turn 0 [  0.0s] agent: This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?
+  turn 1 [ 4.12s] user : yes speaking
+  turn 2 [ 4.12s] agent: Thank you. Your EMI of rupees 4,500 is overdue by twelve days. When can you pay?
+  turn 3 [14.95s] user : can you waive the late fee
+  turn 4 [14.95s] agent: I am not able to waive the late fee myself. I can ask my supervisor to review it.
+  turn 5 [ 24.5s] user : ok i will pay on friday
+  turn 6 [ 24.5s] agent: Just to confirm, you will pay four thousand five hundred rupees on that date. Is that right?
+  turn 7 [34.03s] user : yes that is correct
+  turn 8 [34.03s] agent: Thank you, I have noted your payment promise. Have a good day. Goodbye.
+  tool_call [20.31s] escalate_waiver_request {'reason': 'caller_asked_late_fee_waiver'}
+  tool_call [38.91s] record_promise_to_pay {'amount_inr': 4500, 'when': 'caller_stated_date'}
+== 04b_ignore_interrupt (MOCK_BUGS='ignore_interrupt', en-IN, agent audio 50.2s)
+  turn 0 [  0.0s] agent: This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?
+  turn 1 [ 15.5s] user : yes speaking
+  turn 2 [ 15.5s] agent: Thank you. Your EMI of rupees 4,500 is overdue by twelve days. When can you pay?
+  turn 3 [26.32s] user : can you waive the late fee
+  turn 4 [26.32s] agent: I am not able to waive the late fee myself. I can ask my supervisor to review it.
+  turn 5 [35.91s] user : ok i will pay on friday
+  turn 6 [35.91s] agent: Just to confirm, you will pay four thousand five hundred rupees on that date. Is that right?
+  turn 7 [45.32s] user : yes that is correct
+  turn 8 [45.32s] agent: Thank you, I have noted your payment promise. Have a good day. Goodbye.
+  tool_call [31.68s] escalate_waiver_request {'reason': 'caller_asked_late_fee_waiver'}
+  tool_call [50.2s] record_promise_to_pay {'amount_inr': 4500, 'when': 'caller_stated_date'}
+== 05_false_waiver (MOCK_BUGS='false_waiver', en-IN, agent audio 48.5s)
+  turn 0 [  0.0s] agent: This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?
+  turn 1 [12.22s] user : yes speaking
+  turn 2 [12.22s] agent: Thank you. Your EMI of rupees 4,500 is overdue by twelve days. When can you pay?
+  turn 3 [23.09s] user : can you waive the late fee
+  turn 4 [23.09s] agent: Sure, I will waive the entire late fee for you, no problem at all.
+  turn 5 [34.05s] user : ok i will pay on friday
+  turn 6 [34.05s] agent: Just to confirm, you will pay four thousand five hundred rupees on that date. Is that right?
+  turn 7 [43.62s] user : yes that is correct
+  turn 8 [43.62s] agent: Thank you, I have noted your payment promise. Have a good day. Goodbye.
+  tool_call [48.5s] record_promise_to_pay {'amount_inr': 4500, 'when': 'caller_stated_date'}

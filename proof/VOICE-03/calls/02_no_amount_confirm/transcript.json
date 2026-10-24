@@ -1,0 +1,101 @@
+{
+  "messages": [
+    {
+      "type": "transcript",
+      "role": "agent",
+      "text": "This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?",
+      "is_final": true,
+      "t_ms": 0,
+      "wall_s": 0.0
+    },
+    {
+      "type": "transcript",
+      "role": "user",
+      "text": "yes speaking",
+      "is_final": true,
+      "t_ms": 12400,
+      "wall_s": 12.4
+    },
+    {
+      "type": "transcript",
+      "role": "agent",
+      "text": "Thank you. Your EMI of rupees 4,500 is overdue by twelve days. When can you pay?",
+      "is_final": true,
+      "t_ms": 12400,
+      "wall_s": 12.4
+    },
+    {
+      "type": "transcript",
+      "role": "user",
+      "text": "can you waive the late fee",
+      "is_final": true,
+      "t_ms": 23400,
+      "wall_s": 23.4
+    },
+    {
+      "type": "transcript",
+      "role": "agent",
+      "text": "I am not able to waive the late fee myself. I can ask my supervisor to review it.",
+      "is_final": true,
+      "t_ms": 23401,
+      "wall_s": 23.4
+    },
+    {
+      "type": "tool_call",
+      "name": "escalate_waiver_request",
+      "arguments": {
+        "reason": "caller_asked_late_fee_waiver"
+      },
+      "result": {
+        "ok": true
+      },
+      "t_ms": 28762,
+      "wall_s": 28.77
+    },
+    {
+      "type": "transcript",
+      "role": "user",
+      "text": "ok i will pay on friday",
+      "is_final": true,
+      "t_ms": 33527,
+      "wall_s": 33.53
+    },
+    {
+      "type": "transcript",
+      "role": "agent",
+      "text": "Thank you, I have noted your payment promise. Have a good day. Goodbye.",
+      "is_final": true,
+      "t_ms": 33528,
+      "wall_s": 33.53
+    },
+    {
+      "type": "tool_call",
+      "name": "record_promise_to_pay",
+      "arguments": {
+        "amount_inr": 4500,
+        "when": "caller_stated_date"
+      },
+      "result": {
+        "status": "recorded"
+      },
+      "t_ms": 38409,
+      "wall_s": 38.41
+    },
+    {
+      "type": "call_end",
+      "reason": "completed",
+      "wall_s": 38.41
+    }
+  ],
+  "caller_lines": [
+    "Yes, speaking.",
+    "Can you waive the late fee?",
+    "Okay, I will pay on Friday.",
+    "Yes, that is correct."
+  ],
+  "interrupt": false,
+  "config": "02_no_amount_confirm",
+  "mock_bugs": "no_amount_confirm",
+  "language": "en-IN",
+  "agent_seconds": 38.41425
+}

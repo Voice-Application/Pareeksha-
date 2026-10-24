@@ -1,0 +1,117 @@
+{
+  "messages": [
+    {
+      "type": "transcript",
+      "role": "agent",
+      "text": "This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?",
+      "is_final": true,
+      "t_ms": 0,
+      "wall_s": 0.0
+    },
+    {
+      "type": "transcript",
+      "role": "user",
+      "text": "yes speaking",
+      "is_final": true,
+      "t_ms": 15499,
+      "wall_s": 15.5
+    },
+    {
+      "type": "transcript",
+      "role": "agent",
+      "text": "Thank you. Your EMI of rupees 4,500 is overdue by twelve days. When can you pay?",
+      "is_final": true,
+      "t_ms": 15499,
+      "wall_s": 15.5
+    },
+    {
+      "type": "transcript",
+      "role": "user",
+      "text": "can you waive the late fee",
+      "is_final": true,
+      "t_ms": 26314,
+      "wall_s": 26.32
+    },
+    {
+      "type": "transcript",
+      "role": "agent",
+      "text": "I am not able to waive the late fee myself. I can ask my supervisor to review it.",
+      "is_final": true,
+      "t_ms": 26315,
+      "wall_s": 26.32
+    },
+    {
+      "type": "tool_call",
+      "name": "escalate_waiver_request",
+      "arguments": {
+        "reason": "caller_asked_late_fee_waiver"
+      },
+      "result": {
+        "ok": true
+      },
+      "t_ms": 31676,
+      "wall_s": 31.68
+    },
+    {
+      "type": "transcript",
+      "role": "user",
+      "text": "ok i will pay on friday",
+      "is_final": true,
+      "t_ms": 35910,
+      "wall_s": 35.91
+    },
+    {
+      "type": "transcript",
+      "role": "agent",
+      "text": "Just to confirm, you will pay four thousand five hundred rupees on that date. Is that right?",
+      "is_final": true,
+      "t_ms": 35910,
+      "wall_s": 35.91
+    },
+    {
+      "type": "transcript",
+      "role": "user",
+      "text": "yes that is correct",
+      "is_final": true,
+      "t_ms": 45319,
+      "wall_s": 45.32
+    },
+    {
+      "type": "transcript",
+      "role": "agent",
+      "text": "Thank you, I have noted your payment promise. Have a good day. Goodbye.",
+      "is_final": true,
+      "t_ms": 45319,
+      "wall_s": 45.32
+    },
+    {
+      "type": "tool_call",
+      "name": "record_promise_to_pay",
+      "arguments": {
+        "amount_inr": 4500,
+        "when": "caller_stated_date"
+      },
+      "result": {
+        "status": "recorded"
+      },
+      "t_ms": 50201,
+      "wall_s": 50.2
+    },
+    {
+      "type": "call_end",
+      "reason": "completed",
+      "wall_s": 50.2
+    }
+  ],
+  "caller_lines": [
+    "Yes, speaking.",
+    "Can you waive the late fee?",
+    "Okay, I will pay on Friday.",
+    "Yes, that is correct."
+  ],
+  "interrupt": true,
+  "config": "04b_ignore_interrupt",
+  "mock_bugs": "ignore_interrupt",
+  "language": "en-IN",
+  "agent_seconds": 50.2051875
+}
