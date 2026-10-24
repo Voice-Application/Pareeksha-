@@ -1,0 +1,5 @@
+
+> pareeksha-web@0.1.0 gen:api:check
+> node scripts/gen-api.mjs --check --from ../proof/FE-01/openapi.json
+
+lib/api/schema.d.ts is up to date.
