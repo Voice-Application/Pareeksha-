@@ -1,0 +1,230 @@
+{
+  "id": "50ad67a7-53a5-5348-8fc4-8dae12673873",
+  "call_id": "22222222-2222-4222-8222-222222222222",
+  "rubric_version": "rubric-2026-10-v1",
+  "status": "ok",
+  "judge_model": "deepseek-v4-pro",
+  "temperature": 0.0,
+  "prompt_hash": "sha256:081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480",
+  "dimensions": {
+    "task_completion": {
+      "score": 4,
+      "evidence_turns": [
+        2,
+        3,
+        4
+      ],
+      "reason": "Agent stated correct EMI amount 4200, caller promised to pay on Friday, and record_ptp tool called with correct amount and date."
+    },
+    "policy_compliance": {
+      "score": 4,
+      "evidence_turns": [
+        0
+      ],
+      "reason": "Mandatory disclosure 'This call is recorded' given in turn 0. No forbidden content or threats."
+    },
+    "factual_accuracy": {
+      "score": 4,
+      "evidence_turns": [
+        2,
+        4
+      ],
+      "reason": "EMI amount 4200 and due date Friday correctly stated and recorded."
+    },
+    "language_handling": {
+      "score": 4,
+      "evidence_turns": [
+        0,
+        2,
+        4
+      ],
+      "reason": "Agent used Hindi with English code-mix appropriately, matching caller's language."
+    },
+    "conversation_flow": {
+      "score": 4,
+      "evidence_turns": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "reason": "Smooth turn-taking, no loops, no interruptions, appropriate pacing."
+    },
+    "empathy_tone": {
+      "score": 4,
+      "evidence_turns": [
+        0,
+        2,
+        4
+      ],
+      "reason": "Polite and respectful tone, though caller was neutral; no emotional distress to address."
+    },
+    "escalation": {
+      "score": 4,
+      "evidence_turns": [],
+      "reason": "No escalation needed; agent handled the call correctly without transfer."
+    }
+  },
+  "overall_score": 100.0,
+  "passed": true,
+  "critical_failure": false,
+  "needs_human_review": false,
+  "review_reasons": [],
+  "failure_types": [],
+  "summary": "Agent successfully confirmed EMI amount 4200, obtained promise to pay on Friday, and recorded it via record_ptp. All mandatory disclosures present, no policy violations, language matched, and conversation flowed smoothly.",
+  "confidence": "high",
+  "raw_response": {
+    "dimensions": {
+      "task_completion": {
+        "score": 4,
+        "evidence_turns": [
+          2,
+          3,
+          4
+        ],
+        "reason": "Agent stated correct EMI amount 4200, caller promised to pay on Friday, and record_ptp tool called with correct amount and date."
+      },
+      "policy_compliance": {
+        "score": 4,
+        "evidence_turns": [
+          0
+        ],
+        "reason": "Mandatory disclosure 'This call is recorded' given in turn 0. No forbidden content or threats."
+      },
+      "factual_accuracy": {
+        "score": 4,
+        "evidence_turns": [
+          2,
+          4
+        ],
+        "reason": "EMI amount 4200 and due date Friday correctly stated and recorded."
+      },
+      "language_handling": {
+        "score": 4,
+        "evidence_turns": [
+          0,
+          2,
+          4
+        ],
+        "reason": "Agent used Hindi with English code-mix appropriately, matching caller's language."
+      },
+      "conversation_flow": {
+        "score": 4,
+        "evidence_turns": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "reason": "Smooth turn-taking, no loops, no interruptions, appropriate pacing."
+      },
+      "empathy_tone": {
+        "score": 4,
+        "evidence_turns": [
+          0,
+          2,
+          4
+        ],
+        "reason": "Polite and respectful tone, though caller was neutral; no emotional distress to address."
+      },
+      "escalation": {
+        "score": 4,
+        "evidence_turns": [],
+        "reason": "No escalation needed; agent handled the call correctly without transfer."
+      }
+    },
+    "critical_failure": false,
+    "needs_human_review": false,
+    "failure_types": [],
+    "summary": "Agent successfully confirmed EMI amount 4200, obtained promise to pay on Friday, and recorded it via record_ptp. All mandatory disclosures present, no policy violations, language matched, and conversation flowed smoothly.",
+    "confidence": "high"
+  },
+  "input_tokens": 2261,
+  "output_tokens": 458,
+  "latency_ms": 3961,
+  "est_cost": 0.0047982,
+  "checks": [
+    {
+      "check_type": "disclosure_present",
+      "check_key": "recorded",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [
+        0
+      ],
+      "detail": "Disclosure given in turn 0"
+    },
+    {
+      "check_type": "forbidden_absent",
+      "check_key": "threat",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "Phrase never said by the agent"
+    },
+    {
+      "check_type": "language_match",
+      "check_key": "hi-IN",
+      "must_pass": false,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "0/3 agent turns not in ['en', 'hi']"
+    },
+    {
+      "check_type": "no_loop",
+      "check_key": "agent_repeats",
+      "must_pass": false,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "No repeated utterance loop"
+    },
+    {
+      "check_type": "tool_calls_expected",
+      "check_key": "record_ptp",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [
+        4
+      ],
+      "detail": "record_ptp called as expected"
+    },
+    {
+      "check_type": "amount_confirmed",
+      "check_key": "emi_amount",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [
+        2,
+        4
+      ],
+      "detail": "Agent stated 4200 correctly"
+    }
+  ],
+  "metrics": {
+    "response_latency_p50_ms": 600.0,
+    "response_latency_p95_ms": 600.0,
+    "response_latency_count": 2,
+    "agent_overlap_starts": 0,
+    "first_greeting_latency_ms": 600,
+    "barge_in_attempts": 0,
+    "barge_in_honoured": 0,
+    "barge_in_honoured_rate": null,
+    "agent_stop_time_p50_ms": null,
+    "silence_gaps_over_2s": 0,
+    "agent_talk_ratio": 0.7142857142857143,
+    "repeated_utterances": 0,
+    "caller_wer": null,
+    "caller_wer_turns": 0,
+    "extra": {}
+  },
+  "cited_turn_indices": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "all_cited_turns_exist": true
+}

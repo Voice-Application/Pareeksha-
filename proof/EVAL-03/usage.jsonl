@@ -1,0 +1,2 @@
+{"provider":"deepseek","model":"deepseek-v4-pro","purpose":"judge","input_tokens":2387,"output_tokens":400,"cached_input_tokens":0,"est_cost":0.00473484,"latency_ms":3501,"prompt_hash":"081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480","repair":false,"cache_hit":false}
+{"provider":"deepseek","model":"deepseek-v4-pro","purpose":"judge","input_tokens":2261,"output_tokens":458,"cached_input_tokens":0,"est_cost":0.0047982,"latency_ms":3961,"prompt_hash":"081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480","repair":false,"cache_hit":false}

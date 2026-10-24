@@ -54,6 +54,10 @@ select = ["E", "F", "I", "B", "UP", "RUF"]
 # B905: zip() strictness is not worth churn in code that predates the lint setup.
 ignore = ["RUF001", "RUF002", "RUF003", "B905"]
 
+[tool.ruff.lint.per-file-ignores]
+# The rubric anchors are prompt text; wrapping them would change the prompt.
+"pareeksha/evaluation/rubric.py" = ["E501"]
+
 [tool.coverage.run]
 source = ["pareeksha"]
 branch = true
