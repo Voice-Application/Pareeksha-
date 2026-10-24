@@ -52,9 +52,7 @@ def check_disclosures(
     for d in disclosures:
         d = d if isinstance(d, Disclosure) else Disclosure.from_dict(d)
         scope = agent_turns if d.within_turns is None else agent_turns[: d.within_turns]
-        hits = [
-            t.idx for t in scope if _matches(d.text, d.regex, t.text, DISCLOSURE_FUZZY)
-        ]
+        hits = [t.idx for t in scope if _matches(d.text, d.regex, t.text, DISCLOSURE_FUZZY)]
         if hits:
             results.append(
                 CheckResult(
@@ -68,9 +66,7 @@ def check_disclosures(
             )
         else:
             where = (
-                "the call"
-                if d.within_turns is None
-                else f"the first {d.within_turns} agent turns"
+                "the call" if d.within_turns is None else f"the first {d.within_turns} agent turns"
             )
             results.append(
                 CheckResult(
@@ -95,11 +91,7 @@ def check_forbidden(
     results = []
     for p in phrases:
         p = p if isinstance(p, ForbiddenPhrase) else ForbiddenPhrase.from_dict(p)
-        hits = [
-            t.idx
-            for t in agent_turns
-            if _matches(p.text, p.regex, t.text, FORBIDDEN_FUZZY)
-        ]
+        hits = [t.idx for t in agent_turns if _matches(p.text, p.regex, t.text, FORBIDDEN_FUZZY)]
         if hits:
             results.append(
                 CheckResult(
@@ -166,11 +158,7 @@ def check_language(
     for t in as_turns(turns):
         if t.speaker != "agent":
             continue
-        lang = (
-            _base(t.language_detected)
-            if t.language_detected
-            else _dominant_script(t.text)
-        )
+        lang = _base(t.language_detected) if t.language_detected else _dominant_script(t.text)
         if lang is None:
             continue
         if lang == "en" and not t.language_detected and len(t.text.split()) < 4:
@@ -208,9 +196,7 @@ def check_no_loop(
     """Fail when one agent utterance (similarity >= 0.9) occurs `max_occurrences`+ times."""
     ts = as_turns(turns)
     if not any(t.speaker == "agent" for t in ts):
-        return CheckResult(
-            "no_loop", "agent_repeats", None, must_pass, (), "No agent turns"
-        )
+        return CheckResult("no_loop", "agent_repeats", None, must_pass, (), "No agent turns")
     clusters: dict[int, list[int]] = {}
     for rep, first in find_repeats(ts).items():
         clusters.setdefault(first, [first]).append(rep)
@@ -290,9 +276,7 @@ def check_tool_calls(
                 for i, c in enumerate(calls)
                 if i not in used
                 and c.name == exp["name"]
-                and all(
-                    k in c.args and _value_eq(v, c.args[k]) for k, v in want.items()
-                )
+                and all(k in c.args and _value_eq(v, c.args[k]) for k, v in want.items())
             ),
             None,
         )
@@ -320,7 +304,8 @@ def check_tool_calls(
             )
             continue
         used.add(match)
-        ev = (calls[match].turn_idx,) if calls[match].turn_idx is not None else ()
+        match_turn = calls[match].turn_idx
+        ev: tuple[int, ...] = (match_turn,) if match_turn is not None else ()
         results.append(
             CheckResult(
                 "tool_calls_expected",
@@ -357,10 +342,8 @@ def _agent_amounts(turn: Turn) -> list[ParsedNumber]:
     """Numbers in an agent turn that plausibly state money."""
     out = []
     for n in extract_numbers(turn.text):
-        if (
-            n.currency
-            or 1000 <= n.value < 10**8
-            and not (float(n.value).is_integer() and int(n.value) in _YEAR)
+        if n.currency or (
+            1000 <= n.value < 10**8 and not (float(n.value).is_integer() and int(n.value) in _YEAR)
         ):
             out.append(n)
     return out
@@ -464,9 +447,7 @@ def run_checks(
     if expected_language:
         out.append(check_language(ts, expected_language, allowed_languages))
     out.append(check_no_loop(ts))
-    out += check_tool_calls(
-        expected_tool_calls, None if tool_calls is None else list(tool_calls)
-    )
+    out += check_tool_calls(expected_tool_calls, None if tool_calls is None else list(tool_calls))
     if expected_amounts:
         out += check_amounts(ts, expected_amounts)
     return out

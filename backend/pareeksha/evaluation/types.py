@@ -61,6 +61,7 @@ def as_turn(obj: Any) -> Turn:
     """Coerce a Turn, mapping (dict / DB row mapping) or attribute object into a Turn."""
     if isinstance(obj, Turn):
         return obj
+    data: dict[str, Any]
     if isinstance(obj, Mapping):
         data = {k: obj.get(k) for k in _FIELDS}
     else:
@@ -82,9 +83,7 @@ class Disclosure:
     id: str
     text: str
     regex: str | None = None
-    within_turns: int | None = (
-        None  # only the first N agent turns count; None = whole call
-    )
+    within_turns: int | None = None  # only the first N agent turns count; None = whole call
     must_pass: bool = True
 
     @classmethod
@@ -125,6 +124,4 @@ class ToolCall:
 
     @classmethod
     def from_dict(cls, d: Mapping[str, Any]) -> ToolCall:
-        return cls(
-            name=d["name"], args=dict(d.get("args") or {}), turn_idx=d.get("turn_idx")
-        )
+        return cls(name=d["name"], args=dict(d.get("args") or {}), turn_idx=d.get("turn_idx"))

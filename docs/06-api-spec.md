@@ -419,3 +419,21 @@ Outbound webhook payloads and signing: `10-integrations-and-dx.md §2.1`.
 ## 11. Event contract (for consumers outside the API)
 
 Kafka topics, keys and the envelope are specified in `03-TRD.md §10`. The Pydantic models in `backend/pareeksha/events/schemas.py` are the source of truth; `GET /events/schemas` returns their JSON Schemas so external consumers (e.g. a data team reading `evaluation.completed`) can validate messages.
+
+## 12. Additions frozen by TL-01 (page data gaps)
+
+Added on 23 Oct 2026 after DES-01 listed API data gaps for the FR-DB-1 pages (see CHANGELOG.md). Request/response models are in the OpenAPI document; only the shape of each addition is summarised here. Auth scopes follow the same rules (reads `read`, writes `runs:write`).
+
+| Method & path | Purpose (requirement) | Returns |
+|---|---|---|
+| `POST /runs:estimate` (body of `POST /runs`) | Wizard dry run: item count, cost estimate, budget check; creates nothing (FR-RN-2) | `{ item_count, estimate, remaining_budget, over_budget }` |
+| `GET /runs?kind=&status=&created_from=&created_to=&agent_id=` | Runs page filters | page of runs |
+| `GET /calls?source=&status=&agent_id=&run_id=&needs_review=&reviewed=` | Audits page (`source=upload&source=import`), review queue (`needs_review=true&reviewed=false`), Calibration sample source (FR-AU-*, FR-EV-7, FR-EV-8) | page of call summaries (score, passed, critical, review flags) |
+| `GET /regression-tests?agent_id=&status=` | Regression page with last run result (FR-RG-1, FR-RG-2) | page of regression tests (`last_score`, `last_passed`) |
+| `PATCH /regression-tests/{id}` | Change status (`blocking`/`scheduled`/`manual`/`retired`), baseline, tolerance, notes (FR-RG-1) | the regression test |
+| `GET /dialect-datasets` | Dialect page dataset picker (FR-DI-1) | page of datasets with `sample_count` |
+| `GET /dialect-reports?dataset_id=` | Dialect page report picker (FR-DI-4) | page of report summaries |
+| `GET /dialect-reports/{id}/clips?dialect=&condition=&engine=` | Heatmap drill-down to the worst clips (FR-DB-4) | page of clip results, worst WER first |
+| `GET /dialect-reports/{id}/html` | The `html` link already returned by `GET /dialect-reports/{id}` | `text/html` |
+
+Field additions: `RunSummary.score_distribution` (10 buckets, FR-DB-2); `run_id` and `run_item_id` on the call object.

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import audioop
 import itertools
+from typing import Any
 
 import numpy as np
 import pytest
@@ -70,9 +71,7 @@ def test_profile_validation():
 def test_snr_within_half_db_offline(profile, speech):
     y, stages = LineSimulator.simulate(profile, speech, seed=7, capture=True)
     assert len(y) == len(speech)
-    snr = dsp.measure_snr_db(
-        stages["speech"], stages["noise_applied"], profile.sample_rate
-    )
+    snr = dsp.measure_snr_db(stages["speech"], stages["noise_applied"], profile.sample_rate)
     assert abs(snr - profile.snr_db) <= 0.5
 
 
@@ -106,9 +105,7 @@ def test_mix_at_snr_exact():
         assert abs(dsp.measure_snr_db(s, noise, RATE) - target) < 0.01
 
 
-@pytest.mark.parametrize(
-    "profile", list(BUILTIN_PROFILES.values()), ids=lambda p: p.name
-)
+@pytest.mark.parametrize("profile", list(BUILTIN_PROFILES.values()), ids=lambda p: p.name)
 def test_deterministic_same_seed(profile, speech):
     a = LineSimulator.simulate(profile, speech, seed=11)
     b = LineSimulator.simulate(profile, speech, seed=11)
@@ -123,9 +120,7 @@ def test_different_seed_changes_noise_and_loss(speech):
     )
 
 
-@pytest.mark.parametrize(
-    "profile", list(BUILTIN_PROFILES.values()), ids=lambda p: p.name
-)
+@pytest.mark.parametrize("profile", list(BUILTIN_PROFILES.values()), ids=lambda p: p.name)
 @pytest.mark.parametrize("chunk", [320, 100, 777, 5000])
 def test_chunked_equals_whole(profile, chunk, speech):
     clip = speech[: RATE * 4 + 13]  # odd tail on purpose
@@ -147,14 +142,12 @@ def test_chunked_equals_whole_with_fixed_reference(speech):
     ref.flush()
     c = ref.captured
     mask = dsp.active_mask(c["speech"], 8000)
-    kw = {
+    kw: dict[str, Any] = {
         "speech_power": dsp.power(c["speech"][mask]),
         "noise_power": dsp.power(c["noise_raw"][mask]),
     }
     sim = LineSimulator(p, seed=9, **kw)
-    parts = [sim.process(speech[i : i + 640]) for i in range(0, len(speech), 640)] + [
-        sim.flush()
-    ]
+    parts = [sim.process(speech[i : i + 640]) for i in range(0, len(speech), 640)] + [sim.flush()]
     assert np.array_equal(np.concatenate(parts), whole)
 
 
@@ -173,10 +166,7 @@ def test_output_time_aligned_with_input(speech):
     p = LineProfile(name="r", sample_rate=8000)
     assert _lag(LineSimulator.simulate(p, speech), speech) == 0
     # PSTN band-pass adds only its natural IIR group delay (< 2.5 ms).
-    assert (
-        abs(_lag(LineSimulator.simulate(get_profile("pstn_8k_alaw"), speech), speech))
-        <= 40
-    )
+    assert abs(_lag(LineSimulator.simulate(get_profile("pstn_8k_alaw"), speech), speech)) <= 40
 
 
 def test_pstn_band_limits_spectrum(speech):
@@ -203,9 +193,7 @@ def test_alaw_matches_stdlib_and_quantises():
 def test_clipping_flattens_peaks(speech):
     from pareeksha.audio.line_simulator import CLIP_CEILING
 
-    p = LineProfile(
-        name="c", sample_rate=8000, codec="none", pstn_bandpass=True, clipping=True
-    )
+    p = LineProfile(name="c", sample_rate=8000, codec="none", pstn_bandpass=True, clipping=True)
     y = LineSimulator.simulate(p, speech)
     assert np.max(np.abs(y)) <= CLIP_CEILING * 1.5  # up-sampling Gibbs overshoot only
     assert np.mean(np.abs(y) > CLIP_CEILING * 0.9) > 0.001
@@ -214,9 +202,7 @@ def test_clipping_flattens_peaks(speech):
 @pytest.mark.parametrize("loss", [2.0, 5.0])
 def test_packet_loss_rate(loss):
     p = LineProfile(name="l", sample_rate=8000, codec="none", packet_loss_pct=loss)
-    tone = (0.3 * np.sin(2 * np.pi * 440 * np.arange(RATE * 120) / RATE)).astype(
-        np.float32
-    )
+    tone = (0.3 * np.sin(2 * np.pi * 440 * np.arange(RATE * 120) / RATE)).astype(np.float32)
     sim = LineSimulator(p, seed=4)
     y = np.concatenate([sim.process(tone), sim.flush()])
     frames = y[: len(y) // 320 * 320].reshape(-1, 320)
@@ -237,8 +223,7 @@ def test_noise_unit_power_and_seeded(category):
 
 def test_noise_categories_spectrally_distinct():
     spectra = {
-        c: spectrum_db(NoiseSource(c, 8000, 2).generate(8000 * 10), rate=8000)
-        for c in CATEGORIES
+        c: spectrum_db(NoiseSource(c, 8000, 2).generate(8000 * 10), rate=8000) for c in CATEGORIES
     }
     for a, b in itertools.combinations(CATEGORIES, 2):
         d = np.mean(np.abs(spectra[a] - spectra[b]))
@@ -246,10 +231,7 @@ def test_noise_categories_spectrally_distinct():
 
 
 def test_all_eight_profiles_audible_and_distinct(speech):
-    outs = {
-        n: LineSimulator.simulate(p, speech, seed=0)
-        for n, p in BUILTIN_PROFILES.items()
-    }
+    outs = {n: LineSimulator.simulate(p, speech, seed=0) for n, p in BUILTIN_PROFILES.items()}
     for n, y in outs.items():
         assert np.sqrt(np.mean(y**2)) > 0.01, n  # audible
         assert np.max(np.abs(y)) <= 1.0

@@ -491,7 +491,7 @@ CREATE TABLE api_keys (
 
 CREATE TABLE api_usage (
     id          bigserial PRIMARY KEY,
-    provider    text NOT NULL CHECK (provider IN ('gnani', 'gemini', 'other')),
+    provider    text NOT NULL CHECK (provider IN ('gnani', 'gemini', 'deepseek', 'other')),
     operation   text NOT NULL,                   -- tts, stt_stream, stt_rest, stt_batch, llm_judge, llm_caller, ...
     units       numeric(14,3) NOT NULL,           -- seconds of audio, characters, or tokens
     unit_type   text NOT NULL CHECK (unit_type IN ('audio_seconds', 'characters', 'tokens')),

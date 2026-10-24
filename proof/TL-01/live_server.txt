@@ -1,0 +1,39 @@
+$ curl -s localhost:8765/openapi.json  (count)
+58 paths 75 operations
+
+$ curl -si -H "Authorization: Bearer pk_live_x" localhost:8765/api/v1/runs
+HTTP/1.1 501 Not Implemented
+date: Fri, 23 Oct 2026 18:55:43 GMT
+server: uvicorn
+content-length: 135
+content-type: application/json
+
+{"error":{"code":"not_implemented","message":"This endpoint is not implemented yet (owner task API-03).","details":{"owner":"API-03"}}}
+
+$ curl -si localhost:8765/api/v1/runs   (no key)
+HTTP/1.1 401 Unauthorized
+date: Fri, 23 Oct 2026 18:55:43 GMT
+server: uvicorn
+www-authenticate: Bearer
+content-length: 116
+content-type: application/json
+
+{"error":{"code":"unauthorized","message":"Missing API key: send 'Authorization: Bearer pk_live_...'","details":{}}}
+
+$ curl -si -X POST -H "Authorization: Bearer pk_live_x" -H "Content-Type: application/json" -d "{}" localhost:8765/api/v1/agents
+HTTP/1.1 400 Bad Request
+date: Fri, 23 Oct 2026 18:55:43 GMT
+server: uvicorn
+content-length: 256
+content-type: application/json
+
+{"error":{"code":"validation_error","message":"Request validation failed","details":{"errors":[{"type":"missing","loc":["body","name"],"msg":"Field required","input":{}},{"type":"missing","loc":["body","endpoint_url"],"msg":"Field required","input":{}}]}}}
+
+$ curl -si localhost:8765/health   (no DB or Kafka running here)
+HTTP/1.1 503 Service Unavailable
+date: Fri, 23 Oct 2026 18:55:43 GMT
+server: uvicorn
+content-length: 48
+content-type: application/json
+
+{"db":"down: KeyError","kafka":"down: KeyError"}

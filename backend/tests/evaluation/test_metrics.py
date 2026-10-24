@@ -165,9 +165,7 @@ def test_caller_wer_is_pooled():
             agent_heard_text="green blue",
         ),
         T(2, "caller", 4, 5),  # no ground truth
-        T(
-            3, "agent", 6, 7, ground_truth_text="x", agent_heard_text="y"
-        ),  # agent turns ignored
+        T(3, "agent", 6, 7, ground_truth_text="x", agent_heard_text="y"),  # agent turns ignored
     ]
     w, used = caller_wer(turns)
     assert used == 2 and w == pytest.approx(1 / 6)

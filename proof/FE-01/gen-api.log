@@ -1,0 +1,10 @@
+
+> pareeksha-web@0.1.0 gen:api
+> node scripts/gen-api.mjs --from ../proof/FE-01/openapi.json
+
+Wrote /home/user/Pareeksha-/.claude/worktrees/agent-a87f6410454a40ae1/web/lib/api/schema.d.ts from ../proof/FE-01/openapi.json
+
+> pareeksha-web@0.1.0 gen:api:check
+> node scripts/gen-api.mjs --check --from ../proof/FE-01/openapi.json
+
+lib/api/schema.d.ts is up to date.

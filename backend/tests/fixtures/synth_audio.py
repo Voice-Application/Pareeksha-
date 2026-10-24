@@ -10,9 +10,7 @@ from scipy import signal
 RATE = 16000
 
 
-def synth_speech(
-    seconds: float = 10.0, seed: int = 1, peak_rms: float = 0.08
-) -> np.ndarray:
+def synth_speech(seconds: float = 10.0, seed: int = 1, peak_rms: float = 0.08) -> np.ndarray:
     """Voiced-looking bursts (glottal pulse train through formants, vibrato f0)
     separated by true digital silence, so speech-active masking is meaningful."""
     rng = np.random.default_rng(seed)
@@ -27,12 +25,8 @@ def synth_speech(
         phase = 2 * np.pi * np.cumsum(f0) / RATE
         src = sum(np.sin(k * phase) / k for k in range(1, 30))
         f1, f2 = rng.uniform(400, 800), rng.uniform(1100, 2400)
-        sos1 = signal.butter(
-            2, [f1 * 0.85, f1 * 1.2], "bandpass", fs=RATE, output="sos"
-        )
-        sos2 = signal.butter(
-            2, [f2 * 0.85, f2 * 1.2], "bandpass", fs=RATE, output="sos"
-        )
+        sos1 = signal.butter(2, [f1 * 0.85, f1 * 1.2], "bandpass", fs=RATE, output="sos")
+        sos2 = signal.butter(2, [f2 * 0.85, f2 * 1.2], "bandpass", fs=RATE, output="sos")
         seg = signal.sosfilt(sos1, src) + 0.5 * signal.sosfilt(sos2, src)
         env = np.hanning(seg_n) ** 0.5
         seg = seg * env

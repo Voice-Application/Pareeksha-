@@ -1,0 +1,25 @@
+
+Running 20 tests using 1 worker
+
+  ✓   1 tests/smoke.spec.ts:33:7 › page / renders inside layout with sidebar (393ms)
+  ✓   2 tests/smoke.spec.ts:33:7 › page /agents renders inside layout with sidebar (336ms)
+  ✓   3 tests/smoke.spec.ts:33:7 › page /scenarios renders inside layout with sidebar (314ms)
+  ✓   4 tests/smoke.spec.ts:33:7 › page /personas renders inside layout with sidebar (329ms)
+  ✓   5 tests/smoke.spec.ts:33:7 › page /noise-profiles renders inside layout with sidebar (346ms)
+  ✓   6 tests/smoke.spec.ts:33:7 › page /runs renders inside layout with sidebar (319ms)
+  ✓   7 tests/smoke.spec.ts:33:7 › page /runs/new renders inside layout with sidebar (318ms)
+  ✓   8 tests/smoke.spec.ts:33:7 › page /runs/compare renders inside layout with sidebar (305ms)
+  ✓   9 tests/smoke.spec.ts:33:7 › page /audits renders inside layout with sidebar (316ms)
+  ✓  10 tests/smoke.spec.ts:33:7 › page /dialect renders inside layout with sidebar (331ms)
+  ✓  11 tests/smoke.spec.ts:33:7 › page /regression renders inside layout with sidebar (347ms)
+  ✓  12 tests/smoke.spec.ts:33:7 › page /integrations renders inside layout with sidebar (326ms)
+  ✓  13 tests/smoke.spec.ts:33:7 › page /dlq renders inside layout with sidebar (351ms)
+  ✓  14 tests/smoke.spec.ts:33:7 › page /calibration renders inside layout with sidebar (339ms)
+  ✓  15 tests/smoke.spec.ts:33:7 › page /settings/api-keys renders inside layout with sidebar (344ms)
+  ✓  16 tests/smoke.spec.ts:43:5 › sidebar links navigate client-side to every route (1.3s)
+  ✓  17 tests/smoke.spec.ts:51:5 › proxy adds API key server-side and strips set-cookie (56ms)
+  ✓  18 tests/smoke.spec.ts:61:5 › proxy ignores a client-supplied Authorization header (14ms)
+  ✓  19 tests/smoke.spec.ts:67:5 › proxy streams SSE incrementally (1.0s)
+  ✓  20 tests/smoke.spec.ts:91:5 › API key is absent from pages and client bundles (314ms)
+
+  20 passed (14.0s)
