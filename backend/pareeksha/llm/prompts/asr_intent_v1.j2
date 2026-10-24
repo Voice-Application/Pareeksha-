@@ -1,0 +1,10 @@
+You compare what a customer actually said (the reference transcript) with what a speech recogniser heard (the hypothesis). Both are in {{ language }}; the call is a customer-service call for a loan / EMI product.
+
+Decide whether the hypothesis PRESERVES THE INTENT of the reference: would an agent acting only on the hypothesis do the right thing for this customer? Spelling and small word differences do not matter. A changed number, amount, date, name, negation or request does matter.
+
+Reference: {{ reference }}
+Hypothesis: {{ hypothesis }}
+
+Return json only, for example: {"preserved": true, "reason": "same request, spelling differs only"}
+- preserved: true or false
+- reason: one short sentence in English

@@ -1,0 +1,194 @@
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_f04ed1bfaa5f | language=hi-IN
+{"ts": "2026-10-24T03:09:50.845052+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_f04ed1bfaa5f | language=hi-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_f04ed1bfaa5f
+{"ts": "2026-10-24T03:09:51.772156+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_f04ed1bfaa5f"}
+{"ts": "2026-10-24T03:09:52.644032+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T03:09:53.598485+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-v4-pro purpose=asr_intent in=310 out=26 cached_in=256 cost=None latency_ms=1714 repair=False cache_hit=False"}
+{"ts": "2026-10-24T03:09:53.629500+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "e8e4d794-d0e2-5941-9020-951a2c538a7a", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_6cd8e2f1c067 | language=hi-IN
+{"ts": "2026-10-24T03:09:53.693031+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_6cd8e2f1c067 | language=hi-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_6cd8e2f1c067
+{"ts": "2026-10-24T03:09:54.662694+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_6cd8e2f1c067"}
+{"ts": "2026-10-24T03:09:54.671422+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "6ad12586-9b24-54fd-8311-e35e20bdd95d", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_1ee066a74aa7 | language=hi-IN
+{"ts": "2026-10-24T03:09:54.701161+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_1ee066a74aa7 | language=hi-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_1ee066a74aa7
+{"ts": "2026-10-24T03:09:55.545715+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_1ee066a74aa7"}
+{"ts": "2026-10-24T03:09:55.557961+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "8017d882-2414-555d-8007-d55c2d5f6ad2", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_c3a79b31be6e | language=hi-IN
+{"ts": "2026-10-24T03:09:55.687760+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_c3a79b31be6e | language=hi-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_c3a79b31be6e
+{"ts": "2026-10-24T03:09:56.620443+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_c3a79b31be6e"}
+{"ts": "2026-10-24T03:09:56.631785+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "856a2819-8df0-5b94-820b-e42dbcb4b6b4", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_dfcc4a617ed0 | language=kn-IN
+{"ts": "2026-10-24T03:09:56.645993+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_dfcc4a617ed0 | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_dfcc4a617ed0
+{"ts": "2026-10-24T03:09:57.686617+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_dfcc4a617ed0"}
+{"ts": "2026-10-24T03:09:57.697988+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "45670d1c-85a7-5023-b948-200291e06592", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_e42d5e0c4c92 | language=kn-IN
+{"ts": "2026-10-24T03:09:57.730383+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_e42d5e0c4c92 | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_e42d5e0c4c92
+{"ts": "2026-10-24T03:09:58.723533+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_e42d5e0c4c92"}
+{"ts": "2026-10-24T03:09:58.735620+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "3c453acd-829e-5d44-88b4-0351ef750f22", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_67748766354f | language=kn-IN
+{"ts": "2026-10-24T03:09:58.827209+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_67748766354f | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_67748766354f
+{"ts": "2026-10-24T03:09:59.789091+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_67748766354f"}
+{"ts": "2026-10-24T03:09:59.803488+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "973b5f32-62fd-50f7-9fcd-2f658fd0c0ea", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_cc2704c67a38 | language=kn-IN
+{"ts": "2026-10-24T03:09:59.815942+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_cc2704c67a38 | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_cc2704c67a38
+{"ts": "2026-10-24T03:10:00.640951+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_cc2704c67a38"}
+{"ts": "2026-10-24T03:10:00.653208+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "368e33d0-5aa8-50db-9422-be98af9ddf50", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_8a732db6a435 | language=kn-IN
+{"ts": "2026-10-24T03:10:00.687588+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_8a732db6a435 | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_8a732db6a435
+{"ts": "2026-10-24T03:10:01.687084+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_8a732db6a435"}
+{"ts": "2026-10-24T03:10:01.695300+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "bd23682d-94f1-51fe-a58f-e82ea420bb26", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_fce7b2eaeb50 | language=kn-IN
+{"ts": "2026-10-24T03:10:01.815514+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_fce7b2eaeb50 | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_fce7b2eaeb50
+{"ts": "2026-10-24T03:10:02.789983+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_fce7b2eaeb50"}
+{"ts": "2026-10-24T03:10:02.796468+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "44b4c5dc-83ce-598a-93ea-1440b67a7c6b", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_5fa8088c8dd0 | language=kn-IN
+{"ts": "2026-10-24T03:10:02.809835+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_5fa8088c8dd0 | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_5fa8088c8dd0
+{"ts": "2026-10-24T03:10:03.743055+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_5fa8088c8dd0"}
+{"ts": "2026-10-24T03:10:03.762345+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "f6afbc12-9d75-5bea-84af-bbc3a87e72a7", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_f36724b89be9 | language=kn-IN
+{"ts": "2026-10-24T03:10:03.822937+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_f36724b89be9 | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_f36724b89be9
+{"ts": "2026-10-24T03:10:04.997742+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_f36724b89be9"}
+{"ts": "2026-10-24T03:10:05.004044+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "e3756e9a-e437-5b86-92ab-c32f7523dfc4", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_851ba99a1adf | language=kn-IN
+{"ts": "2026-10-24T03:10:05.137640+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_851ba99a1adf | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_851ba99a1adf
+{"ts": "2026-10-24T03:10:06.022693+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_851ba99a1adf"}
+{"ts": "2026-10-24T03:10:06.031408+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "a249dad5-8f20-5b03-8711-17cd6102309d", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_7108026bc0ed | language=kn-IN
+{"ts": "2026-10-24T03:10:06.048908+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_7108026bc0ed | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_7108026bc0ed
+{"ts": "2026-10-24T03:10:06.787199+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_7108026bc0ed"}
+{"ts": "2026-10-24T03:10:06.797472+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "2000b52d-da96-54b8-a99e-902389efaa50", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_95da97cbef12 | language=kn-IN
+{"ts": "2026-10-24T03:10:06.854373+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_95da97cbef12 | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_95da97cbef12
+{"ts": "2026-10-24T03:10:07.932668+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_95da97cbef12"}
+{"ts": "2026-10-24T03:10:07.941195+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "55d5cfbb-d1e2-5774-9daa-c4419153b151", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_23f08bc34d7d | language=hi-IN
+{"ts": "2026-10-24T03:10:07.973973+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_23f08bc34d7d | language=hi-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_23f08bc34d7d
+{"ts": "2026-10-24T03:10:09.457389+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_23f08bc34d7d"}
+{"ts": "2026-10-24T03:10:10.196124+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T03:10:11.568037+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-v4-pro purpose=asr_intent in=307 out=36 cached_in=256 cost=None latency_ms=2104 repair=False cache_hit=False"}
+{"ts": "2026-10-24T03:10:11.571362+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "3ab4a37f-80a6-52a6-a614-c2ffa3651189", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_2598f1ebc65e | language=hi-IN
+{"ts": "2026-10-24T03:10:11.680748+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_2598f1ebc65e | language=hi-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_2598f1ebc65e
+{"ts": "2026-10-24T03:10:12.602982+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_2598f1ebc65e"}
+{"ts": "2026-10-24T03:10:12.992281+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T03:10:14.383707+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-v4-pro purpose=asr_intent in=305 out=24 cached_in=256 cost=None latency_ms=1774 repair=False cache_hit=False"}
+{"ts": "2026-10-24T03:10:14.390436+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "f81bf668-34a0-57d8-bcc5-79499251e37c", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_c21d7e1a00d6 | language=kn-IN
+{"ts": "2026-10-24T03:10:14.408422+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_c21d7e1a00d6 | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_c21d7e1a00d6
+{"ts": "2026-10-24T03:10:15.435697+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_c21d7e1a00d6"}
+{"ts": "2026-10-24T03:10:15.443928+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "37893011-4d4b-565d-9948-9dc1f3fbbc05", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_f34d6337a644 | language=kn-IN
+{"ts": "2026-10-24T03:10:15.484049+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_f34d6337a644 | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_f34d6337a644
+{"ts": "2026-10-24T03:10:16.424257+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_f34d6337a644"}
+{"ts": "2026-10-24T03:10:16.430153+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "47761064-8c02-5a9d-9035-0872df064f6d", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_fcd45ce75479 | language=kn-IN
+{"ts": "2026-10-24T03:10:16.640358+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_fcd45ce75479 | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_fcd45ce75479
+{"ts": "2026-10-24T03:10:17.603681+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_fcd45ce75479"}
+{"ts": "2026-10-24T03:10:17.614996+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "358c31c3-1e68-5661-9813-6a20d2e59b47", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_1750fbfc90cb | language=kn-IN
+{"ts": "2026-10-24T03:10:17.628794+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_1750fbfc90cb | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_1750fbfc90cb
+{"ts": "2026-10-24T03:10:18.637488+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_1750fbfc90cb"}
+{"ts": "2026-10-24T03:10:19.034549+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T03:10:20.435798+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-v4-pro purpose=asr_intent in=328 out=20 cached_in=256 cost=None latency_ms=1794 repair=False cache_hit=False"}
+{"ts": "2026-10-24T03:10:20.439407+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "312c20c5-0c03-5a9f-877b-c576ccef4908", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_7b66f86671b6 | language=kn-IN
+{"ts": "2026-10-24T03:10:20.471802+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_7b66f86671b6 | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_7b66f86671b6
+{"ts": "2026-10-24T03:10:21.623369+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_7b66f86671b6"}
+{"ts": "2026-10-24T03:10:22.022960+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T03:10:22.926274+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-v4-pro purpose=asr_intent in=328 out=20 cached_in=256 cost=None latency_ms=1299 repair=False cache_hit=False"}
+{"ts": "2026-10-24T03:10:22.929465+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "76aa8f31-f96e-503a-b4ab-a66fdd012adc", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_e8cef1b2cbf3 | language=kn-IN
+{"ts": "2026-10-24T03:10:23.043017+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_e8cef1b2cbf3 | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_e8cef1b2cbf3
+{"ts": "2026-10-24T03:10:24.465436+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_e8cef1b2cbf3"}
+{"ts": "2026-10-24T03:10:24.858067+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T03:10:25.436478+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-v4-pro purpose=asr_intent in=328 out=19 cached_in=256 cost=None latency_ms=967 repair=False cache_hit=False"}
+{"ts": "2026-10-24T03:10:25.444079+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "961fcf63-caff-5c29-9e63-35d67c0cee50", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_5db6e9f30a6a | language=hi-IN
+{"ts": "2026-10-24T03:10:25.454245+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_5db6e9f30a6a | language=hi-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_5db6e9f30a6a
+{"ts": "2026-10-24T03:10:26.337773+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_5db6e9f30a6a"}
+{"ts": "2026-10-24T03:10:26.347340+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "2e27fe39-b91e-5c3a-aa3e-33c35029a6bc", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_f73ff220b546 | language=hi-IN
+{"ts": "2026-10-24T03:10:26.382242+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_f73ff220b546 | language=hi-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_f73ff220b546
+{"ts": "2026-10-24T03:10:27.182338+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_f73ff220b546"}
+{"ts": "2026-10-24T03:10:27.208510+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "558fad8c-fbaa-5269-bf0a-a4d2622b67f0", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_874b08f099af | language=hi-IN
+{"ts": "2026-10-24T03:10:27.340176+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_874b08f099af | language=hi-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_874b08f099af
+{"ts": "2026-10-24T03:10:28.144531+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_874b08f099af"}
+{"ts": "2026-10-24T03:10:28.590923+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T03:10:30.529905+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-v4-pro purpose=asr_intent in=299 out=34 cached_in=0 cost=None latency_ms=2381 repair=False cache_hit=False"}
+{"ts": "2026-10-24T03:10:30.534253+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "cb6d3ccf-9535-5fd1-a5a4-d2e4a3162704", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_bb3597d22f00 | language=kn-IN
+{"ts": "2026-10-24T03:10:30.548967+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_bb3597d22f00 | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_bb3597d22f00
+{"ts": "2026-10-24T03:10:31.382959+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_bb3597d22f00"}
+{"ts": "2026-10-24T03:10:31.395046+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "ed8c31b7-416e-57a9-aa23-cd769fe24f38", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_0be04db3c869 | language=kn-IN
+{"ts": "2026-10-24T03:10:31.436800+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_0be04db3c869 | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_0be04db3c869
+{"ts": "2026-10-24T03:10:32.418663+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_0be04db3c869"}
+{"ts": "2026-10-24T03:10:32.424053+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "a032edfd-8a06-56f8-8c15-cf0a6f9ccb0a", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_768ef230d85e | language=kn-IN
+{"ts": "2026-10-24T03:10:32.513512+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_768ef230d85e | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_768ef230d85e
+{"ts": "2026-10-24T03:10:33.338387+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_768ef230d85e"}
+{"ts": "2026-10-24T03:10:33.345055+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "63acd427-830e-5914-a5cd-13f6690118d3", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_6f85ef80dbfb | language=kn-IN
+{"ts": "2026-10-24T03:10:33.357207+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_6f85ef80dbfb | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_6f85ef80dbfb
+{"ts": "2026-10-24T03:10:34.108054+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_6f85ef80dbfb"}
+{"ts": "2026-10-24T03:10:34.115399+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "5aa1aa32-eed0-5e3f-9851-0da3029278b3", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_ed16b501f6b6 | language=kn-IN
+{"ts": "2026-10-24T03:10:34.152956+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_ed16b501f6b6 | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_ed16b501f6b6
+{"ts": "2026-10-24T03:10:35.123889+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_ed16b501f6b6"}
+{"ts": "2026-10-24T03:10:35.131051+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "c4932eac-d78d-521e-9ab1-965068e33a94", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_98e9c72517e9 | language=kn-IN
+{"ts": "2026-10-24T03:10:35.216388+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_98e9c72517e9 | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_98e9c72517e9
+{"ts": "2026-10-24T03:10:36.253612+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_98e9c72517e9"}
+{"ts": "2026-10-24T03:10:36.261907+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "193c9e8f-de04-5cf5-9ea1-ac3f4204d055", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_2361f0262d42 | language=hi-IN
+{"ts": "2026-10-24T03:10:36.272628+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_2361f0262d42 | language=hi-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_2361f0262d42
+{"ts": "2026-10-24T03:10:37.058341+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_2361f0262d42"}
+{"ts": "2026-10-24T03:10:37.067359+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "4031f6c9-dac2-5211-8c5f-0abbc51f377b", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_2c3e7160f0f1 | language=hi-IN
+{"ts": "2026-10-24T03:10:37.102408+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_2c3e7160f0f1 | language=hi-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_2c3e7160f0f1
+{"ts": "2026-10-24T03:10:37.984821+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_2c3e7160f0f1"}
+{"ts": "2026-10-24T03:10:37.994137+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "2c79b7a0-12ef-59c9-b343-03b223bdb02f", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_95a9e6b494f3 | language=hi-IN
+{"ts": "2026-10-24T03:10:38.107666+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_95a9e6b494f3 | language=hi-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_95a9e6b494f3
+{"ts": "2026-10-24T03:10:38.900502+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_95a9e6b494f3"}
+{"ts": "2026-10-24T03:10:38.915145+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "11d097fd-c388-5f7d-901e-09c39bad0fac", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_457deefb6aa0 | language=kn-IN
+{"ts": "2026-10-24T03:10:39.063714+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_457deefb6aa0 | language=kn-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_457deefb6aa0
+{"ts": "2026-10-24T03:10:39.960225+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_457deefb6aa0"}
+{"ts": "2026-10-24T03:10:40.006349+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "dialect", "event_id": "5e98c8ef-e460-5f28-8681-aa1da2ac12fd", "correlation_id": "e0f3b567-a30a-4586-aa8b-3a01294631e8", "topic": "pareeksha.dialect.clip.requested.v1", "attempt": 1}

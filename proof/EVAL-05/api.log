@@ -1,0 +1,28 @@
+INFO:     Started server process [21096]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:18005 (Press CTRL+C to quit)
+INFO:     127.0.0.1:42872 - "GET /api/v1/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42872 - "POST /api/v1/noise-profiles HTTP/1.1" 201 Created
+INFO:     127.0.0.1:42872 - "POST /api/v1/noise-profiles HTTP/1.1" 201 Created
+INFO:     127.0.0.1:42872 - "POST /api/v1/noise-profiles HTTP/1.1" 201 Created
+INFO:     127.0.0.1:42872 - "POST /api/v1/dialect-datasets HTTP/1.1" 201 Created
+INFO:     127.0.0.1:42872 - "POST /api/v1/dialect-datasets/11bb14f3-ec00-4134-8121-fa510149e2a9/samples HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42872 - "POST /api/v1/dialect-datasets/11bb14f3-ec00-4134-8121-fa510149e2a9/evaluate HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:42872 - "GET /api/v1/dialect-reports/e0f3b567-a30a-4586-aa8b-3a01294631e8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42886 - "GET /api/v1/dialect-reports/e0f3b567-a30a-4586-aa8b-3a01294631e8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35704 - "GET /api/v1/dialect-reports/e0f3b567-a30a-4586-aa8b-3a01294631e8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35712 - "GET /api/v1/dialect-reports/e0f3b567-a30a-4586-aa8b-3a01294631e8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52828 - "GET /api/v1/dialect-reports/e0f3b567-a30a-4586-aa8b-3a01294631e8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52832 - "GET /api/v1/dialect-reports/e0f3b567-a30a-4586-aa8b-3a01294631e8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54242 - "GET /api/v1/dialect-reports/e0f3b567-a30a-4586-aa8b-3a01294631e8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54248 - "GET /api/v1/dialect-reports/e0f3b567-a30a-4586-aa8b-3a01294631e8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49788 - "GET /api/v1/dialect-reports/e0f3b567-a30a-4586-aa8b-3a01294631e8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49794 - "GET /api/v1/dialect-reports/e0f3b567-a30a-4586-aa8b-3a01294631e8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37332 - "GET /api/v1/dialect-reports/e0f3b567-a30a-4586-aa8b-3a01294631e8 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37332 - "GET /api/v1/dialect-reports/e0f3b567-a30a-4586-aa8b-3a01294631e8/html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37332 - "GET /api/v1/dialect-reports/e0f3b567-a30a-4586-aa8b-3a01294631e8/clips?limit=200 HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [21096]

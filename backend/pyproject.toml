@@ -49,6 +49,7 @@ include = ["pareeksha*"]
 [tool.setuptools.package-data]
 "pareeksha.seed" = ["data/*.yaml"]
 "pareeksha.llm" = ["prompts/*.j2"]
+"pareeksha.dialect" = ["*.yaml"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

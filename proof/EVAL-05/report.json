@@ -1,0 +1,155 @@
+{
+  "id": "e0f3b567-a30a-4586-aa8b-3a01294631e8",
+  "dataset_id": "11bb14f3-ec00-4134-8121-fa510149e2a9",
+  "progress": {
+    "done": 36,
+    "expected_results": 36
+  },
+  "aggregates": {
+    "hi-synth": {
+      "clean_16k": {
+        "gnani-prisma": {
+          "n": 4,
+          "wer": 0.1304,
+          "wer_ci": [
+            0.0,
+            0.2308
+          ],
+          "cer": 0.0472,
+          "entity_acc": 0.8333,
+          "intent_preserved_rate": 1.0
+        }
+      },
+      "pstn_8k_alaw": {
+        "gnani-prisma": {
+          "n": 4,
+          "wer": 0.1304,
+          "wer_ci": [
+            0.0,
+            0.2308
+          ],
+          "cer": 0.0472,
+          "entity_acc": 0.8333,
+          "intent_preserved_rate": 1.0
+        }
+      },
+      "pstn_street_10db": {
+        "gnani-prisma": {
+          "n": 4,
+          "wer": 0.1739,
+          "wer_ci": [
+            0.1,
+            0.2308
+          ],
+          "cer": 0.1038,
+          "entity_acc": 0.8333,
+          "intent_preserved_rate": 1.0
+        }
+      }
+    },
+    "kn-synth-f": {
+      "clean_16k": {
+        "gnani-prisma": {
+          "n": 4,
+          "wer": 0.0,
+          "wer_ci": [
+            0.0,
+            0.0
+          ],
+          "cer": 0.0,
+          "entity_acc": 1.0,
+          "intent_preserved_rate": 1.0
+        }
+      },
+      "pstn_8k_alaw": {
+        "gnani-prisma": {
+          "n": 4,
+          "wer": 0.0,
+          "wer_ci": [
+            0.0,
+            0.0
+          ],
+          "cer": 0.0,
+          "entity_acc": 1.0,
+          "intent_preserved_rate": 1.0
+        }
+      },
+      "pstn_street_10db": {
+        "gnani-prisma": {
+          "n": 4,
+          "wer": 0.0,
+          "wer_ci": [
+            0.0,
+            0.0
+          ],
+          "cer": 0.0,
+          "entity_acc": 1.0,
+          "intent_preserved_rate": 1.0
+        }
+      }
+    },
+    "kn-synth-m": {
+      "clean_16k": {
+        "gnani-prisma": {
+          "n": 4,
+          "wer": 0.15,
+          "wer_ci": [
+            0.0,
+            0.2727
+          ],
+          "cer": 0.0455,
+          "entity_acc": 0.8571,
+          "intent_preserved_rate": 1.0
+        }
+      },
+      "pstn_8k_alaw": {
+        "gnani-prisma": {
+          "n": 4,
+          "wer": 0.15,
+          "wer_ci": [
+            0.0,
+            0.2727
+          ],
+          "cer": 0.0455,
+          "entity_acc": 0.8571,
+          "intent_preserved_rate": 1.0
+        }
+      },
+      "pstn_street_10db": {
+        "gnani-prisma": {
+          "n": 4,
+          "wer": 0.15,
+          "wer_ci": [
+            0.0,
+            0.2727
+          ],
+          "cer": 0.0455,
+          "entity_acc": 0.8571,
+          "intent_preserved_rate": 1.0
+        }
+      }
+    }
+  },
+  "top_errors": [
+    {
+      "ref": "emi",
+      "hyp": "आई",
+      "count": 3
+    },
+    {
+      "ref": "emi",
+      "hyp": "ಐ",
+      "count": 3
+    },
+    {
+      "ref": "rupees",
+      "hyp": "रूपए",
+      "count": 1
+    }
+  ],
+  "bias_suggestions": [
+    "emi"
+  ],
+  "html": "/api/v1/dialect-reports/e0f3b567-a30a-4586-aa8b-3a01294631e8/html",
+  "created_at": "2026-10-24T03:09:50.445955Z"
+}
