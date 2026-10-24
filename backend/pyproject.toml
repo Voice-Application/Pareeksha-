@@ -9,6 +9,7 @@ description = "Pareeksha: voice-agent crash-test platform (backend)"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.121",
+    "jinja2>=3.1",
     "pydantic>=2.7",
     "pydantic-settings>=2.3",
     "aiokafka>=0.11",
@@ -45,6 +46,7 @@ include = ["pareeksha*"]
 
 [tool.setuptools.package-data]
 "pareeksha.seed" = ["data/*.yaml"]
+"pareeksha.llm" = ["prompts/*.j2"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
@@ -68,6 +70,8 @@ known-third-party = ["alembic"]
 [tool.ruff.lint.per-file-ignores]
 # Generated from docs/schema.sql with sqlacodegen: long server_default / CHECK strings.
 "pareeksha/db/models.py" = ["E501"]
+# The rubric anchors are prompt text; wrapping them would change the prompt.
+"pareeksha/evaluation/rubric.py" = ["E501"]
 
 [tool.coverage.run]
 source = ["pareeksha"]

@@ -1,0 +1,214 @@
+{
+  "id": "05f5c56c-748b-53b4-a537-8b6533497c4b",
+  "call_id": "11111111-1111-4111-8111-111111111111",
+  "rubric_version": "rubric-2026-10-v1",
+  "status": "ok",
+  "judge_model": "deepseek-v4-pro",
+  "temperature": 0.0,
+  "prompt_hash": "sha256:081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480",
+  "dimensions": {
+    "task_completion": {
+      "score": 1,
+      "evidence_turns": [
+        2,
+        4,
+        6
+      ],
+      "reason": "Agent recorded promise for 4500 instead of correct 4200; caller's goal not met."
+    },
+    "policy_compliance": {
+      "score": 1,
+      "evidence_turns": [
+        0
+      ],
+      "reason": "Mandatory disclosure 'This call is recorded' missing."
+    },
+    "factual_accuracy": {
+      "score": 0,
+      "evidence_turns": [
+        2,
+        4,
+        6
+      ],
+      "reason": "Agent stated and recorded wrong EMI amount 4500 despite caller correction to 4200."
+    },
+    "language_handling": {
+      "score": 4,
+      "evidence_turns": [],
+      "reason": "Agent matched Hindi and code-mix naturally; understood caller's Hindi."
+    },
+    "conversation_flow": {
+      "score": 4,
+      "evidence_turns": [],
+      "reason": "Smooth turns, no loops, appropriate pacing."
+    },
+    "empathy_tone": {
+      "score": 2,
+      "evidence_turns": [],
+      "reason": "Neutral tone; no acknowledgment of caller's confusion about amount."
+    },
+    "escalation": {
+      "score": 4,
+      "evidence_turns": [],
+      "reason": "No transfer needed; correct decision."
+    }
+  },
+  "overall_score": 46.25,
+  "passed": false,
+  "critical_failure": true,
+  "needs_human_review": true,
+  "review_reasons": [
+    "critical_failure",
+    "check_failed:disclosure_present",
+    "check_failed:tool_calls_expected",
+    "check_failed:amount_confirmed"
+  ],
+  "failure_types": [
+    "wrong_fact",
+    "tool_arguments",
+    "missing_disclosure",
+    "tool_selection"
+  ],
+  "summary": "Agent stated and recorded wrong EMI amount (4500 vs 4200) despite caller correction, and missed mandatory disclosure. Critical failure.",
+  "confidence": "high",
+  "raw_response": {
+    "dimensions": {
+      "task_completion": {
+        "score": 1,
+        "evidence_turns": [
+          2,
+          4,
+          6
+        ],
+        "reason": "Agent recorded promise for 4500 instead of correct 4200; caller's goal not met."
+      },
+      "policy_compliance": {
+        "score": 1,
+        "evidence_turns": [
+          0
+        ],
+        "reason": "Mandatory disclosure 'This call is recorded' missing."
+      },
+      "factual_accuracy": {
+        "score": 0,
+        "evidence_turns": [
+          2,
+          4,
+          6
+        ],
+        "reason": "Agent stated and recorded wrong EMI amount 4500 despite caller correction to 4200."
+      },
+      "language_handling": {
+        "score": 4,
+        "evidence_turns": [],
+        "reason": "Agent matched Hindi and code-mix naturally; understood caller's Hindi."
+      },
+      "conversation_flow": {
+        "score": 4,
+        "evidence_turns": [],
+        "reason": "Smooth turns, no loops, appropriate pacing."
+      },
+      "empathy_tone": {
+        "score": 2,
+        "evidence_turns": [],
+        "reason": "Neutral tone; no acknowledgment of caller's confusion about amount."
+      },
+      "escalation": {
+        "score": 4,
+        "evidence_turns": [],
+        "reason": "No transfer needed; correct decision."
+      }
+    },
+    "critical_failure": true,
+    "needs_human_review": true,
+    "failure_types": [
+      "wrong_fact",
+      "tool_arguments",
+      "missing_disclosure"
+    ],
+    "summary": "Agent stated and recorded wrong EMI amount (4500 vs 4200) despite caller correction, and missed mandatory disclosure. Critical failure.",
+    "confidence": "high"
+  },
+  "input_tokens": 2387,
+  "output_tokens": 400,
+  "latency_ms": 3501,
+  "est_cost": 0.00473484,
+  "checks": [
+    {
+      "check_type": "disclosure_present",
+      "check_key": "recorded",
+      "must_pass": true,
+      "passed": false,
+      "evidence_turns": [
+        0
+      ],
+      "detail": "No 'recorded' disclosure in the first 1 agent turns"
+    },
+    {
+      "check_type": "forbidden_absent",
+      "check_key": "threat",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "Phrase never said by the agent"
+    },
+    {
+      "check_type": "language_match",
+      "check_key": "hi-IN",
+      "must_pass": false,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "0/4 agent turns not in ['en', 'hi']"
+    },
+    {
+      "check_type": "no_loop",
+      "check_key": "agent_repeats",
+      "must_pass": false,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "No repeated utterance loop"
+    },
+    {
+      "check_type": "tool_calls_expected",
+      "check_key": "record_ptp",
+      "must_pass": true,
+      "passed": false,
+      "evidence_turns": [],
+      "detail": "Expected record_ptp({'amount': 4200, 'date': 'Friday'}) called with different arguments: {'amount': 4500, 'date': 'Friday'}"
+    },
+    {
+      "check_type": "amount_confirmed",
+      "check_key": "emi_amount",
+      "must_pass": true,
+      "passed": false,
+      "evidence_turns": [
+        4
+      ],
+      "detail": "Expected 4200; agent confirmed 4500"
+    }
+  ],
+  "metrics": {
+    "response_latency_p50_ms": 600.0,
+    "response_latency_p95_ms": 600.0,
+    "response_latency_count": 3,
+    "agent_overlap_starts": 0,
+    "first_greeting_latency_ms": 600,
+    "barge_in_attempts": 0,
+    "barge_in_honoured": 0,
+    "barge_in_honoured_rate": null,
+    "agent_stop_time_p50_ms": null,
+    "silence_gaps_over_2s": 0,
+    "agent_talk_ratio": 0.6896551724137931,
+    "repeated_utterances": 0,
+    "caller_wer": 0.0,
+    "caller_wer_turns": 1,
+    "extra": {}
+  },
+  "cited_turn_indices": [
+    0,
+    2,
+    4,
+    6
+  ],
+  "all_cited_turns_exist": true
+}
