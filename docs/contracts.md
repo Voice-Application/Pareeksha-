@@ -41,7 +41,7 @@ Envelope: `event_id, type, version, occurred_at (UTC), correlation_id, causation
 
 ## 3. REST API (`GET /openapi.json`, code in `backend/pareeksha/api/`)
 
-75 operations under `/api/v1`: the 68 of `06-api-spec.md` sections 1 to 11 plus 7 data-gap additions (section 12 there). Typed request/response models, status codes, `ApiKey` bearer security with a scope per operation, error envelope `{error:{code,message,details}}`, validation failures `400` (not 422), pagination `{items,next_cursor}`, stable operationIds. Two routes are real (`GET /health`, `GET /events/schemas`); the other 73 return `501 not_implemented` with the owner task in `error.details.owner`, each marked `# STUB(<task>)` in its handler.
+76 operations under `/api/v1`: the 68 of `06-api-spec.md` sections 1 to 11 plus 7 data-gap additions and `GET /speech/providers` (section 12 there). Typed request/response models, status codes, `ApiKey` bearer security with a scope per operation, error envelope `{error:{code,message,details}}`, validation failures `400` (not 422), pagination `{items,next_cursor}`, stable operationIds. Three routes are real (`GET /health`, `GET /events/schemas`, `GET /speech/providers`); the other 73 return `501 not_implemented` with the owner task in `error.details.owner`, each marked `# STUB(<task>)` in its handler.
 
 Scope per operation (**decision for approval**, the spec lists scopes but not the mapping): `read` for all GETs, previews and `runs:estimate`; `runs:write` for creating/changing agents, scenarios, personas, noise profiles, runs, reviews, promotion, regression tests, dialect datasets (so `pareeksha apply` and the GitHub Action work with a `read`+`runs:write` key); `audits:write` for `POST /audits` and speaker-map; `admin` for integrations, DLQ replay/discard and API keys. `admin` implies all.
 
@@ -71,3 +71,7 @@ Stub owners: API-02 (31), API-04 (11), API-05 (9), EVAL-05 (8), API-03 (6), INT-
 ## 5. Tooling
 
 `backend/pyproject.toml`: ruff (E, F, I, B, UP, RUF; line 100), mypy strict with the pydantic plugin (EVAL-02 modules checked but not yet fully annotated), pytest with asyncio and coverage config. Dev dependencies in `backend/requirements-dev.txt`.
+
+## 4. Speech provider abstraction (VOICE-07, owner-approved 2026-10-24)
+
+`backend/pareeksha/speech/base.py` defines `STTProvider` (`transcribe` batch, `transcribe_stream` live, `capabilities`: streaming, word timings, word confidence, diarization) and `TTSProvider` (`synthesize` to a WAV at a stated sample rate, `list_voices`, `capabilities`), plus the value types and errors. Providers: `gnani` (default, wraps `pareeksha.gnani`), `google`, `azure`, `elevenlabs`, `deepgram`. `speech/registry.py` selects by `STT_PROVIDER` / `TTS_PROVIDER` (default `gnani`) or per agent/run via `SpeechSelection{stt,tts}`. `GET /api/v1/speech/providers` (scope `read`) reports configured/default/capabilities. `pareeksha.gnani` is unchanged.

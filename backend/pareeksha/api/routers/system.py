@@ -13,7 +13,14 @@ from pareeksha.api.deps import AUTH_ERRORS
 from pareeksha.api.health import check_health
 from pareeksha.api.stubs import not_implemented
 from pareeksha.events.schemas import event_json_schemas
-from pareeksha.schemas.system import CalibrationOut, HealthOut, MetricsSummary, UsageOut
+from pareeksha.schemas.system import (
+    CalibrationOut,
+    HealthOut,
+    MetricsSummary,
+    SpeechProvidersOut,
+    UsageOut,
+)
+from pareeksha.speech.registry import provider_status
 
 router = APIRouter(tags=["system"])
 authed = APIRouter(tags=["system"], responses=AUTH_ERRORS)
@@ -75,3 +82,17 @@ async def get_metrics_summary() -> MetricsSummary:
 )
 async def get_event_schemas() -> dict[str, Any]:
     return event_json_schemas()
+
+
+@authed.get(
+    "/speech/providers",
+    dependencies=[scoped("read")],
+    summary="Speech (STT/TTS) providers: configured?, defaults, capabilities",
+    description=(
+        "Reports which of the pluggable speech providers have their credentials set in the "
+        "environment, which ones are the `STT_PROVIDER` / `TTS_PROVIDER` defaults, and what each "
+        "can do. Presence of a key is reported, never the key; validity is not checked."
+    ),
+)
+async def get_speech_providers() -> SpeechProvidersOut:
+    return SpeechProvidersOut(items=provider_status())

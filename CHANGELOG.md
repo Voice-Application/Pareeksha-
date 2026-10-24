@@ -2,6 +2,9 @@
 
 Contract changes after Day 1 need Tech Lead approval and an entry here.
 
+## Speech provider abstraction (VOICE-07) — 24 Oct 2026
+- **Contract change: speech provider abstraction (owner-approved 2026-10-24).** New `backend/pareeksha/speech/` with `STTProvider` / `TTSProvider` interfaces, capability metadata, registry selected by `STT_PROVIDER` / `TTS_PROVIDER` (default `gnani`, overridable per agent/run with `SpeechSelection`), adapters for gnani (wrapping the unchanged `pareeksha.gnani`), google, azure, elevenlabs, deepgram. New route `GET /api/v1/speech/providers` (76 operations now; `/health` keeps its `{db,kafka}` shape). New env: `STT_PROVIDER`, `TTS_PROVIDER`, `GOOGLE_APPLICATION_CREDENTIALS_JSON`, `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION`, `ELEVENLABS_API_KEY`, `DEEPGRAM_API_KEY` and per-vendor model/voice/`COST_*` variables (see `.env.example`).
+
 ## Contracts frozen as code (TL-01) — 23 Oct 2026
 - **Contract change: LLM provider abstraction, DeepSeek default (owner-approved 2026-10-23).** `backend/pareeksha/llm/base.py` defines `LLMProvider.complete_json(JSONCompletionRequest) -> JSONCompletionResult` (text plus token usage, text-only JSON mode); `llm/config.py` reads `LLM_PROVIDER=deepseek|gemini` (default `deepseek`) and the `DEEPSEEK_*`, `GEMINI_*` and `COST_*` variables in `.env.example`. Supersedes the Gemini-only wording of `03-TRD.md` section 4 (`GeminiClient.generate_json`) and `06-api-spec.md` ("pinned gemini id"); providers are implemented by EVAL-01. `docs/schema.sql`: `api_usage.provider` now also allows `'deepseek'`.
 - Contracts committed: `events/topics.py` (12 topics, keys, partitions, retention, retry/DLQ headers), `events/schemas.py` (envelope plus 9 payloads), `integrations/base.py` (Connector ABC), `adapters/base.py` (AudioSession, Adapter, `pareeksha-audio-v1` messages), FastAPI app with every route of `06-api-spec.md` declared (501 stubs, each marked `# STUB(<owner task>)`).
