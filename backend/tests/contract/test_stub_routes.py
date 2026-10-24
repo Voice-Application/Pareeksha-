@@ -189,14 +189,15 @@ def test_no_stub_marker_names_the_contract_task(route: APIRoute) -> None:
 
 
 def test_no_stub_remains_for_finished_tasks() -> None:
-    """API-02 implemented every CRUD route it owned: none may still answer 501."""
+    """API-02 (CRUD) and API-03 (runs) implemented every route they owned: none may answer 501."""
     owners = {_stub_owner(r) for r in _stub_routes()}
-    assert "API-02" not in owners
+    assert "API-02" not in owners and "API-03" not in owners
     implemented = {(_method(r), r.path) for r in _implemented_routes()}
     assert ("POST", "/agents") in implemented and (
         "DELETE",
         "/api-keys/{api_key_id}",
     ) in implemented
+    assert ("POST", "/runs") in implemented and ("GET", "/runs/{run_id}") in implemented
 
 
 def test_stub_owner_ids_exist_on_the_task_board() -> None:

@@ -145,6 +145,8 @@ Standard `GET` (list/one), `PATCH`, `DELETE` exist for all three resources. Dele
 
 The run row and its `run.requested` event are written in one transaction; the planner then creates the items. `item_count` is computed up front so the UI can show it immediately.
 
+Implementation notes (API-03): ids repeated in a list count once; a matrix above 1000 calls is refused with `400 validation_error` (`details: {item_count, max_items}`); an unknown or other-project agent, scenario, persona or noise profile is `404`, an archived agent `409`. The `402` body carries `details.estimate`, `details.remaining_budget` and `details.item_count`. `est_cost` is priced with the `COST_*` rates of `.env` (unset rate = 0) against `BUDGET_CREDITS` minus the `api_usage.est_cost` already spent; with no `BUDGET_CREDITS` there is no guard. `kind: dry_run` (or `config.dry_run`) is estimated without TTS or STT. The planner (`python -m pareeksha.workers.planner`, group `planner`) inserts one `run_items` row per cell with a deterministic seed and emits `call.requested` (key `run_item_id`) plus an `item.status` progress event per item. `progress.total` is `item_count` until the items exist. `POST /runs/{id}/cancel` moves queued items to `cancelled` and the run to `cancelled`; calls already in flight finish and are evaluated; a finished or already cancelled run answers `409`.
+
 ### `GET /runs/{id}/events` — live progress (Server-Sent Events)
 `Content-Type: text/event-stream`. Sends a `snapshot` first, then:
 ```

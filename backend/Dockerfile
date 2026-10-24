@@ -4,6 +4,6 @@ WORKDIR /app
 # Optional build secret "ca" = extra CA bundle (only needed behind a TLS-intercepting proxy; see docker-compose.proxy.yml).
 RUN --mount=type=secret,id=ca,required=false \
     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi; \
-    pip install --no-cache-dir "fastapi>=0.121" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy[asyncio]>=2.0" "python-multipart>=0.0.9" "pydantic-settings>=2.3" "cryptography>=42" "httpx>=0.27" "jinja2>=3.1" "numpy>=1.26" "scipy>=1.11" "pyyaml>=6" "rapidfuzz>=3.9" "gnani-vachana>=0.8.2"
+    pip install --no-cache-dir "fastapi>=0.121" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy[asyncio]>=2.0.30" "python-multipart>=0.0.9" "pydantic-settings>=2.3" "cryptography>=42" "httpx>=0.27" "jinja2>=3.1" "numpy>=1.26" "scipy>=1.11" "pyyaml>=6" "rapidfuzz>=3.9" "gnani-vachana>=0.8.2"
 COPY . /app
 ENV PYTHONPATH=/app PYTHONUNBUFFERED=1
