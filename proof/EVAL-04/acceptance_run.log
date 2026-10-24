@@ -1,0 +1,16 @@
+seeded: {'personas': 20, 'noise_profiles': 8, 'rubric_versions': 1, 'agents': 1, 'scenarios': 8, 'api_keys': 1}
+reusing synthetic_call.wav (558764 bytes), no TTS spend
+POST /audits -> 202 {"call_id":"20d9f5d0-5459-4fd2-aa60-173d111f0588"}
+WARNING gnani | [STT Batch] GET /stt/v3/batch/jobs/6758d4b4-0128-42bb-8754-10e97f760044 -> 429; retrying in 1.0s (1/5)
+WARNI [gnani] [STT Batch] GET /stt/v3/batch/jobs/6758d4b4-0128-42bb-8754-10e97f760044 -> 429; retrying in 1.0s (1/5)
+auditor produced call.completed
+  turn 0 agent       0-10080  नमस्ते, मैं शक्ति फाइनांस से बोल रही हूँ, ये कॉल रिकॉर्ड की जा रही है, आपकी इ एम आई ₹4,200 है जो शुक्रवार को देय है
+  turn 1 caller  10080-13824  हाँ, मैं शुक्रवार को पैसे जमा कर दूँगा।
+  turn 2 agent   13824-17440  धन्यवाद, मैंने आपका वादा दर्ज कर लिया है।
+evaluation 1: rubric=rubric-2026-10-v1 score=100.00 passed=True review=False failure_types=[]
+POST speaker-map {'spk_0': 'caller', 'spk_1': 'agent'} -> 202
+  turn 0 caller नमस्ते, मैं शक्ति फाइनांस से बोल रही हूँ, ये कॉल रिकॉर्ड की जा रही है, आपकी इ एम आई ₹4,200 है जो शुक्रवार को देय है
+  turn 1 agent  हाँ, मैं शुक्रवार को पैसे जमा कर दूँगा।
+  turn 2 caller धन्यवाद, मैंने आपका वादा दर्ज कर लिया है।
+evaluation 2: rows=1 score=82.50 passed=False review=True failure_types=['missing_disclosure']
+wrote acceptance_result.json

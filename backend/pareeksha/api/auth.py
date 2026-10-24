@@ -108,4 +108,5 @@ def scoped(scope: Scope) -> Any:
 #: Route parameters that both enforce a scope and hand the handler the authenticated key.
 ReadKey = Annotated[Principal, scoped("read")]
 WriteKey = Annotated[Principal, scoped("runs:write")]
+WriteAuditKey = Annotated[Principal, scoped("audits:write")]
 AdminKey = Annotated[Principal, scoped("admin")]

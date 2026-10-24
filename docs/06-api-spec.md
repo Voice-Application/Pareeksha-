@@ -261,6 +261,7 @@ Rows for the matrix view: `scenario`, `persona`, `noise_profile`, `status`, `cal
 → `201 { "scenario_id": "…", "regression_test_id": "…" }`
 
 ### `POST /calls/{id}/speaker-map` (uploads) `{ "spk_0": "caller", "spk_1": "agent" }` → re-evaluates.
+Keys are the labels in the call's `speaker_map` (`spk_0`, `spk_1`, ... in order of first appearance); a speaker left out keeps its current role. → `202 { "call_id": "…" }`: the turns are rebuilt from the stored diarization (no new transcription) and a new `call.completed` makes the evaluator judge the call again under the same rubric version. `400` for unknown speakers or a map without both an agent and a caller, `409` for simulated calls or a call that is not `completed` yet.
 
 ### `POST /audits` (multipart)
 | Field | Type | Notes |

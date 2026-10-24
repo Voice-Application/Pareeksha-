@@ -17,6 +17,8 @@ from typing import Any
 
 import psycopg
 from psycopg.types.json import Jsonb
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from pareeksha.events.producer import EventProducer
 from pareeksha.events.schemas import AnyEnvelope
@@ -43,6 +45,22 @@ async def enqueue(conn: psycopg.AsyncConnection[Any], envelope: AnyEnvelope) -> 
             envelope.partition_key(),
             Jsonb(envelope.model_dump(mode="json")),
         ),
+    )
+
+
+async def enqueue_session(session: AsyncSession, envelope: AnyEnvelope) -> None:
+    """:func:`enqueue` for API routes, which hold a SQLAlchemy session (same transaction)."""
+    await session.execute(
+        text(
+            "INSERT INTO outbox_events (id, topic, key, envelope, created_at) "
+            "VALUES (:id, :topic, :key, CAST(:envelope AS jsonb), clock_timestamp())"
+        ),
+        {
+            "id": envelope.event_id,
+            "topic": envelope.topic.value,
+            "key": envelope.partition_key(),
+            "envelope": json.dumps(envelope.model_dump(mode="json")),
+        },
     )
 
 
