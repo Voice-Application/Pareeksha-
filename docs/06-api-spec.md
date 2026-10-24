@@ -435,5 +435,6 @@ Added on 23 Oct 2026 after DES-01 listed API data gaps for the FR-DB-1 pages (se
 | `GET /dialect-reports?dataset_id=` | Dialect page report picker (FR-DI-4) | page of report summaries |
 | `GET /dialect-reports/{id}/clips?dialect=&condition=&engine=` | Heatmap drill-down to the worst clips (FR-DB-4) | page of clip results, worst WER first |
 | `GET /dialect-reports/{id}/html` | The `html` link already returned by `GET /dialect-reports/{id}` | `text/html` |
+| `GET /speech/providers` | Speech provider abstraction (VOICE-07, owner-approved 2026-10-24): which of gnani / google / azure / elevenlabs / deepgram have credentials set, which are the `STT_PROVIDER` / `TTS_PROVIDER` defaults, and their capabilities; scope `read`; never returns key material | `{ items: [{ name, configured, missing_env, stt_default, tts_default, stt: {streaming, batch, word_timings, word_confidence, diarization, ...}, tts: {sample_rates, voice_listing, speed_control, ...} }] }` |
 
 Field additions: `RunSummary.score_distribution` (10 buckets, FR-DB-2); `run_id` and `run_item_id` on the call object.

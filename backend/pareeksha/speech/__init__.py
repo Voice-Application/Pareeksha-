@@ -1,0 +1,55 @@
+"""Pluggable speech providers (STT / TTS). See ``base.py`` and ``registry.py``."""
+
+from pareeksha.speech.base import (
+    SpeechConfigError,
+    SpeechError,
+    SpeechPermanentError,
+    SpeechProviderName,
+    SpeechRetryableError,
+    SpeechSelection,
+    SpeechUsage,
+    StreamingTranscript,
+    STTCapabilities,
+    STTProvider,
+    SynthesisResult,
+    Transcript,
+    TranscriptSegment,
+    TTSCapabilities,
+    TTSProvider,
+    UnsupportedCapabilityError,
+    Voice,
+    WordTiming,
+)
+from pareeksha.speech.config import SpeechSettings
+from pareeksha.speech.registry import (
+    ProviderStatus,
+    get_stt_provider,
+    get_tts_provider,
+    provider_status,
+)
+
+__all__ = [
+    "ProviderStatus",
+    "STTCapabilities",
+    "STTProvider",
+    "SpeechConfigError",
+    "SpeechError",
+    "SpeechPermanentError",
+    "SpeechProviderName",
+    "SpeechRetryableError",
+    "SpeechSelection",
+    "SpeechSettings",
+    "SpeechUsage",
+    "StreamingTranscript",
+    "SynthesisResult",
+    "TTSCapabilities",
+    "TTSProvider",
+    "Transcript",
+    "TranscriptSegment",
+    "UnsupportedCapabilityError",
+    "Voice",
+    "WordTiming",
+    "get_stt_provider",
+    "get_tts_provider",
+    "provider_status",
+]

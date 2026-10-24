@@ -9,6 +9,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 from pareeksha.schemas.common import RequestModel, Scope
+from pareeksha.speech.registry import ProviderStatus
 
 
 class CalibrationOut(BaseModel):
@@ -38,6 +39,10 @@ class HealthOut(BaseModel):
 
     db: str
     kafka: str
+
+
+class SpeechProvidersOut(BaseModel):
+    items: list[ProviderStatus]
 
 
 class MetricsSummary(BaseModel):

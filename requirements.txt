@@ -11,7 +11,8 @@ pipecat-gnani>=0.5.12          # Pipecat services: GnaniSTTService, GnaniTTSServ
 pipecat-ai[silero,websocket,google]>=1.13.0   # NOTE: there is no [gnani] extra; use pipecat-gnani above
 
 # --- LLM ---------------------------------------------------------------------
-google-genai>=2.33.0           # Gemini SDK (the older google-generativeai package is deprecated)
+google-auth>=2.30              # service-account tokens for the Google Cloud speech adapter
+google-genai>=2.33.0          # Gemini SDK (the older google-generativeai package is deprecated)
 
 # --- Event backbone ---------------------------------------------------------------
 aiokafka>=0.14.0               # asyncio Kafka client (producer/consumer, manual commits)
