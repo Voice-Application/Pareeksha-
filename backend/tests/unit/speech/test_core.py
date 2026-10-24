@@ -9,6 +9,7 @@ import pytest
 import respx
 from fastapi.testclient import TestClient
 
+from pareeksha.api.auth import authenticate
 from pareeksha.api.main import app
 from pareeksha.speech import (
     SpeechConfigError,
@@ -119,7 +120,14 @@ def test_provider_status_reports_presence_without_secrets() -> None:
 def test_api_route_requires_auth_and_lists_providers() -> None:
     client = TestClient(app)
     assert client.get("/api/v1/speech/providers").status_code == 401
-    response = client.get("/api/v1/speech/providers", headers={"Authorization": "Bearer pk_live_t"})
+    # API-01's key lookup is DB-backed (covered in tests/db); here only the payload matters.
+    app.dependency_overrides[authenticate] = lambda: None
+    try:
+        response = client.get(
+            "/api/v1/speech/providers", headers={"Authorization": "Bearer pk_live_t"}
+        )
+    finally:
+        app.dependency_overrides.pop(authenticate, None)
     assert response.status_code == 200
     items = response.json()["items"]
     assert [i["name"] for i in items] == ["gnani", "google", "azure", "elevenlabs", "deepgram"]
