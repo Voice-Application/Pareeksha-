@@ -1,6 +1,10 @@
-// STUB(FE-02): placeholder body, replaced when FE-02 builds this page
-import { RouteStub } from "@/components/layout/route-stub";
+import { Suspense } from "react";
+import { NoiseList, NoiseListSkeleton } from "@/components/noise/noise-list";
 
 export default function Page() {
-  return <RouteStub title="Noise profiles" />;
+  return (
+    <Suspense fallback={<NoiseListSkeleton />}>
+      <NoiseList />
+    </Suspense>
+  );
 }
