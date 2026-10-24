@@ -1,0 +1,24 @@
+2026-10-24 01:29:08,890 websockets.server server listening on 0.0.0.0:8804
+2026-10-24 01:29:08,891 mock_agent mock agent on :8804 bugs=[<Bug.ENGLISH_TO_KANNADA: 'english_to_kannada'>]
+2026-10-24 01:29:09,062 websockets.server HTTP response sent (200 OK)
+2026-10-24 01:29:09,062 websockets.server connection closed
+2026-10-24 01:29:09,068 websockets.server connection open
+2026-10-24 01:29:09,071 mock_agent call 00000000-0000-4000-8000-000000000003 start lang=kn-IN bugs=[<Bug.ENGLISH_TO_KANNADA: 'english_to_kannada'>]
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_81fb433d597c | language=kn-IN
+2026-10-24 01:29:21,632 gnani [STT REST] transcribe_bytes start | request_id=req_81fb433d597c | language=kn-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_81fb433d597c
+2026-10-24 01:29:22,723 gnani [STT REST] transcribe_bytes complete | request_id=req_81fb433d597c
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_f1b344fae145 | language=kn-IN
+2026-10-24 01:29:33,133 gnani [STT REST] transcribe_bytes start | request_id=req_f1b344fae145 | language=kn-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_f1b344fae145
+2026-10-24 01:29:34,114 gnani [STT REST] transcribe_bytes complete | request_id=req_f1b344fae145
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_c2bb9e17c453 | language=kn-IN
+2026-10-24 01:29:43,292 gnani [STT REST] transcribe_bytes start | request_id=req_c2bb9e17c453 | language=kn-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_c2bb9e17c453
+2026-10-24 01:29:44,670 gnani [STT REST] transcribe_bytes complete | request_id=req_c2bb9e17c453
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_28172bec182a | language=kn-IN
+2026-10-24 01:29:52,872 gnani [STT REST] transcribe_bytes start | request_id=req_28172bec182a | language=kn-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_28172bec182a
+2026-10-24 01:29:53,836 gnani [STT REST] transcribe_bytes complete | request_id=req_28172bec182a
+2026-10-24 01:29:58,721 websockets.server connection closed
+2026-10-24 01:29:58,722 mock_agent gnani usage (cumulative, uncached): {"stt_rest": {"calls": 4, "audio_seconds": 9.68, "chars": 0}}

@@ -168,8 +168,10 @@ services:
     restart: unless-stopped
 
   mock-agent:
-    build: { context: ./mock_agent }
+    build: { context: ., dockerfile: mock_agent/Dockerfile }
     env_file: [{ path: .env, required: false }]
+    environment:
+      MOCK_BUGS: ${MOCK_BUGS:-}
     ports: ["8765:8765"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8765/health').status==200 else 1)"]

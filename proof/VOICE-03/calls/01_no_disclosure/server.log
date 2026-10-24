@@ -1,0 +1,28 @@
+2026-10-24 01:26:24,622 websockets.server server listening on 0.0.0.0:8801
+2026-10-24 01:26:24,622 mock_agent mock agent on :8801 bugs=[<Bug.NO_DISCLOSURE: 'no_disclosure'>]
+2026-10-24 01:26:24,806 websockets.server HTTP response sent (200 OK)
+2026-10-24 01:26:24,807 websockets.server connection closed
+2026-10-24 01:26:24,810 websockets.server connection open
+2026-10-24 01:26:24,811 mock_agent call 00000000-0000-4000-8000-000000000003 start lang=en-IN bugs=[<Bug.NO_DISCLOSURE: 'no_disclosure'>]
+INFO  gnani | [TTS REST] synthesize start | request_id=req_ef95fc2f9244 | model=timbre-v3.0 | voice=Avinash
+2026-10-24 01:26:24,813 gnani [TTS REST] synthesize start | request_id=req_ef95fc2f9244 | model=timbre-v3.0 | voice=Avinash
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_ef95fc2f9244
+2026-10-24 01:26:27,083 gnani [TTS REST] synthesize complete | request_id=req_ef95fc2f9244
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_b1ba57cdc272 | language=en-IN
+2026-10-24 01:26:33,852 gnani [STT REST] transcribe_bytes start | request_id=req_b1ba57cdc272 | language=en-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_b1ba57cdc272
+2026-10-24 01:26:34,905 gnani [STT REST] transcribe_bytes complete | request_id=req_b1ba57cdc272
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_296635a8fb88 | language=en-IN
+2026-10-24 01:26:44,932 gnani [STT REST] transcribe_bytes start | request_id=req_296635a8fb88 | language=en-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_296635a8fb88
+2026-10-24 01:26:46,255 gnani [STT REST] transcribe_bytes complete | request_id=req_296635a8fb88
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_cbd4163b8799 | language=en-IN
+2026-10-24 01:26:54,972 gnani [STT REST] transcribe_bytes start | request_id=req_cbd4163b8799 | language=en-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_cbd4163b8799
+2026-10-24 01:26:56,311 gnani [STT REST] transcribe_bytes complete | request_id=req_cbd4163b8799
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_9dd68a23c207 | language=en-IN
+2026-10-24 01:27:04,912 gnani [STT REST] transcribe_bytes start | request_id=req_9dd68a23c207 | language=en-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_9dd68a23c207
+2026-10-24 01:27:05,793 gnani [STT REST] transcribe_bytes complete | request_id=req_9dd68a23c207
+2026-10-24 01:27:10,677 websockets.server connection closed
+2026-10-24 01:27:10,678 mock_agent gnani usage (cumulative, uncached): {"tts": {"calls": 1, "audio_seconds": 4.08, "chars": 71}, "stt_rest": {"calls": 4, "audio_seconds": 8.18, "chars": 0}}

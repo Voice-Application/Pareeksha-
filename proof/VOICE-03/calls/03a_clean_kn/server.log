@@ -1,0 +1,44 @@
+2026-10-24 01:27:52,110 websockets.server server listening on 0.0.0.0:8803
+2026-10-24 01:27:52,110 mock_agent mock agent on :8803 bugs=[]
+2026-10-24 01:27:52,262 websockets.server HTTP response sent (200 OK)
+2026-10-24 01:27:52,263 websockets.server connection closed
+2026-10-24 01:27:58,556 websockets.server connection open
+2026-10-24 01:27:58,557 mock_agent call 00000000-0000-4000-8000-000000000003 start lang=kn-IN bugs=[]
+INFO  gnani | [TTS REST] synthesize start | request_id=req_d741ab528b41 | model=timbre-v3.0 | voice=Avinash
+2026-10-24 01:27:58,559 gnani [TTS REST] synthesize start | request_id=req_d741ab528b41 | model=timbre-v3.0 | voice=Avinash
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_d741ab528b41
+2026-10-24 01:28:02,501 gnani [TTS REST] synthesize complete | request_id=req_d741ab528b41
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_6e64e034f7d7 | language=kn-IN
+2026-10-24 01:28:16,019 gnani [STT REST] transcribe_bytes start | request_id=req_6e64e034f7d7 | language=kn-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_6e64e034f7d7
+2026-10-24 01:28:17,026 gnani [STT REST] transcribe_bytes complete | request_id=req_6e64e034f7d7
+INFO  gnani | [TTS REST] synthesize start | request_id=req_bc381538e3c1 | model=timbre-v3.0 | voice=Avinash
+2026-10-24 01:28:17,028 gnani [TTS REST] synthesize start | request_id=req_bc381538e3c1 | model=timbre-v3.0 | voice=Avinash
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_bc381538e3c1
+2026-10-24 01:28:19,784 gnani [TTS REST] synthesize complete | request_id=req_bc381538e3c1
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_e396e639e805 | language=kn-IN
+2026-10-24 01:28:30,679 gnani [STT REST] transcribe_bytes start | request_id=req_e396e639e805 | language=kn-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_e396e639e805
+2026-10-24 01:28:31,667 gnani [STT REST] transcribe_bytes complete | request_id=req_e396e639e805
+INFO  gnani | [TTS REST] synthesize start | request_id=req_79f1c6415c08 | model=timbre-v3.0 | voice=Avinash
+2026-10-24 01:28:31,670 gnani [TTS REST] synthesize start | request_id=req_79f1c6415c08 | model=timbre-v3.0 | voice=Avinash
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_79f1c6415c08
+2026-10-24 01:28:34,748 gnani [TTS REST] synthesize complete | request_id=req_79f1c6415c08
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_e596894bdbf0 | language=kn-IN
+2026-10-24 01:28:45,359 gnani [STT REST] transcribe_bytes start | request_id=req_e596894bdbf0 | language=kn-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_e596894bdbf0
+2026-10-24 01:28:46,565 gnani [STT REST] transcribe_bytes complete | request_id=req_e596894bdbf0
+INFO  gnani | [TTS REST] synthesize start | request_id=req_0e226c9d4404 | model=timbre-v3.0 | voice=Avinash
+2026-10-24 01:28:46,568 gnani [TTS REST] synthesize start | request_id=req_0e226c9d4404 | model=timbre-v3.0 | voice=Avinash
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_0e226c9d4404
+2026-10-24 01:28:49,144 gnani [TTS REST] synthesize complete | request_id=req_0e226c9d4404
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_0e489d324b4e | language=kn-IN
+2026-10-24 01:28:57,979 gnani [STT REST] transcribe_bytes start | request_id=req_0e489d324b4e | language=kn-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_0e489d324b4e
+2026-10-24 01:28:58,891 gnani [STT REST] transcribe_bytes complete | request_id=req_0e489d324b4e
+INFO  gnani | [TTS REST] synthesize start | request_id=req_6b89e9879c41 | model=timbre-v3.0 | voice=Avinash
+2026-10-24 01:28:58,894 gnani [TTS REST] synthesize start | request_id=req_6b89e9879c41 | model=timbre-v3.0 | voice=Avinash
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_6b89e9879c41
+2026-10-24 01:29:01,600 gnani [TTS REST] synthesize complete | request_id=req_6b89e9879c41
+2026-10-24 01:29:07,444 websockets.server connection closed
+2026-10-24 01:29:07,444 mock_agent gnani usage (cumulative, uncached): {"tts": {"calls": 5, "audio_seconds": 36.24, "chars": 426}, "stt_rest": {"calls": 4, "audio_seconds": 9.68, "chars": 0}}
