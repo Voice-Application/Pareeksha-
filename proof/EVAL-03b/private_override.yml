@@ -1,0 +1,14 @@
+# Private stack for the EVAL-03b tests: own compose project (-p eval03c), own host ports, so other
+# agents' traffic on the default 9094 / 5432 cannot interfere.
+#   docker compose -p eval03c -f docker-compose.yml -f proof/EVAL-03b/private_override.yml up -d kafka postgres
+#   docker compose -p eval03c -f docker-compose.yml -f proof/EVAL-03b/private_override.yml up kafka-init
+#   INFRA_TEST_KAFKA_BOOTSTRAP=localhost:29094 \
+#   INFRA_TEST_DATABASE_URL=postgresql://pareeksha:pareeksha@localhost:56432/pareeksha_events_test \
+#   TEST_DATABASE_URL=postgresql+psycopg://pareeksha:pareeksha@localhost:56432/pareeksha pytest
+services:
+  kafka:
+    ports: !override ["29094:9094"]
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:29094
+  postgres:
+    ports: !override ["56432:5432"]
