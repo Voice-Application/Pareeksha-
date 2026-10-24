@@ -17,6 +17,7 @@ from pareeksha.api.errors import ApiError
 from pareeksha.api.stubs import not_implemented
 from pareeksha.db.models import Integrations
 from pareeksha.integrations.crypto import SecretBox, SecretDecryptError
+from pareeksha.integrations.registry import get_registry
 from pareeksha.schemas.common import Page
 from pareeksha.schemas.integrations import (
     ConnectorInfo,
@@ -89,8 +90,7 @@ def _out(row: Integrations, *, signing_secret: str | None = None) -> Integration
     summary="Installed connectors (built-in and entry-point plugins) with JSON Schemas",
 )
 async def list_connectors() -> list[ConnectorInfo]:
-    # STUB(INT-01)
-    not_implemented("INT-01")
+    return get_registry().info()
 
 
 @router.post(
