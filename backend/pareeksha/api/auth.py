@@ -103,3 +103,9 @@ async def authenticate(
 def scoped(scope: Scope) -> Any:
     """Dependency marker for a route that needs ``scope``: ``dependencies=[scoped("read")]``."""
     return Security(authenticate, scopes=[scope])
+
+
+#: Route parameters that both enforce a scope and hand the handler the authenticated key.
+ReadKey = Annotated[Principal, scoped("read")]
+WriteKey = Annotated[Principal, scoped("runs:write")]
+AdminKey = Annotated[Principal, scoped("admin")]

@@ -15,7 +15,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from pareeksha.db.models import Base
-from tests.db.conftest import BACKEND, alembic_config
+from tests.conftest import BACKEND, alembic_config
 
 SCHEMA_SQL = BACKEND.parent / "docs" / "schema.sql"
 MIGRATION_SQL = BACKEND / "alembic" / "sql" / "0001_initial.sql"

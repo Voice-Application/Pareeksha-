@@ -1,0 +1,11 @@
+{
+  "created": {
+    "personas": 20,
+    "noise_profiles": 8,
+    "rubric_versions": 1,
+    "agents": 1,
+    "scenarios": 8,
+    "api_keys": 1
+  },
+  "existing": {}
+}

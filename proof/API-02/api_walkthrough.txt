@@ -1,0 +1,99 @@
+# counts via the API (demo key)
+personas:       20
+noise profiles: 8
+agents:         ['EMI Reminder Bot']
+scenarios:      8
+
+# no key -> 401; garbage key -> 401
+401
+401
+
+# create a read-only key, use it, fail a write with it, revoke it
+{"id": "7d4688d1-260f-45d1-b331-c22852f8493e", "name": "ci", "prefix": "pk_live_R8uzmpni", "scopes": ["read"], "created_at": "2026-10-24T01:31:31.147558Z", "last_used_at": null, "revoked_at": null, "key": "pk_live_R8uz\u2026(shown once)"}
+GET agents with new key: 200
+{"error":{"code":"forbidden","message":"API key lacks the required scope","details":{"required":["runs:write"],"granted":["read"]}}}
+POST agents with read key: 403
+DELETE key: 204
+GET agents with revoked key: 401
+
+# list keys (prefix, scopes, last_used_at; never the key)
+{
+    "items": [
+        {
+            "id": "7d4688d1-260f-45d1-b331-c22852f8493e",
+            "name": "ci",
+            "prefix": "pk_live_R8uzmpni",
+            "scopes": [
+                "read"
+            ],
+            "created_at": "2026-10-24T01:31:31.147558Z",
+            "last_used_at": "2026-10-24T01:31:31.276510Z",
+            "revoked_at": "2026-10-24T01:31:31.311234Z"
+        },
+        {
+            "id": "5f2d4043-2676-4ff7-aa79-a73932a85b40",
+            "name": "demo",
+            "prefix": "pk_live_proof-ap",
+            "scopes": [
+                "admin"
+            ],
+            "created_at": "2026-10-24T01:31:23.205491Z",
+            "last_used_at": "2026-10-24T01:31:31.333534Z",
+            "revoked_at": null
+        }
+    ],
+    "next_cursor": null
+}
+
+# integrations: webhook shows the signing secret once; secrets_set afterwards; ciphertext in DB
+{
+  "id": "621554e1-bd9b-4380-a978-1f541ed65827",
+  "connector": "webhook",
+  "name": "ci hook",
+  "direction": "sink",
+  "enabled": true,
+  "config": {
+    "url": "https://ci.example.com/hook"
+  },
+  "secrets_set": true,
+  "event_filter": {
+    "events": [
+      "evaluation.completed"
+    ],
+    "agent_ids": [],
+    "only_failed": false,
+    "min_score_below": null
+  },
+  "last_test_at": null,
+  "last_test_ok": null,
+  "created_at": "2026-10-24T01:31:31.396513Z",
+  "updated_at": "2026-10-24T01:31:31.396513Z",
+  "inbound_url": "http://localhost:8000/api/v1/webhooks/inbound/621554e1-bd9b-4380-a978-1f541ed65827",
+  "signing_secret": "<43 chars, shown once>"
+}
+{
+    "id": "621554e1-bd9b-4380-a978-1f541ed65827",
+    "connector": "webhook",
+    "name": "ci hook",
+    "direction": "sink",
+    "enabled": true,
+    "config": {
+        "url": "https://ci.example.com/hook"
+    },
+    "secrets_set": true,
+    "event_filter": {
+        "events": [
+            "evaluation.completed"
+        ],
+        "agent_ids": [],
+        "only_failed": false,
+        "min_score_below": null
+    },
+    "last_test_at": null,
+    "last_test_ok": null,
+    "created_at": "2026-10-24T01:31:31.396513Z",
+    "updated_at": "2026-10-24T01:31:31.396513Z",
+    "inbound_url": "http://localhost:8000/api/v1/webhooks/inbound/621554e1-bd9b-4380-a978-1f541ed65827",
+    "signing_secret": null
+}
+webhook|gAAAAABq3ApznP2qKwjD…

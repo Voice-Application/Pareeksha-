@@ -6,7 +6,9 @@ from dataclasses import dataclass
 from typing import Annotated, Any
 
 from fastapi import Depends, Query
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from pareeksha.db.session import get_session
 from pareeksha.schemas.common import ErrorResponse
 
 
@@ -26,6 +28,10 @@ def _page_params(
 
 
 Pagination = Annotated[PageParams, Depends(_page_params)]
+
+#: One transaction per request. ``scope="function"`` commits before the response is sent, so a
+#: client that reads right after a write always sees it.
+Db = Annotated[AsyncSession, Depends(get_session, scope="function")]
 
 _DESCRIPTIONS: dict[int, str] = {
     400: "validation_error",

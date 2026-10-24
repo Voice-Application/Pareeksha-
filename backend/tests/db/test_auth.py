@@ -22,7 +22,7 @@ from pareeksha.api.main import app
 from pareeksha.db.models import ApiKeys, Projects
 from pareeksha.db.session import get_session, get_session_factory
 
-READ_ROUTE = "/api/v1/agents"  # needs "read"; 501 once auth passes (handler is an API-02 stub)
+READ_ROUTE = "/api/v1/agents"  # needs "read"
 ADMIN_ROUTE = "/api/v1/api-keys"  # needs "admin"
 
 
@@ -92,7 +92,7 @@ async def test_valid_key_with_scope_passes_auth(
 ) -> None:
     key, _ = await _make_key(session_factory, ["read"])
     response = await client.get(READ_ROUTE, headers=_bearer(key))
-    assert response.status_code == 501  # authenticated; the handler itself is a later task
+    assert response.status_code == 200  # authenticated; the handler lists the (empty) project
 
 
 async def test_insufficient_scope_is_403(
@@ -113,8 +113,8 @@ async def test_admin_key_reaches_every_route(
     client: AsyncClient, session_factory: async_sessionmaker[AsyncSession]
 ) -> None:
     key, _ = await _make_key(session_factory, ["admin"])
-    assert (await client.get(ADMIN_ROUTE, headers=_bearer(key))).status_code == 501
-    assert (await client.get(READ_ROUTE, headers=_bearer(key))).status_code == 501
+    assert (await client.get(ADMIN_ROUTE, headers=_bearer(key))).status_code == 200
+    assert (await client.get(READ_ROUTE, headers=_bearer(key))).status_code == 200
 
 
 async def test_revoked_key_is_401(

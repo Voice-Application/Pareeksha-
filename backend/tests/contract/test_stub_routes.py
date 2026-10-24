@@ -13,11 +13,13 @@ from fastapi import Security
 from fastapi.routing import APIRoute
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.testclient import TestClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from pareeksha.api.auth import authenticate, bearer_scheme
 from pareeksha.api.errors import ApiError
 from pareeksha.api.main import ROUTERS, app
 from pareeksha.api.stubs import not_implemented
+from pareeksha.db.session import get_session_factory
 
 client = TestClient(app)
 
@@ -35,8 +37,11 @@ async def _fake_authenticate(
 @pytest.fixture(autouse=True)
 def _no_database_auth() -> Iterator[None]:
     app.dependency_overrides[authenticate] = _fake_authenticate
+    # Routes that validate their input before touching the database still resolve a session.
+    app.dependency_overrides[get_session_factory] = lambda: AsyncSession
     yield
     app.dependency_overrides.pop(authenticate, None)
+    app.dependency_overrides.pop(get_session_factory, None)
 
 
 AUTH = {"Authorization": "Bearer pk_live_test"}
@@ -150,11 +155,13 @@ def _stub_owner(route: APIRoute) -> str | None:
     return match.group(1) if match else None
 
 
-IMPLEMENTED = {("GET", "/health"), ("GET", "/events/schemas")}
-
-
 def _stub_routes() -> list[APIRoute]:
-    return [r for r in ROUTES if (_method(r), r.path) not in IMPLEMENTED]
+    """Routes whose handler still carries a ``# STUB(<TASK-ID>)`` marker."""
+    return [r for r in ROUTES if _stub_owner(r) is not None]
+
+
+def _implemented_routes() -> list[APIRoute]:
+    return [r for r in ROUTES if _stub_owner(r) is None]
 
 
 def test_every_declared_route_is_in_openapi() -> None:
@@ -178,10 +185,18 @@ def test_stub_route_returns_501_with_owner(route: APIRoute) -> None:
 
 @pytest.mark.parametrize("route", ROUTES, ids=lambda r: f"{_method(r)} {r.path}")
 def test_no_stub_marker_names_the_contract_task(route: APIRoute) -> None:
-    owner = _stub_owner(route)
-    assert owner != "TL-01"
-    if (_method(route), route.path) in IMPLEMENTED:
-        assert owner is None
+    assert _stub_owner(route) != "TL-01"
+
+
+def test_no_stub_remains_for_finished_tasks() -> None:
+    """API-02 implemented every CRUD route it owned: none may still answer 501."""
+    owners = {_stub_owner(r) for r in _stub_routes()}
+    assert "API-02" not in owners
+    implemented = {(_method(r), r.path) for r in _implemented_routes()}
+    assert ("POST", "/agents") in implemented and (
+        "DELETE",
+        "/api-keys/{api_key_id}",
+    ) in implemented
 
 
 def test_stub_owner_ids_exist_on_the_task_board() -> None:
