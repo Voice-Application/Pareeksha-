@@ -320,7 +320,8 @@ def check_tool_calls(
             )
             continue
         used.add(match)
-        ev = (calls[match].turn_idx,) if calls[match].turn_idx is not None else ()
+        match_turn = calls[match].turn_idx
+        ev: tuple[int, ...] = (match_turn,) if match_turn is not None else ()
         results.append(
             CheckResult(
                 "tool_calls_expected",
@@ -359,8 +360,8 @@ def _agent_amounts(turn: Turn) -> list[ParsedNumber]:
     for n in extract_numbers(turn.text):
         if (
             n.currency
-            or 1000 <= n.value < 10**8
-            and not (float(n.value).is_integer() and int(n.value) in _YEAR)
+            or (1000 <= n.value < 10**8
+            and not (float(n.value).is_integer() and int(n.value) in _YEAR))
         ):
             out.append(n)
     return out

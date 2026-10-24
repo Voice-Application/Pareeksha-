@@ -1,3 +1,5 @@
+from typing import Any
+
 from pareeksha.evaluation.checks import (
     check_amounts,
     check_disclosures,
@@ -21,7 +23,7 @@ def T(idx, speaker, text, lang=None):
     )
 
 
-DISCLOSURES = [
+DISCLOSURES: list[dict[str, Any]] = [
     {"id": "recording", "text": "this call is being recorded", "within_turns": 2},
     {
         "id": "identity",

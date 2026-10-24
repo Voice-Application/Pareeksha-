@@ -20,3 +20,6 @@ npm-debug.log*
 # Runtime data
 data/runtime/
 .claude/worktrees/
+.coverage
+.mypy_cache/
+htmlcov/

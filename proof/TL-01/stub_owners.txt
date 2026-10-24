@@ -1,0 +1,86 @@
+TOTAL 75
+API-02 (31):
+    POST /agents
+    GET /agents
+    GET /agents/{agent_id}
+    PATCH /agents/{agent_id}
+    POST /agents/{agent_id}/archive
+    POST /scenarios
+    POST /scenarios:bulk
+    GET /scenarios
+    GET /scenarios/{scenario_id}
+    PATCH /scenarios/{scenario_id}
+    DELETE /scenarios/{scenario_id}
+    POST /personas
+    GET /personas
+    GET /personas/{persona_id}
+    PATCH /personas/{persona_id}
+    DELETE /personas/{persona_id}
+    POST /personas/{persona_id}/preview
+    POST /noise-profiles
+    GET /noise-profiles
+    GET /noise-profiles/{noise_profile_id}
+    PATCH /noise-profiles/{noise_profile_id}
+    DELETE /noise-profiles/{noise_profile_id}
+    POST /noise-profiles/{noise_profile_id}/preview
+    POST /integrations
+    GET /integrations
+    GET /integrations/{integration_id}
+    PATCH /integrations/{integration_id}
+    DELETE /integrations/{integration_id}
+    POST /api-keys
+    GET /api-keys
+    DELETE /api-keys/{api_key_id}
+API-03 (6):
+    POST /runs
+    POST /runs:estimate
+    GET /runs
+    GET /runs/{run_id}
+    GET /runs/{run_id}/items
+    POST /runs/{run_id}/cancel
+API-04 (11):
+    GET /runs/compare
+    GET /runs/{run_id}/events
+    GET /runs/{run_id}/report
+    GET /calls
+    GET /calls/{call_id}
+    GET /calls/{call_id}/audio/{track}
+    GET /dlq
+    POST /dlq/{dead_letter_id}/replay
+    POST /dlq/{dead_letter_id}/discard
+    GET /usage
+    GET /metrics/summary
+API-05 (9):
+    POST /agents/{agent_id}/scenarios:generate
+    GET /scenario-drafts/{draft_id}
+    POST /runs:regression
+    GET /regression-tests
+    PATCH /regression-tests/{regression_test_id}
+    POST /calls/{call_id}/reevaluate
+    POST /calls/{call_id}/review
+    POST /calls/{call_id}/promote
+    GET /calibration
+EVAL-04 (2):
+    POST /calls/{call_id}/speaker-map
+    POST /audits
+EVAL-05 (8):
+    POST /dialect-datasets
+    GET /dialect-datasets
+    POST /dialect-datasets/{dataset_id}/samples
+    POST /dialect-datasets/{dataset_id}/evaluate
+    GET /dialect-reports
+    GET /dialect-reports/{report_id}/clips
+    GET /dialect-reports/{report_id}
+    GET /dialect-reports/{report_id}/html
+INT-01 (4):
+    GET /integrations/connectors
+    POST /integrations/{integration_id}/test
+    GET /integrations/{integration_id}/deliveries
+    POST /integrations/{integration_id}/deliveries/{delivery_id}/redeliver
+INT-03 (1):
+    POST /webhooks/inbound/{integration_id}
+VOICE-04 (1):
+    POST /agents/{agent_id}/test-connection
+implemented (2):
+    GET /health
+    GET /events/schemas

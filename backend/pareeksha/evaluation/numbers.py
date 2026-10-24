@@ -379,8 +379,9 @@ def _tokenize(text: str) -> list[_Tok | None]:
             continue
         if "-" in low:
             parts = [_LEX.get(p) for p in low.split("-")]
-            if all(parts):
-                for p, word in zip(parts, low.split("-")):
+            resolved = [p for p in parts if p is not None]
+            if len(resolved) == len(parts):
+                for p, word in zip(resolved, low.split("-")):
                     out.append(_Tok(s, e, p[0], p[1], glued_currency=glued, word=word))
                 continue
         out.append(
