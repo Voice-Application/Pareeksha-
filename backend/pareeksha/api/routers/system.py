@@ -7,11 +7,15 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Query
 from fastapi.responses import JSONResponse
+from sqlalchemy import select
 
-from pareeksha.api.auth import scoped
-from pareeksha.api.deps import AUTH_ERRORS
+from pareeksha.api.auth import ReadKey, scoped
+from pareeksha.api.deps import AUTH_ERRORS, Db
 from pareeksha.api.health import check_health
 from pareeksha.api.stubs import not_implemented
+from pareeksha.db.models import Calls, Evaluations, HumanReviews, RubricVersions
+from pareeksha.db.queries import distinct_on
+from pareeksha.evaluation.calibration import LabelPair, compute_calibration
 from pareeksha.events.schemas import event_json_schemas
 from pareeksha.schemas.system import (
     CalibrationOut,
@@ -40,12 +44,59 @@ async def health() -> JSONResponse:
 
 @authed.get(
     "/calibration",
-    dependencies=[scoped("read")],
     summary="Judge vs human agreement (kappa, Spearman, per-dimension MAE)",
+    description=(
+        "One human label per evaluation (the newest review) against the judge's verdict. "
+        "Without `rubric_version` the active rubric is used (all versions when none is active)."
+    ),
 )
-async def get_calibration(rubric_version: str | None = None) -> CalibrationOut:
-    # STUB(API-05)
-    not_implemented("API-05")
+async def get_calibration(
+    key: ReadKey, session: Db, rubric_version: str | None = None
+) -> CalibrationOut:
+    stmt = (
+        select(Evaluations, HumanReviews)
+        .join(HumanReviews, HumanReviews.evaluation_id == Evaluations.id)
+        .join(Calls, Calls.id == Evaluations.call_id)
+        .join(RubricVersions, RubricVersions.id == Evaluations.rubric_version_id)
+        .where(
+            Calls.project_id == key.project_id,
+            Evaluations.status == "ok",
+            Evaluations.passed.is_not(None),
+        )
+        .order_by(Evaluations.id, HumanReviews.created_at.desc())
+    )
+    stmt = distinct_on(stmt, Evaluations.id)
+    if rubric_version is not None:
+        stmt = stmt.where(RubricVersions.version == rubric_version)
+    elif await session.scalar(select(RubricVersions.id).where(RubricVersions.is_active)):
+        stmt = stmt.where(RubricVersions.is_active)
+    pairs = [
+        LabelPair(
+            judge_passed=bool(ev.passed),
+            human_passed=hr.passed,
+            judge_score=None if ev.overall_score is None else float(ev.overall_score),
+            human_score=None if hr.overall_score is None else float(hr.overall_score),
+            judge_dimensions=_scores(ev.dimensions),
+            human_dimensions=_scores(hr.dimensions),
+        )
+        for ev, hr in (await session.execute(stmt)).all()
+    ]
+    result = compute_calibration(pairs)
+    return CalibrationOut(
+        n=result.n,
+        kappa_pass_fail=result.kappa_pass_fail,
+        spearman_overall=result.spearman_overall,
+        dimension_mae=result.dimension_mae,
+    )
+
+
+def _scores(dimensions: object) -> dict[str, int]:
+    """``{dimension: {"score": n, ...}}`` (as stored for judge and human) -> ``{dimension: n}``."""
+    if not isinstance(dimensions, dict):
+        return {}
+    return {
+        k: int(v["score"]) for k, v in dimensions.items() if isinstance(v, dict) and "score" in v
+    }
 
 
 @authed.get(
