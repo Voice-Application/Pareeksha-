@@ -3326,7 +3326,7 @@ export interface components {
              * Provider
              * @enum {string}
              */
-            provider: "gnani" | "gemini" | "deepseek" | "other";
+            provider: "gnani" | "gemini" | "deepseek" | "google" | "azure" | "elevenlabs" | "deepgram" | "other";
             /**
              * Operation
              * @example tts

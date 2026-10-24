@@ -20,7 +20,9 @@ class CalibrationOut(BaseModel):
 
 
 class UsageRow(BaseModel):
-    provider: Literal["gnani", "gemini", "deepseek", "other"]
+    provider: Literal[
+        "gnani", "gemini", "deepseek", "google", "azure", "elevenlabs", "deepgram", "other"
+    ]
     operation: str = Field(examples=["tts", "stt_batch", "llm_judge"])
     unit_type: Literal["audio_seconds", "characters", "tokens"]
     units: float

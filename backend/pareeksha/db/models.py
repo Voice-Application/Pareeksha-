@@ -1250,7 +1250,7 @@ class ApiUsage(Base):
     __tablename__ = "api_usage"
     __table_args__ = (
         CheckConstraint(
-            "provider = ANY (ARRAY['gnani'::text, 'gemini'::text, 'deepseek'::text, 'other'::text])",
+            "provider = ANY (ARRAY['gnani'::text, 'gemini'::text, 'deepseek'::text, 'google'::text, 'azure'::text, 'elevenlabs'::text, 'deepgram'::text, 'other'::text])",
             name="api_usage_provider_check",
         ),
         CheckConstraint(
