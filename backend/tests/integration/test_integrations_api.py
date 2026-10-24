@@ -16,6 +16,7 @@ from pareeksha.api.connectors import connector_direction, installed_directions
 from pareeksha.db.models import Integrations
 from pareeksha.integrations.crypto import SecretBox
 from pareeksha.integrations.registry import ConnectorRegistry
+from pareeksha.integrations.webhook import WebhookConnector
 from tests.conftest import Tenant
 
 HUBSPOT: dict[str, Any] = {
@@ -293,6 +294,7 @@ def test_a_broken_entry_point_plugin_is_skipped(monkeypatch: pytest.MonkeyPatch)
             return Zoho
 
     registry = ConnectorRegistry.from_entry_points([Broken(), Invalid()])  # type: ignore[list-item]
+    assert registry.register(WebhookConnector)  # a healthy plugin still loads next to the bad ones
     monkeypatch.setattr("pareeksha.api.connectors.get_registry", lambda: registry)
     found = installed_directions()
     assert "broken" not in found and "zoho" not in found and found["webhook"] == "sink"

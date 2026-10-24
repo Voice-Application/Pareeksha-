@@ -52,8 +52,15 @@ def _is_ip_literal(host: str) -> bool:
     return True
 
 
-async def resolve_public(url: str, resolver: Resolver = system_resolver) -> tuple[str, str, int]:
-    """Validate ``url``; return ``(host, pinned_ip, port)``. Raises ``SSRFError``."""
+async def resolve_public(
+    url: str, resolver: Resolver = system_resolver, *, allow_private: bool = False
+) -> tuple[str, str, int]:
+    """Validate ``url``; return ``(host, pinned_ip, port)``. Raises ``SSRFError``.
+
+    ``allow_private`` skips only the public-address check (https, no credentials and IP pinning
+    still apply). It exists for local development and acceptance runs against a receiver on
+    localhost; connectors enable it only through ``PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS=1``.
+    """
     parts = urlsplit(url)
     if parts.scheme != "https":
         raise SSRFError("only https URLs are allowed")
@@ -70,7 +77,7 @@ async def resolve_public(url: str, resolver: Resolver = system_resolver) -> tupl
     if not addresses:
         raise SSRFError(f"{host!r} did not resolve")
     for address in addresses:
-        if not is_public_ip(address):
+        if not allow_private and not is_public_ip(address):
             raise SSRFError(f"{host!r} resolves to a non-public address ({address})")
     return host, addresses[0], port
 
@@ -92,13 +99,14 @@ async def safe_request(
     allowed_content_types: tuple[str, ...] | None = None,
     resolver: Resolver = system_resolver,
     transport: httpx.AsyncBaseTransport | None = None,
+    allow_private: bool = False,
 ) -> httpx.Response:
     """Send one request to a validated public host and return the (size-limited) response.
 
     ``transport`` exists so tests can observe the pinned request without a network
     (an ``httpx.MockTransport``); production uses the default transport.
     """
-    host, ip, port = await resolve_public(url, resolver)
+    host, ip, port = await resolve_public(url, resolver, allow_private=allow_private)
     request_headers = dict(headers or {})
     request_headers["Host"] = host if port == 443 else f"{host}:{port}"
     target = _pinned_url(url, ip, port)

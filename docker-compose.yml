@@ -123,7 +123,7 @@ services:
 
   integrations:
     <<: *backend
-    profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
+    profiles: ["workers"]   # implemented in INT-01
     command: ["python", "-m", "pareeksha.workers.integrations"]
 
   dialect:
