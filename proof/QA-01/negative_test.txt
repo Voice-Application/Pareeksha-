@@ -1,0 +1,6 @@
+requirements in 02-requirements.md: 99 (81 FR, 18 NFR)
+requirements mapped in plan:        98
+GOAL.md items mapped:               11/11
+PRD section 8 metric rows:          9/9
+FAIL
+requirement NFR-4b missing from plan section 2
