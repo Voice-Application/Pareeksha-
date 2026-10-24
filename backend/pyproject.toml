@@ -13,12 +13,15 @@ dependencies = [
     "pydantic-settings>=2.3",
     "aiokafka>=0.11",
     "psycopg[binary]>=3.2",
+    "sqlalchemy[asyncio]>=2.0.30",
+    "alembic>=1.13",
     "python-multipart>=0.0.9",
     "uvicorn[standard]>=0.30",
 ]
 
 [project.optional-dependencies]
 dev = [
+    "gnani-vachana>=0.8.2",
     "httpx>=0.27",
     "mypy>=1.10",
     "pytest>=8",
@@ -49,8 +52,16 @@ select = ["E", "F", "I", "B", "UP", "RUF"]
 # B905: zip() strictness is not worth churn in code that predates the lint setup.
 ignore = ["RUF001", "RUF002", "RUF003", "B905"]
 
+[tool.ruff.lint.isort]
+known-third-party = ["alembic"]
+
+[tool.ruff.lint.per-file-ignores]
+# Generated from docs/schema.sql with sqlacodegen: long server_default / CHECK strings.
+"pareeksha/db/models.py" = ["E501"]
+
 [tool.coverage.run]
 source = ["pareeksha"]
+concurrency = ["thread", "greenlet"]
 branch = true
 
 [tool.coverage.report]

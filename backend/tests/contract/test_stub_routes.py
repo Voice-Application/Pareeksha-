@@ -5,17 +5,40 @@ from __future__ import annotations
 import inspect
 import re
 import uuid
-from typing import Any
+from collections.abc import Iterator
+from typing import Annotated, Any
 
 import pytest
+from fastapi import Security
 from fastapi.routing import APIRoute
+from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.testclient import TestClient
 
+from pareeksha.api.auth import authenticate, bearer_scheme
 from pareeksha.api.errors import ApiError
 from pareeksha.api.main import ROUTERS, app
 from pareeksha.api.stubs import not_implemented
 
 client = TestClient(app)
+
+
+async def _fake_authenticate(
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Security(bearer_scheme)],
+) -> None:
+    """Stands in for the DB-backed key check (covered against real Postgres in tests/db)."""
+    if credentials is None or not credentials.credentials:
+        raise ApiError(
+            401, "unauthorized", "Missing API key", headers={"WWW-Authenticate": "Bearer"}
+        )
+
+
+@pytest.fixture(autouse=True)
+def _no_database_auth() -> Iterator[None]:
+    app.dependency_overrides[authenticate] = _fake_authenticate
+    yield
+    app.dependency_overrides.pop(authenticate, None)
+
+
 AUTH = {"Authorization": "Bearer pk_live_test"}
 ID = str(uuid.uuid4())
 API = "/api/v1"
