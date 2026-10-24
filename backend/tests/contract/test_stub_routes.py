@@ -127,7 +127,11 @@ def _stub_owner(route: APIRoute) -> str | None:
     return match.group(1) if match else None
 
 
-IMPLEMENTED = {("GET", "/health"), ("GET", "/events/schemas")}
+IMPLEMENTED = {
+    ("GET", "/health"),
+    ("GET", "/events/schemas"),
+    ("GET", "/integrations/connectors"),
+}
 
 
 def _stub_routes() -> list[APIRoute]:

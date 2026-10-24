@@ -9,6 +9,7 @@ from fastapi import APIRouter, Response
 from pareeksha.api.auth import scoped
 from pareeksha.api.deps import AUTH_ERRORS, Pagination, errors
 from pareeksha.api.stubs import not_implemented
+from pareeksha.integrations.registry import get_registry
 from pareeksha.schemas.common import Page
 from pareeksha.schemas.integrations import (
     ConnectorInfo,
@@ -29,8 +30,7 @@ router = APIRouter(tags=["integrations"], responses=AUTH_ERRORS)
     summary="Installed connectors (built-in and entry-point plugins) with JSON Schemas",
 )
 async def list_connectors() -> list[ConnectorInfo]:
-    # STUB(INT-01)
-    not_implemented("INT-01")
+    return get_registry().info()
 
 
 @router.post(
