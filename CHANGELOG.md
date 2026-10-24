@@ -25,3 +25,4 @@ Contract changes after Day 1 need Tech Lead approval and an entry here.
 ## 2026-10-23
 - Owner approval (Preetham): DES-01 design direction "Field Instrument" approved.
 - Owner decision (Preetham): DeepSeek is the default LLM provider; Gemini remains supported (contract change via TL-01).
+- 2026-10-24 Owner approval (Preetham): TL-01 contracts approved and frozen (docs/contracts.md: scopes, 400 validation errors, stub owners, DeepSeek defaults deepseek-v4-pro / deepseek-flash).

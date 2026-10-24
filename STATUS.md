@@ -10,17 +10,17 @@ State values: todo / doing / blocked / review / done. Verified = QA sign-off (`y
 
 | ID | Title | Role | Depends on | State | Owner | Verified |
 |---|---|---|---|---|---|---|
-| H-01 | Keys in `.env`, Timbre v3.0 access, Gemini model ID, SECRET_KEY | Preetham (human) | — | keys added to cloud env by Preetham; not visible in this session (needs new session) | — | no |
+| H-01 | Keys in `.env`, Timbre v3.0 access, Gemini model ID, SECRET_KEY | Preetham (human) | — | keys in cloud env (Gnani, DeepSeek, Gemini) — usable only in new cloud sessions; key-dependent tasks run as separate sessions | — | no |
 | PM-01 | Scope v0.2 vs PRD §7; acceptance criteria per task | PM | — | done | — | proof/PM-01/verified.md |
-| TL-01 | Freeze §6 contracts as code; full OpenAPI stubs | TL | PM-01 | doing | — | no |
+| TL-01 | Freeze §6 contracts as code; full OpenAPI stubs | TL | PM-01 | done | — | proof/TL-01/verified.md |
 | INFRA-01 | Compose from `docs/starter/` runs (Kafka KRaft, Postgres, topics) | BE-INFRA | — | done | — | proof/INFRA-01/verified.md |
 | INFRA-02 | Consumer framework, producer, outbox relay, retrier, DLQ recorder | BE-INFRA | TL-01 | todo | — | no |
 | API-01 | SQLAlchemy models, Alembic `0001_initial`, API-key auth | BE-API | TL-01 | todo | — | no |
-| VOICE-01 | `scripts/smoke_gnani.py`: TTS/STT round trip, voices, `COST_*` | VOICE | H-01 | todo | — | no |
+| VOICE-01 | `scripts/smoke_gnani.py`: TTS/STT round trip, voices, `COST_*` | VOICE | H-01 | done | — | proof/VOICE-01/verified.md |
 | VOICE-02 | Audio DSP + LineSimulator (8 profiles) | VOICE | — | done | — | proof/VOICE-02/verified.md |
-| DES-01 | IA, wireframe specs, tokens, score scale, states | DES | PM-01 | direction awaiting Preetham approval; page specs in progress | — | no |
-| FE-01 | Next.js scaffold, Tailwind, shadcn/ui, BFF proxy, `gen:api` | FE | — | built, waiting on TL-01 openapi for gen:api | — | no |
-| QA-01 | Test plan mapping every FR/NFR to a test | QA | PM-01 | todo | — | no |
+| DES-01 | IA, wireframe specs, tokens, score scale, states | DES | PM-01 | done | — | proof/DES-01/verified.md |
+| FE-01 | Next.js scaffold, Tailwind, shadcn/ui, BFF proxy, `gen:api` | FE | — | done | — | proof/FE-01/verified.md |
+| QA-01 | Test plan mapping every FR/NFR to a test | QA | PM-01 | done | — | proof/QA-01/verified.md |
 | DOC-01 | Docs pack in `docs/`, README skeleton, STATUS, CHANGELOG | DOC | — | done | — | proof/DOC-01/verified.md |
 | API-02 | CRUD routers + seed script (personas, profiles, rubric, demo key) | BE-API | API-01 | todo | — | no |
 | API-03 | `POST /runs` outbox + planner + run-slot reconciler | BE-API | API-01, INFRA-02 | todo | — | no |
@@ -101,3 +101,10 @@ Never cut: mock agent with planted bugs, judge with evidence, Kafka outbox + ide
 ## Budget & verification policy (owner, 2026-10-23)
 - Total cloud credit budget: $100 (owner revised 2026-10-23; be careful, owner reviews if exceeded). Spent ≈ $13 at 18:50 UTC (batch 1: 7 tasks built, 5 verified).
 - Verification is batched at milestones (after a major build), not per task: M1 foundation (TL-01, QA-01, DES-01, FE-01, VOICE-01) → M2 pipeline end-to-end → M3 UI + integrations → M4 final `make verify`.
+
+## M1 (foundation) — merged 2026-10-24
+- Verified: TL-01, QA-01, DES-01, FE-01 (qa batch), VOICE-01 (separate cloud verifier). Integration fix (ruff format/E731/mypy) task/M1-fix f406d67, re-checked: 540 passed, 0 skipped, 97% cov; ruff, mypy, web lint/typecheck clean.
+- Owner approved TL-01 contracts 2026-10-24 ("Continue"); contracts frozen.
+- Gnani credit use: VOICE-01 build 17 calls (23.3 s TTS, 67 s STT); verify 11 calls (23.4 s TTS, 33.6 s STT).
+- Follow-ups: add gnani-vachana to backend dev deps; VOICE voices chosen by STT only (Preetham to listen); HubSpot token (HUBSPOT_ACCESS_TOKEN) needed for INT-*.
+- Open STUBs now: api/stubs.py handlers owned by API-02..05, EVAL-04/05, INT-01/03, VOICE-04; STUB(API-01) auth; STUB(VOICE-03) mock_agent; STUB(FE-02/03/05) pages.
