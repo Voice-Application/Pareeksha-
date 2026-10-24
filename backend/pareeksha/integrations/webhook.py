@@ -7,6 +7,8 @@ receive an ``EvaluationSummary`` which carries no transcript or audio (data mini
 from __future__ import annotations
 
 import json
+import logging
+import os
 from typing import ClassVar
 
 import httpx
@@ -24,6 +26,12 @@ from pareeksha.integrations.base import (
 )
 from pareeksha.integrations.signing import sign_headers
 from pareeksha.integrations.ssrf import Resolver, SSRFError, safe_request, system_resolver
+
+log = logging.getLogger(__name__)
+
+#: Development switch: let the sink call a receiver on a private/loopback address (still https).
+DEV_ALLOW_PRIVATE_ENV = "PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS"
+EVENT_ID_HEADER = "X-Pareeksha-Event-Id"
 
 
 class WebhookConfig(BaseModel):
@@ -58,16 +66,32 @@ class WebhookConnector(Connector):
         *,
         resolver: Resolver = system_resolver,
         transport: httpx.AsyncBaseTransport | None = None,
+        allow_private: bool | None = None,
     ) -> None:
         # injection points for tests; production uses DNS and the default transport
         self._resolver = resolver
         self._transport = transport
+        if allow_private is None:
+            allow_private = os.environ.get(DEV_ALLOW_PRIVATE_ENV) == "1"
+        if allow_private:
+            log.warning("%s is set: the SSRF public-address check is OFF", DEV_ALLOW_PRIVATE_ENV)
+        self._allow_private = allow_private
 
-    async def _post(self, cfg: WebhookConfig, sec: WebhookSecrets, body: bytes) -> httpx.Response:
+    async def _post(
+        self,
+        cfg: WebhookConfig,
+        sec: WebhookSecrets,
+        body: bytes,
+        extra_headers: dict[str, str] | None = None,
+    ) -> httpx.Response:
         secrets = [sec.signing_secret]
         if sec.previous_signing_secret:
             secrets.append(sec.previous_signing_secret)
-        headers = {"Content-Type": "application/json", **sign_headers(secrets, body)}
+        headers = {
+            "Content-Type": "application/json",
+            **(extra_headers or {}),
+            **sign_headers(secrets, body),
+        }
         try:
             return await safe_request(
                 "POST",
@@ -78,6 +102,7 @@ class WebhookConnector(Connector):
                 max_bytes=64 * 1024,
                 resolver=self._resolver,
                 transport=self._transport,
+                allow_private=self._allow_private,
             )
         except SSRFError as exc:
             raise ConnectorPermanentError(f"blocked: {exc}") from exc
@@ -124,7 +149,8 @@ class WebhookConnector(Connector):
             "data": data,
         }
         body = json.dumps(payload, sort_keys=True).encode()
-        response = await self._post(cfg, sec, body)
+        # the event id is stable across retries and redeliveries: receivers dedupe on it
+        response = await self._post(cfg, sec, body, {EVENT_ID_HEADER: str(event.event_id)})
         status = response.status_code
         excerpt = response.text[:2000]
         if status == 429 or status >= 500:

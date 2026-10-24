@@ -6,12 +6,14 @@ posts twice. Retryable errors are recorded (attempt counted) and re-raised so th
 the event through the retry topics; permanent errors are recorded as ``failed`` and swallowed.
 
 ``DeliveryStore`` is the persistence seam. ``InMemoryDeliveryStore`` is a complete implementation
-(used by tests and single-process runs); the SQL store over ``integration_deliveries`` lands with
-the API-01 models and implements the same protocol.
+(unit tests); ``PsycopgDeliveryStore`` (``integrations/sql_store.py``) persists to
+``integration_deliveries`` on its own autocommit connection, so a claimed or finished row survives
+the consumer transaction rolling back for a retry.
 """
 
 from __future__ import annotations
 
+import json
 import uuid
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -49,21 +51,21 @@ class DeliveryRecord:
 
 
 class DeliveryStore(Protocol):
-    def claim(
+    async def claim(
         self, integration_id: uuid.UUID, event_id: uuid.UUID, direction: Direction
     ) -> tuple[DeliveryRecord, bool]:
         """Return the unique row for the key and whether this call created it."""
 
-    def save(self, record: DeliveryRecord) -> None: ...
+    async def save(self, record: DeliveryRecord) -> None: ...
 
-    def recent(self, integration_id: uuid.UUID, limit: int = 100) -> list[DeliveryRecord]: ...
+    async def recent(self, integration_id: uuid.UUID, limit: int = 100) -> list[DeliveryRecord]: ...
 
 
 class InMemoryDeliveryStore:
     def __init__(self) -> None:
         self._rows: dict[tuple[uuid.UUID, uuid.UUID, str], DeliveryRecord] = {}
 
-    def claim(
+    async def claim(
         self, integration_id: uuid.UUID, event_id: uuid.UUID, direction: Direction
     ) -> tuple[DeliveryRecord, bool]:
         key = (integration_id, event_id, direction)
@@ -74,11 +76,11 @@ class InMemoryDeliveryStore:
         self._rows[key] = record
         return record, True
 
-    def save(self, record: DeliveryRecord) -> None:
+    async def save(self, record: DeliveryRecord) -> None:
         record.updated_at = datetime.now(UTC)
         self._rows[(record.integration_id, record.event_id, record.direction)] = record
 
-    def recent(self, integration_id: uuid.UUID, limit: int = 100) -> list[DeliveryRecord]:
+    async def recent(self, integration_id: uuid.UUID, limit: int = 100) -> list[DeliveryRecord]:
         rows = [r for r in self._rows.values() if r.integration_id == integration_id]
         return sorted(rows, key=lambda r: r.created_at, reverse=True)[:limit]
 
@@ -107,12 +109,19 @@ class DeliveryService:
         *,
         summary: EvaluationSummary | None = None,
         public_base_url: str | None = None,
+        final_attempt: bool = False,
     ) -> DeliveryRecord:
-        record, _created = self.store.claim(integration.id, event.event_id, "outbound")
+        record, _created = await self.store.claim(integration.id, event.event_id, "outbound")
         if record.status in TERMINAL:
             return record
         record.attempts += 1
-        record.request_summary = {"event_type": event.type.value}
+        # ids and scores only (no transcript, no secrets); the envelope lets a redelivery replay it
+        record.request_summary = {
+            "event_type": event.type.value,
+            "envelope": json.loads(event.to_json_bytes()),
+        }
+        # durable before the call: a crash mid-request leaves a pending row that counts the attempt
+        await self.store.save(record)
         ctx = DeliveryCtx(
             integration_id=integration.id,
             delivery_id=record.id,
@@ -127,9 +136,10 @@ class DeliveryService:
             )
             outcome = await connector.handle(event, config, secrets, ctx)
         except ConnectorRetryableError as exc:
-            record.status = "pending"
+            # the last attempt has no retry left: the log must not claim it is still pending
+            record.status = "failed" if final_attempt else "pending"
             record.response_excerpt = str(exc)[:2000]
-            self.store.save(record)
+            await self.store.save(record)
             raise
         except (
             ConnectorPermanentError,
@@ -138,10 +148,10 @@ class DeliveryService:
         ) as exc:  # ValueError: pydantic
             record.status = "failed"
             record.response_excerpt = str(exc)[:2000]
-            self.store.save(record)
+            await self.store.save(record)
             return record
         _apply(record, outcome)
-        self.store.save(record)
+        await self.store.save(record)
         return record
 
 
