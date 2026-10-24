@@ -1,8 +1,20 @@
 # Optional overlay for builds behind a TLS-intercepting proxy:
 #   CA_BUNDLE=/path/ca-bundle.crt docker compose -f docker-compose.yml -f docker-compose.proxy.yml up -d --build
+# Every service built from ./backend needs the CA as a build secret.
 x-ca: &ca { build: { secrets: [ca] } }
 services:
   migrate: *ca
   api: *ca
+  outbox-relay: *ca
+  planner: *ca
+  simulator: *ca
+  auditor: *ca
+  evaluator: *ca
+  finalizer: *ca
+  integrations: *ca
+  dialect: *ca
+  generator: *ca
+  retrier: *ca
+  dlq-recorder: *ca
 secrets:
   ca: { file: "${CA_BUNDLE}" }

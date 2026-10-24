@@ -1,0 +1,115 @@
+
+=== 02:09:50 apply the Kafka plumbing tables (outbox_events, processed_events, dead_letters) from docs/schema.sql
+applied
+               List of relations
+ Schema |       Name       | Type  |   Owner   
+--------+------------------+-------+-----------
+ public | dead_letters     | table | pareeksha
+ public | it_side_effects  | table | pareeksha
+ public | outbox_events    | table | pareeksha
+ public | processed_events | table | pareeksha
+(4 rows)
+
+
+=== 02:09:51 start the three worker groups at the current end of their topics (so earlier test traffic is not replayed)
+Group Coordinator Request failed: [Error 15] GroupCoordinatorNotAvailableError
+Marking the coordinator dead (node 1)for group retrier.
+Marking the coordinator dead (node 1)for group retrier.
+primed: retrier, dlq-recorder, demo-flaky
+
+=== 02:09:52 build and start the worker containers: outbox-relay, retrier, dlq-recorder
+ Container infra02-outbox-relay-1 Starting 
+ Container infra02-kafka-init-1 Exited 
+ Container infra02-kafka-init-1 Exited 
+ Container infra02-retrier-1 Starting 
+ Container infra02-dlq-recorder-1 Starting 
+ Container infra02-outbox-relay-1 Started 
+ Container infra02-retrier-1 Started 
+ Container infra02-dlq-recorder-1 Started 
+NAME                     IMAGE                  COMMAND                  SERVICE        CREATED          STATUS         PORTS
+infra02-dlq-recorder-1   infra02-dlq-recorder   "python -m pareeksha…"   dlq-recorder   35 seconds ago   Up 8 seconds   
+infra02-outbox-relay-1   infra02-outbox-relay   "python -m pareeksha…"   outbox-relay   35 seconds ago   Up 8 seconds   
+infra02-retrier-1        infra02-retrier        "python -m pareeksha…"   retrier        35 seconds ago   Up 8 seconds   
+
+=== 02:10:29 1. outbox: enqueue 5 events in one DB transaction; the relay container publishes them
+enqueued event_id=9d9063a6-88e2-4389-8e1c-e7686b3ad977 key=67485bba-2ef7-423c-bf15-80b3ce3959f8
+enqueued event_id=b02dbea7-b77b-4101-a57c-e7afc191ab26 key=c5e14169-e135-4dfd-866b-2d6f47b293f3
+enqueued event_id=d7b87b62-6a28-49a5-ab4e-dd0905af5bdc key=74c2a6e8-319e-4d21-8101-f1d29c0b398d
+enqueued event_id=e0a50f8b-3a14-4c55-b986-cedc5ff29203 key=6b7ee124-7b0e-4dd4-b437-3d70889fa311
+enqueued event_id=51a96b32-677c-4bce-8845-67fbfc388c8e key=0a1893d4-f8b9-42fa-a4f3-d2f59060a7bc
+ unpublished | published 
+-------------+-----------
+           0 |         5
+(1 row)
+
+{"ts": "2026-10-24T02:10:30.309904+00:00", "level": "info", "logger": "__main__", "msg": "outbox published 5 event(s)"}
+
+=== 02:10:33 2. REAL Kafka outage: stop the broker, enqueue 3 events (the DB write still works), then restart the broker
+ Container infra02-kafka-1 Stopped 
+enqueued event_id=7fedbc5e-cf55-4f33-abaa-8d90f26e3131 key=9ff9ab1b-b3f3-427c-9ffb-cde93a9d5924
+enqueued event_id=83eb35b1-99d0-46e4-ac66-fc0204fd8d2b key=43c6063c-effa-45c8-81b4-6949236d7d8b
+enqueued event_id=0764336c-39eb-4096-b1a3-07d050af469c key=caf35f27-e135-4c7f-9388-b32db5734ea7
+ unpublished | max_attempts |   last_error   
+-------------+--------------+----------------
+           3 |            1 | TimeoutError: 
+(1 row)
+
+relay backoff warnings logged: 1
+ Container infra02-kafka-1 Started 
+unpublished after broker restart: 0 (waited ~18s)
+ unpublished | total 
+-------------+-------
+           0 |     8
+(1 row)
+
+
+=== 02:11:21 3. retry + DLQ with the real delays: a consumer that always fails (group demo-flaky), real retrier + dlq-recorder containers
+enqueued event_id=481d869d-475a-45cb-9789-6adba401baea key=48a2e5db-0a85-406b-a3f6-e91bb0a01163
+dead letter recorded after 333s
+--- handler calls for this event (the retry delays are the gaps between the timestamps):
+02:11:22 DEMO handler call: event_id=481d869d-475a-45cb-9789-6adba401baea attempt=1
+{"ts": "2026-10-24T02:11:22.667739+00:00", "level": "warning", "logger": "pareeksha.events.consumer", "msg": "handler failed (RetryableError: agent unreachable (demo)) -> retry attempt 2", "group": "demo-flaky", "event_id": "481d869d-475a-45cb-9789-6adba401baea", "correlation_id": "48a2e5db-0a85-406b-a3f6-e91bb0a01163", "topic": "pareeksha.audit.requested.v1", "attempt": 1}
+02:11:52 DEMO handler call: event_id=481d869d-475a-45cb-9789-6adba401baea attempt=2
+{"ts": "2026-10-24T02:11:52.919011+00:00", "level": "warning", "logger": "pareeksha.events.consumer", "msg": "handler failed (RetryableError: agent unreachable (demo)) -> retry attempt 3", "group": "demo-flaky", "event_id": "481d869d-475a-45cb-9789-6adba401baea", "correlation_id": "48a2e5db-0a85-406b-a3f6-e91bb0a01163", "topic": "pareeksha.audit.requested.v1", "attempt": 2}
+02:16:53 DEMO handler call: event_id=481d869d-475a-45cb-9789-6adba401baea attempt=3
+{"ts": "2026-10-24T02:16:53.851414+00:00", "level": "error", "logger": "pareeksha.events.consumer", "msg": "handler failed (RetryableError: agent unreachable (demo)) -> DLQ after 3 attempt(s)", "group": "demo-flaky", "event_id": "481d869d-475a-45cb-9789-6adba401baea", "correlation_id": "48a2e5db-0a85-406b-a3f6-e91bb0a01163", "topic": "pareeksha.audit.requested.v1", "attempt": 3}
+--- dead_letters:
+ consumer_group |        original_topic        | attempts | status |                  error                   
+----------------+------------------------------+----------+--------+------------------------------------------
+ demo-flaky     | pareeksha.audit.requested.v1 |        3 | open   | RetryableError: agent unreachable (demo)
+(1 row)
+
+--- consumer-group offsets and lag (all groups used in this demo):
+GROUP           TOPIC                        PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                          HOST            CLIENT-ID
+demo-flaky      pareeksha.audit.requested.v1 5          0               0               0               demo-flaky-8932-2e6843e6-17aa-4c43-a88e-03e7140e915c /172.19.0.1     demo-flaky-8932
+demo-flaky      pareeksha.audit.requested.v1 4          12              12              0               demo-flaky-8932-2e6843e6-17aa-4c43-a88e-03e7140e915c /172.19.0.1     demo-flaky-8932
+demo-flaky      pareeksha.audit.requested.v1 1          12              12              0               demo-flaky-8932-2e6843e6-17aa-4c43-a88e-03e7140e915c /172.19.0.1     demo-flaky-8932
+demo-flaky      pareeksha.audit.requested.v1 0          9               9               0               demo-flaky-8932-2e6843e6-17aa-4c43-a88e-03e7140e915c /172.19.0.1     demo-flaky-8932
+demo-flaky      pareeksha.audit.requested.v1 3          0               0               0               demo-flaky-8932-2e6843e6-17aa-4c43-a88e-03e7140e915c /172.19.0.1     demo-flaky-8932
+demo-flaky      pareeksha.audit.requested.v1 2          0               0               0               demo-flaky-8932-2e6843e6-17aa-4c43-a88e-03e7140e915c /172.19.0.1     demo-flaky-8932
+dlq-recorder    pareeksha.dlq.v1 1          8               8               0               aiokafka-0.14.0-33e7a10a-c35a-448a-bb30-c6a2179a4dac /172.19.0.6     aiokafka-0.14.0
+dlq-recorder    pareeksha.dlq.v1 0          3               3               0               aiokafka-0.14.0-33e7a10a-c35a-448a-bb30-c6a2179a4dac /172.19.0.6     aiokafka-0.14.0
+dlq-recorder    pareeksha.dlq.v1 2          0               0               0               aiokafka-0.14.0-33e7a10a-c35a-448a-bb30-c6a2179a4dac /172.19.0.6     aiokafka-0.14.0
+retrier         pareeksha.retry.30s.v1 1          8               8               0               aiokafka-0.14.0-5c39f474-d038-4359-a2b7-6272e90fa952 /172.19.0.5     aiokafka-0.14.0
+retrier         pareeksha.retry.5m.v1  1          8               8               0               aiokafka-0.14.0-5c39f474-d038-4359-a2b7-6272e90fa952 /172.19.0.5     aiokafka-0.14.0
+retrier         pareeksha.retry.5m.v1  2          0               0               0               aiokafka-0.14.0-5c39f474-d038-4359-a2b7-6272e90fa952 /172.19.0.5     aiokafka-0.14.0
+retrier         pareeksha.retry.30s.v1 2          0               0               0               aiokafka-0.14.0-5c39f474-d038-4359-a2b7-6272e90fa952 /172.19.0.5     aiokafka-0.14.0
+retrier         pareeksha.retry.30s.v1 0          3               3               0               aiokafka-0.14.0-5c39f474-d038-4359-a2b7-6272e90fa952 /172.19.0.5     aiokafka-0.14.0
+retrier         pareeksha.retry.5m.v1  0          3               3               0               aiokafka-0.14.0-5c39f474-d038-4359-a2b7-6272e90fa952 /172.19.0.5     aiokafka-0.14.0
+--- pareeksha.retry.30s.v1 (headers + key + attempt):
+x-target-topic:pareeksha.audit.requested.v1,x-error:RetryableError: agent unreachable (demo),x-consumer-group:demo-flaky,x-not-before:2026-10-24T02:11:52.667932Z	48a2e5db-0a85-406b-a3f6-e91bb0a01163	{"event_id":"481d869d-475a-45cb-9789-6adba401baea","type":"audit.requested","version":1,"occurred_at":"2026-10-24T02:11:22.027448Z","correlation_id":"48a2e5db-0a85-406b-a3f6-e91bb0a01163","causation_id":null,"attempt":2,"producer":"demo@host","payload":{...}}
+--- pareeksha.retry.5m.v1 (headers + key + attempt):
+x-target-topic:pareeksha.audit.requested.v1,x-error:RetryableError: agent unreachable (demo),x-consumer-group:demo-flaky,x-not-before:2026-10-24T02:16:52.919231Z	48a2e5db-0a85-406b-a3f6-e91bb0a01163	{"event_id":"481d869d-475a-45cb-9789-6adba401baea","type":"audit.requested","version":1,"occurred_at":"2026-10-24T02:11:22.027448Z","correlation_id":"48a2e5db-0a85-406b-a3f6-e91bb0a01163","causation_id":null,"attempt":3,"producer":"demo@host","payload":{...}}
+--- pareeksha.dlq.v1 (headers + key + attempt):
+x-target-topic:pareeksha.audit.requested.v1,x-error:RetryableError: agent unreachable (demo),x-consumer-group:demo-flaky	48a2e5db-0a85-406b-a3f6-e91bb0a01163	{"event_id":"481d869d-475a-45cb-9789-6adba401baea","type":"audit.requested","version":1,"occurred_at":"2026-10-24T02:11:22.027448Z","correlation_id":"48a2e5db-0a85-406b-a3f6-e91bb0a01163","causation_id":null,"attempt":3,"producer":"demo@host","payload":{...}}
+
+=== 02:17:19 4. graceful shutdown (SIGTERM): consumer on the host, worker containers
+demo consumer exit code: 0
+ Container infra02-outbox-relay-1 Stopped 
+ Container infra02-retrier-1 Stopped 
+ Container infra02-dlq-recorder-1 Stopped 
+retrier exit code: 0
+dlq-recorder exit code: 0
+outbox-relay exit code: 0
+
+=== 02:17:21 done
