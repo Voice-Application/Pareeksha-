@@ -41,10 +41,7 @@ def test_disclosure_present_within_window():
     ]
     res = {r.check_key: r for r in check_disclosures(turns, DISCLOSURES)}
     assert res["recording"].passed is True and res["recording"].evidence_turns == (0,)
-    assert (
-        res["identity"].passed is True
-        and res["identity"].check_type == "disclosure_present"
-    )
+    assert res["identity"].passed is True and res["identity"].check_type == "disclosure_present"
 
 
 def test_disclosure_missing_or_too_late_fails_with_evidence():
@@ -76,9 +73,7 @@ def test_forbidden_absent():
         T(0, "agent", "Please pay by Friday."),
         T(1, "caller", "legal action? we will send someone to your house"),
     ]
-    assert all(
-        r.passed for r in check_forbidden(ok, phrases)
-    )  # caller words never count
+    assert all(r.passed for r in check_forbidden(ok, phrases))  # caller words never count
     bad = [
         T(0, "agent", "Pay or we will send someone to your house."),
         T(1, "agent", "Legal Action follows."),
@@ -102,9 +97,7 @@ def test_language_match():
     ]
     r = check_language(en, "kn-IN")
     assert r.passed is False and r.evidence_turns == (0, 1) and r.must_pass is False
-    assert (
-        check_language(en, "kn-IN", allowed=["en-IN"]).passed is True
-    )  # caller switches language
+    assert check_language(en, "kn-IN", allowed=["en-IN"]).passed is True  # caller switches language
     assert check_language([T(0, "agent", "OK sir")], "kn-IN").passed is None
     detected = [
         T(0, "agent", "x y z w", lang="hi-IN"),
@@ -157,15 +150,11 @@ def test_tool_calls_expected():
     ]
     res = check_tool_calls(expected, wrong_amount)
     assert (
-        res[0].passed is False
-        and "different arguments" in res[0].detail
-        and res[1].passed is True
+        res[0].passed is False and "different arguments" in res[0].detail and res[1].passed is True
     )
 
     missing = check_tool_calls(expected, [])
-    assert [r.passed for r in missing] == [False, False] and "never called" in missing[
-        0
-    ].detail
+    assert [r.passed for r in missing] == [False, False] and "never called" in missing[0].detail
 
     wrong_order = check_tool_calls(expected, list(reversed(actual)))
     assert [r.passed for r in wrong_order] == [
@@ -203,10 +192,7 @@ def test_amount_confirmed_pass_selfcorrect_and_na():
         T(1, "agent", "So 40000 rupees then."),
     ]
     assert check_amounts(still_wrong, {"emi": 4000})[0].passed is False
-    assert (
-        check_amounts([T(0, "agent", "Hello, how are you?")], {"emi": 4000})[0].passed
-        is None
-    )
+    assert check_amounts([T(0, "agent", "Hello, how are you?")], {"emi": 4000})[0].passed is None
 
 
 def test_amount_confirmed_ignores_dates_and_other_known_amounts():

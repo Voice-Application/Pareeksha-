@@ -107,33 +107,23 @@ def barge_in_stats(turns: Sequence[Turn]) -> tuple[int, int, list[int]]:
         if c.speaker != "caller" or not c.is_barge_in:
             continue
         attempts += 1
-        interrupted = next(
-            (a for a in agents if a.start_ms < c.start_ms < a.end_ms), None
-        )
+        interrupted = next((a for a in agents if a.start_ms < c.start_ms < a.end_ms), None)
         if interrupted is None:
             honoured += 1
             continue
         stop = max(0, interrupted.end_ms - c.start_ms)
         stops.append(stop)
         nxt = next(
-            (
-                a
-                for a in agents
-                if a.start_ms >= interrupted.end_ms and a.idx != interrupted.idx
-            ),
+            (a for a in agents if a.start_ms >= interrupted.end_ms and a.idx != interrupted.idx),
             None,
         )
-        silent_long_enough = (
-            nxt is None or nxt.start_ms - interrupted.end_ms >= BARGE_IN_SILENCE_MS
-        )
+        silent_long_enough = nxt is None or nxt.start_ms - interrupted.end_ms >= BARGE_IN_SILENCE_MS
         if stop <= BARGE_IN_WINDOW_MS and silent_long_enough:
             honoured += 1
     return attempts, honoured, stops
 
 
-def silence_gaps(
-    turns: Sequence[Turn], threshold_ms: int = SILENCE_GAP_MS
-) -> list[int]:
+def silence_gaps(turns: Sequence[Turn], threshold_ms: int = SILENCE_GAP_MS) -> list[int]:
     merged = _merge((t.start_ms, t.end_ms) for t in turns)
     return [
         merged[i + 1][0] - merged[i][1]
@@ -145,10 +135,7 @@ def silence_gaps(
 def talk_ratio(turns: Sequence[Turn]) -> float | None:
     def total(speaker: str) -> int:
         return sum(
-            e - s
-            for s, e in _merge(
-                (t.start_ms, t.end_ms) for t in turns if t.speaker == speaker
-            )
+            e - s for s, e in _merge((t.start_ms, t.end_ms) for t in turns if t.speaker == speaker)
         )
 
     a, c = total("agent"), total("caller")
@@ -201,11 +188,7 @@ def caller_wer(turns: Sequence[Turn]) -> tuple[float | None, int]:
     """
     errors = words = used = 0
     for t in turns:
-        if (
-            t.speaker != "caller"
-            or t.ground_truth_text is None
-            or t.agent_heard_text is None
-        ):
+        if t.speaker != "caller" or t.ground_truth_text is None or t.agent_heard_text is None:
             continue
         ref = normalize_text(t.ground_truth_text).split()
         if not ref:

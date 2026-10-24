@@ -60,21 +60,13 @@ class LineSimulator:
         noise_ss, loss_ss = ss.spawn(2)
         self._loss_rng = np.random.default_rng(loss_ss)
         self._noise = (
-            NoiseSource(
-                profile.background, self._rate, int(noise_ss.generate_state(1)[0])
-            )
+            NoiseSource(profile.background, self._rate, int(noise_ss.generate_state(1)[0]))
             if profile.background
             else None
         )
-        self._down = (
-            dsp.StreamingResampler("down") if self._rate != dsp.PIPELINE_RATE else None
-        )
-        self._up = (
-            dsp.StreamingResampler("up") if self._rate != dsp.PIPELINE_RATE else None
-        )
-        self._bandpass = (
-            dsp.StreamingBandpass(self._rate) if profile.pstn_bandpass else None
-        )
+        self._down = dsp.StreamingResampler("down") if self._rate != dsp.PIPELINE_RATE else None
+        self._up = dsp.StreamingResampler("up") if self._rate != dsp.PIPELINE_RATE else None
+        self._bandpass = dsp.StreamingBandpass(self._rate) if profile.pstn_bandpass else None
         # Group delay of down + up FIR at the 16 kHz pipeline rate.
         self._latency = 2 * dsp.StreamingResampler.FIR_DELAY if self._down else 0
         self._skip = self._latency
@@ -110,9 +102,7 @@ class LineSimulator:
             self._flushed = True
             return np.zeros(0, dtype=np.float32)
         self._flushed = True
-        self._buf = np.concatenate(
-            [self._buf, np.zeros(self._latency, dtype=np.float32)]
-        )
+        self._buf = np.concatenate([self._buf, np.zeros(self._latency, dtype=np.float32)])
         out: list[np.ndarray] = []
         while len(self._buf) > 0:
             frame, self._buf = self._buf[: self._frame], self._buf[self._frame :]
@@ -151,9 +141,7 @@ class LineSimulator:
             ref.flush()
             c = ref.captured
             mask = dsp.active_mask(c["speech"], profile.sample_rate)
-            ps = (
-                dsp.power(c["speech"][mask]) if mask.any() else dsp.NOMINAL_SPEECH_POWER
-            )
+            ps = dsp.power(c["speech"][mask]) if mask.any() else dsp.NOMINAL_SPEECH_POWER
             pn = dsp.power(c["noise_raw"][mask]) if mask.any() else 1.0
             kwargs = {"speech_power": ps, "noise_power": pn}
         sim = cls(profile, seed, capture=capture, **kwargs)
@@ -187,11 +175,7 @@ class LineSimulator:
                 if dsp.power(x) > _ACTIVE_POWER_THRESHOLD:
                     self._acc_sum += float(np.sum(np.square(x, dtype=np.float64)))
                     self._acc_n += len(x)
-                ps = (
-                    self._acc_sum / self._acc_n
-                    if self._acc_n
-                    else dsp.NOMINAL_SPEECH_POWER
-                )
+                ps = self._acc_sum / self._acc_n if self._acc_n else dsp.NOMINAL_SPEECH_POWER
             assert p.snr_db is not None  # guaranteed by NoiseProfile validation
             g = dsp.noise_gain(ps, self._noise_power, p.snr_db)
             applied = (g * raw).astype(np.float32)
@@ -207,9 +191,6 @@ class LineSimulator:
         if p.clipping:
             x = dsp.hard_clip(x, CLIP_DRIVE, CLIP_CEILING)
         x = dsp.codec_roundtrip(x, p.codec)
-        if (
-            p.packet_loss_pct > 0.0
-            and self._loss_rng.random() < p.packet_loss_pct / 100.0
-        ):
+        if p.packet_loss_pct > 0.0 and self._loss_rng.random() < p.packet_loss_pct / 100.0:
             x = np.zeros_like(x)
         return self._up.process(x) if self._up else x.astype(np.float32)

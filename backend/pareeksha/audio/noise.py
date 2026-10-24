@@ -77,9 +77,7 @@ class _Voice:
 
 
 class _Babble:
-    def __init__(
-        self, rng: np.random.Generator, rate: int, voices: int, crackle: float = 0.0
-    ):
+    def __init__(self, rng: np.random.Generator, rate: int, voices: int, crackle: float = 0.0):
         self.voices = [_Voice(rng, rate) for _ in range(voices)]
         self.rng = rng
         self.crackle = crackle
@@ -176,9 +174,7 @@ class _Rickshaw:
 
     def generate(self, n: int) -> np.ndarray:
         am = 0.65 + 0.35 * self.am.generate(n)
-        return (
-            self.engine.generate(n) + 0.7 * self.rasp(self.rng.standard_normal(n))
-        ) * am
+        return (self.engine.generate(n) + 0.7 * self.rasp(self.rng.standard_normal(n))) * am
 
 
 def _build(category: str, rng: np.random.Generator, rate: int):
@@ -192,9 +188,7 @@ def _build(category: str, rng: np.random.Generator, rate: int):
         return _Bus(rng, rate)
     if category == "auto_rickshaw":
         return _Rickshaw(rng, rate)
-    raise ValueError(
-        f"unknown noise category: {category!r} (expected one of {CATEGORIES})"
-    )
+    raise ValueError(f"unknown noise category: {category!r} (expected one of {CATEGORIES})")
 
 
 @cache

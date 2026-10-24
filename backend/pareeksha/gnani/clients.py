@@ -93,11 +93,7 @@ def normalize_wav(data: bytes) -> bytes:
             if fmt is None:
                 break
             start = pos + 8
-            end = (
-                len(data)
-                if size == 0xFFFFFFFF or start + size > len(data)
-                else start + size
-            )
+            end = len(data) if size == 0xFFFFFFFF or start + size > len(data) else start + size
             buf = io.BytesIO()
             with wave.open(buf, "wb") as w:
                 w.setnchannels(fmt[0])
@@ -111,7 +107,7 @@ def normalize_wav(data: bytes) -> bytes:
 
 def wav_duration_s(data: bytes) -> float:
     with wave.open(io.BytesIO(normalize_wav(data))) as w:
-        return w.getnframes() / w.getframerate()
+        return float(w.getnframes() / w.getframerate())
 
 
 def cache_key(
@@ -181,9 +177,7 @@ class GnaniSpeech:
             return TTSResult(audio, sample_rate, secs, True)
 
         client = GnaniTTSClient(self._api_key)
-        cfg = AudioConfig(
-            sample_rate=sample_rate, encoding="linear_pcm", container="wav"
-        )
+        cfg = AudioConfig(sample_rate=sample_rate, encoding="linear_pcm", container="wav")
         t0 = time.monotonic()
         audio = _retry(
             lambda: client.synthesize(
@@ -249,9 +243,7 @@ class GnaniSpeech:
         padded = pcm16 + b"\x00" * int(tail_s * sample_rate * 2)
         try:
             for i in range(0, len(padded), STREAM_CHUNK_BYTES):
-                chunk = padded[i : i + STREAM_CHUNK_BYTES].ljust(
-                    STREAM_CHUNK_BYTES, b"\x00"
-                )
+                chunk = padded[i : i + STREAM_CHUNK_BYTES].ljust(STREAM_CHUNK_BYTES, b"\x00")
                 await stream.send_audio(chunk)
                 await asyncio.sleep(pace)
             await asyncio.sleep(1.5)

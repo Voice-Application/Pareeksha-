@@ -71,6 +71,11 @@ files = ["pareeksha", "tests"]
 module = ["aiokafka", "aiokafka.*", "scipy", "scipy.*", "soundfile"]
 ignore_missing_imports = true
 
+# gnani-vachana ships no py.typed marker for gnani.tts (the other gnani modules are typed).
+[[tool.mypy.overrides]]
+module = ["gnani.tts"]
+ignore_missing_imports = true
+
 # EVAL-02 and VOICE-02 code and tests predate the mypy setup: they are checked
 # (check_untyped_defs) but not yet required to carry full annotations. Tighten as those tasks
 # touch them; new packages are strict.

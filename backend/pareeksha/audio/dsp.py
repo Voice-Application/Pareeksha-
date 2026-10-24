@@ -65,9 +65,7 @@ def measure_snr_db(speech: np.ndarray, noise: np.ndarray, rate: int) -> float:
     return 10.0 * np.log10(power(speech[mask]) / power(noise[mask]))
 
 
-def mix_at_snr(
-    speech: np.ndarray, noise: np.ndarray, snr_db: float, rate: int
-) -> np.ndarray:
+def mix_at_snr(speech: np.ndarray, noise: np.ndarray, snr_db: float, rate: int) -> np.ndarray:
     """Offline mix at an exact SNR (noise tiled/trimmed to the speech length)."""
     reps = int(np.ceil(len(speech) / max(len(noise), 1)))
     nz = np.tile(noise, reps)[: len(speech)]
@@ -97,12 +95,8 @@ def hard_clip(x: np.ndarray, drive: float, ceiling: float) -> np.ndarray:
 class StreamingBandpass:
     """Stateful Butterworth band-pass (PSTN 300-3400 Hz)."""
 
-    def __init__(
-        self, rate: int, low: float = 300.0, high: float = 3400.0, order: int = 4
-    ):
-        self._sos = signal.butter(
-            order, [low, high], btype="bandpass", fs=rate, output="sos"
-        )
+    def __init__(self, rate: int, low: float = 300.0, high: float = 3400.0, order: int = 4):
+        self._sos = signal.butter(order, [low, high], btype="bandpass", fs=rate, output="sos")
         self._zi = np.zeros((self._sos.shape[0], 2))
 
     def process(self, x: np.ndarray) -> np.ndarray:

@@ -117,9 +117,7 @@ def test_normalize_numbers():
     assert normalize_numbers("EMI ₹4,000 due") == "EMI ₹4000 due"
     assert normalize_numbers("चार हज़ार रुपये") == "4000 रुपये"
     assert normalize_numbers("ನಾಲ್ಕು ಸಾವಿರ ರೂಪಾಯಿ") == "4000 ರೂಪಾಯಿ"
-    assert (
-        normalize_numbers("account 007") == "account 007"
-    )  # plain digit strings untouched
+    assert normalize_numbers("account 007") == "account 007"  # plain digit strings untouched
     assert normalize_numbers("one lakh twenty five thousand and two") == "125002"
     assert normalize_numbers("no digits here") == "no digits here"
 
@@ -128,9 +126,7 @@ def test_hindi_two_digit_table_is_complete_and_correct():
     from pareeksha.evaluation import numbers as nb
 
     hindi_words = [
-        w
-        for w, (k, v) in nb._LEX.items()
-        if "ऀ" <= w[0] <= "ॿ" and k in ("unit", "teen", "two")
+        w for w, (k, v) in nb._LEX.items() if "ऀ" <= w[0] <= "ॿ" and k in ("unit", "teen", "two")
     ]
     values = sorted({int(nb._LEX[w][1]) for w in hindi_words})
     assert values == list(range(100))

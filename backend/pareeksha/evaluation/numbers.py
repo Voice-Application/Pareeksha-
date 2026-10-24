@@ -181,11 +181,7 @@ for _i, _tens in enumerate(_KN_TENS):
     for _u in range(1, 10):
         _uw = _KN_UNITS[_u]
         _first = _uw[0]
-        _join = (
-            _stem + _VOWEL_SIGN[_first] + _uw[1:]
-            if _first in _VOWEL_SIGN
-            else _stem + _uw
-        )
+        _join = _stem + _VOWEL_SIGN[_first] + _uw[1:] if _first in _VOWEL_SIGN else _stem + _uw
         _add(_join, TWO, _t + _u)
 _add("ನೂರು", HUNDRED, 100)
 _add("ಸಾವಿರ ಸಾವಿರದ", BIG, 1_000)
@@ -275,9 +271,7 @@ _CUR_POST = {
 _CUR_PRE_N = {_norm_word(w) for w in _CUR_PRE}
 _CUR_POST_N = {_norm_word(w) for w in _CUR_POST}
 
-_LITERAL = re.compile(
-    r"^(\d+(?:,\d+)*(?:\.\d+)?)(k|lakh|lakhs|lac|lacs|cr|crore|crores)?$"
-)
+_LITERAL = re.compile(r"^(\d+(?:,\d+)*(?:\.\d+)?)(k|lakh|lakhs|lac|lacs|cr|crore|crores)?$")
 _SUFFIX = {
     "k": 1_000,
     "lakh": 100_000,
@@ -385,9 +379,7 @@ def _tokenize(text: str) -> list[_Tok | None]:
                     out.append(_Tok(s, e, p[0], p[1], glued_currency=glued, word=word))
                 continue
         out.append(
-            _Tok(s, e, "cur", Fraction(0), word=low)
-            if low in _CUR_PRE_N | _CUR_POST_N
-            else None
+            _Tok(s, e, "cur", Fraction(0), word=low) if low in _CUR_PRE_N | _CUR_POST_N else None
         )
     return out
 
@@ -450,12 +442,7 @@ def extract_numbers(text: str) -> list[ParsedNumber]:
     i, n = 0, len(toks)
     while i < n:
         t = toks[i]
-        if (
-            t is None
-            or t.kind == "cur"
-            or t.kind == AND
-            or not _can_extend(None, t, None)
-        ):
+        if t is None or t.kind == "cur" or t.kind == AND or not _can_extend(None, t, None):
             i += 1
             continue
         run = [t]
@@ -522,11 +509,7 @@ def parse_number(text: str) -> int | float | None:
     n = found[0]
     rest = text[: n.start] + " " + text[n.end :]
     toks = [_norm_word(x.strip(_EDGE)) for x in rest.split()]
-    toks = [
-        x
-        for x in toks
-        if x and x not in _CUR_PRE_N and x not in _CUR_POST_N and x != "/-"
-    ]
+    toks = [x for x in toks if x and x not in _CUR_PRE_N and x not in _CUR_POST_N and x != "/-"]
     if toks:
         return None
     return n.value

@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import asyncio
 import io
 import struct
 import wave
+from pathlib import Path
 from types import SimpleNamespace
-from typing import ClassVar
+from typing import Any, ClassVar
 
 import pytest
 import requests
@@ -24,9 +26,7 @@ from pareeksha.gnani.clients import (
 )
 
 
-def make_wav(
-    seconds: float = 1.0, rate: int = 16000, streaming_header: bool = False
-) -> bytes:
+def make_wav(seconds: float = 1.0, rate: int = 16000, streaming_header: bool = False) -> bytes:
     buf = io.BytesIO()
     with wave.open(buf, "wb") as w:
         w.setnchannels(1)
@@ -40,7 +40,7 @@ def make_wav(
     return bytes(data)
 
 
-def test_streaming_header_duration_is_real():
+def test_streaming_header_duration_is_real() -> None:
     wav = make_wav(2.0, streaming_header=True)
     assert wav_duration_s(wav) == pytest.approx(2.0)
     fixed = normalize_wav(wav)
@@ -48,39 +48,47 @@ def test_streaming_header_duration_is_real():
         assert w.getnframes() == 32000
 
 
-def test_normalize_rejects_garbage_and_missing_data():
+def test_normalize_rejects_garbage_and_missing_data() -> None:
     with pytest.raises(ValueError):
         normalize_wav(b"not a wav at all")
     with pytest.raises(ValueError):
         normalize_wav(make_wav(0.1)[:36])
 
 
-def test_normalize_skips_odd_chunks():
+def test_normalize_skips_odd_chunks() -> None:
     wav = make_wav(0.5)
     extra = b"LIST" + struct.pack("<I", 3) + b"abc" + b"\x00"
     with_list = wav[:36] + extra + wav[36:]
     assert wav_duration_s(with_list) == pytest.approx(0.5)
 
 
-def test_cache_key_depends_on_every_field():
-    base = ("timbre-v3.0", "Lakshmi", "kn-IN", 1.0, 16000, "linear_pcm", "ನಮಸ್ಕಾರ")
-    keys = {cache_key(*base)}
-    variants = [
-        ("timbre-v2.5",),
-        ("m", "Avinash"),
-        ("m", "v", "hi-IN"),
-        ("m", "v", "l", 1.1),
-        ("m", "v", "l", 1.0, 8000),
-        ("m", "v", "l", 1.0, 8000, "pcm_mulaw"),
-        ("m", "v", "l", 1.0, 8000, "pcm_mulaw", "x"),
+def test_cache_key_depends_on_every_field() -> None:
+    base: dict[str, Any] = {
+        "model": "timbre-v3.0",
+        "voice": "Lakshmi",
+        "language": "kn-IN",
+        "speed": 1.0,
+        "rate": 16000,
+        "encoding": "linear_pcm",
+        "text": "ನಮಸ್ಕಾರ",
+    }
+    keys = {cache_key(**base)}
+    variants: list[dict[str, Any]] = [
+        {"model": "timbre-v2.5"},
+        {"voice": "Avinash"},
+        {"language": "hi-IN"},
+        {"speed": 1.1},
+        {"rate": 8000},
+        {"encoding": "pcm_mulaw"},
+        {"text": "x"},
     ]
     for v in variants:
-        keys.add(cache_key(*(v + base[len(v) :])))
+        keys.add(cache_key(**{**base, **v}))
     assert len(keys) == len(variants) + 1
-    assert cache_key(*base) == cache_key(*base)
+    assert cache_key(**base) == cache_key(**base)
 
 
-def test_is_retryable():
+def test_is_retryable() -> None:
     assert is_retryable(APIError(503, "x"))
     assert not is_retryable(APIError(400, "x"))
     assert not is_retryable(APIError(401, "x"))
@@ -89,7 +97,7 @@ def test_is_retryable():
     assert not is_retryable(ValueError("x"))
 
 
-def test_ledger_totals_ignore_cache_hits():
+def test_ledger_totals_ignore_cache_hits() -> None:
     ledger = UsageLedger()
     ledger.add(UsageRecord("tts", "kn-IN", 2.0, 10))
     ledger.add(UsageRecord("tts", "kn-IN", 3.0, 5))
@@ -103,13 +111,13 @@ def test_ledger_totals_ignore_cache_hits():
 
 
 class FakeTTS:
-    calls: ClassVar[list[dict]] = []
+    calls: ClassVar[list[dict[str, Any]]] = []
     fail_times = 0
 
-    def __init__(self, api_key=None):
+    def __init__(self, api_key: str | None = None) -> None:
         pass
 
-    def synthesize(self, text, voice, **kw):
+    def synthesize(self, text: str, voice: str, **kw: Any) -> bytes:
         FakeTTS.calls.append({"text": text, "voice": voice, **kw})
         if FakeTTS.fail_times:
             FakeTTS.fail_times -= 1
@@ -118,12 +126,12 @@ class FakeTTS:
 
 
 @pytest.fixture(autouse=True)
-def _reset_fake():
+def _reset_fake() -> None:
     FakeTTS.calls = []
     FakeTTS.fail_times = 0
 
 
-def test_synthesize_caches_and_logs(tmp_path, monkeypatch):
+def test_synthesize_caches_and_logs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(clients, "GnaniTTSClient", FakeTTS)
     g = GnaniSpeech("k", cache_dir=tmp_path, retry_delay=0)
     first = g.synthesize("hello", "Lakshmi", "kn-IN", speed=1.1)
@@ -137,7 +145,7 @@ def test_synthesize_caches_and_logs(tmp_path, monkeypatch):
     assert len(g.ledger.records) == 2
 
 
-def test_synthesize_retries_5xx_then_succeeds(monkeypatch):
+def test_synthesize_retries_5xx_then_succeeds(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(clients, "GnaniTTSClient", FakeTTS)
     FakeTTS.fail_times = 2
     g = GnaniSpeech("k", retry_delay=0)
@@ -145,9 +153,9 @@ def test_synthesize_retries_5xx_then_succeeds(monkeypatch):
     assert len(FakeTTS.calls) == 3
 
 
-def test_synthesize_does_not_retry_4xx(monkeypatch):
+def test_synthesize_does_not_retry_4xx(monkeypatch: pytest.MonkeyPatch) -> None:
     class Bad(FakeTTS):
-        def synthesize(self, *a, **kw):
+        def synthesize(self, *a: Any, **kw: Any) -> bytes:
             FakeTTS.calls.append({})
             raise APIError(400, "bad voice")
 
@@ -157,7 +165,7 @@ def test_synthesize_does_not_retry_4xx(monkeypatch):
     assert len(FakeTTS.calls) == 1
 
 
-def test_synthesize_gives_up_after_three_5xx(monkeypatch):
+def test_synthesize_gives_up_after_three_5xx(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(clients, "GnaniTTSClient", FakeTTS)
     FakeTTS.fail_times = 99
     with pytest.raises(APIError):
@@ -165,12 +173,12 @@ def test_synthesize_gives_up_after_three_5xx(monkeypatch):
     assert len(FakeTTS.calls) == 3
 
 
-def test_transcribe_rest_records_usage(monkeypatch):
+def test_transcribe_rest_records_usage(monkeypatch: pytest.MonkeyPatch) -> None:
     class FakeSTT:
-        def __init__(self, api_key=None):
+        def __init__(self, api_key: str | None = None) -> None:
             pass
 
-        def transcribe_bytes(self, audio, name, lang):
+        def transcribe_bytes(self, audio: bytes, name: str, lang: str) -> dict[str, str]:
             return {"transcript": "नमस्ते", "model": "m"}
 
     monkeypatch.setattr(clients, "GnaniSTTClient", FakeSTT)
@@ -184,48 +192,47 @@ def test_transcribe_rest_records_usage(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_transcribe_stream_paces_pads_and_collects(monkeypatch):
+async def test_transcribe_stream_paces_pads_and_collects(monkeypatch: pytest.MonkeyPatch) -> None:
     sent: list[bytes] = []
 
     class FakeStream:
-        def __init__(self, api_key, lang, sample_rate):
+        def __init__(self, api_key: str, lang: str, sample_rate: int) -> None:
             self.rate = sample_rate
 
-        async def connect(self):
+        async def connect(self) -> None:
             return None
 
-        async def send_audio(self, chunk):
+        async def send_audio(self, chunk: bytes) -> None:
             sent.append(chunk)
 
-        async def close(self):
+        async def close(self) -> list[SimpleNamespace]:
             return [SimpleNamespace(text="ok")]
 
-    async def no_sleep(_):
+    async def no_sleep(_: float) -> None:
         return None
 
     monkeypatch.setattr(clients, "GnaniSTTStreamClient", FakeStream)
-    monkeypatch.setattr(clients.asyncio, "sleep", no_sleep)
+    monkeypatch.setattr(asyncio, "sleep", no_sleep)
     g = GnaniSpeech("k")
     pcm = b"\x01\x00" * 16000  # 1 s
     events = await g.transcribe_stream(pcm, "hi-IN", tail_s=1.0)
     assert [e.text for e in events] == ["ok"]
     assert all(len(c) == 1024 for c in sent)
-    assert (
-        sum(len(c) for c in sent) >= len(pcm) + 32000
-    )  # one second of silence appended
+    assert sum(len(c) for c in sent) >= len(pcm) + 32000  # one second of silence appended
     assert g.ledger.totals()["stt_stream"]["audio_seconds"] == pytest.approx(1.0)
 
 
-def test_transcribe_batch_returns_plain_segments(monkeypatch):
-    seg = lambda s, e, t, sp: SimpleNamespace(start=s, end=e, text=t, speaker=sp)
+def test_transcribe_batch_returns_plain_segments(monkeypatch: pytest.MonkeyPatch) -> None:
+    def seg(s: float, e: float, t: str, sp: int) -> SimpleNamespace:
+        return SimpleNamespace(start=s, end=e, text=t, speaker=sp)
 
     class FakeBatch:
-        args: ClassVar[dict] = {}
+        args: ClassVar[dict[str, Any]] = {}
 
-        def __init__(self, api_key=None):
+        def __init__(self, api_key: str | None = None) -> None:
             pass
 
-        def transcribe(self, files, lang, **kw):
+        def transcribe(self, files: list[Any], lang: str, **kw: Any) -> list[SimpleNamespace]:
             FakeBatch.args = {"files": files, "lang": lang, **kw}
             return [SimpleNamespace(segments=[seg(0, 1, "a", 1), seg(1, 2, "b", 2)])]
 
