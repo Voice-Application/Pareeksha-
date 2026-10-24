@@ -102,7 +102,38 @@ class Portal:
         if request.url.path == "/crm/v3/objects/notes":
             self.notes.append(json.loads(request.content))
             return httpx.Response(201, json={"id": f"note-{len(self.notes)}"})
+        if request.url.path.startswith("/crm/v4/objects/contacts/") and request.url.path.endswith(
+            "/associations/notes"
+        ):
+            return self._associations(request)
+        if request.url.path == "/crm/v3/objects/notes/batch/read":
+            ids = [i["id"] for i in json.loads(request.content)["inputs"]]
+            return httpx.Response(
+                200,
+                json={
+                    "results": [
+                        {
+                            "id": f"note-{n}",
+                            "properties": {"hs_note_body": body["properties"]["hs_note_body"]},
+                        }
+                        for n, body in enumerate(self.notes, 1)
+                        if f"note-{n}" in ids
+                    ]
+                },
+            )
         return httpx.Response(404)
+
+    def _associations(self, request: httpx.Request) -> httpx.Response:
+        # two notes per page so pagination is exercised
+        start = int(request.url.params.get("after", "0"))
+        page = [
+            {"toObjectId": f"note-{n}"}
+            for n in range(start + 1, min(start + 2, len(self.notes)) + 1)
+        ]
+        body: dict[str, Any] = {"results": page}
+        if start + 2 < len(self.notes):
+            body["paging"] = {"next": {"after": str(start + 2)}}
+        return httpx.Response(200, json=body)
 
 
 async def test_phone_match_creates_one_associated_note() -> None:
@@ -300,3 +331,61 @@ def test_render_note_variants() -> None:
 def test_registered_as_builtin() -> None:
     registry = ConnectorRegistry.from_entry_points()
     assert registry.get("hubspot") is HubSpotConnector
+
+
+async def test_worker_crash_after_create_before_row_save_still_one_note() -> None:
+    """Note created in HubSpot, then the worker dies before the delivery row is saved."""
+    portal = Portal()
+    service, record = setup()
+    env, summary = evaluation()
+    connector = make(portal)
+
+    class Crash(BaseException):
+        pass
+
+    real_save = service.store.save
+    armed = {"on": True}
+
+    def crashing_save(row: Any) -> None:
+        if armed["on"] and row.status == "succeeded":
+            armed["on"] = False
+            raise Crash
+        real_save(row)
+
+    service.store.save = crashing_save  # type: ignore[method-assign,assignment]
+    with pytest.raises(Crash):
+        await service.deliver(connector, record, env, summary=summary)
+    assert len(portal.notes) == 1
+    # a fresh attempt (row still pending) must find the marker and not create a second note
+    row = await service.deliver(connector, record, env, summary=summary)
+    assert row.status == "succeeded" and row.external_id == "note-1"
+    assert len(portal.notes) == 1
+
+
+async def test_marker_found_across_association_pages() -> None:
+    portal = Portal()
+    service, record = setup()
+    connector = make(portal)
+    for _ in range(4):  # four other events, each its own note
+        other_env, other_summary = evaluation()
+        await service.deliver(connector, record, other_env, summary=other_summary)
+    assert len(portal.notes) == 4
+    # a new service/store has no delivery rows: only the HubSpot-side marker can dedupe
+    fresh = DeliveryService(InMemoryDeliveryStore(), service.box)
+    env = make_envelope(
+        EvaluationCompleted(
+            call_id=uuid.uuid4(),
+            evaluation_id=uuid.uuid4(),
+            overall_score=40.0,
+            passed=False,
+        ),
+        producer="t",
+        correlation_id="c",
+        event_id=uuid.uuid4(),
+    )
+    _, summary = evaluation()
+    first = await fresh.deliver(connector, record, env, summary=summary)
+    assert len(portal.notes) == 5
+    again = DeliveryService(InMemoryDeliveryStore(), service.box)
+    row = await again.deliver(connector, record, env, summary=summary)
+    assert row.external_id == first.external_id and len(portal.notes) == 5

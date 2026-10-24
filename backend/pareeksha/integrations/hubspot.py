@@ -133,6 +133,14 @@ class HubSpotConnector(Connector):
         contact_id = await self._find_contact(cfg, sec, summary)
         if contact_id is None:
             return DeliveryOutcome(status="skipped", detail="no matching contact")
+        marker = event_marker(str(event.event_id))
+        existing = await self._existing_note(cfg, sec, contact_id, marker)
+        if existing is not None:
+            return DeliveryOutcome(
+                status="succeeded",
+                external_id=existing,
+                response_excerpt=f"note {existing} already on contact {contact_id}",
+            )
         body = render_note(cfg, summary, ctx, str(event.event_id))
         response = await self._call(
             cfg,
@@ -168,6 +176,44 @@ class HubSpotConnector(Connector):
             external_id=str(note_id),
             response_excerpt=f"note {note_id} on contact {contact_id}",
         )
+
+    async def _existing_note(
+        self, cfg: HubSpotConfig, sec: HubSpotSecrets, contact_id: str, marker: str
+    ) -> str | None:
+        """Crash safety: find a note on the contact that already carries this event's marker.
+
+        Uses the associations list (not search) so a note created seconds ago is visible; search
+        indexing lags.
+        """
+        note_ids: list[str] = []
+        after: str | None = None
+        while True:
+            query = f"?limit=500&after={after}" if after else "?limit=500"
+            page = (
+                await self._call(
+                    cfg,
+                    sec,
+                    "GET",
+                    f"/crm/v4/objects/contacts/{contact_id}/associations/notes{query}",
+                )
+            ).json()
+            note_ids += [str(r["toObjectId"]) for r in page.get("results", [])]
+            after = (page.get("paging") or {}).get("next", {}).get("after")
+            if not after:
+                break
+        for start in range(0, len(note_ids), 100):
+            chunk = note_ids[start : start + 100]
+            read = await self._call(
+                cfg,
+                sec,
+                "POST",
+                "/crm/v3/objects/notes/batch/read",
+                {"properties": ["hs_note_body"], "inputs": [{"id": i} for i in chunk]},
+            )
+            for note in read.json().get("results", []):
+                if marker in (note.get("properties", {}).get("hs_note_body") or ""):
+                    return str(note["id"])
+        return None
 
     async def _find_contact(
         self, cfg: HubSpotConfig, sec: HubSpotSecrets, summary: EvaluationSummary
@@ -222,6 +268,11 @@ def _phone_variants(phone: str) -> list[str]:
     return variants
 
 
+def event_marker(event_id: str) -> str:
+    """Stable per-event idempotency marker embedded in every note body."""
+    return f"[pareeksha event {event_id}]"
+
+
 def render_note(cfg: HubSpotConfig, s: EvaluationSummary, ctx: DeliveryCtx, event_id: str) -> str:
     base = (cfg.public_base_url or ctx.public_base_url or "").rstrip("/")
     link = s.link if s.link.startswith("http") or not base else base + s.link
@@ -241,7 +292,7 @@ def render_note(cfg: HubSpotConfig, s: EvaluationSummary, ctx: DeliveryCtx, even
         text = _env.from_string(cfg.note_template).render(**values)
     except TemplateError as exc:
         raise ConnectorPermanentError(f"note_template is invalid: {exc}") from exc
-    return f"{text}\n[pareeksha event {event_id}]"
+    return f"{text}\n{event_marker(event_id)}"
 
 
 def _typed(config: BaseModel, secrets: BaseModel) -> tuple[HubSpotConfig, HubSpotSecrets]:
