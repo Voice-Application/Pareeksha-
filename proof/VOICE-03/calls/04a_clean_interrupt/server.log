@@ -1,0 +1,24 @@
+2026-10-24 01:30:00,153 websockets.server server listening on 0.0.0.0:8805
+2026-10-24 01:30:00,154 mock_agent mock agent on :8805 bugs=[]
+2026-10-24 01:30:00,273 websockets.server HTTP response sent (200 OK)
+2026-10-24 01:30:00,274 websockets.server connection closed
+2026-10-24 01:30:00,276 websockets.server connection open
+2026-10-24 01:30:00,277 mock_agent call 00000000-0000-4000-8000-000000000003 start lang=en-IN bugs=[]
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_6b05a98e2487 | language=en-IN
+2026-10-24 01:30:03,599 gnani [STT REST] transcribe_bytes start | request_id=req_6b05a98e2487 | language=en-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_6b05a98e2487
+2026-10-24 01:30:04,392 gnani [STT REST] transcribe_bytes complete | request_id=req_6b05a98e2487
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_1d28108b4c55 | language=en-IN
+2026-10-24 01:30:14,419 gnani [STT REST] transcribe_bytes start | request_id=req_1d28108b4c55 | language=en-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_1d28108b4c55
+2026-10-24 01:30:15,219 gnani [STT REST] transcribe_bytes complete | request_id=req_1d28108b4c55
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_70fe4ae5ed36 | language=en-IN
+2026-10-24 01:30:23,938 gnani [STT REST] transcribe_bytes start | request_id=req_70fe4ae5ed36 | language=en-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_70fe4ae5ed36
+2026-10-24 01:30:24,772 gnani [STT REST] transcribe_bytes complete | request_id=req_70fe4ae5ed36
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_eec2757bac24 | language=en-IN
+2026-10-24 01:30:33,358 gnani [STT REST] transcribe_bytes start | request_id=req_eec2757bac24 | language=en-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_eec2757bac24
+2026-10-24 01:30:34,299 gnani [STT REST] transcribe_bytes complete | request_id=req_eec2757bac24
+2026-10-24 01:30:39,183 websockets.server connection closed
+2026-10-24 01:30:39,183 mock_agent gnani usage (cumulative, uncached): {"stt_rest": {"calls": 4, "audio_seconds": 8.18, "chars": 0}}

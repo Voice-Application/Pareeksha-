@@ -1,0 +1,117 @@
+{
+  "messages": [
+    {
+      "type": "transcript",
+      "role": "agent",
+      "text": "This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?",
+      "is_final": true,
+      "t_ms": 0,
+      "wall_s": 0.01
+    },
+    {
+      "type": "transcript",
+      "role": "user",
+      "text": "ಹೌದು ನಾನೇ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆ",
+      "is_final": true,
+      "t_ms": 13653,
+      "wall_s": 13.66
+    },
+    {
+      "type": "transcript",
+      "role": "agent",
+      "text": "Thank you. Your EMI of rupees 4,500 is overdue by twelve days. When can you pay?",
+      "is_final": true,
+      "t_ms": 13654,
+      "wall_s": 13.66
+    },
+    {
+      "type": "transcript",
+      "role": "user",
+      "text": "ತಡೆ ಶುಲ್ಕ ಮನ್ನಾ ಮಾಡಬಹುದೇ",
+      "is_final": true,
+      "t_ms": 25044,
+      "wall_s": 25.05
+    },
+    {
+      "type": "transcript",
+      "role": "agent",
+      "text": "I am not able to waive the late fee myself. I can ask my supervisor to review it.",
+      "is_final": true,
+      "t_ms": 25044,
+      "wall_s": 25.05
+    },
+    {
+      "type": "tool_call",
+      "name": "escalate_waiver_request",
+      "arguments": {
+        "reason": "caller_asked_late_fee_waiver"
+      },
+      "result": {
+        "ok": true
+      },
+      "t_ms": 30405,
+      "wall_s": 30.41
+    },
+    {
+      "type": "transcript",
+      "role": "user",
+      "text": "ಸರಿ ಶುಕ್ರವಾರ ಪಾವತಿಸುತ್ತೇನೆ",
+      "is_final": true,
+      "t_ms": 35600,
+      "wall_s": 35.61
+    },
+    {
+      "type": "transcript",
+      "role": "agent",
+      "text": "Just to confirm, you will pay four thousand five hundred rupees on that date. Is that right?",
+      "is_final": true,
+      "t_ms": 35600,
+      "wall_s": 35.61
+    },
+    {
+      "type": "transcript",
+      "role": "user",
+      "text": "ಹೌದು ಸರಿ",
+      "is_final": true,
+      "t_ms": 44767,
+      "wall_s": 44.77
+    },
+    {
+      "type": "transcript",
+      "role": "agent",
+      "text": "Thank you, I have noted your payment promise. Have a good day. Goodbye.",
+      "is_final": true,
+      "t_ms": 44767,
+      "wall_s": 44.77
+    },
+    {
+      "type": "tool_call",
+      "name": "record_promise_to_pay",
+      "arguments": {
+        "amount_inr": 4500,
+        "when": "caller_stated_date"
+      },
+      "result": {
+        "status": "recorded"
+      },
+      "t_ms": 49649,
+      "wall_s": 49.66
+    },
+    {
+      "type": "call_end",
+      "reason": "completed",
+      "wall_s": 49.66
+    }
+  ],
+  "caller_lines": [
+    "ಹೌದು, ನಾನೇ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆ.",
+    "ತಡ ಶುಲ್ಕ ಮನ್ನಾ ಮಾಡಬಹುದೇ?",
+    "ಸರಿ, ಶುಕ್ರವಾರ ಪಾವತಿಸುತ್ತೇನೆ.",
+    "ಹೌದು, ಸರಿ."
+  ],
+  "interrupt": false,
+  "config": "03b_english_to_kannada",
+  "mock_bugs": "english_to_kannada",
+  "language": "kn-IN",
+  "agent_seconds": 49.66125
+}

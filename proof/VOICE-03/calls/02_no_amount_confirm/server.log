@@ -1,0 +1,20 @@
+2026-10-24 01:27:12,125 websockets.server server listening on 0.0.0.0:8802
+2026-10-24 01:27:12,125 mock_agent mock agent on :8802 bugs=[<Bug.NO_AMOUNT_CONFIRM: 'no_amount_confirm'>]
+2026-10-24 01:27:12,285 websockets.server HTTP response sent (200 OK)
+2026-10-24 01:27:12,285 websockets.server connection closed
+2026-10-24 01:27:12,289 websockets.server connection open
+2026-10-24 01:27:12,289 mock_agent call 00000000-0000-4000-8000-000000000003 start lang=en-IN bugs=[<Bug.NO_AMOUNT_CONFIRM: 'no_amount_confirm'>]
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_41ab1a203137 | language=en-IN
+2026-10-24 01:27:23,711 gnani [STT REST] transcribe_bytes start | request_id=req_41ab1a203137 | language=en-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_41ab1a203137
+2026-10-24 01:27:24,688 gnani [STT REST] transcribe_bytes complete | request_id=req_41ab1a203137
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_c300dde3079f | language=en-IN
+2026-10-24 01:27:34,731 gnani [STT REST] transcribe_bytes start | request_id=req_c300dde3079f | language=en-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_c300dde3079f
+2026-10-24 01:27:35,688 gnani [STT REST] transcribe_bytes complete | request_id=req_c300dde3079f
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_0f62f2f015c2 | language=en-IN
+2026-10-24 01:27:44,411 gnani [STT REST] transcribe_bytes start | request_id=req_0f62f2f015c2 | language=en-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_0f62f2f015c2
+2026-10-24 01:27:45,816 gnani [STT REST] transcribe_bytes complete | request_id=req_0f62f2f015c2
+2026-10-24 01:27:50,699 websockets.server connection closed
+2026-10-24 01:27:50,700 mock_agent gnani usage (cumulative, uncached): {"stt_rest": {"calls": 3, "audio_seconds": 6.02, "chars": 0}}
