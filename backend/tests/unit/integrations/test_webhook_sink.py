@@ -14,6 +14,7 @@ from cryptography.fernet import Fernet
 from fastapi.testclient import TestClient
 from pydantic import BaseModel
 
+from pareeksha.api.auth import authenticate
 from pareeksha.api.main import app
 from pareeksha.events.schemas import (
     AnyEnvelope,
@@ -91,8 +92,15 @@ def test_registry_loads_entry_point_objects_and_refuses_broken_ones() -> None:
 
 def test_connectors_endpoint_lists_schemas() -> None:
     get_registry()
-    client = TestClient(app)
-    resp = client.get("/api/v1/integrations/connectors", headers={"Authorization": "Bearer pk_x"})
+    # API-01's key check is DB-backed (covered in tests/db); this test is about the payload.
+    app.dependency_overrides[authenticate] = lambda: None
+    try:
+        client = TestClient(app)
+        resp = client.get(
+            "/api/v1/integrations/connectors", headers={"Authorization": "Bearer pk_x"}
+        )
+    finally:
+        app.dependency_overrides.pop(authenticate, None)
     assert resp.status_code == 200
     webhook = next(c for c in resp.json() if c["name"] == "webhook")
     assert webhook["direction"] == "sink"
