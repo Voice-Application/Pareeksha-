@@ -66,3 +66,4 @@ None in files I own. Remaining `STUB(...)` markers belong to other tasks (EVAL-0
 
 ## Final numbers
 `pytest.txt`: **848 passed, 0 failed, 0 skipped**, total coverage 97 % (dispatch 88 %, sql_store 96 %, routers/integrations 99 %, webhook 99 %; `workers/integrations.py` shows 0 % only because it runs as a subprocess in the tests, which coverage does not measure; its handler is exercised end to end by the three worker tests). `lint.txt`: ruff check, ruff format --check and mypy strict all clean.
+Code commit: 52a4029 (branch task/INT-01b)
