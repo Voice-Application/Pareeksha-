@@ -1,0 +1,95 @@
+ Network agent-a09cbdc482ee45812_default Creating 
+ Network agent-a09cbdc482ee45812_default Creating 
+ Volume agent-a09cbdc482ee45812_pg-data Creating 
+ Volume agent-a09cbdc482ee45812_pg-data Creating 
+ Volume agent-a09cbdc482ee45812_pg-data Created 
+ Volume agent-a09cbdc482ee45812_pg-data Created 
+ Network agent-a09cbdc482ee45812_default Created 
+ Network agent-a09cbdc482ee45812_default Created 
+ Container agent-a09cbdc482ee45812-postgres-1 Creating 
+ Container agent-a09cbdc482ee45812-postgres-1 Created 
+ Container agent-a09cbdc482ee45812-postgres-1 Starting 
+ Container agent-a09cbdc482ee45812-postgres-1 Started 
+ Container agent-a09cbdc482ee45812-postgres-1 Waiting 
+ Container agent-a09cbdc482ee45812-postgres-1 Healthy 
+$ docker compose run --rm migrate   (1st run, empty database)
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, initial schema (docs/schema.sql v0.2)
+exit=0  [2nd run: already at head, must be 0]
+
+$ psql -c "\dt"
+                  List of relations
+ Schema |          Name          | Type  |   Owner   
+--------+------------------------+-------+-----------
+ public | agents                 | table | pareeksha
+ public | alembic_version        | table | pareeksha
+ public | api_keys               | table | pareeksha
+ public | api_usage              | table | pareeksha
+ public | asr_results            | table | pareeksha
+ public | call_metrics           | table | pareeksha
+ public | calls                  | table | pareeksha
+ public | dead_letters           | table | pareeksha
+ public | deterministic_checks   | table | pareeksha
+ public | dialect_datasets       | table | pareeksha
+ public | dialect_reports        | table | pareeksha
+ public | dialect_samples        | table | pareeksha
+ public | evaluations            | table | pareeksha
+ public | external_refs          | table | pareeksha
+ public | human_reviews          | table | pareeksha
+ public | integration_deliveries | table | pareeksha
+ public | integrations           | table | pareeksha
+ public | noise_profiles         | table | pareeksha
+ public | outbox_events          | table | pareeksha
+ public | personas               | table | pareeksha
+ public | processed_events       | table | pareeksha
+ public | projects               | table | pareeksha
+ public | regression_tests       | table | pareeksha
+ public | rubric_versions        | table | pareeksha
+ public | run_items              | table | pareeksha
+ public | scenario_drafts        | table | pareeksha
+ public | scenarios              | table | pareeksha
+ public | test_runs              | table | pareeksha
+ public | tool_calls             | table | pareeksha
+ public | turns                  | table | pareeksha
+(30 rows)
+
+$ select * from alembic_version
+ version_num 
+-------------
+ 0001
+(1 row)
+
+$ table count (excluding alembic_version)
+ tables 
+--------
+     29
+(1 row)
+
+$ \d api_keys
+                              Table "public.api_keys"
+    Column    |           Type           | Collation | Nullable |      Default      
+--------------+--------------------------+-----------+----------+-------------------
+ id           | uuid                     |           | not null | gen_random_uuid()
+ project_id   | uuid                     |           | not null | 
+ name         | text                     |           | not null | 
+ prefix       | text                     |           | not null | 
+ key_hash     | text                     |           | not null | 
+ scopes       | text[]                   |           | not null | '{read}'::text[]
+ created_at   | timestamp with time zone |           | not null | now()
+ last_used_at | timestamp with time zone |           |          | 
+ revoked_at   | timestamp with time zone |           |          | 
+Indexes:
+    "api_keys_pkey" PRIMARY KEY, btree (id)
+    "api_keys_prefix_key" UNIQUE CONSTRAINT, btree (prefix)
+Foreign-key constraints:
+    "api_keys_project_id_fkey" FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+
+$ partial indexes
+     indexname      |                                                     indexdef                                                     
+--------------------+------------------------------------------------------------------------------------------------------------------
+ one_active_rubric  | CREATE UNIQUE INDEX one_active_rubric ON public.rubric_versions USING btree (is_active) WHERE is_active
+ outbox_unpublished | CREATE INDEX outbox_unpublished ON public.outbox_events USING btree (created_at) WHERE (published_at IS NULL)
+ dead_letters_open  | CREATE INDEX dead_letters_open ON public.dead_letters USING btree (failed_at DESC) WHERE (status = 'open'::text)
+(3 rows)
+

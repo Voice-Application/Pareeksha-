@@ -1,0 +1,5 @@
+noise preview: 200 audio/wav 192044 bytes
+persona preview (live Gnani): 200 audio/wav 102444 bytes
+noise_preview_pstn_market_5db.wav 16000 Hz 6.0 s
+persona_preview_manju_kn.wav 16000 Hz 3.2 s
+operations in OpenAPI: 75

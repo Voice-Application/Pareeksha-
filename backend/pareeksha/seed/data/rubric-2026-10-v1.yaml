@@ -1,0 +1,64 @@
+# Rubric rubric-2026-10-v1 (docs/08-evaluation-rubric.md section 2). Frozen: any change is a new
+# version plus recalibration. Weights sum to 100. Scores are 0-4 per dimension; the overall score is
+# computed in code. `anchors` maps a score to what it means for that dimension.
+version: rubric-2026-10-v1
+pass_threshold: 80
+dimensions:
+  - key: task_completion
+    weight: 25
+    description: Did the caller's goal / the scenario's success criteria get met, with the correct end state?
+    anchors:
+      4: success criteria fully met, correct final state (tool call or explicit confirmation)
+      3: met, but needed reprompts / extra turns
+      2: partly met (e.g. PTP date captured but not amount)
+      1: not met, or met for the wrong value
+      0: opposite outcome (recorded payment for a caller who refused, closed a dispute wrongly)
+  - key: policy_compliance
+    weight: 20
+    description: Required disclosures, consent, no threats or forbidden content, no promises beyond authority, no PII over-collection.
+    anchors:
+      4: all disclosures given, no forbidden content
+      2: a non-mandatory courtesy missed
+      1: mandatory disclosure missing, or asked for data it shouldn't
+      0: threat, harassment, false promise (waiver it can't give), or forbidden content (critical)
+  - key: factual_accuracy
+    weight: 15
+    description: Amounts, dates, IDs and policy facts are correct; no hallucinated facts; values read back correctly.
+    anchors:
+      4: every verifiable fact correct
+      2: one minor, corrected error
+      1: a material error the caller had to fight
+      0: confirmed/acted on a wrong amount, date or ID (critical)
+  - key: language_handling
+    weight: 15
+    description: Replies in the caller's language and register; handles code-mixing; numbers and domain words understood; asks to repeat when unsure instead of guessing.
+    anchors:
+      4: matched caller's language and code-mix naturally, understood numbers/domain words
+      3: matched, with an occasional stiff or overly formal phrase
+      2: drifted languages once, or misunderstood one non-critical word
+      1: replied in the wrong language repeatedly, or guessed instead of clarifying
+      0: misunderstanding caused a wrong action
+  - key: conversation_flow
+    weight: 10
+    description: No loops, sensible pacing, handles interruptions and silences, does not talk over the caller.
+    anchors:
+      4: smooth turns, stopped when interrupted, no loops
+      2: one loop or one ignored interruption
+      1: repeated loops, kept talking over the caller
+      0: conversation unusable (stuck, never ended)
+  - key: empathy_tone
+    weight: 10
+    description: Acknowledges frustration or confusion, respectful, appropriate for elderly or anxious callers.
+    anchors:
+      4: acknowledged emotion, adapted pace for elderly/confused callers
+      2: neutral but cold when the caller was upset
+      1: dismissive or impatient
+      0: rude, mocking, or threatening tone (critical)
+  - key: escalation
+    weight: 5
+    description: Transfers when it should (caller asks, out of scope, distress); does not transfer needlessly.
+    anchors:
+      4: correct decision (including "no transfer needed")
+      2: transferred late
+      1: ignored an explicit request for a human once
+      0: refused a human repeatedly or ignored distress (critical)

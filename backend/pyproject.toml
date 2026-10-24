@@ -8,23 +8,31 @@ version = "0.2.0"
 description = "Pareeksha: voice-agent crash-test platform (backend)"
 requires-python = ">=3.11"
 dependencies = [
-    "fastapi>=0.115",
+    "fastapi>=0.121",
     "pydantic>=2.7",
     "pydantic-settings>=2.3",
     "aiokafka>=0.11",
     "psycopg[binary]>=3.2",
+    "sqlalchemy[asyncio]>=2.0.30",
+    "alembic>=1.13",
+    "cryptography>=42",
+    "numpy>=1.26",
+    "pyyaml>=6",
+    "scipy>=1.11",
     "python-multipart>=0.0.9",
     "uvicorn[standard]>=0.30",
 ]
 
 [project.optional-dependencies]
 dev = [
+    "gnani-vachana>=0.8.2",
     "httpx>=0.27",
     "mypy>=1.10",
     "pytest>=8",
     "pytest-asyncio>=0.23",
     "pytest-cov>=5",
     "ruff>=0.5",
+    "types-PyYAML",
 ]
 
 # Third-party connectors register here (group "pareeksha.connectors"); built-ins are added by INT-01.
@@ -32,6 +40,9 @@ dev = [
 
 [tool.setuptools.packages.find]
 include = ["pareeksha*"]
+
+[tool.setuptools.package-data]
+"pareeksha.seed" = ["data/*.yaml"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
@@ -49,8 +60,16 @@ select = ["E", "F", "I", "B", "UP", "RUF"]
 # B905: zip() strictness is not worth churn in code that predates the lint setup.
 ignore = ["RUF001", "RUF002", "RUF003", "B905"]
 
+[tool.ruff.lint.isort]
+known-third-party = ["alembic"]
+
+[tool.ruff.lint.per-file-ignores]
+# Generated from docs/schema.sql with sqlacodegen: long server_default / CHECK strings.
+"pareeksha/db/models.py" = ["E501"]
+
 [tool.coverage.run]
 source = ["pareeksha"]
+concurrency = ["thread", "greenlet"]
 branch = true
 
 [tool.coverage.report]
