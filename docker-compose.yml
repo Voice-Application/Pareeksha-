@@ -91,7 +91,7 @@ services:
 
   outbox-relay:
     <<: *backend
-    profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
+    profiles: ["workers"]   # implemented in INFRA-02
     command: ["python", "-m", "pareeksha.workers.outbox_relay"]
 
   planner:
@@ -138,12 +138,12 @@ services:
 
   retrier:
     <<: *backend
-    profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
+    profiles: ["workers"]   # implemented in INFRA-02
     command: ["python", "-m", "pareeksha.workers.retrier"]
 
   dlq-recorder:
     <<: *backend
-    profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
+    profiles: ["workers"]   # implemented in INFRA-02
     command: ["python", "-m", "pareeksha.workers.dlq_recorder"]
 
   web:
