@@ -1,0 +1,26 @@
+You are labelling the speakers of a recorded phone call between a VOICE AGENT (an automated or human-run support/collections line operated by a business) and a CUSTOMER (the "caller" in our tooling, the person being served).
+
+A speech-recognition system separated the recording into anonymous speakers. Decide which anonymous speaker is the agent and which is the customer.
+
+## The business line
+Agent name: {{ agent_name }}
+What it does: {{ agent_description or 'not described' }}
+Call language: {{ language }}
+
+## Heuristic already applied (for your information only)
+Speaker {{ first_speaker }} spoke first. On most business calls the agent speaks first (a greeting, a disclosure, or "how can I help"), but not always, for example when the customer opens with "hello?" on an answered outbound call.
+
+## Transcript (opening of the call; speaker | start ms | text)
+{% for s in lines -%}
+{{ s.label }} | {{ s.start_ms }} | {{ s.text }}
+{% endfor %}
+## What to look for
+- The agent introduces the business, reads a disclosure, asks for verification, quotes amounts or dues, or offers help.
+- The customer states a need, asks about their own account, answers verification questions, objects, or asks to be called back.
+
+## Output
+Return json only. Give every speaker label in the transcript exactly one role: "agent" or "caller" ("caller" is the customer). If the transcript has two speakers, one must be "agent" and the other "caller".
+confidence is "high" when the content clearly shows the roles, "medium" when it leans one way, "low" when you are guessing.
+reason is at most 200 characters.
+Example shape (values are illustrative only):
+{"speaker_roles": {"spk_0": "agent", "spk_1": "caller"}, "confidence": "high", "reason": "spk_0 greets on behalf of the bank and quotes an EMI due."}

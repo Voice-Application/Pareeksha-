@@ -140,7 +140,8 @@ class PgEvaluatorStore:
 
         glass_box = bool(call["glass_box"])
         tool_calls: list[ToolCall] | None = None
-        if glass_box:
+        # uploads / imports: the tool trace is unknown (None), not "no tools called"
+        if glass_box and call["source"] == "simulation":
             tc_rows = await self._rows(
                 "SELECT name, arguments, turn_idx FROM tool_calls WHERE call_id = %s ORDER BY seq",
                 (call_id,),
@@ -151,7 +152,14 @@ class PgEvaluatorStore:
             ]
 
         language = call["language"] or (persona.language if persona else None) or "unknown"
-        allowed = list(dict.fromkeys([language, *(call["agent_languages"] or [])]))
+        if persona is None and call["source"] != "simulation":
+            # upload / import: the languages the uploader named ("hi,en"); the first is expected
+            tags = [t.strip() for t in language.split(",") if t.strip()]
+            expected_language: str | None = tags[0] if tags else None
+            allowed = list(dict.fromkeys(tags))
+        else:
+            expected_language = None if language == "unknown" else language
+            allowed = list(dict.fromkeys([language, *(call["agent_languages"] or [])]))
         agent = AgentInfo(
             name=call["agent_name"] or "unknown agent",
             description=call["agent_description"] or "",
@@ -176,7 +184,7 @@ class PgEvaluatorStore:
             scenario=scenario,
             persona=persona,
             tool_calls=tool_calls,
-            expected_language=None if language == "unknown" else language,
+            expected_language=expected_language,
             allowed_languages=allowed,
             expected_tool_calls=expected_tools,
             expected_amounts=amounts or None,

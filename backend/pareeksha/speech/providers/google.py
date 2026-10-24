@@ -116,7 +116,12 @@ class GoogleSTT(_GoogleAuth, STTProvider):
         diarize: bool = False,
         num_speakers: int | None = None,
         bias_words: list[str] | None = None,
+        denoise: bool = False,
     ) -> Transcript:
+        if denoise:
+            raise UnsupportedCapabilityError(
+                "google has no denoise option (see STTCapabilities.denoise)"
+            )
         _, wav_s = wav_info(wav)
         if wav_s > 60.0:
             raise UnsupportedCapabilityError(

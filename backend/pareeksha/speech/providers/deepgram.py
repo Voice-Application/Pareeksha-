@@ -85,7 +85,12 @@ class DeepgramSTT(HTTPAdapter, STTProvider):
         diarize: bool = False,
         num_speakers: int | None = None,
         bias_words: list[str] | None = None,
+        denoise: bool = False,
     ) -> Transcript:
+        if denoise:
+            raise UnsupportedCapabilityError(
+                "deepgram has no denoise option (see STTCapabilities.denoise)"
+            )
         model = self.settings.deepgram_stt_model
         params: list[tuple[str, str]] = [
             ("model", model),
