@@ -1,0 +1,99 @@
+$ pareeksha apply -f /tmp/tmpjlj7xtaa/pareeksha.yaml
+created   agent: EMI Reminder Bot
+created   scenario: Already paid, wants confirmation
+created   scenario: Happy path, promises to pay
+created   persona: Manju - auto driver
+created   noise profile: pstn_market_5db
+5 change(s)
+[exit 0]
+
+$ pareeksha apply -f /tmp/tmpjlj7xtaa/pareeksha.yaml
+unchanged agent: EMI Reminder Bot
+unchanged scenario: Already paid, wants confirmation
+unchanged scenario: Happy path, promises to pay
+unchanged persona: Manju - auto driver
+unchanged noise profile: pstn_market_5db
+0 change(s)
+[exit 0]
+
+writes after first apply: 5, after second: 5
+
+$ pareeksha run --suite pr_check -f /tmp/tmpjlj7xtaa/pareeksha.yaml --wait --poll 0.05
+created run f444a709-c840-47ed-89f5-a6b8b3c4cab2 (2 items)
+run f444a709-c840-47ed-89f5-a6b8b3c4cab2: completed, pass rate 90.0%, critical 0
+  running: 0/2 evaluated, 0 error
+  completed: 2/2 evaluated, 0 error
+[exit 0]
+
+$ pareeksha run --suite pr_check -f /tmp/tmpjlj7xtaa/pareeksha.yaml --wait --fail-under 101 --poll 0.05
+created run d56b6ff3-7f8a-4ee2-93c1-14e6e2dad9e6 (2 items)
+run d56b6ff3-7f8a-4ee2-93c1-14e6e2dad9e6: completed, pass rate 90.0%, critical 0
+  running: 0/2 evaluated, 0 error
+  completed: 2/2 evaluated, 0 error
+FAIL: pass rate 90.0% is below 101%
+[exit 1]
+
+$ pareeksha regress --agent EMI Reminder Bot --poll 0.05
+created regression run 6e69ec41-d602-4997-9534-a82e084dfd16 (2 items)
+run 6e69ec41-d602-4997-9534-a82e084dfd16: completed, pass rate 90.0%, critical 1
+  running: 0/2 evaluated, 0 error
+  completed: 2/2 evaluated, 0 error
+FAIL: regression suite failed
+[exit 1]
+
+$ pareeksha doctor
+ok   db: ok
+ok   kafka: ok
+ok   api: reachable and key accepted
+info dlq_open=0 outbox_backlog=0
+n/a  gnani, gemini: the API exposes no connectivity probe for these yet
+[exit 0]
+
+--- $GITHUB_STEP_SUMMARY ---
+## Pareeksha: EMI Reminder Bot / pr_check - PASS
+
+| Metric | Value |
+|---|---|
+| Status | completed |
+| Pass rate | 90.0% (threshold 80%) |
+| Mean score | 80.0 |
+| Critical failures | 0 |
+| Needs human review | n/a |
+| Items | 2/2 evaluated, 0 error |
+## Pareeksha: EMI Reminder Bot / pr_check - FAIL
+
+| Metric | Value |
+|---|---|
+| Status | completed |
+| Pass rate | 90.0% (threshold 101%) |
+| Mean score | 80.0 |
+| Critical failures | 0 |
+| Needs human review | n/a |
+| Items | 2/2 evaluated, 0 error |
+
+**Why it failed**
+- pass rate 90.0% is below 101%
+## Pareeksha: EMI Reminder Bot / regression - FAIL
+
+| Metric | Value |
+|---|---|
+| Status | completed |
+| Pass rate | 90.0% |
+| Mean score | 80.0 |
+| Critical failures | 1 |
+| Needs human review | n/a |
+| Items | 2/2 evaluated, 0 error |
+| Regression suite | FAILED |
+
+**Why it failed**
+- regression suite failed
+
+**Top failure types**
+- asr_misrecognition: 2
+
+**Failing cells**
+
+| Scenario | Persona | Noise | Score | Critical |
+|---|---|---|---|---|
+| Already paid | Manju | pstn_market_5db | 40 | yes |
+

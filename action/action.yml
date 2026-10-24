@@ -1,0 +1,76 @@
+name: Pareeksha voice-agent tests
+description: >
+  Applies pareeksha.yaml, runs a suite against the voice agent, writes a Markdown summary to the
+  job summary and fails the check when the suite is below its threshold or a regression is found.
+author: Pareeksha
+inputs:
+  api-url:
+    description: Base URL of the Pareeksha API (for example https://pareeksha.example.com)
+    required: true
+  api-key:
+    description: API key with the read and runs:write scopes (store it as a secret)
+    required: true
+  config:
+    description: Path to pareeksha.yaml
+    required: false
+    default: pareeksha.yaml
+  suite:
+    description: Suite name from pareeksha.yaml
+    required: true
+  fail-under:
+    description: Minimum pass rate in percent; overrides the suite's fail_under
+    required: false
+    default: ""
+  timeout:
+    description: Seconds to wait for the run
+    required: false
+    default: "1800"
+  regression:
+    description: Also run the blocking regression suite ("true" or "false")
+    required: false
+    default: "false"
+  sdk-package:
+    description: pip requirement for the SDK
+    required: false
+    default: pareeksha-sdk
+  web-url:
+    description: Web app URL, used for links in the summary (optional)
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - name: Install pareeksha-sdk
+      shell: bash
+      run: python -m pip install --quiet "${{ inputs.sdk-package }}"
+    - name: Apply config
+      shell: bash
+      env:
+        PAREEKSHA_URL: ${{ inputs.api-url }}
+        PAREEKSHA_KEY: ${{ inputs.api-key }}
+      run: pareeksha apply -f "${{ inputs.config }}"
+    - name: Run suite
+      shell: bash
+      env:
+        PAREEKSHA_URL: ${{ inputs.api-url }}
+        PAREEKSHA_KEY: ${{ inputs.api-key }}
+        PAREEKSHA_WEB_URL: ${{ inputs.web-url }}
+        FAIL_UNDER: ${{ inputs.fail-under }}
+      run: |
+        args=(run --suite "${{ inputs.suite }}" -f "${{ inputs.config }}" --wait --timeout "${{ inputs.timeout }}")
+        if [ -n "$FAIL_UNDER" ]; then args+=(--fail-under "$FAIL_UNDER"); fi
+        pareeksha "${args[@]}"
+    - name: Regression suite
+      if: ${{ inputs.regression == 'true' && always() }}
+      shell: bash
+      env:
+        PAREEKSHA_URL: ${{ inputs.api-url }}
+        PAREEKSHA_KEY: ${{ inputs.api-key }}
+        PAREEKSHA_WEB_URL: ${{ inputs.web-url }}
+      run: |
+        agent=$(python -c "import yaml,sys; print(yaml.safe_load(open(sys.argv[1]))['agent']['name'])" "${{ inputs.config }}")
+        pareeksha regress --agent "$agent" --wait --timeout "${{ inputs.timeout }}"

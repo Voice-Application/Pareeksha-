@@ -1,0 +1,36 @@
+version: 1
+agent:
+  name: EMI Reminder Bot
+  adapter: audio_v1
+  endpoint_url: ws://mock-agent:8765/ws
+  languages: [kn-IN, hi-IN, en-IN]
+  mandatory_disclosures:
+    - id: recording
+      text: This call is being recorded for quality purposes
+      regex: "(record|ರೆಕಾರ್ಡ್|रिकॉर्ड)"
+      within_turns: 2
+scenarios:
+  - title: Already paid, wants confirmation
+    caller_goal: Say the EMI was paid yesterday and ask for confirmation.
+    success_criteria: Agent verifies the payment instead of demanding it again.
+    tags: [payment_dispute]
+  - title: Happy path, promises to pay
+    caller_goal: Agree to pay on Friday.
+    success_criteria: Agent records the promise-to-pay date.
+    tags: [happy_path]
+personas:
+  - name: Manju - auto driver
+    language: kn-IN
+    voice_id: Lakshmi
+noise_profiles:
+  - name: pstn_market_5db
+    sample_rate: 8000
+    codec: alaw
+    background_category: market_crowd
+    snr_db: 5
+suites:
+  pr_check:
+    scenarios: {tags: [happy_path, payment_dispute]}
+    personas: [Manju - auto driver]
+    noise_profiles: [pstn_market_5db]
+    fail_under: 80
