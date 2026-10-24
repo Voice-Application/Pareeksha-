@@ -1,0 +1,129 @@
+
+=== 03:09:50 stack: kafka, postgres, topics
+ Container eval03b-postgres-1 Running 
+ Container eval03b-kafka-1 Running 
+kafka-init-1  | pareeksha.scenario.generate.requested.v1
+[Kkafka-init-1 exited with code 0
+
+=== 03:10:25 migrate (Alembic) and seed (rubric rubric-2026-10-v1, demo agent) inside the backend image
+ Container eval03b-migrate-1 Started 
+migrate-1  | INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+migrate-1  | INFO  [alembic.runtime.migration] Will assume transactional DDL.
+[Kmigrate-1 exited with code 0
+ Container eval03b-postgres-1 Running 
+ Container eval03b-postgres-1 Waiting 
+ Container eval03b-postgres-1 Healthy 
+ Container eval03b-migrate-run-8d30158f6e98 Creating 
+ Container eval03b-migrate-run-8d30158f6e98 Created 
+{
+  "created": {
+    "personas": 20,
+    "noise_profiles": 8,
+    "agents": 1,
+    "scenarios": 8,
+    "api_keys": 1
+  },
+  "existing": {
+    "rubric_versions": 1
+  }
+}
+
+
+=== 03:11:30 start the worker groups at the current end of their topics (earlier test traffic is not replayed)
+primed: evaluator, finalizer
+
+=== 03:11:32 start evaluator (2 replicas) and finalizer containers
+ Container eval03b-kafka-init-1 Exited 
+ Container eval03b-finalizer-1 Starting 
+ Container eval03b-evaluator-2 Started 
+ Container eval03b-evaluator-1 Starting 
+ Container eval03b-evaluator-1 Started 
+ Container eval03b-finalizer-1 Started 
+NAME                  IMAGE                COMMAND                  SERVICE     CREATED          STATUS                    PORTS
+eval03b-evaluator-1   eval03b-evaluator    "python -m pareeksha…"   evaluator   50 seconds ago   Up 15 seconds             
+eval03b-evaluator-2   eval03b-evaluator    "python -m pareeksha…"   evaluator   50 seconds ago   Up 15 seconds             
+eval03b-finalizer-1   eval03b-finalizer    "python -m pareeksha…"   finalizer   50 seconds ago   Up 15 seconds             
+eval03b-kafka-1       apache/kafka:4.0.0   "/__cacert_entrypoin…"   kafka       17 minutes ago   Up 17 minutes (healthy)   9092/tcp, 0.0.0.0:9094->9094/tcp
+eval03b-postgres-1    postgres:16          "docker-entrypoint.s…"   postgres    17 minutes ago   Up 17 minutes (healthy)   0.0.0.0:55432->5432/tcp
+
+=== 03:12:24 acceptance: seed one run/one call, publish call.completed twice, one real DeepSeek call
+seeded run 29c7794c-2ebc-4463-a5c6-0e217a6332d7 item 0b5347af-728e-40ba-879f-6d811cf22790 call d40492f0-3f1e-4c34-9b4b-4968033b12d2
+published call.completed event_id=1767b30b-8b2f-41ce-ba19-acbb30e10dff twice
+
+=== database ===
+
+-- evaluations rows for the call (must be 1)
+   SELECT count(*) FROM evaluations WHERE call_id = %s
+   (1,)
+
+-- the evaluation
+   SELECT e.id, rv.version, e.status, e.judge_model, e.temperature, left(e.prompt_hash, 15), e.overall_score, e.passed, e.critical_failure, e.needs_human_review, e.failure_types, e.input_tokens, e.output_tokens FROM evaluations e JOIN rubric_versions rv ON rv.id = e.rubric_version_id WHERE e.call_id = %s
+   (UUID('684662f8-f9ab-571b-ad7b-5cea217c6128'), 'rubric-2026-10-v1', 'ok', 'deepseek-v4-pro', Decimal('0.00'), 'sha256:081ce3f8', Decimal('100.00'), True, False, False, [], 2230, 491)
+
+-- api_usage rows for the call (one per real judge call)
+   SELECT provider, operation, units, unit_type, est_cost, cached, run_id = %s AS run_ok FROM api_usage WHERE call_id = %s
+   ('deepseek', 'llm_judge', Decimal('2721.000'), 'tokens', Decimal('0.0049'), False, True)
+
+-- processed_events (one row per consumer group)
+   SELECT consumer_group, count(*) FROM processed_events GROUP BY 1 ORDER BY 1
+   ('evaluator', 1)
+   ('finalizer', 1)
+
+-- deterministic_checks
+   SELECT check_type, check_key, passed FROM deterministic_checks WHERE call_id = %s ORDER BY 1, 2
+   ('amount_confirmed', 'emi_amount', True)
+   ('disclosure_present', 'recorded', True)
+   ('forbidden_absent', 'threat', True)
+   ('language_match', 'hi-IN', True)
+   ('no_loop', 'agent_repeats', True)
+   ('tool_calls_expected', 'record_ptp', True)
+
+-- run item
+   SELECT status FROM run_items WHERE id = %s
+   ('evaluated',)
+
+-- test run
+   SELECT status, finished_at IS NOT NULL AS finished, summary FROM test_runs WHERE id = %s
+   ('completed', True, {'pass_rate': 1.0, 'item_count': 1, 'score_mean': 100.0, 'error_count': 0, 'needs_review': 0, 'suite_passed': None, 'evaluated_count': 1, 'critical_failures': 0})
+
+-- dead letters (must be none)
+   SELECT count(*) FROM dead_letters
+   (0,)
+
+=== topics ===
+pareeksha.evaluation.completed.v1 key=d40492f0-3f1e-4c34-9b4b-4968033b12d2: 2 message(s), distinct event_ids=1
+  event_id 453d99f7-980f-5a7b-8818-57cc6170bec2
+  event_id 453d99f7-980f-5a7b-8818-57cc6170bec2
+pareeksha.run.completed.v1 key=29c7794c-2ebc-4463-a5c6-0e217a6332d7: 2 message(s), distinct event_ids=1
+  event_id 215637bb-d763-5295-a164-3ab24fb0e7dc
+  event_id 215637bb-d763-5295-a164-3ab24fb0e7dc
+expected run.completed id = uuid5(run_id, 'run.completed') = 215637bb-d763-5295-a164-3ab24fb0e7dc
+
+=== 03:12:36 worker logs (evaluator + finalizer)
+{"ts": "2026-10-24T03:12:30.527276+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T03:12:30.528578+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-v4-pro purpose=judge in=2230 out=491 cached_in=0 cost=0.00488796 latency_ms=5287 repair=False cache_hit=False"}
+{"ts": "2026-10-24T03:12:30.558301+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "evaluator", "event_id": "1767b30b-8b2f-41ce-ba19-acbb30e10dff", "correlation_id": "29c7794c-2ebc-4463-a5c6-0e217a6332d7", "topic": "pareeksha.call.completed.v1", "attempt": 1}
+{"ts": "2026-10-24T03:12:30.804114+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "duplicate delivery; re-producing outputs", "group": "evaluator", "event_id": "1767b30b-8b2f-41ce-ba19-acbb30e10dff"}
+{"ts": "2026-10-24T03:12:30.811020+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "evaluator", "event_id": "1767b30b-8b2f-41ce-ba19-acbb30e10dff", "correlation_id": "29c7794c-2ebc-4463-a5c6-0e217a6332d7", "topic": "pareeksha.call.completed.v1", "attempt": 1}
+{"ts": "2026-10-24T03:12:30.583275+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "finalizer", "event_id": "453d99f7-980f-5a7b-8818-57cc6170bec2", "correlation_id": "29c7794c-2ebc-4463-a5c6-0e217a6332d7", "topic": "pareeksha.evaluation.completed.v1", "attempt": 1}
+{"ts": "2026-10-24T03:12:30.812143+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "duplicate delivery; re-producing outputs", "group": "finalizer", "event_id": "453d99f7-980f-5a7b-8818-57cc6170bec2"}
+{"ts": "2026-10-24T03:12:30.817113+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "finalizer", "event_id": "453d99f7-980f-5a7b-8818-57cc6170bec2", "correlation_id": "29c7794c-2ebc-4463-a5c6-0e217a6332d7", "topic": "pareeksha.evaluation.completed.v1", "attempt": 1}
+{"ts": "2026-10-24T03:12:13.061791+00:00", "level": "warning", "logger": "aiokafka.consumer.group_coordinator", "msg": "Heartbeat failed for group evaluator because it is rebalancing"}
+
+=== 03:12:36 consumer group lag
+
+GROUP           TOPIC                       PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                      HOST            CLIENT-ID
+evaluator       pareeksha.call.completed.v1 4          2               2               0               evaluator-1-760ddda9-608e-47c0-ad90-a5c3604a376e /172.19.0.5     evaluator-1
+evaluator       pareeksha.call.completed.v1 0          7               7               0               evaluator-1-760ddda9-608e-47c0-ad90-a5c3604a376e /172.19.0.5     evaluator-1
+evaluator       pareeksha.call.completed.v1 2          1               1               0               evaluator-1-760ddda9-608e-47c0-ad90-a5c3604a376e /172.19.0.5     evaluator-1
+evaluator       pareeksha.call.completed.v1 5          7               7               0               evaluator-1-83c3ee5c-107f-47b5-905c-ee65846139c8 /172.19.0.4     evaluator-1
+evaluator       pareeksha.call.completed.v1 1          8               8               0               evaluator-1-83c3ee5c-107f-47b5-905c-ee65846139c8 /172.19.0.4     evaluator-1
+evaluator       pareeksha.call.completed.v1 3          4               4               0               evaluator-1-83c3ee5c-107f-47b5-905c-ee65846139c8 /172.19.0.4     evaluator-1
+
+GROUP           TOPIC                             PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                      HOST            CLIENT-ID
+finalizer       pareeksha.evaluation.completed.v1 2          2               2               0               finalizer-1-0f81c5e2-94bf-4d74-9e98-5e2fa4da3e30 /172.19.0.6     finalizer-1
+finalizer       pareeksha.evaluation.completed.v1 3          6               6               0               finalizer-1-0f81c5e2-94bf-4d74-9e98-5e2fa4da3e30 /172.19.0.6     finalizer-1
+finalizer       pareeksha.evaluation.completed.v1 4          3               3               0               finalizer-1-0f81c5e2-94bf-4d74-9e98-5e2fa4da3e30 /172.19.0.6     finalizer-1
+finalizer       pareeksha.evaluation.completed.v1 5          13              13              0               finalizer-1-0f81c5e2-94bf-4d74-9e98-5e2fa4da3e30 /172.19.0.6     finalizer-1
+finalizer       pareeksha.evaluation.completed.v1 0          1               1               0               finalizer-1-0f81c5e2-94bf-4d74-9e98-5e2fa4da3e30 /172.19.0.6     finalizer-1
+finalizer       pareeksha.evaluation.completed.v1 1          7               7               0               finalizer-1-0f81c5e2-94bf-4d74-9e98-5e2fa4da3e30 /172.19.0.6     finalizer-1

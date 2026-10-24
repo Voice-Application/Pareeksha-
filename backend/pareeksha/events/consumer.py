@@ -92,6 +92,9 @@ class Outgoing:
     payload: EventPayload
     discriminator: str | None = None
     correlation_id: str | None = None
+    #: Explicit event id, for outputs whose identity is not "one per input event" (the finalizer's
+    #: ``run.completed`` is one per run: ``uuid5(run_id, ...)``). Must still be deterministic.
+    event_id: uuid.UUID | None = None
 
 
 @dataclass(slots=True)
@@ -437,7 +440,7 @@ class ConsumerRunner:
 
     def _build_output(self, inp: AnyEnvelope, out: Outgoing) -> AnyEnvelope:
         etype = out.payload.event_type
-        event_id = uuid.uuid5(
+        event_id = out.event_id or uuid.uuid5(
             inp.event_id, f"{etype.value}:{out.discriminator}" if out.discriminator else etype.value
         )
         return make_envelope(
