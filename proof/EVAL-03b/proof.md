@@ -25,6 +25,12 @@ How the pieces give exactly one evaluation:
 - `api_usage`: one row per provider call (`provider`, `operation=llm_judge`, `units`=tokens, `est_cost`, `run_id`, `call_id`), written on its own connection so a rolled-back evaluation still records the spend it caused; an insert failure is logged with the full record and never fails the evaluation.
 - LLM errors map to framework dispositions: `LLMPermanentError` -> `PermanentError` (DLQ), `LLMRetryableError` -> `RetryableError` (retry.30s -> retry.5m), unknown call -> permanent, missing rubric row -> retryable.
 
+## Follow-up: completion reconciler, `evaluating`, cancelled runs
+- `backend/pareeksha/evaluation/completion_reconciler.py`: every 60 s (task inside the finalizer worker) finds unfinished runs whose items are all terminal, and in ONE transaction claims the run and enqueues `run.completed` (+ progress) into the outbox, with the same per-run event ids as the consumer. Named distinctly from API-03's run-slot (`active_calls`) reconciler `workers/reconciler.py`, which it does not touch.
+- `evaluator` sets `run_items.status = 'evaluating'` (only from `completed`) on its own autocommit connection before the judge call; the evaluation commit moves it to `evaluated` / `judge_error`.
+- `claim_run_completion` keeps `status = 'cancelled'` (never overwrites it).
+- Tests (`backend/tests/integration/test_completion_reconciler.py`, private Kafka+Postgres `proof/EVAL-03b/private_override.yml`, compose project `eval03c`, ports 29094/56432): overdue run completed once and idempotent; unfinished run untouched; 5 runs with the finalizer consumer racing 3 hammering reconcilers: per run topic + outbox messages == 1; cancelled run keeps `cancelled` (claim and reconciler); loop starts and stops; item observed as `evaluating` from another connection during the judge call.
+
 ## Reproduce
 
 ```
@@ -40,7 +46,7 @@ cd .. && ./proof/EVAL-03b/acceptance.sh > proof/EVAL-03b/acceptance.txt 2>&1   #
 
 ## Results
 
-### Tests: `pytest.txt`: 847 passed, 0 failed, 0 skipped; total coverage 97 %
+### Tests: `pytest.txt`: 854 passed, 0 failed, 0 skipped (final run, private stack); total coverage 97 %
 New modules: `workers/evaluator.py` 81 %, `workers/finalizer.py` 85 %, `evaluation/pg_stores.py` 90 % (uncovered: judge_error / no-scenario / cancelled-run branches and the real `get_client` path's run loop), `llm/usage_db.py` and `workers/_outgoing.py` 100 %.
 Lint (`lint.txt`): `ruff check`, `ruff format --check`, `python3 -m mypy` (strict, 186 files) all clean.
 

@@ -30,7 +30,7 @@ from pareeksha.events.topics import Topics
 from pareeksha.llm.client import LLMClient
 from pareeksha.llm.config import LLMSettings
 from pareeksha.llm.usage_db import ApiUsageSink
-from pareeksha.workers import evaluator
+from pareeksha.workers import evaluator, finalizer
 from tests.integration.eval_support import (
     SeededCall,
     count,
@@ -309,7 +309,7 @@ async def test_run_completed_is_emitted_once_with_evaluator_and_two_finalizers(
     try:
         async with (
             running("evaluator", "evaluator", dburl) as ev,
-            running("finalizer", "finalizer", dburl) as fin,
+            running("finalizer", str(finalizer.GROUP), dburl) as fin,
         ):
             # each call.completed twice, interleaved
             await publish(*envs, *envs)
@@ -346,7 +346,7 @@ async def test_concurrent_finalizers_claim_the_run_once(dburl: str) -> None:
     with psycopg.connect(dburl, autocommit=True) as conn:
         conn.execute("UPDATE run_items SET status = 'evaluated' WHERE run_id = %s", (run_id,))
     group = unique_group("finalizer-race")
-    spec = dataclasses.replace(REGISTRY["finalizer"], group=group)
+    spec = dataclasses.replace(REGISTRY[str(finalizer.GROUP)], group=group)
     await prime_group(group, [EVAL_DONE])
     members: list[Any] = [ConsumerRunner(spec, EventSettings(BOOTSTRAP, dburl)) for _ in range(2)]
     tasks = [asyncio.create_task(m.run()) for m in members]

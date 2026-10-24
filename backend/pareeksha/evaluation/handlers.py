@@ -256,12 +256,12 @@ async def handle_evaluation_completed(
     if not await store.claim_run_completion(run_id, status, summary):
         return []
     return run_completed_outputs(
-        env, run_id, state.agent_id, state.kind, status, summary, producer=producer
+        env.event_id, run_id, state.agent_id, state.kind, status, summary, producer=producer
     )
 
 
 def run_completed_outputs(
-    env: Envelope[EvaluationCompleted],
+    causation_id: uuid.UUID | None,
     run_id: uuid.UUID,
     agent_id: uuid.UUID,
     kind: RunKind,
@@ -286,14 +286,14 @@ def run_completed_outputs(
             completed,
             producer=producer,
             correlation_id=str(run_id),
-            causation_id=env.event_id,
+            causation_id=causation_id,
             event_id=run_completed_event_id(run_id),
         ),
         make_envelope(
             progress,
             producer=producer,
             correlation_id=str(run_id),
-            causation_id=env.event_id,
+            causation_id=causation_id,
             event_id=uuid.uuid5(run_id, "progress:run.completed"),
         ),
     ]
@@ -325,7 +325,7 @@ async def reproduce_run_completed(
     if finished is None:
         return []
     return run_completed_outputs(
-        env,
+        env.event_id,
         run_id,
         finished.agent_id,
         finished.kind,

@@ -2,6 +2,9 @@
 
 Contract changes after Day 1 need Tech Lead approval and an entry here.
 
+## Evaluator and finalizer workers (EVAL-03b) — 24 Oct 2026
+- Additive behaviour, no contract change: `run.completed` is emitted once per run with id `uuid5(run_id, "run.completed")` by the finalizer consumer or its every-minute completion reconciler (whichever wins the atomic claim), also for runs the API cancelled (status stays `cancelled`; only `summary` and `finished_at` are filled). `Outgoing` (consumer framework) gained an optional `event_id`. `run_items` move `completed -> evaluating` while the judge runs. See `docs/contracts.md` section 1.
+
 ## Speech provider abstraction (VOICE-07) — 24 Oct 2026
 - **Contract change: speech provider abstraction (owner-approved 2026-10-24).** New `backend/pareeksha/speech/` with `STTProvider` / `TTSProvider` interfaces, capability metadata, registry selected by `STT_PROVIDER` / `TTS_PROVIDER` (default `gnani`, overridable per agent/run with `SpeechSelection`), adapters for gnani (wrapping the unchanged `pareeksha.gnani`), google, azure, elevenlabs, deepgram. New route `GET /api/v1/speech/providers` (76 operations now; `/health` keeps its `{db,kafka}` shape). New env: `STT_PROVIDER`, `TTS_PROVIDER`, `GOOGLE_APPLICATION_CREDENTIALS_JSON`, `AZURE_SPEECH_KEY`, `AZURE_SPEECH_REGION`, `ELEVENLABS_API_KEY`, `DEEPGRAM_API_KEY` and per-vendor model/voice/`COST_*` variables (see `.env.example`).
 - **Contract change (same):** `api_usage.provider` CHECK and `UsageRow.provider` now also allow `google`, `azure`, `elevenlabs`, `deepgram` (docs/schema.sql, Alembic 0001 and its SQL copy, `web/lib/api/schema.d.ts`).

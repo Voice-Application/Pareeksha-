@@ -18,6 +18,7 @@ from psycopg.types.json import Jsonb
 
 from pareeksha.evaluation.evaluator import CallSnapshot, EvaluationRecord
 from pareeksha.evaluation.handlers import (
+    TERMINAL_ITEM_STATUSES,
     FinishedRun,
     RunItemOutcome,
     RunState,
@@ -413,10 +414,16 @@ class PgFinalizerStore:
     async def claim_run_completion(
         self, run_id: uuid.UUID, status: RunFinalStatus, summary: RunCompletedSummary
     ) -> bool:
-        """Atomic: only the first caller finds ``finished_at`` unset and gets a row back."""
+        """Atomic: only the first caller finds ``finished_at`` unset and gets a row back.
+
+        A run the API cancelled keeps ``status = 'cancelled'`` (the finalizer never overwrites it);
+        only ``summary`` and ``finished_at`` are filled in.
+        """
         cur = await self._conn.execute(
             """
-            UPDATE test_runs SET status = %s, summary = %s, finished_at = now()
+            UPDATE test_runs
+               SET status = CASE WHEN status = 'cancelled' THEN status ELSE %s END,
+                   summary = %s, finished_at = now()
              WHERE id = %s AND finished_at IS NULL
                AND status IN ('queued', 'running', 'cancelled')
             RETURNING id
@@ -443,3 +450,29 @@ class PgFinalizerStore:
             status=cast(RunFinalStatus, r["status"]),
             summary=RunCompletedSummary.model_validate(r["summary"]),
         )
+
+
+async def mark_evaluating(conn: Conn, call_id: uuid.UUID) -> None:
+    """``run_items``: ``completed`` -> ``evaluating`` (only that transition; autocommit connection,
+    so the state is visible while the judge runs)."""
+    await conn.execute(
+        "UPDATE run_items SET status = 'evaluating' "
+        "WHERE id = (SELECT run_item_id FROM calls WHERE id = %s) AND status = 'completed'",
+        (call_id,),
+    )
+
+
+async def find_completable_runs(conn: Conn) -> list[uuid.UUID]:
+    """Unfinished runs whose items are all terminal (their ``run.completed`` is overdue)."""
+    cur = await conn.execute(
+        """
+        SELECT tr.id FROM test_runs tr
+         WHERE tr.finished_at IS NULL AND tr.status IN ('queued', 'running', 'cancelled')
+           AND EXISTS (SELECT 1 FROM run_items ri WHERE ri.run_id = tr.id)
+           AND NOT EXISTS (SELECT 1 FROM run_items ri WHERE ri.run_id = tr.id
+                              AND ri.status <> ALL(%s))
+         ORDER BY tr.created_at
+        """,
+        (sorted(TERMINAL_ITEM_STATUSES),),
+    )
+    return [r[0] for r in await cur.fetchall()]

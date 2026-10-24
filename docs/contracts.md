@@ -37,6 +37,8 @@ Envelope: `event_id, type, version, occurred_at (UTC), correlation_id, causation
 | `scenario.generate.requested` | draft_id, agent_id, count, mix |
 | `dialect.clip.requested` | report_id, dataset_id, sample_id, noise_profile_id, engines, expected_results |
 
+Additive behaviour (EVAL-03b, no schema change): `run.completed` has the per-run event id `uuid5(run_id, "run.completed")` (not per input event) and is emitted exactly once per run, by the finalizer consumer or by the finalizer's completion reconciler (via the outbox), whichever wins the atomic claim (`UPDATE test_runs ... WHERE finished_at IS NULL`). It is also emitted for a run the API cancelled (`status: "cancelled"` in the payload) once every item is terminal; the finalizer never changes a `cancelled` run's status, it only fills `summary` and `finished_at`. `run_items.status` goes `completed -> evaluating` when the evaluator starts judging.
+
 `GET /api/v1/events/schemas` serves the JSON Schemas (implemented, not a stub).
 
 ## 3. REST API (`GET /openapi.json`, code in `backend/pareeksha/api/`)

@@ -24,7 +24,7 @@ from pareeksha.evaluation.handlers import (
     handle_call_completed,
     reproduce_call_completed,
 )
-from pareeksha.evaluation.pg_stores import PgEvaluatorStore, RubricNotFoundError
+from pareeksha.evaluation.pg_stores import PgEvaluatorStore, RubricNotFoundError, mark_evaluating
 from pareeksha.events.consumer import (
     Ctx,
     Outgoing,
@@ -33,6 +33,7 @@ from pareeksha.events.consumer import (
     consumer,
     run_worker,
 )
+from pareeksha.events.runtime import Database
 from pareeksha.events.settings import EventSettings
 from pareeksha.events.topics import ConsumerGroups, Topics
 from pareeksha.llm.base import LLMPermanentError, LLMRetryableError
@@ -47,12 +48,29 @@ GROUP = ConsumerGroups.EVALUATOR
 
 _client: LLMClient | None = None
 _usage: ApiUsageSink | None = None
+_status_db: Database | None = None
 
 
-def set_client(client: LLMClient | None, usage: ApiUsageSink | None = None) -> None:
+def set_client(
+    client: LLMClient | None,
+    usage: ApiUsageSink | None = None,
+    status_db: Database | None = None,
+) -> None:
     """Install the judge client (tests and the crash worker inject a provider here)."""
-    global _client, _usage
-    _client, _usage = client, usage
+    global _client, _usage, _status_db
+    _client, _usage, _status_db = client, usage, status_db
+
+
+async def _mark_evaluating(call_id: Any) -> None:
+    """Best effort ``completed -> evaluating`` on its own connection (visible during the judge
+    call); the evaluation commit moves the item on, so a failure here is only logged."""
+    global _status_db
+    try:
+        if _status_db is None:
+            _status_db = Database(EventSettings.from_env())
+        await mark_evaluating(await _status_db.connection(), call_id)
+    except Exception:
+        log.warning("could not mark run item evaluating", exc_info=True)
 
 
 def get_client() -> tuple[LLMClient, ApiUsageSink]:
@@ -74,6 +92,7 @@ async def reproduce(env: Any, ctx: Ctx) -> list[Outgoing]:
 async def on_call_completed(env: Any, ctx: Ctx) -> list[Outgoing]:
     client, usage = get_client()
     store = PgEvaluatorStore(ctx.tx)
+    await _mark_evaluating(env.payload.call_id)
     try:
         with usage.scope(run_id=env.payload.run_id, call_id=env.payload.call_id):
             envelopes = await handle_call_completed(env, store, client)
@@ -96,6 +115,8 @@ async def main() -> None:
             await _client.aclose()
         if _usage is not None:
             await _usage.close()
+        if _status_db is not None:
+            await _status_db.close()
 
 
 if __name__ == "__main__":
