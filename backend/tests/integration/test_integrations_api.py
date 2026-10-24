@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from pareeksha.api.connectors import connector_direction, installed_directions
 from pareeksha.db.models import Integrations
 from pareeksha.integrations.crypto import SecretBox
+from pareeksha.integrations.registry import ConnectorRegistry
 from tests.conftest import Tenant
 
 HUBSPOT: dict[str, Any] = {
@@ -281,7 +282,7 @@ def test_a_broken_entry_point_plugin_is_skipped(monkeypatch: pytest.MonkeyPatch)
         def load(self) -> Any:
             raise ImportError("missing dependency")
 
-    class Good:
+    class Invalid:
         name = "zoho"
 
         def load(self) -> Any:
@@ -291,6 +292,8 @@ def test_a_broken_entry_point_plugin_is_skipped(monkeypatch: pytest.MonkeyPatch)
 
             return Zoho
 
-    monkeypatch.setattr("pareeksha.api.connectors.entry_points", lambda group: [Broken(), Good()])
+    registry = ConnectorRegistry.from_entry_points([Broken(), Invalid()])  # type: ignore[list-item]
+    monkeypatch.setattr("pareeksha.api.connectors.get_registry", lambda: registry)
     found = installed_directions()
-    assert found["zoho"] == "both" and "broken" not in found and found["webhook"] == "sink"
+    assert "broken" not in found and "zoho" not in found and found["webhook"] == "sink"
+    assert set(registry.rejected) == {"broken", "zoho"}
