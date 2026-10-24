@@ -1,0 +1,6 @@
+$ ruff check .
+All checks passed!
+$ ruff format --check .
+191 files already formatted
+$ python3 -m mypy
+Success: no issues found in 189 source files

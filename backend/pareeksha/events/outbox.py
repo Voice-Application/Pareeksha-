@@ -17,7 +17,10 @@ from typing import Any
 
 import psycopg
 from psycopg.types.json import Jsonb
+from sqlalchemy import func
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from pareeksha.db.models import OutboxEvents
 from pareeksha.events.producer import EventProducer
 from pareeksha.events.schemas import AnyEnvelope
 
@@ -43,6 +46,23 @@ async def enqueue(conn: psycopg.AsyncConnection[Any], envelope: AnyEnvelope) -> 
             envelope.partition_key(),
             Jsonb(envelope.model_dump(mode="json")),
         ),
+    )
+
+
+def enqueue_session(session: AsyncSession, envelope: AnyEnvelope) -> None:
+    """``enqueue`` for the API: add the outbox row to the request's SQLAlchemy session.
+
+    The row is written by the session's own flush/commit, i.e. in the same transaction as the
+    domain rows the route added, which is the point of the outbox.
+    """
+    session.add(
+        OutboxEvents(
+            id=envelope.event_id,
+            topic=envelope.topic.value,
+            key=envelope.partition_key(),
+            envelope=envelope.model_dump(mode="json"),
+            created_at=func.clock_timestamp(),
+        )
     )
 
 

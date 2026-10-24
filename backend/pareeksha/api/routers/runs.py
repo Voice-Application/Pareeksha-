@@ -8,9 +8,10 @@ from uuid import UUID
 
 from fastapi import APIRouter, Header, Response
 
-from pareeksha.api.auth import scoped
-from pareeksha.api.deps import AUTH_ERRORS, Pagination, binary_response, errors
+from pareeksha.api.auth import ReadKey, WriteKey, scoped
+from pareeksha.api.deps import AUTH_ERRORS, Db, Pagination, binary_response, errors
 from pareeksha.api.stubs import not_implemented
+from pareeksha.runs import service
 from pareeksha.schemas.common import Page
 from pareeksha.schemas.runs import (
     RunCompareOut,
@@ -40,28 +41,26 @@ _SSE_RESPONSE: dict[int | str, dict[str, Any]] = {
 @router.post(
     "/runs",
     status_code=201,
-    dependencies=[scoped("runs:write")],
-    responses=errors(402, 404),
+    responses=errors(402, 404, 409),
     summary="Create a run (writes the run and its run.requested outbox event in one transaction)",
 )
-async def create_run(body: RunCreate) -> RunCreated:
-    # STUB(API-03)
-    not_implemented("API-03")
+async def create_run(body: RunCreate, key: WriteKey, session: Db) -> RunCreated:
+    return await service.create_run(session, key.project_id, body)
 
 
 @router.post(
     "/runs:estimate",
-    dependencies=[scoped("read")],
-    responses=errors(404),
+    responses=errors(404, 409),
     summary="Dry estimate of a run (item count, cost, budget check); creates nothing",
 )
-async def estimate_run(body: RunCreate) -> RunEstimateOut:
-    # STUB(API-03)
-    not_implemented("API-03")
+async def estimate_run(body: RunCreate, key: ReadKey, session: Db) -> RunEstimateOut:
+    return await service.estimate(session, key.project_id, body)
 
 
-@router.get("/runs", dependencies=[scoped("read")], summary="List runs")
+@router.get("/runs", summary="List runs")
 async def list_runs(
+    key: ReadKey,
+    session: Db,
     page: Pagination,
     agent_id: UUID | None = None,
     status: RunStatus | None = None,
@@ -69,8 +68,16 @@ async def list_runs(
     created_from: datetime | None = None,
     created_to: datetime | None = None,
 ) -> Page[RunOut]:
-    # STUB(API-03)
-    not_implemented("API-03")
+    return await service.list_runs(
+        session,
+        key.project_id,
+        page,
+        agent_id=agent_id,
+        status=status,
+        kind=kind,
+        created_from=created_from,
+        created_to=created_to,
+    )
 
 
 # Declared before /runs/{run_id} so "compare" is never parsed as a run id.
@@ -85,10 +92,9 @@ async def compare_runs(base: UUID, head: UUID) -> RunCompareOut:
     not_implemented("API-04")
 
 
-@router.get("/runs/{run_id}", dependencies=[scoped("read")], responses=errors(404))
-async def get_run(run_id: UUID) -> RunOut:
-    # STUB(API-03)
-    not_implemented("API-03")
+@router.get("/runs/{run_id}", responses=errors(404))
+async def get_run(run_id: UUID, key: ReadKey, session: Db) -> RunOut:
+    return await service.get_run(session, key.project_id, run_id)
 
 
 @router.get(
@@ -108,25 +114,23 @@ async def stream_run_events(
 
 @router.get(
     "/runs/{run_id}/items",
-    dependencies=[scoped("read")],
     responses=errors(404),
     summary="Rows for the matrix view",
 )
-async def list_run_items(run_id: UUID, page: Pagination) -> Page[RunItemOut]:
-    # STUB(API-03)
-    not_implemented("API-03")
+async def list_run_items(
+    run_id: UUID, key: ReadKey, session: Db, page: Pagination
+) -> Page[RunItemOut]:
+    return await service.list_items(session, key.project_id, run_id, page)
 
 
 @router.post(
     "/runs/{run_id}/cancel",
     status_code=202,
-    dependencies=[scoped("runs:write")],
     responses=errors(404, 409),
     summary="Cancel a run (409 if already finished)",
 )
-async def cancel_run(run_id: UUID) -> RunOut:
-    # STUB(API-03)
-    not_implemented("API-03")
+async def cancel_run(run_id: UUID, key: WriteKey, session: Db) -> RunOut:
+    return await service.cancel_run(session, key.project_id, run_id)
 
 
 @router.get(

@@ -11,6 +11,7 @@ services:
   auditor: *ca
   evaluator: *ca
   finalizer: *ca
+  reconciler: *ca
   integrations: *ca
   dialect: *ca
   generator: *ca

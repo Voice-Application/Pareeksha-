@@ -96,7 +96,7 @@ services:
 
   planner:
     <<: *backend
-    profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
+    profiles: ["workers"]
     command: ["python", "-m", "pareeksha.workers.planner"]
 
   simulator:
@@ -120,6 +120,11 @@ services:
     <<: *backend
     profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
     command: ["python", "-m", "pareeksha.workers.finalizer"]
+
+  reconciler:               # heals leaked per-run slots (test_runs.active_calls) every minute
+    <<: *backend
+    profiles: ["workers"]
+    command: ["python", "-m", "pareeksha.workers.reconciler"]
 
   integrations:
     <<: *backend

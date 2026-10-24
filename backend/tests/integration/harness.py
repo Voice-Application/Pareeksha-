@@ -11,6 +11,7 @@ from typing import Any
 from pareeksha.events.consumer import ConsumerRunner, ConsumerSpec, RetryPolicy
 from pareeksha.events.producer import EventProducer
 from pareeksha.events.schemas import AnyEnvelope
+from pareeksha.events.settings import EventSettings
 from pareeksha.events.topics import Topics
 from pareeksha.workers.dlq_recorder import DlqRecorder
 from pareeksha.workers.retrier import Retrier
@@ -42,8 +43,12 @@ async def pipeline(
     policy: RetryPolicy | None = None,
     with_retrier: bool = True,
     with_recorder: bool = True,
+    settings: EventSettings = SETTINGS,
 ) -> AsyncIterator[Pipeline]:
-    """Start the consumer for ``spec`` (+ retrier, + dlq-recorder) with fresh, primed groups."""
+    """Start the consumer for ``spec`` (+ retrier, + dlq-recorder) with fresh, primed groups.
+
+    ``settings`` points the workers at another database (the planner tests use the migrated one).
+    """
     retrier_group = unique_group("retrier")
     recorder_group = unique_group("dlq-recorder")
     await prime_group(spec.group, list(spec.topics))
@@ -52,11 +57,11 @@ async def pipeline(
     if with_recorder:
         await prime_group(recorder_group, [Topics.DLQ])
 
-    producer = EventProducer(SETTINGS.bootstrap_servers, client_id="test-producer")
+    producer = EventProducer(settings.bootstrap_servers, client_id="test-producer")
     await producer.start()
-    runner = ConsumerRunner(spec, SETTINGS, policy=policy)
-    retrier = Retrier(SETTINGS, group=retrier_group) if with_retrier else None
-    recorder = DlqRecorder(SETTINGS, group=recorder_group) if with_recorder else None
+    runner = ConsumerRunner(spec, settings, policy=policy)
+    retrier = Retrier(settings, group=retrier_group) if with_retrier else None
+    recorder = DlqRecorder(settings, group=recorder_group) if with_recorder else None
     components: list[Any] = [c for c in (runner, retrier, recorder) if c is not None]
     tasks = [asyncio.create_task(c.run()) for c in components]
     try:
