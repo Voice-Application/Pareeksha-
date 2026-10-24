@@ -1,0 +1,2 @@
+full suite: 611 passed in 73.30s (0 failed, 0 skipped); coverage TOTAL 98%, hubspot.py 99%
+ruff check: All checks passed; mypy --strict: Success, no issues found in 65 source files
