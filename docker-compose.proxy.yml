@@ -17,5 +17,6 @@ services:
   generator: *ca
   retrier: *ca
   dlq-recorder: *ca
+  mock-agent: *ca
 secrets:
   ca: { file: "${CA_BUNDLE}" }

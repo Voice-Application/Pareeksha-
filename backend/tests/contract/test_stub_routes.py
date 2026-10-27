@@ -269,7 +269,9 @@ def test_not_implemented_helper_validates_owner() -> None:
             not_implemented(bad)
 
 
-def test_health_reports_down_dependencies_with_503() -> None:
+def test_health_reports_down_dependencies_with_503(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://x:x@127.0.0.1:1/none")
+    monkeypatch.setenv("KAFKA_BOOTSTRAP_SERVERS", "127.0.0.1:1")
     response = client.get(f"{API}/health")  # no auth, no DB or Kafka configured in tests
     assert response.status_code == 503
     body = response.json()

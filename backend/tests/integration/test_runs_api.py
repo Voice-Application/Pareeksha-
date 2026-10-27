@@ -12,7 +12,7 @@ from typing import Any
 
 import pytest
 from httpx import AsyncClient
-from sqlalchemy import func, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from pareeksha.api.errors import ApiError
@@ -194,6 +194,7 @@ async def test_estimate_creates_nothing_and_matches_create(
     monkeypatch.setenv("COST_STT_STREAM_PER_MIN", "2")
     monkeypatch.setenv("COST_TTS_PER_1K_CHARS", "1")
     monkeypatch.setenv("BUDGET_CREDITS", "1000")
+    await _clear_usage(session_factory)
     fx = await make_fixture(api, tenant, 2, 2, 1, max_turns=10)
     estimate = (await api.post(f"{API}/runs:estimate", json=fx.body(), headers=tenant.read)).json()
     assert estimate["item_count"] == 4 and estimate["over_budget"] is False
@@ -204,6 +205,13 @@ async def test_estimate_creates_nothing_and_matches_create(
     # 4 calls x 10 turns x 6 s = 240 s of STT, half of it spoken by the caller (TTS)
     assert created["estimate"]["stt_seconds"] == 240 and created["estimate"]["tts_seconds"] == 120
     assert created["estimate"]["caller_llm_calls"] == 20 and created["estimate"]["judge_calls"] == 4
+
+
+async def _clear_usage(factory: Factory) -> None:
+    """Spend is account-wide: budget assertions need a ledger other tests have not written to."""
+    async with factory() as session:
+        await session.execute(delete(models.ApiUsage))
+        await session.commit()
 
 
 async def _count_runs(factory: Factory, tenant: Tenant) -> int:
@@ -221,6 +229,7 @@ async def test_over_budget_run_gets_402_with_the_estimate_unless_confirmed(
 ) -> None:
     monkeypatch.setenv("COST_STT_STREAM_PER_MIN", "10")
     monkeypatch.setenv("BUDGET_CREDITS", "5")
+    await _clear_usage(session_factory)
     fx = await make_fixture(api, tenant, 2, 2, 2, max_turns=10)
     estimate = (await api.post(f"{API}/runs:estimate", json=fx.body(), headers=tenant.read)).json()
     assert estimate["over_budget"] is True and estimate["estimate"]["est_cost"] > 5
