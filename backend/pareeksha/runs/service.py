@@ -380,6 +380,20 @@ async def list_items(
     return Page(items=items, next_cursor=next_cursor)
 
 
+async def all_items(
+    session: AsyncSession, project_id: uuid.UUID, run_id: uuid.UUID
+) -> list[RunItemOut]:
+    """Every matrix row of a run (at most ``MAX_RUN_ITEMS``), for the SSE snapshot and report."""
+    items: list[RunItemOut] = []
+    cursor: str | None = None
+    while True:
+        page = await list_items(session, project_id, run_id, PageParams(limit=200, cursor=cursor))
+        items.extend(page.items)
+        cursor = page.next_cursor
+        if cursor is None:
+            return items
+
+
 # --------------------------------------------------------------------------------------------
 # Cancel
 # --------------------------------------------------------------------------------------------

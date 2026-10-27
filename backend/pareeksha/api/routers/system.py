@@ -5,14 +5,16 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 
-from pareeksha.api.auth import scoped
-from pareeksha.api.deps import AUTH_ERRORS
+from pareeksha.api.auth import ReadKey, scoped
+from pareeksha.api.deps import AUTH_ERRORS, Db
 from pareeksha.api.health import check_health
 from pareeksha.api.stubs import not_implemented
 from pareeksha.events.schemas import event_json_schemas
+from pareeksha.events.settings import kafka_bootstrap
+from pareeksha.ops import metrics
 from pareeksha.schemas.system import (
     CalibrationOut,
     HealthOut,
@@ -50,25 +52,26 @@ async def get_calibration(rubric_version: str | None = None) -> CalibrationOut:
 
 @authed.get(
     "/usage",
-    dependencies=[scoped("read")],
     summary="Aggregated api_usage and remaining budget",
 )
 async def get_usage(
+    key: ReadKey,
+    session: Db,
     from_: Annotated[datetime | None, Query(alias="from")] = None,
     to: datetime | None = None,
 ) -> UsageOut:
-    # STUB(API-04)
-    not_implemented("API-04")
+    return await metrics.usage(session, from_, to)
 
 
 @authed.get(
     "/metrics/summary",
-    dependencies=[scoped("read")],
     summary="Consumer lag per group, outbox backlog, open DLQ count, credits used",
+    responses={502: {"description": "upstream_error: Kafka unreachable"}},
 )
-async def get_metrics_summary() -> MetricsSummary:
-    # STUB(API-04)
-    not_implemented("API-04")
+async def get_metrics_summary(
+    key: ReadKey, session: Db, bootstrap: Annotated[str, Depends(kafka_bootstrap)]
+) -> MetricsSummary:
+    return await metrics.metrics_summary(session, bootstrap)
 
 
 @authed.get(

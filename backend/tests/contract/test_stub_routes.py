@@ -189,15 +189,29 @@ def test_no_stub_marker_names_the_contract_task(route: APIRoute) -> None:
 
 
 def test_no_stub_remains_for_finished_tasks() -> None:
-    """API-02 (CRUD) and API-03 (runs) implemented every route they owned: none may answer 501."""
+    """API-02 (CRUD), API-03 (runs) and API-04 (reads) implemented every route they owned."""
     owners = {_stub_owner(r) for r in _stub_routes()}
-    assert "API-02" not in owners and "API-03" not in owners
+    assert not owners & {"API-02", "API-03", "API-04"}
     implemented = {(_method(r), r.path) for r in _implemented_routes()}
     assert ("POST", "/agents") in implemented and (
         "DELETE",
         "/api-keys/{api_key_id}",
     ) in implemented
     assert ("POST", "/runs") in implemented and ("GET", "/runs/{run_id}") in implemented
+    for method, path in (
+        ("GET", "/runs/compare"),
+        ("GET", "/runs/{run_id}/events"),
+        ("GET", "/runs/{run_id}/report"),
+        ("GET", "/calls"),
+        ("GET", "/calls/{call_id}"),
+        ("GET", "/calls/{call_id}/audio/{track}"),
+        ("GET", "/dlq"),
+        ("POST", "/dlq/{dead_letter_id}/replay"),
+        ("POST", "/dlq/{dead_letter_id}/discard"),
+        ("GET", "/usage"),
+        ("GET", "/metrics/summary"),
+    ):
+        assert (method, path) in implemented
 
 
 def test_stub_owner_ids_exist_on_the_task_board() -> None:
@@ -250,9 +264,9 @@ def test_unknown_route_uses_error_envelope() -> None:
 
 
 def test_runs_compare_is_not_shadowed_by_run_id() -> None:
-    response = client.get(f"{API}/runs/compare", params={"base": ID, "head": ID}, headers=AUTH)
-    assert response.status_code == 501
-    assert response.json()["error"]["details"]["owner"] == "API-04"
+    """``/runs/compare`` must be matched before ``/runs/{run_id}`` (declaration order)."""
+    paths = [r.path for r in ROUTES if _method(r) == "GET"]
+    assert paths.index("/runs/compare") < paths.index("/runs/{run_id}")
 
 
 def test_bad_enum_for_audio_track_is_400() -> None:

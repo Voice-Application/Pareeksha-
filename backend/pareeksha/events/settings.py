@@ -24,3 +24,8 @@ class EventSettings:
             bootstrap_servers=os.environ["KAFKA_BOOTSTRAP_SERVERS"],
             database_url=libpq_url(os.environ["DATABASE_URL"]),
         )
+
+
+def kafka_bootstrap() -> str:
+    """``KAFKA_BOOTSTRAP_SERVERS`` for API routes that read Kafka (FastAPI dependency)."""
+    return os.environ["KAFKA_BOOTSTRAP_SERVERS"]
