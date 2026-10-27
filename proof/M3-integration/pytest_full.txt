@@ -1,0 +1,10 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.17, pytest-9.1.1, pluggy-1.7.0 -- /usr/bin/python3
+rootdir: /home/user/pareeksha-/backend
+configfile: pyproject.toml
+testpaths: tests
+plugins: respx-0.23.1, asyncio-1.4.1, anyio-4.15.1, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collecting ... collected 1238 items
+
+tests/contract/test_adapter_contract.py::test_adapter_contract[audio_v1-mock-agent] 
