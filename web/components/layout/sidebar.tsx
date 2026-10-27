@@ -8,7 +8,9 @@ import { cn } from "@/lib/utils";
 const GROUPS: NavItem["group"][] = [null, "Build", "Evaluate", "Operate"];
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
-  const pathname = usePathname();
+  const raw = usePathname();
+  // A call is reached from a run, so Runs stays lit on /calls/[id].
+  const pathname = raw.startsWith("/calls/") ? "/runs" : raw;
   // The most specific matching item is active, so /runs/new does not also light up Runs.
   const match = NAV_ITEMS.filter((i) => (i.href === "/" ? pathname === "/" : pathname === i.href || pathname.startsWith(i.href + "/"))).sort(
     (a, b) => b.href.length - a.href.length,
