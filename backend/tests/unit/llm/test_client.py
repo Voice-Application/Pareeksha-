@@ -264,3 +264,14 @@ async def test_file_cache_survives_a_new_client(tmp_path: Path) -> None:
     c2, prov2, _ = make([], cache=FileJSONCache(tmp_path / "c"))
     res = await gen(c2, cache_salt="s")
     assert res.parsed.x == 7 and res.cache_hit and not prov2.requests
+
+
+async def test_two_repair_attempts_recover_on_the_second_and_sum_usage() -> None:
+    def check(o: Out) -> str | None:
+        return "x must be even" if o.x % 2 else None
+
+    client, prov, records = make(['{"x": 1}', '{"x": 3}', '{"x": 6}'])
+    res = await gen(client, semantic_check=check, repair_attempts=2)
+    assert res.parsed.x == 6 and res.repaired
+    assert res.usage.input_tokens == 300 and len(records) == 3
+    assert prov.requests[2].messages[-2].content == '{"x": 3}'

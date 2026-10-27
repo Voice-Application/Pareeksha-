@@ -78,6 +78,7 @@ async def run_judge(client: LLMClient, data: JudgeInput) -> GenerationResult[Jud
     """Judge one call. Raises ``JSONGenerationError`` if the output stays invalid after the repair
     retry (the evaluator stores that as ``judge_error``)."""
     valid = {t.idx for t in data.turns}
+    agent = {t.idx for t in data.turns if t.speaker == "agent"}
     return await client.generate_json(
         purpose=LLMPurpose.JUDGE,
         messages=[ChatMessage(role="user", content=render_judge_prompt(data))],
@@ -87,5 +88,6 @@ async def run_judge(client: LLMClient, data: JudgeInput) -> GenerationResult[Jud
         max_output_tokens=JUDGE_MAX_OUTPUT_TOKENS,
         thinking=False,
         timeout_s=120.0,
-        semantic_check=lambda out: evidence_problems(out, valid),
+        semantic_check=lambda out: evidence_problems(out, valid, agent),
+        repair_attempts=2,
     )

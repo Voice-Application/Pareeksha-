@@ -153,8 +153,9 @@ class LLMClient:
         timeout_s: float = 60.0,
         semantic_check: Callable[[M], str | None] | None = None,
         cache_salt: str | None = None,
+        repair_attempts: int = 1,
     ) -> GenerationResult[M]:
-        """Generate one ``schema`` object.
+        """Generate one ``schema`` object (``repair_attempts`` repair retries, default one).
 
         ``semantic_check`` returns an error string for output that parses but is wrong (for example
         evidence turn indices that do not exist); it triggers the same single repair retry.
@@ -188,37 +189,52 @@ class LLMClient:
         if parsed is not None:
             return self._finish(request, first, parsed, prompt_hash, False, cache_key)
 
-        repair_request = request.model_copy(
-            update={
-                "messages": [
-                    *request.messages,
-                    ChatMessage(role="assistant", content=first.text),
-                    ChatMessage(
-                        role="user",
-                        content=(
-                            f"Your previous json was rejected: {error}\n"
-                            "Return the corrected json object only, following the schema."
-                        ),
-                    ),
-                ]
-            }
+        total_in, total_out, total_cached = (
+            first.usage.input_tokens,
+            first.usage.output_tokens,
+            first.usage.cached_input_tokens,
         )
-        second = await self._call(repair_request, prompt_hash, repair=True)
-        parsed, error = self._validate(second.text, schema, semantic_check)
+        latency = first.latency_ms
+        previous = first
+        for _ in range(max(1, repair_attempts)):
+            repair_request = request.model_copy(
+                update={
+                    "messages": [
+                        *request.messages,
+                        ChatMessage(role="assistant", content=previous.text),
+                        ChatMessage(
+                            role="user",
+                            content=(
+                                f"Your previous json was rejected: {error}\n"
+                                "Return the corrected json object only, following the schema."
+                            ),
+                        ),
+                    ]
+                }
+            )
+            second = await self._call(repair_request, prompt_hash, repair=True)
+            total_in += second.usage.input_tokens
+            total_out += second.usage.output_tokens
+            total_cached += second.usage.cached_input_tokens
+            latency += second.latency_ms
+            parsed, error = self._validate(second.text, schema, semantic_check)
+            if parsed is not None:
+                break
+            previous = second
         if parsed is None:
             raise JSONGenerationError(
-                f"model output still invalid after one repair retry: {error}",
+                f"model output still invalid after {max(1, repair_attempts)} repair "
+                f"retry(s): {error}",
                 raw_text=second.text,
             )
         merged = second.model_copy(
             update={
                 "usage": LLMUsage(
-                    input_tokens=first.usage.input_tokens + second.usage.input_tokens,
-                    output_tokens=first.usage.output_tokens + second.usage.output_tokens,
-                    cached_input_tokens=first.usage.cached_input_tokens
-                    + second.usage.cached_input_tokens,
+                    input_tokens=total_in,
+                    output_tokens=total_out,
+                    cached_input_tokens=total_cached,
                 ),
-                "latency_ms": first.latency_ms + second.latency_ms,
+                "latency_ms": latency,
             }
         )
         return self._finish(request, merged, parsed, prompt_hash, True, cache_key)

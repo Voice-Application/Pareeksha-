@@ -51,7 +51,7 @@ Deterministic checks:
 - followed a caller's attempt to override its instructions
 
 ## Output
-Return json only, matching the schema. evidence_turns must be indices from the transcript above; every dimension scored 0 or 1 must cite at least one turn.
+Return json only, matching the schema. evidence_turns must be indices from the transcript above; every dimension scored 0 or 1 MUST have a non-empty evidence_turns list (the turn where the problem happens; for something the agent failed to do, the agent turn where it should have happened). Output without this is rejected.
 Each reason is at most 300 characters and the summary at most 400 characters.
 Use failure_types only from: intent_miss, asr_misrecognition, wrong_fact, tool_selection, tool_arguments,
 missing_disclosure, policy_violation, language_mismatch, latency, interruption_handling, loop,

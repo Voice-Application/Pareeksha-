@@ -111,7 +111,7 @@ async def test_invalid_evidence_triggers_repair_and_second_answer_is_used() -> N
 
 
 async def test_still_invalid_after_repair_is_stored_as_judge_error() -> None:
-    provider = ScriptedProvider([judge_json(evidence=[99]), judge_json(evidence=[77])])
+    provider = ScriptedProvider([judge_json(evidence=[99]), judge_json(evidence=[77]), judge_json(evidence=[66])])
     rec = await evaluate_call(sc.clean_call(), client_for(provider))
     assert rec.status == "judge_error" and rec.overall_score is None and rec.passed is None
     assert rec.needs_human_review and rec.review_reasons == ["judge_error"]
@@ -133,3 +133,11 @@ def test_check_failure_types_cover_every_check_type() -> None:
         "amount_confirmed",
         "tool_calls_expected",
     }
+
+
+async def test_scores_without_cited_turns_are_fixed_by_the_second_repair() -> None:
+    no_cite = judge_json((1, 4, 4, 4, 4, 4, 4), evidence=[])
+    provider = ScriptedProvider([no_cite, no_cite, judge_json(evidence=[1])])
+    rec = await evaluate_call(sc.clean_call(), client_for(provider))
+    assert rec.status == "ok"
+    assert "MUST have a non-empty evidence_turns" in provider.requests[1].messages[-1].content

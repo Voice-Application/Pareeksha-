@@ -114,3 +114,12 @@ def test_low_score_without_evidence_is_rejected_but_high_score_is_not() -> None:
 def test_judge_schema_bounds() -> None:
     with pytest.raises(ValueError, match="score"):
         judge(dict.fromkeys(DIMENSION_KEYS, 5))
+
+
+def test_missing_evidence_message_says_how_to_fix_and_lists_agent_turns() -> None:
+    scores = dict.fromkeys(DIMENSION_KEYS, 4)
+    scores["task_completion"] = 1
+    msg = evidence_problems(judge(scores, evidence=[]), range(6), agent_indices=[1, 3, 5])
+    assert msg is not None
+    assert "MUST have a non-empty evidence_turns" in msg and "agent turns: [1, 3, 5]" in msg
+    assert "do not raise it" in msg
