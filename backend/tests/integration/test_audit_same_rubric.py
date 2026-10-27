@@ -218,7 +218,7 @@ async def test_judge_that_never_validates_is_stored_as_judge_error(
     out = await judged(
         completed_event(sim_id, "simulation", run_id, item_id),
         database_url,
-        ScriptedProvider([bad, bad]),
+        ScriptedProvider([bad, bad, bad]),
     )
     (row,) = await fetch_rows(
         database_url, "SELECT status, overall_score FROM evaluations WHERE call_id = %s", sim_id

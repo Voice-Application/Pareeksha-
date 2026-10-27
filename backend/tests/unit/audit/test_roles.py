@@ -82,7 +82,7 @@ async def test_verdict_with_wrong_keys_is_repaired_once() -> None:
 
 async def test_two_speakers_with_the_same_role_are_invalid() -> None:
     bad = verdict({"spk_0": "agent", "spk_1": "agent"})
-    provider = ScriptedProvider([bad, bad])
+    provider = ScriptedProvider([bad, bad, bad])
     d = await detect_roles(SEGMENTS, client_for(provider))
     assert d.method == "heuristic" and "unusable" in d.note
 
