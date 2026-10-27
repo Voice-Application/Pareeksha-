@@ -322,11 +322,13 @@ async def run_mode(run_id: uuid.UUID) -> None:
 
 
 async def audit_mode(agent_id: uuid.UUID) -> None:
-    """One upload-source call: a two-speaker TTS clip, mixed to mono, transcribed with diarisation (what the auditor will do)."""
+    """One upload-source call: a two-speaker TTS clip mixed to mono, transcribed with diarisation, judged, stored as source='upload'.
+
+    This is what the auditor (EVAL-04, not merged) will do for POST /audits; the API route itself is still a 501 stub.
+    """
     lang = "hi-IN"
     ttsp, sttp = get_tts_provider(), get_stt_provider()
     lines = HI["Disputes the EMI amount"][True][0]
-    agent_a, caller_a = np.zeros(0, np.float32), np.zeros(0, np.float32)
     mixed = np.zeros(0, np.float32)
     for speaker, text in lines:
         a = await tts(ttsp, text, AGENT_VOICE[lang] if speaker == "agent" else "Shubham", lang)
@@ -334,11 +336,65 @@ async def audit_mode(agent_id: uuid.UUID) -> None:
     wav = f32_to_wav(mixed)
     tr = await retry(lambda: sttp.transcribe(wav, lang, diarize=True, num_speakers=2))
     ledger({"kind": "stt_batch_diarized", "language": lang, "audio_s": round(len(mixed) / SR, 2)})
-    print(tr.model_dump_json(indent=1)[:2500])
-    out = DATA / "fe04" / "audit_clip.wav"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_bytes(wav)
-    (DATA / "fe04" / "audit_transcript.json").write_text(tr.model_dump_json())
+    first = tr.segments[0].speaker
+    smap = {sp: ("agent" if sp == first else "caller") for sp in {s.speaker for s in tr.segments}}
+    turns = [
+        {"idx": i, "speaker": smap[sg.speaker], "text": sg.text, "start_ms": int(sg.start_s * 1000), "end_ms": int(sg.end_s * 1000), "language_detected": lang}
+        for i, sg in enumerate(tr.segments)
+    ]
+    client = build_client(LLMSettings(cost_deepseek_per_1k_input_tokens=0.00132, cost_deepseek_per_1k_output_tokens=0.00396), usage_sink=llm_sink)
+    with psycopg.connect(libpq_url(os.environ["DATABASE_URL"]), autocommit=False, row_factory=psycopg.rows.dict_row) as conn:
+        agent = conn.execute("SELECT * FROM agents WHERE id=%s", (agent_id,)).fetchone()
+        call_id = uuid.uuid4()
+        snap = CallSnapshot(
+            call_id=call_id,
+            agent=agent_info(agent),
+            turns=[Turn(idx=t["idx"], speaker=t["speaker"], start_ms=t["start_ms"], end_ms=t["end_ms"], text=t["text"], text_masked=t["text"], language_detected=lang) for t in turns],
+            language=lang,
+            expected_language=lang,
+            allowed_languages=tuple(agent["languages"]),
+            agent_id=agent_id,
+        )
+        rec = await evaluate_call(snap, client)
+        rel = f"fe04/audit_{uuid.uuid4().hex[:8]}"
+        (DATA / rel).mkdir(parents=True, exist_ok=True)
+        (DATA / rel / "original.wav").write_bytes(wav)
+        conn.execute(
+            """INSERT INTO calls (id, project_id, agent_id, source, language, status, end_reason, duration_ms, recording_original, recording_mixed,
+                   speaker_map, metadata, started_at) VALUES (%s,%s,%s,'upload',%s,'completed','upload',%s,%s,%s,%s,%s, now() - interval '3 minutes')""",
+            (call_id, agent["project_id"], agent_id, lang, int(len(mixed) / SR * 1000), f"{rel}/original.wav", f"{rel}/original.wav", Jsonb(smap), Jsonb({"file": "ravi_call_0412.wav"})),
+        )
+        for t in turns:
+            conn.execute(
+                """INSERT INTO turns (call_id, idx, speaker, text, text_masked, language_detected, start_ms, end_ms, is_barge_in)
+                   VALUES (%s,%s,%s,%s,%s,%s,%s,%s,false)""",
+                (call_id, t["idx"], t["speaker"], t["text"], t["text"], lang, t["start_ms"], t["end_ms"]),
+            )
+        m = rec.metrics
+        conn.execute(
+            """INSERT INTO call_metrics (call_id, first_greeting_ms, response_latency_p50_ms, response_latency_p95_ms, barge_in_attempts, barge_in_honoured,
+                   silence_gaps_over_2s, turn_count, agent_talk_ratio, repeated_utterances, latency_is_approximate, extra)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,true,%s)""",
+            (call_id, m.first_greeting_latency_ms, m.response_latency_p50_ms, m.response_latency_p95_ms, m.barge_in_attempts, m.barge_in_honoured,
+             m.silence_gaps_over_2s, len(turns), m.agent_talk_ratio, m.repeated_utterances, Jsonb(m.to_dict())),
+        )
+        for c in rec.checks:
+            conn.execute(
+                "INSERT INTO deterministic_checks (call_id, check_type, check_key, must_pass, passed, evidence_turns, detail) VALUES (%s,%s,%s,%s,%s,%s,%s)",
+                (call_id, c.check_type, c.check_key, c.must_pass, c.passed, list(c.evidence_turns), c.detail),
+            )
+        rubric_id = conn.execute("SELECT id FROM rubric_versions ORDER BY is_active DESC, created_at LIMIT 1").fetchone()["id"]
+        conn.execute(
+            """INSERT INTO evaluations (id, call_id, rubric_version_id, status, judge_model, temperature, prompt_hash, dimensions, overall_score, passed,
+                   critical_failure, needs_human_review, review_reasons, failure_types, summary, confidence, raw_response, input_tokens, output_tokens, latency_ms)
+               VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+            (rec.id, call_id, rubric_id, rec.status, rec.judge_model, rec.temperature, rec.prompt_hash, Jsonb(rec.dimensions), rec.overall_score, rec.passed,
+             rec.critical_failure, rec.needs_human_review, rec.review_reasons, rec.failure_types, rec.summary, rec.confidence,
+             Jsonb(rec.raw_response) if rec.raw_response else None, rec.input_tokens, rec.output_tokens, rec.latency_ms),
+        )
+        conn.commit()
+        print(f"audit call {call_id}: score={rec.overall_score} passed={rec.passed} tags={rec.failure_types}")
+    await client.aclose()
 
 
 if __name__ == "__main__":

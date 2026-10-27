@@ -58,7 +58,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     if (!open && d.open) d.close();
   }, [open]);
 
-  const current = NAV_ITEMS.filter((i) => i.href !== "/" && (pathname === i.href || pathname.startsWith(i.href + "/"))).sort(
+  const current = NAV_ITEMS.filter((i) => i.href !== "/" && (pathname.startsWith("/calls/") ? i.href === "/runs" : pathname === i.href || pathname.startsWith(i.href + "/"))).sort(
     (a, b) => b.href.length - a.href.length,
   )[0];
 

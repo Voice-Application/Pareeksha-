@@ -1,0 +1,6 @@
+
+> pareeksha-web@0.1.0 gen:api:check
+> node scripts/gen-api.mjs --check
+
+lib/api/schema.d.ts is up to date.
+exit 0
