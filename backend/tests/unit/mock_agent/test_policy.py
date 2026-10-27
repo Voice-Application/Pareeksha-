@@ -245,3 +245,10 @@ def test_clean_a_bare_today_never_replaces_a_committed_date() -> None:
     _, confirm, closing = _run(d, "yes", "I will pay Friday", "yes, but nothing today")
     assert "Friday" in confirm.text
     assert closing.tool_calls[0][1]["when"] == "Friday" and "Friday" in closing.text
+
+
+def test_bug_no_amount_confirm_also_skips_the_read_back_when_the_date_comes_early() -> None:
+    d = Dialog("en-IN", frozenset({Bug.NO_AMOUNT_CONFIRM}))
+    d.opening()
+    closing = d.respond("yes, I will pay on Friday")
+    assert closing.end_call and "four thousand five hundred" not in closing.text

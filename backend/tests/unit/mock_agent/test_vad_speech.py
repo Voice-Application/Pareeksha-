@@ -2,6 +2,7 @@ import array
 import io
 import wave
 
+import pytest
 from mock_agent.speech import pcm_to_wav, wav_to_pcm
 from mock_agent.vad import UtteranceDetector, rms
 
@@ -62,3 +63,24 @@ async def test_gnani_agent_speech_wraps_shared_client() -> None:
     assert (await speech.hear(LOUD, "kn-IN")).startswith("heard kn-IN")
     assert await speech.say("hi", "en-IN") == LOUD
     assert speech.usage_totals() == {}
+
+
+async def test_stt_is_retried_when_the_provider_answers_429(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from mock_agent import speech as speech_module
+
+    calls: list[int] = []
+
+    class Flaky:
+        def transcribe(self, wav: bytes, language: str) -> dict[str, str]:
+            calls.append(1)
+            if len(calls) < 3:
+                raise RuntimeError("429 Too Many Requests")
+            return {"transcript": "yes speaking"}
+
+    monkeypatch.setattr(speech_module, "STT_RETRY_S", 0.0)
+    engine = speech_module.GnaniAgentSpeech.__new__(speech_module.GnaniAgentSpeech)
+    engine._gnani = Flaky()  # type: ignore[assignment]
+    assert await engine.hear(b"\x00\x00" * 160, "en-IN") == "yes speaking"
+    assert len(calls) == 3

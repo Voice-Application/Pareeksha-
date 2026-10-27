@@ -536,8 +536,10 @@ class Dialog:
 
         when = extract_when(text)
         if self.stage in ("identify", "ask_pay"):
-            if Bug.NO_AMOUNT_CONFIRM in self.bugs and self.stage == "ask_pay":
-                return self._finish(lang)
+            if Bug.NO_AMOUNT_CONFIRM in self.bugs and (self.stage == "ask_pay" or when):
+                return self._finish(
+                    lang
+                )  # bug 2: records the promise without reading the amount back
             if when:
                 self.when = when
                 return self._confirm_when(lang)

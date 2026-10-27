@@ -76,7 +76,9 @@ export function Overview() {
       </>
     );
 
-  const s = latest?.summary;
+  // While a run is in flight the server summary is empty; fill the tiles from the items scored so far.
+  const scoredNow = (items.data?.items ?? []).filter((i) => i.overall_score != null);
+  const s = latest?.summary?.pass_rate != null || !scoredNow.length ? latest?.summary : { ...latest?.summary, pass_rate: scoredNow.filter((i) => i.passed).length / scoredNow.length, critical_failures: scoredNow.filter((i) => i.critical_failure).length };
   const running = latest && ["queued", "running"].includes(latest.status);
   const failed = latest && s?.pass_rate != null && latest.progress.evaluated ? Math.round(latest.progress.evaluated * (1 - s.pass_rate)) : 0;
   const crit = s?.critical_failures ?? 0;

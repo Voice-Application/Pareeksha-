@@ -152,7 +152,13 @@ class CallSession:
                         dataclasses.replace(self.last_reply, tool_calls=())
                     )
                 continue
-            heard = await self.speech.hear(utterance, self.dialog.language)
+            try:
+                heard = await self.speech.hear(utterance, self.dialog.language)
+            except Exception:
+                log.exception(
+                    "speech-to-text failed; treating the utterance as not heard"
+                )
+                heard = ""
             await self._send(
                 TranscriptMessage(role="user", text=heard, t_ms=self.now_ms())
             )
