@@ -1,0 +1,5 @@
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/unit/audit/test_role_review.py::test_review_reasons_are_kept_when_the_judge_fails
+1 failed, 954 passed, 1 warning in 190.87s (0:03:10)
