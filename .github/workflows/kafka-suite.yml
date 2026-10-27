@@ -31,7 +31,11 @@ jobs:
           docker compose ps
 
       - name: Install dependencies
-        run: pip install -r requirements.txt -r backend/requirements-dev.txt
+        run: |
+          pip install -r requirements.txt -r backend/requirements-dev.txt
+          # Connectors are discovered through the pareeksha.connectors entry-point group,
+          # which only exists once the package is installed (as it is in the Docker image).
+          pip install --no-deps -e backend
 
       - name: Kafka suite
         run: scripts/ci/kafka_suite.sh

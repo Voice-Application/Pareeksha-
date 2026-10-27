@@ -24,7 +24,9 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: web/package-lock.json
-      - run: pip install -r requirements.txt -r backend/requirements-dev.txt types-PyYAML
+      - run: |
+          pip install -r requirements.txt -r backend/requirements-dev.txt
+          pip install --no-deps -e backend   # registers the pareeksha.connectors entry points
       - run: npm ci
         working-directory: web   # the contract test regenerates schema.d.ts with openapi-typescript
       - name: Lint
