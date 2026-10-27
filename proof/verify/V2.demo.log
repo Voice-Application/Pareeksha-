@@ -1,1144 +1,610 @@
-[13:27:12] make demo (compose up --build, health wait, seed, 10-call demo run)
+[16:45:37] make demo (compose up --build, health wait, seed, 10-call demo run)
 scripts/demo.sh
- Image prc-integrations Building 
- Image prc-simulator Building 
- Image prc-generator Building 
- Image prc-api Building 
- Image prc-retrier Building 
- Image prc-reconciler Building 
- Image prc-finalizer Building 
- Image prc-dlq-recorder Building 
- Image prc-planner Building 
- Image prc-web Building 
- Image prc-auditor Building 
- Image prc-dialect Building 
- Image prc-mock-agent Building 
- Image prc-migrate Building 
- Image prc-outbox-relay Building 
- Image prc-evaluator Building 
+ Image pqa-web Building 
+ Image pqa-outbox-relay Building 
+ Image pqa-integrations Building 
+ Image pqa-finalizer Building 
+ Image pqa-api Building 
+ Image pqa-migrate Building 
+ Image pqa-generator Building 
+ Image pqa-evaluator Building 
+ Image pqa-reconciler Building 
+ Image pqa-dialect Building 
+ Image pqa-retrier Building 
+ Image pqa-planner Building 
+ Image pqa-auditor Building 
+ Image pqa-mock-agent Building 
+ Image pqa-dlq-recorder Building 
+ Image pqa-simulator Building 
 #1 [internal] load local bake definitions
-#1 reading from stdin 8.17kB done
+#1 reading from stdin 10.25kB done
 #1 DONE 0.0s
 
-#2 [reconciler internal] load build definition from Dockerfile
+#2 [web internal] load build definition from Dockerfile
+#2 transferring dockerfile: 702B 0.0s done
 #2 DONE 0.0s
 
-#3 [web internal] load build definition from Dockerfile
-#3 transferring dockerfile: 702B done
+#3 [mock-agent internal] load build definition from Dockerfile
+#3 transferring dockerfile: 669B 0.0s done
 #3 DONE 0.0s
 
-#4 [mock-agent internal] load build definition from Dockerfile
-#4 transferring dockerfile: 669B 0.0s done
+#4 [outbox-relay internal] load build definition from Dockerfile
+#4 transferring dockerfile: 1.22kB 0.0s done
 #4 DONE 0.0s
 
-#2 [dlq-recorder internal] load build definition from Dockerfile
-#2 transferring dockerfile: 1.22kB 0.0s done
-#2 DONE 0.0s
-
-#5 [dialect internal] load metadata for docker.io/library/python:3.12-slim
+#5 [web internal] load metadata for docker.io/library/node:22-alpine
 #5 DONE 0.0s
 
-#6 [web internal] load metadata for docker.io/library/node:22-alpine
+#6 [planner internal] load metadata for docker.io/library/python:3.12-slim
 #6 DONE 0.0s
 
-#7 [auditor internal] load .dockerignore
-#7 transferring context:
-#7 transferring context: 2B done
+#7 [web internal] load .dockerignore
+#7 transferring context: 90B done
 #7 DONE 0.0s
 
 #8 [mock-agent internal] load .dockerignore
 #8 transferring context: 2B done
 #8 DONE 0.0s
 
-#9 [web internal] load .dockerignore
-#9 transferring context: 90B done
+#9 [api internal] load .dockerignore
+#9 transferring context: 2B done
 #9 DONE 0.0s
 
-#10 [mock-agent internal] load build context
-#10 transferring context: 1.01MB 0.0s done
-#10 DONE 0.1s
+#10 [web internal] load build context
+#10 DONE 0.0s
 
-#11 [simulator stage-0 1/5] FROM docker.io/library/python:3.12-slim@sha256:12316debbfb86890f6b2d825820612741ba527ad5a44e3902759141d572bfe8f
-#11 resolve docker.io/library/python:3.12-slim@sha256:12316debbfb86890f6b2d825820612741ba527ad5a44e3902759141d572bfe8f 0.0s done
-#11 DONE 0.2s
+#11 [dlq-recorder internal] load build context
+#11 DONE 0.0s
 
-#12 [simulator internal] load build context
-#12 ...
+#12 [mock-agent internal] load build context
+#12 transferring context: 29.60kB 0.0s done
+#12 DONE 0.0s
 
-#13 [web internal] load build context
-#13 transferring context: 1.28MB 0.1s done
-#13 DONE 0.1s
+#13 [web build 1/6] FROM docker.io/library/node:22-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914
+#13 resolve docker.io/library/node:22-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914 0.0s done
+#13 DONE 0.0s
 
-#12 [simulator internal] load build context
-#12 transferring context: 73.74MB 1.9s done
-#12 DONE 1.9s
+#14 [dlq-recorder stage-0 1/5] FROM docker.io/library/python:3.12-slim@sha256:12316debbfb86890f6b2d825820612741ba527ad5a44e3902759141d572bfe8f
+#14 resolve docker.io/library/python:3.12-slim@sha256:12316debbfb86890f6b2d825820612741ba527ad5a44e3902759141d572bfe8f
+#14 resolve docker.io/library/python:3.12-slim@sha256:12316debbfb86890f6b2d825820612741ba527ad5a44e3902759141d572bfe8f 0.0s done
+#14 DONE 0.0s
 
-#11 [dialect stage-0 1/5] FROM docker.io/library/python:3.12-slim@sha256:12316debbfb86890f6b2d825820612741ba527ad5a44e3902759141d572bfe8f
-#11 extracting sha256:f2be67225471500c788ce88c597eb5ea8336e912ad1ca4815650e0281afe2034
-#11 extracting sha256:f2be67225471500c788ce88c597eb5ea8336e912ad1ca4815650e0281afe2034 2.0s done
-#11 extracting sha256:f2be67225471500c788ce88c597eb5ea8336e912ad1ca4815650e0281afe2034 2.0s done
-#11 extracting sha256:f5b253875fcbce1c3ed3bf3431019fc52d83f106ccf45e58e083985648ad4ec7
-#11 extracting sha256:f5b253875fcbce1c3ed3bf3431019fc52d83f106ccf45e58e083985648ad4ec7 0.2s done
-#11 extracting sha256:f5b253875fcbce1c3ed3bf3431019fc52d83f106ccf45e58e083985648ad4ec7 0.2s done
-#11 extracting sha256:ca30a39e3f58fe12fab1873dcbc2295c56c29222f8aca17c0765e9777c59615c
-#11 extracting sha256:ca30a39e3f58fe12fab1873dcbc2295c56c29222f8aca17c0765e9777c59615c 1.2s done
-#11 extracting sha256:ca30a39e3f58fe12fab1873dcbc2295c56c29222f8aca17c0765e9777c59615c 1.2s done
-#11 extracting sha256:86586d55cc56d61ea925eceb95264d80c84fae62b3f013b4022710968a0bcf73 0.0s done
-#11 DONE 3.6s
+#15 [mock-agent stage-0 4/5] COPY backend/pareeksha /app/pareeksha
+#15 CACHED
 
-#14 [dlq-recorder stage-0 2/5] WORKDIR /app
-#14 ...
+#16 [mock-agent stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "pydantic>=2.7" "requests"
+#16 CACHED
 
-#15 [web build 1/6] FROM docker.io/library/node:22-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914
-#15 resolve docker.io/library/node:22-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914 0.1s done
-#15 extracting sha256:7b229517ed222597277036d94892173207d01a731ab3a88eeb1de2e963a2c788 0.3s done
-#15 extracting sha256:8776aa3d2ba7247a375d06dcec03856b99dbb0e16e904a5672d3bf08c852d4f1 4.0s done
-#15 DONE 4.5s
+#17 [mock-agent stage-0 5/5] COPY mock_agent /app/mock_agent
+#17 CACHED
 
-#15 [web build 1/6] FROM docker.io/library/node:22-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914
-#15 extracting sha256:7246d4c6a55dd0f8dd00d2e63aece3a68d91e6a5d04c4e748fc2706897d96312
-#15 extracting sha256:7246d4c6a55dd0f8dd00d2e63aece3a68d91e6a5d04c4e748fc2706897d96312 1.0s done
-#15 DONE 5.5s
+#10 [web internal] load build context
+#10 transferring context: 171.16kB 0.0s done
+#10 DONE 0.0s
 
-#14 [dlq-recorder stage-0 2/5] WORKDIR /app
-#14 DONE 1.9s
+#18 [web build 3/6] COPY package.json package-lock.json ./
+#18 CACHED
 
-#15 [web build 1/6] FROM docker.io/library/node:22-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914
-#15 extracting sha256:304511616d6a6d472222f696b9045e20dc90e8043b2a8ba2acb61746595781f3 0.0s done
-#15 DONE 5.5s
+#19 [web build 2/6] WORKDIR /app
+#19 CACHED
 
-#16 [web build 2/6] WORKDIR /app
-#16 DONE 0.0s
+#20 [web build 4/6] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/ca; fi;     npm ci
+#20 CACHED
 
-#17 [web build 3/6] COPY package.json package-lock.json ./
-#17 DONE 0.1s
+#11 [auditor internal] load build context
+#11 transferring context: 52.03kB 0.0s done
+#11 DONE 0.0s
 
-#18 [retrier stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "fastapi>=0.121" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy[asyncio]>=2.0.30" "python-multipart>=0.0.9" "pydantic-settings>=2.3" "cryptography>=42" "httpx>=0.27" "jinja2>=3.1" "numpy>=1.26" "scipy>=1.11" "pyyaml>=6" "rapidfuzz>=3.9" "soundfile>=0.12" "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "google-auth>=2.30" "pipecat-ai[silero]>=1.13.0"
-#18 2.944 Collecting fastapi>=0.121
-#18 3.235   Downloading fastapi-0.162.0-py3-none-any.whl.metadata (26 kB)
-#18 3.355 Collecting uvicorn>=0.30
-#18 3.582   Downloading uvicorn-0.54.0-py3-none-any.whl.metadata (6.6 kB)
-#18 3.638 Collecting psycopg>=3.2 (from psycopg[binary]>=3.2)
-#18 3.848   Downloading psycopg-3.3.6-py3-none-any.whl.metadata (4.4 kB)
-#18 3.932 Collecting aiokafka>=0.11
-#18 4.130   Downloading aiokafka-0.14.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (5.0 kB)
-#18 4.194 Collecting alembic>=1.13
-#18 4.377   Downloading alembic-1.20.1-py3-none-any.whl.metadata (7.3 kB)
-#18 4.950 Collecting sqlalchemy>=2.0.30 (from sqlalchemy[asyncio]>=2.0.30)
-#18 5.103   Downloading sqlalchemy-2.1.6-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (9.7 kB)
-#18 5.152 Collecting python-multipart>=0.0.9
-#18 5.418   Downloading python_multipart-0.0.32-py3-none-any.whl.metadata (2.1 kB)
-#18 5.487 Collecting pydantic-settings>=2.3
-#18 5.754   Downloading pydantic_settings-2.16.1-py3-none-any.whl.metadata (4.0 kB)
-#18 6.006 Collecting cryptography>=42
-#18 6.229   Downloading cryptography-50.0.2-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (4.4 kB)
-#18 6.300 Collecting httpx>=0.27
-#18 6.513   Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
-#18 6.564 Collecting jinja2>=3.1
-#18 6.762   Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
-#18 7.102 Collecting numpy>=1.26
-#18 7.284   Downloading numpy-2.5.4-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (6.6 kB)
-#18 7.425 Collecting scipy>=1.11
-#18 7.642   Downloading scipy-1.18.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)
-#18 7.803 Collecting pyyaml>=6
-#18 8.013   Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
-#18 9.018 Collecting rapidfuzz>=3.9
-#18 9.235   Downloading rapidfuzz-3.14.6-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (12 kB)
-#18 9.292 Collecting soundfile>=0.12
-#18 9.494   Downloading soundfile-0.14.0-py2.py3-none-manylinux_2_28_x86_64.whl.metadata (18 kB)
-#18 9.554 Collecting gnani-vachana>=0.8.2
-#18 9.741   Downloading gnani_vachana-0.8.2-py3-none-any.whl.metadata (28 kB)
-#18 9.982 Collecting websockets<16.0,>=12.0
-#18 ...
+#21 [auditor stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "fastapi>=0.121" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy[asyncio]>=2.0.30" "python-multipart>=0.0.9" "pydantic-settings>=2.3" "cryptography>=42" "httpx>=0.27" "jinja2>=3.1" "numpy>=1.26" "scipy>=1.11" "pyyaml>=6" "rapidfuzz>=3.9" "soundfile>=0.12" "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "google-auth>=2.30" "pipecat-ai[silero]>=1.13.0"
+#21 CACHED
 
-#19 [web build 4/6] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/ca; fi;     npm ci
-#19 ...
+#22 [auditor stage-0 2/5] WORKDIR /app
+#22 CACHED
 
-#20 [mock-agent stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "pydantic>=2.7" "requests"
-#20 2.777 Collecting gnani-vachana>=0.8.2
-#20 3.296   Downloading gnani_vachana-0.8.2-py3-none-any.whl.metadata (28 kB)
-#20 3.672 Collecting websockets<16.0,>=12.0
-#20 4.080   Downloading websockets-15.0.1-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.8 kB)
-#20 4.416 Collecting pydantic>=2.7
-#20 5.237   Downloading pydantic-2.14.1-py3-none-any.whl.metadata (133 kB)
-#20 6.650 Collecting requests
-#20 7.654   Downloading requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
-#20 7.807 Collecting annotated-types>=0.6.0 (from pydantic>=2.7)
-#20 8.820   Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
-#20 10.32 Collecting pydantic-core==2.50.1 (from pydantic>=2.7)
-#20 ...
+#23 [auditor stage-0 4/5] COPY . /app
+#23 CACHED
 
-#18 [retrier stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "fastapi>=0.121" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy[asyncio]>=2.0.30" "python-multipart>=0.0.9" "pydantic-settings>=2.3" "cryptography>=42" "httpx>=0.27" "jinja2>=3.1" "numpy>=1.26" "scipy>=1.11" "pyyaml>=6" "rapidfuzz>=3.9" "soundfile>=0.12" "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "google-auth>=2.30" "pipecat-ai[silero]>=1.13.0"
-#18 10.15   Downloading websockets-15.0.1-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.8 kB)
-#18 10.24 Collecting google-auth>=2.30
-#18 10.40   Downloading google_auth-2.62.0-py3-none-any.whl.metadata (6.0 kB)
-#18 10.48 Collecting pipecat-ai>=1.13.0 (from pipecat-ai[silero]>=1.13.0)
-#18 10.63   Downloading pipecat_ai-1.14.0-py3-none-any.whl.metadata (52 kB)
-#18 10.84 Collecting starlette>=0.46.0 (from fastapi>=0.121)
-#18 10.99   Downloading starlette-1.10.0-py3-none-any.whl.metadata (6.6 kB)
-#18 11.16 Collecting pydantic>=2.9.0 (from fastapi>=0.121)
-#18 11.30   Downloading pydantic-2.14.1-py3-none-any.whl.metadata (133 kB)
-#18 11.45 Collecting typing-extensions>=4.8.0 (from fastapi>=0.121)
-#18 11.58   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
-#18 11.62 Collecting typing-inspection>=0.4.2 (from fastapi>=0.121)
-#18 11.75   Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
-#18 11.78 Collecting annotated-doc>=0.0.2 (from fastapi>=0.121)
-#18 11.91   Downloading annotated_doc-0.0.5-py3-none-any.whl.metadata (6.5 kB)
-#18 11.95 Collecting opentelemetry-api>=1.44.0 (from fastapi>=0.121)
-#18 12.08   Downloading opentelemetry_api-1.45.1-py3-none-any.whl.metadata (1.4 kB)
-#18 12.12 Collecting click>=7.0 (from uvicorn>=0.30)
-#18 12.24   Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
-#18 12.27 Collecting h11>=0.8 (from uvicorn>=0.30)
-#18 12.39   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
-#18 12.46 Collecting async-timeout (from aiokafka>=0.11)
-#18 12.68   Downloading async_timeout-5.0.1-py3-none-any.whl.metadata (5.1 kB)
-#18 12.73 Collecting packaging (from aiokafka>=0.11)
-#18 12.94   Downloading packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
-#18 13.02 Collecting Mako (from alembic>=1.13)
-#18 13.20   Downloading mako-1.4.3-py3-none-any.whl.metadata (2.9 kB)
-#18 13.27 Collecting python-dotenv>=1.2.2 (from pydantic-settings>=2.3)
-#18 13.45   Downloading python_dotenv-1.2.4-py3-none-any.whl.metadata (29 kB)
-#18 13.61 Collecting cffi>=2.0.0 (from cryptography>=42)
-#18 13.77   Downloading cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.5 kB)
-#18 13.82 Collecting anyio (from httpx>=0.27)
-#18 13.98   Downloading anyio-4.15.1-py3-none-any.whl.metadata (4.7 kB)
-#18 14.03 Collecting certifi (from httpx>=0.27)
-#18 14.18   Downloading certifi-2026.10.23-py3-none-any.whl.metadata (2.5 kB)
-#18 14.22 Collecting httpcore==1.* (from httpx>=0.27)
-#18 14.37   Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
-#18 14.42 Collecting idna (from httpx>=0.27)
-#18 14.56   Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
-#18 14.67 Collecting MarkupSafe>=2.0 (from jinja2>=3.1)
-#18 14.80   Downloading markupsafe-3.0.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
-#18 14.86 Collecting requests>=2.28.0 (from gnani-vachana>=0.8.2)
-#18 15.00   Downloading requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
-#18 15.05 Collecting pyasn1-modules>=0.2.1 (from google-auth>=2.30)
-#18 15.17   Downloading pyasn1_modules-0.4.2-py3-none-any.whl.metadata (3.5 kB)
-#18 15.24 Collecting aiofiles<27,>=24.1.0 (from pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 15.36   Downloading aiofiles-25.1.0-py3-none-any.whl.metadata (6.3 kB)
-#18 16.28 Collecting aiohttp<4,>=3.14.4 (from pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 16.38   Downloading aiohttp-3.14.5-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (8.3 kB)
-#18 16.42 Collecting docstring_parser<1,>=0.16 (from pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 16.52   Downloading docstring_parser-0.18.0-py3-none-any.whl.metadata (3.5 kB)
-#18 16.56 Collecting loguru~=0.7.3 (from pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 16.66   Downloading loguru-0.7.3-py3-none-any.whl.metadata (22 kB)
-#18 16.73 Collecting loudness<1,>=0.2.0 (from pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 16.84   Downloading loudness-0.2.0-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (4.8 kB)
-#18 16.89 Collecting Markdown<4,>=3.7 (from pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 17.03   Downloading markdown-3.11.2-py3-none-any.whl.metadata (5.1 kB)
-#18 17.11 Collecting sentencex==1.0.32 (from pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 17.30   Downloading sentencex-1.0.32-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (1.4 kB)
-#18 17.65 Collecting Pillow<14,>=11.1.0 (from pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 17.81   Downloading pillow-13.0.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (9.1 kB)
-#18 18.01 Collecting protobuf<7,>=5.29.6 (from pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 18.16   Downloading protobuf-6.33.6-cp39-abi3-manylinux2014_x86_64.whl.metadata (593 bytes)
-#18 18.27 Collecting resampy~=0.4.3 (from pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 18.42   Downloading resampy-0.4.3-py3-none-any.whl.metadata (3.0 kB)
-#18 18.43 Collecting soundfile>=0.12
-#18 18.57   Downloading soundfile-0.13.1-py2.py3-none-manylinux_2_28_x86_64.whl.metadata (16 kB)
-#18 18.66 Collecting soxr~=1.0.0 (from pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 18.80   Downloading soxr-1.0.0-cp312-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (5.6 kB)
-#18 19.02 Collecting openai<4,>=1.74.0 (from pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 19.15   Downloading openai-3.39.0-py3-none-any.whl.metadata (44 kB)
-#18 19.29 Collecting numba<1,>=0.61.2 (from pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 19.41   Downloading numba-0.68.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (2.8 kB)
-#18 19.45 Collecting num2words>=0.5.14 (from pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 19.57   Downloading num2words-0.5.14-py3-none-any.whl.metadata (13 kB)
-#18 19.70 Collecting onnxruntime<2,>=1.24.3 (from pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 19.82   Downloading onnxruntime-1.31.1-cp312-cp312-manylinux_2_28_x86_64.whl.metadata (5.8 kB)
-#18 20.12 Collecting psycopg-binary==3.3.6 (from psycopg[binary]>=3.2)
-#18 20.23   Downloading psycopg_binary-3.3.6-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.7 kB)
-#18 20.49 Collecting greenlet>=1 (from sqlalchemy[asyncio]>=2.0.30)
-#18 20.59   Downloading greenlet-3.5.6-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
-#18 20.63 Collecting aiohappyeyeballs>=2.5.0 (from aiohttp<4,>=3.14.4->pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 20.74   Downloading aiohappyeyeballs-2.7.1-py3-none-any.whl.metadata (5.9 kB)
-#18 20.77 Collecting aiosignal>=1.4.0 (from aiohttp<4,>=3.14.4->pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 20.87   Downloading aiosignal-1.4.0-py3-none-any.whl.metadata (3.7 kB)
-#18 20.91 Collecting attrs>=17.3.0 (from aiohttp<4,>=3.14.4->pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 21.01   Downloading attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
-#18 21.10 Collecting frozenlist>=1.1.1 (from aiohttp<4,>=3.14.4->pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 ...
+#24 [web build 5/6] COPY . .
+#24 DONE 0.1s
 
-#20 [mock-agent stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "pydantic>=2.7" "requests"
-#20 11.18   Downloading pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.5 kB)
-#20 11.31 Collecting typing-extensions>=4.16.0 (from pydantic>=2.7)
-#20 12.02   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
-#20 12.13 Collecting typing-inspection>=0.4.4 (from pydantic>=2.7)
-#20 12.76   Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
-#20 13.05 Collecting charset_normalizer<4,>=2 (from requests)
-#20 13.59   Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (46 kB)
-#20 13.82 Collecting idna<4,>=2.5 (from requests)
-#20 14.31   Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
-#20 14.40 Collecting urllib3<3,>=1.26 (from requests)
-#20 15.02   Downloading urllib3-2.8.0-py3-none-any.whl.metadata (7.4 kB)
-#20 15.15 Collecting certifi>=2023.5.7 (from requests)
-#20 15.91   Downloading certifi-2026.10.23-py3-none-any.whl.metadata (2.5 kB)
-#20 16.70 Downloading gnani_vachana-0.8.2-py3-none-any.whl (41 kB)
-#20 17.65 Downloading websockets-15.0.1-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (182 kB)
-#20 20.52 Downloading pydantic-2.14.1-py3-none-any.whl (488 kB)
-#20 ...
+#25 [mock-agent] exporting to image
+#25 exporting layers done
+#25 exporting manifest sha256:2516aa9c317781a4852ed27b68192efc449a8e90fecba4c02dd88fb593781e83 done
+#25 exporting config sha256:6e3b124d4832a797f042a19e4e78a3e44872330c4440fd6c7566973208c779c8 done
+#25 exporting attestation manifest sha256:e9c99dc7e0e7329b3f7b4d7c3898a5fe23637f34e06dfcb4658ce18e9fb5e306 done
+#25 exporting manifest list sha256:9787930475208d5735b35521e1aacfa624ce5b040d898e89e0dab1c040b28f3b done
+#25 naming to docker.io/library/pqa-mock-agent:latest done
+#25 unpacking to docker.io/library/pqa-mock-agent:latest 0.0s done
+#25 DONE 0.1s
 
-#18 [retrier stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "fastapi>=0.121" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy[asyncio]>=2.0.30" "python-multipart>=0.0.9" "pydantic-settings>=2.3" "cryptography>=42" "httpx>=0.27" "jinja2>=3.1" "numpy>=1.26" "scipy>=1.11" "pyyaml>=6" "rapidfuzz>=3.9" "soundfile>=0.12" "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "google-auth>=2.30" "pipecat-ai[silero]>=1.13.0"
-#18 21.25   Downloading frozenlist-1.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (20 kB)
-#18 21.64 Collecting multidict<8.0,>=4.5 (from aiohttp<4,>=3.14.4->pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 21.87   Downloading multidict-7.2.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (6.1 kB)
-#18 21.99 Collecting propcache>=0.2.0 (from aiohttp<4,>=3.14.4->pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 22.21   Downloading propcache-0.5.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (25 kB)
-#18 22.72 Collecting yarl<2.0,>=1.25.1 (from aiohttp<4,>=3.14.4->pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 23.00   Downloading yarl-1.25.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (111 kB)
-#18 23.19 Collecting pycparser (from cffi>=2.0.0->cryptography>=42)
-#18 23.48   Downloading pycparser-3.12-py3-none-any.whl.metadata (9.7 kB)
-#18 23.56 Collecting docopt>=0.6.2 (from num2words>=0.5.14->pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 23.90   Downloading docopt-0.6.2.tar.gz (25 kB)
-#18 23.95   Installing build dependencies: started
-#18 ...
+#26 [simulator stage-0 5/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir --no-deps /app
+#26 ...
 
-#19 [web build 4/6] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/ca; fi;     npm ci
-#19 13.94 npm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.
-#19 ...
+#27 [mock-agent] resolving provenance for metadata file
+#27 DONE 0.0s
 
-#18 [retrier stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "fastapi>=0.121" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy[asyncio]>=2.0.30" "python-multipart>=0.0.9" "pydantic-settings>=2.3" "cryptography>=42" "httpx>=0.27" "jinja2>=3.1" "numpy>=1.26" "scipy>=1.11" "pyyaml>=6" "rapidfuzz>=3.9" "soundfile>=0.12" "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "google-auth>=2.30" "pipecat-ai[silero]>=1.13.0"
-#18 26.89   Installing build dependencies: finished with status 'done'
-#18 26.90   Getting requirements to build wheel: started
-#18 27.14   Getting requirements to build wheel: finished with status 'done'
-#18 27.14   Preparing metadata (pyproject.toml): started
-#18 27.65   Preparing metadata (pyproject.toml): finished with status 'done'
-#18 27.76 Collecting llvmlite<0.51,>=0.50.0dev0 (from numba<1,>=0.61.2->pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 27.88   Downloading llvmlite-0.50.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (5.1 kB)
-#18 27.93 Collecting flatbuffers (from onnxruntime<2,>=1.24.3->pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 28.08   Downloading flatbuffers-25.12.19-py2.py3-none-any.whl.metadata (1.0 kB)
-#18 28.13 Collecting httpx2<3,>=2.12.0 (from openai<4,>=1.74.0->pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 28.87   Downloading httpx2-2.16.0-py3-none-any.whl.metadata (10 kB)
-#18 ...
+#28 [web build 6/6] RUN npm run build
+#28 0.407 
+#28 0.407 > pareeksha-web@0.1.0 build
+#28 0.407 > next build
+#28 0.407 
+#28 0.998 ▲ Next.js 16.4.3 (Turbopack)
+#28 1.051 ✓ Running next.config.ts took 52ms
+#28 1.059 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+#28 1.059 This information is used to shape Next.js' roadmap and prioritize features.
+#28 1.059 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+#28 1.059 https://nextjs.org/telemetry
+#28 1.059 
+#28 1.111 
+#28 1.161   Creating an optimized production build ...
+#28 ...
 
-#19 [web build 4/6] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/ca; fi;     npm ci
-#19 26.96 npm notice
-#19 26.96 npm notice New major version of npm available! 10.9.9 -> 12.2.1
-#19 26.96 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.1
-#19 26.96 npm notice To update run: npm install -g npm@12.2.1
-#19 26.96 npm notice
-#19 26.96 
-#19 26.96 added 407 packages, and audited 408 packages in 26s
-#19 26.96 
-#19 26.96 158 packages are looking for funding
-#19 26.96   run `npm fund` for details
-#19 26.96 
-#19 26.96 found 0 vulnerabilities
-#19 DONE 28.8s
+#26 [reconciler stage-0 5/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir --no-deps /app
+#26 0.679 Processing /app
+#26 0.683   Installing build dependencies: started
+#26 2.030   Installing build dependencies: finished with status 'done'
+#26 2.034   Getting requirements to build wheel: started
+#26 2.278   Getting requirements to build wheel: finished with status 'done'
+#26 2.280   Preparing metadata (pyproject.toml): started
+#26 2.560   Preparing metadata (pyproject.toml): finished with status 'done'
+#26 2.567 Building wheels for collected packages: pareeksha
+#26 2.567   Building wheel for pareeksha (pyproject.toml): started
+#26 2.934   Building wheel for pareeksha (pyproject.toml): finished with status 'done'
+#26 2.935   Created wheel for pareeksha: filename=pareeksha-0.2.0-py3-none-any.whl size=354747 sha256=4cc469b704f876c74ef48c5f9180e36caf5e4c55005b969dca4b69aa886b027f
+#26 2.936   Stored in directory: /tmp/pip-ephem-wheel-cache-vc1g9ucx/wheels/54/1b/b7/aa63e25c8f14f4f2ae7b04e6097bdecb770e455c5c1ee0a600
+#26 2.939 Successfully built pareeksha
+#26 2.940 Installing collected packages: pareeksha
+#26 3.251 Successfully installed pareeksha-0.2.0
+#26 3.251 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#26 3.385 
+#26 3.385 [notice] A new release of pip is available: 25.0.1 -> 26.2.2
+#26 3.385 [notice] To update, run: pip install --upgrade pip
+#26 DONE 3.5s
 
-#18 [retrier stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "fastapi>=0.121" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy[asyncio]>=2.0.30" "python-multipart>=0.0.9" "pydantic-settings>=2.3" "cryptography>=42" "httpx>=0.27" "jinja2>=3.1" "numpy>=1.26" "scipy>=1.11" "pyyaml>=6" "rapidfuzz>=3.9" "soundfile>=0.12" "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "google-auth>=2.30" "pipecat-ai[silero]>=1.13.0"
-#18 28.98 Collecting jiter<1,>=0.16.0 (from openai<4,>=1.74.0->pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 ...
+#29 [outbox-relay] exporting to image
+#29 exporting layers 1.6s done
+#29 exporting manifest sha256:4528f90cda2fccbc9be429b35602bbb1383be811c84a624fba2868fe30ed6918
+#29 exporting manifest sha256:4528f90cda2fccbc9be429b35602bbb1383be811c84a624fba2868fe30ed6918 0.1s done
+#29 exporting config sha256:f8bb76803a131788717428607a738fb37d2be6038608a10fe17fd0b87f744012 0.1s done
+#29 exporting attestation manifest sha256:d697551683525e06548d1f28978c2e68bc55f0490e7aa192ff5f999ec5a12701
+#29 exporting attestation manifest sha256:d697551683525e06548d1f28978c2e68bc55f0490e7aa192ff5f999ec5a12701 0.1s done
+#29 exporting manifest list sha256:0375e63fad7b8a1ff2f04fa129b09e20f6d1a6febc456c01f9a9115c2626aa61 0.0s done
+#29 naming to docker.io/library/pqa-outbox-relay:latest 0.0s done
+#29 unpacking to docker.io/library/pqa-outbox-relay:latest
+#29 ...
 
-#21 [web build 5/6] COPY . .
-#21 DONE 0.2s
+#30 [dialect] exporting to image
+#30 exporting layers 1.6s done
+#30 exporting manifest sha256:7658977fe4309511c1c5310a07273e5ffe71faea2eda9895ba25b98aa93dc450 0.1s done
+#30 exporting config sha256:73d365590a1ac1bc6d8def79473226684f19d5aa0b450d00215baf4721f366a5 0.1s done
+#30 exporting attestation manifest sha256:8247f84046bd842c727633f89dfa59da5034769e950753ddfb47dbaa86811e18 0.1s done
+#30 exporting manifest list sha256:919460bff292b5dde4a3d4a63171a050a34e184fec83d7e84a91dbbef79e2dd1 0.0s done
+#30 naming to docker.io/library/pqa-dialect:latest 0.0s done
+#30 unpacking to docker.io/library/pqa-dialect:latest 4.8s done
+#30 ...
 
-#18 [retrier stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "fastapi>=0.121" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy[asyncio]>=2.0.30" "python-multipart>=0.0.9" "pydantic-settings>=2.3" "cryptography>=42" "httpx>=0.27" "jinja2>=3.1" "numpy>=1.26" "scipy>=1.11" "pyyaml>=6" "rapidfuzz>=3.9" "soundfile>=0.12" "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "google-auth>=2.30" "pipecat-ai[silero]>=1.13.0"
-#18 29.12   Downloading jiter-0.18.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.2 kB)
-#18 29.18 Collecting sniffio (from openai<4,>=1.74.0->pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 29.31   Downloading sniffio-1.3.1-py3-none-any.whl.metadata (3.9 kB)
-#18 29.40 Collecting pyasn1<0.7.0,>=0.6.1 (from pyasn1-modules>=0.2.1->google-auth>=2.30)
-#18 29.54   Downloading pyasn1-0.6.5-py3-none-any.whl.metadata (8.4 kB)
-#18 29.57 Collecting annotated-types>=0.6.0 (from pydantic>=2.9.0->fastapi>=0.121)
-#18 29.69   Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
-#18 30.46 Collecting pydantic-core==2.50.1 (from pydantic>=2.9.0->fastapi>=0.121)
-#18 30.67   Downloading pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.5 kB)
-#18 30.80 Collecting charset_normalizer<4,>=2 (from requests>=2.28.0->gnani-vachana>=0.8.2)
-#18 31.09   Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (46 kB)
-#18 31.26 Collecting urllib3<3,>=1.26 (from requests>=2.28.0->gnani-vachana>=0.8.2)
-#18 31.83   Downloading urllib3-2.8.0-py3-none-any.whl.metadata (7.4 kB)
-#18 32.00 Collecting httpcore2==2.16.0 (from httpx2<3,>=2.12.0->openai<4,>=1.74.0->pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 32.46   Downloading httpcore2-2.16.0-py3-none-any.whl.metadata (27 kB)
-#18 32.54 Collecting truststore>=0.10 (from httpx2<3,>=2.12.0->openai<4,>=1.74.0->pipecat-ai>=1.13.0->pipecat-ai[silero]>=1.13.0)
-#18 32.90   Downloading truststore-0.10.5-py3-none-any.whl.metadata (4.5 kB)
-#18 33.30 Downloading fastapi-0.162.0-py3-none-any.whl (148 kB)
-#18 33.71 Downloading uvicorn-0.54.0-py3-none-any.whl (87 kB)
-#18 34.02 Downloading psycopg-3.3.6-py3-none-any.whl (215 kB)
-#18 34.40 Downloading aiokafka-0.14.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.1 MB)
-#18 35.47    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.1/1.1 MB 1.1 MB/s eta 0:00:00
-#18 35.67 Downloading alembic-1.20.1-py3-none-any.whl (270 kB)
-#18 36.05 Downloading sqlalchemy-2.1.6-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (4.7 MB)
-#18 ...
+#31 [planner] exporting to image
+#31 exporting layers 1.6s done
+#31 exporting manifest sha256:d5e312d9376b45400dcec51b2f48276deedcb982a1903b225b36312a7b214cfb 0.1s done
+#31 exporting config sha256:076241f9ec0ddfeb90e4ab1caf60f470fe980c67e76cd37198e1286c15786e54 0.1s done
+#31 exporting attestation manifest sha256:310db315bcd9fb3ffdd4c20143469ca28ee25f99a5244f523ec8928022d478c1 0.1s done
+#31 exporting manifest list sha256:4e86df33db20c07437169b3d9e134c914fb6d1c129f5aa1793336592bc82a3da 0.0s done
+#31 naming to docker.io/library/pqa-planner:latest 0.0s done
+#31 unpacking to docker.io/library/pqa-planner:latest 5.1s done
+#31 ...
 
-#20 [mock-agent stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "pydantic>=2.7" "requests"
-#20 28.87 Downloading pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.2 MB)
-#20 ...
+#29 [outbox-relay] exporting to image
+#29 unpacking to docker.io/library/pqa-outbox-relay:latest 5.1s done
+#29 DONE 7.4s
 
-#22 [web build 6/6] RUN npm run build
-#22 0.401 
-#22 0.401 > pareeksha-web@0.1.0 build
-#22 0.401 > next build
-#22 0.401 
-#22 1.110 ▲ Next.js 16.4.3 (Turbopack)
-#22 1.170 ✓ Running next.config.ts took 58ms
-#22 1.180 Attention: Next.js now collects completely anonymous telemetry regarding usage.
-#22 1.180 This information is used to shape Next.js' roadmap and prioritize features.
-#22 1.182 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
-#22 1.182 https://nextjs.org/telemetry
-#22 1.182 
-#22 1.257 
-#22 1.313   Creating an optimized production build ...
-#22 10.33 ✓ Compiled successfully in 9.0s
-#22 10.37   Running TypeScript ...
-#22 ...
+#30 [dialect] exporting to image
+#30 DONE 7.3s
 
-#18 [retrier stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "fastapi>=0.121" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy[asyncio]>=2.0.30" "python-multipart>=0.0.9" "pydantic-settings>=2.3" "cryptography>=42" "httpx>=0.27" "jinja2>=3.1" "numpy>=1.26" "scipy>=1.11" "pyyaml>=6" "rapidfuzz>=3.9" "soundfile>=0.12" "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "google-auth>=2.30" "pipecat-ai[silero]>=1.13.0"
-#18 40.29    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.7/4.7 MB 1.1 MB/s eta 0:00:00
-#18 40.45 Downloading python_multipart-0.0.32-py3-none-any.whl (30 kB)
-#18 40.63 Downloading pydantic_settings-2.16.1-py3-none-any.whl (80 kB)
-#18 40.84 Downloading cryptography-50.0.2-cp311-abi3-manylinux_2_34_x86_64.whl (4.8 MB)
-#18 45.63    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.8/4.8 MB 969.2 kB/s eta 0:00:00
-#18 45.86 Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
-#18 46.14 Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
-#18 46.43 Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
-#18 46.73 Downloading numpy-2.5.4-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.7 MB)
-#18 ...
+#32 [finalizer] exporting to image
+#32 exporting layers 1.7s done
+#32 exporting manifest sha256:c6767ec6e58f5890e2accc8df07f08fcdaadece7f1eb4c18f5fae0328a3b7ffe 0.1s done
+#32 exporting config sha256:ccd76e31b624d334c19cce791fbec4328a00fa94222df1ffd0a554390c20b43e 0.1s done
+#32 exporting attestation manifest sha256:2370b78263fadd27f6806a50b1269412755c58fe2046162476cff37dae87a9b3 0.1s done
+#32 exporting manifest list sha256:7f703d69df3c5c86156850996ec85db67e6e7b0050e2b827588ac1dd36a30095 0.0s done
+#32 naming to docker.io/library/pqa-finalizer:latest 0.0s done
+#32 unpacking to docker.io/library/pqa-finalizer:latest 5.1s done
+#32 DONE 7.4s
 
-#20 [mock-agent stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "pydantic>=2.7" "requests"
-#20 49.77    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.2/2.2 MB 111.5 kB/s eta 0:00:00
-#20 50.57 Downloading requests-2.34.2-py3-none-any.whl (73 kB)
-#20 53.52 Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
-#20 54.71 Downloading certifi-2026.10.23-py3-none-any.whl (135 kB)
-#20 ...
+#33 [generator] exporting to image
+#33 exporting layers 1.7s done
+#33 exporting manifest sha256:753dc73766f2773b5c052245e6c08937152dafc95a690472d229b3a87c997955 0.1s done
+#33 exporting config sha256:bc99922114a803e14ecbb8f03972025858487111e04929fa6ad6d9d7262ed175 0.1s done
+#33 exporting attestation manifest sha256:76ded67aa02a6b9f940fd72976948c321d2bd2ba7eb478c958df46ea24f18c30 0.1s done
+#33 exporting manifest list sha256:ac6dc19b71df2c3f57ddc19171e720c58dd45dd9d2cb3a16be8042d8f1710910 0.0s done
+#33 naming to docker.io/library/pqa-generator:latest 0.0s done
+#33 unpacking to docker.io/library/pqa-generator:latest 5.1s done
+#33 DONE 7.4s
 
-#22 [web build 6/6] RUN npm run build
-#22 25.18   Finished TypeScript in 14.8s ...
-#22 25.19   Collecting page data using 3 workers ...
-#22 25.93   Generating static pages using 3 workers (0/20) ...
-#22 26.53   Generating static pages using 3 workers (5/20) 
-#22 26.79   Generating static pages using 3 workers (10/20) 
-#22 26.79   Generating static pages using 3 workers (15/20) 
-#22 26.94 ✓ Generating static pages using 3 workers (20/20) in 1014ms
-#22 26.95   Finalizing page optimization ...
-#22 26.97 
-#22 26.98 Route (app)
-#22 26.98 ┌ ○ /
-#22 26.98 ├ ○ /_not-found
-#22 26.98 ├ ○ /agents
-#22 26.98 ├ ƒ /agents/[id]
-#22 26.98 ├ ○ /agents/new
-#22 26.98 ├ ƒ /api/proxy/[...path]
-#22 26.98 ├ ○ /audits
-#22 26.98 ├ ○ /audits/new
-#22 26.98 ├ ○ /calibration
-#22 26.98 ├ ƒ /calls/[id]
-#22 26.98 ├ ○ /dialect
-#22 26.98 ├ ƒ /dialect/[reportId]
-#22 26.98 ├ ○ /dlq
-#22 26.98 ├ ○ /integrations
-#22 26.98 ├ ƒ /integrations/[id]
-#22 26.98 ├ ○ /noise-profiles
-#22 26.98 ├ ƒ /noise-profiles/[id]
-#22 26.98 ├ ○ /personas
-#22 26.98 ├ ƒ /personas/[id]
-#22 26.98 ├ ○ /regression
-#22 26.98 ├ ○ /runs
-#22 26.98 ├ ƒ /runs/[id]
-#22 26.98 ├ ○ /runs/compare
-#22 26.98 ├ ○ /runs/new
-#22 26.98 ├ ○ /scenarios
-#22 26.98 ├ ƒ /scenarios/[id]
-#22 26.98 ├ ○ /scenarios/new
-#22 26.98 └ ○ /settings/api-keys
-#22 26.98 
-#22 26.98 
-#22 26.98 ƒ Proxy (Middleware)
-#22 26.98 
-#22 26.98 ○  (Static)   prerendered as static content
-#22 26.98 ƒ  (Dynamic)  server-rendered on demand
-#22 26.98 
-#22 DONE 27.6s
+#34 [evaluator] exporting to image
+#34 exporting layers 1.6s done
+#34 exporting manifest sha256:a35d319bf4d9aa0415a9afd6c958a54308442f7d77620e8498abb00e591a738c 0.1s done
+#34 exporting config sha256:f8bb4b885c909500861d87615bf350d89d261a07c616f109363f48b464bb6948 0.1s done
+#34 exporting attestation manifest sha256:5a7fbbf8ae62df0c840d9d4414272b7729198d78d9c78e8626e0898a9034f34d 0.1s done
+#34 exporting manifest list sha256:fedaf235f56917dd933fdea0909c57731b26e1f81c3039658efe376cd070ff4a 0.0s done
+#34 naming to docker.io/library/pqa-evaluator:latest 0.0s done
+#34 unpacking to docker.io/library/pqa-evaluator:latest 5.1s done
+#34 DONE 7.4s
 
-#18 [retrier stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "fastapi>=0.121" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy[asyncio]>=2.0.30" "python-multipart>=0.0.9" "pydantic-settings>=2.3" "cryptography>=42" "httpx>=0.27" "jinja2>=3.1" "numpy>=1.26" "scipy>=1.11" "pyyaml>=6" "rapidfuzz>=3.9" "soundfile>=0.12" "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "google-auth>=2.30" "pipecat-ai[silero]>=1.13.0"
-#18 ...
-
-#20 [mock-agent stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "pydantic>=2.7" "requests"
-#20 56.76 Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (257 kB)
-#20 ...
-
-#23 [web stage-1 3/6] COPY --from=build /app/package.json ./
-#23 DONE 0.1s
-
-#20 [mock-agent stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "pydantic>=2.7" "requests"
-#20 59.83 Downloading idna-3.20-py3-none-any.whl (69 kB)
-#20 61.43 Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
-#20 62.45 Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
-#20 63.23 Downloading urllib3-2.8.0-py3-none-any.whl (135 kB)
-#20 ...
-
-#24 [web stage-1 4/6] COPY --from=build /app/node_modules ./node_modules
-#24 DONE 4.3s
-
-#25 [web stage-1 5/6] COPY --from=build /app/.next ./.next
-#25 DONE 0.4s
-
-#20 [mock-agent stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "pydantic>=2.7" "requests"
-#20 64.30 Installing collected packages: websockets, urllib3, typing-extensions, idna, charset_normalizer, certifi, annotated-types, typing-inspection, requests, pydantic-core, pydantic, gnani-vachana
-#20 ...
-
-#26 [web stage-1 6/6] COPY --from=build /app/next.config.ts ./
-#26 DONE 0.0s
-
-#27 [web] exporting to image
-#27 exporting layers
-#27 ...
-
-#20 [mock-agent stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "pydantic>=2.7" "requests"
-#20 65.24 Successfully installed annotated-types-0.8.0 certifi-2026.10.23 charset_normalizer-3.5.2 gnani-vachana-0.8.2 idna-3.20 pydantic-2.14.1 pydantic-core-2.50.1 requests-2.34.2 typing-extensions-4.16.0 typing-inspection-0.4.4 urllib3-2.8.0 websockets-15.0.1
-#20 65.24 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
-#20 65.35 
-#20 65.35 [notice] A new release of pip is available: 25.0.1 -> 26.2.2
-#20 65.35 [notice] To update, run: pip install --upgrade pip
-#20 DONE 65.6s
-
-#28 [mock-agent stage-0 4/5] COPY backend/pareeksha /app/pareeksha
-#28 DONE 0.1s
-
-#29 [mock-agent stage-0 5/5] COPY mock_agent /app/mock_agent
-#29 DONE 0.0s
-
-#18 [retrier stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "fastapi>=0.121" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy[asyncio]>=2.0.30" "python-multipart>=0.0.9" "pydantic-settings>=2.3" "cryptography>=42" "httpx>=0.27" "jinja2>=3.1" "numpy>=1.26" "scipy>=1.11" "pyyaml>=6" "rapidfuzz>=3.9" "soundfile>=0.12" "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "google-auth>=2.30" "pipecat-ai[silero]>=1.13.0"
-#18 57.45    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.7/16.7 MB 1.6 MB/s eta 0:00:00
-#18 57.62 Downloading scipy-1.18.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (35.3 MB)
-#18 ...
-
-#30 [mock-agent] exporting to image
-#30 exporting layers 1.3s done
-#30 exporting manifest sha256:6544b0469dae61bef6722cb81bd5531457b9591dfcd7fc31462aaf41823e469a
-#30 exporting manifest sha256:6544b0469dae61bef6722cb81bd5531457b9591dfcd7fc31462aaf41823e469a done
-#30 exporting config sha256:22f0601dd84bf49ce3a6ebd711e03336022dc82612e8b810d7d7f8908eac7440 done
-#30 exporting attestation manifest sha256:eeac3d274a6511f27475cc06eda0b37261da3f01a00f5edbb2af075339a4fb11 0.0s done
-#30 exporting manifest list sha256:7fbbdbeed06b7a97e0619d35234a797e3dc45f4517d6ec3ae358853886595612 done
-#30 naming to docker.io/library/prc-mock-agent:latest done
-#30 unpacking to docker.io/library/prc-mock-agent:latest
-#30 unpacking to docker.io/library/prc-mock-agent:latest 0.4s done
-#30 DONE 1.8s
-
-#31 [mock-agent] resolving provenance for metadata file
-#31 DONE 0.0s
-
-#27 [web] exporting to image
-#27 ...
-
-#18 [retrier stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "fastapi>=0.121" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy[asyncio]>=2.0.30" "python-multipart>=0.0.9" "pydantic-settings>=2.3" "cryptography>=42" "httpx>=0.27" "jinja2>=3.1" "numpy>=1.26" "scipy>=1.11" "pyyaml>=6" "rapidfuzz>=3.9" "soundfile>=0.12" "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "google-auth>=2.30" "pipecat-ai[silero]>=1.13.0"
-#18 79.88    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 35.3/35.3 MB 1.6 MB/s eta 0:00:00
-#18 80.06 Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
-#18 80.51    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 807.9/807.9 kB 1.9 MB/s eta 0:00:00
-#18 80.66 Downloading rapidfuzz-3.14.6-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (3.2 MB)
-#18 82.12    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.2/3.2 MB 2.2 MB/s eta 0:00:00
-#18 82.23 Downloading gnani_vachana-0.8.2-py3-none-any.whl (41 kB)
-#18 82.36 Downloading websockets-15.0.1-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (182 kB)
-#18 82.55 Downloading google_auth-2.62.0-py3-none-any.whl (267 kB)
-#18 82.77 Downloading pipecat_ai-1.14.0-py3-none-any.whl (12.1 MB)
-#18 92.55    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.1/12.1 MB 1.2 MB/s eta 0:00:00
-#18 92.72 Downloading sentencex-1.0.32-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.2 MB)
-#18 93.25    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 2.3 MB/s eta 0:00:00
-#18 93.39 Downloading soundfile-0.13.1-py2.py3-none-manylinux_2_28_x86_64.whl (1.3 MB)
-#18 93.94    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.3/1.3 MB 2.5 MB/s eta 0:00:00
-#18 94.07 Downloading psycopg_binary-3.3.6-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (5.2 MB)
-#18 ...
-
-#27 [web] exporting to image
-#27 exporting layers 30.5s done
-#27 exporting manifest sha256:61d4b69f2c926b4b00e180d33d8c36d066ff425d63d9a0b13b2e5ae264f8faf2 0.0s done
-#27 exporting config sha256:2a15aa2fc89f8bee880e5b348c8e179d448ceba6e609734028c3d86177d39da1 done
-#27 exporting attestation manifest sha256:192efd00318b70babebb329b1b67e91d62ecbd1bb96a348484a5abb66ed3e5ba done
-#27 exporting manifest list sha256:3fd2ac614795ecebb936f2f81cf51af839c827d52b9812ce9d6034f70b7a41a3 done
-#27 naming to docker.io/library/prc-web:latest done
-#27 unpacking to docker.io/library/prc-web:latest
-#27 ...
-
-#18 [retrier stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "fastapi>=0.121" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy[asyncio]>=2.0.30" "python-multipart>=0.0.9" "pydantic-settings>=2.3" "cryptography>=42" "httpx>=0.27" "jinja2>=3.1" "numpy>=1.26" "scipy>=1.11" "pyyaml>=6" "rapidfuzz>=3.9" "soundfile>=0.12" "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "google-auth>=2.30" "pipecat-ai[silero]>=1.13.0"
-#18 95.68    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.2/5.2 MB 3.3 MB/s eta 0:00:00
-#18 95.78 Downloading aiofiles-25.1.0-py3-none-any.whl (14 kB)
-#18 95.88 Downloading aiohttp-3.14.5-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.9 MB)
-#18 96.39    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.9/1.9 MB 3.8 MB/s eta 0:00:00
-#18 96.48 Downloading annotated_doc-0.0.5-py3-none-any.whl (5.3 kB)
-#18 96.57 Downloading cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (221 kB)
-#18 96.73 Downloading click-8.5.0-py3-none-any.whl (125 kB)
-#18 96.85 Downloading docstring_parser-0.18.0-py3-none-any.whl (22 kB)
-#18 96.94 Downloading greenlet-3.5.6-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (621 kB)
-#18 97.08    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 621.4/621.4 kB 4.8 MB/s eta 0:00:00
-#18 97.17 Downloading h11-0.16.0-py3-none-any.whl (37 kB)
-#18 97.27 Downloading loguru-0.7.3-py3-none-any.whl (61 kB)
-#18 97.36 Downloading loudness-0.2.0-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (121 kB)
-#18 97.47 Downloading markdown-3.11.2-py3-none-any.whl (114 kB)
-#18 97.58 Downloading markupsafe-3.0.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
-#18 97.66 Downloading num2words-0.5.14-py3-none-any.whl (163 kB)
-#18 97.78 Downloading numba-0.68.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (3.9 MB)
-#18 98.49    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.9/3.9 MB 5.5 MB/s eta 0:00:00
-#18 98.56 Downloading onnxruntime-1.31.1-cp312-cp312-manylinux_2_28_x86_64.whl (23.8 MB)
-#18 103.1    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 23.8/23.8 MB 5.3 MB/s eta 0:00:00
-#18 103.1 Downloading openai-3.39.0-py3-none-any.whl (2.4 MB)
-#18 103.5    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.4/2.4 MB 7.1 MB/s eta 0:00:00
-#18 103.6 Downloading anyio-4.15.1-py3-none-any.whl (132 kB)
-#18 103.6 Downloading idna-3.20-py3-none-any.whl (69 kB)
-#18 103.7 Downloading opentelemetry_api-1.45.1-py3-none-any.whl (60 kB)
-#18 103.8 Downloading pillow-13.0.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (7.1 MB)
-#18 ...
-
-#27 [web] exporting to image
-#27 unpacking to docker.io/library/prc-web:latest 11.9s done
-#27 DONE 42.5s
-
-#32 [web] resolving provenance for metadata file
-#32 DONE 0.0s
-
-#18 [retrier stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "fastapi>=0.121" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy[asyncio]>=2.0.30" "python-multipart>=0.0.9" "pydantic-settings>=2.3" "cryptography>=42" "httpx>=0.27" "jinja2>=3.1" "numpy>=1.26" "scipy>=1.11" "pyyaml>=6" "rapidfuzz>=3.9" "soundfile>=0.12" "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "google-auth>=2.30" "pipecat-ai[silero]>=1.13.0"
-#18 108.2    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 7.1/7.1 MB 1.6 MB/s eta 0:00:00
-#18 108.4 Downloading protobuf-6.33.6-cp39-abi3-manylinux2014_x86_64.whl (323 kB)
-#18 109.0 Downloading pyasn1_modules-0.4.2-py3-none-any.whl (181 kB)
-#18 109.5 Downloading pydantic-2.14.1-py3-none-any.whl (488 kB)
-#18 110.2 Downloading pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.2 MB)
-#18 111.5    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.2/2.2 MB 1.7 MB/s eta 0:00:00
-#18 111.7 Downloading python_dotenv-1.2.4-py3-none-any.whl (23 kB)
-#18 111.9 Downloading requests-2.34.2-py3-none-any.whl (73 kB)
-#18 112.2 Downloading certifi-2026.10.23-py3-none-any.whl (135 kB)
-#18 112.4 Downloading resampy-0.4.3-py3-none-any.whl (3.1 MB)
-#18 113.4    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.1/3.1 MB 3.2 MB/s eta 0:00:00
-#18 113.5 Downloading soxr-1.0.0-cp312-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (238 kB)
-#18 113.7 Downloading starlette-1.10.0-py3-none-any.whl (80 kB)
-#18 113.9 Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
-#18 114.0 Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
-#18 114.1 Downloading async_timeout-5.0.1-py3-none-any.whl (6.2 kB)
-#18 114.3 Downloading mako-1.4.3-py3-none-any.whl (80 kB)
-#18 114.4 Downloading packaging-26.3-py3-none-any.whl (129 kB)
-#18 114.5 Downloading aiohappyeyeballs-2.7.1-py3-none-any.whl (15 kB)
-#18 114.7 Downloading aiosignal-1.4.0-py3-none-any.whl (7.5 kB)
-#18 114.8 Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
-#18 114.9 Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
-#18 115.0 Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (257 kB)
-#18 115.2 Downloading frozenlist-1.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (242 kB)
-#18 115.3 Downloading httpx2-2.16.0-py3-none-any.whl (97 kB)
-#18 115.4 Downloading httpcore2-2.16.0-py3-none-any.whl (85 kB)
-#18 115.6 Downloading jiter-0.18.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (336 kB)
-#18 115.7 Downloading llvmlite-0.50.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (59.7 MB)
-#18 122.3    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 59.7/59.7 MB 9.1 MB/s eta 0:00:00
-#18 122.4 Downloading multidict-7.2.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (516 kB)
-#18 122.6 Downloading propcache-0.5.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (250 kB)
-#18 122.8 Downloading pyasn1-0.6.5-py3-none-any.whl (84 kB)
-#18 122.9 Downloading urllib3-2.8.0-py3-none-any.whl (135 kB)
-#18 123.1 Downloading yarl-1.25.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (117 kB)
-#18 123.3 Downloading flatbuffers-25.12.19-py2.py3-none-any.whl (26 kB)
-#18 123.5 Downloading pycparser-3.12-py3-none-any.whl (62 kB)
-#18 123.8 Downloading sniffio-1.3.1-py3-none-any.whl (10 kB)
-#18 124.3 Downloading truststore-0.10.5-py3-none-any.whl (19 kB)
-#18 124.7 Building wheels for collected packages: docopt
-#18 124.7   Building wheel for docopt (pyproject.toml): started
-#18 125.0   Building wheel for docopt (pyproject.toml): finished with status 'done'
-#18 125.1   Created wheel for docopt: filename=docopt-0.6.2-py2.py3-none-any.whl size=13781 sha256=571541524ac3029c3e70523de0498b977a61d56839e040a2ff5251ba5fc8aab0
-#18 125.1   Stored in directory: /tmp/pip-ephem-wheel-cache-n7komq50/wheels/1a/bf/a1/4cee4f7678c68c5875ca89eaccf460593539805c3906722228
-#18 125.1 Successfully built docopt
-#18 125.2 Installing collected packages: flatbuffers, docopt, websockets, urllib3, typing-extensions, truststore, sniffio, sentencex, rapidfuzz, pyyaml, python-multipart, python-dotenv, pycparser, pyasn1, psycopg-binary, protobuf, propcache, Pillow, packaging, numpy, num2words, multidict, MarkupSafe, Markdown, loguru, llvmlite, jiter, idna, h11, greenlet, frozenlist, docstring_parser, click, charset_normalizer, certifi, attrs, async-timeout, annotated-types, annotated-doc, aiohappyeyeballs, aiofiles, yarl, uvicorn, typing-inspection, sqlalchemy, soxr, scipy, requests, pydantic-core, pyasn1-modules, psycopg, opentelemetry-api, onnxruntime, numba, Mako, loudness, jinja2, httpcore2, httpcore, cffi, anyio, aiosignal, aiokafka, starlette, soundfile, resampy, pydantic, httpx2, httpx, gnani-vachana, cryptography, alembic, aiohttp, pydantic-settings, openai, google-auth, fastapi, pipecat-ai
-#18 153.6 Successfully installed Mako-1.4.3 Markdown-3.11.2 MarkupSafe-3.0.4 Pillow-13.0.0 aiofiles-25.1.0 aiohappyeyeballs-2.7.1 aiohttp-3.14.5 aiokafka-0.14.0 aiosignal-1.4.0 alembic-1.20.1 annotated-doc-0.0.5 annotated-types-0.8.0 anyio-4.15.1 async-timeout-5.0.1 attrs-26.1.0 certifi-2026.10.23 cffi-2.1.1 charset_normalizer-3.5.2 click-8.5.0 cryptography-50.0.2 docopt-0.6.2 docstring_parser-0.18.0 fastapi-0.162.0 flatbuffers-25.12.19 frozenlist-1.8.0 gnani-vachana-0.8.2 google-auth-2.62.0 greenlet-3.5.6 h11-0.16.0 httpcore-1.0.9 httpcore2-2.16.0 httpx-0.28.1 httpx2-2.16.0 idna-3.20 jinja2-3.1.6 jiter-0.18.0 llvmlite-0.50.0 loguru-0.7.3 loudness-0.2.0 multidict-7.2.1 num2words-0.5.14 numba-0.68.0 numpy-2.5.4 onnxruntime-1.31.1 openai-3.39.0 opentelemetry-api-1.45.1 packaging-26.3 pipecat-ai-1.14.0 propcache-0.5.4 protobuf-6.33.6 psycopg-3.3.6 psycopg-binary-3.3.6 pyasn1-0.6.5 pyasn1-modules-0.4.2 pycparser-3.12 pydantic-2.14.1 pydantic-core-2.50.1 pydantic-settings-2.16.1 python-dotenv-1.2.4 python-multipart-0.0.32 pyyaml-6.0.3 rapidfuzz-3.14.6 requests-2.34.2 resampy-0.4.3 scipy-1.18.1 sentencex-1.0.32 sniffio-1.3.1 soundfile-0.13.1 soxr-1.0.0 sqlalchemy-2.1.6 starlette-1.10.0 truststore-0.10.5 typing-extensions-4.16.0 typing-inspection-0.4.4 urllib3-2.8.0 uvicorn-0.54.0 websockets-15.0.1 yarl-1.25.1
-#18 153.6 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
-#18 153.7 
-#18 153.7 [notice] A new release of pip is available: 25.0.1 -> 26.2.2
-#18 153.7 [notice] To update, run: pip install --upgrade pip
-#18 DONE 155.6s
-
-#33 [simulator stage-0 4/5] COPY . /app
-#33 DONE 0.3s
-
-#34 [generator stage-0 5/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir --no-deps /app
-#34 0.631 Processing /app
-#34 0.634   Installing build dependencies: started
-#34 1.962   Installing build dependencies: finished with status 'done'
-#34 1.964   Getting requirements to build wheel: started
-#34 2.266   Getting requirements to build wheel: finished with status 'done'
-#34 2.269   Preparing metadata (pyproject.toml): started
-#34 2.508   Preparing metadata (pyproject.toml): finished with status 'done'
-#34 2.514 Building wheels for collected packages: pareeksha
-#34 2.515   Building wheel for pareeksha (pyproject.toml): started
-#34 3.006   Building wheel for pareeksha (pyproject.toml): finished with status 'done'
-#34 3.008   Created wheel for pareeksha: filename=pareeksha-0.2.0-py3-none-any.whl size=354551 sha256=b8e7ab160eca796884f3ca1e152f50c348669139aeb0cfa1855ceb27450e351c
-#34 3.008   Stored in directory: /tmp/pip-ephem-wheel-cache-2u5_yx05/wheels/54/1b/b7/aa63e25c8f14f4f2ae7b04e6097bdecb770e455c5c1ee0a600
-#34 3.012 Successfully built pareeksha
-#34 3.012 Installing collected packages: pareeksha
-#34 3.265 Successfully installed pareeksha-0.2.0
-#34 3.265 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
-#34 3.358 
-#34 3.358 [notice] A new release of pip is available: 25.0.1 -> 26.2.2
-#34 3.358 [notice] To update, run: pip install --upgrade pip
-#34 DONE 3.5s
-
-#35 [finalizer] exporting to image
-#35 exporting layers
-#35 ...
+#35 [migrate] exporting to image
+#35 exporting layers 1.7s done
+#35 exporting manifest sha256:08308a714956e93d34141198c9df4dbb5d389a718c4f5b857eaeeefcd8740a75 0.1s done
+#35 exporting config sha256:8438415c245d40416277fa4c2abbd6b46f18b6b1959157899dbb4b959611b8d7 0.1s done
+#35 exporting attestation manifest sha256:19420999fb8c763a45b6b3729e57929ba43d87d0a2edaf7bd47b281bcc2837c5 0.1s done
+#35 exporting manifest list sha256:ad7c6298c4991b3e12bf9f73f5d9020961327538825cedaf63fc730b1f9d5cfc 0.0s done
+#35 naming to docker.io/library/pqa-migrate:latest 0.0s done
+#35 unpacking to docker.io/library/pqa-migrate:latest 5.1s done
+#35 DONE 7.4s
 
 #36 [retrier] exporting to image
-#36 ...
+#36 exporting layers 1.7s done
+#36 exporting manifest sha256:e7fe2b2b8b135c834865fe59c9b3120d2252ba53ff016b274631c1683634ecee 0.1s done
+#36 exporting config sha256:77ebee4e946135278c770d12e06441153f7b8c3b9ab451850008e54014a04f36 0.1s done
+#36 exporting attestation manifest sha256:126485411177d1ad3f63d408996e31cbf66735fbef52706c6699d16f1475f9ec 0.1s done
+#36 exporting manifest list sha256:6c044af4c8edfd8bf6a4ac18d7b2ed08d58bf52b7a7c018e888593c135fae105 0.0s done
+#36 naming to docker.io/library/pqa-retrier:latest done
+#36 unpacking to docker.io/library/pqa-retrier:latest 5.1s done
+#36 DONE 7.4s
 
-#37 [generator] exporting to image
-#37 ...
+#31 [planner] exporting to image
+#31 DONE 7.4s
 
-#38 [outbox-relay] exporting to image
-#38 ...
+#37 [auditor] exporting to image
+#37 exporting layers 1.6s done
+#37 exporting manifest sha256:c4fba01de174759b25a170e27f0a0ef76f9292a525ed957fb665f3e3093d9c24 0.1s done
+#37 exporting config sha256:8886af02d4aac7ab50dc76c7799cd9151e9fd4ccaede1ae16be095c15a852101 0.1s done
+#37 exporting attestation manifest sha256:694a0201f4d206511baaa4be91913ad46493cd669203c039b5c46d531fc8cdb5 0.1s done
+#37 exporting manifest list sha256:52f97beb194888572711c3b8470926b3366dc8c090bdf6af4c5ad277be62bace 0.0s done
+#37 naming to docker.io/library/pqa-auditor:latest 0.0s done
+#37 unpacking to docker.io/library/pqa-auditor:latest 5.1s done
+#37 DONE 7.4s
 
-#39 [migrate] exporting to image
-#39 ...
+#38 [reconciler] exporting to image
+#38 exporting layers 1.6s done
+#38 exporting manifest sha256:c30a1f61dc0a11f9e3e41a9fcc78c8e9710847014f28baf316dbd0af865b376a 0.1s done
+#38 exporting config sha256:612433a863b1f8a080cc8f03b1c18f8e013b53caf5520dee716c9bf8ec5967d8 0.1s done
+#38 exporting attestation manifest sha256:54433a98c9c11456de1d371c69df049d4ed5b27f52fb28952b54a4bf0298aa0c 0.1s done
+#38 exporting manifest list sha256:a6575e3192de47721009c4d1fe53598054c42ba4b754662583f2b3662a811be1 0.0s done
+#38 naming to docker.io/library/pqa-reconciler:latest 0.0s done
+#38 unpacking to docker.io/library/pqa-reconciler:latest 5.1s done
+#38 DONE 7.4s
 
-#40 [integrations] exporting to image
-#40 ...
+#39 [api] exporting to image
+#39 exporting layers 1.6s done
+#39 exporting manifest sha256:f1041fb022cb1dc5560807fd97c06872f17e7567819709cf1d380d4c5baa8528 0.1s done
+#39 exporting config sha256:2940a077ae954f7faa055a388195ce8ee6865f2f82e285413e3f73bbda6f526e 0.1s done
+#39 exporting attestation manifest sha256:70e65f5e7dd8935900d46128b90bc6a51d0d7af856f6267822f9574ff71b8352 0.1s done
+#39 exporting manifest list sha256:4783e8e30f1768bd5cd78d4a09d8a7a5ee09d04f9c30cdbadff993dd4deba283 0.0s done
+#39 naming to docker.io/library/pqa-api:latest 0.0s done
+#39 unpacking to docker.io/library/pqa-api:latest 5.1s done
+#39 DONE 7.4s
 
-#41 [simulator] exporting to image
-#41 ...
+#40 [simulator] exporting to image
+#40 exporting layers 1.7s done
+#40 exporting manifest sha256:4fdf34bd48ba138be2035d68048af8e22829201b1ca46e7f1058c0e74643fdfd 0.1s done
+#40 exporting config sha256:2c2cd3a83412e7c9ee05c1a3470a1d442bca700716d3b740e00500658d73e3b1 0.1s done
+#40 exporting attestation manifest sha256:50587bce5183243bb25933556972c66a7094d2a588ed242afd7135b5de40a61c 0.1s done
+#40 exporting manifest list sha256:da6445d77d1e4a58d6effe8791b476dd4064864abcd782767d87ba92f8750b44 0.0s done
+#40 naming to docker.io/library/pqa-simulator:latest done
+#40 unpacking to docker.io/library/pqa-simulator:latest 5.1s done
+#40 DONE 7.4s
 
-#42 [evaluator] exporting to image
-#42 ...
+#41 [dlq-recorder] exporting to image
+#41 exporting layers 1.6s done
+#41 exporting manifest sha256:64cd48c548bbf25c3fc9327be9e2224f5115f2caaa280de6330c34f29b460dc6 0.1s done
+#41 exporting config sha256:34435d65e436edb69e9f88e134b4c9924a332d302977d49b4ef545eebfe6e13b 0.1s done
+#41 exporting attestation manifest sha256:066f4a4e4ba90ae74bd87a3ea97f01681262aaa9c6241622f630c15e0f6f9e17 0.1s done
+#41 exporting manifest list sha256:ed92c856bdb5bc1ab05b084221b0b7e183e4e44338805350e7c348632b66fa2a 0.0s done
+#41 naming to docker.io/library/pqa-dlq-recorder:latest 0.0s done
+#41 unpacking to docker.io/library/pqa-dlq-recorder:latest 5.3s done
+#41 DONE 7.5s
 
-#43 [dlq-recorder] exporting to image
-#43 ...
+#42 [integrations] exporting to image
+#42 exporting layers 1.7s done
+#42 exporting manifest sha256:5d36c69842105be252bdbf4b0010f4261861e9a26e29d1b204d01f0f5ebf56e4 0.1s done
+#42 exporting config sha256:11c983debe1012236a0e40bf319db6a84281a825fb0bea4fd09b2b907443f709 0.1s done
+#42 exporting attestation manifest sha256:1e579f0186a1a4f9cfa3d015f3ee9b33538fe8ebdb9ddbeea1cdfa366a911771 0.1s done
+#42 exporting manifest list sha256:74f38a04c53c5448e8b51e19f6456d9664326429488ca2d90eb4c6f0afb088de 0.0s done
+#42 naming to docker.io/library/pqa-integrations:latest 0.0s done
+#42 unpacking to docker.io/library/pqa-integrations:latest 5.3s done
+#42 DONE 7.5s
 
-#44 [reconciler] exporting to image
-#44 ...
+#28 [web build 6/6] RUN npm run build
+#28 ...
 
-#45 [dialect] exporting to image
-#45 ...
+#43 [dialect] resolving provenance for metadata file
+#43 DONE 0.8s
 
-#46 [auditor] exporting to image
-#46 ...
+#44 [reconciler] resolving provenance for metadata file
+#44 DONE 0.3s
 
-#47 [api] exporting to image
-#47 ...
+#45 [evaluator] resolving provenance for metadata file
+#45 DONE 0.7s
 
-#48 [planner] exporting to image
-#48 ...
+#46 [integrations] resolving provenance for metadata file
+#46 DONE 0.1s
 
-#37 [generator] exporting to image
-#37 exporting layers 30.9s done
-#37 exporting manifest sha256:9b908e1a615c3aff1116d3960d33ff62151254e7fd65fd7b8a78250a5f066d54
-#37 exporting manifest sha256:9b908e1a615c3aff1116d3960d33ff62151254e7fd65fd7b8a78250a5f066d54 0.0s done
-#37 exporting config sha256:3a8f5df1ba3be0c475fc8cd0cd63a0bfdcabaafc9cebccd180b65b4dcd4f3c02 0.1s done
-#37 exporting attestation manifest sha256:6c6c9152e12f336d2857ac6f969f92d187d505813f194d9500e492e66a7a469b
-#37 exporting attestation manifest sha256:6c6c9152e12f336d2857ac6f969f92d187d505813f194d9500e492e66a7a469b 0.1s done
-#37 exporting manifest list sha256:a5f2216b7c886921c2dad6d6ec3a480bcdca64dab2b45865d8f1cc3326e7a13f 0.1s done
-#37 naming to docker.io/library/prc-generator:latest
-#37 naming to docker.io/library/prc-generator:latest 0.0s done
-#37 unpacking to docker.io/library/prc-generator:latest
-#37 ...
+#47 [api] resolving provenance for metadata file
+#47 DONE 0.3s
 
-#39 [migrate] exporting to image
-#39 exporting layers 30.9s done
-#39 exporting manifest sha256:d87f69dcc5eda237a2caf6e339d5863b0ce7b33db1df32f9c0866eca5014d78a 0.1s done
-#39 exporting config sha256:acbd4a43f69cf7cd0f3f969c6bdb72e6f4a57e199d9e6ba6a20f2cf096937d5d 0.1s done
-#39 exporting attestation manifest sha256:244f624731929f2670c8e9d5835d0b40ed6a7a9c520d4690e7455319ca1d00ec 0.1s done
-#39 exporting manifest list sha256:d55e9f6e856908e0d13a8d051dfe1a44a59387d34e5cd4a46ba4e5a4896bb64c 0.1s done
-#39 naming to docker.io/library/prc-migrate:latest 0.0s done
-#39 unpacking to docker.io/library/prc-migrate:latest
-#39 ...
+#48 [outbox-relay] resolving provenance for metadata file
+#48 DONE 0.8s
 
-#48 [planner] exporting to image
-#48 exporting layers 30.9s done
-#48 exporting manifest sha256:96a13d3875704bd9f989228cdc799ee19f60a594c96f98aab6de6cf8acdbc7e6 0.0s done
-#48 exporting config sha256:1022a4776d14f9b581ff0298d6756afde2f46c1a0a175e45a1c1f313ce7328a0 0.1s done
-#48 exporting attestation manifest sha256:6e825c1c358f7bb77c90fd1d732ad9458d0d7f29e0b6a2e9abf81d4b781698b7 0.1s done
-#48 exporting manifest list sha256:af4a005ca5c542719d2e153a5dccd93f4dabf3a0dd27cf3fade5d835bb09f92f 0.0s done
-#48 naming to docker.io/library/prc-planner:latest 0.1s done
-#48 unpacking to docker.io/library/prc-planner:latest
-#48 ...
+#49 [retrier] resolving provenance for metadata file
+#49 DONE 0.5s
 
-#41 [simulator] exporting to image
-#41 exporting layers 30.9s done
-#41 exporting manifest sha256:681a2c086acd4c80b3a5c8266e3e69407e6d2a80e74c74186f6953befa483df2 0.0s done
-#41 exporting config sha256:d2d8205d81feabc5337c002894d1e97d3041d4dfbed9c17d14e3c21b17a37312 0.1s done
-#41 exporting attestation manifest sha256:eeedafe63c1c520aad9b636b039d88163a8222e60c0607cde4be5263869c80d4 0.1s done
-#41 exporting manifest list sha256:41d84dd64d679db2f9e89aa207dc854630c72c569b155430d12f6966569271a9 0.1s done
-#41 naming to docker.io/library/prc-simulator:latest 0.1s done
-#41 unpacking to docker.io/library/prc-simulator:latest
-#41 ...
+#50 [finalizer] resolving provenance for metadata file
+#50 DONE 0.8s
 
-#45 [dialect] exporting to image
-#45 exporting layers 30.9s done
-#45 exporting manifest sha256:6afeb75abccc082842b6445d5f2439a76054cda58fdcaf9d6941fa662d5f62bb 0.1s done
-#45 exporting config sha256:181bf4cdc358d47198e6d4b06141b1588d15abff071551ae974f53ab58320b26 0.1s done
-#45 exporting attestation manifest sha256:79dd7e7d02a63d3fcec16493e4bdd6ae4fd4ce2392cb30a33e2a7af7eedfc9ff 0.1s done
-#45 exporting manifest list sha256:7ae60c7b97b9ce2c869a3c87f6aa98ff8df9a80c4a9af2d3b697855b7c78efd5 0.1s done
-#45 naming to docker.io/library/prc-dialect:latest 0.0s done
-#45 unpacking to docker.io/library/prc-dialect:latest
-#45 ...
+#51 [auditor] resolving provenance for metadata file
+#51 DONE 0.2s
 
-#46 [auditor] exporting to image
-#46 exporting layers 30.9s done
-#46 exporting manifest sha256:77fdd1ae742eba29d065cce5a0879e20611b8ca2068a5ad84fea7f5e045f1cda 0.1s done
-#46 exporting config sha256:94a20985d41d6958032eb50e8c0d2c40db384b298a2617f7ec4ad6a8df003bc7 0.1s done
-#46 exporting attestation manifest sha256:1d9fc8a32a1f9669b7137d252c8a67b4d534d2aba2fff2188032144d654756e5 0.1s done
-#46 exporting manifest list sha256:7fc42169addf74cfb1da01e810653d8e3a1329b7af5f60b3c8dfd177cc4a5abe 0.1s done
-#46 naming to docker.io/library/prc-auditor:latest 0.0s done
-#46 unpacking to docker.io/library/prc-auditor:latest
-#46 ...
+#52 [generator] resolving provenance for metadata file
+#52 DONE 0.8s
 
-#43 [dlq-recorder] exporting to image
-#43 exporting layers 30.9s done
-#43 exporting manifest sha256:da40c1fba69ef2ef946f902f2947a92fcfcc7893ee4af81fd1b6b52bb040a2c4 0.0s done
-#43 exporting config sha256:28604b29f17b5914b8ecda59c720e797851f25cbdd59d21ddbb9803e2485a23e 0.1s done
-#43 exporting attestation manifest sha256:3c01f1554c700a973f33d3a84953c51daf181224f8f7a3f11e92f85d9ecdec56 0.1s done
-#43 exporting manifest list sha256:a2c500f2e42da75246e4a073ea5056be513e227ea7366e1efcc5e2637ffb4781 0.1s done
-#43 naming to docker.io/library/prc-dlq-recorder:latest 0.0s done
-#43 unpacking to docker.io/library/prc-dlq-recorder:latest
-#43 ...
+#53 [migrate] resolving provenance for metadata file
+#53 DONE 0.7s
 
-#42 [evaluator] exporting to image
-#42 exporting layers 30.9s done
-#42 exporting manifest sha256:120514b2e4d7eb3b48a749ff6c65f5a4e505b6001ac99443636eaa42435d527f 0.0s done
-#42 exporting config sha256:28cee4a0f6c611c937e55a1e52adbdd89ed063066c01585c3357fc820a5d610b 0.1s done
-#42 exporting attestation manifest sha256:226e3eac94bfa8aae9144cf9341de4e0d94f9caca1d5990a2a11fd4d13a8e827 0.1s done
-#42 exporting manifest list sha256:ff25b59323b6d2e7f7dbcd68abd1dc82b07f0f2f312c177baeb3c95d5b5b7798 0.1s done
-#42 naming to docker.io/library/prc-evaluator:latest 0.0s done
-#42 unpacking to docker.io/library/prc-evaluator:latest
-#42 ...
+#54 [simulator] resolving provenance for metadata file
+#54 DONE 0.5s
 
-#35 [finalizer] exporting to image
-#35 exporting layers 30.9s done
-#35 exporting manifest sha256:01a406787663dd1952a8b3b6ed897991ebd2458d41208d3aa8bf8f66e89e8f7f 0.0s done
-#35 exporting config sha256:87e162f4b793e421a42d1db74371b5c5909ff58459664560bbabf8f9565a70aa 0.1s done
-#35 exporting attestation manifest sha256:b99e821547ea9fe1df118a1c2d326ba5fea6c9d21448527bb80769da4120ed0c 0.1s done
-#35 exporting manifest list sha256:67509056dda7c14389cdb2183aeb5719edcdbc39aa7b9bd35d734ced79f54190 0.1s done
-#35 naming to docker.io/library/prc-finalizer:latest 0.0s done
-#35 unpacking to docker.io/library/prc-finalizer:latest
-#35 ...
-
-#44 [reconciler] exporting to image
-#44 exporting layers 30.9s done
-#44 exporting manifest sha256:38c43476c39b78e555d79454832f478e4098d8cb1562a3f3076fd1d3d67512c4 0.1s done
-#44 exporting config sha256:4339e39731b9e62e1654078506fdfdae7b3d50843c8588fda1266b205abc6150 0.1s done
-#44 exporting attestation manifest sha256:f4d4dbac72a8cdcecec8363215f2d2177a7132c51d4b40983e689d6d3f995e23 0.1s done
-#44 exporting manifest list sha256:e8964c7d6d48a0cde20981283180837ab139122dfb9c080952369dfc1873f5ab 0.1s done
-#44 naming to docker.io/library/prc-reconciler:latest 0.0s done
-#44 unpacking to docker.io/library/prc-reconciler:latest
-#44 ...
-
-#38 [outbox-relay] exporting to image
-#38 exporting layers 30.9s done
-#38 exporting manifest sha256:b0497337577c1f67cdc81b0eadefbca97693f75829df8f36e8705ce79cbf788b 0.0s done
-#38 exporting config sha256:9d8156e650608c8f836993ab850c0204d180ddd0623ff5bc3d84b8faf4b7fe23 0.1s done
-#38 exporting attestation manifest sha256:8ec277659eb3eb58466b16f2c8ad3c0c28b3ee8222692d6f8d524e712f8eb484 0.1s done
-#38 exporting manifest list sha256:186f2696f06e68a41584addc2f55ec239d2691d61170292aa8f00d995421155e 0.1s done
-#38 naming to docker.io/library/prc-outbox-relay:latest 0.0s done
-#38 unpacking to docker.io/library/prc-outbox-relay:latest
-#38 ...
-
-#47 [api] exporting to image
-#47 exporting layers 30.9s done
-#47 exporting manifest sha256:b2e5237ba8202716d986268af718f43b29fbd9217dd5bba035dfa68fcff59e42 0.1s done
-#47 exporting config sha256:2e95e503ce21a2144259af679d8ea2b13fde81e1daa71a6b621143447d9f2ecf 0.1s done
-#47 exporting attestation manifest sha256:6b81594248d4121d80eff9398bcca9ffb84fff055710041cbfa293f97fdd9e3e 0.1s done
-#47 exporting manifest list sha256:9ebabcfd39616e4fc583d481b408c36569d1f0196c396f451fa2c16721fd2970 0.1s done
-#47 naming to docker.io/library/prc-api:latest 0.0s done
-#47 unpacking to docker.io/library/prc-api:latest
-#47 ...
-
-#40 [integrations] exporting to image
-#40 exporting layers 30.9s done
-#40 exporting manifest sha256:e8647a1ed20b1339d2afe28b99e5bf79196e8aa04b0c95f8e46fbe9f1289b64e 0.0s done
-#40 exporting config sha256:6153a1c8ae5b38107a86fbbe6a7d759844bda47eb715e281a7f70895c318dccc 0.1s done
-#40 exporting attestation manifest sha256:3833fc85e9517c75a4cfa0423a1f0d500189a3b59b78b7ea14ba71a0930d7c20 0.1s done
-#40 exporting manifest list sha256:a4bba7bc0f03a342d799863cd13a6b7beadcad40dc68499707dd1f6a3be105fc 0.1s done
-#40 naming to docker.io/library/prc-integrations:latest 0.0s done
-#40 unpacking to docker.io/library/prc-integrations:latest
-#40 ...
-
-#36 [retrier] exporting to image
-#36 exporting layers 30.9s done
-#36 exporting manifest sha256:a630786c1cf6f920dd263ce2d70943e1d57d62a98dd74215707c1317e446c640 0.0s done
-#36 exporting config sha256:3bf75eeb4862d64e8ec21bf434371a0fe69e527e0bb5e257503603eb1692d0fd 0.1s done
-#36 exporting attestation manifest sha256:cc84817e2f487f8bdb54ccede7d1a6a7589a87922211c1d4e0e40085d0b4ddb5 0.1s done
-#36 exporting manifest list sha256:bff3fc9df9526b161527044e090b520202854516db2a97c79e30413b50b6cd10 0.1s done
-#36 naming to docker.io/library/prc-retrier:latest 0.0s done
-#36 unpacking to docker.io/library/prc-retrier:latest
-#36 ...
-
-#35 [finalizer] exporting to image
-#35 unpacking to docker.io/library/prc-finalizer:latest 48.4s done
-#35 DONE 80.0s
-
-#48 [planner] exporting to image
-#48 unpacking to docker.io/library/prc-planner:latest 48.4s done
-#48 ...
-
-#37 [generator] exporting to image
-#37 unpacking to docker.io/library/prc-generator:latest 48.4s done
-#37 DONE 80.0s
-
-#43 [dlq-recorder] exporting to image
-#43 unpacking to docker.io/library/prc-dlq-recorder:latest 48.4s done
-#43 DONE 80.0s
-
-#38 [outbox-relay] exporting to image
-#38 unpacking to docker.io/library/prc-outbox-relay:latest 48.4s done
-#38 DONE 80.0s
-
-#39 [migrate] exporting to image
-#39 unpacking to docker.io/library/prc-migrate:latest 48.4s done
-#39 DONE 80.1s
-
-#48 [planner] exporting to image
-#48 DONE 80.1s
-
-#40 [integrations] exporting to image
-#40 unpacking to docker.io/library/prc-integrations:latest 48.8s done
-#40 DONE 80.2s
-
-#36 [retrier] exporting to image
-#36 unpacking to docker.io/library/prc-retrier:latest 48.8s done
-#36 DONE 80.2s
-
-#46 [auditor] exporting to image
-#46 unpacking to docker.io/library/prc-auditor:latest 48.9s done
-#46 DONE 80.3s
-
-#42 [evaluator] exporting to image
-#42 unpacking to docker.io/library/prc-evaluator:latest 48.9s done
-#42 DONE 80.3s
-
-#47 [api] exporting to image
-#47 unpacking to docker.io/library/prc-api:latest 48.9s done
-#47 DONE 80.3s
-
-#41 [simulator] exporting to image
-#41 unpacking to docker.io/library/prc-simulator:latest 48.9s done
-#41 DONE 80.3s
-
-#44 [reconciler] exporting to image
-#44 unpacking to docker.io/library/prc-reconciler:latest 48.8s done
-#44 DONE 80.3s
-
-#45 [dialect] exporting to image
-#45 unpacking to docker.io/library/prc-dialect:latest 48.8s done
-#45 DONE 80.3s
-
-#49 [finalizer] resolving provenance for metadata file
-#49 DONE 0.2s
-
-#50 [simulator] resolving provenance for metadata file
-#50 DONE 0.3s
-
-#51 [planner] resolving provenance for metadata file
-#51 DONE 0.4s
-
-#52 [auditor] resolving provenance for metadata file
-#52 DONE 0.1s
-
-#53 [outbox-relay] resolving provenance for metadata file
-#53 DONE 0.5s
-
-#54 [api] resolving provenance for metadata file
-#54 DONE 0.2s
-
-#55 [reconciler] resolving provenance for metadata file
+#55 [dlq-recorder] resolving provenance for metadata file
 #55 DONE 0.2s
 
-#56 [migrate] resolving provenance for metadata file
-#56 DONE 0.5s
+#56 [planner] resolving provenance for metadata file
+#56 DONE 0.6s
 
-#57 [retrier] resolving provenance for metadata file
-#57 DONE 0.3s
+#28 [web build 6/6] RUN npm run build
+#28 11.60 ✓ Compiled successfully in 10.4s
+#28 11.61   Running TypeScript ...
+#28 22.91   Finished TypeScript in 11.3s ...
+#28 22.91   Collecting page data using 3 workers ...
+#28 23.75   Generating static pages using 3 workers (0/20) ...
+#28 24.37   Generating static pages using 3 workers (5/20) 
+#28 24.61   Generating static pages using 3 workers (10/20) 
+#28 24.62   Generating static pages using 3 workers (15/20) 
+#28 24.74 ✓ Generating static pages using 3 workers (20/20) in 988ms
+#28 24.75   Finalizing page optimization ...
+#28 24.76 
+#28 24.76 Route (app)
+#28 24.76 ┌ ○ /
+#28 24.76 ├ ○ /_not-found
+#28 24.76 ├ ○ /agents
+#28 24.76 ├ ƒ /agents/[id]
+#28 24.76 ├ ○ /agents/new
+#28 24.76 ├ ƒ /api/proxy/[...path]
+#28 24.76 ├ ○ /audits
+#28 24.76 ├ ○ /audits/new
+#28 24.76 ├ ○ /calibration
+#28 24.76 ├ ƒ /calls/[id]
+#28 24.76 ├ ○ /dialect
+#28 24.76 ├ ƒ /dialect/[reportId]
+#28 24.76 ├ ○ /dlq
+#28 24.76 ├ ○ /integrations
+#28 24.76 ├ ƒ /integrations/[id]
+#28 24.76 ├ ○ /noise-profiles
+#28 24.76 ├ ƒ /noise-profiles/[id]
+#28 24.76 ├ ○ /personas
+#28 24.76 ├ ƒ /personas/[id]
+#28 24.76 ├ ○ /regression
+#28 24.76 ├ ○ /runs
+#28 24.76 ├ ƒ /runs/[id]
+#28 24.76 ├ ○ /runs/compare
+#28 24.76 ├ ○ /runs/new
+#28 24.76 ├ ○ /scenarios
+#28 24.76 ├ ƒ /scenarios/[id]
+#28 24.76 ├ ○ /scenarios/new
+#28 24.76 └ ○ /settings/api-keys
+#28 24.76 
+#28 24.76 
+#28 24.76 ƒ Proxy (Middleware)
+#28 24.76 
+#28 24.76 ○  (Static)   prerendered as static content
+#28 24.76 ƒ  (Dynamic)  server-rendered on demand
+#28 24.76 
+#28 DONE 25.5s
 
-#58 [generator] resolving provenance for metadata file
-#58 DONE 0.2s
+#57 [web stage-1 3/6] COPY --from=build /app/package.json ./
+#57 CACHED
 
-#59 [dialect] resolving provenance for metadata file
-#59 DONE 0.1s
+#58 [web stage-1 4/6] COPY --from=build /app/node_modules ./node_modules
+#58 CACHED
 
-#60 [evaluator] resolving provenance for metadata file
-#60 DONE 0.3s
+#59 [web stage-1 5/6] COPY --from=build /app/.next ./.next
+#59 DONE 0.3s
 
-#61 [integrations] resolving provenance for metadata file
-#61 DONE 0.4s
+#60 [web stage-1 6/6] COPY --from=build /app/next.config.ts ./
+#60 DONE 0.0s
 
-#62 [dlq-recorder] resolving provenance for metadata file
-#62 DONE 0.6s
- Image prc-finalizer Built 
- Image prc-simulator Built 
- Image prc-dialect Built 
- Image prc-auditor Built 
- Image prc-evaluator Built 
- Image prc-dlq-recorder Built 
- Image prc-planner Built 
- Image prc-mock-agent Built 
- Image prc-outbox-relay Built 
- Image prc-web Built 
- Image prc-integrations Built 
- Image prc-migrate Built 
- Image prc-api Built 
- Image prc-reconciler Built 
- Image prc-retrier Built 
- Image prc-generator Built 
- Volume prc_kafka-data Creating 
- Network prc_default Creating 
- Volume prc_pg-data Creating 
- Volume prc_kafka-data Creating 
- Volume prc_pg-data Creating 
- Network prc_default Creating 
- Volume prc_kafka-data Created 
- Volume prc_kafka-data Created 
- Volume prc_pg-data Created 
- Volume prc_pg-data Created 
- Network prc_default Created 
- Network prc_default Created 
- Container prc-kafka-1 Creating 
- Container prc-postgres-1 Creating 
- Container prc-mock-agent-1 Creating 
- Container prc-mock-agent-1 Created 
- Container prc-postgres-1 Created 
- Container prc-migrate-1 Creating 
- Container prc-kafka-1 Created 
- Container prc-kafka-init-1 Creating 
- Container prc-migrate-1 Created 
- Container prc-kafka-init-1 Created 
- Container prc-integrations-1 Creating 
- Container prc-simulator-1 Creating 
- Container prc-simulator-3 Creating 
- Container prc-outbox-relay-1 Creating 
- Container prc-retrier-1 Creating 
- Container prc-simulator-2 Creating 
- Container prc-reconciler-1 Creating 
- Container prc-generator-1 Creating 
- Container prc-dialect-1 Creating 
- Container prc-api-1 Creating 
- Container prc-planner-1 Creating 
- Container prc-dlq-recorder-1 Creating 
- Container prc-evaluator-1 Creating 
- Container prc-evaluator-2 Creating 
- Container prc-auditor-1 Creating 
- Container prc-finalizer-1 Creating 
- Container prc-integrations-1 Created 
- Container prc-api-1 Created 
- Container prc-web-1 Creating 
- Container prc-dlq-recorder-1 Created 
- Container prc-evaluator-2 Created 
- Container prc-dialect-1 Created 
- Container prc-generator-1 Created 
- Container prc-reconciler-1 Created 
- Container prc-simulator-3 Created 
- Container prc-evaluator-1 Created 
- Container prc-finalizer-1 Created 
- Container prc-retrier-1 Created 
- Container prc-simulator-1 Created 
- Container prc-outbox-relay-1 Created 
- Container prc-planner-1 Created 
- Container prc-simulator-2 Created 
- Container prc-auditor-1 Created 
- Container prc-web-1 Created 
- Container prc-kafka-1 Starting 
- Container prc-postgres-1 Starting 
- Container prc-mock-agent-1 Starting 
- Container prc-kafka-1 Started 
- Container prc-kafka-1 Waiting 
- Container prc-postgres-1 Started 
- Container prc-postgres-1 Waiting 
- Container prc-mock-agent-1 Started 
- Container prc-postgres-1 Healthy 
- Container prc-migrate-1 Starting 
- Container prc-migrate-1 Started 
- Container prc-kafka-1 Healthy 
- Container prc-kafka-init-1 Starting 
- Container prc-kafka-init-1 Started 
- Container prc-postgres-1 Waiting 
- Container prc-kafka-init-1 Waiting 
- Container prc-kafka-init-1 Waiting 
- Container prc-postgres-1 Waiting 
- Container prc-postgres-1 Waiting 
- Container prc-kafka-init-1 Waiting 
- Container prc-kafka-init-1 Waiting 
- Container prc-postgres-1 Waiting 
- Container prc-postgres-1 Waiting 
- Container prc-kafka-init-1 Waiting 
- Container prc-migrate-1 Waiting 
- Container prc-kafka-init-1 Waiting 
- Container prc-kafka-init-1 Waiting 
- Container prc-postgres-1 Waiting 
- Container prc-postgres-1 Waiting 
- Container prc-kafka-init-1 Waiting 
- Container prc-postgres-1 Waiting 
- Container prc-kafka-init-1 Waiting 
- Container prc-kafka-init-1 Waiting 
- Container prc-postgres-1 Waiting 
- Container prc-kafka-init-1 Waiting 
- Container prc-postgres-1 Waiting 
- Container prc-kafka-init-1 Waiting 
- Container prc-postgres-1 Waiting 
- Container prc-kafka-init-1 Waiting 
- Container prc-postgres-1 Waiting 
- Container prc-postgres-1 Healthy 
- Container prc-postgres-1 Healthy 
- Container prc-migrate-1 Exited 
- Container prc-postgres-1 Healthy 
- Container prc-postgres-1 Healthy 
- Container prc-postgres-1 Healthy 
- Container prc-postgres-1 Healthy 
- Container prc-postgres-1 Healthy 
- Container prc-postgres-1 Healthy 
- Container prc-postgres-1 Healthy 
- Container prc-postgres-1 Healthy 
- Container prc-postgres-1 Healthy 
- Container prc-postgres-1 Healthy 
- Container prc-kafka-init-1 Exited 
- Container prc-simulator-2 Starting 
- Container prc-kafka-init-1 Exited 
- Container prc-dlq-recorder-1 Starting 
- Container prc-kafka-init-1 Exited 
- Container prc-dialect-1 Starting 
- Container prc-kafka-init-1 Exited 
- Container prc-integrations-1 Starting 
- Container prc-kafka-init-1 Exited 
- Container prc-planner-1 Starting 
- Container prc-kafka-init-1 Exited 
- Container prc-evaluator-1 Starting 
- Container prc-kafka-init-1 Exited 
- Container prc-generator-1 Starting 
- Container prc-kafka-init-1 Exited 
- Container prc-kafka-init-1 Exited 
- Container prc-reconciler-1 Starting 
- Container prc-auditor-1 Starting 
- Container prc-kafka-init-1 Exited 
- Container prc-retrier-1 Starting 
- Container prc-kafka-init-1 Exited 
- Container prc-kafka-init-1 Exited 
- Container prc-api-1 Starting 
- Container prc-outbox-relay-1 Starting 
- Container prc-kafka-init-1 Exited 
- Container prc-finalizer-1 Starting 
- Container prc-simulator-2 Started 
- Container prc-simulator-1 Starting 
- Container prc-simulator-1 Started 
- Container prc-simulator-3 Starting 
- Container prc-dlq-recorder-1 Started 
- Container prc-dialect-1 Started 
- Container prc-integrations-1 Started 
- Container prc-planner-1 Started 
- Container prc-evaluator-1 Started 
- Container prc-evaluator-2 Starting 
- Container prc-generator-1 Started 
- Container prc-reconciler-1 Started 
- Container prc-auditor-1 Started 
- Container prc-retrier-1 Started 
- Container prc-api-1 Started 
- Container prc-api-1 Waiting 
- Container prc-outbox-relay-1 Started 
- Container prc-finalizer-1 Started 
- Container prc-simulator-3 Started 
- Container prc-evaluator-2 Started 
- Container prc-api-1 Healthy 
- Container prc-web-1 Starting 
- Container prc-web-1 Started 
+#61 [web] exporting to image
+#61 exporting layers
+#61 exporting layers 2.4s done
+#61 exporting manifest sha256:5302c7751dba9a2d529b78a724b15cdc4915f0d99c6b523cc3b1ee54c7334550 done
+#61 exporting config sha256:6a56043c1123c3876fd6f4bd619b538261fc7deb36769de84a0824e389155fed done
+#61 exporting attestation manifest sha256:f0fbdfdd6531d8e7b1a8b0514c48b74dc6db18aac7387af203fae4d942f584bd done
+#61 exporting manifest list sha256:b62741f59e4eae5c47a89d89e7a5889f418148b4fdfedd9ef476153c4bf61f4b done
+#61 naming to docker.io/library/pqa-web:latest done
+#61 unpacking to docker.io/library/pqa-web:latest
+#61 unpacking to docker.io/library/pqa-web:latest 0.5s done
+#61 DONE 2.9s
+
+#62 [web] resolving provenance for metadata file
+#62 DONE 0.0s
+ Image pqa-mock-agent Built 
+ Image pqa-simulator Built 
+ Image pqa-dialect Built 
+ Image pqa-api Built 
+ Image pqa-generator Built 
+ Image pqa-outbox-relay Built 
+ Image pqa-finalizer Built 
+ Image pqa-migrate Built 
+ Image pqa-dlq-recorder Built 
+ Image pqa-integrations Built 
+ Image pqa-evaluator Built 
+ Image pqa-planner Built 
+ Image pqa-retrier Built 
+ Image pqa-auditor Built 
+ Image pqa-web Built 
+ Image pqa-reconciler Built 
+ Container pqa-postgres-1 Running 
+ Container pqa-kafka-1 Running 
+ Container pqa-dialect-1 Recreate 
+ Container pqa-mock-agent-1 Creating 
+ Container pqa-integrations-1 Recreate 
+ Container pqa-auditor-1 Recreate 
+ Container pqa-migrate-1 Creating 
+ Container pqa-outbox-relay-1 Recreate 
+ Container pqa-planner-1 Recreate 
+ Container pqa-retrier-1 Recreate 
+ Container pqa-simulator-1 Recreate 
+ Container pqa-simulator-2 Recreate 
+ Container pqa-simulator-3 Recreate 
+ Container pqa-reconciler-1 Recreate 
+ Container pqa-dlq-recorder-1 Recreate 
+ Container pqa-evaluator-1 Recreate 
+ Container pqa-evaluator-2 Recreate 
+ Container pqa-finalizer-1 Recreate 
+ Container pqa-generator-1 Recreate 
+ Container pqa-migrate-1 Created 
+ Container pqa-api-1 Creating 
+ Container pqa-mock-agent-1 Created 
+ Container pqa-api-1 Created 
+ Container pqa-web-1 Creating 
+ Container pqa-web-1 Created 
+ Container pqa-reconciler-1 Recreated 
+ Container pqa-generator-1 Recreated 
+ Container pqa-auditor-1 Recreated 
+ Container pqa-dlq-recorder-1 Recreated 
+ Container pqa-planner-1 Recreated 
+ Container pqa-evaluator-2 Recreated 
+ Container pqa-outbox-relay-1 Recreated 
+ Container pqa-dialect-1 Recreated 
+ Container pqa-integrations-1 Recreated 
+ Container pqa-retrier-1 Recreated 
+ Container pqa-finalizer-1 Recreated 
+ Container pqa-evaluator-1 Recreated 
+ Container pqa-simulator-2 Recreated 
+ Container pqa-simulator-1 Recreated 
+ Container pqa-simulator-3 Recreated 
+ Container pqa-mock-agent-1 Starting 
+ Container pqa-kafka-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-mock-agent-1 Started 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-migrate-1 Starting 
+ Container pqa-kafka-1 Healthy 
+ Container pqa-kafka-init-1 Starting 
+ Container pqa-migrate-1 Started 
+ Container pqa-kafka-init-1 Started 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-migrate-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-migrate-1 Exited 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-api-1 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-retrier-1 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-evaluator-2 Starting 
+ Container pqa-generator-1 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-reconciler-1 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-integrations-1 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-auditor-1 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-planner-1 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-outbox-relay-1 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-finalizer-1 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-dialect-1 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-simulator-3 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-dlq-recorder-1 Starting 
+ Container pqa-api-1 Started 
+ Container pqa-api-1 Waiting 
+ Container pqa-retrier-1 Started 
+ Container pqa-evaluator-2 Started 
+ Container pqa-evaluator-1 Starting 
+ Container pqa-evaluator-1 Started 
+ Container pqa-generator-1 Started 
+ Container pqa-reconciler-1 Started 
+ Container pqa-integrations-1 Started 
+ Container pqa-auditor-1 Started 
+ Container pqa-planner-1 Started 
+ Container pqa-outbox-relay-1 Started 
+ Container pqa-finalizer-1 Started 
+ Container pqa-dialect-1 Started 
+ Container pqa-simulator-3 Started 
+ Container pqa-simulator-1 Starting 
+ Container pqa-dlq-recorder-1 Started 
+ Container pqa-simulator-1 Started 
+ Container pqa-simulator-2 Starting 
+ Container pqa-simulator-2 Started 
+ Container pqa-api-1 Healthy 
+ Container pqa-web-1 Starting 
+ Container pqa-web-1 Started 
 waiting for the API on :18000 ...
- Container prc-postgres-1 Running 
- Container prc-kafka-1 Running 
- Container prc-kafka-1 Waiting 
- Container prc-postgres-1 Waiting 
- Container prc-kafka-1 Healthy 
- Container prc-kafka-init-1 Starting 
- Container prc-postgres-1 Healthy 
- Container prc-migrate-1 Starting 
- Container prc-kafka-init-1 Started 
- Container prc-migrate-1 Started 
- Container prc-migrate-1 Waiting 
- Container prc-kafka-init-1 Waiting 
- Container prc-migrate-1 Exited 
- Container prc-kafka-init-1 Exited 
- Container prc-api-run-da4d08131194 Creating 
- Container prc-api-run-da4d08131194 Created 
+ Container pqa-postgres-1 Running 
+ Container pqa-kafka-1 Running 
+ Container pqa-kafka-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-kafka-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-migrate-1 Starting 
+ Container pqa-kafka-init-1 Starting 
+ Container pqa-migrate-1 Started 
+ Container pqa-kafka-init-1 Started 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-migrate-1 Waiting 
+ Container pqa-migrate-1 Exited 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-api-run-adfddfdded92 Creating 
+ Container pqa-api-run-adfddfdded92 Created 
 {
   "created": {
     "personas": 20,
@@ -1151,15 +617,15 @@ waiting for the API on :18000 ...
   "existing": {}
 }
 {
- "run_id": "e1212efb-1f48-44bf-b841-5253337c8930",
- "wall_s": 90.3,
- "evaluated": 10,
+ "run_id": "0fcd964f-1b4f-4654-9a45-46a86009a0ad",
+ "wall_s": 280.5,
+ "evaluated": 7,
  "of": 10,
  "summary": {
   "pass_rate": 0.0,
-  "critical_failures": 10,
-  "needs_review": 10,
-  "score_mean": 9.25,
+  "critical_failures": 7,
+  "needs_review": 7,
+  "score_mean": 48.04,
   "latency_p50_ms": null,
   "latency_p95_ms": null,
   "barge_in_honoured_rate": null,
@@ -1169,4 +635,4 @@ waiting for the API on :18000 ...
  }
 }
 Demo done. Web app: http://localhost:13000  (API key is PAREEKSHA_API_KEY in .env)
-[13:34:42] demo returned 0
+[16:52:10] demo returned 0
