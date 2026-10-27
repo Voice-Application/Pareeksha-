@@ -159,7 +159,9 @@ class PgEvaluatorStore:
             allowed = list(dict.fromkeys(tags))
         else:
             expected_language = None if language == "unknown" else language
-            allowed = list(dict.fromkeys([language, *(call["agent_languages"] or [])]))
+            # A simulated caller speaks one language; the agent answering in another language it
+            # merely supports (Kannada caller, English reply) is the failure this check exists for.
+            allowed = [language]
         agent = AgentInfo(
             name=call["agent_name"] or "unknown agent",
             description=call["agent_description"] or "",

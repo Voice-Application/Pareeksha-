@@ -12,9 +12,24 @@ orders the turns by start time and attaches the glass-box items by time:
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 
 from pareeksha.simulation.models import ToolCallRecord, TurnRecord
+
+_SCRIPT_LANGUAGES = (
+    ("kn-IN", re.compile(r"[\u0c80-\u0cff]")),
+    ("hi-IN", re.compile(r"[\u0900-\u097f]")),
+    ("en-IN", re.compile(r"[A-Za-z]")),
+)
+
+
+def script_language(text: str) -> str | None:
+    """Language of the glass-box text by dominant script (None when under 3 letters)."""
+    counts = [(lang, len(rx.findall(text))) for lang, rx in _SCRIPT_LANGUAGES]
+    if sum(n for _, n in counts) < 3:
+        return None
+    return max(counts, key=lambda c: c[1])[0]
 
 
 @dataclass
@@ -141,6 +156,13 @@ class TurnTracker:
                 if early:
                     owned_early.add(i)
                 break
+
+        # The STT of an agent turn runs in the call's language, so it transliterates a reply in
+        # another language into that script (English spoken to a Kannada caller reads as Kannada).
+        # What the bot actually said, when it reports it, is the evidence for the language.
+        for turn in agent:
+            if turn.glass_box_text and (spoken := script_language(turn.glass_box_text)):
+                turn.language_detected = spoken
 
         turns = sorted([*caller, *agent], key=lambda t: (t.start_ms, t.speaker != "agent"))
         for idx, turn in enumerate(turns):

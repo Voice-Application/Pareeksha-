@@ -251,3 +251,14 @@ def test_wav_to_pcm16_resamples_and_downmixes() -> None:
         w.writeframes(bytes(16))
     with pytest.raises(ValueError, match="16-bit"):
         wav_to_pcm16(eight_bit.getvalue())
+
+
+def test_agent_language_comes_from_what_the_bot_said_not_from_the_stt_language() -> None:
+    t = TurnTracker()
+    # the STT ran in kn-IN and transliterated the English reply into Kannada script
+    t.add_agent_turn(start_ms=0, end_ms=2000, text="ದಿಸ್ ಕಾಲ್ ಈಸ್ ರೆಕಾರ್ಡೆಡ್", language="kn-IN")
+    t.add_agent_turn(start_ms=4000, end_ms=6000, text="ಧನ್ಯವಾದ", language="kn-IN")
+    t.add_agent_said(10, "This call is being recorded.")
+    t.add_agent_said(4010, "ಧನ್ಯವಾದ, ನಿಮ್ಮ ಇಎಂಐ ಬಾಕಿ ಇದೆ")
+    turns, _ = t.build()
+    assert [x.language_detected for x in turns] == ["en-IN", "kn-IN"]
