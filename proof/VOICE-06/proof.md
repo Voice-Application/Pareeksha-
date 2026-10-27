@@ -22,7 +22,7 @@ Latency finding: caller-end to bot-audio-start is ~6 s (segmented REST STT + LLM
 Spend: `credit_use.md`.
 
 ## Tests
-`proof/VOICE-06/pytest_full.txt` (full backend suite against a private Postgres 16 and Kafka: `TEST_DATABASE_URL`/`INFRA_TEST_*` pointing at localhost:55432 / :59094). `ruff check`, `ruff format --check`, `python3 -m mypy` in `backend/`: clean (see `lint_types.txt`).
+Full backend suite against a private Postgres 16 and Kafka (`TEST_DATABASE_URL`/`INFRA_TEST_*` -> localhost:55432 / :59094). First run (`pytest_first_run_topics_missing.txt`, coverage 94%): 1074 passed, 28 failed, 4 errors, all Kafka integration tests, because my private broker had no `pareeksha.*` topics yet ("Topic ... not found in cluster metadata"). After creating them with `infra/kafka/create-topics.sh`, every failing file was re-run: 56 passed (incl. `test_real_delays`, 332 s), 0 failed. No full single-run log with 0 failures exists; the combined result is 1074 + 56 passed, 0 failed, 0 skipped. `ruff check`, `ruff format --check`, `python3 -m mypy` in `backend/`: clean (see `lint_types.txt`).
 
 ## Not covered / notes
 - `pipecat-gnani` 0.5.12 does not import with `gnani-vachana` 0.8.2 (`TIMBRE_V20_VOICES` missing); the example wraps `pareeksha.speech` providers instead (NOTES.md).
