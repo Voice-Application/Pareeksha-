@@ -66,8 +66,9 @@ def _stored_secrets(row: Integrations) -> dict[str, str]:
 def _inbound_url(row: Integrations) -> str | None:
     if row.connector != WEBHOOK:
         return None
-    # The inbound endpoint lives on the API, not the web app (PUBLIC_BASE_URL has no /webhooks route).
-    default = f"http://localhost:{os.environ.get('API_HOST_PORT') or os.environ.get('API_PORT') or '8000'}"
+    # The inbound endpoint lives on the API, not the web app (it has no /webhooks route).
+    port = os.environ.get("API_HOST_PORT") or os.environ.get("API_PORT") or "8000"
+    default = f"http://localhost:{port}"
     base = (os.environ.get("PUBLIC_API_URL") or default).rstrip("/")
     return f"{base}/api/v1/webhooks/inbound/{row.id}"
 

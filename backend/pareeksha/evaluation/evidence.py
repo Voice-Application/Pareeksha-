@@ -41,9 +41,9 @@ def evidence_problems(
     if missing_cite:
         agent = sorted(set(agent_indices) & valid)
         msg += (
-            " Every dimension scored 0 or 1 MUST have a non-empty evidence_turns list: cite the turn"
-            " where the problem happens, or, for something the agent failed to do, the agent turn"
-            " where it should have happened"
+            " Every dimension scored 0 or 1 MUST have a non-empty evidence_turns list: cite"
+            " the turn where the problem happens, or, for something the agent failed to do,"
+            " the agent turn where it should have happened"
             + (f" (agent turns: {agent})" if agent else "")
             + ". Keep the score the transcript supports; do not raise it just to avoid citing."
         )

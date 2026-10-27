@@ -244,7 +244,7 @@ def _emi_call(readback: bool):
             T(
                 4,
                 "agent",
-                "Just to confirm, you will pay four thousand five hundred rupees on Friday. Is that right?",
+                "Just to confirm, you will pay four thousand five hundred rupees on Friday, right?",
             ),
             T(5, "caller", "Yes."),
             T(6, "agent", "Noted, goodbye."),

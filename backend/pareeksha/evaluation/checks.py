@@ -403,7 +403,7 @@ def check_amounts(
                     False,
                     True,
                     tuple(sorted({*said[:1], at})),
-                    f"Agent acted ({action.name}) without reading back the amount {want:g} to the caller",
+                    f"Agent acted ({action.name}) without reading back {want:g} to the caller",
                 )
             )
             continue
