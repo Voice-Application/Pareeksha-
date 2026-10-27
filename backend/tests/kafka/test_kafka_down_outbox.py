@@ -57,6 +57,9 @@ async def test_api_accepts_while_kafka_is_down_and_the_outbox_drains_in_per_key_
     relay = OutboxRelay(settings, poll_interval=0.2, request_timeout_ms=3000)
     relay_task = asyncio.create_task(relay.run())
     conn = await psycopg.AsyncConnection.connect(settings.database_url, autocommit=True)
+    await conn.execute(
+        "DELETE FROM outbox_events"
+    )  # rows left by earlier tests sharing this database
     try:
         healthy = await api.get("/api/v1/health")
         assert healthy.status_code == 200 and healthy.json() == {"db": "ok", "kafka": "ok"}
