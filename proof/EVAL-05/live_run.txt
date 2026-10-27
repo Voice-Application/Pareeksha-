@@ -1,0 +1,19 @@
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, initial schema (docs/schema.sql v0.2)
+upload: {'accepted': 12, 'rejected': []}
+evaluate: {'report_id': 'e0f3b567-a30a-4586-aa8b-3a01294631e8', 'expected_results': 36}
+  progress {'done': 0, 'expected_results': 36}
+  progress {'done': 2, 'expected_results': 36}
+  progress {'done': 7, 'expected_results': 36}
+  progress {'done': 12, 'expected_results': 36}
+  progress {'done': 15, 'expected_results': 36}
+  progress {'done': 18, 'expected_results': 36}
+  progress {'done': 21, 'expected_results': 36}
+  progress {'done': 23, 'expected_results': 36}
+  progress {'done': 26, 'expected_results': 36}
+  progress {'done': 31, 'expected_results': 36}
+  progress {'done': 36, 'expected_results': 36}
+report ready in 50 s
+usage: [('deepseek', 'llm_asr_intent', 2384.0, 'tokens', 7), ('gnani', 'stt_rest', 92.16, 'audio_seconds', 36)]
+done
