@@ -22,4 +22,4 @@ Full output: `run.json`. A real `low`-confidence verdict did not occur; that bra
 ## Tests
 - `tests/unit/audit/test_role_review.py` (18): reason extraction table, forced review on an otherwise passing call, reasons kept on `judge_error`, speech override parsing/validation, schema validation.
 - `tests/integration/test_audit_role_review.py` (6, Postgres): audit -> judge -> `evaluations.needs_human_review` / `review_reasons` for agree / low / disagree; override reaches `stt_factory`; no override passes none; invalid stored override is a dead letter.
-- Full backend suite + coverage: `pytest_full.txt`. `ruff check`, `ruff format --check`, `python3 -m mypy` in `backend/`: clean (`lint_types.txt`).
+- Full backend suite against private Postgres 16 + Kafka: 1049 passed, 0 failed, 0 skipped, coverage 97% (`pytest_full.txt`). `ruff check`, `ruff format --check`, `python3 -m mypy` in `backend/`: clean (`lint_types.txt`).
