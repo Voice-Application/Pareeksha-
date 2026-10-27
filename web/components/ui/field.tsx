@@ -141,7 +141,9 @@ export function Segmented<T extends string | number>({
   options,
   help,
   disabled,
+  hideLabel,
 }: {
+  hideLabel?: boolean;
   label: string;
   value: T;
   onChange: (v: T) => void;
@@ -167,7 +169,7 @@ export function Segmented<T extends string | number>({
 
   return (
     <div className="flex flex-col gap-1">
-      <span id={id} className="text-sm font-medium">
+      <span id={id} className={hideLabel ? "sr-only" : "text-sm font-medium"}>
         {label}
       </span>
       <div role="radiogroup" aria-labelledby={id} className="inline-flex w-fit max-w-full flex-wrap rounded-sm border border-border-strong bg-surface p-0.5">

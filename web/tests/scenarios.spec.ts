@@ -36,6 +36,7 @@ test.describe("Scenarios list", () => {
     await expect(page.getByRole("link", { name: "Abusive caller" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Already paid, wants confirmation" })).toHaveCount(0);
     await page.getByRole("button", { name: "Clear", exact: true }).click();
+    await expect(page).toHaveURL(/\/scenarios$/); // wait for the URL update, or the next filter is built from the stale params
     await page.getByLabel("Source", { exact: true }).selectOption("promoted");
     await expect(page.getByRole("link", { name: "Promoted: wrong amount" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Abusive caller" })).toHaveCount(0);
