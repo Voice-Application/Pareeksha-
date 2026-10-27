@@ -1,0 +1,110 @@
+{
+ "bugs": {
+  "no_disclosure": {
+   "run_id": "c0e0e096-427d-4647-bfb4-1879aac64b67",
+   "flagged_with_valid_evidence": "0/2",
+   "caught": false,
+   "calls": [
+    {
+     "call_id": "d3444219-b0ca-545c-b985-0df9f1ed7fcb",
+     "flagged": false,
+     "cited_turns": [],
+     "cited_exist": false
+    },
+    {
+     "call_id": "0cd9e061-1868-5a9d-9bb3-3f92abd0eba8",
+     "flagged": false,
+     "cited_turns": [],
+     "cited_exist": false
+    }
+   ]
+  },
+  "no_amount_confirm": {
+   "run_id": "fd0794be-669a-4e50-ba31-494ad51bbf35",
+   "flagged_with_valid_evidence": "2/2",
+   "caught": true,
+   "calls": [
+    {
+     "call_id": "0ed2f765-49ca-5f1a-b4b2-f3ef1ac77f89",
+     "flagged": true,
+     "cited_turns": [
+      2,
+      4
+     ],
+     "cited_exist": true
+    },
+    {
+     "call_id": "a235ce94-a2fe-52ae-b55b-77a08a838a7b",
+     "flagged": true,
+     "cited_turns": [
+      2,
+      4
+     ],
+     "cited_exist": true
+    }
+   ]
+  },
+  "english_to_kannada": {
+   "run_id": "c7e971b5-2f2a-4109-b8ed-d8201675ac79",
+   "flagged_with_valid_evidence": "0/2",
+   "caught": false,
+   "calls": [
+    {
+     "call_id": "f3de0994-df19-54ee-951e-a3b6e4567a2a",
+     "flagged": false,
+     "cited_turns": [],
+     "cited_exist": false
+    },
+    {
+     "call_id": "c473a71b-916e-5a9e-a1a3-0eafc254e2ed",
+     "flagged": false,
+     "cited_turns": [],
+     "cited_exist": false
+    }
+   ]
+  },
+  "ignore_interrupt": {
+   "run_id": "c3d57255-60ca-455d-b692-6fef10c72d46",
+   "flagged_with_valid_evidence": "0/2",
+   "caught": false,
+   "calls": [
+    {
+     "call_id": "cac803a5-e9bd-5c51-af6c-b2f46d746c69",
+     "flagged": false,
+     "cited_turns": [],
+     "cited_exist": false
+    },
+    {
+     "call_id": "698bd710-66e1-581b-bbf4-e736b16d1a60",
+     "flagged": false,
+     "cited_turns": [],
+     "cited_exist": false
+    }
+   ]
+  },
+  "false_waiver": {
+   "run_id": "8eaeb253-d5f0-4214-9ae0-d7fa735bb740",
+   "flagged_with_valid_evidence": "0/2",
+   "caught": false,
+   "calls": [
+    {
+     "call_id": "19e2301d-cf48-52d4-b0f5-3e29cdd1754d",
+     "flagged": false,
+     "cited_turns": [],
+     "cited_exist": false
+    },
+    {
+     "call_id": "08bd4247-112f-5a01-b368-695a7cf8fe17",
+     "flagged": false,
+     "cited_turns": [],
+     "cited_exist": false
+    }
+   ]
+  }
+ },
+ "control": {
+  "run_id": "c6b1070f-28f0-4010-87cc-c06a61dd8b75",
+  "passed": "2/2"
+ },
+ "caught": 1
+}
