@@ -27,9 +27,9 @@ PYEOF
 sleep 30
 [ "$(psql_q "SELECT count(*) FROM evaluations")" -gt 0 ] || finish FAIL "no evaluation in the database to replay"
 
-call_id=$(psql_q "SELECT call_id FROM evaluations WHERE status='ok' ORDER BY id DESC LIMIT 1")
+call_id=$(psql_q "SELECT call_id FROM evaluations WHERE status='ok' ORDER BY created_at DESC LIMIT 1")
 before_eval=$(psql_q "SELECT count(*) FROM evaluations WHERE call_id='$call_id'")
-sink_before=$([ -n "${V6_SINK_LOG:-}" ] && grep -c "\"call_id\": \"$call_id\"" "$V6_SINK_LOG" || echo n/a)
+sink_before=$([ -n "${V6_SINK_LOG:-}" ] && grep -c "\"call_id\": \"$call_id\"" "$V6_SINK_LOG" || true)
 note "sink hits before replay: $sink_before"
 before_del=$(psql_q "SELECT count(*) FROM integration_deliveries")
 sink_log=${V6_SINK_LOG:-}
@@ -63,7 +63,7 @@ sleep 45
 after_eval=$(psql_q "SELECT count(*) FROM evaluations WHERE call_id='$call_id'")
 dup_del=$(psql_q "SELECT count(*) FROM (SELECT integration_id, event_id, direction FROM integration_deliveries GROUP BY 1,2,3 HAVING count(*)>1) t")
 dup_notes=$(psql_q "SELECT count(*) FROM (SELECT integration_id, external_id FROM integration_deliveries WHERE external_id IS NOT NULL GROUP BY 1,2 HAVING count(*)>1) t")
-sink_hits=$([ -n "$sink_log" ] && grep -c "\"call_id\": \"$call_id\"" "$sink_log" || echo n/a)
+sink_hits=$([ -n "$sink_log" ] && grep -c "\"call_id\": \"$call_id\"" "$sink_log" || true)
 note "webhook sink receiver hits for this call: $sink_hits"
 note "call $call_id: evaluations before/after = $before_eval/$after_eval; deliveries before=$before_del; duplicate delivery keys=$dup_del; duplicate CRM note ids=$dup_notes"
 [ "$suite" -eq 0 ] || finish FAIL "Kafka suite failed"
