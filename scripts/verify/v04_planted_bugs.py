@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -33,6 +34,16 @@ def start_container(bug: str) -> str:
         cwd=vapi.ROOT, check=True, capture_output=True,
     )
     return name
+
+
+def wait_ready(container: str) -> None:
+    """`compose run -d` returns before the server listens; a call started too early ends connect_failed."""
+    probe = "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8765/health').status==200 else 1)"
+    for _ in range(60):
+        if subprocess.run(["docker", "exec", container, "python", "-c", probe], capture_output=True).returncode == 0:
+            return
+        time.sleep(2)
+    raise SystemExit(f"{container} did not become healthy")
 
 
 def register(bug: str, container: str, clean: dict) -> str:
@@ -74,6 +85,7 @@ def main() -> int:
     caught = 0
     for bug, (scenario, persona) in CASES.items():
         container = start_container(bug)
+        wait_ready(container)
         agent = register(bug, container, clean)
         res = vapi.run_and_wait(agent, [scenario], [persona], [N], repeats=2, concurrency=2, name=f"verify-{bug}")
         calls = [vapi.call(i["call_id"]) for i in res["items"] if i.get("call_id")]

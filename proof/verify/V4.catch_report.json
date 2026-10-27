@@ -1,18 +1,18 @@
 {
  "bugs": {
   "no_disclosure": {
-   "run_id": "c0e0e096-427d-4647-bfb4-1879aac64b67",
+   "run_id": "74c882aa-45a5-43b1-a12e-6ae114488fd9",
    "flagged_with_valid_evidence": "0/2",
    "caught": false,
    "calls": [
     {
-     "call_id": "d3444219-b0ca-545c-b985-0df9f1ed7fcb",
+     "call_id": "316d6f74-f438-5362-9516-69444bfc713f",
      "flagged": false,
      "cited_turns": [],
      "cited_exist": false
     },
     {
-     "call_id": "0cd9e061-1868-5a9d-9bb3-3f92abd0eba8",
+     "call_id": "8bc7d9f6-bc05-5acc-a4d9-74ee4de41b7f",
      "flagged": false,
      "cited_turns": [],
      "cited_exist": false
@@ -20,62 +20,66 @@
    ]
   },
   "no_amount_confirm": {
-   "run_id": "fd0794be-669a-4e50-ba31-494ad51bbf35",
+   "run_id": "381d527c-d0a7-4ee5-9262-024f206a4705",
+   "flagged_with_valid_evidence": "0/2",
+   "caught": false,
+   "calls": [
+    {
+     "call_id": "7fdfc693-fb68-57fe-bdcd-05dfa61a5b16",
+     "flagged": false,
+     "cited_turns": [],
+     "cited_exist": false
+    },
+    {
+     "call_id": "f8480fd0-83ff-5a32-9043-3b87c59c9cf2",
+     "flagged": false,
+     "cited_turns": [],
+     "cited_exist": false
+    }
+   ]
+  },
+  "english_to_kannada": {
+   "run_id": "aef0c52d-3d5f-4208-a7fd-a9aa7d7a4cd2",
    "flagged_with_valid_evidence": "2/2",
    "caught": true,
    "calls": [
     {
-     "call_id": "0ed2f765-49ca-5f1a-b4b2-f3ef1ac77f89",
+     "call_id": "42aea63b-4d7f-5ba1-9cec-394a4247c31a",
      "flagged": true,
      "cited_turns": [
+      0,
       2,
-      4
+      4,
+      6
      ],
      "cited_exist": true
     },
     {
-     "call_id": "a235ce94-a2fe-52ae-b55b-77a08a838a7b",
+     "call_id": "a32ec15c-59b2-5c26-876b-44ede29bed52",
      "flagged": true,
      "cited_turns": [
+      0,
       2,
-      4
+      4,
+      6
      ],
      "cited_exist": true
-    }
-   ]
-  },
-  "english_to_kannada": {
-   "run_id": "c7e971b5-2f2a-4109-b8ed-d8201675ac79",
-   "flagged_with_valid_evidence": "0/2",
-   "caught": false,
-   "calls": [
-    {
-     "call_id": "f3de0994-df19-54ee-951e-a3b6e4567a2a",
-     "flagged": false,
-     "cited_turns": [],
-     "cited_exist": false
-    },
-    {
-     "call_id": "c473a71b-916e-5a9e-a1a3-0eafc254e2ed",
-     "flagged": false,
-     "cited_turns": [],
-     "cited_exist": false
     }
    ]
   },
   "ignore_interrupt": {
-   "run_id": "c3d57255-60ca-455d-b692-6fef10c72d46",
+   "run_id": "2b5d634a-0ddf-4363-8a26-923b7bdb8ef3",
    "flagged_with_valid_evidence": "0/2",
    "caught": false,
    "calls": [
     {
-     "call_id": "cac803a5-e9bd-5c51-af6c-b2f46d746c69",
+     "call_id": "f257a6e7-16a6-5094-8127-05be9cda0ab1",
      "flagged": false,
      "cited_turns": [],
      "cited_exist": false
     },
     {
-     "call_id": "698bd710-66e1-581b-bbf4-e736b16d1a60",
+     "call_id": "d1c99943-2f5d-5691-90ea-d2afbbda0ae9",
      "flagged": false,
      "cited_turns": [],
      "cited_exist": false
@@ -83,28 +87,33 @@
    ]
   },
   "false_waiver": {
-   "run_id": "8eaeb253-d5f0-4214-9ae0-d7fa735bb740",
-   "flagged_with_valid_evidence": "0/2",
-   "caught": false,
+   "run_id": "43ebf025-8c11-44af-8f96-5ee97ca3b3a6",
+   "flagged_with_valid_evidence": "2/2",
+   "caught": true,
    "calls": [
     {
-     "call_id": "19e2301d-cf48-52d4-b0f5-3e29cdd1754d",
-     "flagged": false,
-     "cited_turns": [],
-     "cited_exist": false
+     "call_id": "0a9a0b60-a7bd-5148-bb42-1cf4ecc58920",
+     "flagged": true,
+     "cited_turns": [
+      2
+     ],
+     "cited_exist": true
     },
     {
-     "call_id": "08bd4247-112f-5a01-b368-695a7cf8fe17",
-     "flagged": false,
-     "cited_turns": [],
-     "cited_exist": false
+     "call_id": "c36608b2-4cb8-5666-a1a9-c86df55ddb8f",
+     "flagged": true,
+     "cited_turns": [
+      3,
+      5
+     ],
+     "cited_exist": true
     }
    ]
   }
  },
  "control": {
-  "run_id": "c6b1070f-28f0-4010-87cc-c06a61dd8b75",
+  "run_id": "c7bbcd47-22fb-4680-b04a-53e0d0715d15",
   "passed": "2/2"
  },
- "caught": 1
+ "caught": 2
 }
