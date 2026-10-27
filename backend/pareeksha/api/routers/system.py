@@ -12,7 +12,6 @@ from sqlalchemy import select
 from pareeksha.api.auth import ReadKey, scoped
 from pareeksha.api.deps import AUTH_ERRORS, Db
 from pareeksha.api.health import check_health
-from pareeksha.api.stubs import not_implemented
 from pareeksha.db.models import Calls, Evaluations, HumanReviews, RubricVersions
 from pareeksha.db.queries import distinct_on
 from pareeksha.evaluation.calibration import LabelPair, compute_calibration

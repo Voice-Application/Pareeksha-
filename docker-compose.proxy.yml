@@ -18,5 +18,6 @@ services:
   retrier: *ca
   dlq-recorder: *ca
   mock-agent: *ca
+  web: *ca
 secrets:
   ca: { file: "${CA_BUNDLE}" }

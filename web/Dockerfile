@@ -1,7 +1,10 @@
 FROM node:22-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+# Optional build secret "ca" = extra CA bundle (only behind a TLS-intercepting proxy; see docker-compose.proxy.yml).
+RUN --mount=type=secret,id=ca,required=false \
+    if [ -f /run/secrets/ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/ca; fi; \
+    npm ci
 COPY . .
 RUN npm run build
 
