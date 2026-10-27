@@ -108,7 +108,9 @@ async def test_api_accepts_while_kafka_is_down_and_the_outbox_drains_in_per_key_
         assert recovered.status_code == 200
     finally:
         relay.stop_event.set()
-        await asyncio.wait_for(relay_task, 30)
+        await asyncio.wait_for(
+            relay_task, 90
+        )  # producer.stop() flushes; slow right after a broker restart
         await conn.close()
 
     duplicates = 0
