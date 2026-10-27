@@ -37,7 +37,10 @@ def start_container(bug: str) -> str:
 
 def register(bug: str, container: str, clean: dict) -> str:
     name = f"{CLEAN} [bug:{bug}]"
-    if not any(a["name"] == name for a in vapi.items("/agents")):
+    existing = next((a for a in vapi.items("/agents") if a["name"] == name), None)
+    if existing:  # an earlier run may have left the agent pointing at a container that is gone
+        vapi.request("PATCH", f"/agents/{existing['id']}", {"endpoint_url": f"ws://{container}:8765/ws"})
+    else:
         keys = ("description", "adapter", "adapter_config", "languages", "glass_box", "mandatory_disclosures",
                 "forbidden_phrases", "expected_tools", "bias_list", "max_call_seconds")
         body = {k: clean[k] for k in keys if k in clean}
