@@ -4,13 +4,17 @@ from __future__ import annotations
 
 from pareeksha.adapters.audio_v1 import AudioV1Adapter
 from pareeksha.adapters.base import Adapter, AdapterError, AdapterName
+from pareeksha.adapters.pipecat_adapter import PipecatAdapter
 
 
 class AdapterUnavailableError(AdapterError):
-    """The agent uses an adapter this build does not include (pipecat/livekit/vapi: VOICE-06)."""
+    """The agent uses an adapter this build does not include (livekit/vapi: not built)."""
 
 
-_ADAPTERS: dict[AdapterName, type[Adapter]] = {"audio_v1": AudioV1Adapter}
+_ADAPTERS: dict[AdapterName, type[Adapter]] = {
+    "audio_v1": AudioV1Adapter,
+    "pipecat": PipecatAdapter,
+}
 
 
 def available_adapters() -> list[AdapterName]:

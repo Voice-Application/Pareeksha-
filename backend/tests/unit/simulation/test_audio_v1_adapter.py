@@ -193,10 +193,10 @@ async def test_agent_closing_before_the_start_message_is_a_connect_failure_or_a_
 
 
 def test_registry_knows_only_the_shipped_adapters() -> None:
-    assert available_adapters() == ["audio_v1"]
+    assert available_adapters() == ["audio_v1", "pipecat"]
     assert isinstance(get_adapter("audio_v1"), AudioV1Adapter)
-    with pytest.raises(AdapterUnavailableError, match="pipecat"):
-        get_adapter("pipecat")
+    with pytest.raises(AdapterUnavailableError, match="livekit"):
+        get_adapter("livekit")
 
 
 # ------------------------------------------------------------------------------ test-connection

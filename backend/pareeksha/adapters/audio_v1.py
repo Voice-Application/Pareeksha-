@@ -60,8 +60,8 @@ class AudioV1Session(AudioSession):
         try:
             async for message in self._ws:
                 if isinstance(message, bytes):
-                    if message:
-                        self._events.put_nowait(AgentAudio(message))
+                    for audio in self._on_binary(message):
+                        self._events.put_nowait(audio)
                     continue
                 event = self._parse_text(message)
                 if event is None:
@@ -80,6 +80,10 @@ class AudioV1Session(AudioSession):
                 self._ended = True
                 self._events.put_nowait(AgentCallEnd(reason))
             self._events.put_nowait(None)
+
+    def _on_binary(self, data: bytes) -> list[AgentEvent]:
+        """Turn one binary frame into events; subclasses may re-frame the audio."""
+        return [AgentAudio(data)] if data else []
 
     def _parse_text(self, raw: str) -> AgentEvent | None:
         try:
@@ -129,6 +133,7 @@ class AudioV1Session(AudioSession):
 
 class AudioV1Adapter(Adapter):
     name: ClassVar[AdapterName] = "audio_v1"
+    session_class: ClassVar[type[AudioV1Session]] = AudioV1Session
 
     async def connect(self, agent: AgentTarget, call_ctx: CallContext) -> AudioSession:
         start = StartMessage(
@@ -155,4 +160,4 @@ class AudioV1Adapter(Adapter):
             await ws.send(start.model_dump_json(exclude_none=True))
         except (ConnectionClosed, OSError) as exc:
             raise AgentConnectError(f"agent closed during start: {exc}") from exc
-        return AudioV1Session(ws)
+        return self.session_class(ws)
