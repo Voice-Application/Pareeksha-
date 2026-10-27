@@ -408,7 +408,7 @@ Headers: `X-Pareeksha-Timestamp`, `X-Pareeksha-Signature: v1=<hex hmac_sha256(se
 { "external_id": "exotel-CA123", "recording_url": "https://…/CA123.mp3", "agent_name": "EMI Reminder Bot",
   "language": "kn-IN", "metadata": { "phone": "+91XXXXXXXX00", "crm_contact_id": "1234" } }
 ```
-→ `202 { "call_id": "…", "duplicate": false }` · `401 invalid_signature` · `408 timestamp_out_of_window` · `422 unsafe_url`
+→ `202 { "call_id": "…", "duplicate": false }` · `401 invalid_signature` · `408 timestamp_out_of_window` · `422 unsafe_url` · `422 unknown_agent` (no agent matches `agent_name` and the integration has no `default_agent_id`). A repeated `external_id` returns the first call with `duplicate: true`; nothing new is created.
 
 Outbound webhook payloads and signing: `10-integrations-and-dx.md §2.1`.
 

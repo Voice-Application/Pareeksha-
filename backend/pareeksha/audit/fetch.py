@@ -6,7 +6,13 @@ import httpx
 
 from pareeksha.audit.ingest import MAX_UPLOAD_BYTES
 from pareeksha.audit.pipeline import RecordingFetchError
-from pareeksha.integrations.ssrf import Resolver, SSRFError, safe_request, system_resolver
+from pareeksha.integrations.ssrf import (
+    Resolver,
+    SSRFError,
+    dev_allow_private,
+    safe_request,
+    system_resolver,
+)
 
 #: Telephony platforms serve recordings as audio/* or as an untyped byte stream.
 ALLOWED_CONTENT_TYPES = ("audio/*", "application/octet-stream", "binary/octet-stream")
@@ -33,6 +39,7 @@ async def fetch_recording(
             allowed_content_types=ALLOWED_CONTENT_TYPES,
             resolver=resolver,
             transport=transport,
+            allow_private=dev_allow_private(),
         )
     except SSRFError as exc:
         raise RecordingFetchError(f"blocked: {exc}", retryable=False) from exc

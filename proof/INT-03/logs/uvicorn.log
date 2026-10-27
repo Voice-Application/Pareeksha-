@@ -1,0 +1,21 @@
+INFO:     Started server process [17531]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:28000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:49398 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36462 - "GET /api/v1/agents HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36462 - "POST /api/v1/integrations HTTP/1.1" 201 Created
+PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS is set: the SSRF public-address check is OFF
+INFO:     127.0.0.1:36462 - "POST /api/v1/integrations/bffd6c06-668e-4682-bc2a-812816f85e34/test HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36462 - "POST /api/v1/webhooks/inbound/bffd6c06-668e-4682-bc2a-812816f85e34 HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:36462 - "POST /api/v1/webhooks/inbound/bffd6c06-668e-4682-bc2a-812816f85e34 HTTP/1.1" 408 Request Timeout
+PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS is set: the SSRF public-address check is OFF
+INFO:     127.0.0.1:36462 - "POST /api/v1/webhooks/inbound/bffd6c06-668e-4682-bc2a-812816f85e34 HTTP/1.1" 422 Unprocessable Content
+PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS is set: the SSRF public-address check is OFF
+INFO:     127.0.0.1:36462 - "POST /api/v1/webhooks/inbound/bffd6c06-668e-4682-bc2a-812816f85e34 HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:36462 - "POST /api/v1/webhooks/inbound/bffd6c06-668e-4682-bc2a-812816f85e34 HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:59038 - "GET /health HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [17531]

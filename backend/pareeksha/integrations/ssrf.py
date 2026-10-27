@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import ipaddress
+import os
 import socket
 from collections.abc import Awaitable, Callable
 from urllib.parse import urlsplit, urlunsplit
@@ -19,6 +20,14 @@ import httpx
 Resolver = Callable[[str, int], Awaitable[list[str]]]
 
 DEFAULT_MAX_BYTES = 10 * 1024 * 1024
+
+#: Development switch: let the platform call a receiver on a private/loopback address (still https).
+DEV_ALLOW_PRIVATE_ENV = "PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS"
+
+
+def dev_allow_private() -> bool:
+    """True when ``PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS=1`` turns the public-address check off."""
+    return os.environ.get(DEV_ALLOW_PRIVATE_ENV) == "1"
 
 
 class SSRFError(Exception):

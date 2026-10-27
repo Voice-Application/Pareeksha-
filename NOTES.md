@@ -68,3 +68,5 @@
 - EVAL-05: `dialect_reports` has no progress columns, so the report row keeps `_meta` (expected count, frozen sample ids, `complete`) inside `aggregates`; the consumer locks the row (`FOR UPDATE`) before counting so two instances finish a report exactly once ([pipeline](backend/pareeksha/dialect/pipeline.py)).
 - QA-02: `docker ps --filter publish=<host port>` finds the broker container whether it came from Compose or `docker run`, so the outage test can `docker stop` / `docker start` it without knowing the Compose project name ([kit](backend/tests/kafka/kit.py)).
 - QA-02: during a real broker outage a send that times out may still be delivered when the broker returns, so the outbox is at-least-once: the order test dedupes by event_id and asserts the first occurrences are in enqueue order per key ([test](backend/tests/kafka/test_kafka_down_outbox.py)).
+
+- INT-03: inbound webhook (HMAC, dedupe on external_refs, SSRF guard) imports calls; PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS=1 also lets the auditor fetch from loopback. Run the stack natively against a `docker compose -p <x>` kafka+postgres to avoid image rebuilds ([proof/INT-03/proof.md](proof/INT-03/proof.md)).
