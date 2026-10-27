@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "gen:api": "node scripts/gen-api.mjs",
     "gen:api:check": "node scripts/gen-api.mjs --check",
-    "test:smoke": "playwright test"
+    "test:smoke": "playwright test",
+    "test:real": "playwright test -c playwright.real.config.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.104.5",
