@@ -1,0 +1,5 @@
+All checks passed!
+206 files already formatted
+tests/unit/speech/test_deepgram.py:229: error: Value of type "Iterable[socket]" is not indexable  [index]
+tests/unit/speech/test_deepgram.py:254: error: Value of type "Iterable[socket]" is not indexable  [index]
+Found 2 errors in 1 file (checked 204 source files)
