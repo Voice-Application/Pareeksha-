@@ -1,0 +1,66 @@
+name: pareeksha-regression
+
+# Dogfood of action/action.yml: starts the full stack on the runner (real Kafka, Postgres, Gnani, DeepSeek),
+# points the bundled mock agent at the bugs listed in .github/mock-agent-bugs, applies examples/ci/pareeksha.yaml and
+# runs its suite. Needs repository secrets GNANI_API_KEY and DEEPSEEK_API_KEY (spends a few calls per run).
+on:
+  pull_request:
+    paths:
+      - ".github/mock-agent-bugs"
+      - "mock_agent/**"
+      - "examples/ci/pareeksha.yaml"
+      - "action/**"
+  workflow_dispatch:
+
+jobs:
+  suite:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure the stack
+        env:
+          GNANI_API_KEY: ${{ secrets.GNANI_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          test -n "$GNANI_API_KEY" && test -n "$DEEPSEEK_API_KEY" || { echo "::error::GNANI_API_KEY / DEEPSEEK_API_KEY secrets are not set"; exit 1; }
+          bugs=$(grep -vE '^\s*(#|$)' .github/mock-agent-bugs | tr -d ' \n' || true)
+          echo "planted bugs: ${bugs:-none}"
+          cp .env.example .env
+          {
+            echo "GNANI_API_KEY=$GNANI_API_KEY"
+            echo "DEEPSEEK_API_KEY=$DEEPSEEK_API_KEY"
+            echo "SECRET_KEY=$(python3 -c 'import base64,os; print(base64.urlsafe_b64encode(os.urandom(32)).decode())')"
+            echo "PAREEKSHA_API_KEY=pk_live_$(python3 -c 'import secrets; print(secrets.token_hex(24))')"
+            echo "MOCK_BUGS=$bugs"
+            echo "SIMULATOR_REPLICAS=1"
+          } >> .env
+          echo "::add-mask::$GNANI_API_KEY"
+          echo "::add-mask::$DEEPSEEK_API_KEY"
+          echo "PAREEKSHA_KEY=$(grep '^PAREEKSHA_API_KEY=' .env | tail -1 | cut -d= -f2)" >> "$GITHUB_ENV"
+
+      - name: Start and seed
+        run: |
+          docker compose --profile workers up -d --build
+          for _ in $(seq 1 120); do curl -fsS http://localhost:8000/health >/dev/null 2>&1 && break; sleep 5; done
+          curl -fsS http://localhost:8000/health
+          docker compose run --rm api python -m pareeksha.seed
+
+      - name: Pareeksha suite
+        uses: ./action
+        with:
+          api-url: http://localhost:8000
+          api-key: ${{ env.PAREEKSHA_KEY }}
+          config: examples/ci/pareeksha.yaml
+          suite: pr_check
+          regression: "false"
+          sdk-package: ./sdk/python
+
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --no-color --tail=200 api simulator evaluator mock-agent
+
+      - name: Stop the stack
+        if: always()
+        run: docker compose down -v

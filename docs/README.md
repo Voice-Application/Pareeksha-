@@ -15,7 +15,7 @@
 - **Speech is pluggable:** `STT_PROVIDER` / `TTS_PROVIDER` = `gnani` (default, verified live) | `google` | `azure` | `elevenlabs` | `deepgram`. The last four are implemented and unit-tested; their keys are pending, so they are not yet verified live. Overridable per agent/run.
 - **SDK:** distribution `pareeksha-sdk`, import name **`pareeksha_sdk`** (not `pareeksha`, which is the backend package); CLI command `pareeksha`. The `agent_server` helper in the file tree was not built; Guide 3 shows a ~20-line server instead.
 - **Dev switch:** `PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS=1` lets webhooks/recording fetches target loopback/private addresses for local testing only (https, no-credentials and IP pinning still apply). Never set it in production.
-- **No `make demo`:** setup is `docker compose --profile workers up -d --build` then `docker compose run --rm api python -m pareeksha.seed`; see [Guide 1](guides/01-quickstart.md).
+- **`make demo`** (QA-05) does the whole setup in one command: generates `SECRET_KEY` and `PAREEKSHA_API_KEY` in `.env` when empty (you still add the Gnani and DeepSeek keys), starts the stack, seeds it and runs a 10-call demo. The manual steps stay in [Guide 1](guides/01-quickstart.md). `make verify` runs the acceptance steps V1..V11 and writes `proof/FINAL_REPORT.md`.
 
 **Adopter guides:** [1 Quick start](guides/01-quickstart.md) · [2 Pipecat bot](guides/02-connect-pipecat.md) · [3 Any bot (`pareeksha-audio-v1`)](guides/03-connect-any-bot.md) · [4 Webhook source](guides/04-webhook-source.md) · [5 HubSpot](guides/05-hubspot.md) · [6 GitHub Action](guides/06-github-action.md) · [7 Write a connector](guides/07-write-a-connector.md) · [8 Operating Kafka](guides/08-operating-kafka.md) · [SDK reference](guides/sdk-reference.md)
 

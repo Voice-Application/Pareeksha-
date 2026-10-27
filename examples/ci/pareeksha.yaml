@@ -1,0 +1,26 @@
+# Suite used by .github/workflows/pareeksha-regression.yml against the bundled mock agent
+# (ws://mock-agent:8765/ws inside the compose network). The mock agent's planted bugs come from
+# .github/mock-agent-bugs: a PR that lists a bug there makes this suite fail; removing it makes it pass.
+version: 1
+agent:
+  name: EMI Reminder Bot
+  adapter: audio_v1
+  endpoint_url: ws://mock-agent:8765/ws
+  languages: [kn-IN, hi-IN, en-IN]
+  mandatory_disclosures:
+    - id: recording
+      text: This call is being recorded for quality and compliance purposes
+      regex: "(record|ರೆಕಾರ್ಡ್|रिकॉर्ड)"
+      within_turns: 2
+scenarios:
+  - title: Promise to pay on Friday
+    caller_goal: Say the salary arrives on Friday and promise to pay the full EMI that day.
+    success_criteria: Agent states the amount, records the promise and confirms it back.
+    tags: [ci_smoke]
+suites:
+  pr_check:
+    scenarios: {tags: [ci_smoke]}
+    personas: ["Priya — careful"]
+    noise_profiles: [pstn_8k_alaw]
+    max_concurrency: 1
+    fail_under: 80

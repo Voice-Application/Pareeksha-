@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# V6 (NFR-4, FR-IN-5): the Kafka suite, then a live replay: re-publish one real evaluation.completed event twice and
+# SIGKILL the integrations worker mid-flight; there must still be exactly one evaluation for the call and at most one
+# delivery per (integration, event). Needs a finished run (V2/V3 create one).
+cd "$(dirname "$0")/../.." && source scripts/verify/lib.sh
+begin 6 "Duplicate delivery and worker crash give one evaluation and one CRM note"
+(set -o pipefail; cd backend && python3 -m pytest tests/kafka -q -p no:cacheprovider 2>&1 | tail -15) > "$OUT/V6.kafka_suite.txt"
+suite=$?
+block < "$OUT/V6.kafka_suite.txt"
+[ "$(psql_q "SELECT count(*) FROM evaluations")" -gt 0 ] || finish FAIL "no evaluation in the database to replay"
+
+call_id=$(psql_q "SELECT call_id FROM evaluations WHERE status='ok' ORDER BY id LIMIT 1")
+before_eval=$(psql_q "SELECT count(*) FROM evaluations WHERE call_id='$call_id'")
+before_del=$(psql_q "SELECT count(*) FROM integration_deliveries")
+$COMPOSE exec -T api python - "$call_id" <<'PYEOF' 2>&1 | block
+import asyncio, json, sys
+from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
+from pareeksha.events.settings import EventSettings
+from pareeksha.events.topics import Topics
+async def main(call_id):
+    s = EventSettings.from_env()
+    cons = AIOKafkaConsumer(Topics.EVALUATION_COMPLETED.value, bootstrap_servers=s.bootstrap_servers, group_id=None,
+                            auto_offset_reset="earliest", enable_auto_commit=False, consumer_timeout_ms=15000)
+    await cons.start()
+    prod = AIOKafkaProducer(bootstrap_servers=s.bootstrap_servers)
+    await prod.start()
+    sent = 0
+    try:
+        async for m in cons:
+            if json.loads(m.value)["payload"].get("call_id") == call_id:
+                for _ in range(2):
+                    await prod.send_and_wait(m.topic, m.value, key=m.key, headers=m.headers)
+                    sent += 1
+                break
+    finally:
+        await cons.stop(); await prod.stop()
+    print(f"re-published the original evaluation.completed {sent} time(s)")
+asyncio.run(main(sys.argv[1]))
+PYEOF
+$COMPOSE kill -s KILL integrations >/dev/null 2>&1; $COMPOSE up -d integrations >/dev/null 2>&1
+sleep 45
+after_eval=$(psql_q "SELECT count(*) FROM evaluations WHERE call_id='$call_id'")
+dup_del=$(psql_q "SELECT count(*) FROM (SELECT integration_id, event_id, direction FROM integration_deliveries GROUP BY 1,2,3 HAVING count(*)>1) t")
+dup_notes=$(psql_q "SELECT count(*) FROM (SELECT integration_id, external_id FROM integration_deliveries WHERE external_id IS NOT NULL GROUP BY 1,2 HAVING count(*)>1) t")
+note "call $call_id: evaluations before/after = $before_eval/$after_eval; deliveries before=$before_del; duplicate delivery keys=$dup_del; duplicate CRM note ids=$dup_notes"
+[ "$suite" -eq 0 ] || finish FAIL "Kafka suite failed"
+[ "$after_eval" -eq 1 ] && [ "$dup_del" -eq 0 ] && [ "$dup_notes" -eq 0 ] && finish PASS "one evaluation, no duplicate delivery after replay x2 and SIGKILL"
+finish FAIL "evaluations=$after_eval duplicate deliveries=$dup_del duplicate notes=$dup_notes"
