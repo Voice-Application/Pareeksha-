@@ -32,7 +32,7 @@ Overrides: `INFRA_TEST_KAFKA_BOOTSTRAP`, `TEST_DATABASE_URL`, `INFRA_TEST_DATABA
 
 ## Results
 
-PYTEST_SUMMARY
+Full backend suite on real Kafka (`apache/kafka:4.0.0`) + Postgres 16, private compose project, re-run this session (`pytest.txt`): 838 passed, 1 environment-dependent failure (`test_health_reports_down_dependencies_with_503` asserts "no DB configured", but `DATABASE_URL` was exported for the suite; it passes, 169/169 in `tests/contract/test_stub_routes.py`, with `DATABASE_URL` unset), 0 skipped, coverage 97%. `tests/kafka`: 9 passed in 60 s (duplicate, SIGKILL crash x2, chain, Kafka-down outbox drain, retry/DLQ, throttle, scale-out). ruff and ruff format clean; mypy reports 2 errors in `tests/unit/speech/test_deepgram.py` (VOICE-07, websockets typing), none in this task.
 
 ### The suite fails when the system is broken (mutation checks, files in this folder)
 - `mutation_dedupe.txt`: the `processed_events` dedupe disabled in `events/consumer.py` -> 3 of the 4 duplicate / crash tests fail (the handler re-runs and the INSERT violates the unique key); the in-handler-kill test correctly still passes. File restored.

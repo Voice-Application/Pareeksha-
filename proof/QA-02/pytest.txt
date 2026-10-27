@@ -1,16 +1,16 @@
 ============================= test session starts ==============================
 platform linux -- Python 3.13.17, pytest-9.1.1, pluggy-1.7.0
-rootdir: /home/user/Pareeksha-/.claude/worktrees/agent-a5bc7f66519e61c3a/backend
+rootdir: /tmp/claude-0/wt/QA-02/backend
 configfile: pyproject.toml
 testpaths: tests
-plugins: respx-0.23.1, typeguard-4.6.0, asyncio-1.4.0, anyio-4.15.1, cov-7.1.0
+plugins: respx-0.23.1, asyncio-1.4.1, anyio-4.15.1, cov-7.1.0
 asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
 collected 839 items
 
 tests/contract/test_openapi_routes.py .............                      [  1%]
 tests/contract/test_stub_routes.py ..................................... [  5%]
 ........................................................................ [ 14%]
-............................................................             [ 21%]
+..........................................................F.             [ 21%]
 tests/contract/test_topics_contract.py ........                          [ 22%]
 tests/db/test_auth.py ..........                                         [ 23%]
 tests/db/test_migrations.py ......                                       [ 24%]
@@ -64,11 +64,26 @@ tests/unit/test_llm_provider_interface.py ............                   [ 97%]
 tests/unit/test_no_api02_stubs.py ..                                     [ 97%]
 tests/unit/test_persona_schema.py ...................                    [100%]
 
+=================================== FAILURES ===================================
+________________ test_health_reports_down_dependencies_with_503 ________________
+
+    def test_health_reports_down_dependencies_with_503() -> None:
+        response = client.get(f"{API}/health")  # no auth, no DB or Kafka configured in tests
+        assert response.status_code == 503
+        body = response.json()
+        assert set(body) == {"db", "kafka"}
+>       assert body["db"].startswith("down") and body["kafka"].startswith("down")
+E       AssertionError: assert (False)
+E        +  where False = <built-in method startswith of str object at 0x7f2fa24b3c60>('down')
+E        +    where <built-in method startswith of str object at 0x7f2fa24b3c60> = 'ok'.startswith
+
+tests/contract/test_stub_routes.py:276: AssertionError
 ================================ tests coverage ================================
 _______________ coverage: platform linux, python 3.13.17-final-0 _______________
 
 Name                                       Stmts   Miss Branch BrPart  Cover   Missing
 --------------------------------------------------------------------------------------
+pareeksha/api/health.py                       27      2      0      0    93%   41-42
 pareeksha/api/main.py                         49      1     16      1    97%   79
 pareeksha/audio/dsp.py                        82      4     14      2    94%   53-54, 87, 119
 pareeksha/audio/line_simulator.py            124      4     30      2    96%   85, 188-190
@@ -96,11 +111,11 @@ pareeksha/speech/providers/elevenlabs.py      78      0     24      1    99%   2
 pareeksha/speech/providers/gnani.py          114      4     32      4    95%   71, 181, 189, 204
 pareeksha/speech/providers/google.py         102      0     18      1    99%   64->66
 pareeksha/workers/dlq_recorder.py             96     12     12      2    87%   134, 167-172, 179-182, 186
-pareeksha/workers/outbox_relay.py             62      7     16      3    87%   67, 78, 91-94, 98
+pareeksha/workers/outbox_relay.py             62     10     16      3    81%   64-67, 78, 91-94, 98
 pareeksha/workers/retrier.py                  90     13     22      3    86%   82, 93, 147-152, 159-162, 166
 --------------------------------------------------------------------------------------
-TOTAL                                       6722    119   1030     62    98%
+TOTAL                                       6722    124   1030     62    97%
 
-82 files skipped due to complete coverage.
-======================= 839 passed in 582.80s (0:09:42) ========================
-EXIT 0
+81 files skipped due to complete coverage.
+================== 1 failed, 838 passed in 566.12s (0:09:26) ===================
+EXIT 1
