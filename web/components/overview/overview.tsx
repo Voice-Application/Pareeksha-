@@ -87,6 +87,10 @@ export function Overview() {
 
   const worst = [...(items.data?.items ?? [])].filter((i) => i.overall_score != null).sort((a, b) => a.overall_score! - b.overall_score!).slice(0, 5);
   const lag = metrics.data ? Math.max(0, ...Object.values(metrics.data.consumer_lag)) : 0;
+  // Show the most lagging consumer groups only; a long tail of idle or test groups must not stretch the panel.
+  const lagAll = Object.entries(metrics.data?.consumer_lag ?? {}).sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0]));
+  const lagRows = lagAll.slice(0, 6);
+  const lagHidden = lagAll.length - lagRows.length;
   const stale = metrics.dataUpdatedAt && now && now - metrics.dataUpdatedAt > 45000;
   const budget = usage.data?.budget_credits;
 
@@ -142,12 +146,13 @@ export function Overview() {
               <dd><Status ok={health.data?.kafka === "ok"} fail={health.data?.kafka !== "ok" && !!health.data} label={health.data?.kafka ?? "unknown"} /></dd>
               <dt className="text-muted">Outbox backlog</dt>
               <dd className="mono">{metrics.data?.outbox_backlog ?? "-"}</dd>
-              {Object.entries(metrics.data?.consumer_lag ?? {}).map(([k, v]) => (
+              {lagRows.map(([k, v]) => (
                 <div key={k} className="contents">
                   <dt className="text-muted">Lag: <span className="mono">{k}</span></dt>
                   <dd className={v > 20 ? "mono text-warn-fg" : "mono"}>{v}</dd>
                 </div>
               ))}
+              {lagHidden > 0 && <p className="col-span-2 text-xs text-subtle">and {lagHidden} more consumer group{lagHidden === 1 ? "" : "s"}</p>}
               {lag > 20 && <p className="col-span-2 text-xs text-warn-fg">A consumer is more than 20 events behind.</p>}
             </dl>
           </PanelBody>

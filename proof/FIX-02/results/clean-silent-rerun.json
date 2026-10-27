@@ -1,0 +1,343 @@
+{
+ "label": "clean-silent-rerun",
+ "run_id": "8f32e605-768b-417d-bd4e-f14d53304064",
+ "agent": "EMI Reminder Bot",
+ "status": "completed",
+ "wall_seconds": 110.2,
+ "progress": {
+  "total": 1,
+  "queued": 0,
+  "in_progress": 0,
+  "evaluated": 1,
+  "error": 0
+ },
+ "summary": {
+  "pass_rate": 1.0,
+  "critical_failures": 0,
+  "needs_review": 0,
+  "score_mean": 100.0,
+  "latency_p50_ms": null,
+  "latency_p95_ms": null,
+  "barge_in_honoured_rate": null,
+  "top_failure_types": [],
+  "suite_passed": null,
+  "score_distribution": []
+ },
+ "request": {
+  "agent_id": "767eac68-4d7e-41d4-b996-40981ae4e30d",
+  "name": "clean-silent-rerun",
+  "scenario_ids": [
+   "26c37c83-aeec-4dd6-9f59-491edae46116"
+  ],
+  "persona_ids": [
+   "5182d51a-1ea1-4cc9-8c2d-c128c5a65435"
+  ],
+  "noise_profile_ids": [
+   "381621a6-cd71-45e6-b015-930f2d14cf33"
+  ],
+  "repeats": 1,
+  "config": {
+   "max_concurrency": 1
+  }
+ },
+ "calls": [
+  {
+   "item": {
+    "id": "95d5332a-8262-4d91-9815-d3e2ef5347a6",
+    "scenario": "Caller goes silent",
+    "persona": "Priya — careful",
+    "noise_profile": "pstn_8k_alaw",
+    "status": "evaluated",
+    "call_id": "4e526a80-939a-5fff-8725-8bb5b3307ab8",
+    "overall_score": 100.0,
+    "passed": true,
+    "critical_failure": false
+   },
+   "call": {
+    "id": "4e526a80-939a-5fff-8725-8bb5b3307ab8",
+    "source": "simulation",
+    "status": "completed",
+    "agent_id": "767eac68-4d7e-41d4-b996-40981ae4e30d",
+    "run_id": "8f32e605-768b-417d-bd4e-f14d53304064",
+    "run_item_id": "95d5332a-8262-4d91-9815-d3e2ef5347a6",
+    "language": "en-IN",
+    "end_reason": "agent_hangup",
+    "duration_ms": 100931,
+    "started_at": "2026-10-27T19:15:34.595302Z",
+    "recordings": {
+     "mixed": "/api/v1/calls/4e526a80-939a-5fff-8725-8bb5b3307ab8/audio/mixed",
+     "caller": "/api/v1/calls/4e526a80-939a-5fff-8725-8bb5b3307ab8/audio/caller",
+     "agent": "/api/v1/calls/4e526a80-939a-5fff-8725-8bb5b3307ab8/audio/agent",
+     "original": null
+    },
+    "turns": [
+     {
+      "idx": 0,
+      "speaker": "agent",
+      "text": "this call is being recorded for quality and compliance purposes hello this is suraksha finance am i speaking with the account holder",
+      "start_ms": 505,
+      "end_ms": 7597,
+      "ground_truth_text": "This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?",
+      "agent_heard_text": null,
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 1,
+      "speaker": "caller",
+      "text": "Yes, speaking.",
+      "start_ms": 11393,
+      "end_ms": 12814,
+      "ground_truth_text": "Yes, speaking.",
+      "agent_heard_text": "yes speaking",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 2,
+      "speaker": "agent",
+      "text": "thank you your emi of rupees four thousand five hundred is overdue by twelve days when can you pay",
+      "start_ms": 13970,
+      "end_ms": 20196,
+      "ground_truth_text": "Thank you. Your EMI of rupees 4,500 is overdue by twelve days. When can you pay?",
+      "agent_heard_text": null,
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 3,
+      "speaker": "caller",
+      "text": "Sorry, could you repeat that? I didn't quite catch what you said.",
+      "start_ms": 24173,
+      "end_ms": 28154,
+      "ground_truth_text": "Sorry, could you repeat that? I didn't quite catch what you said.",
+      "agent_heard_text": "sorry could you repeat that i didn't quite catch what you said",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 4,
+      "speaker": "agent",
+      "text": "of course happy to repeat it your emi of four thousand five hundred rupees was due on the fifth of this month and is now overdue by twelve days when can you pay",
+      "start_ms": 29768,
+      "end_ms": 39562,
+      "ground_truth_text": "Of course, happy to repeat it. Your EMI of 4,500 rupees was due on the fifth of this month and is now overdue by twelve days. When can you pay?",
+      "agent_heard_text": null,
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 5,
+      "speaker": "caller",
+      "text": "Which loan is this for, please? Can you confirm the loan number?",
+      "start_ms": 43313,
+      "end_ms": 47214,
+      "ground_truth_text": "Which loan is this for, please? Can you confirm the loan number?",
+      "agent_heard_text": "which loan is this for please can you confirm the loan number",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 6,
+      "speaker": "agent",
+      "text": "for your security i cannot read account details allowed on this call i can transfer you to a human agent who can verify the loan id and the emi amount with you",
+      "start_ms": 48411,
+      "end_ms": 57090,
+      "ground_truth_text": "For your security I cannot read account details aloud on this call. I can transfer you to a human agent who can verify the loan ID and the EMI amount with you.",
+      "agent_heard_text": null,
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 7,
+      "speaker": "caller",
+      "text": "Okay, but before transferring me, can you at least confirm the EMI amount once more so I have it noted down?",
+      "start_ms": 61953,
+      "end_ms": 69534,
+      "ground_truth_text": "Okay, but before transferring me, can you at least confirm the EMI amount once more so I have it noted down?",
+      "agent_heard_text": "ok but before transferring me can you at least confirm the emi amount once more so i have it noted down",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 8,
+      "speaker": "agent",
+      "text": "yes that is correct your emi of four thousand five hundred rupees was due on the fifth of this month and is twelve days overdue when can you pay it",
+      "start_ms": 70821,
+      "end_ms": 79245,
+      "ground_truth_text": "Yes, that is correct. Your EMI of four thousand five hundred rupees was due on the fifth of this month and is twelve days overdue. When can you pay it?",
+      "agent_heard_text": null,
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 9,
+      "speaker": "caller",
+      "text": "You've said four thousand five hundred twice now, so I've noted it. But I still don't know which loan this is — can you please transfer me to the human agent who can confirm the loan number?",
+      "start_ms": 83753,
+      "end_ms": 94214,
+      "ground_truth_text": "You've said four thousand five hundred twice now, so I've noted it. But I still don't know which loan this is — can you please transfer me to the human agent who can confirm the loan number?",
+      "agent_heard_text": "you said four thousand five hundred twice now so i've noted it but i still don't know which loan this is can you please transfer me to the human agent who can confirm the loan number",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 10,
+      "speaker": "agent",
+      "text": "of course i am transferring you to a human agent now please stay on the line",
+      "start_ms": 95585,
+      "end_ms": 99577,
+      "ground_truth_text": "Of course. I am transferring you to a human agent now. Please stay on the line.",
+      "agent_heard_text": null,
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     }
+    ],
+    "tool_calls": [
+     {
+      "seq": 0,
+      "name": "transfer_to_human",
+      "arguments": {
+       "reason": "caller_requested_human"
+      },
+      "result": {
+       "status": "transferred"
+      },
+      "at_ms": 99735,
+      "turn_idx": 10
+     }
+    ],
+    "metrics": {
+     "first_greeting_ms": 505,
+     "response_latency_p50_ms": 1287,
+     "response_latency_p90_ms": null,
+     "response_latency_p95_ms": 1565,
+     "response_latency_max_ms": null,
+     "barge_in_attempts": 0,
+     "barge_in_honoured": 0,
+     "agent_stop_time_p50_ms": null,
+     "silence_gaps_over_2s": 5,
+     "turn_count": 11,
+     "agent_talk_ratio": 0.618,
+     "repeated_utterances": 0,
+     "caller_asr_wer": 0.0238,
+     "latency_is_approximate": false
+    },
+    "checks": [
+     {
+      "check_type": "amount_confirmed",
+      "check_key": "emi_amount",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [
+       2,
+       4,
+       8
+      ],
+      "detail": "Agent stated 4500 correctly"
+     },
+     {
+      "check_type": "disclosure_present",
+      "check_key": "recording",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [
+       0
+      ],
+      "detail": "Disclosure given in turn 0"
+     },
+     {
+      "check_type": "forbidden_absent",
+      "check_key": "threat_legal",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "Phrase never said by the agent"
+     },
+     {
+      "check_type": "language_match",
+      "check_key": "en-IN",
+      "must_pass": false,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "0/6 agent turns not in ['en']"
+     },
+     {
+      "check_type": "no_loop",
+      "check_key": "agent_repeats",
+      "must_pass": false,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "No repeated utterance loop"
+     }
+    ],
+    "evaluation": {
+     "id": "2abb758c-3fdc-51b4-91dc-99ce5f1a53d2",
+     "rubric_version": "rubric-2026-10-v1",
+     "judge_model": "deepseek-v4-pro",
+     "prompt_hash": "sha256:f495ed1d9c3590c5dd9a5a82cdbc05ce077d35880a1b012b1c48ff021a43dacf",
+     "status": "ok",
+     "overall_score": 100.0,
+     "passed": true,
+     "critical_failure": false,
+     "needs_human_review": false,
+     "review_reasons": [],
+     "failure_types": [],
+     "dimensions": {
+      "escalation": {
+       "score": 4,
+       "evidence_turns": [
+        10
+       ],
+       "reason": "Transferred promptly upon explicit request; correct decision."
+      },
+      "empathy_tone": {
+       "score": 4,
+       "evidence_turns": [],
+       "reason": "Polite and helpful; offered to repeat and transfer without frustration."
+      },
+      "task_completion": {
+       "score": 4,
+       "evidence_turns": [],
+       "reason": "Caller requested transfer to human for loan ID confirmation; agent transferred correctly. Success criteria met."
+      },
+      "factual_accuracy": {
+       "score": 4,
+       "evidence_turns": [],
+       "reason": "EMI amount 4500 stated correctly; due date and overdue days consistent; no hallucinated facts."
+      },
+      "conversation_flow": {
+       "score": 4,
+       "evidence_turns": [],
+       "reason": "No loops; agent responded appropriately to each turn and transferred when requested."
+      },
+      "language_handling": {
+       "score": 4,
+       "evidence_turns": [],
+       "reason": "Agent matched caller's English, understood requests, and repeated clearly when asked."
+      },
+      "policy_compliance": {
+       "score": 4,
+       "evidence_turns": [],
+       "reason": "Recording disclosure given in turn 0; no threats or forbidden content; no PII over-collection."
+      }
+     },
+     "summary": "Agent handled the call well: disclosed recording, stated EMI correctly, repeated when asked, and transferred to human upon request. No issues found.",
+     "confidence": "high"
+    },
+    "speaker_map": null
+   }
+  }
+ ]
+}
