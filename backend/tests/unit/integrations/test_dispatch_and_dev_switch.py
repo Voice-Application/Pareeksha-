@@ -15,8 +15,8 @@ from pareeksha.events.schemas import (
     make_envelope,
 )
 from pareeksha.integrations.dispatch import DEFAULT_EVENTS, filter_matches
-from pareeksha.integrations.ssrf import SSRFError, resolve_public
-from pareeksha.integrations.webhook import DEV_ALLOW_PRIVATE_ENV, WebhookConnector
+from pareeksha.integrations.ssrf import DEV_ALLOW_PRIVATE_ENV, SSRFError, resolve_public
+from pareeksha.integrations.webhook import WebhookConnector
 
 PACKAGE = Path(__file__).resolve().parents[3] / "pareeksha"
 

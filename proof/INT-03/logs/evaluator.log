@@ -1,0 +1,8 @@
+{"ts": "2026-10-27T01:36:55.673727+00:00", "level": "warning", "logger": "aiokafka.consumer.group_coordinator", "msg": "Marking the coordinator dead (node 1)for group evaluator."}
+{"ts": "2026-10-27T01:36:55.783942+00:00", "level": "warning", "logger": "aiokafka.consumer.group_coordinator", "msg": "Marking the coordinator dead (node 1)for group evaluator."}
+{"ts": "2026-10-27T01:36:55.888625+00:00", "level": "warning", "logger": "aiokafka.consumer.group_coordinator", "msg": "Marking the coordinator dead (node 1)for group evaluator."}
+{"ts": "2026-10-27T01:36:56.008328+00:00", "level": "warning", "logger": "aiokafka.consumer.group_coordinator", "msg": "Marking the coordinator dead (node 1)for group evaluator."}
+{"ts": "2026-10-27T01:36:56.115927+00:00", "level": "warning", "logger": "aiokafka.consumer.group_coordinator", "msg": "Marking the coordinator dead (node 1)for group evaluator."}
+{"ts": "2026-10-27T01:37:39.649086+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-27T01:37:43.633161+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-v4-pro purpose=judge in=2133 out=396 cached_in=2048 cost=0.00438372 latency_ms=4686 repair=False cache_hit=False"}
+{"ts": "2026-10-27T01:37:43.674763+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "evaluator", "event_id": "ee29c9f8-6f51-5021-989d-30107edb7200", "correlation_id": "abf1edee-a9bc-446a-bd64-b713182f8806", "topic": "pareeksha.call.completed.v1", "attempt": 1}

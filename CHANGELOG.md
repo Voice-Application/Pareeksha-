@@ -2,6 +2,10 @@
 
 Contract changes after Day 1 need Tech Lead approval and an entry here.
 
+## Inbound webhook source (INT-03) — 27 Oct 2026
+- `POST /webhooks/inbound/{integration_id}` is real (the `STUB(INT-03)` handler). Shapes and status codes as documented (202/400/401/404/408/422); extra error codes `timestamp_out_of_window` (408), `unsafe_url` and `unknown_agent` (422). Additive: the built-in `webhook` connector now reports `direction: "both"` (it implements `ingest`; it was `"sink"` while only the sink existed) and its config gained optional `default_agent_id` (agent used when the payload's `agent_name` matches none). The frozen `Connector` interface is unchanged.
+- `PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS=1` now also lets the import path (inbound URL check and recording download) reach a loopback host; unchanged otherwise.
+
 ## Evaluator and finalizer workers (EVAL-03b) — 24 Oct 2026
 - Additive behaviour, no contract change: `run.completed` is emitted once per run with id `uuid5(run_id, "run.completed")` by the finalizer consumer or its every-minute completion reconciler (whichever wins the atomic claim), also for runs the API cancelled (status stays `cancelled`; only `summary` and `finished_at` are filled). `Outgoing` (consumer framework) gained an optional `event_id`. `run_items` move `completed -> evaluating` while the judge runs. See `docs/contracts.md` section 1.
 ## Audit pipeline (EVAL-04) — 24 Oct 2026

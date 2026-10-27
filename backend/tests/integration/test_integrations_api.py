@@ -270,7 +270,7 @@ async def test_wrong_secret_key_when_patching_a_webhook_is_a_500(
 
 
 def test_connector_directions_include_shipped_and_entry_point_connectors() -> None:
-    assert connector_direction("webhook") == "sink"
+    assert connector_direction("webhook") == "both"
     assert connector_direction("hubspot") == "sink"
     assert connector_direction("does-not-exist") is None
     assert {"webhook", "hubspot"} <= set(installed_directions())
@@ -297,5 +297,5 @@ def test_a_broken_entry_point_plugin_is_skipped(monkeypatch: pytest.MonkeyPatch)
     assert registry.register(WebhookConnector)  # a healthy plugin still loads next to the bad ones
     monkeypatch.setattr("pareeksha.api.connectors.get_registry", lambda: registry)
     found = installed_directions()
-    assert "broken" not in found and "zoho" not in found and found["webhook"] == "sink"
+    assert "broken" not in found and "zoho" not in found and found["webhook"] == "both"
     assert set(registry.rejected) == {"broken", "zoho"}

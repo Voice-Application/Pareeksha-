@@ -23,6 +23,10 @@ class SignatureError(Exception):
     """Inbound signature missing, malformed, stale or wrong."""
 
 
+class StaleTimestampError(SignatureError):
+    """The timestamp is outside the replay window (HTTP 408 on the inbound endpoint)."""
+
+
 def compute_signature(secret: str, timestamp: int | str, body: bytes) -> str:
     mac = hmac.new(secret.encode(), f"{timestamp}.".encode() + body, hashlib.sha256)
     return mac.hexdigest()
@@ -60,7 +64,7 @@ def verify_signature(
         raise SignatureError("malformed timestamp") from exc
     current = time.time() if now is None else now
     if abs(current - ts) > tolerance_s:
-        raise SignatureError("timestamp outside the tolerance window")
+        raise StaleTimestampError("timestamp outside the tolerance window")
     provided = [part.strip()[3:] for part in sig_raw.split(",") if part.strip().startswith("v1=")]
     if not provided:
         raise SignatureError("no v1 signature")

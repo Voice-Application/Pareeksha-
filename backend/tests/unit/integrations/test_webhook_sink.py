@@ -103,7 +103,7 @@ def test_connectors_endpoint_lists_schemas() -> None:
         app.dependency_overrides.pop(authenticate, None)
     assert resp.status_code == 200
     webhook = next(c for c in resp.json() if c["name"] == "webhook")
-    assert webhook["direction"] == "sink"
+    assert webhook["direction"] == "both"
     assert "signing_secret" in webhook["secrets_schema"]["properties"]
 
 

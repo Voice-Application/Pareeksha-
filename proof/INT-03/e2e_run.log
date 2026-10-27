@@ -1,0 +1,18 @@
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, initial schema (docs/schema.sql v0.2)
+[2026-10-27T01:37:18.876+00:00] stack up (api + outbox_relay + auditor + evaluator + integrations) 
+integration bffd6c06-668e-4682-bc2a-812816f85e34 direction=both
+integration test (sink ping to the local HTTPS receiver): {'ok': True, 'detail': 'HTTP 200'}
+negative checks: {'bad_signature': [401, 'invalid_signature'], 'stale_timestamp': [408, 'timestamp_out_of_window'], 'non_https_url': [422, 'unsafe_url']}
+[2026-10-27T01:37:19.192+00:00] POST /webhooks/inbound (signed) 
+[2026-10-27T01:37:19.215+00:00] webhook accepted {'status': 202, 'response': {'call_id': 'abf1edee-a9bc-446a-bd64-b713182f8806', 'duplicate': False}}
+replayed delivery: 202 {'call_id': 'abf1edee-a9bc-446a-bd64-b713182f8806', 'duplicate': True}
+[2026-10-27T01:37:19.410+00:00] recording downloaded from the import URL {'bytes': 558764}
+[2026-10-27T01:37:43.868+00:00] sink delivery received (CRM-note stand-in) {'signature_ok': True}
+webhook -> sink delivery: 24.7 s (limit 180 s)
+  turn 0 agent       0-10080  नमस्ते, मैं शक्ति फाइनांस से बोल रही हूँ, ये कॉल रिकॉर्ड की जा रही है, आपकी इ एम आई ₹4,200 है जो शुक्रवार को देय है
+  turn 1 caller  10080-13824  हाँ, मैं शुक्रवार को पैसे जमा कर दूँगा।
+  turn 2 agent   13824-17440  धन्यवाद, मैंने आपका वादा दर्ज कर लिया है।
+evaluation: [{'overall_score': Decimal('100.00'), 'passed': True, 'needs_human_review': False, 'failure_types': [], 'created_at': datetime.datetime(2026, 10, 27, 1, 37, 38, 851171, tzinfo=zoneinfo.ZoneInfo(key='Etc/UTC')), 'version': 'rubric-2026-10-v1'}]
+wrote e2e_result.json

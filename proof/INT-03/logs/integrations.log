@@ -1,0 +1,9 @@
+{"ts": "2026-10-27T01:36:55.633480+00:00", "level": "error", "logger": "aiokafka.consumer.group_coordinator", "msg": "Group Coordinator Request failed: [Error 15] GroupCoordinatorNotAvailableError"}
+{"ts": "2026-10-27T01:36:55.749274+00:00", "level": "warning", "logger": "aiokafka.consumer.group_coordinator", "msg": "Marking the coordinator dead (node 1)for group integrations."}
+{"ts": "2026-10-27T01:36:55.855949+00:00", "level": "warning", "logger": "aiokafka.consumer.group_coordinator", "msg": "Marking the coordinator dead (node 1)for group integrations."}
+{"ts": "2026-10-27T01:36:55.958900+00:00", "level": "warning", "logger": "aiokafka.consumer.group_coordinator", "msg": "Marking the coordinator dead (node 1)for group integrations."}
+{"ts": "2026-10-27T01:36:56.065060+00:00", "level": "warning", "logger": "aiokafka.consumer.group_coordinator", "msg": "Marking the coordinator dead (node 1)for group integrations."}
+{"ts": "2026-10-27T01:36:56.170076+00:00", "level": "warning", "logger": "aiokafka.consumer.group_coordinator", "msg": "Marking the coordinator dead (node 1)for group integrations."}
+{"ts": "2026-10-27T01:37:43.775124+00:00", "level": "warning", "logger": "pareeksha.integrations.webhook", "msg": "PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS is set: the SSRF public-address check is OFF"}
+{"ts": "2026-10-27T01:37:43.869558+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://127.0.0.1:28443/note \"HTTP/1.0 200 OK\""}
+{"ts": "2026-10-27T01:37:43.873481+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "integrations", "event_id": "4588ae30-7794-5b29-8709-bb03d3eb0786", "correlation_id": "abf1edee-a9bc-446a-bd64-b713182f8806", "topic": "pareeksha.evaluation.completed.v1", "attempt": 1}

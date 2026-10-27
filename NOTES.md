@@ -53,3 +53,5 @@
 - EVAL-04: libsndfile (via `soundfile`) decodes both WAV and MP3, so uploads need no ffmpeg; recordings are resampled to 16 kHz mono once and the labelled diarization segments are stored as `stt.json` next to the audio, so a speaker-map override rebuilds turns without paying for STT again ([audit/ingest.py](backend/pareeksha/audit/ingest.py), [audit/turns.py](backend/pareeksha/audit/turns.py)).
 - EVAL-04: the shared dev Kafka (several agents' stacks on one host) makes INFRA-02's retry/redelivery tests flaky (two retriers consume `retry.30s`); run the suite against a private broker (`INFRA_TEST_KAFKA_BOOTSTRAP=localhost:<port>`) for a clean result ([proof](proof/EVAL-04/proof.md)).
 
+
+- INT-03: inbound webhook (HMAC, dedupe on external_refs, SSRF guard) imports calls; PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS=1 also lets the auditor fetch from loopback. Run the stack natively against a `docker compose -p <x>` kafka+postgres to avoid image rebuilds ([proof/INT-03/proof.md](proof/INT-03/proof.md)).
