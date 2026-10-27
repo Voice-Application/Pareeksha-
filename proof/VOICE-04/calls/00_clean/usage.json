@@ -3,12 +3,12 @@
     "kind": "stt",
     "provider": "gnani",
     "operation": "stt_rest",
-    "audio_seconds": 8.28,
+    "audio_seconds": 8.02,
     "characters": 0,
     "input_tokens": 0,
     "output_tokens": 0,
     "est_cost": null,
-    "latency_ms": 1715,
+    "latency_ms": 979,
     "cached": false
   },
   {
@@ -20,19 +20,43 @@
     "input_tokens": 725,
     "output_tokens": 51,
     "est_cost": null,
-    "latency_ms": 1320,
+    "latency_ms": 1396,
     "cached": false
   },
   {
     "kind": "tts",
     "provider": "gnani",
     "operation": "tts",
-    "audio_seconds": 8.64,
+    "audio_seconds": 2.88,
+    "characters": 35,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "est_cost": null,
+    "latency_ms": 2087,
+    "cached": false
+  },
+  {
+    "kind": "tts",
+    "provider": "gnani",
+    "operation": "tts",
+    "audio_seconds": 9.04,
     "characters": 128,
     "input_tokens": 0,
     "output_tokens": 0,
     "est_cost": null,
-    "latency_ms": 2971,
+    "latency_ms": 3689,
+    "cached": false
+  },
+  {
+    "kind": "stt",
+    "provider": "gnani",
+    "operation": "stt_rest",
+    "audio_seconds": 4.7,
+    "characters": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "est_cost": null,
+    "latency_ms": 1012,
     "cached": false
   }
 ]

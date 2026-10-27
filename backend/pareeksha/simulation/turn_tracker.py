@@ -125,13 +125,22 @@ class TurnTracker:
                     else item.text
                 )
 
-        taken: set[int] = set()
+        # A text belongs to the first agent turn that has not ended before it arrived. A reply cut
+        # off by the caller before any of its audio is heard leaves a text that arrived ahead of
+        # the next reply's own: texts that both precede a turn's audio, the latest one was spoken.
+        # A text that arrives while a turn is already labelled belongs to the following turn.
+        owned_early: set[int] = set()
         for item in sorted(self._said, key=lambda g: g.arrived_ms):
             for i, turn in enumerate(agent):
-                if i not in taken and turn.end_ms >= item.arrived_ms:
-                    taken.add(i)
-                    turn.glass_box_text = item.text
-                    break
+                if turn.end_ms < item.arrived_ms:
+                    continue
+                early = item.arrived_ms < turn.start_ms
+                if turn.glass_box_text is not None and not (early and i in owned_early):
+                    continue
+                turn.glass_box_text = item.text
+                if early:
+                    owned_early.add(i)
+                break
 
         turns = sorted([*caller, *agent], key=lambda t: (t.start_ms, t.speaker != "agent"))
         for idx, turn in enumerate(turns):

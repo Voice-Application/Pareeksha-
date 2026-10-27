@@ -71,6 +71,7 @@ class FakeSTT(STTProvider):
         diarize: bool = False,
         num_speakers: int | None = None,
         bias_words: list[str] | None = None,
+        denoise: bool = False,
     ) -> Transcript:
         from pareeksha.speech.base import SpeechRetryableError
         from pareeksha.speech.wav import wav_info
@@ -275,6 +276,7 @@ class ReactiveAgent:
 
     ``honour`` = stops talking when the caller talks over it. ``hangup`` = sends ``call_end`` after
     the last turn. ``speak_first`` = the first turn starts without waiting for the caller.
+    ``quiet_frames`` = 20 ms frames of caller silence before the agent takes its turn.
     """
 
     def __init__(
@@ -285,7 +287,9 @@ class ReactiveAgent:
         hangup: bool = False,
         speak_first: bool = True,
         glass_box: bool = True,
+        quiet_frames: int = 15,
     ) -> None:
+        self.quiet_frames = quiet_frames
         self.turns = list(turns)
         self.honour = honour
         self.hangup = hangup
@@ -316,7 +320,7 @@ class ReactiveAgent:
                         self.stopped_early += 1
                 else:
                     loud_run, quiet_run = 0, quiet_run + 1
-                    if heard and quiet_run >= 15:
+                    if heard and quiet_run >= self.quiet_frames:
                         heard = False
                         if not self._speaking():  # talked over and ignored: nothing to answer
                             self._next_turn(ws)

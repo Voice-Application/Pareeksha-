@@ -128,6 +128,23 @@ def test_turn_tracker_orders_turns_and_attaches_glass_box_by_time() -> None:
     ]
 
 
+def test_glass_box_text_of_a_reply_cut_off_before_any_audio_is_not_attributed_to_the_next() -> None:
+    t = TurnTracker()
+    t.add_agent_turn(start_ms=0, end_ms=2000, text="greeting")
+    t.add_agent_turn(start_ms=34000, end_ms=39000, text="just to confirm")
+    t.add_agent_said(10, "Hello")
+    t.add_agent_said(21000, "Overdue by twelve days")  # barged over: never audible
+    t.add_agent_said(32000, "Just to confirm, you will pay")
+    t.add_agent_turn(start_ms=50000, end_ms=52000, text="bye")
+    t.add_agent_said(50100, "Goodbye")
+    turns, _ = t.build()
+    assert [x.glass_box_text for x in turns] == [
+        "Hello",
+        "Just to confirm, you will pay",
+        "Goodbye",
+    ]
+
+
 def test_turn_tracker_without_glass_box_and_with_repeated_heard_text() -> None:
     t = TurnTracker()
     t.add_caller_turn(start_ms=0, end_ms=500, ground_truth="hello")

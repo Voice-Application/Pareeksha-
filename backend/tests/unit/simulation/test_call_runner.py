@@ -418,7 +418,8 @@ async def test_a_long_line_is_voiced_in_two_parts_and_played_without_a_gap() -> 
 
 
 async def test_the_microphone_waits_in_silence_for_a_late_second_part() -> None:
-    agent = ReactiveAgent([0.6, 0.6], hangup=True)
+    # the agent tolerates 0.5 s of silence; the 0.38 s gap before part two must not end the turn
+    agent = ReactiveAgent([0.6, 0.6], hangup=True, quiet_frames=25)
     tts = FakeTTS(seconds_per_char=0.01, delays={"EMI amount": 0.8})
     async with agent_server(agent) as url:
         outcome = await run_call(make_spec(url), ScriptedCaller([LONG_LINE]), tts=tts)
