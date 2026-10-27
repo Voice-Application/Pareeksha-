@@ -1,7 +1,7 @@
-# The demo agent: the mock EMI reminder bot (VOICE-03) for the fictional lender "Shakti Finance".
+# The demo agent: the mock EMI reminder bot (VOICE-03) for the fictional lender "Suraksha Finance".
 name: EMI Reminder Bot
 description: >-
-  Outbound bot for Shakti Finance (fictional). Reminds customers of EMI due dates in Kannada, Hindi
+  Outbound bot for Suraksha Finance (fictional). Reminds customers of EMI due dates in Kannada, Hindi
   or English, records promise-to-pay date, never threatens, offers human transfer on request.
 adapter: audio_v1
 adapter_config: {}
@@ -22,5 +22,5 @@ expected_tools:
     description: Save PTP date and amount
   - name: transfer_to_human
     description: Warm transfer
-bias_list: [EMI, UPI, NEFT, Shakti Finance, ಕಂತು, किस्त]
+bias_list: [EMI, UPI, NEFT, Suraksha Finance, ಕಂತು, किस्त]
 max_call_seconds: 240
