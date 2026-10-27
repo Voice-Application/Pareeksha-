@@ -7,10 +7,11 @@ from uuid import UUID
 
 from fastapi import APIRouter
 
-from pareeksha.api.auth import ReadKey, WriteKey, scoped
+from pareeksha.adapters.base import AgentTarget
+from pareeksha.adapters.connection_check import check_connection
+from pareeksha.api.auth import ReadKey, WriteKey
 from pareeksha.api.crud import flush, get_or_404, paginate
 from pareeksha.api.deps import AUTH_ERRORS, Db, Pagination, errors
-from pareeksha.api.stubs import not_implemented
 from pareeksha.db.models import Agents
 from pareeksha.schemas.agents import (
     AgentCreate,
@@ -80,10 +81,17 @@ async def archive_agent(agent_id: UUID, key: WriteKey, session: Db) -> AgentOut:
 
 @router.post(
     "/agents/{agent_id}/test-connection",
-    dependencies=[scoped("runs:write")],
     responses=errors(404),
     summary="Open the socket, send 1 s of silence, wait up to 10 s for agent audio",
 )
-async def test_agent_connection(agent_id: UUID) -> TestConnectionResult:
-    # STUB(VOICE-04)
-    not_implemented("VOICE-04")
+async def test_agent_connection(agent_id: UUID, key: WriteKey, session: Db) -> TestConnectionResult:
+    row = await get_or_404(session, Agents, agent_id, key.project_id, "Agent")
+    target = AgentTarget(
+        agent_id=row.id,
+        adapter=row.adapter,
+        endpoint_url=row.endpoint_url,
+        adapter_config=dict(row.adapter_config or {}),
+        languages=list(row.languages or []),
+        glass_box=row.glass_box,
+    )
+    return await check_connection(target)

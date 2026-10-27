@@ -1,0 +1,145 @@
+{
+  "call_id": "35ec99b4-acdd-48fc-9067-2f83fb1b607d",
+  "end_reason": "timeout",
+  "duration_ms": 150136,
+  "turns": [
+    {
+      "idx": 0,
+      "speaker": "agent",
+      "text": "this call is being recorded for quality and compliance purposes hello this is suraksha finance am i speaking with the account holder",
+      "start_ms": 582,
+      "end_ms": 8254,
+      "ground_truth_text": null,
+      "agent_heard_text": null,
+      "glass_box_text": "This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?",
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": null
+    }
+  ],
+  "tool_calls": [],
+  "events": [
+    {
+      "t_ms": 0,
+      "type": "call_start",
+      "data": {
+        "language": "en-IN",
+        "profile": "pstn_8k_alaw",
+        "seed": 1
+      }
+    },
+    {
+      "t_ms": 134,
+      "type": "agent_transcript",
+      "data": {
+        "role": "agent",
+        "text": "This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?"
+      }
+    },
+    {
+      "t_ms": 134,
+      "type": "agent_audio_first",
+      "data": {}
+    },
+    {
+      "t_ms": 582,
+      "type": "agent_speech_start",
+      "data": {
+        "detected_ms": 754
+      }
+    },
+    {
+      "t_ms": 8254,
+      "type": "agent_speech_end",
+      "data": {
+        "start_ms": 582
+      }
+    },
+    {
+      "t_ms": 10595,
+      "type": "agent_heard",
+      "data": {
+        "text": "this call is being recorded for quality and compliance purposes hello this is suraksha finance am i speaking with the account holder",
+        "stt_ms": 1717,
+        "start_ms": 582,
+        "end_ms": 8254
+      }
+    },
+    {
+      "t_ms": 14901,
+      "type": "caller_tts",
+      "data": {
+        "utt_id": 1,
+        "tts_ms": 2971,
+        "seconds": 8.64,
+        "characters": 128
+      }
+    },
+    {
+      "t_ms": 150136,
+      "type": "call_end",
+      "data": {
+        "reason": "timeout",
+        "error": null
+      }
+    },
+    {
+      "t_ms": 150140,
+      "type": "pipeline_overhead",
+      "data": {
+        "frames": 408,
+        "p50_ms": 0.059,
+        "p95_ms": 0.107,
+        "max_ms": 0.223
+      }
+    }
+  ],
+  "barge_in_attempts": [],
+  "recordings": {
+    "caller": "proof/VOICE-04/calls/00_clean/caller.wav",
+    "agent": "proof/VOICE-04/calls/00_clean/agent.wav",
+    "mixed": "proof/VOICE-04/calls/00_clean/mixed.wav",
+    "duration_ms": 150136
+  },
+  "usage": [
+    {
+      "kind": "stt",
+      "provider": "gnani",
+      "operation": "stt_rest",
+      "audio_seconds": 8.28,
+      "characters": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 1715,
+      "cached": false
+    },
+    {
+      "kind": "llm",
+      "provider": "deepseek",
+      "operation": "llm_caller",
+      "audio_seconds": 0.0,
+      "characters": 0,
+      "input_tokens": 725,
+      "output_tokens": 51,
+      "est_cost": null,
+      "latency_ms": 1320,
+      "cached": false
+    },
+    {
+      "kind": "tts",
+      "provider": "gnani",
+      "operation": "tts",
+      "audio_seconds": 8.64,
+      "characters": 128,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 2971,
+      "cached": false
+    }
+  ],
+  "error": null,
+  "glass_box": true
+}

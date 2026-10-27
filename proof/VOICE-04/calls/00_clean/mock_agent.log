@@ -1,0 +1,7 @@
+2026-10-24 03:58:46,469 websockets.server server listening on 0.0.0.0:52681
+2026-10-24 03:58:46,469 mock_agent mock agent on :52681 bugs=[]
+2026-10-24 03:58:46,623 websockets.server connection closed
+2026-10-24 03:58:46,745 websockets.server connection open
+2026-10-24 03:58:46,746 mock_agent call 35ec99b4-acdd-48fc-9067-2f83fb1b607d start lang=en-IN bugs=[]
+2026-10-24 04:01:16,884 websockets.server connection closed
+2026-10-24 04:01:16,884 mock_agent gnani usage (cumulative, uncached): {}

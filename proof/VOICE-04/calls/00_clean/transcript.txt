@@ -1,0 +1,7 @@
+persona: Priya — careful (en-IN, interruption 0)
+scenario: Disputes the EMI amount
+end_reason: timeout   duration: 150.1 s
+
+[00]   0.58-  8.25s agent 
+       text: this call is being recorded for quality and compliance purposes hello this is suraksha finance am i speaking with the account holder
+       agent said (glass box): This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?

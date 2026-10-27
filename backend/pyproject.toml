@@ -102,7 +102,7 @@ ignore_missing_imports = true
 
 # gnani-vachana ships no py.typed marker for gnani.tts (the other gnani modules are typed).
 [[tool.mypy.overrides]]
-module = ["gnani.tts"]
+module = ["gnani.tts", "gnani.tts.*"]
 ignore_missing_imports = true
 
 # EVAL-02 and VOICE-02 code and tests predate the mypy setup: they are checked

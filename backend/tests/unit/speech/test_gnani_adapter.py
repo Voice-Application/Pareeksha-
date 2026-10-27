@@ -10,6 +10,7 @@ from typing import Any, cast
 import pytest
 from gnani.stt.client import StreamTranscriptEvent
 from gnani.stt.exceptions import APIError
+from gnani.tts.exceptions import APIError as TTSAPIError
 
 from pareeksha.gnani import GnaniSpeech, TTSResult
 from pareeksha.speech import (
@@ -87,6 +88,18 @@ async def test_sdk_errors_are_mapped() -> None:
         await stt.transcribe(make_wav(), "kn-IN")
     with pytest.raises(SpeechPermanentError):
         await GnaniTTS(SETTINGS, speech=speech).synthesize("x", None, "kn-IN")
+
+
+async def test_tts_sdk_errors_are_mapped_too() -> None:
+    """The TTS client raises its own ``APIError`` class (distinct from the STT one)."""
+    speech = FakeSpeech()
+    tts = GnaniTTS(SETTINGS, speech=speech)
+    speech.fail = TTSAPIError(429, "Only 1 active request is allowed at a time")
+    with pytest.raises(SpeechRetryableError):
+        await tts.synthesize("x", "Lakshmi", "kn-IN")
+    speech.fail = TTSAPIError(400, "bad voice")
+    with pytest.raises(SpeechPermanentError):
+        await tts.synthesize("x", "Lakshmi", "kn-IN")
 
 
 async def test_tts_wav_voices_and_cache_accounting(tmp_path: Path) -> None:

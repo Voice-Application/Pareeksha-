@@ -22,6 +22,7 @@ from gnani.stt import GnaniSTTBatchClient, GnaniSTTClient, GnaniSTTStreamClient
 from gnani.stt.client import StreamTranscriptEvent
 from gnani.stt.exceptions import APIError
 from gnani.tts import AudioConfig, GnaniTTSClient
+from gnani.tts.exceptions import APIError as TTSAPIError
 
 T = TypeVar("T")
 
@@ -124,9 +125,14 @@ def cache_key(
 
 
 def is_retryable(exc: BaseException) -> bool:
-    """5xx and timeouts retry; 4xx never does (TRD section 3)."""
-    if isinstance(exc, APIError):
-        return exc.status_code >= 500
+    """5xx, 429 and timeouts retry; other 4xx never do (TRD section 3).
+
+    429 is retried because Gnani allows one active request per key ("Only 1 active request is
+    allowed at a time"), so concurrent callers sharing a key collide briefly. The TTS client raises
+    its own ``APIError`` class, distinct from the STT one.
+    """
+    if isinstance(exc, APIError | TTSAPIError):
+        return exc.status_code >= 500 or exc.status_code == 429
     return isinstance(exc, (requests.Timeout, requests.ConnectionError, TimeoutError))
 
 

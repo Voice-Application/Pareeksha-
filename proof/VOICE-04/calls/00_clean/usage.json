@@ -1,0 +1,38 @@
+[
+  {
+    "kind": "stt",
+    "provider": "gnani",
+    "operation": "stt_rest",
+    "audio_seconds": 8.28,
+    "characters": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "est_cost": null,
+    "latency_ms": 1715,
+    "cached": false
+  },
+  {
+    "kind": "llm",
+    "provider": "deepseek",
+    "operation": "llm_caller",
+    "audio_seconds": 0.0,
+    "characters": 0,
+    "input_tokens": 725,
+    "output_tokens": 51,
+    "est_cost": null,
+    "latency_ms": 1320,
+    "cached": false
+  },
+  {
+    "kind": "tts",
+    "provider": "gnani",
+    "operation": "tts",
+    "audio_seconds": 8.64,
+    "characters": 128,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "est_cost": null,
+    "latency_ms": 2971,
+    "cached": false
+  }
+]

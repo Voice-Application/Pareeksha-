@@ -18,6 +18,7 @@ from gnani.stt import GnaniSTTStreamClient
 from gnani.stt.client import StreamTranscriptEvent
 from gnani.stt.exceptions import APIError
 from gnani.tts import TIMBRE_V30_VOICES
+from gnani.tts.exceptions import APIError as TTSAPIError
 
 from pareeksha.gnani import GnaniSpeech, is_retryable, wav_duration_s
 from pareeksha.speech.base import (
@@ -142,7 +143,7 @@ class GnaniSTT(STTProvider):
                 segments = (
                     [TranscriptSegment(text=text, start_s=0.0, end_s=duration)] if text else []
                 )
-        except (APIError, OSError, TimeoutError) as exc:
+        except (APIError, TTSAPIError, OSError, TimeoutError) as exc:
             raise _map_error(exc) from exc
         return Transcript(
             provider=self.name,
@@ -254,7 +255,7 @@ class GnaniTTS(TTSProvider):
                 sample_rate=sample_rate,
                 model=self.settings.gnani_tts_model,
             )
-        except (APIError, OSError, TimeoutError) as exc:
+        except (APIError, TTSAPIError, OSError, TimeoutError) as exc:
             raise _map_error(exc) from exc
         return SynthesisResult(
             provider=self.name,

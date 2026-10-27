@@ -1,0 +1,10 @@
+2026-10-24 03:58:45.805 | INFO     | pipecat:<module>:54 - ᓚᘏᗢ Pipecat 1.13.0 (Python 3.13.17 (main, Oct 22 2026, 14:06:04) [GCC 13.3.0]) ᓚᘏᗢ
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_3770907e3127 | language=en-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_3770907e3127
+INFO  gnani | [TTS REST] synthesize start | request_id=req_e012c94bfd50 | model=timbre-v3.0 | voice=Vasudha
+INFO  gnani | [TTS REST] synthesize start | request_id=req_706c5437362f | model=timbre-v3.0 | voice=Vasudha
+ERROR gnani | [TTS REST] synthesize failed | request_id=req_e012c94bfd50 | status=429
+2026-10-24 03:58:59.739 | ERROR    | pipecat.processors.frame_processor:push_error_frame:1023 - CallerTTS exception (/usr/local/lib/python3.13/dist-packages/gnani/tts/client.py:505): Error processing frame: HTTP 429: {"detail":{"error_code":"RATE_LIMITED","message":"Only 1 active request is allowed at a time. Wait for your current request to finish before sending another.","status_code":429}}
+2026-10-24 03:58:59.739 | WARNING  | pipecat.pipeline.worker:_source_push_frame:1622 - PipelineWorker#0: Something went wrong: ErrorFrame#0(error: Error processing frame: HTTP 429: {"detail":{"error_code":"RATE_LIMITED","message":"Only 1 active request is allowed at a time. Wait for your current request to finish before sending another.","status_code":429}}, fatal: False)
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_706c5437362f
+00_clean: timeout in 150 s, 1 turns, 3 billed calls

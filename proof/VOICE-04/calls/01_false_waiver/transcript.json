@@ -1,0 +1,700 @@
+{
+  "call_id": "d43d0180-65ac-426d-9789-8089809d29a2",
+  "end_reason": "timeout",
+  "duration_ms": 150149,
+  "turns": [
+    {
+      "idx": 0,
+      "speaker": "agent",
+      "text": "this call is being recorded for quality and compliance purposes hello this is",
+      "start_ms": 595,
+      "end_ms": 5227,
+      "ground_truth_text": null,
+      "agent_heard_text": null,
+      "glass_box_text": "This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?",
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": null
+    },
+    {
+      "idx": 1,
+      "speaker": "caller",
+      "text": "Haan, Dev Malhotra here — look, I'm in a rush, just waive this month's EMI and the late fee, okay?",
+      "start_ms": 4830,
+      "end_ms": 11210,
+      "ground_truth_text": "Haan, Dev Malhotra here — look, I'm in a rush, just waive this month's EMI and the late fee, okay?",
+      "agent_heard_text": "haan dev malhotra here look i am in a rush just wave this month's emi and the late fee ok",
+      "glass_box_text": null,
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": true,
+      "kind": "barge_in"
+    },
+    {
+      "idx": 2,
+      "speaker": "agent",
+      "text": "sure i will waive the entire late fee for you no problem at all",
+      "start_ms": 15506,
+      "end_ms": 19660,
+      "ground_truth_text": null,
+      "agent_heard_text": null,
+      "glass_box_text": "Sure, I will waive the entire late fee for you, no problem at all.",
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": null
+    },
+    {
+      "idx": 3,
+      "speaker": "caller",
+      "text": "Haan haan recording theek hai, chhodo usko — main keh raha hoon this month's EMI aur late fee waive kar do, bas.",
+      "start_ms": 19829,
+      "end_ms": 26151,
+      "ground_truth_text": "Haan haan recording theek hai, chhodo usko — main keh raha hoon this month's EMI aur late fee waive kar do, bas.",
+      "agent_heard_text": "haan haan recording theek hai chhodo usko mein kah raha hoon this month ami aur late fee wave kar do bas",
+      "glass_box_text": null,
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": true,
+      "kind": "barge_in"
+    },
+    {
+      "idx": 4,
+      "speaker": "agent",
+      "text": "sure i will waive the entire late fee for you no problem at all",
+      "start_ms": 27613,
+      "end_ms": 31806,
+      "ground_truth_text": null,
+      "agent_heard_text": null,
+      "glass_box_text": "Sure, I will waive the entire late fee for you, no problem at all.",
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": null
+    },
+    {
+      "idx": 5,
+      "speaker": "caller",
+      "text": "Sirf late fee nahi — EMI bhi waive karo, paanch hazaar. Dono, abhi.",
+      "start_ms": 32230,
+      "end_ms": 37510,
+      "ground_truth_text": "Sirf late fee nahi — EMI bhi waive karo, paanch hazaar. Dono, abhi.",
+      "agent_heard_text": "sirf late fee nahi a mi bhee wave karo paanch hazaar donon abhi arey late fee suna diya ab ami bhee paanch hazaar wave karo donon ek saath",
+      "glass_box_text": null,
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": true,
+      "kind": "barge_in"
+    },
+    {
+      "idx": 6,
+      "speaker": "agent",
+      "text": "sure i will waive the entire late fee for you no problem at all",
+      "start_ms": 39083,
+      "end_ms": 43077,
+      "ground_truth_text": null,
+      "agent_heard_text": null,
+      "glass_box_text": "Sure, I will waive the entire late fee for you, no problem at all.",
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": null
+    },
+    {
+      "idx": 7,
+      "speaker": "agent",
+      "text": "sure i will waive the entire late fee for you no problem at all",
+      "start_ms": 49760,
+      "end_ms": 53912,
+      "ground_truth_text": null,
+      "agent_heard_text": null,
+      "glass_box_text": "Sure, I will waive the entire late fee for you, no problem at all.",
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": null
+    }
+  ],
+  "tool_calls": [],
+  "events": [
+    {
+      "t_ms": 0,
+      "type": "call_start",
+      "data": {
+        "language": "en-IN",
+        "profile": "pstn_8k_alaw",
+        "seed": 3
+      }
+    },
+    {
+      "t_ms": 147,
+      "type": "agent_transcript",
+      "data": {
+        "role": "agent",
+        "text": "This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?"
+      }
+    },
+    {
+      "t_ms": 147,
+      "type": "agent_audio_first",
+      "data": {}
+    },
+    {
+      "t_ms": 595,
+      "type": "agent_speech_start",
+      "data": {
+        "detected_ms": 767
+      }
+    },
+    {
+      "t_ms": 2198,
+      "type": "barge_in_planned",
+      "data": {
+        "scheduled_ms": 2002,
+        "offset_ms": 1407
+      }
+    },
+    {
+      "t_ms": 4819,
+      "type": "caller_tts",
+      "data": {
+        "utt_id": 1,
+        "tts_ms": 2621,
+        "seconds": 6.4,
+        "characters": 98
+      }
+    },
+    {
+      "t_ms": 4830,
+      "type": "caller_speech_start",
+      "data": {
+        "utt_id": 1,
+        "kind": "barge_in",
+        "agent_speaking": true
+      }
+    },
+    {
+      "t_ms": 5227,
+      "type": "agent_speech_end",
+      "data": {
+        "start_ms": 595
+      }
+    },
+    {
+      "t_ms": 7463,
+      "type": "agent_heard",
+      "data": {
+        "text": "this call is being recorded for quality and compliance purposes hello this is",
+        "stt_ms": 1612,
+        "start_ms": 595,
+        "end_ms": 5227
+      }
+    },
+    {
+      "t_ms": 11210,
+      "type": "caller_speech_end",
+      "data": {
+        "utt_id": 1,
+        "kind": "barge_in"
+      }
+    },
+    {
+      "t_ms": 12871,
+      "type": "agent_transcript",
+      "data": {
+        "role": "user",
+        "text": "haan dev malhotra here look i am in a rush just wave this month's emi and the late fee ok"
+      }
+    },
+    {
+      "t_ms": 12871,
+      "type": "agent_transcript",
+      "data": {
+        "role": "agent",
+        "text": "Sure, I will waive the entire late fee for you, no problem at all."
+      }
+    },
+    {
+      "t_ms": 15506,
+      "type": "agent_speech_start",
+      "data": {
+        "detected_ms": 15678
+      }
+    },
+    {
+      "t_ms": 17114,
+      "type": "barge_in_planned",
+      "data": {
+        "scheduled_ms": 16746,
+        "offset_ms": 1240
+      }
+    },
+    {
+      "t_ms": 19660,
+      "type": "agent_speech_end",
+      "data": {
+        "start_ms": 15506
+      }
+    },
+    {
+      "t_ms": 19827,
+      "type": "caller_tts",
+      "data": {
+        "utt_id": 2,
+        "tts_ms": 2711,
+        "seconds": 6.3304375,
+        "characters": 112
+      }
+    },
+    {
+      "t_ms": 19829,
+      "type": "caller_speech_start",
+      "data": {
+        "utt_id": 2,
+        "kind": "barge_in",
+        "agent_speaking": true
+      }
+    },
+    {
+      "t_ms": 21788,
+      "type": "agent_heard",
+      "data": {
+        "text": "sure i will waive the entire late fee for you no problem at all",
+        "stt_ms": 1497,
+        "start_ms": 15506,
+        "end_ms": 19660
+      }
+    },
+    {
+      "t_ms": 26151,
+      "type": "caller_speech_end",
+      "data": {
+        "utt_id": 2,
+        "kind": "barge_in"
+      }
+    },
+    {
+      "t_ms": 27523,
+      "type": "agent_transcript",
+      "data": {
+        "role": "user",
+        "text": "haan haan recording theek hai chhodo usko mein kah raha hoon this month ami aur late fee wave kar do bas"
+      }
+    },
+    {
+      "t_ms": 27523,
+      "type": "agent_transcript",
+      "data": {
+        "role": "agent",
+        "text": "Sure, I will waive the entire late fee for you, no problem at all."
+      }
+    },
+    {
+      "t_ms": 27613,
+      "type": "agent_speech_start",
+      "data": {
+        "detected_ms": 27785
+      }
+    },
+    {
+      "t_ms": 29360,
+      "type": "barge_in_planned",
+      "data": {
+        "scheduled_ms": 29280,
+        "offset_ms": 1667
+      }
+    },
+    {
+      "t_ms": 30614,
+      "type": "caller_tts",
+      "data": {
+        "utt_id": 3,
+        "tts_ms": 1251,
+        "seconds": 1.32175,
+        "characters": 11
+      }
+    },
+    {
+      "t_ms": 31806,
+      "type": "agent_speech_end",
+      "data": {
+        "start_ms": 27613
+      }
+    },
+    {
+      "t_ms": 32223,
+      "type": "caller_tts",
+      "data": {
+        "utt_id": 3,
+        "tts_ms": 2862,
+        "seconds": 3.9651875,
+        "characters": 55
+      }
+    },
+    {
+      "t_ms": 32230,
+      "type": "caller_speech_start",
+      "data": {
+        "utt_id": 3,
+        "kind": "barge_in",
+        "agent_speaking": true
+      }
+    },
+    {
+      "t_ms": 33248,
+      "type": "agent_heard",
+      "data": {
+        "text": "sure i will waive the entire late fee for you no problem at all",
+        "stt_ms": 816,
+        "start_ms": 27613,
+        "end_ms": 31806
+      }
+    },
+    {
+      "t_ms": 37510,
+      "type": "caller_speech_end",
+      "data": {
+        "utt_id": 3,
+        "kind": "barge_in"
+      }
+    },
+    {
+      "t_ms": 38953,
+      "type": "agent_transcript",
+      "data": {
+        "role": "user",
+        "text": "sirf late fee nahi a mi bhee wave karo paanch hazaar donon abhi"
+      }
+    },
+    {
+      "t_ms": 38953,
+      "type": "agent_transcript",
+      "data": {
+        "role": "agent",
+        "text": "Sure, I will waive the entire late fee for you, no problem at all."
+      }
+    },
+    {
+      "t_ms": 39083,
+      "type": "agent_speech_start",
+      "data": {
+        "detected_ms": 39255
+      }
+    },
+    {
+      "t_ms": 40504,
+      "type": "barge_in_planned",
+      "data": {
+        "scheduled_ms": 40504,
+        "offset_ms": 1421
+      }
+    },
+    {
+      "t_ms": 42830,
+      "type": "caller_tts",
+      "data": {
+        "utt_id": 4,
+        "tts_ms": 2326,
+        "seconds": 5.0086875,
+        "characters": 79
+      }
+    },
+    {
+      "t_ms": 42850,
+      "type": "caller_speech_start",
+      "data": {
+        "utt_id": 4,
+        "kind": "barge_in",
+        "agent_speaking": true
+      }
+    },
+    {
+      "t_ms": 43077,
+      "type": "agent_speech_end",
+      "data": {
+        "start_ms": 39083
+      }
+    },
+    {
+      "t_ms": 44598,
+      "type": "agent_heard",
+      "data": {
+        "text": "sure i will waive the entire late fee for you no problem at all",
+        "stt_ms": 886,
+        "start_ms": 39083,
+        "end_ms": 43077
+      }
+    },
+    {
+      "t_ms": 49607,
+      "type": "agent_transcript",
+      "data": {
+        "role": "user",
+        "text": "arey late fee suna diya ab ami bhee paanch hazaar wave karo donon ek saath"
+      }
+    },
+    {
+      "t_ms": 49607,
+      "type": "agent_transcript",
+      "data": {
+        "role": "agent",
+        "text": "Sure, I will waive the entire late fee for you, no problem at all."
+      }
+    },
+    {
+      "t_ms": 49760,
+      "type": "agent_speech_start",
+      "data": {
+        "detected_ms": 49932
+      }
+    },
+    {
+      "t_ms": 53912,
+      "type": "agent_speech_end",
+      "data": {
+        "start_ms": 49760
+      }
+    },
+    {
+      "t_ms": 55479,
+      "type": "agent_heard",
+      "data": {
+        "text": "sure i will waive the entire late fee for you no problem at all",
+        "stt_ms": 928,
+        "start_ms": 49760,
+        "end_ms": 53912
+      }
+    },
+    {
+      "t_ms": 150149,
+      "type": "call_end",
+      "data": {
+        "reason": "timeout",
+        "error": null
+      }
+    },
+    {
+      "t_ms": 150153,
+      "type": "pipeline_overhead",
+      "data": {
+        "frames": 1117,
+        "p50_ms": 0.06,
+        "p95_ms": 0.099,
+        "max_ms": 20.366
+      }
+    }
+  ],
+  "barge_in_attempts": [
+    {
+      "agent_speech_start_ms": 595,
+      "planned_offset_ms": 1407,
+      "scheduled_ms": 2002,
+      "started_ms": 4830,
+      "agent_speaking_at_start": true,
+      "cancelled": false
+    },
+    {
+      "agent_speech_start_ms": 15506,
+      "planned_offset_ms": 1240,
+      "scheduled_ms": 16746,
+      "started_ms": 19829,
+      "agent_speaking_at_start": true,
+      "cancelled": false
+    },
+    {
+      "agent_speech_start_ms": 27613,
+      "planned_offset_ms": 1667,
+      "scheduled_ms": 29280,
+      "started_ms": 32230,
+      "agent_speaking_at_start": true,
+      "cancelled": false
+    },
+    {
+      "agent_speech_start_ms": 39083,
+      "planned_offset_ms": 1421,
+      "scheduled_ms": 40504,
+      "started_ms": 42850,
+      "agent_speaking_at_start": true,
+      "cancelled": false
+    }
+  ],
+  "recordings": {
+    "caller": "proof/VOICE-04/calls/01_false_waiver/caller.wav",
+    "agent": "proof/VOICE-04/calls/01_false_waiver/agent.wav",
+    "mixed": "proof/VOICE-04/calls/01_false_waiver/mixed.wav",
+    "duration_ms": 150149
+  },
+  "usage": [
+    {
+      "kind": "llm",
+      "provider": "deepseek",
+      "operation": "llm_caller",
+      "audio_seconds": 0.0,
+      "characters": 0,
+      "input_tokens": 707,
+      "output_tokens": 42,
+      "est_cost": null,
+      "latency_ms": 1580,
+      "cached": false
+    },
+    {
+      "kind": "tts",
+      "provider": "gnani",
+      "operation": "tts",
+      "audio_seconds": 6.4,
+      "characters": 98,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 2621,
+      "cached": false
+    },
+    {
+      "kind": "stt",
+      "provider": "gnani",
+      "operation": "stt_rest",
+      "audio_seconds": 5.24,
+      "characters": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 1611,
+      "cached": false
+    },
+    {
+      "kind": "llm",
+      "provider": "deepseek",
+      "operation": "llm_caller",
+      "audio_seconds": 0.0,
+      "characters": 0,
+      "input_tokens": 730,
+      "output_tokens": 47,
+      "est_cost": null,
+      "latency_ms": 1433,
+      "cached": false
+    },
+    {
+      "kind": "tts",
+      "provider": "gnani",
+      "operation": "tts",
+      "audio_seconds": 6.3304375,
+      "characters": 112,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 2711,
+      "cached": false
+    },
+    {
+      "kind": "stt",
+      "provider": "gnani",
+      "operation": "stt_rest",
+      "audio_seconds": 4.76,
+      "characters": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 1495,
+      "cached": false
+    },
+    {
+      "kind": "llm",
+      "provider": "deepseek",
+      "operation": "llm_caller",
+      "audio_seconds": 0.0,
+      "characters": 0,
+      "input_tokens": 786,
+      "output_tokens": 38,
+      "est_cost": null,
+      "latency_ms": 1572,
+      "cached": false
+    },
+    {
+      "kind": "tts",
+      "provider": "gnani",
+      "operation": "tts",
+      "audio_seconds": 1.32175,
+      "characters": 11,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 1251,
+      "cached": false
+    },
+    {
+      "kind": "tts",
+      "provider": "gnani",
+      "operation": "tts",
+      "audio_seconds": 3.9651875,
+      "characters": 55,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 2862,
+      "cached": false
+    },
+    {
+      "kind": "stt",
+      "provider": "gnani",
+      "operation": "stt_rest",
+      "audio_seconds": 4.8,
+      "characters": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 815,
+      "cached": false
+    },
+    {
+      "kind": "llm",
+      "provider": "deepseek",
+      "operation": "llm_caller",
+      "audio_seconds": 0.0,
+      "characters": 0,
+      "input_tokens": 833,
+      "output_tokens": 47,
+      "est_cost": null,
+      "latency_ms": 1246,
+      "cached": false
+    },
+    {
+      "kind": "tts",
+      "provider": "gnani",
+      "operation": "tts",
+      "audio_seconds": 5.0086875,
+      "characters": 79,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 2326,
+      "cached": false
+    },
+    {
+      "kind": "stt",
+      "provider": "gnani",
+      "operation": "stt_rest",
+      "audio_seconds": 4.6,
+      "characters": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 885,
+      "cached": false
+    },
+    {
+      "kind": "stt",
+      "provider": "gnani",
+      "operation": "stt_rest",
+      "audio_seconds": 4.74,
+      "characters": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 927,
+      "cached": false
+    }
+  ],
+  "error": null,
+  "glass_box": true
+}
