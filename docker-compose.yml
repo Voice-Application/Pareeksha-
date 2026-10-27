@@ -12,6 +12,8 @@ x-backend: &backend
     DATABASE_URL: postgresql+psycopg://pareeksha:pareeksha@postgres:5432/pareeksha
     KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     DATA_DIR: /data
+    SECRET_KEY: ${SECRET_KEY:-}   # Fernet key; the integrations worker exits at startup if empty (make demo sets it)
+    PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:${API_HOST_PORT:-8000}}
     # LLM judge (evaluator). Empty values are ignored by LLMSettings; .env (env_file) fills the rest.
     LLM_PROVIDER: ${LLM_PROVIDER:-deepseek}
     DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}

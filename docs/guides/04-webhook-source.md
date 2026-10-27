@@ -16,7 +16,7 @@ curl -s -X POST "$API/integrations" -H "Authorization: Bearer $PAREEKSHA_API_KEY
        \"secrets\":{\"signing_secret\":\"$(openssl rand -hex 24)\"}}" | tee /tmp/integration.json
 ```
 
-The response has `id` and `signing_secret` (shown **once**, store it). It also has an `inbound_url`, but that is built from `PUBLIC_BASE_URL` (the web app's address, `http://localhost:3000` in `.env.example`) and the web app does not forward webhooks, so post to the **API** instead: `http://localhost:${API_HOST_PORT:-8000}/api/v1/webhooks/inbound/<id>`. `config.url` is the outbound sink address (https only); the same integration is both directions. `default_agent_id` is used when a payload's `agent_name` matches no agent.
+The response has `id` and `signing_secret` (shown **once**, store it). It also has an `inbound_url`, which points at the **API** (`PUBLIC_API_URL`, default `http://localhost:${API_HOST_PORT:-8000}`): post recordings to `<inbound_url>`, i.e. `$API/webhooks/inbound/<id>`. `config.url` is the outbound sink address (https only); the same integration is both directions. `default_agent_id` is used when a payload's `agent_name` matches no agent.
 
 ## 2. Send a signed call
 

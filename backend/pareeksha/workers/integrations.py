@@ -41,7 +41,14 @@ _state: dict[str, Any] = {}
 
 
 def _secret_box() -> SecretBox:
-    return SecretBox(os.environ["SECRET_KEY"])
+    key = os.environ.get("SECRET_KEY")
+    if not key:
+        raise SystemExit(
+            "SECRET_KEY is not set: the integrations worker cannot decrypt connector secrets. "
+            "Generate one with: python -c \"from cryptography.fernet import Fernet; "
+            "print(Fernet.generate_key().decode())\" and put it in .env (`make demo` does this)."
+        )
+    return SecretBox(key)
 
 
 async def _store() -> PsycopgDeliveryStore:
@@ -78,4 +85,5 @@ async def handle(env: Any, ctx: Ctx) -> Sequence[Outgoing]:
 
 
 if __name__ == "__main__":
+    _secret_box()  # fail fast at startup, not as a dead-letter per event
     asyncio.run(run_worker(GROUP))

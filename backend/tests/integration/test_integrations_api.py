@@ -37,7 +37,7 @@ WEBHOOK: dict[str, Any] = {
 def secret_key(monkeypatch: pytest.MonkeyPatch) -> str:
     key = Fernet.generate_key().decode()
     monkeypatch.setenv("SECRET_KEY", key)
-    monkeypatch.setenv("PUBLIC_BASE_URL", "https://pareeksha.example.com/")
+    monkeypatch.setenv("PUBLIC_API_URL", "https://pareeksha.example.com/")
     return key
 
 
@@ -75,6 +75,18 @@ async def test_create_hides_secrets_and_stores_ciphertext(
     assert fetched.json()["secrets_set"] is True
     listed = await api.get("/api/v1/integrations", headers=tenant.read)
     assert "pat-very-secret-token" not in listed.text
+
+
+async def test_inbound_url_ignores_the_web_app_base_url(
+    api: AsyncClient, tenant: Tenant, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("PUBLIC_API_URL")
+    monkeypatch.setenv("PUBLIC_BASE_URL", "http://localhost:3000")
+    monkeypatch.setenv("API_HOST_PORT", "18000")
+    created = (await api.post("/api/v1/integrations", json=WEBHOOK, headers=tenant.admin)).json()
+    assert created["inbound_url"] == (
+        f"http://localhost:18000/api/v1/webhooks/inbound/{created['id']}"
+    )
 
 
 async def test_webhook_gets_inbound_url_and_a_signing_secret_shown_once(
