@@ -1,6 +1,5 @@
-// STUB(FE-05): placeholder body, replaced when FE-05 builds this page
-import { RouteStub } from "@/components/layout/route-stub";
+import { CalibrationPage } from "@/components/calibration/calibration-page";
 
 export default function Page() {
-  return <RouteStub title="Calibration" />;
+  return <CalibrationPage />;
 }

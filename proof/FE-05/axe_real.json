@@ -1,0 +1,82 @@
+[
+  {
+    "path": "/audits",
+    "scheme": "light",
+    "violations": []
+  },
+  {
+    "path": "/audits/new",
+    "scheme": "light",
+    "violations": []
+  },
+  {
+    "path": "/dlq",
+    "scheme": "light",
+    "violations": []
+  },
+  {
+    "path": "/settings/api-keys",
+    "scheme": "light",
+    "violations": []
+  },
+  {
+    "path": "/integrations",
+    "scheme": "light",
+    "violations": []
+  },
+  {
+    "path": "/dialect",
+    "scheme": "light",
+    "violations": []
+  },
+  {
+    "path": "/regression",
+    "scheme": "light",
+    "violations": []
+  },
+  {
+    "path": "/calibration",
+    "scheme": "light",
+    "violations": []
+  },
+  {
+    "path": "/audits",
+    "scheme": "dark",
+    "violations": []
+  },
+  {
+    "path": "/audits/new",
+    "scheme": "dark",
+    "violations": []
+  },
+  {
+    "path": "/dlq",
+    "scheme": "dark",
+    "violations": []
+  },
+  {
+    "path": "/settings/api-keys",
+    "scheme": "dark",
+    "violations": []
+  },
+  {
+    "path": "/integrations",
+    "scheme": "dark",
+    "violations": []
+  },
+  {
+    "path": "/dialect",
+    "scheme": "dark",
+    "violations": []
+  },
+  {
+    "path": "/regression",
+    "scheme": "dark",
+    "violations": []
+  },
+  {
+    "path": "/calibration",
+    "scheme": "dark",
+    "violations": []
+  }
+]
