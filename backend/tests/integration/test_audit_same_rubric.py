@@ -13,8 +13,8 @@ import pytest
 from httpx import AsyncClient
 
 from pareeksha.evaluation.evaluator import evaluate_call
-from pareeksha.evaluation.rubric import RUBRIC_VERSION
 from pareeksha.evaluation.pg_stores import PgEvaluatorStore, RubricNotFoundError
+from pareeksha.evaluation.rubric import RUBRIC_VERSION
 from pareeksha.events.consumer import PermanentError
 from pareeksha.events.schemas import (
     CallCompleted,
@@ -250,7 +250,7 @@ async def test_duplicate_delivery_reproduces_the_same_events(
     call_id, env = await audited(api, tenant, blobs, database_url)
     first = await judged(env, database_url, ScriptedProvider([judge_json(evidence=[0])]))
     async with transaction(database_url) as ctx:
-        again = await reproduce(env, ctx)  # type: ignore[arg-type]
+        again = await reproduce(env, ctx)
     assert [type(o.payload) for o in again] == [type(o.payload) for o in first]
     assert again[0].payload == first[0].payload
     assert again[1].payload == first[1].payload

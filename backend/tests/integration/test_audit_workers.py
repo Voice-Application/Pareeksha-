@@ -10,10 +10,10 @@ from httpx import AsyncClient
 
 from pareeksha.evaluation.pg_stores import PgEvaluatorStore
 from pareeksha.events.consumer import REGISTRY
-from pareeksha.events.settings import EventSettings
+from pareeksha.events.settings import EventSettings, libpq_url
 from pareeksha.events.topics import Topics
-from pareeksha.llm.usage_db import ApiUsageSink
 from pareeksha.llm.client import LLMClient
+from pareeksha.llm.usage_db import ApiUsageSink
 from pareeksha.speech.providers.gnani import GnaniSTT
 from pareeksha.storage.blob import LocalBlobStore
 from pareeksha.workers import auditor as auditor_worker
@@ -27,8 +27,8 @@ from tests.integration.audit_support import (
     transaction,
     upload,
 )
-from tests.integration.test_agent_role_swap import audited
 from tests.integration.support import BOOTSTRAP
+from tests.integration.test_agent_role_swap import audited
 from tests.unit.evaluation.fakes import ScriptedProvider, judge_json
 
 
@@ -96,8 +96,10 @@ async def test_registered_evaluator_handler_judges_the_call(
 
     call_id, completed = await audited(api, tenant, blobs, database_url)
     provider = ScriptedProvider([judge_json(evidence=[0])])
-    usage = ApiUsageSink(EventSettings(BOOTSTRAP, database_url))
-    monkeypatch.setattr(evaluator_worker, "get_client", lambda: (client_for(provider, usage), usage))
+    usage = ApiUsageSink(EventSettings(BOOTSTRAP, libpq_url(database_url)))
+    monkeypatch.setattr(
+        evaluator_worker, "get_client", lambda: (client_for(provider, usage), usage)
+    )
     env = make_envelope(completed.payload, producer="auditor", correlation_id=call_id)
     async with transaction(database_url) as ctx:
         out = await evaluator_worker.on_call_completed(env, ctx)

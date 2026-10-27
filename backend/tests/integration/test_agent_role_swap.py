@@ -11,14 +11,13 @@ from httpx import AsyncClient
 
 from pareeksha.db.models import Calls
 from pareeksha.evaluation.rubric import RUBRIC_VERSION
-from pareeksha.events.schemas import AnyEnvelope, CallCompleted, EvaluationCompleted, make_envelope
 from pareeksha.events.runtime import Database
-from pareeksha.events.settings import EventSettings
+from pareeksha.events.schemas import AnyEnvelope, CallCompleted, EvaluationCompleted, make_envelope
+from pareeksha.events.settings import EventSettings, libpq_url
 from pareeksha.llm.usage_db import ApiUsageSink
 from pareeksha.storage.blob import LocalBlobStore
 from pareeksha.workers import evaluator as evaluator_worker
 from tests.conftest import Tenant
-from tests.integration.support import BOOTSTRAP
 from tests.integration.audit_support import (
     audit_envelope,
     client_for,
@@ -30,6 +29,7 @@ from tests.integration.audit_support import (
     transaction,
     upload,
 )
+from tests.integration.support import BOOTSTRAP
 from tests.unit.evaluation.fakes import ScriptedProvider, judge_json
 
 KEEP = {"spk_0": "agent", "spk_1": "caller"}
@@ -50,13 +50,15 @@ async def audited(
 
 async def judged(env: AnyEnvelope, database_url: str, provider: ScriptedProvider) -> list[Any]:
     """Run the canonical (EVAL-03b) ``evaluator`` handler with a scripted judge, usage rows on."""
-    usage = ApiUsageSink(EventSettings(BOOTSTRAP, database_url))
+    usage = ApiUsageSink(EventSettings(BOOTSTRAP, libpq_url(database_url)))
     evaluator_worker.set_client(
-        client_for(provider, usage), usage, Database(EventSettings(BOOTSTRAP, database_url))
+        client_for(provider, usage),
+        usage,
+        Database(EventSettings(BOOTSTRAP, libpq_url(database_url))),
     )
     try:
         async with transaction(database_url) as ctx:
-            return list(await evaluator_worker.on_call_completed(env, ctx))  # type: ignore[arg-type]
+            return list(await evaluator_worker.on_call_completed(env, ctx))
     finally:
         await usage.close()
         evaluator_worker.set_client(None)
