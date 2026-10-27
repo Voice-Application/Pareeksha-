@@ -72,7 +72,11 @@ async def test_rest_and_batch_transcribe() -> None:
     assert [s.speaker for s in batch.segments] == ["1", None]
     assert batch.text == "haan boliye" and batch.usage.operation == "stt_batch"
     assert batch.usage.est_cost == pytest.approx(0.1)
-    assert speech.calls[1][2] == {"speakers": 3, "bias_words": ["EMI"]}
+    assert speech.calls[1][2] == {"speakers": 3, "denoise": False, "bias_words": ["EMI"]}
+    await stt.transcribe(make_wav(2.0), "kn-IN", diarize=True, denoise=True)
+    assert speech.calls[2][2] == {"speakers": 2, "denoise": True, "bias_words": None}
+    await stt.transcribe(make_wav(2.0), "kn-IN", denoise=True)  # denoise alone: batch, 1 speaker
+    assert speech.calls[3][2] == {"speakers": 1, "denoise": True, "bias_words": None}
     with pytest.raises(UnsupportedCapabilityError):
         await stt.transcribe(make_wav(), "kn-IN", bias_words=["x"])
 

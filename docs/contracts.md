@@ -37,6 +37,8 @@ Envelope: `event_id, type, version, occurred_at (UTC), correlation_id, causation
 | `scenario.generate.requested` | draft_id, agent_id, count, mix |
 | `dialect.clip.requested` | report_id, dataset_id, sample_id, noise_profile_id, engines, expected_results |
 
+Additive behaviour (EVAL-03b, no schema change): `run.completed` has the per-run event id `uuid5(run_id, "run.completed")` (not per input event) and is emitted exactly once per run, by the finalizer consumer or by the finalizer's completion reconciler (via the outbox), whichever wins the atomic claim (`UPDATE test_runs ... WHERE finished_at IS NULL`). It is also emitted for a run the API cancelled (`status: "cancelled"` in the payload) once every item is terminal; the finalizer never changes a `cancelled` run's status, it only fills `summary` and `finished_at`. `run_items.status` goes `completed -> evaluating` when the evaluator starts judging.
+
 `GET /api/v1/events/schemas` serves the JSON Schemas (implemented, not a stub).
 
 ## 3. REST API (`GET /openapi.json`, code in `backend/pareeksha/api/`)
@@ -74,4 +76,4 @@ Stub owners: API-02 (31), API-04 (11), API-05 (9), EVAL-05 (8), API-03 (6), INT-
 
 ## 4. Speech provider abstraction (VOICE-07, owner-approved 2026-10-24)
 
-`backend/pareeksha/speech/base.py` defines `STTProvider` (`transcribe` batch, `transcribe_stream` live, `capabilities`: streaming, word timings, word confidence, diarization) and `TTSProvider` (`synthesize` to a WAV at a stated sample rate, `list_voices`, `capabilities`), plus the value types and errors. Providers: `gnani` (default, wraps `pareeksha.gnani`), `google`, `azure`, `elevenlabs`, `deepgram`. `speech/registry.py` selects by `STT_PROVIDER` / `TTS_PROVIDER` (default `gnani`) or per agent/run via `SpeechSelection{stt,tts}`. `GET /api/v1/speech/providers` (scope `read`) reports configured/default/capabilities. `pareeksha.gnani` is unchanged.
+`backend/pareeksha/speech/base.py` defines `STTProvider` (`transcribe` batch, `transcribe_stream` live, `capabilities`: streaming, word timings, word confidence, diarization) and `TTSProvider` (`synthesize` to a WAV at a stated sample rate, `list_voices`, `capabilities`), plus the value types and errors. Providers: `gnani` (default, wraps `pareeksha.gnani`), `google`, `azure`, `elevenlabs`, `deepgram`. `speech/registry.py` selects by `STT_PROVIDER` / `TTS_PROVIDER` (default `gnani`) or per agent/run via `SpeechSelection{stt,tts}`. `GET /api/v1/speech/providers` (scope `read`) reports configured/default/capabilities. EVAL-04 adds an optional `denoise` argument and `STTCapabilities.denoise` (Gnani only; others refuse). `pareeksha.gnani` is unchanged.

@@ -82,6 +82,7 @@ class GnaniSTT(STTProvider):
         word_timings=False,
         word_confidence=False,
         diarization=True,
+        denoise=True,
         languages_note="bn hi en gu kn ml mr pa ta te (-IN); Indian-language specialist",
     )
 
@@ -111,16 +112,18 @@ class GnaniSTT(STTProvider):
         diarize: bool = False,
         num_speakers: int | None = None,
         bias_words: list[str] | None = None,
+        denoise: bool = False,
     ) -> Transcript:
         duration = wav_duration_s(wav)
         t0 = time.monotonic()
         try:
-            if diarize:
+            if diarize or denoise:
                 segs = await asyncio.to_thread(
                     self._speech.transcribe_batch,
                     wav,
                     language,
-                    speakers=num_speakers or 2,
+                    speakers=num_speakers or (2 if diarize else 1),
+                    denoise=denoise,
                     bias_words=bias_words,
                 )
                 segments = [

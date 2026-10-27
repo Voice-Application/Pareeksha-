@@ -346,11 +346,11 @@ async def test_worker_crash_after_create_before_row_save_still_one_note() -> Non
     real_save = service.store.save
     armed = {"on": True}
 
-    def crashing_save(row: Any) -> None:
+    async def crashing_save(row: Any) -> None:
         if armed["on"] and row.status == "succeeded":
             armed["on"] = False
             raise Crash
-        real_save(row)
+        await real_save(row)
 
     service.store.save = crashing_save  # type: ignore[method-assign,assignment]
     with pytest.raises(Crash):

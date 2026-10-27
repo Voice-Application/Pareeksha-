@@ -71,7 +71,12 @@ class ElevenLabsSTT(HTTPAdapter, STTProvider):
         diarize: bool = False,
         num_speakers: int | None = None,
         bias_words: list[str] | None = None,
+        denoise: bool = False,
     ) -> Transcript:
+        if denoise:
+            raise UnsupportedCapabilityError(
+                "elevenlabs has no denoise option (see STTCapabilities.denoise)"
+            )
         if bias_words:
             raise UnsupportedCapabilityError("elevenlabs Scribe has no bias-word list")
         model = self.settings.elevenlabs_stt_model

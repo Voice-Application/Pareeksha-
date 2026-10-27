@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from pareeksha.db.session import get_session
 from pareeksha.schemas.common import ErrorResponse
+from pareeksha.storage.blob import BlobStore, blob_store_from_env
 
 
 @dataclass(frozen=True)
@@ -32,6 +33,14 @@ Pagination = Annotated[PageParams, Depends(_page_params)]
 #: One transaction per request. ``scope="function"`` commits before the response is sent, so a
 #: client that reads right after a write always sees it.
 Db = Annotated[AsyncSession, Depends(get_session, scope="function")]
+
+
+def get_blob_store() -> BlobStore:
+    """Where recordings live (``DATA_DIR``); tests override this dependency."""
+    return blob_store_from_env()
+
+
+Blobs = Annotated[BlobStore, Depends(get_blob_store)]
 
 _DESCRIPTIONS: dict[int, str] = {
     400: "validation_error",

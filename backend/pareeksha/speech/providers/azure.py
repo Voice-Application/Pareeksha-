@@ -30,6 +30,7 @@ from pareeksha.speech.base import (
     TranscriptSegment,
     TTSCapabilities,
     TTSProvider,
+    UnsupportedCapabilityError,
     Voice,
     WordTiming,
 )
@@ -81,7 +82,12 @@ class AzureSTT(HTTPAdapter, STTProvider):
         diarize: bool = False,
         num_speakers: int | None = None,
         bias_words: list[str] | None = None,
+        denoise: bool = False,
     ) -> Transcript:
+        if denoise:
+            raise UnsupportedCapabilityError(
+                "azure has no denoise option (see STTCapabilities.denoise)"
+            )
         definition: dict[str, Any] = {"locales": [language]}
         if diarize:
             definition["diarization"] = {"enabled": True, "maxSpeakers": num_speakers or 2}

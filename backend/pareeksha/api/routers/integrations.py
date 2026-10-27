@@ -7,17 +7,23 @@ import secrets
 from datetime import UTC, datetime
 from uuid import UUID
 
+import psycopg
 from fastapi import APIRouter, Response
+from pydantic import ValidationError
 
 from pareeksha.api.auth import AdminKey, ReadKey, scoped
 from pareeksha.api.connectors import connector_direction
 from pareeksha.api.crud import delete_row, flush, get_or_404, paginate
 from pareeksha.api.deps import AUTH_ERRORS, Db, Pagination, errors
 from pareeksha.api.errors import ApiError
-from pareeksha.api.stubs import not_implemented
-from pareeksha.db.models import Integrations
+from pareeksha.db.models import IntegrationDeliveries, Integrations
+from pareeksha.events.settings import libpq_url
+from pareeksha.integrations.base import TestResult
 from pareeksha.integrations.crypto import SecretBox, SecretDecryptError
+from pareeksha.integrations.delivery import DeliveryRecord, IntegrationRecord
+from pareeksha.integrations.dispatch import NothingToReplay, redeliver
 from pareeksha.integrations.registry import get_registry
+from pareeksha.integrations.sql_store import PsycopgDeliveryStore
 from pareeksha.schemas.common import Page
 from pareeksha.schemas.integrations import (
     ConnectorInfo,
@@ -183,34 +189,105 @@ async def delete_integration(integration_id: UUID, key: AdminKey, session: Db) -
 
 @router.post(
     "/integrations/{integration_id}/test",
-    dependencies=[scoped("admin")],
     responses=errors(404),
     summary="Run the connector's test() and store the result",
 )
-async def test_integration(integration_id: UUID) -> IntegrationTestResult:
-    # STUB(INT-01)
-    not_implemented("INT-01")
+async def test_integration(
+    integration_id: UUID, key: AdminKey, session: Db
+) -> IntegrationTestResult:
+    row = await get_or_404(session, Integrations, integration_id, key.project_id, "Integration")
+    result = await _run_test(row)
+    row.last_test_at = datetime.now(UTC)
+    row.last_test_ok = result.ok
+    await flush(session, _DUPLICATE, refresh=row)
+    return IntegrationTestResult(ok=result.ok, detail=result.detail)
+
+
+async def _run_test(row: Integrations) -> TestResult:
+    """The connector's own ``test``; a broken configuration is a failed test, not a server error."""
+    try:
+        connector_cls = get_registry().get(row.connector)
+    except KeyError:
+        return TestResult(ok=False, detail=f"Connector {row.connector!r} is not installed")
+    try:
+        config = connector_cls.config_schema.model_validate(row.config)
+        secret_values = connector_cls.secrets_schema.model_validate(_stored_secrets(row))
+    except ValidationError as exc:  # names the fields, never their values
+        fields = ", ".join(".".join(str(p) for p in e["loc"]) or "?" for e in exc.errors())
+        return TestResult(ok=False, detail=f"Invalid configuration or secrets: {fields}")
+    try:
+        return await connector_cls().test(config, secret_values)
+    except Exception as exc:  # a plugin's bug must not become a 500
+        return TestResult(ok=False, detail=f"Test failed: {type(exc).__name__}")
+
+
+def _delivery_out(row: IntegrationDeliveries | DeliveryRecord) -> DeliveryOut:
+    return DeliveryOut(
+        id=row.id,
+        event_id=row.event_id,
+        direction=row.direction,  # type: ignore[arg-type]
+        status=row.status,  # type: ignore[arg-type]
+        http_status=row.http_status,
+        external_id=row.external_id,
+        attempts=row.attempts,
+        response_excerpt=row.response_excerpt,
+        created_at=row.created_at,
+    )
 
 
 @router.get(
     "/integrations/{integration_id}/deliveries",
-    dependencies=[scoped("read")],
     responses=errors(404),
     summary="Delivery log",
 )
 async def list_integration_deliveries(
-    integration_id: UUID, page: Pagination, status: DeliveryStatus | None = None
+    integration_id: UUID,
+    key: ReadKey,
+    session: Db,
+    page: Pagination,
+    status: DeliveryStatus | None = None,
 ) -> Page[DeliveryOut]:
-    # STUB(INT-01)
-    not_implemented("INT-01")
+    await get_or_404(session, Integrations, integration_id, key.project_id, "Integration")
+    conditions = [IntegrationDeliveries.integration_id == integration_id]
+    if status is not None:
+        conditions.append(IntegrationDeliveries.status == status)
+    rows, next_cursor = await paginate(session, IntegrationDeliveries, conditions, page)
+    return Page(items=[_delivery_out(r) for r in rows], next_cursor=next_cursor)
 
 
 @router.post(
     "/integrations/{integration_id}/deliveries/{delivery_id}/redeliver",
     status_code=202,
-    dependencies=[scoped("admin")],
-    responses=errors(404),
+    responses=errors(404, 409),
+    summary="Send a logged delivery again (same event id; the receiver dedupes on it)",
 )
-async def redeliver_integration_delivery(integration_id: UUID, delivery_id: UUID) -> DeliveryOut:
-    # STUB(INT-01)
-    not_implemented("INT-01")
+async def redeliver_integration_delivery(
+    integration_id: UUID, delivery_id: UUID, key: AdminKey, session: Db
+) -> DeliveryOut:
+    row = await get_or_404(session, Integrations, integration_id, key.project_id, "Integration")
+    box = _secret_box()
+    integration = IntegrationRecord(
+        id=row.id,
+        connector=row.connector,
+        config=dict(row.config),
+        secrets_encrypted=bytes(row.secrets_encrypted).decode()
+        if row.secrets_encrypted
+        else box.encrypt({}),
+        enabled=row.enabled,
+    )
+    url = libpq_url(os.environ.get("DATABASE_URL", ""))
+    try:
+        async with await psycopg.AsyncConnection.connect(url, autocommit=True) as conn:
+            record = await redeliver(
+                conn, PsycopgDeliveryStore(conn), box, get_registry(), integration, delivery_id
+            )
+    except LookupError as exc:
+        raise ApiError(404, "not_found", "Delivery not found", {"id": str(delivery_id)}) from exc
+    except NothingToReplay as exc:
+        raise ApiError(
+            409,
+            "conflict",
+            "This delivery has no stored event to send again",
+            {"id": str(delivery_id)},
+        ) from exc
+    return _delivery_out(record)

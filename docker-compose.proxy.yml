@@ -11,10 +11,12 @@ services:
   auditor: *ca
   evaluator: *ca
   finalizer: *ca
+  reconciler: *ca
   integrations: *ca
   dialect: *ca
   generator: *ca
   retrier: *ca
   dlq-recorder: *ca
+  mock-agent: *ca
 secrets:
   ca: { file: "${CA_BUNDLE}" }

@@ -119,6 +119,8 @@ class STTCapabilities(BaseModel):
     word_confidence: bool
     #: Speaker labels on batch results (``diarize=True``).
     diarization: bool
+    #: Batch denoising before recognition (``denoise=True``); raises when unsupported.
+    denoise: bool = False
     #: Longest single batch request in seconds; ``None`` = not limited by the provider.
     max_batch_seconds: float | None = None
     #: Free-text note on language coverage (e.g. which Indian languages).
@@ -174,8 +176,9 @@ class STTProvider(ABC):
         diarize: bool = False,
         num_speakers: int | None = None,
         bias_words: list[str] | None = None,
+        denoise: bool = False,
     ) -> Transcript:
-        """Batch-transcribe a WAV recording."""
+        """Batch-transcribe a WAV recording (``denoise``: provider-side noise suppression)."""
 
     def transcribe_stream(
         self, pcm_chunks: AsyncIterator[bytes], language: str, *, sample_rate: int = 16000

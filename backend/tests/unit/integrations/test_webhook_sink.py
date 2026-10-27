@@ -178,7 +178,7 @@ async def test_sink_posts_signed_payload_and_logs_delivery() -> None:
     assert body["data"]["agent"]["name"] == "EMI Reminder Bot"
     assert body["data"]["metadata"] == {"phone": "+91XXXXXXXX00"}
     assert "transcript" not in req.content.decode()
-    assert service.store.recent(record.id)[0].id == row.id
+    assert (await service.store.recent(record.id))[0].id == row.id
 
 
 async def test_delivery_is_idempotent_per_integration_and_event() -> None:
