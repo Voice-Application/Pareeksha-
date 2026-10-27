@@ -1,0 +1,15 @@
+ERROR [asyncio] Unclosed AIOKafkaConsumer
+consumer: <aiokafka.consumer.consumer.AIOKafkaConsumer object at 0x7f26b8bb5d10>
+ERROR [asyncio] Unclosed AIOKafkaConsumer
+consumer: <aiokafka.consumer.consumer.AIOKafkaConsumer object at 0x7f26b8ca6fd0>
+--- Logging error ---
+Traceback (most recent call last):
+  File "/usr/lib/python3.13/logging/__init__.py", line 1154, in emit
+ValueError: I/O operation on closed file.
+Call stack:
+  File "/tmp/venv/lib/python3.13/site-packages/aiokafka/consumer/consumer.py", line 368, in __del__
+    self._loop.call_exception_handler(context)
+  File "/usr/lib/python3.13/asyncio/base_events.py", line 1918, in call_exception_handler
+  File "/usr/lib/python3.13/asyncio/base_events.py", line 1890, in default_exception_handler
+Message: 'Unclosed AIOKafkaConsumer\nconsumer: <aiokafka.consumer.consumer.AIOKafkaConsumer object at 0x7f26b8ca6d50>'
+Arguments: ()

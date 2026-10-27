@@ -4,14 +4,22 @@
 # delivery per (integration, event). Needs a finished run (V2/V3 create one).
 cd "$(dirname "$0")/../.." && source scripts/verify/lib.sh
 begin 6 "Duplicate delivery and worker crash give one evaluation and one CRM note"
-(set -o pipefail; cd backend && python3 -m pytest tests/kafka -q -p no:cacheprovider 2>&1 | tail -15) > "$OUT/V6.kafka_suite.txt"
+# The suite publishes to the same topics the stack's workers consume, so the workers are stopped while it runs.
+WORKERS="outbox-relay planner simulator auditor evaluator finalizer integrations dialect generator retrier dlq-recorder reconciler"
+pgport=$(grep -E '^POSTGRES_HOST_PORT=' .env | cut -d= -f2 | cut -d' ' -f1); kport=$(grep -E '^KAFKA_HOST_PORT=' .env | cut -d= -f2 | cut -d' ' -f1)
+$COMPOSE --profile workers stop $WORKERS >/dev/null 2>&1
+(set -o pipefail; cd backend && DATABASE_URL="postgresql+psycopg://pareeksha:pareeksha@localhost:${pgport:-5432}/pareeksha" \
+  KAFKA_BOOTSTRAP_SERVERS="localhost:${kport:-9094}" python3 -m pytest tests/kafka -q -p no:cacheprovider 2>&1 | tail -15) > "$OUT/V6.kafka_suite.txt"
 suite=$?
+$COMPOSE --profile workers up -d $WORKERS >/dev/null 2>&1
+sleep 20
 block < "$OUT/V6.kafka_suite.txt"
 [ "$(psql_q "SELECT count(*) FROM evaluations")" -gt 0 ] || finish FAIL "no evaluation in the database to replay"
 
 call_id=$(psql_q "SELECT call_id FROM evaluations WHERE status='ok' ORDER BY id LIMIT 1")
 before_eval=$(psql_q "SELECT count(*) FROM evaluations WHERE call_id='$call_id'")
 before_del=$(psql_q "SELECT count(*) FROM integration_deliveries")
+sink_log=${V6_SINK_LOG:-}
 $COMPOSE exec -T api python - "$call_id" <<'PYEOF' 2>&1 | block
 import asyncio, json, sys
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
@@ -42,7 +50,9 @@ sleep 45
 after_eval=$(psql_q "SELECT count(*) FROM evaluations WHERE call_id='$call_id'")
 dup_del=$(psql_q "SELECT count(*) FROM (SELECT integration_id, event_id, direction FROM integration_deliveries GROUP BY 1,2,3 HAVING count(*)>1) t")
 dup_notes=$(psql_q "SELECT count(*) FROM (SELECT integration_id, external_id FROM integration_deliveries WHERE external_id IS NOT NULL GROUP BY 1,2 HAVING count(*)>1) t")
+sink_hits=$([ -n "$sink_log" ] && grep -c "\"call_id\": \"$call_id\"" "$sink_log" || echo n/a)
+note "webhook sink receiver hits for this call: $sink_hits"
 note "call $call_id: evaluations before/after = $before_eval/$after_eval; deliveries before=$before_del; duplicate delivery keys=$dup_del; duplicate CRM note ids=$dup_notes"
 [ "$suite" -eq 0 ] || finish FAIL "Kafka suite failed"
-[ "$after_eval" -eq 1 ] && [ "$dup_del" -eq 0 ] && [ "$dup_notes" -eq 0 ] && finish PASS "one evaluation, no duplicate delivery after replay x2 and SIGKILL"
+[ "$after_eval" -eq 1 ] && { [ "$sink_hits" = n/a ] || [ "$sink_hits" -eq 1 ]; } && [ "$dup_del" -eq 0 ] && [ "$dup_notes" -eq 0 ] && finish PASS "one evaluation, no duplicate delivery after replay x2 and SIGKILL"
 finish FAIL "evaluations=$after_eval duplicate deliveries=$dup_del duplicate notes=$dup_notes"

@@ -664,3 +664,509 @@ scripts/demo.sh
 
 #35 [finalizer] exporting to image
 #35 exporting layers
+#35 ...
+
+#36 [retrier] exporting to image
+#36 ...
+
+#37 [generator] exporting to image
+#37 ...
+
+#38 [outbox-relay] exporting to image
+#38 ...
+
+#39 [migrate] exporting to image
+#39 ...
+
+#40 [integrations] exporting to image
+#40 ...
+
+#41 [simulator] exporting to image
+#41 ...
+
+#42 [evaluator] exporting to image
+#42 ...
+
+#43 [dlq-recorder] exporting to image
+#43 ...
+
+#44 [reconciler] exporting to image
+#44 ...
+
+#45 [dialect] exporting to image
+#45 ...
+
+#46 [auditor] exporting to image
+#46 ...
+
+#47 [api] exporting to image
+#47 ...
+
+#48 [planner] exporting to image
+#48 ...
+
+#37 [generator] exporting to image
+#37 exporting layers 30.9s done
+#37 exporting manifest sha256:9b908e1a615c3aff1116d3960d33ff62151254e7fd65fd7b8a78250a5f066d54
+#37 exporting manifest sha256:9b908e1a615c3aff1116d3960d33ff62151254e7fd65fd7b8a78250a5f066d54 0.0s done
+#37 exporting config sha256:3a8f5df1ba3be0c475fc8cd0cd63a0bfdcabaafc9cebccd180b65b4dcd4f3c02 0.1s done
+#37 exporting attestation manifest sha256:6c6c9152e12f336d2857ac6f969f92d187d505813f194d9500e492e66a7a469b
+#37 exporting attestation manifest sha256:6c6c9152e12f336d2857ac6f969f92d187d505813f194d9500e492e66a7a469b 0.1s done
+#37 exporting manifest list sha256:a5f2216b7c886921c2dad6d6ec3a480bcdca64dab2b45865d8f1cc3326e7a13f 0.1s done
+#37 naming to docker.io/library/prc-generator:latest
+#37 naming to docker.io/library/prc-generator:latest 0.0s done
+#37 unpacking to docker.io/library/prc-generator:latest
+#37 ...
+
+#39 [migrate] exporting to image
+#39 exporting layers 30.9s done
+#39 exporting manifest sha256:d87f69dcc5eda237a2caf6e339d5863b0ce7b33db1df32f9c0866eca5014d78a 0.1s done
+#39 exporting config sha256:acbd4a43f69cf7cd0f3f969c6bdb72e6f4a57e199d9e6ba6a20f2cf096937d5d 0.1s done
+#39 exporting attestation manifest sha256:244f624731929f2670c8e9d5835d0b40ed6a7a9c520d4690e7455319ca1d00ec 0.1s done
+#39 exporting manifest list sha256:d55e9f6e856908e0d13a8d051dfe1a44a59387d34e5cd4a46ba4e5a4896bb64c 0.1s done
+#39 naming to docker.io/library/prc-migrate:latest 0.0s done
+#39 unpacking to docker.io/library/prc-migrate:latest
+#39 ...
+
+#48 [planner] exporting to image
+#48 exporting layers 30.9s done
+#48 exporting manifest sha256:96a13d3875704bd9f989228cdc799ee19f60a594c96f98aab6de6cf8acdbc7e6 0.0s done
+#48 exporting config sha256:1022a4776d14f9b581ff0298d6756afde2f46c1a0a175e45a1c1f313ce7328a0 0.1s done
+#48 exporting attestation manifest sha256:6e825c1c358f7bb77c90fd1d732ad9458d0d7f29e0b6a2e9abf81d4b781698b7 0.1s done
+#48 exporting manifest list sha256:af4a005ca5c542719d2e153a5dccd93f4dabf3a0dd27cf3fade5d835bb09f92f 0.0s done
+#48 naming to docker.io/library/prc-planner:latest 0.1s done
+#48 unpacking to docker.io/library/prc-planner:latest
+#48 ...
+
+#41 [simulator] exporting to image
+#41 exporting layers 30.9s done
+#41 exporting manifest sha256:681a2c086acd4c80b3a5c8266e3e69407e6d2a80e74c74186f6953befa483df2 0.0s done
+#41 exporting config sha256:d2d8205d81feabc5337c002894d1e97d3041d4dfbed9c17d14e3c21b17a37312 0.1s done
+#41 exporting attestation manifest sha256:eeedafe63c1c520aad9b636b039d88163a8222e60c0607cde4be5263869c80d4 0.1s done
+#41 exporting manifest list sha256:41d84dd64d679db2f9e89aa207dc854630c72c569b155430d12f6966569271a9 0.1s done
+#41 naming to docker.io/library/prc-simulator:latest 0.1s done
+#41 unpacking to docker.io/library/prc-simulator:latest
+#41 ...
+
+#45 [dialect] exporting to image
+#45 exporting layers 30.9s done
+#45 exporting manifest sha256:6afeb75abccc082842b6445d5f2439a76054cda58fdcaf9d6941fa662d5f62bb 0.1s done
+#45 exporting config sha256:181bf4cdc358d47198e6d4b06141b1588d15abff071551ae974f53ab58320b26 0.1s done
+#45 exporting attestation manifest sha256:79dd7e7d02a63d3fcec16493e4bdd6ae4fd4ce2392cb30a33e2a7af7eedfc9ff 0.1s done
+#45 exporting manifest list sha256:7ae60c7b97b9ce2c869a3c87f6aa98ff8df9a80c4a9af2d3b697855b7c78efd5 0.1s done
+#45 naming to docker.io/library/prc-dialect:latest 0.0s done
+#45 unpacking to docker.io/library/prc-dialect:latest
+#45 ...
+
+#46 [auditor] exporting to image
+#46 exporting layers 30.9s done
+#46 exporting manifest sha256:77fdd1ae742eba29d065cce5a0879e20611b8ca2068a5ad84fea7f5e045f1cda 0.1s done
+#46 exporting config sha256:94a20985d41d6958032eb50e8c0d2c40db384b298a2617f7ec4ad6a8df003bc7 0.1s done
+#46 exporting attestation manifest sha256:1d9fc8a32a1f9669b7137d252c8a67b4d534d2aba2fff2188032144d654756e5 0.1s done
+#46 exporting manifest list sha256:7fc42169addf74cfb1da01e810653d8e3a1329b7af5f60b3c8dfd177cc4a5abe 0.1s done
+#46 naming to docker.io/library/prc-auditor:latest 0.0s done
+#46 unpacking to docker.io/library/prc-auditor:latest
+#46 ...
+
+#43 [dlq-recorder] exporting to image
+#43 exporting layers 30.9s done
+#43 exporting manifest sha256:da40c1fba69ef2ef946f902f2947a92fcfcc7893ee4af81fd1b6b52bb040a2c4 0.0s done
+#43 exporting config sha256:28604b29f17b5914b8ecda59c720e797851f25cbdd59d21ddbb9803e2485a23e 0.1s done
+#43 exporting attestation manifest sha256:3c01f1554c700a973f33d3a84953c51daf181224f8f7a3f11e92f85d9ecdec56 0.1s done
+#43 exporting manifest list sha256:a2c500f2e42da75246e4a073ea5056be513e227ea7366e1efcc5e2637ffb4781 0.1s done
+#43 naming to docker.io/library/prc-dlq-recorder:latest 0.0s done
+#43 unpacking to docker.io/library/prc-dlq-recorder:latest
+#43 ...
+
+#42 [evaluator] exporting to image
+#42 exporting layers 30.9s done
+#42 exporting manifest sha256:120514b2e4d7eb3b48a749ff6c65f5a4e505b6001ac99443636eaa42435d527f 0.0s done
+#42 exporting config sha256:28cee4a0f6c611c937e55a1e52adbdd89ed063066c01585c3357fc820a5d610b 0.1s done
+#42 exporting attestation manifest sha256:226e3eac94bfa8aae9144cf9341de4e0d94f9caca1d5990a2a11fd4d13a8e827 0.1s done
+#42 exporting manifest list sha256:ff25b59323b6d2e7f7dbcd68abd1dc82b07f0f2f312c177baeb3c95d5b5b7798 0.1s done
+#42 naming to docker.io/library/prc-evaluator:latest 0.0s done
+#42 unpacking to docker.io/library/prc-evaluator:latest
+#42 ...
+
+#35 [finalizer] exporting to image
+#35 exporting layers 30.9s done
+#35 exporting manifest sha256:01a406787663dd1952a8b3b6ed897991ebd2458d41208d3aa8bf8f66e89e8f7f 0.0s done
+#35 exporting config sha256:87e162f4b793e421a42d1db74371b5c5909ff58459664560bbabf8f9565a70aa 0.1s done
+#35 exporting attestation manifest sha256:b99e821547ea9fe1df118a1c2d326ba5fea6c9d21448527bb80769da4120ed0c 0.1s done
+#35 exporting manifest list sha256:67509056dda7c14389cdb2183aeb5719edcdbc39aa7b9bd35d734ced79f54190 0.1s done
+#35 naming to docker.io/library/prc-finalizer:latest 0.0s done
+#35 unpacking to docker.io/library/prc-finalizer:latest
+#35 ...
+
+#44 [reconciler] exporting to image
+#44 exporting layers 30.9s done
+#44 exporting manifest sha256:38c43476c39b78e555d79454832f478e4098d8cb1562a3f3076fd1d3d67512c4 0.1s done
+#44 exporting config sha256:4339e39731b9e62e1654078506fdfdae7b3d50843c8588fda1266b205abc6150 0.1s done
+#44 exporting attestation manifest sha256:f4d4dbac72a8cdcecec8363215f2d2177a7132c51d4b40983e689d6d3f995e23 0.1s done
+#44 exporting manifest list sha256:e8964c7d6d48a0cde20981283180837ab139122dfb9c080952369dfc1873f5ab 0.1s done
+#44 naming to docker.io/library/prc-reconciler:latest 0.0s done
+#44 unpacking to docker.io/library/prc-reconciler:latest
+#44 ...
+
+#38 [outbox-relay] exporting to image
+#38 exporting layers 30.9s done
+#38 exporting manifest sha256:b0497337577c1f67cdc81b0eadefbca97693f75829df8f36e8705ce79cbf788b 0.0s done
+#38 exporting config sha256:9d8156e650608c8f836993ab850c0204d180ddd0623ff5bc3d84b8faf4b7fe23 0.1s done
+#38 exporting attestation manifest sha256:8ec277659eb3eb58466b16f2c8ad3c0c28b3ee8222692d6f8d524e712f8eb484 0.1s done
+#38 exporting manifest list sha256:186f2696f06e68a41584addc2f55ec239d2691d61170292aa8f00d995421155e 0.1s done
+#38 naming to docker.io/library/prc-outbox-relay:latest 0.0s done
+#38 unpacking to docker.io/library/prc-outbox-relay:latest
+#38 ...
+
+#47 [api] exporting to image
+#47 exporting layers 30.9s done
+#47 exporting manifest sha256:b2e5237ba8202716d986268af718f43b29fbd9217dd5bba035dfa68fcff59e42 0.1s done
+#47 exporting config sha256:2e95e503ce21a2144259af679d8ea2b13fde81e1daa71a6b621143447d9f2ecf 0.1s done
+#47 exporting attestation manifest sha256:6b81594248d4121d80eff9398bcca9ffb84fff055710041cbfa293f97fdd9e3e 0.1s done
+#47 exporting manifest list sha256:9ebabcfd39616e4fc583d481b408c36569d1f0196c396f451fa2c16721fd2970 0.1s done
+#47 naming to docker.io/library/prc-api:latest 0.0s done
+#47 unpacking to docker.io/library/prc-api:latest
+#47 ...
+
+#40 [integrations] exporting to image
+#40 exporting layers 30.9s done
+#40 exporting manifest sha256:e8647a1ed20b1339d2afe28b99e5bf79196e8aa04b0c95f8e46fbe9f1289b64e 0.0s done
+#40 exporting config sha256:6153a1c8ae5b38107a86fbbe6a7d759844bda47eb715e281a7f70895c318dccc 0.1s done
+#40 exporting attestation manifest sha256:3833fc85e9517c75a4cfa0423a1f0d500189a3b59b78b7ea14ba71a0930d7c20 0.1s done
+#40 exporting manifest list sha256:a4bba7bc0f03a342d799863cd13a6b7beadcad40dc68499707dd1f6a3be105fc 0.1s done
+#40 naming to docker.io/library/prc-integrations:latest 0.0s done
+#40 unpacking to docker.io/library/prc-integrations:latest
+#40 ...
+
+#36 [retrier] exporting to image
+#36 exporting layers 30.9s done
+#36 exporting manifest sha256:a630786c1cf6f920dd263ce2d70943e1d57d62a98dd74215707c1317e446c640 0.0s done
+#36 exporting config sha256:3bf75eeb4862d64e8ec21bf434371a0fe69e527e0bb5e257503603eb1692d0fd 0.1s done
+#36 exporting attestation manifest sha256:cc84817e2f487f8bdb54ccede7d1a6a7589a87922211c1d4e0e40085d0b4ddb5 0.1s done
+#36 exporting manifest list sha256:bff3fc9df9526b161527044e090b520202854516db2a97c79e30413b50b6cd10 0.1s done
+#36 naming to docker.io/library/prc-retrier:latest 0.0s done
+#36 unpacking to docker.io/library/prc-retrier:latest
+#36 ...
+
+#35 [finalizer] exporting to image
+#35 unpacking to docker.io/library/prc-finalizer:latest 48.4s done
+#35 DONE 80.0s
+
+#48 [planner] exporting to image
+#48 unpacking to docker.io/library/prc-planner:latest 48.4s done
+#48 ...
+
+#37 [generator] exporting to image
+#37 unpacking to docker.io/library/prc-generator:latest 48.4s done
+#37 DONE 80.0s
+
+#43 [dlq-recorder] exporting to image
+#43 unpacking to docker.io/library/prc-dlq-recorder:latest 48.4s done
+#43 DONE 80.0s
+
+#38 [outbox-relay] exporting to image
+#38 unpacking to docker.io/library/prc-outbox-relay:latest 48.4s done
+#38 DONE 80.0s
+
+#39 [migrate] exporting to image
+#39 unpacking to docker.io/library/prc-migrate:latest 48.4s done
+#39 DONE 80.1s
+
+#48 [planner] exporting to image
+#48 DONE 80.1s
+
+#40 [integrations] exporting to image
+#40 unpacking to docker.io/library/prc-integrations:latest 48.8s done
+#40 DONE 80.2s
+
+#36 [retrier] exporting to image
+#36 unpacking to docker.io/library/prc-retrier:latest 48.8s done
+#36 DONE 80.2s
+
+#46 [auditor] exporting to image
+#46 unpacking to docker.io/library/prc-auditor:latest 48.9s done
+#46 DONE 80.3s
+
+#42 [evaluator] exporting to image
+#42 unpacking to docker.io/library/prc-evaluator:latest 48.9s done
+#42 DONE 80.3s
+
+#47 [api] exporting to image
+#47 unpacking to docker.io/library/prc-api:latest 48.9s done
+#47 DONE 80.3s
+
+#41 [simulator] exporting to image
+#41 unpacking to docker.io/library/prc-simulator:latest 48.9s done
+#41 DONE 80.3s
+
+#44 [reconciler] exporting to image
+#44 unpacking to docker.io/library/prc-reconciler:latest 48.8s done
+#44 DONE 80.3s
+
+#45 [dialect] exporting to image
+#45 unpacking to docker.io/library/prc-dialect:latest 48.8s done
+#45 DONE 80.3s
+
+#49 [finalizer] resolving provenance for metadata file
+#49 DONE 0.2s
+
+#50 [simulator] resolving provenance for metadata file
+#50 DONE 0.3s
+
+#51 [planner] resolving provenance for metadata file
+#51 DONE 0.4s
+
+#52 [auditor] resolving provenance for metadata file
+#52 DONE 0.1s
+
+#53 [outbox-relay] resolving provenance for metadata file
+#53 DONE 0.5s
+
+#54 [api] resolving provenance for metadata file
+#54 DONE 0.2s
+
+#55 [reconciler] resolving provenance for metadata file
+#55 DONE 0.2s
+
+#56 [migrate] resolving provenance for metadata file
+#56 DONE 0.5s
+
+#57 [retrier] resolving provenance for metadata file
+#57 DONE 0.3s
+
+#58 [generator] resolving provenance for metadata file
+#58 DONE 0.2s
+
+#59 [dialect] resolving provenance for metadata file
+#59 DONE 0.1s
+
+#60 [evaluator] resolving provenance for metadata file
+#60 DONE 0.3s
+
+#61 [integrations] resolving provenance for metadata file
+#61 DONE 0.4s
+
+#62 [dlq-recorder] resolving provenance for metadata file
+#62 DONE 0.6s
+ Image prc-finalizer Built 
+ Image prc-simulator Built 
+ Image prc-dialect Built 
+ Image prc-auditor Built 
+ Image prc-evaluator Built 
+ Image prc-dlq-recorder Built 
+ Image prc-planner Built 
+ Image prc-mock-agent Built 
+ Image prc-outbox-relay Built 
+ Image prc-web Built 
+ Image prc-integrations Built 
+ Image prc-migrate Built 
+ Image prc-api Built 
+ Image prc-reconciler Built 
+ Image prc-retrier Built 
+ Image prc-generator Built 
+ Volume prc_kafka-data Creating 
+ Network prc_default Creating 
+ Volume prc_pg-data Creating 
+ Volume prc_kafka-data Creating 
+ Volume prc_pg-data Creating 
+ Network prc_default Creating 
+ Volume prc_kafka-data Created 
+ Volume prc_kafka-data Created 
+ Volume prc_pg-data Created 
+ Volume prc_pg-data Created 
+ Network prc_default Created 
+ Network prc_default Created 
+ Container prc-kafka-1 Creating 
+ Container prc-postgres-1 Creating 
+ Container prc-mock-agent-1 Creating 
+ Container prc-mock-agent-1 Created 
+ Container prc-postgres-1 Created 
+ Container prc-migrate-1 Creating 
+ Container prc-kafka-1 Created 
+ Container prc-kafka-init-1 Creating 
+ Container prc-migrate-1 Created 
+ Container prc-kafka-init-1 Created 
+ Container prc-integrations-1 Creating 
+ Container prc-simulator-1 Creating 
+ Container prc-simulator-3 Creating 
+ Container prc-outbox-relay-1 Creating 
+ Container prc-retrier-1 Creating 
+ Container prc-simulator-2 Creating 
+ Container prc-reconciler-1 Creating 
+ Container prc-generator-1 Creating 
+ Container prc-dialect-1 Creating 
+ Container prc-api-1 Creating 
+ Container prc-planner-1 Creating 
+ Container prc-dlq-recorder-1 Creating 
+ Container prc-evaluator-1 Creating 
+ Container prc-evaluator-2 Creating 
+ Container prc-auditor-1 Creating 
+ Container prc-finalizer-1 Creating 
+ Container prc-integrations-1 Created 
+ Container prc-api-1 Created 
+ Container prc-web-1 Creating 
+ Container prc-dlq-recorder-1 Created 
+ Container prc-evaluator-2 Created 
+ Container prc-dialect-1 Created 
+ Container prc-generator-1 Created 
+ Container prc-reconciler-1 Created 
+ Container prc-simulator-3 Created 
+ Container prc-evaluator-1 Created 
+ Container prc-finalizer-1 Created 
+ Container prc-retrier-1 Created 
+ Container prc-simulator-1 Created 
+ Container prc-outbox-relay-1 Created 
+ Container prc-planner-1 Created 
+ Container prc-simulator-2 Created 
+ Container prc-auditor-1 Created 
+ Container prc-web-1 Created 
+ Container prc-kafka-1 Starting 
+ Container prc-postgres-1 Starting 
+ Container prc-mock-agent-1 Starting 
+ Container prc-kafka-1 Started 
+ Container prc-kafka-1 Waiting 
+ Container prc-postgres-1 Started 
+ Container prc-postgres-1 Waiting 
+ Container prc-mock-agent-1 Started 
+ Container prc-postgres-1 Healthy 
+ Container prc-migrate-1 Starting 
+ Container prc-migrate-1 Started 
+ Container prc-kafka-1 Healthy 
+ Container prc-kafka-init-1 Starting 
+ Container prc-kafka-init-1 Started 
+ Container prc-postgres-1 Waiting 
+ Container prc-kafka-init-1 Waiting 
+ Container prc-kafka-init-1 Waiting 
+ Container prc-postgres-1 Waiting 
+ Container prc-postgres-1 Waiting 
+ Container prc-kafka-init-1 Waiting 
+ Container prc-kafka-init-1 Waiting 
+ Container prc-postgres-1 Waiting 
+ Container prc-postgres-1 Waiting 
+ Container prc-kafka-init-1 Waiting 
+ Container prc-migrate-1 Waiting 
+ Container prc-kafka-init-1 Waiting 
+ Container prc-kafka-init-1 Waiting 
+ Container prc-postgres-1 Waiting 
+ Container prc-postgres-1 Waiting 
+ Container prc-kafka-init-1 Waiting 
+ Container prc-postgres-1 Waiting 
+ Container prc-kafka-init-1 Waiting 
+ Container prc-kafka-init-1 Waiting 
+ Container prc-postgres-1 Waiting 
+ Container prc-kafka-init-1 Waiting 
+ Container prc-postgres-1 Waiting 
+ Container prc-kafka-init-1 Waiting 
+ Container prc-postgres-1 Waiting 
+ Container prc-kafka-init-1 Waiting 
+ Container prc-postgres-1 Waiting 
+ Container prc-postgres-1 Healthy 
+ Container prc-postgres-1 Healthy 
+ Container prc-migrate-1 Exited 
+ Container prc-postgres-1 Healthy 
+ Container prc-postgres-1 Healthy 
+ Container prc-postgres-1 Healthy 
+ Container prc-postgres-1 Healthy 
+ Container prc-postgres-1 Healthy 
+ Container prc-postgres-1 Healthy 
+ Container prc-postgres-1 Healthy 
+ Container prc-postgres-1 Healthy 
+ Container prc-postgres-1 Healthy 
+ Container prc-postgres-1 Healthy 
+ Container prc-kafka-init-1 Exited 
+ Container prc-simulator-2 Starting 
+ Container prc-kafka-init-1 Exited 
+ Container prc-dlq-recorder-1 Starting 
+ Container prc-kafka-init-1 Exited 
+ Container prc-dialect-1 Starting 
+ Container prc-kafka-init-1 Exited 
+ Container prc-integrations-1 Starting 
+ Container prc-kafka-init-1 Exited 
+ Container prc-planner-1 Starting 
+ Container prc-kafka-init-1 Exited 
+ Container prc-evaluator-1 Starting 
+ Container prc-kafka-init-1 Exited 
+ Container prc-generator-1 Starting 
+ Container prc-kafka-init-1 Exited 
+ Container prc-kafka-init-1 Exited 
+ Container prc-reconciler-1 Starting 
+ Container prc-auditor-1 Starting 
+ Container prc-kafka-init-1 Exited 
+ Container prc-retrier-1 Starting 
+ Container prc-kafka-init-1 Exited 
+ Container prc-kafka-init-1 Exited 
+ Container prc-api-1 Starting 
+ Container prc-outbox-relay-1 Starting 
+ Container prc-kafka-init-1 Exited 
+ Container prc-finalizer-1 Starting 
+ Container prc-simulator-2 Started 
+ Container prc-simulator-1 Starting 
+ Container prc-simulator-1 Started 
+ Container prc-simulator-3 Starting 
+ Container prc-dlq-recorder-1 Started 
+ Container prc-dialect-1 Started 
+ Container prc-integrations-1 Started 
+ Container prc-planner-1 Started 
+ Container prc-evaluator-1 Started 
+ Container prc-evaluator-2 Starting 
+ Container prc-generator-1 Started 
+ Container prc-reconciler-1 Started 
+ Container prc-auditor-1 Started 
+ Container prc-retrier-1 Started 
+ Container prc-api-1 Started 
+ Container prc-api-1 Waiting 
+ Container prc-outbox-relay-1 Started 
+ Container prc-finalizer-1 Started 
+ Container prc-simulator-3 Started 
+ Container prc-evaluator-2 Started 
+ Container prc-api-1 Healthy 
+ Container prc-web-1 Starting 
+ Container prc-web-1 Started 
+waiting for the API on :18000 ...
+ Container prc-postgres-1 Running 
+ Container prc-kafka-1 Running 
+ Container prc-kafka-1 Waiting 
+ Container prc-postgres-1 Waiting 
+ Container prc-kafka-1 Healthy 
+ Container prc-kafka-init-1 Starting 
+ Container prc-postgres-1 Healthy 
+ Container prc-migrate-1 Starting 
+ Container prc-kafka-init-1 Started 
+ Container prc-migrate-1 Started 
+ Container prc-migrate-1 Waiting 
+ Container prc-kafka-init-1 Waiting 
+ Container prc-migrate-1 Exited 
+ Container prc-kafka-init-1 Exited 
+ Container prc-api-run-da4d08131194 Creating 
+ Container prc-api-run-da4d08131194 Created 
+{
+  "created": {
+    "personas": 20,
+    "noise_profiles": 8,
+    "rubric_versions": 1,
+    "agents": 1,
+    "scenarios": 8,
+    "api_keys": 1
+  },
+  "existing": {}
+}
+{
+ "run_id": "e1212efb-1f48-44bf-b841-5253337c8930",
+ "wall_s": 90.3,
+ "evaluated": 10,
+ "of": 10,
+ "summary": {
+  "pass_rate": 0.0,
+  "critical_failures": 10,
+  "needs_review": 10,
+  "score_mean": 9.25,
+  "latency_p50_ms": null,
+  "latency_p95_ms": null,
+  "barge_in_honoured_rate": null,
+  "top_failure_types": [],
+  "suite_passed": null,
+  "score_distribution": []
+ }
+}
+Demo done. Web app: http://localhost:13000  (API key is PAREEKSHA_API_KEY in .env)
+[13:34:42] demo returned 0
