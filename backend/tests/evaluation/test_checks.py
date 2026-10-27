@@ -226,3 +226,47 @@ def test_run_checks_integration():
         ("amount_confirmed", "emi"): False,
     }
     assert res[0].to_dict()["check_type"] == "disclosure_present"
+
+
+def _emi_call(readback: bool):
+    turns = [
+        T(0, "agent", "Hello, this is Suraksha Finance."),
+        T(1, "caller", "Yes speaking."),
+        T(
+            2,
+            "agent",
+            "Your EMI of rupees four thousand five hundred is overdue. When can you pay?",
+        ),
+        T(3, "caller", "I will pay the full amount on Friday."),
+    ]
+    if readback:
+        turns += [
+            T(
+                4,
+                "agent",
+                "Just to confirm, you will pay four thousand five hundred rupees on Friday. Is that right?",
+            ),
+            T(5, "caller", "Yes."),
+            T(6, "agent", "Noted, goodbye."),
+        ]
+    else:
+        turns.append(T(4, "agent", "Thank you, I have noted your promise. Goodbye."))
+    from pareeksha.evaluation.types import ToolCall
+
+    tool = [
+        ToolCall(
+            "record_promise_to_pay", {"amount_inr": 4500, "when": "Friday"}, turn_idx=turns[-1].idx
+        )
+    ]
+    return turns, tool
+
+
+def test_amount_readback_missing_before_acting_fails_and_clean_passes():
+    turns, tool = _emi_call(readback=False)
+    r = check_amounts(turns, {"emi_amount": 4500}, tool)[0]
+    assert r.passed is False and r.must_pass and r.evidence_turns == (2, 4)
+    turns, tool = _emi_call(readback=True)
+    assert check_amounts(turns, {"emi_amount": 4500}, tool)[0].passed is True
+    # no action taken (caller hung up after the first statement): not failed
+    turns, _ = _emi_call(readback=False)
+    assert check_amounts(turns, {"emi_amount": 4500}, [])[0].passed is True

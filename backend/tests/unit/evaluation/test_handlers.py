@@ -96,7 +96,9 @@ async def test_redelivery_reproduces_the_same_output_event_ids() -> None:
 
 async def test_judge_error_emits_evaluation_completed_without_score_and_no_progress() -> None:
     store = FakeEvaluatorStore(sc.clean_call())
-    provider = ScriptedProvider([judge_json(evidence=[99]), judge_json(evidence=[99]), judge_json(evidence=[99])])
+    provider = ScriptedProvider(
+        [judge_json(evidence=[99]), judge_json(evidence=[99]), judge_json(evidence=[99])]
+    )
     out = await handle_call_completed(call_completed_env(), store, client_for(provider))
     assert len(out) == 1
     p = out[0].payload

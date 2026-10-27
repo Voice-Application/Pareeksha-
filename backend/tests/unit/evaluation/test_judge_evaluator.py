@@ -111,7 +111,9 @@ async def test_invalid_evidence_triggers_repair_and_second_answer_is_used() -> N
 
 
 async def test_still_invalid_after_repair_is_stored_as_judge_error() -> None:
-    provider = ScriptedProvider([judge_json(evidence=[99]), judge_json(evidence=[77]), judge_json(evidence=[66])])
+    provider = ScriptedProvider(
+        [judge_json(evidence=[99]), judge_json(evidence=[77]), judge_json(evidence=[66])]
+    )
     rec = await evaluate_call(sc.clean_call(), client_for(provider))
     assert rec.status == "judge_error" and rec.overall_score is None and rec.passed is None
     assert rec.needs_human_review and rec.review_reasons == ["judge_error"]

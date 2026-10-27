@@ -45,8 +45,8 @@ def _secret_box() -> SecretBox:
     if not key:
         raise SystemExit(
             "SECRET_KEY is not set: the integrations worker cannot decrypt connector secrets. "
-            "Generate one with: python -c \"from cryptography.fernet import Fernet; "
-            "print(Fernet.generate_key().decode())\" and put it in .env (`make demo` does this)."
+            'Generate one with: python -c "from cryptography.fernet import Fernet; '
+            'print(Fernet.generate_key().decode())" and put it in .env (`make demo` does this).'
         )
     return SecretBox(key)
 
