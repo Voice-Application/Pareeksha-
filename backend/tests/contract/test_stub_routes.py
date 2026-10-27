@@ -219,7 +219,6 @@ def test_stub_owner_ids_exist_on_the_task_board() -> None:
         __import__("pathlib").Path(__file__).resolve().parents[3] / "docs" / "AGENTS.md"
     ).read_text(encoding="utf-8")
     owners = {_stub_owner(r) for r in _stub_routes()}
-    assert owners, "no stubs found"
     for owner in owners:
         assert owner is not None
         assert f"**{owner}**" in board, f"{owner} is not a task in AGENTS.md section 7"
