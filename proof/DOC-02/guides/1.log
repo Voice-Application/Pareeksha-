@@ -101,5 +101,5 @@ created run d33b61bb-b755-4c54-840d-4b39cdd57829 (1 items)
 run d33b61bb-b755-4c54-840d-4b39cdd57829: completed, pass rate 0.0%, critical 1
 exit=0
 11:05:39
-RESULT: PASS: stack up, seed ok, CLI run completed with 1/1 call evaluated (judge: score 60, critical failure wrong EMI amount), exit=0, 1m49s for the run. Total clone-to-first-evaluated-call incl. image build ~14 min (NFR-14 < 20 min met in the sandbox; images were partly cached from an earlier build, see proof.md).
+RESULT: PASS: stack up, seed ok, CLI run completed with 1/1 call evaluated (judge: score 60, critical failure wrong EMI amount), exit=0, 1m49s for the run. Image build was not timed from cold (layers were cached from earlier builds in this sandbox), so the NFR-14 20-minute figure is unmeasured here.
 Step 5 (planted bug) not executed live to save Gnani spend; mechanism = MOCK_BUGS env, same as the unit-tested mock agent (guide 4 of VOICE-03 proof).

@@ -16,7 +16,7 @@ curl -s -X POST "$API/integrations" -H "Authorization: Bearer $PAREEKSHA_API_KEY
        \"secrets\":{\"signing_secret\":\"$(openssl rand -hex 24)\"}}" | tee /tmp/integration.json
 ```
 
-The response has `id`, `inbound_url` and `signing_secret` (shown **once**, store it). `config.url` is the outbound sink address (https only); the same integration is both directions. `default_agent_id` is used when a payload's `agent_name` matches no agent.
+The response has `id` and `signing_secret` (shown **once**, store it). It also has an `inbound_url`, but that is built from `PUBLIC_BASE_URL` (the web app's address, `http://localhost:3000` in `.env.example`) and the web app does not forward webhooks, so post to the **API** instead: `http://localhost:${API_HOST_PORT:-8000}/api/v1/webhooks/inbound/<id>`. `config.url` is the outbound sink address (https only); the same integration is both directions. `default_agent_id` is used when a payload's `agent_name` matches no agent.
 
 ## 2. Send a signed call
 
@@ -35,7 +35,7 @@ The body:
 Sign it Stripe-style: `X-Pareeksha-Timestamp` = unix seconds, `X-Pareeksha-Signature: v1=<hex(hmac_sha256(secret, f"{timestamp}.{raw_body}"))>`. Receivers reject timestamps older than 5 minutes (HTTP 408). A small sender:
 
 ```python
-# send_call.py  ·  usage: python send_call.py <inbound_url> <signing_secret> <recording_url> <external_id>
+# send_call.py  ·  usage: python send_call.py <api_inbound_url> <signing_secret> <recording_url> <external_id>
 import hashlib, hmac, json, sys, time, urllib.request
 url, secret, rec, ext = sys.argv[1:5]
 body = json.dumps({"external_id": ext, "recording_url": rec, "agent_name": "EMI Reminder Bot",
@@ -70,14 +70,16 @@ openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 1 
   -addext "subjectAltName=DNS:host.docker.internal"
 cat > docker-compose.dev-webhook.yml <<'YAML'
 services:
-  auditor:
+  api:                                  # checks the recording URL when the webhook arrives
+    environment: { PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS: "1" }
+  auditor:                              # downloads the recording
     environment: { PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS: "1", SSL_CERT_FILE: /dev-cert.pem }
     volumes: ["./cert.pem:/dev-cert.pem:ro"]
 YAML
-docker compose -f docker-compose.yml -f docker-compose.dev-webhook.yml --profile workers up -d auditor
+docker compose -f docker-compose.yml -f docker-compose.dev-webhook.yml --profile workers up -d api auditor
 ```
 
-Then use `https://host.docker.internal:8443/call.wav` as `recording_url`. **Never set `PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS` in production**: it disables the private-address check (https, no-credentials and IP pinning still apply). The same switch relaxes the outbound webhook sink target check.
+Then use `https://host.docker.internal:8443/call.wav` as `recording_url` (any WAV or MP3 served from `./rec`, for example `python3 -m http.server`-style over TLS; `backend/tests/fixtures/agent_greeting_5s.wav` works for a smoke test). `SSL_CERT_FILE` replaces the system trust store inside that container, which is fine for the auditor's local download. **Never set `PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS` in production**: it disables the private-address check (https, no-credentials and IP pinning still apply). The same switch relaxes the outbound webhook sink target check.
 
 ## 5. Receive the results (sink side)
 

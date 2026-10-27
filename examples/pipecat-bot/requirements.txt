@@ -2,4 +2,7 @@
 pipecat-ai[websocket,silero]>=1.13.0
 fastapi>=0.115
 uvicorn[standard]>=0.30
-pareeksha            # pip install -e backend/  (serializer + speech providers)
+# the pareeksha package is installed from this repo: pip install -e ./backend --no-deps
+pydantic-settings>=2
+gnani-vachana
+httpx>=0.27

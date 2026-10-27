@@ -196,6 +196,7 @@ agent:
   description: file://prompts/system_prompt.md
   mandatory_disclosures:
     - id: recording
+      text: This call is being recorded for quality purposes   # required
       regex: "(record|ರೆಕಾರ್ಡ್|रिकॉर्ड)"
       within_turns: 2
 scenarios:

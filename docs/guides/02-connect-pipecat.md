@@ -33,8 +33,8 @@ Pipeline([transport.input(), stt, GlassBoxProcessor(), user_agg, llm, GlassBoxPr
 
 ```bash
 python3 -m venv .venv-bot && . .venv-bot/bin/activate
-pip install -r examples/pipecat-bot/requirements.txt
-pip install -e ./backend --no-deps
+pip install -r examples/pipecat-bot/requirements.txt      # Pipecat + the few libraries the speech wrapper needs
+pip install -e ./backend --no-deps                     # the pareeksha package (serializer, speech providers)
 set -a; . ./.env; set +a
 cd examples/pipecat-bot && PYTHONPATH=.:../../backend python bot.py      # ws://0.0.0.0:8766/ws
 ```

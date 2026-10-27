@@ -48,6 +48,26 @@ Via the API: `GET /dlq?status=open`, `POST /dlq/{id}/replay`, `POST /dlq/{id}/di
 
 The web app has the same list under DLQ.
 
+**Drill (safe to run on a dev box):** put two bad messages on a topic and watch them land.
+
+```bash
+# 1. not JSON at all: goes straight to the DLQ and can only be discarded
+echo "not-json" | docker compose exec -T kafka /opt/kafka/bin/kafka-console-producer.sh \
+  --bootstrap-server localhost:9092 --topic pareeksha.call.completed.v1
+# 2. a valid envelope for a call that does not exist (attempt=3): permanent failure, replayable
+python3 - > env.json <<'PY'
+import json, uuid, datetime
+print(json.dumps({"event_id": str(uuid.uuid4()), "type": "call.completed", "version": 1,
+  "occurred_at": datetime.datetime.now(datetime.UTC).isoformat(), "correlation_id": "drill", "attempt": 3,
+  "producer": "drill@cli", "payload": {"call_id": str(uuid.uuid4()), "source": "upload"}}))
+PY
+docker compose exec -T kafka /opt/kafka/bin/kafka-console-producer.sh \
+  --bootstrap-server localhost:9092 --topic pareeksha.call.completed.v1 < env.json
+sleep 15; pareeksha dlq list
+```
+
+Replaying the first answers `409 ... not a valid event envelope and cannot be replayed`; discard it with `curl -X POST -H "Authorization: Bearer $PAREEKSHA_API_KEY" $API/dlq/<id>/discard`. Replaying the second re-publishes it; it fails the same way (the call still does not exist), so the row re-opens. That is the expected behaviour until the cause is fixed.
+
 ## 5. Recovery cheat sheet
 
 | Situation | Action |

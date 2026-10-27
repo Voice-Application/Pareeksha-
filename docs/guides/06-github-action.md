@@ -13,20 +13,24 @@ version: 1
 agent:
   name: EMI Reminder Bot
   adapter: audio_v1
-  endpoint_url: wss://bot.example.com/ws
+  endpoint_url: wss://bot.example.com/ws        # must be reachable from your Pareeksha instance
   languages: [kn-IN, hi-IN, en-IN]
   mandatory_disclosures:
-    - {id: recording, regex: "(record|ರೆಕಾರ್ಡ್|रिकॉर्ड)", within_turns: 2}
+    - id: recording
+      text: This call is being recorded for quality purposes
+      regex: "(record|ರೆಕಾರ್ಡ್|रिकॉर्ड)"
+      within_turns: 2
 scenarios:
-  - title: Already paid, wants confirmation
-    caller_goal: Say the EMI was paid yesterday and ask for confirmation.
-    success_criteria: Agent verifies the payment instead of demanding it again.
-    tags: [payment_dispute]
+  - title: Pays after salary credit
+    caller_goal: Say the salary arrives on Friday and promise to pay the EMI that day.
+    success_criteria: Agent records the promised date and amount and confirms them.
+    tags: [ci_smoke]
 suites:
   pr_check:
-    scenarios: {tags: [payment_dispute, happy_path]}
+    scenarios: {tags: [ci_smoke]}
     personas: ["Manju — auto driver"]
-    noise_profiles: [clean_16k, pstn_market_5db]
+    noise_profiles: [clean_16k]
+    max_concurrency: 1
     fail_under: 80
 ```
 

@@ -1,0 +1,31 @@
+# Guide 6: the action's steps run by hand with env credentials only (no login, PAREEKSHA_CONFIG points at a missing file). pareeksha.yaml = guide's yaml with agent name 'CI Demo Bot' and endpoint ws://mock-agent:8765/ws (the compose mock agent).
+$ pareeksha apply -f pareeksha.yaml
+created   agent: CI Demo Bot
+created   scenario: Pays after salary credit
+2 change(s)
+exit=0
+$ pareeksha apply -f pareeksha.yaml   (second time: idempotent)
+unchanged agent: CI Demo Bot
+unchanged scenario: Pays after salary credit
+0 change(s)
+exit=0
+11:15:50
+$ pareeksha run --suite pr_check -f pareeksha.yaml --wait --timeout 1800
+created run 5eaded56-761b-4345-978f-cd1636cee50e (1 items)
+  queued: 0/1 evaluated, 0 error
+  completed: 1/1 evaluated, 0 error
+run 5eaded56-761b-4345-978f-cd1636cee50e: completed, pass rate 100.0%, critical 0
+exit=0
+11:16:42
+--- $GITHUB_STEP_SUMMARY ---
+## Pareeksha: CI Demo Bot / pr_check - PASS
+
+| Metric | Value |
+|---|---|
+| Status | completed |
+| Pass rate | 100.0% (threshold 80%) |
+| Mean score | 97.5 |
+| Critical failures | 0 |
+| Needs human review | 0 |
+| Items | 1/1 evaluated, 0 error |
+RESULT: PASS (apply created/unchanged idempotent; suite run completed 1/1, pass rate 100%, exit 0; step summary written). Fixed in guide: disclosure needs a text field.

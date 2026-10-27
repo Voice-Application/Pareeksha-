@@ -1,4 +1,4 @@
-# Overlay: install the connector into the api and integrations containers at start-up.
+# Overlay: install the connector into the api and integrations containers at start-up (needs network for the build backend; for production bake it into an image).
 #   docker compose -f docker-compose.yml -f examples/connector-slack/docker-compose.connector.yml --profile workers up -d api integrations
 x-ext: &ext
   volumes: ["./examples/connector-slack:/ext-src:ro"]
@@ -6,10 +6,10 @@ services:
   api:
     <<: *ext
     command: >
-      sh -c "cp -r /ext-src /tmp/ext && pip install -q --no-deps --no-build-isolation /tmp/ext &&
+      sh -c "cp -r /ext-src /tmp/ext && pip install -q --no-deps /tmp/ext &&
              exec uvicorn pareeksha.api.main:app --host 0.0.0.0 --port 8000"
   integrations:
     <<: *ext
     command: >
-      sh -c "cp -r /ext-src /tmp/ext && pip install -q --no-deps --no-build-isolation /tmp/ext &&
+      sh -c "cp -r /ext-src /tmp/ext && pip install -q --no-deps /tmp/ext &&
              exec python -m pareeksha.workers.integrations"

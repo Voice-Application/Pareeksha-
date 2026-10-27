@@ -1,0 +1,29 @@
+# Guide 4: steps 1-3 and 4 (local https receiver on :8443, dev switch on api+auditor)
+$ POST /integrations (webhook)
+{"id": "6c0282a4-99ed-40f5-8e5d-d5ade9f666f1", "connector": "webhook", "name": "Telephony recordings", "direction": "both", "enabled": true, "config": {"url": "https://example.com/pareeksha-results", "events": ["evaluation.completed"], "default_agent_id": "fc0f1790-b694-43db-88e8-2978708d43a3"}, "secrets_set": true, "event_filter": {"events": ["evaluation.completed"], "agent_ids": [], "only_failed": false, "min_score_below": null}, "last_test_at": null, "last_test_ok": null, "created_at": "2026-10-27T11:09:39.928872Z", "updated_at": "2026-10-27T11:09:39.928872Z", "inbound_url": "http://localho
+inbound_url=http://localhost:3000/api/v1/webhooks/inbound/6c0282a4-99ed-40f5-8e5d-d5ade9f666f1
+$ python send_call.py <inbound_url> <secret> https://host.docker.internal:8443/call.wav exotel-CA123
+  File "/usr/lib/python3.13/urllib/request.py", line 1334, in do_open
+    raise URLError(err)
+urllib.error.URLError: <urlopen error [Errno 111] Connection refused>
+$ same again (dedupe)
+    raise URLError(err)
+urllib.error.URLError: <urlopen error [Errno 111] Connection refused>
+$ bad signature
+urllib.error.URLError: <urlopen error [Errno 111] Connection refused>
+# inbound_url uses PUBLIC_BASE_URL (default :3000); this stack uses web port 13000, so post to the API directly:
+$ python send_call.py <api inbound url> <secret> https://host.docker.internal:8443/call.wav exotel-CA123
+{"call_id":"7e9ac5ad-9efa-4504-acbe-50cfbce371aa","duplicate":false}
+$ same again (dedupe)
+{"call_id":"7e9ac5ad-9efa-4504-acbe-50cfbce371aa","duplicate":true}
+$ bad signature
+urllib.error.HTTPError: HTTP Error 401: Unauthorized
+$ via web port (inbound_url host with the web port)
+urllib.error.HTTPError: HTTP Error 404: Not Found
+$ GET /calls/<call_id>  (after ~1 min)
+status completed source import score 50.0 passed False
+$ GET /integrations/<id>/deliveries
+[('outbound', 'failed', None, 1)]
+# NOTE: outbound delivery to https://example.com failed (no real receiver; expected). Sink payload/signature is covered by INT-01 tests, not re-run here.
+# ISSUE: IntegrationOut.inbound_url is built from PUBLIC_BASE_URL (web, :3000) and the web app returns 404 for /api/v1/webhooks/inbound/<id>; guide tells users to post to the API address instead.
+RESULT: PASS (signed import accepted 202, duplicate external_id -> duplicate:true same call_id, wrong secret -> 401, imported call transcribed and judged: status completed, score 50)

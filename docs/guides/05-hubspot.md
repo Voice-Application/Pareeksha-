@@ -62,6 +62,6 @@ Each row has `status` (`succeeded`, `failed`, `skipped`), `http_status`, `extern
 
 ## Notes and limits
 
-- The HubSpot code is covered by mocked-API tests (`cd backend && pytest tests -k hubspot`); exercise it once against a free HubSpot developer account before you rely on it.
+- The HubSpot code is covered by mocked-API tests (21 tests): `docker compose run --rm --no-deps -v "$PWD/backend/tests:/app/tests:ro" api sh -c "pip install -q pytest pytest-asyncio respx && python -m pytest tests/unit/integrations/test_hubspot_sink.py -q"`; exercise it once against a free HubSpot developer account before you rely on it.
 - Only `evaluation.completed` is subscribed. Transcripts are never sent.
 - Other CRMs (Salesforce, Zoho, LeadSquared, Freshdesk, Slack) are designed for but not built: see [Guide 7](07-write-a-connector.md).

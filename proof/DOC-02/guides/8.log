@@ -30,3 +30,32 @@ info dlq_open=0 outbox_backlog=0
 n/a  gnani, gemini: the API exposes no connectivity probe for these yet
 $ pareeksha dlq list
 0 dead letter(s)
+$ (poison message) echo "not-json" | kafka-console-producer --topic pareeksha.call.completed.v1
+$ pareeksha dlq list
+52140f50-63de-447e-b79d-73c0f8a2bfdd  pareeksha.call.completed.v1  attempts=1  JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+1 dead letter(s)
+$ metrics
+{"consumer_lag":{"dlq-recorder":0,"evaluator":0,"finalizer":0,"integrations":0,"planner":0,"simulator":0},"outbox_backlog":0,"dlq_open":1,"credits_used":0.0}
+id=52140f50-63de-447e-b79d-73c0f8a2bfdd
+$ pareeksha dlq replay <id>
+API error: 409 conflict: The stored message is not a valid event envelope and cannot be replayed
+exit=2
+52140f50-63de-447e-b79d-73c0f8a2bfdd  pareeksha.call.completed.v1  attempts=1  JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+1 dead letter(s)
+$ (valid envelope for a call that does not exist, attempt=3) | kafka-console-producer
+8e6b9b77-c2e5-4be3-b966-cac9e8c78d63  pareeksha.call.completed.v1  attempts=3  PermanentError: call feaf9c59-ee02-4355-a019-81fcbe1cd50b not found
+52140f50-63de-447e-b79d-73c0f8a2bfdd  pareeksha.call.completed.v1  attempts=1  JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2 dead letter(s)
+evaluator-1  | {"ts": "2026-10-27T11:07:07.393386+00:00", "level": "warning", "logger": "pareeksha.events.consumer", "msg": "unparseable message -> DLQ", "group": "evaluator", "topic": "pareeksha.call.completed.v1"}
+evaluator-2  | {"ts": "2026-10-27T11:07:48.874188+00:00", "level": "error", "logger": "pareeksha.events.consumer", "msg": "handler failed (PermanentError: call feaf9c59-ee02-4355-a019-81fcbe1cd50b not found) -> DLQ after 3 attempt(s)", "group": "eval
+$ pareeksha dlq replay 8e6b9b77-... (the valid one; it still fails: call does not exist, so the row re-opens)
+replay requested for 8e6b9b77-c2e5-4be3-b966-cac9e8c78d63
+8e6b9b77-c2e5-4be3-b966-cac9e8c78d63  pareeksha.call.completed.v1  attempts=1  PermanentError: call feaf9c59-ee02-4355-a019-81fcbe1cd50b not found
+52140f50-63de-447e-b79d-73c0f8a2bfdd  pareeksha.call.completed.v1  attempts=1  JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2 dead letter(s)
+$ curl -X POST /dlq/<malformed id>/discard
+{"id":"52140f50-63de-447e-b79d-73c0f8a2bfdd","event_id":"9975736a-fcb3-5c69-9c26-f99fe040fd64","original_topic":"pareeks
+
+8e6b9b77-c2e5-4be3-b966-cac9e8c78d63  pareeksha.call.completed.v1  attempts=1  PermanentError: call feaf9c59-ee02-4355-a019-81fcbe1cd50b not found
+1 dead letter(s)
+RESULT: PASS (topics, groups, /metrics/summary, doctor, DLQ list/replay/discard drill executed against the live stack; guide updated with the drill)
