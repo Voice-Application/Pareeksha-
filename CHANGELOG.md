@@ -2,6 +2,11 @@
 
 Contract changes after Day 1 need Tech Lead approval and an entry here.
 
+## Docs and compose (DOC-02) — 27 Oct 2026
+- No contract change. `docs/guides/` holds the 8 adopter guides plus an SDK reference; `docs/README.md` lists the build decisions that supersede older text (DeepSeek default LLM with Gemini optional, pluggable speech providers, SDK import `pareeksha_sdk`, `PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS`). `make demo` does not exist; the seed is `docker compose run --rm api python -m pareeksha.seed`.
+- `docker-compose.yml`: host ports are overridable (`API_HOST_PORT`, `WEB_HOST_PORT`, `POSTGRES_HOST_PORT`, `KAFKA_HOST_PORT`, `MOCK_AGENT_HOST_PORT`, `KAFKA_UI_HOST_PORT`) and the backend services map `host.docker.internal` to the host so a bot on the host can be called.
+- `.env.example`: trailing comments after an empty value were read by Compose as the value (`MOCK_BUGS` crashed the mock agent); comments now sit on their own line, and the `MOCK_BUGS` names are the real ones.
+
 ## Inbound webhook source (INT-03) — 27 Oct 2026
 - `POST /webhooks/inbound/{integration_id}` is real (the `STUB(INT-03)` handler). Shapes and status codes as documented (202/400/401/404/408/422); extra error codes `timestamp_out_of_window` (408), `unsafe_url` and `unknown_agent` (422). Additive: the built-in `webhook` connector now reports `direction: "both"` (it implements `ingest`; it was `"sink"` while only the sink existed) and its config gained optional `default_agent_id` (agent used when the payload's `agent_name` matches none). The frozen `Connector` interface is unchanged.
 - `PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS=1` now also lets the import path (inbound URL check and recording download) reach a loopback host; unchanged otherwise.

@@ -161,7 +161,7 @@ A "write a connector" guide (DOC-02) walks through implementing one of these in 
 
 ### 3.1 SDK
 ```python
-from pareeksha import Pareeksha
+from pareeksha_sdk import Pareeksha
 
 pk = Pareeksha(base_url="http://localhost:8000", api_key="pk_live_…")
 agent = pk.agents.get_by_name("EMI Reminder Bot")
@@ -183,7 +183,7 @@ Thin, typed (Pydantic models generated from the OpenAPI spec with `datamodel-cod
 | `pareeksha regress --agent NAME --wait` | Runs blocking regression tests; exit 1 on suite failure |
 | `pareeksha audit FILE --agent NAME --language kn-IN` | Uploads a recording and prints the result |
 | `pareeksha dlq list` / `pareeksha dlq replay ID` | Inspect and replay dead letters |
-| `pareeksha doctor` | Checks API, Kafka, Gnani and Gemini connectivity |
+| `pareeksha doctor` | Checks API, database and Kafka connectivity and prints DLQ/outbox counts (speech/LLM provider probes are not exposed by the API) |
 
 ### 3.3 `pareeksha.yaml` (lives in the bot's own repo)
 ```yaml
@@ -196,6 +196,7 @@ agent:
   description: file://prompts/system_prompt.md
   mandatory_disclosures:
     - id: recording
+      text: This call is being recorded for quality purposes   # required
       regex: "(record|ರೆಕಾರ್ಡ್|रिकॉर्ड)"
       within_turns: 2
 scenarios:
@@ -217,7 +218,7 @@ Every adapter exposes the same internal interface to the simulator: `connect(age
 
 | Adapter | How it connects | What the bot team does |
 |---|---|---|
-| `audio_v1` (Must) | Platform opens a WebSocket and speaks `pareeksha-audio-v1` (see `06-api-spec.md §7`) | Add a small WS endpoint (helper: `pareeksha_sdk.agent_server` wraps any bot with `on_audio` / `send_audio` callbacks) |
+| `audio_v1` (Must) | Platform opens a WebSocket and speaks `pareeksha-audio-v1` (see `06-api-spec.md §7`) | Add a small WS endpoint (see [Guide 3](guides/03-connect-any-bot.md) for a minimal server; no helper library was built) |
 | `pipecat` (Must) | Platform connects to the bot's existing Pipecat `FastAPIWebsocketTransport`; ships `PareekshaFrameSerializer` that maps protocol frames ↔ Pipecat frames, and emits glass-box events from Pipecat transcription/function-call frames | Add the serializer to their transport (≈5 lines) |
 | `livekit` (Should) | Platform joins the bot's LiveKit room as a participant using a token from a URL the team provides; publishes caller track, subscribes to agent track | Expose a token endpoint for test rooms |
 | `vapi` (Could) | Uses Vapi's WebSocket call transport to stream audio to/from an assistant | Provide assistant ID + API key (verify current Vapi transport docs on Day 4) |
@@ -249,19 +250,19 @@ Composite action: installs `pareeksha-sdk`, runs `pareeksha apply` then `pareeks
 
 ```bash
 git clone https://github.com/<you>/pareeksha && cd pareeksha
-cp .env.example .env          # add GNANI_API_KEY, GEMINI_API_KEY, SECRET_KEY
-docker compose up -d          # kafka, postgres, api, workers, web, mock-agent
-make demo                     # seeds personas/profiles/rubric, registers mock agent, runs a 10-call demo
+cp .env.example .env          # add GNANI_API_KEY, DEEPSEEK_API_KEY, SECRET_KEY, PAREEKSHA_API_KEY (see guide 1)
+docker compose --profile workers up -d --build   # kafka, postgres, api, workers, web, mock-agent
+docker compose run --rm api python -m pareeksha.seed   # personas, profiles, rubric, mock agent, demo key
 open http://localhost:3000
 ```
-`make demo` prints the API key it created for the web app and CLI. Target: from clone to seeing the first evaluated call in under 20 minutes (NFR-14).
+The seed creates the admin API key from `PAREEKSHA_API_KEY` (or prints a generated one once); the web app and CLI use it. Target: from clone to seeing the first evaluated call in under 20 minutes (NFR-14).
 
-## 7. Docs for adopters (DOC-02)
-1. Quick start (above)
-2. Connect your Pipecat bot
-3. Connect any bot with `pareeksha-audio-v1`
-4. Send recordings in with the webhook source
-5. Send scores to HubSpot
-6. Run tests on every PR with the GitHub Action
-7. Write your own connector (one file + entry point + tests)
-8. Operating Kafka: topics, consumer lag, DLQ replay
+## 7. Docs for adopters (DOC-02) — written, in `docs/guides/`
+1. [Quick start (above)](guides/01-quickstart.md)
+2. [Connect your Pipecat bot](guides/02-connect-pipecat.md)
+3. [Connect any bot with `pareeksha-audio-v1`](guides/03-connect-any-bot.md)
+4. [Send recordings in with the webhook source](guides/04-webhook-source.md)
+5. [Send scores to HubSpot](guides/05-hubspot.md)
+6. [Run tests on every PR with the GitHub Action](guides/06-github-action.md)
+7. [Write your own connector (one file + entry point + tests)](guides/07-write-a-connector.md)
+8. [Operating Kafka: topics, consumer lag, DLQ replay](guides/08-operating-kafka.md)

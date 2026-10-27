@@ -188,7 +188,7 @@ Every requirement has an ID, a priority (**M**ust / **S**hould / **C**ould) and 
 
 ## 3. Constraints and assumptions
 
-- **C-1** Must use Gnani Prisma (STT) and Timbre (TTS) for speech. Gemini is the judge and caller brain.
+- **C-1** Must use Gnani Prisma (STT) and Timbre (TTS) for speech. The judge and caller brain use the configured LLM (DeepSeek by default, Gemini optional); speech providers are pluggable (Gnani default).
 - **C-2** Built by a multi-agent AI team under an orchestrator in 5 days (Sat 24 – Wed 28 Oct 2026), with Preetham as human owner; see `AGENTS.md`.
 - **C-3** Python 3.11 (not 3.13: `audioop` was removed in 3.13; if you must use 3.13, install `audioop-lts`).
 - **A-1** Agents under test can be reached over WebSocket using the platform's audio protocol (§ API spec) or Pipecat's serializer.

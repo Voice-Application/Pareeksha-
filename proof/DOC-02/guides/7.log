@@ -1,0 +1,41 @@
+# Guide 7 step 4: tests
+ Container doc02a-api-run-7d3835a3353a Creating 
+ Container doc02a-api-run-7d3835a3353a Created 
+[notice] To update, run: pip install --upgrade pip
+....                                                                     [100%]
+4 passed in 0.19s
+$ docker compose -f docker-compose.yml -f examples/connector-slack/docker-compose.connector.yml --profile workers up -d api integrations  (+ sandbox proxy overlay)
+ Container doc02a-integrations-1 Starting 
+ Container doc02a-api-1 Starting 
+ Container doc02a-integrations-1 Started 
+ Container doc02a-api-1 Started 
+$ GET /integrations/connectors
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+    import sys,json; print([c['name'] for c in json.load(sys.stdin)])
+                                               ~~~~~~~~~^^^^^^^^^^^
+  File "/usr/lib/python3.13/json/__init__.py", line 298, in load
+    return loads(fp.read(),
+        cls=cls, object_hook=object_hook,
+        parse_float=parse_float, parse_int=parse_int,
+        parse_constant=parse_constant, object_pairs_hook=object_pairs_hook, **kw)
+  File "/usr/lib/python3.13/json/__init__.py", line 352, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "/usr/lib/python3.13/json/decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/json/decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+$ POST /integrations (slack)
+
+# first attempt: overlay used --no-build-isolation but the image has no setuptools -> api crash loop; fixed (build isolation on).
+ Container doc02a-integrations-1 Starting 
+ Container doc02a-integrations-1 Started 
+$ GET /integrations/connectors
+['hubspot', 'slack', 'webhook']
+$ POST /integrations (slack)
+{"id":"9916472e-79d4-47a8-abfb-94447c67c936","connector":"slack","name":"Collections alerts","direction":"sink","enabled":true,"config":{"only_critical":true},"secrets_set":true,"event_filter":{"events":["evaluation.completed"],"agent_ids":[],"only_failed":fal
+
+RESULT: PASS (4 connector tests pass in the backend image; overlay installs the package; /integrations/connectors lists ['hubspot','slack','webhook']; slack integration created with secrets_set true)

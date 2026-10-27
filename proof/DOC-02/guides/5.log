@@ -1,0 +1,20 @@
+# Guide 5 (HubSpot): LIVE STEP PENDING OWNER KEY (no HubSpot private-app token available). Executed: create integration with a placeholder token, test endpoint (expects auth failure), mocked-API unit tests.
+$ POST /integrations (hubspot, placeholder token)
+{'id': '0f37763d-f2a4-4766-8121-f29467a8fe5a', 'connector': 'hubspot', 'direction': 'sink', 'secrets_set': True, 'config': {'match_by': 'phone', 'only_failed': False, 'public_base_url': 'http://localhost:3000'}}
+$ POST /integrations/<id>/test
+{"ok":false,"detail":"HubSpot HTTP 400: Invalid request"}
+$ GET /integrations/<id>/deliveries
+{"items":[],"next_cursor":null}
+$ docker compose run --rm --no-deps -v ./backend/tests:/app/tests:ro api sh -c "pip install -q pytest pytest-asyncio respx && python -m pytest tests/unit/integrations/test_hubspot_sink.py -q"
+ Container doc02a-api-run-fabfb3386893 Creating 
+ Container doc02a-api-run-fabfb3386893 Created 
+[notice] To update, run: pip install --upgrade pip
+.....................                                                    [100%]
+=============================== warnings summary ===============================
+pareeksha/audio/dsp.py:8
+  /app/pareeksha/audio/dsp.py:8: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13
+    import audioop  # stdlib <= 3.12; audioop-lts on >= 3.13 (see requirements.txt)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+21 passed, 1 warning in 0.19s
+RESULT: PENDING OWNER KEY for the live HubSpot step (note on a real contact). Verified without a key: integration create (secret stored, secrets_set true), /test reaches HubSpot and reports failure for a placeholder token, 21 mocked-API sink tests pass.

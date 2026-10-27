@@ -4,11 +4,20 @@
 
 **One line:** An India-native crash-testing and call-audit platform for voice AI agents. Synthetic Indian callers (Kannada, Hindi, Hinglish/Kanglish, noisy phone lines) attack a voice bot before launch; the same judge audits real calls after launch; a dialect report shows where speech recognition breaks; and results flow into the team's CRM and CI.
 
-**Stack:** Gnani Prisma (STT) + Timbre (TTS) · Gemini (caller brain + judge) · Pipecat · **Kafka** event backbone · Postgres · FastAPI · **Next.js** web app · Python SDK/CLI · HubSpot + webhook connectors.
+**Stack:** pluggable speech (Gnani Prisma/Timbre default; Google, Azure, ElevenLabs, Deepgram selectable) · DeepSeek (caller brain + judge; Gemini optional) · Pipecat · **Kafka** event backbone · Postgres · FastAPI · **Next.js** web app · Python SDK/CLI · HubSpot + webhook connectors.
 
 **What's new in v0.2:** Kafka replaces the Postgres job queue · Next.js replaces Streamlit · built for other teams to adopt (SDK, CLI, GitHub Action, adapters, one-command setup) · CRM/webhook connector framework · 5-day multi-agent build plan. Details in [CHANGELOG.md](../CHANGELOG.md).
 
 ---
+
+**Decisions made during the build (they supersede older text in this pack):**
+- **LLM:** DeepSeek is the default for the caller brain, judge, scenario generation, role detection and ASR intent (`LLM_PROVIDER=deepseek`); Gemini is the supported alternative (`LLM_PROVIDER=gemini`). Where these docs say "Gemini judge", read "the configured LLM judge".
+- **Speech is pluggable:** `STT_PROVIDER` / `TTS_PROVIDER` = `gnani` (default, verified live) | `google` | `azure` | `elevenlabs` | `deepgram`. The last four are implemented and unit-tested; their keys are pending, so they are not yet verified live. Overridable per agent/run.
+- **SDK:** distribution `pareeksha-sdk`, import name **`pareeksha_sdk`** (not `pareeksha`, which is the backend package); CLI command `pareeksha`. The `agent_server` helper in the file tree was not built; Guide 3 shows a ~20-line server instead.
+- **Dev switch:** `PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS=1` lets webhooks/recording fetches target loopback/private addresses for local testing only (https, no-credentials and IP pinning still apply). Never set it in production.
+- **No `make demo`:** setup is `docker compose --profile workers up -d --build` then `docker compose run --rm api python -m pareeksha.seed`; see [Guide 1](guides/01-quickstart.md).
+
+**Adopter guides:** [1 Quick start](guides/01-quickstart.md) · [2 Pipecat bot](guides/02-connect-pipecat.md) · [3 Any bot (`pareeksha-audio-v1`)](guides/03-connect-any-bot.md) · [4 Webhook source](guides/04-webhook-source.md) · [5 HubSpot](guides/05-hubspot.md) · [6 GitHub Action](guides/06-github-action.md) · [7 Write a connector](guides/07-write-a-connector.md) · [8 Operating Kafka](guides/08-operating-kafka.md) · [SDK reference](guides/sdk-reference.md)
 
 ## How to read this folder
 

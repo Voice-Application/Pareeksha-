@@ -18,6 +18,7 @@ x-backend: &backend
     GEMINI_API_KEY: ${GEMINI_API_KEY:-}
     COST_DEEPSEEK_PER_1K_INPUT_TOKENS: ${COST_DEEPSEEK_PER_1K_INPUT_TOKENS:-}
     COST_DEEPSEEK_PER_1K_OUTPUT_TOKENS: ${COST_DEEPSEEK_PER_1K_OUTPUT_TOKENS:-}
+  extra_hosts: ["host.docker.internal:host-gateway"]   # reach a bot running on the host
   volumes:
     - ./data/runtime:/data
   depends_on:
@@ -29,12 +30,12 @@ services:
   kafka:
     image: apache/kafka:4.0.0
     hostname: kafka
-    ports: ["9094:9094"]                 # host access for local dev tools
+    ports: ["${KAFKA_HOST_PORT:-9094}:${KAFKA_HOST_PORT:-9094}"]                 # host access for local dev tools
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:${KAFKA_HOST_PORT:-9094}
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:${KAFKA_HOST_PORT:-9094}
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
@@ -69,7 +70,7 @@ services:
       POSTGRES_USER: pareeksha
       POSTGRES_PASSWORD: pareeksha
       POSTGRES_DB: pareeksha
-    ports: ["5432:5432"]
+    ports: ["${POSTGRES_HOST_PORT:-5432}:5432"]
     volumes: [pg-data:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U pareeksha"]
@@ -86,7 +87,7 @@ services:
   api:
     <<: *backend
     command: ["uvicorn", "pareeksha.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
-    ports: ["8000:8000"]
+    ports: ["${API_HOST_PORT:-8000}:8000"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status==200 else 1)"]
       interval: 10s
@@ -163,7 +164,7 @@ services:
       PAREEKSHA_API_URL: http://api:8000/api/v1
       PAREEKSHA_API_KEY: ${PAREEKSHA_API_KEY:-}
       WEB_PASSWORD: ${WEB_PASSWORD:-}
-    ports: ["3000:3000"]
+    ports: ["${WEB_HOST_PORT:-3000}:3000"]
     depends_on: { api: { condition: service_healthy } }
     restart: unless-stopped
 
@@ -172,7 +173,7 @@ services:
     env_file: [{ path: .env, required: false }]
     environment:
       MOCK_BUGS: ${MOCK_BUGS:-}
-    ports: ["8765:8765"]
+    ports: ["${MOCK_AGENT_HOST_PORT:-8765}:8765"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8765/health').status==200 else 1)"]
       interval: 10s
@@ -185,7 +186,7 @@ services:
     environment:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
-    ports: ["8080:8080"]
+    ports: ["${KAFKA_UI_HOST_PORT:-8080}:8080"]
     depends_on: [kafka]
 
 volumes:

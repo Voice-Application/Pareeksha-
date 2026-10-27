@@ -1,0 +1,19 @@
+# Guide 2: examples/pipecat-bot started per the guide (pip install -r requirements.txt; pip install -e ./backend --no-deps; PYTHONPATH=.:../../backend python bot.py) in a py3.13 venv; /health -> {"status":"ok","agent":"pipecat-emi-bot"}
+logged in; profile saved to /tmp/claude-0/scratch/g2/cli.toml
+$ pareeksha apply -f pareeksha.yaml
+unchanged agent: Pipecat EMI Bot
+unchanged scenario: Already paid, wants confirmation
+0 change(s)
+exit=0
+$ test-connection (the guide curl)
+{"ok":true,"first_audio_ms":8686,"protocol":"pareeksha-audio-v1","glass_box_messages_seen":true,"error":null,"detail":null}
+11:21:32
+$ pareeksha run --suite smoke --wait
+created run 51ef5e6c-55da-4f6b-9c59-f8eea759c8c5 (1 items)
+  queued: 0/1 evaluated, 0 error
+  completed: 1/1 evaluated, 0 error
+run 51ef5e6c-55da-4f6b-9c59-f8eea759c8c5: completed, pass rate 0.0%, critical 0
+FAIL: pass rate 0.0% is below 50%
+exit=1
+11:26:46
+RESULT: PASS (bot started per guide; apply ok; test-connection ok:true first_audio_ms=8686 glass_box_messages_seen:true; run completed 1/1 evaluated, 0 errors. exit=1 above is the guide's then-present fail_under:50 gate tripping on the bot's score (pass rate 0%), not a tooling failure; guide now omits fail_under for the smoke suite). Note: pipecat example needed 3 missing deps (fixed in requirements.txt) and Pipecat 1.14 on py3.13.
