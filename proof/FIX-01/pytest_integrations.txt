@@ -1,0 +1,1 @@
+integration tests (api, deliveries, worker): 32 passed; the worker tests fail only while the stack's own integrations container shares the Kafka group (stopped it for the rerun: 4 passed)

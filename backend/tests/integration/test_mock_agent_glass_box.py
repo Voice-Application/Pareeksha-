@@ -59,3 +59,22 @@ async def test_stop_message_ends_session_cleanly() -> None:
         await ws.send(start_message())
         await ws.send('{"type":"stop","reason":"caller_hangup"}')
         await asyncio.wait_for(ws.wait_closed(), 5)
+
+
+async def test_tool_call_survives_the_caller_talking_over_the_reply() -> None:
+    """A reply cut off by the caller must still report the tool call it decided on."""
+    speech = FakeSpeech(["yes speaking", "I will pay friday", "hello?"])
+    async with running_agent(speech) as addr, connect(f"ws://{addr}/call") as ws:
+        rec = Recorder()
+        start_reader(ws, rec)
+        await ws.send(start_message("en-IN", mock_bugs=["no_amount_confirm"]))
+        await wait_for(lambda: len(rec.of("transcript")) >= 1)
+        await asyncio.sleep(0.35)
+        await speak(ws)  # -> asks when the caller can pay
+        await wait_for(lambda: len(rec.of("transcript")) >= 3)
+        await asyncio.sleep(0.35)
+        await speak(ws)  # the promise: the bug skips the read-back and closes with the tool call
+        await wait_for(lambda: len(rec.of("transcript")) >= 5)
+        await speak(ws)  # talks over the closing line, cancelling its playback
+        await wait_for(lambda: bool(rec.of("call_end")))
+    assert [t["name"] for t in rec.of("tool_call")] == ["record_promise_to_pay"]

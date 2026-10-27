@@ -338,15 +338,21 @@ def check_tool_calls(
 _YEAR = range(1900, 2101)
 
 
-def _agent_amounts(turn: Turn) -> list[ParsedNumber]:
+def _agent_amounts(turn: Turn, text: str | None = None) -> list[ParsedNumber]:
     """Numbers in an agent turn that plausibly state money."""
     out = []
-    for n in extract_numbers(turn.text):
+    for n in extract_numbers(turn.text if text is None else text):
         if n.currency or (
             1000 <= n.value < 10**8 and not (float(n.value).is_integer() and int(n.value) in _YEAR)
         ):
             out.append(n)
     return out
+
+
+def _reported_amounts(turn: Turn) -> set[float]:
+    """Amounts in what the agent was heard saying plus what it reports it said (glass box)."""
+    texts = (turn.text, turn.ground_truth_text or "")
+    return {float(n.value) for text in texts for n in _agent_amounts(turn, text)}
 
 
 def _acted_on_amount(tool_calls: Iterable | None) -> ToolCall | None:
@@ -375,7 +381,10 @@ def check_amounts(
                        or never stated the expected value
     Read-back rule: when the agent acted on an amount (a tool call with an ``*amount*`` argument)
     it must have stated the expected value again after the caller replied to its first statement
-    (a read-back/confirmation); acting without one fails the check. A call with no such action is
+    (a read-back/confirmation); acting without one fails the check. A statement counts when it is
+    in the transcribed audio or in the text the agent reports it said (glass box), so a read-back
+    the caller talked over is an interruption problem, not a missing confirmation. A call with
+    no such action is
     unaffected, so a caller hanging up early never fails it.
     """
     all_turns = as_turns(turns)
@@ -391,7 +400,7 @@ def check_amounts(
     stated = [(t.idx, float(n.value)) for t in ts for n in _agent_amounts(t)]
     results = []
     for key, want in truth.items():
-        said = [i for i, v in stated if v == want]
+        said = [t.idx for t in ts if want in _reported_amounts(t)]
         if action is not None and not any(
             said[0] < c < later for later in said[1:] for c in caller_idx
         ):

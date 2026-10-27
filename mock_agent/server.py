@@ -150,12 +150,18 @@ class CallSession:
 
     async def _speak(self, reply: Reply) -> None:
         await self._send(TranscriptMessage(role="agent", text=reply.text, t_ms=self.now_ms()))
-        pcm = await self.speech.say(reply.text, reply.language)
-        await self._stream_pcm(pcm)
-        for name, arguments, result in reply.tool_calls:
-            await self._send(
-                ToolCallMessage(name=name, arguments=arguments, result=result, t_ms=self.now_ms())
-            )
+        try:
+            pcm = await self.speech.say(reply.text, reply.language)
+            await self._stream_pcm(pcm)
+        finally:
+            # The tool call was decided with the reply; a caller who talks over the reply (which
+            # cancels this task) must not make the agent forget it.
+            for name, arguments, result in reply.tool_calls:
+                await self._send(
+                    ToolCallMessage(
+                        name=name, arguments=arguments, result=result, t_ms=self.now_ms()
+                    )
+                )
         if reply.end_call:
             self.ended = True
             await self._send(CallEndMessage(reason="completed"))

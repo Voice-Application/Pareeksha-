@@ -18,7 +18,7 @@ export function PageHeader({
       <div className="min-w-0">
         <p className="eyebrow mb-1 min-h-[14px]">{eyebrow}</p>
         <h1 className="display text-xl font-semibold">{title}</h1>
-        {description && <p className="mt-1 max-w-[68ch] text-base text-muted">{description}</p>}
+        {description && <div className="mt-1 max-w-[68ch] text-base text-muted">{description}</div>}
       </div>
       {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
     </header>

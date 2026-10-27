@@ -1,0 +1,84 @@
+[
+ {
+  "label": "bug2-no_amount_confirm",
+  "call_id": "e6b6a744-2989-5972-8a68-e30a5eff0641",
+  "overall": 77.5,
+  "passed": false,
+  "critical": false,
+  "status": "ok",
+  "failure_types": [
+   "wrong_fact"
+  ],
+  "failed_checks": [
+   [
+    "amount_confirmed",
+    [
+     2
+    ],
+    "Agent acted (record_promise_to_pay) without reading back 4500 to the caller"
+   ]
+  ]
+ },
+ {
+  "label": "bug2-no_amount_confirm",
+  "call_id": "577a4b92-06b3-52a0-9667-794e73a587eb",
+  "overall": 60.0,
+  "passed": false,
+  "critical": true,
+  "status": "ok",
+  "failure_types": [
+   "intent_miss",
+   "wrong_fact"
+  ],
+  "failed_checks": [
+   [
+    "amount_confirmed",
+    [
+     2
+    ],
+    "Agent acted (record_promise_to_pay) without reading back 4500 to the caller"
+   ]
+  ]
+ },
+ {
+  "label": "clean-a",
+  "call_id": "c86a55eb-35fa-5436-8cd4-514b0220e074",
+  "overall": 41.25,
+  "passed": false,
+  "critical": true,
+  "status": "ok",
+  "failure_types": [
+   "missing_disclosure",
+   "wrong_fact",
+   "intent_miss"
+  ],
+  "failed_checks": [
+   [
+    "amount_confirmed",
+    [
+     2,
+     4
+    ],
+    "Agent acted (record_promise_to_pay) without reading back 4500 to the caller"
+   ],
+   [
+    "disclosure_present",
+    [
+     0,
+     2
+    ],
+    "No 'recording' disclosure in the first 2 agent turns"
+   ]
+  ]
+ },
+ {
+  "label": "clean-a",
+  "call_id": "0bbbf04f-ea4b-5355-a0aa-37f4b2cc3ee5",
+  "overall": 95.0,
+  "passed": true,
+  "critical": false,
+  "status": "ok",
+  "failure_types": [],
+  "failed_checks": []
+ }
+]

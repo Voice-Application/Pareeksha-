@@ -270,3 +270,18 @@ def test_amount_readback_missing_before_acting_fails_and_clean_passes():
     # no action taken (caller hung up after the first statement): not failed
     turns, _ = _emi_call(readback=False)
     assert check_amounts(turns, {"emi_amount": 4500}, [])[0].passed is True
+
+
+def test_readback_cut_off_by_the_caller_still_counts_when_the_agent_reports_it_said_it():
+    turns, tool = _emi_call(readback=True)
+    # the read-back audio was truncated ("just to confirm") but the glass box has the sentence
+    t = turns[4]
+    turns[4] = Turn(
+        idx=t.idx,
+        speaker="agent",
+        start_ms=t.start_ms,
+        end_ms=t.end_ms,
+        text="just to confirm",
+        ground_truth_text="Just to confirm, you will pay four thousand five hundred rupees. Right?",
+    )
+    assert check_amounts(turns, {"emi_amount": 4500}, tool)[0].passed is True
