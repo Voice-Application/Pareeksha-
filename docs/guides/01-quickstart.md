@@ -19,6 +19,7 @@ Edit `.env` and set:
 | `DEEPSEEK_API_KEY` | your DeepSeek key (`LLM_PROVIDER=deepseek` is the default) |
 | `SECRET_KEY` | a Fernet key, generate one with the command below |
 | `PAREEKSHA_API_KEY` | the admin API key the seed will create, generate one with the command below |
+| `SIMULATOR_REPLICAS` | `1` while you use a single Gnani key (it allows one active request at a time) |
 
 ```bash
 echo "SECRET_KEY=$(openssl rand -base64 32 | tr '+/' '-_')"      # paste into .env
@@ -46,7 +47,7 @@ docker compose ps
 curl -s http://localhost:8000/health        # {"db":"ok","kafka":"ok"}
 ```
 
-Behind a TLS-intercepting proxy, build with the overlay: `BUILDX_BAKE_ENTITLEMENTS_FS=0 CA_BUNDLE=/path/ca-bundle.crt docker compose -f docker-compose.yml -f docker-compose.proxy.yml --profile workers up -d --build`. A normal machine does not need it.
+Behind a TLS-intercepting proxy, use the overlay for every compose command: `BUILDX_BAKE_ENTITLEMENTS_FS=0 CA_BUNDLE=/path/ca-bundle.crt docker compose -f docker-compose.yml -f docker-compose.proxy.yml --profile workers up -d --build` (it trusts the CA for the build and inside the containers, otherwise calls to Gnani/DeepSeek fail with `SSLError`). A normal machine does not need it.
 
 ## 3. Seed the demo data
 
@@ -54,7 +55,7 @@ Behind a TLS-intercepting proxy, build with the overlay: `BUILDX_BAKE_ENTITLEMEN
 docker compose run --rm api python -m pareeksha.seed
 ```
 
-This creates the 10 personas, the 8 noise profiles, the active rubric, the **EMI Reminder Bot** agent (pointing at the bundled mock agent, `ws://mock-agent:8765/ws`) with 8 scenarios, and an admin API key. It is get-or-create, so running it twice changes nothing. Because you pinned `PAREEKSHA_API_KEY` in `.env`, that exact value is the key (it is stored hashed). Restart the web app so it picks the key up:
+This creates the 20 personas, the 8 noise profiles, the active rubric, the **EMI Reminder Bot** agent (pointing at the bundled mock agent, `ws://mock-agent:8765/ws`) with 8 scenarios, and an admin API key. It is get-or-create, so running it twice changes nothing. Because you pinned `PAREEKSHA_API_KEY` in `.env`, that exact value is the key (it is stored hashed). Restart the web app so it picks the key up:
 
 ```bash
 docker compose up -d web
@@ -70,24 +71,24 @@ pip install ./sdk/python
 set -a; . ./.env; set +a
 pareeksha login --url http://localhost:${API_HOST_PORT:-8000} --key "$PAREEKSHA_API_KEY"
 pareeksha doctor
-pareeksha run --agent "EMI Reminder Bot" --tags happy_path \
+pareeksha run --agent "EMI Reminder Bot" --tags promise_to_pay \
     --persona "Manju — auto driver" --noise clean_16k --wait
 ```
 
-Two scenarios carry the `happy_path` tag; each gets one call. A call is real time, so expect about 1 to 2 minutes per call (Gnani allows one request at a time). The CLI prints progress and ends with a line like
+Exactly one scenario carries the `promise_to_pay` tag, so this is one call. A call is real time: expect about 2 minutes (Gnani allows one request at a time, so do not start several at once on one key). The CLI prints progress and ends with a line like
 
 ```
-run <uuid>: completed, pass rate 100.0%, critical 0
+run <uuid>: completed, pass rate 0.0%, critical 1
 ```
 
-The exit code is 0 when the run completed (add `--fail-under 80` to gate on a threshold). Open <http://localhost:3000/runs> to see the run: transcript, waveform, judge scores with evidence, and latency metrics for each call.
+Your numbers will differ: the caller is an LLM and the judge scores what it heard. (In our own run the judge flagged the bot for confirming a different EMI amount than the scenario's, a real finding.) The exit code is 0 when the run completed (add `--fail-under 80` to gate on a threshold). Open <http://localhost:3000/runs> to see the run: transcript, waveform, judge scores with evidence, and latency metrics for each call.
 
 ## 5. Plant a bug and watch the judge catch it
 
 ```bash
 echo "MOCK_BUGS=no_disclosure" >> .env
 docker compose up -d mock-agent
-pareeksha run --agent "EMI Reminder Bot" --tags happy_path --persona "Manju — auto driver" --noise clean_16k --wait
+pareeksha run --agent "EMI Reminder Bot" --tags promise_to_pay --persona "Manju — auto driver" --noise clean_16k --wait
 ```
 
 The mock agent now skips the recording disclosure, so the run reports a failed call. Other bugs: `no_amount_confirm`, `english_to_kannada`, `ignore_interrupt`, `false_waiver` (comma-separate to combine). Remove the line and `docker compose up -d mock-agent` to restore.
@@ -98,7 +99,7 @@ The mock agent now skips the recording disclosure, so the run reports a failed c
 |---|---|
 | `kafka` unhealthy | Give Docker at least 4 GB RAM; `docker compose logs kafka` |
 | `pareeksha doctor` 401 | the key in `.env` is not the one that was seeded; run the seed again after fixing `PAREEKSHA_API_KEY` |
-| Calls end in `error` with 429 | Gnani allows one active request per key; lower `SIMULATOR_REPLICAS` or run one call at a time |
+| Calls end in `error` with 429 | Gnani allows one active request per key; set `SIMULATOR_REPLICAS=1` and run one call at a time |
 | `docker pull` 429 from Docker Hub | log in (`docker login`) or pull through a mirror |
 
 Stop everything: `docker compose --profile workers down` (add `-v` to delete the data volumes).

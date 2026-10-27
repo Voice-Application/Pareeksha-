@@ -1,7 +1,12 @@
 # Optional overlay for builds behind a TLS-intercepting proxy:
 #   CA_BUNDLE=/path/ca-bundle.crt docker compose -f docker-compose.yml -f docker-compose.proxy.yml up -d --build
-# Every service built from ./backend needs the CA as a build secret.
-x-ca: &ca { build: { secrets: [ca] } }
+# Every service built from ./backend needs the CA as a build secret, and at run time the same CA
+# must be trusted for calls to Gnani / DeepSeek (mounted at /ca.crt, SSL_CERT_FILE points at it).
+# Also set BUILDX_BAKE_ENTITLEMENTS_FS=0 so Compose may read the CA file for the build secret.
+x-ca: &ca
+  build: { secrets: [ca] }
+  environment: { SSL_CERT_FILE: /ca.crt, REQUESTS_CA_BUNDLE: /ca.crt, CURL_CA_BUNDLE: /ca.crt }
+  volumes: ["${CA_BUNDLE}:/ca.crt:ro"]
 services:
   migrate: *ca
   api: *ca

@@ -1,0 +1,32 @@
+$ kafka-topics --list
+pareeksha.audit.requested.v1
+pareeksha.call.completed.v1
+pareeksha.call.requested.v1
+pareeksha.dialect.clip.requested.v1
+pareeksha.dlq.v1
+pareeksha.evaluation.completed.v1
+pareeksha.progress.v1
+pareeksha.retry.30s.v1
+pareeksha.retry.5m.v1
+pareeksha.run.completed.v1
+pareeksha.run.requested.v1
+pareeksha.scenario.generate.requested.v1
+$ kafka-consumer-groups --describe --all-groups (head)
+
+GROUP           TOPIC                        PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                    HOST            CLIENT-ID
+auditor         pareeksha.audit.requested.v1 5          -               0               -               auditor-1-5389e654-5e63-47b3-be5d-26e5b9842365 /172.18.0.15    auditor-1
+auditor         pareeksha.audit.requested.v1 4          -               0               -               auditor-1-5389e654-5e63-47b3-be5d-26e5b9842365 /172.18.0.15    auditor-1
+auditor         pareeksha.audit.requested.v1 1          -               0               -               auditor-1-5389e654-5e63-47b3-be5d-26e5b9842365 /172.18.0.15    auditor-1
+auditor         pareeksha.audit.requested.v1 0          -               0               -               auditor-1-5389e654-5e63-47b3-be5d-26e5b9842365 /172.18.0.15    auditor-1
+auditor         pareeksha.audit.requested.v1 3          -               0               -               auditor-1-5389e654-5e63-47b3-be5d-26e5b9842365 /172.18.0.15    auditor-1
+auditor         pareeksha.audit.requested.v1 2          -               0               -               auditor-1-5389e654-5e63-47b3-be5d-26e5b9842365 /172.18.0.15    auditor-1
+$ curl /metrics/summary
+{"consumer_lag":{"evaluator":0,"finalizer":0,"integrations":0,"planner":0,"simulator":0},"outbox_backlog":0,"dlq_open":0,"credits_used":0.0}
+$ pareeksha doctor
+ok   db: ok
+ok   kafka: ok
+ok   api: reachable and key accepted
+info dlq_open=0 outbox_backlog=0
+n/a  gnani, gemini: the API exposes no connectivity probe for these yet
+$ pareeksha dlq list
+0 dead letter(s)

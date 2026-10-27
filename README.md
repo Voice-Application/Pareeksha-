@@ -9,12 +9,12 @@ Target: first evaluated call in under 20 minutes. Needs Docker (Compose v2), Pyt
 
 ```bash
 git clone https://github.com/voice-application/pareeksha- pareeksha && cd pareeksha
-cp .env.example .env     # set GNANI_API_KEY, DEEPSEEK_API_KEY; append SECRET_KEY and PAREEKSHA_API_KEY (see the guide)
+cp .env.example .env     # set GNANI_API_KEY, DEEPSEEK_API_KEY, SIMULATOR_REPLICAS=1; append SECRET_KEY and PAREEKSHA_API_KEY (see the guide)
 docker compose --profile workers up -d --build
 docker compose run --rm api python -m pareeksha.seed      # personas, noise profiles, rubric, mock EMI agent, API key
 pip install ./sdk/python
 pareeksha login --url http://localhost:8000 --key "$PAREEKSHA_API_KEY"
-pareeksha run --agent "EMI Reminder Bot" --tags happy_path --persona "Manju — auto driver" --noise clean_16k --wait
+pareeksha run --agent "EMI Reminder Bot" --tags promise_to_pay --persona "Manju — auto driver" --noise clean_16k --wait
 ```
 Then open <http://localhost:3000> for the call: transcript, waveform, judge scores with evidence.
 
