@@ -1,0 +1,27 @@
+persona: Priya — careful (en-IN, interruption 0)
+scenario: Disputes the EMI amount
+end_reason: timeout   duration: 100.0 s
+
+[00]   4.49- 17.92s agent 
+       text: hello this is an automated assistant calling on behalf of sampoorna finance and this call may be recorded is it a good time to talk about your overdue emi of four thousand five hundred rupees on your two wheeler loan
+       agent said (glass box): Hello, this is an automated assistant calling on behalf of Sampoorna Finance, and this call may be recorded. Is it a good time to talk about your overdue EMI of Rs 4,500 on your two-wheeler loan?
+[01]  24.16- 38.10s caller
+       text: Yes, this is a good time. But I believe my EMI should be four thousand rupees, not four thousand five hundred. Can you tell me where the extra five hundred is coming from?
+       agent heard: yes this is a good time but i believe my em i should be four thousand rupees not four thousand five hundred can you tell me where the extra five hundred is coming from
+[02]  43.48- 52.94s agent 
+       text: i understand your concern but i'm not able to break down the charges on this call could you please check the loan statement or contact our office for the exact details
+       agent said (glass box): I understand your concern, but I'm not able to break down the charges on this call. Could you please check the loan statement or contact our office for the exact details?
+[03]  58.70- 68.28s caller
+       text: I see, but I want to understand this before I pay. Can you at least confirm my EMI is four thousand five hundred and not four thousand?
+       agent heard: i see but i want to understand this before i pay can you at least confirm my emi is four thousand five hundred and not four thousand
+[04]  76.54- 78.13s agent 
+       text: i am sorry but i can
+       agent said (glass box): I'm sorry, but I can only confirm the overdue amount as Rs 4,500 in our records, and I'm not able to verify the EMI breakdown here. Would you like to pay this amount, or shall I have our office clarify the details first?
+[05]  77.70- 79.36s caller
+       text: Hello, are you still there?
+       agent heard: hello are you still there
+[06]  84.28- 85.55s agent 
+       text: yes i am here
+       agent said (glass box): Yes, I'm here. Our records show the overdue amount as Rs 4,500, but for a detailed breakdown I'd request you to check with our office.
+[07]  87.07- 95.27s agent 
+       text: our records show the overdue amount as four thousand five hundred rupees but for a detailed breakdown i'd request you to check with our office

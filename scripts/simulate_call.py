@@ -113,6 +113,7 @@ async def main() -> None:
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--bug", default="", help="MOCK_BUGS value for the mock agent")
     ap.add_argument("--agent-url", default=None)
+    ap.add_argument("--adapter", default="audio_v1", choices=["audio_v1", "pipecat"])
     ap.add_argument("--max-seconds", type=int, default=150)
     args = ap.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
@@ -130,7 +131,9 @@ async def main() -> None:
     stt, tts = get_stt_provider(), get_tts_provider()
     spec = CallSpec(
         call_id=uuid.uuid4(),
-        agent=AgentTarget(agent_id=uuid.uuid4(), adapter="audio_v1", endpoint_url=url, glass_box=True),
+        agent=AgentTarget(
+            agent_id=uuid.uuid4(), adapter=args.adapter, endpoint_url=url, glass_box=True
+        ),
         persona=persona,
         scenario=scenario,
         profile=get_profile(args.profile),

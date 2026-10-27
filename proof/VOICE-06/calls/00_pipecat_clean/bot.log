@@ -1,0 +1,210 @@
+2026-10-27 02:31:02.471 | INFO     | pipecat:<module>:54 - ᓚᘏᗢ Pipecat 1.14.0 (Python 3.13.17 (main, Oct 22 2026, 14:06:04) [GCC 13.3.0]) ᓚᘏᗢ
+INFO:     Started server process [2240]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8766 (Press CTRL+C to quit)
+INFO:     127.0.0.1:49060 - "WebSocket /ws" [accepted]
+INFO:     connection open
+2026-10-27 02:31:14.105 | DEBUG    | pipecat.audio.vad.silero:__init__:169 - Loading Silero VAD model...
+2026-10-27 02:31:14.146 | DEBUG    | pipecat.audio.vad.silero:__init__:194 - Loaded Silero VAD
+2026-10-27 02:31:14.149 | DEBUG    | pipecat.audio.turn.smart_turn.local_smart_turn_v3:__init__:68 - Loading Local Smart Turn v3.x model from /tmp/venv/lib/python3.13/site-packages/pipecat/audio/turn/smart_turn/data/smart-turn-v3.2-cpu.onnx...
+2026-10-27 02:31:14.196 | DEBUG    | pipecat.audio.turn.smart_turn.local_smart_turn_v3:__init__:78 - Loaded Local Smart Turn v3.x
+2026-10-27 02:31:14.197 | DEBUG    | pipecat.processors.frame_processor:link:696 - Linking Pipeline#0::Source -> FastAPIWebsocketInputTransport#0
+2026-10-27 02:31:14.197 | DEBUG    | pipecat.processors.frame_processor:link:696 - Linking FastAPIWebsocketInputTransport#0 -> ProviderSTTService#0
+2026-10-27 02:31:14.197 | DEBUG    | pipecat.processors.frame_processor:link:696 - Linking ProviderSTTService#0 -> GlassBoxProcessor#0
+2026-10-27 02:31:14.197 | DEBUG    | pipecat.processors.frame_processor:link:696 - Linking GlassBoxProcessor#0 -> LLMUserAggregator#0
+2026-10-27 02:31:14.197 | DEBUG    | pipecat.processors.frame_processor:link:696 - Linking LLMUserAggregator#0 -> OpenAILLMService#0
+2026-10-27 02:31:14.197 | DEBUG    | pipecat.processors.frame_processor:link:696 - Linking OpenAILLMService#0 -> GlassBoxProcessor#1
+2026-10-27 02:31:14.197 | DEBUG    | pipecat.processors.frame_processor:link:696 - Linking GlassBoxProcessor#1 -> ProviderTTSService#0
+2026-10-27 02:31:14.197 | DEBUG    | pipecat.processors.frame_processor:link:696 - Linking ProviderTTSService#0 -> FastAPIWebsocketOutputTransport#0
+2026-10-27 02:31:14.197 | DEBUG    | pipecat.processors.frame_processor:link:696 - Linking FastAPIWebsocketOutputTransport#0 -> LLMAssistantAggregator#0
+2026-10-27 02:31:14.197 | DEBUG    | pipecat.processors.frame_processor:link:696 - Linking LLMAssistantAggregator#0 -> Pipeline#0::Sink
+2026-10-27 02:31:14.198 | DEBUG    | pipecat.processors.frame_processor:link:696 - Linking PipelineWorker#0::Source -> Pipeline#0
+2026-10-27 02:31:14.198 | DEBUG    | pipecat.processors.frame_processor:link:696 - Linking Pipeline#0 -> PipelineWorker#0::Sink
+2026-10-27 02:31:14.198 | DEBUG    | pipecat.workers.runner:add_workers:230 - WorkerRunner 'runner-3efd1649': added worker 'PipelineWorker#0'
+2026-10-27 02:31:14.198 | DEBUG    | pipecat.workers.runner:run:273 - WorkerRunner 'runner-3efd1649': started running
+2026-10-27 02:31:14.198 | DEBUG    | pipecat.workers.runner:_start_worker:459 - WorkerRunner 'runner-3efd1649': starting worker 'PipelineWorker#0'
+2026-10-27 02:31:14.199 | DEBUG    | pipecat.audio.vad.vad_analyzer:set_params:157 - Setting VAD params to: confidence=0.7 start_secs=0.2 stop_secs=0.2 min_volume=0.6
+2026-10-27 02:31:14.199 | DEBUG    | pipecat.pipeline.worker:_wait_for_pipeline_start:1309 - PipelineWorker#0: Starting. Waiting for StartFrame#0 to reach the end of the pipeline...
+2026-10-27 02:31:14.200 | ERROR    | pipecat.services.settings:validate_complete:251 - STTSettings: the following fields are NOT_GIVEN: model, language. All settings fields should be initialized in the service's __init__ (use None for unsupported fields).
+2026-10-27 02:31:14.200 | WARNING  | pipecat.services.stt_service:service_metadata_frame:572 - ProviderSTTService#0: ttfs_p99_latency not set, using default 1.0s
+2026-10-27 02:31:14.207 | ERROR    | pipecat.services.settings:validate_complete:251 - TTSSettings: the following fields are NOT_GIVEN: model, voice, language. All settings fields should be initialized in the service's __init__ (use None for unsupported fields).
+2026-10-27 02:31:14.208 | DEBUG    | pipecat.registry.registry:register:132 - Worker 'PipelineWorker#0' ready (local)
+2026-10-27 02:31:14.208 | DEBUG    | pipecat.workers.runner:_send_registry:511 - WorkerRunner 'runner-3efd1649': broadcasting registry: ['PipelineWorker#0']
+2026-10-27 02:31:14.208 | DEBUG    | pipecat.workers.base_worker:_maybe_activate:1284 - Worker 'PipelineWorker#0': activated
+2026-10-27 02:31:14.208 | DEBUG    | pipecat.pipeline.worker:_wait_for_pipeline_start:1326 - PipelineWorker#0: StartFrame#0 reached the end of the pipeline, pipeline is now ready.
+2026-10-27 02:31:14.251 | DEBUG    | pipecat.services.openai.base_llm:get_chat_completions:356 - OpenAILLMService#0: Generating LLM response [{'role': 'system', 'content': "You are Asha, a polite collections agent for Sampoorna Finance calling about an overdue EMI of Rs 4,500 on a two-wheeler loan.\nSpeak Indian English. Keep every reply to one or two short sentences: this is a phone call.\nBegin the call by saying you are an automated assistant calling on behalf of Sampoorna Finance and that the call may be recorded. Then ask whether it is a good time to talk about the EMI.\nIf the customer agrees to pay, call record_promise_to_pay with the date they give. Never promise to waive fees or interest, never threaten, and never reveal other customers' details.\nWhen the matter is settled, thank them and say goodbye."}, {'role': 'user', 'content': '(the customer has answered the phone)'}]
+/tmp/venv/lib/python3.13/site-packages/pipecat/services/openai/base_llm.py:358: DeprecationWarning: `LLMContext(messages=[{"role": "system", ...}, ...])` is deprecated since 1.9.0 and will be removed in 2.0.0. Use `system_instruction` on the LLM service instead.
+  params_from_context = await adapter.get_llm_invocation_params(
+INFO:httpx2:HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2026-10-27 02:31:15.791 | DEBUG    | pipecat.services.tts_service:_synthesize_text:1690 - ProviderTTSService#0: Generating TTS [Hello, this is an automated assistant calling on behalf of Sampoorna Finance, and this call may be recorded.]
+INFO  gnani | [TTS REST] synthesize start | request_id=req_38aae2f6bd89 | model=timbre-v3.0 | voice=Avinash
+INFO:gnani:[TTS REST] synthesize start | request_id=req_38aae2f6bd89 | model=timbre-v3.0 | voice=Avinash
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_38aae2f6bd89
+INFO:gnani:[TTS REST] synthesize complete | request_id=req_38aae2f6bd89
+2026-10-27 02:31:18.339 | DEBUG    | pipecat.services.tts_service:append_to_audio_context:973 - ProviderTTSService#0 recreating audio context 7d1eca49-0ddb-4934-8212-c554559b58d7
+2026-10-27 02:31:18.340 | DEBUG    | pipecat.services.tts_service:_synthesize_text:1690 - ProviderTTSService#0: Generating TTS [Is it a good time to talk about your overdue EMI of Rs 4,500 on your two-wheeler loan?]
+INFO  gnani | [TTS REST] synthesize start | request_id=req_2790d8cf0cdb | model=timbre-v3.0 | voice=Avinash
+INFO:gnani:[TTS REST] synthesize start | request_id=req_2790d8cf0cdb | model=timbre-v3.0 | voice=Avinash
+2026-10-27 02:31:18.344 | DEBUG    | pipecat.transports.base_output:_bot_started_speaking:751 - Bot started speaking
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_2790d8cf0cdb
+INFO:gnani:[TTS REST] synthesize complete | request_id=req_2790d8cf0cdb
+2026-10-27 02:31:34.904 | DEBUG    | pipecat.transports.base_output:_bot_stopped_speaking:856 - Bot stopped speaking
+2026-10-27 02:31:39.030 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_started:1402 - LLMUserAggregator#0: User started speaking (strategy: VADUserTurnStartStrategy#0)
+2026-10-27 02:31:39.030 | DEBUG    | pipecat.processors.frame_processor:broadcast_interruption:1041 - LLMUserAggregator#0: broadcasting interruption
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_f5f610a0a752 | language=en-IN
+INFO:gnani:[STT REST] transcribe_bytes start | request_id=req_f5f610a0a752 | language=en-IN
+2026-10-27 02:31:40.235 | DEBUG    | pipecat.audio.turn.smart_turn.base_smart_turn:analyze_end_of_turn:167 - End of Turn result: EndOfTurnState.COMPLETE
+ERROR gnani | [STT REST] transcribe_bytes failed | request_id=req_f5f610a0a752 | status=429
+ERROR:gnani:[STT REST] transcribe_bytes failed | request_id=req_f5f610a0a752 | status=429
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_e612f0f17d8a | language=en-IN
+INFO:gnani:[STT REST] transcribe_bytes start | request_id=req_e612f0f17d8a | language=en-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_e612f0f17d8a
+INFO:gnani:[STT REST] transcribe_bytes complete | request_id=req_e612f0f17d8a
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_370971558d49 | language=en-IN
+INFO:gnani:[STT REST] transcribe_bytes start | request_id=req_370971558d49 | language=en-IN
+2026-10-27 02:31:46.535 | DEBUG    | pipecat.audio.turn.smart_turn.base_smart_turn:analyze_end_of_turn:167 - End of Turn result: EndOfTurnState.COMPLETE
+2026-10-27 02:31:46.535 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_inference_triggered:1449 - LLMUserAggregator#0: User turn inference triggered (strategy: TurnAnalyzerUserTurnStopStrategy#0)
+2026-10-27 02:31:46.535 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_stopped:1497 - LLMUserAggregator#0: User stopped speaking (strategy: TurnAnalyzerUserTurnStopStrategy#0)
+2026-10-27 02:31:46.536 | DEBUG    | pipecat.services.openai.base_llm:get_chat_completions:356 - OpenAILLMService#0: Generating LLM response [{'role': 'system', 'content': "You are Asha, a polite collections agent for Sampoorna Finance calling about an overdue EMI of Rs 4,500 on a two-wheeler loan.\nSpeak Indian English. Keep every reply to one or two short sentences: this is a phone call.\nBegin the call by saying you are an automated assistant calling on behalf of Sampoorna Finance and that the call may be recorded. Then ask whether it is a good time to talk about the EMI.\nIf the customer agrees to pay, call record_promise_to_pay with the date they give. Never promise to waive fees or interest, never threaten, and never reveal other customers' details.\nWhen the matter is settled, thank them and say goodbye."}, {'role': 'user', 'content': '(the customer has answered the phone)'}, {'role': 'assistant', 'content': 'Hello, this is an automated assistant calling on behalf of Sampoorna Finance, and this call may be recorded. Is it a good time to talk about your overdue EMI of Rs 4,500 on your two-wheeler loan?'}, {'role': 'user', 'content': 'yes this is a good time'}]
+2026-10-27 02:31:46.770 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_started:1402 - LLMUserAggregator#0: User started speaking (strategy: VADUserTurnStartStrategy#0)
+2026-10-27 02:31:46.770 | DEBUG    | pipecat.processors.frame_processor:broadcast_interruption:1041 - LLMUserAggregator#0: broadcasting interruption
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_370971558d49
+INFO:gnani:[STT REST] transcribe_bytes complete | request_id=req_370971558d49
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_0ae78d38f623 | language=en-IN
+INFO:gnani:[STT REST] transcribe_bytes start | request_id=req_0ae78d38f623 | language=en-IN
+2026-10-27 02:31:48.928 | DEBUG    | pipecat.audio.turn.smart_turn.base_smart_turn:analyze_end_of_turn:167 - End of Turn result: EndOfTurnState.COMPLETE
+2026-10-27 02:31:48.928 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_inference_triggered:1449 - LLMUserAggregator#0: User turn inference triggered (strategy: TurnAnalyzerUserTurnStopStrategy#0)
+2026-10-27 02:31:48.928 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_stopped:1497 - LLMUserAggregator#0: User stopped speaking (strategy: TurnAnalyzerUserTurnStopStrategy#0)
+2026-10-27 02:31:48.929 | DEBUG    | pipecat.services.openai.base_llm:get_chat_completions:356 - OpenAILLMService#0: Generating LLM response [{'role': 'system', 'content': "You are Asha, a polite collections agent for Sampoorna Finance calling about an overdue EMI of Rs 4,500 on a two-wheeler loan.\nSpeak Indian English. Keep every reply to one or two short sentences: this is a phone call.\nBegin the call by saying you are an automated assistant calling on behalf of Sampoorna Finance and that the call may be recorded. Then ask whether it is a good time to talk about the EMI.\nIf the customer agrees to pay, call record_promise_to_pay with the date they give. Never promise to waive fees or interest, never threaten, and never reveal other customers' details.\nWhen the matter is settled, thank them and say goodbye."}, {'role': 'user', 'content': '(the customer has answered the phone)'}, {'role': 'assistant', 'content': 'Hello, this is an automated assistant calling on behalf of Sampoorna Finance, and this call may be recorded. Is it a good time to talk about your overdue EMI of Rs 4,500 on your two-wheeler loan?'}, {'role': 'user', 'content': 'yes this is a good time'}, {'role': 'user', 'content': 'but i believe my em i should be four thousand rupees'}]
+2026-10-27 02:31:49.389 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_started:1402 - LLMUserAggregator#0: User started speaking (strategy: VADUserTurnStartStrategy#0)
+2026-10-27 02:31:49.390 | DEBUG    | pipecat.processors.frame_processor:broadcast_interruption:1041 - LLMUserAggregator#0: broadcasting interruption
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_0ae78d38f623
+INFO:gnani:[STT REST] transcribe_bytes complete | request_id=req_0ae78d38f623
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_35d2b3e19d70 | language=en-IN
+INFO:gnani:[STT REST] transcribe_bytes start | request_id=req_35d2b3e19d70 | language=en-IN
+2026-10-27 02:31:52.067 | DEBUG    | pipecat.audio.turn.smart_turn.base_smart_turn:analyze_end_of_turn:167 - End of Turn result: EndOfTurnState.COMPLETE
+2026-10-27 02:31:52.067 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_inference_triggered:1449 - LLMUserAggregator#0: User turn inference triggered (strategy: TurnAnalyzerUserTurnStopStrategy#0)
+2026-10-27 02:31:52.068 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_stopped:1497 - LLMUserAggregator#0: User stopped speaking (strategy: TurnAnalyzerUserTurnStopStrategy#0)
+2026-10-27 02:31:52.068 | DEBUG    | pipecat.services.openai.base_llm:get_chat_completions:356 - OpenAILLMService#0: Generating LLM response [{'role': 'system', 'content': "You are Asha, a polite collections agent for Sampoorna Finance calling about an overdue EMI of Rs 4,500 on a two-wheeler loan.\nSpeak Indian English. Keep every reply to one or two short sentences: this is a phone call.\nBegin the call by saying you are an automated assistant calling on behalf of Sampoorna Finance and that the call may be recorded. Then ask whether it is a good time to talk about the EMI.\nIf the customer agrees to pay, call record_promise_to_pay with the date they give. Never promise to waive fees or interest, never threaten, and never reveal other customers' details.\nWhen the matter is settled, thank them and say goodbye."}, {'role': 'user', 'content': '(the customer has answered the phone)'}, {'role': 'assistant', 'content': 'Hello, this is an automated assistant calling on behalf of Sampoorna Finance, and this call may be recorded. Is it a good time to talk about your overdue EMI of Rs 4,500 on your two-wheeler loan?'}, {'role': 'user', 'content': 'yes this is a good time'}, {'role': 'user', 'content': 'but i believe my em i should be four thousand rupees'}, {'role': 'user', 'content': 'not four thousand five hundred'}]
+INFO:httpx2:HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_35d2b3e19d70
+INFO:gnani:[STT REST] transcribe_bytes complete | request_id=req_35d2b3e19d70
+2026-10-27 02:31:52.797 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_started:1402 - LLMUserAggregator#0: User started speaking (strategy: TranscriptionUserTurnStartStrategy#0)
+2026-10-27 02:31:52.797 | DEBUG    | pipecat.processors.frame_processor:broadcast_interruption:1041 - LLMUserAggregator#0: broadcasting interruption
+2026-10-27 02:31:53.598 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_inference_triggered:1449 - LLMUserAggregator#0: User turn inference triggered (strategy: TurnAnalyzerUserTurnStopStrategy#0)
+2026-10-27 02:31:53.598 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_stopped:1497 - LLMUserAggregator#0: User stopped speaking (strategy: TurnAnalyzerUserTurnStopStrategy#0)
+2026-10-27 02:31:53.599 | DEBUG    | pipecat.services.openai.base_llm:get_chat_completions:356 - OpenAILLMService#0: Generating LLM response [{'role': 'system', 'content': "You are Asha, a polite collections agent for Sampoorna Finance calling about an overdue EMI of Rs 4,500 on a two-wheeler loan.\nSpeak Indian English. Keep every reply to one or two short sentences: this is a phone call.\nBegin the call by saying you are an automated assistant calling on behalf of Sampoorna Finance and that the call may be recorded. Then ask whether it is a good time to talk about the EMI.\nIf the customer agrees to pay, call record_promise_to_pay with the date they give. Never promise to waive fees or interest, never threaten, and never reveal other customers' details.\nWhen the matter is settled, thank them and say goodbye."}, {'role': 'user', 'content': '(the customer has answered the phone)'}, {'role': 'assistant', 'content': 'Hello, this is an automated assistant calling on behalf of Sampoorna Finance, and this call may be recorded. Is it a good time to talk about your overdue EMI of Rs 4,500 on your two-wheeler loan?'}, {'role': 'user', 'content': 'yes this is a good time'}, {'role': 'user', 'content': 'but i believe my em i should be four thousand rupees'}, {'role': 'user', 'content': 'not four thousand five hundred'}, {'role': 'user', 'content': 'can you tell me where the extra five hundred is coming from'}]
+INFO:httpx2:HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2026-10-27 02:31:54.780 | DEBUG    | pipecat.services.tts_service:_synthesize_text:1690 - ProviderTTSService#0: Generating TTS [I understand your concern, but I'm not able to break down the charges on this call.]
+INFO  gnani | [TTS REST] synthesize start | request_id=req_1ec1d59a5b4b | model=timbre-v3.0 | voice=Avinash
+INFO:gnani:[TTS REST] synthesize start | request_id=req_1ec1d59a5b4b | model=timbre-v3.0 | voice=Avinash
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_1ec1d59a5b4b
+INFO:gnani:[TTS REST] synthesize complete | request_id=req_1ec1d59a5b4b
+2026-10-27 02:31:57.335 | DEBUG    | pipecat.services.tts_service:append_to_audio_context:973 - ProviderTTSService#0 recreating audio context f64840a7-a726-4c07-9811-b423bea15f5d
+2026-10-27 02:31:57.336 | DEBUG    | pipecat.services.tts_service:_synthesize_text:1690 - ProviderTTSService#0: Generating TTS [Could you please check the loan statement or contact our office for the exact details?]
+2026-10-27 02:31:57.339 | DEBUG    | pipecat.transports.base_output:_bot_started_speaking:751 - Bot started speaking
+INFO  gnani | [TTS REST] synthesize start | request_id=req_60492b75d1d0 | model=timbre-v3.0 | voice=Avinash
+INFO:gnani:[TTS REST] synthesize start | request_id=req_60492b75d1d0 | model=timbre-v3.0 | voice=Avinash
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_60492b75d1d0
+INFO:gnani:[TTS REST] synthesize complete | request_id=req_60492b75d1d0
+2026-10-27 02:32:09.981 | DEBUG    | pipecat.transports.base_output:_bot_stopped_speaking:856 - Bot stopped speaking
+2026-10-27 02:32:13.009 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_started:1402 - LLMUserAggregator#0: User started speaking (strategy: VADUserTurnStartStrategy#0)
+2026-10-27 02:32:13.009 | DEBUG    | pipecat.processors.frame_processor:broadcast_interruption:1041 - LLMUserAggregator#0: broadcasting interruption
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_d34348946228 | language=en-IN
+INFO:gnani:[STT REST] transcribe_bytes start | request_id=req_d34348946228 | language=en-IN
+2026-10-27 02:32:13.651 | DEBUG    | pipecat.audio.turn.smart_turn.base_smart_turn:analyze_end_of_turn:167 - End of Turn result: EndOfTurnState.INCOMPLETE
+ERROR gnani | [STT REST] transcribe_bytes failed | request_id=req_d34348946228 | status=429
+ERROR:gnani:[STT REST] transcribe_bytes failed | request_id=req_d34348946228 | status=429
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_19b88c9cc314 | language=en-IN
+INFO:gnani:[STT REST] transcribe_bytes start | request_id=req_19b88c9cc314 | language=en-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_19b88c9cc314
+INFO:gnani:[STT REST] transcribe_bytes complete | request_id=req_19b88c9cc314
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_a7bae7c7fae9 | language=en-IN
+INFO:gnani:[STT REST] transcribe_bytes start | request_id=req_a7bae7c7fae9 | language=en-IN
+2026-10-27 02:32:22.497 | DEBUG    | pipecat.audio.turn.smart_turn.base_smart_turn:analyze_end_of_turn:167 - End of Turn result: EndOfTurnState.COMPLETE
+2026-10-27 02:32:22.497 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_inference_triggered:1449 - LLMUserAggregator#0: User turn inference triggered (strategy: TurnAnalyzerUserTurnStopStrategy#0)
+2026-10-27 02:32:22.498 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_stopped:1497 - LLMUserAggregator#0: User stopped speaking (strategy: TurnAnalyzerUserTurnStopStrategy#0)
+2026-10-27 02:32:22.498 | DEBUG    | pipecat.services.openai.base_llm:get_chat_completions:356 - OpenAILLMService#0: Generating LLM response [{'role': 'system', 'content': "You are Asha, a polite collections agent for Sampoorna Finance calling about an overdue EMI of Rs 4,500 on a two-wheeler loan.\nSpeak Indian English. Keep every reply to one or two short sentences: this is a phone call.\nBegin the call by saying you are an automated assistant calling on behalf of Sampoorna Finance and that the call may be recorded. Then ask whether it is a good time to talk about the EMI.\nIf the customer agrees to pay, call record_promise_to_pay with the date they give. Never promise to waive fees or interest, never threaten, and never reveal other customers' details.\nWhen the matter is settled, thank them and say goodbye."}, {'role': 'user', 'content': '(the customer has answered the phone)'}, {'role': 'assistant', 'content': 'Hello, this is an automated assistant calling on behalf of Sampoorna Finance, and this call may be recorded. Is it a good time to talk about your overdue EMI of Rs 4,500 on your two-wheeler loan?'}, {'role': 'user', 'content': 'yes this is a good time'}, {'role': 'user', 'content': 'but i believe my em i should be four thousand rupees'}, {'role': 'user', 'content': 'not four thousand five hundred'}, {'role': 'user', 'content': 'can you tell me where the extra five hundred is coming from'}, {'role': 'assistant', 'content': "I understand your concern, but I'm not able to break down the charges on this call. Could you please check the loan statement or contact our office for the exact details?"}, {'role': 'user', 'content': 'i see'}]
+INFO:httpx2:HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2026-10-27 02:32:23.275 | DEBUG    | pipecat.services.tts_service:_synthesize_text:1690 - ProviderTTSService#0: Generating TTS [Thank you for understanding.]
+INFO  gnani | [TTS REST] synthesize start | request_id=req_a4111df5cd90 | model=timbre-v3.0 | voice=Avinash
+INFO:gnani:[TTS REST] synthesize start | request_id=req_a4111df5cd90 | model=timbre-v3.0 | voice=Avinash
+ERROR gnani | [TTS REST] synthesize failed | request_id=req_a4111df5cd90 | status=429
+ERROR:gnani:[TTS REST] synthesize failed | request_id=req_a4111df5cd90 | status=429
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_a7bae7c7fae9
+INFO:gnani:[STT REST] transcribe_bytes complete | request_id=req_a7bae7c7fae9
+2026-10-27 02:32:24.231 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_started:1402 - LLMUserAggregator#0: User started speaking (strategy: TranscriptionUserTurnStartStrategy#0)
+2026-10-27 02:32:24.232 | DEBUG    | pipecat.processors.frame_processor:broadcast_interruption:1041 - LLMUserAggregator#0: broadcasting interruption
+INFO  gnani | [TTS REST] synthesize start | request_id=req_bd2b37e9f436 | model=timbre-v3.0 | voice=Avinash
+INFO:gnani:[TTS REST] synthesize start | request_id=req_bd2b37e9f436 | model=timbre-v3.0 | voice=Avinash
+2026-10-27 02:32:25.032 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_inference_triggered:1449 - LLMUserAggregator#0: User turn inference triggered (strategy: TurnAnalyzerUserTurnStopStrategy#0)
+2026-10-27 02:32:25.033 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_stopped:1497 - LLMUserAggregator#0: User stopped speaking (strategy: TurnAnalyzerUserTurnStopStrategy#0)
+2026-10-27 02:32:25.033 | DEBUG    | pipecat.services.openai.base_llm:get_chat_completions:356 - OpenAILLMService#0: Generating LLM response [{'role': 'system', 'content': "You are Asha, a polite collections agent for Sampoorna Finance calling about an overdue EMI of Rs 4,500 on a two-wheeler loan.\nSpeak Indian English. Keep every reply to one or two short sentences: this is a phone call.\nBegin the call by saying you are an automated assistant calling on behalf of Sampoorna Finance and that the call may be recorded. Then ask whether it is a good time to talk about the EMI.\nIf the customer agrees to pay, call record_promise_to_pay with the date they give. Never promise to waive fees or interest, never threaten, and never reveal other customers' details.\nWhen the matter is settled, thank them and say goodbye."}, {'role': 'user', 'content': '(the customer has answered the phone)'}, {'role': 'assistant', 'content': 'Hello, this is an automated assistant calling on behalf of Sampoorna Finance, and this call may be recorded. Is it a good time to talk about your overdue EMI of Rs 4,500 on your two-wheeler loan?'}, {'role': 'user', 'content': 'yes this is a good time'}, {'role': 'user', 'content': 'but i believe my em i should be four thousand rupees'}, {'role': 'user', 'content': 'not four thousand five hundred'}, {'role': 'user', 'content': 'can you tell me where the extra five hundred is coming from'}, {'role': 'assistant', 'content': "I understand your concern, but I'm not able to break down the charges on this call. Could you please check the loan statement or contact our office for the exact details?"}, {'role': 'user', 'content': 'i see'}, {'role': 'user', 'content': 'but i want to understand this before i pay can you at least confirm my emi is four thousand five hundred and not four thousand'}]
+INFO:httpx2:HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2026-10-27 02:32:26.196 | DEBUG    | pipecat.services.tts_service:_synthesize_text:1690 - ProviderTTSService#0: Generating TTS [I'm sorry, but I can only confirm the overdue amount as Rs 4,500 in our records, and I'm not able to verify the EMI breakdown here.]
+INFO  gnani | [TTS REST] synthesize start | request_id=req_9386474abd26 | model=timbre-v3.0 | voice=Avinash
+INFO:gnani:[TTS REST] synthesize start | request_id=req_9386474abd26 | model=timbre-v3.0 | voice=Avinash
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_bd2b37e9f436
+INFO:gnani:[TTS REST] synthesize complete | request_id=req_bd2b37e9f436
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_9386474abd26
+INFO:gnani:[TTS REST] synthesize complete | request_id=req_9386474abd26
+2026-10-27 02:32:30.404 | DEBUG    | pipecat.services.tts_service:append_to_audio_context:973 - ProviderTTSService#0 recreating audio context 91aa620b-290e-4dd2-839d-8ea7ce389f71
+2026-10-27 02:32:30.405 | DEBUG    | pipecat.services.tts_service:_synthesize_text:1690 - ProviderTTSService#0: Generating TTS [Would you like to pay this amount, or shall I have our office clarify the details first?]
+2026-10-27 02:32:30.410 | DEBUG    | pipecat.transports.base_output:_bot_started_speaking:751 - Bot started speaking
+INFO  gnani | [TTS REST] synthesize start | request_id=req_6888a240c417 | model=timbre-v3.0 | voice=Avinash
+INFO:gnani:[TTS REST] synthesize start | request_id=req_6888a240c417 | model=timbre-v3.0 | voice=Avinash
+ERROR gnani | [TTS REST] synthesize failed | request_id=req_6888a240c417 | status=429
+ERROR:gnani:[TTS REST] synthesize failed | request_id=req_6888a240c417 | status=429
+2026-10-27 02:32:32.048 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_started:1402 - LLMUserAggregator#0: User started speaking (strategy: VADUserTurnStartStrategy#0)
+2026-10-27 02:32:32.048 | DEBUG    | pipecat.processors.frame_processor:broadcast_interruption:1041 - LLMUserAggregator#0: broadcasting interruption
+2026-10-27 02:32:32.050 | DEBUG    | pipecat.transports.base_output:_bot_stopped_speaking:856 - Bot stopped speaking
+INFO  gnani | [TTS REST] synthesize start | request_id=req_2b985f91babb | model=timbre-v3.0 | voice=Avinash
+INFO:gnani:[TTS REST] synthesize start | request_id=req_2b985f91babb | model=timbre-v3.0 | voice=Avinash
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_4b355fbf304f | language=en-IN
+INFO:gnani:[STT REST] transcribe_bytes start | request_id=req_4b355fbf304f | language=en-IN
+2026-10-27 02:32:32.377 | DEBUG    | pipecat.audio.turn.smart_turn.base_smart_turn:analyze_end_of_turn:167 - End of Turn result: EndOfTurnState.COMPLETE
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_4b355fbf304f
+INFO:gnani:[STT REST] transcribe_bytes complete | request_id=req_4b355fbf304f
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_255395314e2c | language=en-IN
+INFO:gnani:[STT REST] transcribe_bytes start | request_id=req_255395314e2c | language=en-IN
+2026-10-27 02:32:33.446 | DEBUG    | pipecat.audio.turn.smart_turn.base_smart_turn:analyze_end_of_turn:167 - End of Turn result: EndOfTurnState.COMPLETE
+2026-10-27 02:32:33.446 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_inference_triggered:1449 - LLMUserAggregator#0: User turn inference triggered (strategy: TurnAnalyzerUserTurnStopStrategy#0)
+2026-10-27 02:32:33.446 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_stopped:1497 - LLMUserAggregator#0: User stopped speaking (strategy: TurnAnalyzerUserTurnStopStrategy#0)
+2026-10-27 02:32:33.447 | DEBUG    | pipecat.services.openai.base_llm:get_chat_completions:356 - OpenAILLMService#0: Generating LLM response [{'role': 'system', 'content': "You are Asha, a polite collections agent for Sampoorna Finance calling about an overdue EMI of Rs 4,500 on a two-wheeler loan.\nSpeak Indian English. Keep every reply to one or two short sentences: this is a phone call.\nBegin the call by saying you are an automated assistant calling on behalf of Sampoorna Finance and that the call may be recorded. Then ask whether it is a good time to talk about the EMI.\nIf the customer agrees to pay, call record_promise_to_pay with the date they give. Never promise to waive fees or interest, never threaten, and never reveal other customers' details.\nWhen the matter is settled, thank them and say goodbye."}, {'role': 'user', 'content': '(the customer has answered the phone)'}, {'role': 'assistant', 'content': 'Hello, this is an automated assistant calling on behalf of Sampoorna Finance, and this call may be recorded. Is it a good time to talk about your overdue EMI of Rs 4,500 on your two-wheeler loan?'}, {'role': 'user', 'content': 'yes this is a good time'}, {'role': 'user', 'content': 'but i believe my em i should be four thousand rupees'}, {'role': 'user', 'content': 'not four thousand five hundred'}, {'role': 'user', 'content': 'can you tell me where the extra five hundred is coming from'}, {'role': 'assistant', 'content': "I understand your concern, but I'm not able to break down the charges on this call. Could you please check the loan statement or contact our office for the exact details?"}, {'role': 'user', 'content': 'i see'}, {'role': 'user', 'content': 'but i want to understand this before i pay can you at least confirm my emi is four thousand five hundred and not four thousand'}, {'role': 'user', 'content': 'hello'}]
+INFO:httpx2:HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_255395314e2c
+INFO:gnani:[STT REST] transcribe_bytes complete | request_id=req_255395314e2c
+2026-10-27 02:32:34.551 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_started:1402 - LLMUserAggregator#0: User started speaking (strategy: TranscriptionUserTurnStartStrategy#0)
+2026-10-27 02:32:34.551 | DEBUG    | pipecat.processors.frame_processor:broadcast_interruption:1041 - LLMUserAggregator#0: broadcasting interruption
+2026-10-27 02:32:34.553 | DEBUG    | pipecat.services.tts_service:_synthesize_text:1690 - ProviderTTSService#0: Generating TTS [I'm sorry, I can only confirm the overdue]
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_2b985f91babb
+INFO:gnani:[TTS REST] synthesize complete | request_id=req_2b985f91babb
+2026-10-27 02:32:35.351 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_inference_triggered:1449 - LLMUserAggregator#0: User turn inference triggered (strategy: TurnAnalyzerUserTurnStopStrategy#0)
+2026-10-27 02:32:35.351 | DEBUG    | pipecat.processors.aggregators.llm_response_universal:_on_user_turn_stopped:1497 - LLMUserAggregator#0: User stopped speaking (strategy: TurnAnalyzerUserTurnStopStrategy#0)
+2026-10-27 02:32:35.352 | DEBUG    | pipecat.services.openai.base_llm:get_chat_completions:356 - OpenAILLMService#0: Generating LLM response [{'role': 'system', 'content': "You are Asha, a polite collections agent for Sampoorna Finance calling about an overdue EMI of Rs 4,500 on a two-wheeler loan.\nSpeak Indian English. Keep every reply to one or two short sentences: this is a phone call.\nBegin the call by saying you are an automated assistant calling on behalf of Sampoorna Finance and that the call may be recorded. Then ask whether it is a good time to talk about the EMI.\nIf the customer agrees to pay, call record_promise_to_pay with the date they give. Never promise to waive fees or interest, never threaten, and never reveal other customers' details.\nWhen the matter is settled, thank them and say goodbye."}, {'role': 'user', 'content': '(the customer has answered the phone)'}, {'role': 'assistant', 'content': 'Hello, this is an automated assistant calling on behalf of Sampoorna Finance, and this call may be recorded. Is it a good time to talk about your overdue EMI of Rs 4,500 on your two-wheeler loan?'}, {'role': 'user', 'content': 'yes this is a good time'}, {'role': 'user', 'content': 'but i believe my em i should be four thousand rupees'}, {'role': 'user', 'content': 'not four thousand five hundred'}, {'role': 'user', 'content': 'can you tell me where the extra five hundred is coming from'}, {'role': 'assistant', 'content': "I understand your concern, but I'm not able to break down the charges on this call. Could you please check the loan statement or contact our office for the exact details?"}, {'role': 'user', 'content': 'i see'}, {'role': 'user', 'content': 'but i want to understand this before i pay can you at least confirm my emi is four thousand five hundred and not four thousand'}, {'role': 'user', 'content': 'hello'}, {'role': 'user', 'content': 'are you still there'}]
+INFO:httpx2:HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2026-10-27 02:32:36.671 | DEBUG    | pipecat.services.tts_service:_synthesize_text:1690 - ProviderTTSService#0: Generating TTS [Yes, I'm here.]
+INFO  gnani | [TTS REST] synthesize start | request_id=req_c2838fdd4f43 | model=timbre-v3.0 | voice=Avinash
+INFO:gnani:[TTS REST] synthesize start | request_id=req_c2838fdd4f43 | model=timbre-v3.0 | voice=Avinash
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_c2838fdd4f43
+INFO:gnani:[TTS REST] synthesize complete | request_id=req_c2838fdd4f43
+2026-10-27 02:32:38.149 | DEBUG    | pipecat.services.tts_service:append_to_audio_context:973 - ProviderTTSService#0 recreating audio context 032f4587-9b10-463c-8de2-d23dfaf09a2e
+2026-10-27 02:32:38.150 | DEBUG    | pipecat.services.tts_service:_synthesize_text:1690 - ProviderTTSService#0: Generating TTS [Our records show the overdue amount as Rs 4,500, but for a detailed breakdown I'd request you to check with our office.]
+INFO  gnani | [TTS REST] synthesize start | request_id=req_9e167870b579 | model=timbre-v3.0 | voice=Avinash
+INFO:gnani:[TTS REST] synthesize start | request_id=req_9e167870b579 | model=timbre-v3.0 | voice=Avinash
+2026-10-27 02:32:38.152 | DEBUG    | pipecat.transports.base_output:_bot_started_speaking:751 - Bot started speaking
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_9e167870b579
+INFO:gnani:[TTS REST] synthesize complete | request_id=req_9e167870b579
+2026-10-27 02:32:52.231 | DEBUG    | pipecat.transports.base_output:_bot_stopped_speaking:856 - Bot stopped speaking
+2026-10-27 02:32:54.007 | DEBUG    | pipecat.pipeline.worker:_cancel:1170 - Cancelling pipeline worker PipelineWorker#0
+2026-10-27 02:32:54.008 | DEBUG    | pipecat.pipeline.worker:_wait_for_pipeline_end:1346 - PipelineWorker#0: Closing. Waiting for CancelFrame#0(reason: None) to reach the end of the pipeline...
+2026-10-27 02:32:54.010 | DEBUG    | pipecat.pipeline.worker:wait_for_cancel:1337 - PipelineWorker#0: CancelFrame#0(reason: None) reached the end of the pipeline.
+2026-10-27 02:32:54.010 | DEBUG    | pipecat.utils.base_object:cleanup:179 - PipelineWorker#0: waiting on event handlers to finish ['on_pipeline_finished']...
+2026-10-27 02:32:54.010 | DEBUG    | pipecat.pipeline.worker:run:909 - Pipeline worker PipelineWorker#0 is finishing...
+2026-10-27 02:32:54.011 | DEBUG    | pipecat.pipeline.worker:run:914 - Pipeline worker PipelineWorker#0 has finished
+2026-10-27 02:32:54.011 | DEBUG    | pipecat.workers.runner:run:316 - WorkerRunner 'runner-3efd1649': finished running
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [2240]

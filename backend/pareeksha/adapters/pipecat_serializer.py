@@ -117,7 +117,7 @@ class GlassBoxProcessor(FrameProcessor):
     Place one after the STT service and one after the LLM service (before TTS). It turns
     ``TranscriptionFrame`` (user speech),
     the LLM's streamed text (one ``agent`` transcript per response) and ``FunctionCallResultFrame``
-    into ``OutputTransportMessageFrame`` frames that ``PareekshaFrameSerializer`` sends on.
+    into ``OutputTransportMessageUrgentFrame`` frames that ``PareekshaFrameSerializer`` sends on.
     """
 
     def __init__(self, **kwargs: Any) -> None:
@@ -161,4 +161,6 @@ class GlassBoxProcessor(FrameProcessor):
         await self.push_frame(frame, direction)
 
     async def _publish(self, message: dict[str, Any]) -> None:
-        await self.push_frame(OutputTransportMessageFrame(message=message))
+        # Urgent (system) frames skip the TTS queue, so the text reaches the platform when the
+        # LLM finishes rather than after the audio has played.
+        await self.push_frame(OutputTransportMessageUrgentFrame(message=message))
