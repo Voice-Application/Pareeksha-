@@ -1,0 +1,4 @@
+deepseek | llm_caller | tokens | 109827.0 | 121
+deepseek | llm_judge | tokens | 208204.0 | 66
+gnani | stt_rest | audio_seconds | 1102.7 | 177
+gnani | tts | characters | 11407.0 | 231

@@ -1,0 +1,42 @@
+-- run_id 8422cb13-0f26-4afa-98ef-77a7abb5ea70
+select status, count(*) from run_items where run_id='8422cb13-0f26-4afa-98ef-77a7abb5ea70' group by 1 order by 1;
+   status    | count 
+-------------+-------
+ error       |     1
+ evaluated   |    38
+ judge_error |     1
+(3 rows)
+
+select ri.status item_status, c.status call_status, c.end_reason, left(coalesce(c.error,''),120) err, e.status eval_status from run_items ri left join calls c on c.run_item_id=ri.id left join evaluations e on e.call_id=c.id where ri.run_id='8422cb13-0f26-4afa-98ef-77a7abb5ea70' and (ri.status<>'evaluated' or e.status<>'ok' or c.status='error');
+ item_status | call_status |  end_reason  |            err             | eval_status 
+-------------+-------------+--------------+----------------------------+-------------
+ judge_error | completed   | agent_hangup |                            | judge_error
+ error       | error       | infra_error  | caller TTS: TimeoutError:  | 
+(2 rows)
+
+select count(*) calls_total, count(*) filter (where c.status='error') calls_error, count(*) filter (where c.status<>'error') calls_ok from run_items ri join calls c on c.run_item_id=ri.id where ri.run_id='8422cb13-0f26-4afa-98ef-77a7abb5ea70';
+ calls_total | calls_error | calls_ok 
+-------------+-------------+----------
+          40 |           1 |       39
+(1 row)
+
+select count(*) dead_letters from dead_letters;
+ dead_letters 
+--------------
+           80
+(1 row)
+
+select consumer, count(*) from processed_events group by 1 order by 1;
+select count(*) unpublished_outbox from outbox where published_at is null;
+ERROR:  column "consumer" does not exist
+LINE 1: select consumer, count(*) from processed_events group by 1 o...
+               ^
+ERROR:  relation "outbox" does not exist
+LINE 1: select count(*) unpublished_outbox from outbox where publish...
+                                                ^
+select status, active_calls, started_at, finished_at, finished_at-started_at wall from test_runs where id='8422cb13-0f26-4afa-98ef-77a7abb5ea70';
+ status  | active_calls |          started_at           |          finished_at          |      wall       
+---------+--------------+-------------------------------+-------------------------------+-----------------
+ partial |            0 | 2026-10-27 10:57:56.810067+00 | 2026-10-27 11:09:20.270302+00 | 00:11:23.460235
+(1 row)
+
