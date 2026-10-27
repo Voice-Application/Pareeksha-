@@ -1,6 +1,10 @@
-// STUB(FE-05): placeholder body, replaced when FE-05 builds this page
-import { RouteStub } from "@/components/layout/route-stub";
+import { Suspense } from "react";
+import { AuditsList } from "@/components/audits/audits-list";
 
 export default function Page() {
-  return <RouteStub title="Audits" />;
+  return (
+    <Suspense fallback={null}>
+      <AuditsList />
+    </Suspense>
+  );
 }

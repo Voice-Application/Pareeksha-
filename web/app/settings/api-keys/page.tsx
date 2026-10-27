@@ -1,6 +1,5 @@
-// STUB(FE-05): placeholder body, replaced when FE-05 builds this page
-import { RouteStub } from "@/components/layout/route-stub";
+import { ApiKeysPage } from "@/components/ops/api-keys-page";
 
 export default function Page() {
-  return <RouteStub title="API keys" />;
+  return <ApiKeysPage />;
 }

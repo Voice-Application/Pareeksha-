@@ -1,6 +1,10 @@
-// STUB(FE-05): placeholder body, replaced when FE-05 builds this page
-import { RouteStub } from "@/components/layout/route-stub";
+import { Suspense } from "react";
+import { DlqPage } from "@/components/ops/dlq-page";
 
 export default function Page() {
-  return <RouteStub title="DLQ" />;
+  return (
+    <Suspense fallback={null}>
+      <DlqPage />
+    </Suspense>
+  );
 }

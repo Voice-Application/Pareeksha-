@@ -81,7 +81,7 @@ export const callDetail = (over: Record<string, unknown> = {}) => ({
   ...over,
 });
 
-export type OpsState = { dlq: Record<string, unknown>[]; keys: Record<string, unknown>[]; fail: Record<string, number>; created: unknown[]; sse: string };
+export type OpsState = { dlq: Record<string, unknown>[]; keys: Record<string, unknown>[]; fail: Record<string, number>; created: unknown[]; sse: string; /** "METHOD /path" -> JSON answered as 200 (or [status, json]) before the built-in routes. */ extra: Record<string, unknown>; revealed: Record<string, unknown>[] };
 
 export const opsState = (): OpsState => ({
   dlq: [{ id: uuid(960), event_id: uuid(961), original_topic: "pareeksha.call.completed.v1", consumer_group: "evaluator", error: "JudgeSchemaError: invalid JSON from judge", attempts: 3, status: "open", failed_at: ts, envelope: { type: "call.completed", payload: { call_id: CALL_ID } } }],
@@ -89,6 +89,8 @@ export const opsState = (): OpsState => ({
   fail: {},
   created: [],
   sse: "",
+  extra: {},
+  revealed: [],
 });
 
 /** Routes every endpoint the new pages call. `state.fail["GET /path"] = status` forces an error. */
@@ -103,6 +105,7 @@ export async function mockFe(pg: Page, st: OpsState, opts: { runStatus?: string;
     const forced = Object.entries(st.fail).find(([k]) => key.startsWith(k));
     if (forced) return send({ error: { code: forced[1] === 501 ? "not_implemented" : "internal", message: "Forced failure.", details: { owner: "TEST-01" } } }, forced[1]);
     const page = (list: unknown[]) => ({ items: list, next_cursor: null });
+    if (key in st.extra) { const v = st.extra[key]; return Array.isArray(v) && typeof v[0] === "number" && v.length === 2 ? send(v[1], v[0] as number) : send(v); }
 
     if (path === "/agents") return send(page([agent(1)]));
     if (/^\/agents\/[^/]+$/.test(path)) return send(agent(1));
