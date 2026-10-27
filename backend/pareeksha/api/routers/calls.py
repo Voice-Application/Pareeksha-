@@ -10,23 +10,28 @@ from uuid import UUID
 from fastapi import APIRouter, Header, Query, Request, Response
 from sqlalchemy import delete, select
 
-from pareeksha.api.auth import ReadKey, WriteAuditKey, scoped
+from pareeksha.api.auth import ReadKey, WriteAuditKey, WriteKey
+from pareeksha.api.crud import flush, get_or_404
 from pareeksha.api.deps import AUTH_ERRORS, Blobs, Db, Pagination, binary_response, errors
 from pareeksha.api.errors import ApiError
-from pareeksha.api.stubs import not_implemented
-from pareeksha.calls import service
-from pareeksha.calls.audio import audio_response
+from pareeksha.api.outbox import enqueue_event
 from pareeksha.audit.pipeline import primary_language, stt_blob_key
 from pareeksha.audit.turns import LabelledSegment, build_turns, labels_in_order
-from pareeksha.db.models import Calls, Turns
+from pareeksha.calls import service
+from pareeksha.calls.audio import audio_response
+from pareeksha.db.models import Calls, Evaluations, HumanReviews, RubricVersions, RunItems, Turns
 from pareeksha.evaluation.pii import mask_pii
+from pareeksha.evaluation.rubric import DIMENSION_KEYS, RUBRIC_VERSION
+from pareeksha.evaluation.scoring import overall_score
 from pareeksha.events.outbox import enqueue_session
 from pareeksha.events.schemas import CallCompleted, make_envelope
+from pareeksha.regression.promote import promote_call as create_promotion
 from pareeksha.schemas.calls import (
     AudioTrack,
     CallOut,
     CallStatus,
     CallSummaryOut,
+    DimensionReview,
     HumanReviewOut,
     PromoteRequest,
     PromoteResult,
@@ -105,37 +110,123 @@ async def get_call_audio(
 @router.post(
     "/calls/{call_id}/reevaluate",
     status_code=202,
-    dependencies=[scoped("runs:write")],
-    responses=errors(404),
+    responses=errors(404, 409),
     summary="Re-run the judge (optionally with another rubric version)",
 )
-async def reevaluate_call(call_id: UUID, body: ReevaluateRequest | None = None) -> CallRef:
-    # STUB(API-05)
-    not_implemented("API-05")
+async def reevaluate_call(
+    call_id: UUID, key: WriteKey, session: Db, body: ReevaluateRequest | None = None
+) -> CallRef:
+    call = await get_or_404(session, Calls, call_id, key.project_id, "Call")
+    version = body.rubric_version if body else None
+    if version is not None:
+        known = await session.scalar(
+            select(RubricVersions.id).where(RubricVersions.version == version)
+        )
+        if known is None:
+            raise ApiError(
+                404, "not_found", "Rubric version not found", {"rubric_version": version}
+            )
+        if version != RUBRIC_VERSION:
+            raise ApiError(
+                400,
+                "validation_error",
+                f"This build evaluates with {RUBRIC_VERSION} only",
+                {"rubric_version": version, "supported": RUBRIC_VERSION},
+            )
+    if call.status != "completed":
+        raise ApiError(409, "conflict", f"The call is {call.status}; it has no transcript yet")
+    run_id = None
+    if call.run_item_id is not None:
+        run_id = await session.scalar(
+            select(RunItems.run_id).where(RunItems.id == call.run_item_id)
+        )
+    if call.source == "simulation" and (run_id is None or call.run_item_id is None):
+        raise ApiError(409, "conflict", "The simulated call no longer belongs to a run item")
+    enqueue_event(
+        session,
+        make_envelope(
+            CallCompleted(
+                call_id=call.id,
+                source=call.source,
+                agent_id=call.agent_id,
+                run_id=run_id,
+                run_item_id=call.run_item_id,
+                end_reason=call.end_reason,
+            ),
+            producer="api",
+            correlation_id=str(call.id),  # a fresh event id: re-evaluating is a new request
+        ),
+    )
+    return CallRef(call_id=call.id)
 
 
 @router.post(
     "/calls/{call_id}/review",
     status_code=201,
-    dependencies=[scoped("runs:write")],
     responses=errors(404, 409),
     summary="Human review of the call's evaluation",
 )
-async def review_call(call_id: UUID, body: ReviewCreate) -> HumanReviewOut:
-    # STUB(API-05)
-    not_implemented("API-05")
+async def review_call(
+    call_id: UUID, body: ReviewCreate, key: WriteKey, session: Db
+) -> HumanReviewOut:
+    call = await get_or_404(session, Calls, call_id, key.project_id, "Call")
+    unknown = sorted(set(body.dimensions) - set(DIMENSION_KEYS))
+    if unknown:
+        raise ApiError(
+            400,
+            "validation_error",
+            f"Unknown rubric dimensions: {', '.join(unknown)}",
+            {"known": list(DIMENSION_KEYS)},
+        )
+    evaluation = (
+        await session.scalars(
+            select(Evaluations)
+            .where(Evaluations.call_id == call.id, Evaluations.status == "ok")
+            .order_by(Evaluations.created_at.desc())
+            .limit(1)
+        )
+    ).first()
+    if evaluation is None:
+        raise ApiError(409, "conflict", "The call has no completed evaluation to review")
+    scores = {k: v.score for k, v in body.dimensions.items()}
+    review = HumanReviews(
+        evaluation_id=evaluation.id,
+        reviewer=body.reviewer,
+        dimensions={k: {"score": v} for k, v in scores.items()},
+        passed=body.passed,
+        critical_failure=body.critical_failure,
+        notes=body.notes,
+        overall_score=overall_score(scores) if set(scores) == set(DIMENSION_KEYS) else None,
+    )
+    session.add(review)
+    await flush(session, "This reviewer has already reviewed this evaluation", refresh=review)
+    return HumanReviewOut(
+        id=review.id,
+        evaluation_id=review.evaluation_id,
+        reviewer=review.reviewer,
+        passed=review.passed,
+        critical_failure=review.critical_failure,
+        overall_score=None if review.overall_score is None else float(review.overall_score),
+        dimensions={k: DimensionReview(score=v) for k, v in scores.items()},
+        notes=review.notes,
+        created_at=review.created_at,
+    )
 
 
 @router.post(
     "/calls/{call_id}/promote",
     status_code=201,
-    dependencies=[scoped("runs:write")],
     responses=errors(404),
     summary="Promote a failed call to a regression test",
 )
-async def promote_call(call_id: UUID, body: PromoteRequest) -> PromoteResult:
-    # STUB(API-05)
-    not_implemented("API-05")
+async def promote_call(
+    call_id: UUID, body: PromoteRequest, key: WriteKey, session: Db
+) -> PromoteResult:
+    call = await get_or_404(session, Calls, call_id, key.project_id, "Call")
+    promoted = await create_promotion(session, call, body, key.project_id)
+    return PromoteResult(
+        scenario_id=promoted.scenario_id, regression_test_id=promoted.regression_test_id
+    )
 
 
 @router.post(

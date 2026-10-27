@@ -9,12 +9,14 @@ from fastapi import APIRouter, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from pareeksha.api.auth import ReadKey, WriteKey, scoped
+from pareeksha.api.auth import ReadKey, WriteKey
 from pareeksha.api.crud import delete_row, flush, get_or_404, paginate
 from pareeksha.api.deps import AUTH_ERRORS, Db, Pagination, errors
 from pareeksha.api.errors import ApiError
-from pareeksha.api.stubs import not_implemented
-from pareeksha.db.models import Agents, Scenarios
+from pareeksha.api.outbox import enqueue_event
+from pareeksha.db.models import Agents, ScenarioDrafts, Scenarios
+from pareeksha.events.schemas import ScenarioGenerateRequested, make_envelope
+from pareeksha.scenario_gen.generator import CATEGORIES
 from pareeksha.schemas.common import Page
 from pareeksha.schemas.scenarios import (
     DraftAccepted,
@@ -133,21 +135,66 @@ async def delete_scenario(scenario_id: UUID, key: WriteKey, session: Db) -> Resp
 @router.post(
     "/agents/{agent_id}/scenarios:generate",
     status_code=202,
-    dependencies=[scoped("runs:write")],
     responses=errors(404),
     summary="Generate scenario drafts with the LLM (drafts are not saved)",
 )
-async def generate_scenarios(agent_id: UUID, body: ScenarioGenerateRequest) -> DraftAccepted:
-    # STUB(API-05)
-    not_implemented("API-05")
+async def generate_scenarios(
+    agent_id: UUID, body: ScenarioGenerateRequest, key: WriteKey, session: Db
+) -> DraftAccepted:
+    agent = await get_or_404(session, Agents, agent_id, key.project_id, "Agent")
+    unknown = sorted(set(body.mix) - set(CATEGORIES))
+    if unknown or any(n < 0 for n in body.mix.values()):
+        raise ApiError(
+            400,
+            "validation_error",
+            f"mix keys must be among {list(CATEGORIES)} with counts >= 0",
+            {"mix": body.mix},
+        )
+    if body.mix and sum(body.mix.values()) != body.count:
+        raise ApiError(
+            400,
+            "validation_error",
+            "mix must add up to count",
+            {"count": body.count, "mix_total": sum(body.mix.values())},
+        )
+    draft = ScenarioDrafts(agent_id=agent.id, status="pending", request=body.model_dump())
+    session.add(draft)
+    await flush(session, "Draft could not be created")
+    enqueue_event(
+        session,
+        make_envelope(
+            ScenarioGenerateRequested(
+                draft_id=draft.id, agent_id=agent.id, count=body.count, mix=body.mix
+            ),
+            producer="api",
+            correlation_id=str(draft.id),
+        ),
+    )
+    return DraftAccepted(draft_id=draft.id)
 
 
 @router.get(
     "/scenario-drafts/{draft_id}",
-    dependencies=[scoped("read")],
     responses=errors(404),
     summary="Poll a draft until status is ready",
 )
-async def get_scenario_draft(draft_id: UUID) -> ScenarioDraftOut:
-    # STUB(API-05)
-    not_implemented("API-05")
+async def get_scenario_draft(draft_id: UUID, key: ReadKey, session: Db) -> ScenarioDraftOut:
+    stmt = (
+        select(ScenarioDrafts)
+        .join(Agents, Agents.id == ScenarioDrafts.agent_id)
+        .where(ScenarioDrafts.id == draft_id, Agents.project_id == key.project_id)
+    )
+    row = (await session.scalars(stmt)).one_or_none()
+    if row is None:
+        raise ApiError(404, "not_found", "Draft not found", {"id": str(draft_id)})
+    return ScenarioDraftOut.model_validate(
+        {
+            "id": row.id,
+            "agent_id": row.agent_id,
+            "status": row.status,
+            "request": row.request,
+            "drafts": row.drafts,
+            "error": row.error,
+            "created_at": row.created_at,
+        }
+    )

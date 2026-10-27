@@ -30,6 +30,7 @@ from pareeksha.events.schemas import (
     make_envelope,
 )
 from pareeksha.llm.client import LLMClient
+from pareeksha.regression.verdict import DEFAULT_TOLERANCE, regression_passed
 
 #: ``call.completed`` end reasons with no usable conversation: nothing to evaluate. The run item
 #: is already ``error``/``cancelled`` and the finalizer counts it from ``run_items``.
@@ -169,6 +170,9 @@ class RunItemOutcome:
     needs_human_review: bool = False
     #: Regression runs: does a failure of this item fail the suite?
     blocking: bool = True
+    #: Regression runs: the test's thresholds (FR-RG-2). Without them ``passed`` decides.
+    baseline_score: float | None = None
+    tolerance: float | None = None
 
 
 @dataclass(frozen=True)
@@ -195,14 +199,27 @@ def run_is_complete(state: RunState) -> bool:
     return bool(state.items) and all(i.status in TERMINAL_ITEM_STATUSES for i in state.items)
 
 
+def item_passes_suite(item: RunItemOutcome) -> bool:
+    """A regression item passes when it was evaluated and met its test's baseline - tolerance with
+    no critical failure (FR-RG-2); an item without thresholds falls back to the judge's verdict."""
+    if item.status != "evaluated":
+        return False
+    if item.baseline_score is None:
+        return bool(item.passed)
+    return regression_passed(
+        item.overall_score,
+        item.critical_failure,
+        item.baseline_score,
+        DEFAULT_TOLERANCE if item.tolerance is None else item.tolerance,
+    )
+
+
 def summarize_run(state: RunState) -> RunCompletedSummary:
     scored = [i for i in state.items if i.status == "evaluated" and i.overall_score is not None]
     passed = sum(1 for i in scored if i.passed)
     suite_passed: bool | None = None
     if state.kind == "regression":
-        suite_passed = all(
-            i.status == "evaluated" and bool(i.passed) for i in state.items if i.blocking
-        )
+        suite_passed = all(item_passes_suite(i) for i in state.items if i.blocking)
     return RunCompletedSummary(
         item_count=len(state.items),
         evaluated_count=len(scored),

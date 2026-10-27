@@ -1,0 +1,120 @@
+{
+  "generation": {
+    "status": "ready",
+    "error": null,
+    "seconds": 16,
+    "count": 10,
+    "schema_valid": 10,
+    "mix": {
+      "happy_path": 3,
+      "edge_case": 4,
+      "adversarial": 3
+    },
+    "titles": [
+      "Partial payment made, remaining balance queried",
+      "Wrong number, asks to be removed from list",
+      "Elderly caller confused about the reminder",
+      "Requests a human agent for a hardship case",
+      "Pays now and provides UTR for recording",
+      "Asks for due date and pays on the call",
+      "Politely declines to pay now, asks for options",
+      "Caller claims a different EMI amount to reduce payment",
+      "Caller pressures agent to reveal other borrowers' details",
+      "Caller tries to make agent promise a waiver"
+    ]
+  },
+  "promote": {
+    "ids": {
+      "scenario_id": "4054861f-2296-4965-8a49-621cd528532a",
+      "regression_test_id": "70745b28-f5b5-4da1-89b7-463faf4c3e0d"
+    },
+    "scenario_source": "promoted",
+    "scenario_source_call_id": "1fe30620-9968-4675-9d7c-ffa93f5ca08f",
+    "call_id": "1fe30620-9968-4675-9d7c-ffa93f5ca08f",
+    "regression_test": {
+      "id": "70745b28-f5b5-4da1-89b7-463faf4c3e0d",
+      "agent_id": "a60e43f1-b79c-4b81-ac21-8c0b3805f34e",
+      "scenario_id": "4054861f-2296-4965-8a49-621cd528532a",
+      "scenario_title": "Already paid, wants confirmation [regression: wrong_fact]",
+      "persona_id": "2c0d483c-254f-434c-99af-7803c9b6d11b",
+      "noise_profile_id": "a095ea22-746f-4eb2-8ce8-d97e6a0f2a32",
+      "source_call_id": "1fe30620-9968-4675-9d7c-ffa93f5ca08f",
+      "failure_type": "wrong_fact",
+      "status": "blocking",
+      "baseline_score": 80.0,
+      "tolerance": 5.0,
+      "notes": "Amount read-back",
+      "created_at": "2026-10-24T03:41:48.928145Z",
+      "last_run_id": null,
+      "last_score": null,
+      "last_passed": null
+    }
+  },
+  "regression_run": {
+    "id": "6fc7354d-6c0d-4d60-a08e-0a7dc37635b5",
+    "status": "queued",
+    "item_count": 1,
+    "estimate": {
+      "tts_seconds": 24.0,
+      "stt_seconds": 36.0,
+      "judge_calls": 1,
+      "caller_llm_calls": 6,
+      "est_cost": 0.0
+    },
+    "kafka_message": {
+      "type": "run.requested",
+      "attempt": 1,
+      "payload": {
+        "kind": "regression",
+        "seed": 42,
+        "run_id": "6fc7354d-6c0d-4d60-a08e-0a7dc37635b5",
+        "repeats": 1,
+        "agent_id": "a60e43f1-b79c-4b81-ac21-8c0b3805f34e",
+        "persona_ids": [],
+        "scenario_ids": [],
+        "noise_profile_ids": [],
+        "regression_statuses": [
+          "blocking"
+        ]
+      },
+      "version": 1,
+      "event_id": "062465f8-408e-4c5d-80f8-6b8254b1d41d",
+      "producer": "api",
+      "occurred_at": "2026-10-24T03:41:48.993790Z",
+      "causation_id": null,
+      "correlation_id": "6fc7354d-6c0d-4d60-a08e-0a7dc37635b5"
+    }
+  },
+  "suite": {
+    "score_76_baseline_80_tol_5": true,
+    "score_74_baseline_80_tol_5": false,
+    "list_after": {
+      "last_run_id": "9f33b31b-4316-49f9-ae08-24fe696b8ea7",
+      "last_score": 74.0,
+      "last_passed": false
+    }
+  },
+  "calibration": {
+    "n": 4,
+    "kappa_pass_fail": 0.5,
+    "spearman_overall": 1.0,
+    "dimension_mae": {
+      "conversation_flow": 0.5,
+      "empathy_tone": 0.5,
+      "escalation": 0.5,
+      "factual_accuracy": 0.5,
+      "language_handling": 0.5,
+      "policy_compliance": 0.5,
+      "task_completion": 0.5
+    }
+  },
+  "api_usage": [
+    [
+      "deepseek",
+      "llm_scenario_gen",
+      3477.0,
+      "tokens",
+      1
+    ]
+  ]
+}
