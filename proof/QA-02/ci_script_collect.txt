@@ -1,0 +1,8 @@
+tests/integration/test_seed.py::test_a_revoked_demo_key_is_replaced
+tests/integration/test_seed.py::test_pinned_demo_key_from_the_environment
+tests/integration/test_seed.py::test_a_second_project_is_not_created
+tests/integration/test_seed.py::test_seed_module_runs_from_the_command_line
+tests/integration/test_seed.py::test_main_seeds_the_database_named_by_database_url
+tests/integration/test_seed.py::test_seed_result_counts
+
+92 tests collected in 0.09s
