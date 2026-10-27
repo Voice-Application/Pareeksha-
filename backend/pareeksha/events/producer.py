@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from collections.abc import Mapping
 from typing import Any
 
@@ -10,6 +11,10 @@ from aiokafka import AIOKafkaProducer
 
 from pareeksha.events.runtime import encode_headers
 from pareeksha.events.schemas import AnyEnvelope
+
+log = logging.getLogger(__name__)
+
+STOP_TIMEOUT_S = 15.0
 
 
 class EventProducer:
@@ -41,7 +46,14 @@ class EventProducer:
     async def stop(self) -> None:
         if self._started:
             self._started = False
-            await self._producer.stop()
+            try:
+                # stop() flushes; sends that already timed out may still retry against a broker
+                # that went away, and a flush that never ends must not block a worker's shutdown.
+                await asyncio.wait_for(self._producer.stop(), STOP_TIMEOUT_S)
+            except TimeoutError:
+                log.warning(
+                    "producer flush did not finish in %.0fs; shutting down anyway", STOP_TIMEOUT_S
+                )
 
     async def send(
         self,
