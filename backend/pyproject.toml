@@ -32,7 +32,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Needed by `PareekshaFrameSerializer` (pareeksha.adapters.pipecat_serializer) and examples/pipecat-bot.
+pipecat = ["pipecat-ai[websocket,silero]>=1.13.0"]
 dev = [
+    "pipecat-ai[websocket,silero]>=1.13.0",
     "gnani-vachana>=0.8.2",
     "httpx>=0.27",
     "websockets>=12.0",

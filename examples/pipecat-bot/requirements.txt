@@ -1,0 +1,5 @@
+# Example Pipecat bot for Pareeksha (docs/10-integrations-and-dx.md section 4)
+pipecat-ai[websocket,silero]>=1.13.0
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pareeksha            # pip install -e backend/  (serializer + speech providers)
