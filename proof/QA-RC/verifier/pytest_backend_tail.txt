@@ -1,0 +1,106 @@
+........................................................................ [  5%]
+........................................................................ [ 11%]
+........................................................................ [ 16%]
+........................................................................ [ 22%]
+........................................................................ [ 27%]
+........................................................................ [ 33%]
+........................................................................ [ 39%]
+........................................................................ [ 44%]
+........................................................................ [ 50%]
+........................................................................ [ 55%]
+........................................................................ [ 61%]
+........................................................................ [ 67%]
+........................................................................ [ 72%]
+........................................................................ [ 78%]
+........................................................................ [ 83%]
+........................................................................ [ 89%]
+........................................................................ [ 95%]
+..............................................................           [100%]
+=============================== warnings summary ===============================
+<frozen abc>:106
+  <frozen abc>:106: DeprecationWarning: `AudioContextTTSService` is deprecated since 0.0.105 and will be removed in 2.0.0. Use `WebsocketTTSService` instead.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.13.17-final-0 _______________
+
+Name                                            Stmts   Miss Branch BrPart  Cover   Missing
+-------------------------------------------------------------------------------------------
+pareeksha/adapters/connection_check.py             60      5     14      2    91%   79->73, 89, 92-95
+pareeksha/adapters/pipecat_serializer.py           80      1     34      2    97%   78, 144->161
+pareeksha/api/deps.py                              26      1      0      0    96%   40
+pareeksha/api/main.py                              49      1     16      1    97%   78
+pareeksha/api/routers/calls.py                    111      1     28      2    98%   139->143, 144
+pareeksha/api/routers/integrations.py             149      2     26      0    99%   225-226
+pareeksha/api/routers/system.py                    51      2      6      2    93%   73, 97
+pareeksha/api/routers/webhooks.py                  98     11     20      2    87%   40-41, 51, 153-154, 156, 182-186
+pareeksha/audio/dsp.py                             82      4     14      2    94%   53-54, 87, 119
+pareeksha/audio/line_simulator.py                 124      4     30      2    96%   85, 188-190
+pareeksha/audio/noise.py                          128      1     16      1    99%   191
+pareeksha/audio/profiles.py                        38      3     12      3    88%   28, 33, 37
+pareeksha/audit/pipeline.py                       168      1     26      1    99%   220
+pareeksha/audit/turns.py                           66      0     14      1    99%   93->91
+pareeksha/calls/audio.py                           47      1     16      1    97%   43
+pareeksha/dialect/manifest.py                     118      5     34      4    94%   81, 85, 135, 176-177
+pareeksha/dialect/pipeline.py                     122      5     18      2    95%   81-82, 134, 268, 315
+pareeksha/dialect/report.py                       123      2     32      2    97%   163, 242
+pareeksha/evaluation/calibration.py                64      0     22      1    99%   82->81
+pareeksha/evaluation/checks.py                    182      7     80      8    94%   38, 133, 163, 238-240, 361->360, 397->395, 458, 489->491
+pareeksha/evaluation/completion_reconciler.py      43      3     12      1    93%   46, 69-70
+pareeksha/evaluation/metrics.py                   142      1     46      1    99%   195
+pareeksha/evaluation/numbers.py                   304     12    102      8    95%   335-336, 346-351, 377->381, 398, 408, 426->417, 430, 434
+pareeksha/evaluation/pg_stores.py                 113      1     24      3    97%   125->128, 139->142, 388
+pareeksha/evaluation/pii.py                        91      1     34      1    98%   71
+pareeksha/evaluation/types.py                      66      1      6      1    97%   68
+pareeksha/events/consumer.py                      221     17     46      6    91%   276->278, 296, 307->309, 309->311, 324-336, 384, 395, 398, 436-438, 508-511
+pareeksha/events/producer.py                       37      5      4      0    88%   53-54, 84-86
+pareeksha/events/runtime.py                        60      9     12      0    85%   46-51, 102-104
+pareeksha/events/schemas.py                       249      5     26      3    97%   286, 292, 380-381, 389
+pareeksha/events/settings.py                       14      1      0      0    93%   31
+pareeksha/gnani/clients.py                        163      1     30      1    99%   96
+pareeksha/integrations/dispatch.py                132     12     42      7    88%   80->84, 91-94, 188, 208-209, 216, 219, 241-243, 273
+pareeksha/integrations/hubspot.py                 139      1     40      1    99%   267
+pareeksha/integrations/sql_store.py                41      1      6      1    96%   82
+pareeksha/integrations/ssrf.py                     80      1     24      1    98%   147
+pareeksha/integrations/webhook.py                 106      2     20      1    98%   93->95, 152-153
+pareeksha/llm/_http.py                             21      2      6      0    93%   16-17
+pareeksha/llm/deepseek.py                          65      0     16      1    99%   77->81
+pareeksha/ops/metrics.py                           69      3     14      4    92%   49, 60, 70, 117->119
+pareeksha/regression/outcomes.py                   36      1      8      1    95%   57
+pareeksha/regression/promote.py                    43      0     10      1    98%   37->39
+pareeksha/runs/report.py                           33      2      6      2    90%   45, 62
+pareeksha/runs/service.py                         172      1     44      1    99%   113, 393->389
+pareeksha/runs/slots.py                            62      1     16      2    96%   141, 149->134
+pareeksha/runs/stream.py                          135      5     34      3    95%   130, 166->exit, 187-189, 191
+pareeksha/scenario_gen/generator.py                89      0     28      1    99%   73->71
+pareeksha/seed/__main__.py                         19      3      4      2    78%   23-24, 29
+pareeksha/simulation/director.py                  261     16     82     12    92%   110, 149-150, 171->exit, 173->175, 192, 202, 230, 254, 284, 327, 329-331, 364-366, 388
+pareeksha/simulation/models.py                    114      3      0      0    97%   176, 179, 182
+pareeksha/simulation/processors.py                333      9     96      6    97%   95-96, 100, 164->140, 167-168, 189->199, 246->exit, 273->exit, 286-287, 558, 563
+pareeksha/simulation/runner.py                    111      4     16      4    94%   91->99, 212, 220->225, 226-228
+pareeksha/simulation/runtime.py                    53      1      2      1    96%   112
+pareeksha/simulation/store.py                      55      4      2      1    91%   82, 124-130
+pareeksha/simulation/turn_tracker.py               82      2     32      3    96%   31, 136->131, 154
+pareeksha/speech/providers/_common.py              29      1      4      1    94%   41->exit, 50
+pareeksha/speech/providers/deepgram.py            123      1     30      2    98%   205, 219->221
+pareeksha/speech/providers/elevenlabs.py           80      0     26      1    99%   206->208
+pareeksha/speech/providers/gnani.py               115      4     32      4    95%   72, 185, 193, 208
+pareeksha/speech/providers/google.py              104      1     20      2    98%   64->66, 122
+pareeksha/workers/auditor.py                       35      3      4      2    87%   32, 66, 70
+pareeksha/workers/dialect.py                       42      4      4      1    89%   31, 60, 64, 68
+pareeksha/workers/dlq_recorder.py                  96     12     12      2    87%   134, 167-172, 179-182, 186
+pareeksha/workers/evaluator.py                     65      9     14      1    80%   111-119, 123
+pareeksha/workers/finalizer.py                     25      7      2      1    70%   42-48, 52
+pareeksha/workers/generator.py                     71      3      8      1    95%   138, 142, 146
+pareeksha/workers/integrations.py                  37     13      6      2    60%   51, 56-59, 64, 73-84, 88-89
+pareeksha/workers/outbox_relay.py                  62     10     16      3    81%   64-67, 78, 91-94, 98
+pareeksha/workers/planner.py                       76      4     20      3    93%   77, 228, 236, 240
+pareeksha/workers/reconciler.py                    36      5      4      1    85%   52-55, 59
+pareeksha/workers/retrier.py                       90     13     22      3    86%   82, 93, 147-152, 159-162, 166
+pareeksha/workers/simulator.py                    113     24     30      5    74%   74, 81, 87, 93-98, 124, 180-182, 205-215, 219
+-------------------------------------------------------------------------------------------
+TOTAL                                           11756    302   2142    155    96%
+
+112 files skipped due to complete coverage.
+1286 passed, 1 warning in 876.46s (0:14:36)
+exit=0

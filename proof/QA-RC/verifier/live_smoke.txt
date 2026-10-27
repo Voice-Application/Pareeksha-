@@ -1,0 +1,6 @@
+INFO  gnani | [TTS REST] synthesize start | request_id=req_2ab71728d9ce | model=timbre-v3.0 | voice=Prakash
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_2ab71728d9ce
+tts_bytes 97324
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_f1077c6f93b9 | language=kn-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_f1077c6f93b9
+stt_text ನಮಸ್ಕಾರ ನಿಮ್ಮ ಇ ಎಮ್ ಐ ಬಾಕಿ ಇದೆ

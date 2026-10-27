@@ -1,0 +1,2 @@
+llm_provider deepseek caller_model deepseek-flash
+deepseek_ok None tokens input_tokens=122 output_tokens=13 cached_input_tokens=0
