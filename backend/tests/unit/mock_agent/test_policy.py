@@ -191,3 +191,57 @@ def test_clean_answers_are_you_a_bot_and_amount_questions_without_ending_or_tran
     bot, amount = _run(d, "are you a real person or a machine?", "confirm the amount once more")
     assert "automated" in bot.text and not bot.tool_calls and not bot.end_call
     assert "four thousand five hundred" in amount.text and not amount.end_call
+
+
+def test_clean_due_date_questions_are_answered_not_treated_as_amount_questions() -> None:
+    d = Dialog("en-IN")
+    d.opening()
+    first, second = _run(
+        d,
+        "yes speaking",
+        "please repeat the due date and the amount once more",
+        "is the due date the fifth and the amount four thousand five hundred, yes or no",
+    )[1:]
+    assert "fifth" in first.text and "Yes, that is correct" in second.text
+
+
+def test_clean_replays_the_disclosure_at_most_once() -> None:
+    d = Dialog("en-IN")
+    d.opening()
+    d.opening_cut = True
+    assert DISCLOSURE["en-IN"] in d.respond("hello?").text
+    d.opening_cut = True
+    assert DISCLOSURE["en-IN"] not in d.respond("who is this?").text
+
+
+def test_clean_confirm_questions_on_the_due_date_get_yes_and_a_third_repeat_is_slow() -> None:
+    d = Dialog("en-IN")
+    d.opening()
+    _, yes, again, slow = _run(
+        d,
+        "yes speaking",
+        "the fifth of this month, and four thousand five hundred, correct?",
+        "please confirm the due date and amount once more",
+        "tell me the due date again, slowly",
+    )
+    assert "Yes, that is correct" in yes.text and "fifth" in again.text and "slowly" in slow.text
+
+
+def test_clean_loan_id_questions_get_three_different_answers_before_a_transfer() -> None:
+    d = Dialog("en-IN")
+    d.opening()
+    one, two, three = _run(
+        d, "confirm my loan I D is SHK-001", "confirm the loan ID please", "loan number?"
+    )
+    assert one.text != two.text and not two.end_call
+    assert three.end_call and three.tool_calls[0][0] == "transfer_to_human"
+
+
+def test_clean_a_bare_today_never_replaces_a_committed_date() -> None:
+    assert extract_when("ಇವತ್ತು pay ಮಾಡಕ್ಕೆ ಆಗಲ್ಲ, Friday full EMI ಮಾಡ್ತೀನಿ") == "Friday"
+    assert extract_when("आज तो पेमेंट possible नहीं है, मैं Friday को pay करूँगा") == "Friday"
+    d = Dialog("en-IN")
+    d.opening()
+    _, confirm, closing = _run(d, "yes", "I will pay Friday", "yes, but nothing today")
+    assert "Friday" in confirm.text
+    assert closing.tool_calls[0][1]["when"] == "Friday" and "Friday" in closing.text

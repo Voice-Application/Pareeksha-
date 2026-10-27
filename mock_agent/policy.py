@@ -141,7 +141,7 @@ _ABUSE_RE = re.compile(
     re.IGNORECASE,
 )
 _REPEAT_RE = re.compile(
-    r"repeat|say that again|once more|due date|when is it due|next month|"
+    r"repeat|say that again|due date|when is it due|next month|"
     r"दोहरा|फिर से|दोबारा|अगले महीने|देय तारीख|"
     r"ಮತ್ತೆ ಹೇಳಿ|ಇನ್ನೊಮ್ಮೆ|ಮುಂದಿನ ತಿಂಗಳು|ಬಾಕಿ ದಿನಾಂಕ",
     re.IGNORECASE,
@@ -214,9 +214,15 @@ _PRESENT_RE = re.compile(
     re.IGNORECASE,
 )
 _LOAN_RE = re.compile(
-    r"loan (id|number|no)|account (id|number|no)|which loan|reference number|"
+    r"loan\W*(i\W*d|number|no)\b|account\W*(i\W*d|number|no)\b|which loan|reference number|\bshk\b|"
+    r"confirm.{0,20}\bloan\b|"
     r"लोन (आईडी|नंबर)|कौन सा लोन|खाता (संख्या|नंबर)|"
     r"ಸಾಲ.{0,12}(ಐಡಿ|ಸಂಖ್ಯೆ)|ಯಾವ ಸಾಲ|ಖಾತೆ ಸಂಖ್ಯೆ",
+    re.IGNORECASE,
+)
+_CONFIRMQ_RE = re.compile(
+    r"(confirm|correct|right\b|yes or no|one more time|once more|again).{0,80}(due|date|fifth|amount|four thousand)|"
+    r"(due|date|fifth|amount|four thousand).{0,80}(confirm|correct|right\b|yes or no|one more time)",
     re.IGNORECASE,
 )
 _WHEN_RE = re.compile(
@@ -253,6 +259,21 @@ CALLBACK_LATER = {
     "hi-IN": "मैं केवल आपके लोन में मदद कर सकती हूँ, इसलिए अभी फोन रखती हूँ। ईएमआई पर बात करनी हो तो कभी भी कॉल कीजिए। नमस्ते।",
     "kn-IN": "ನಾನು ನಿಮ್ಮ ಸಾಲದ ಬಗ್ಗೆ ಮಾತ್ರ ಸಹಾಯ ಮಾಡಬಲ್ಲೆ, ಹಾಗಾಗಿ ಈಗ ಕರೆ ಮುಗಿಸುತ್ತೇನೆ. ಇಎಂಐ ಬಗ್ಗೆ ಮಾತನಾಡಲು ಯಾವಾಗ ಬೇಕಾದರೂ ಕರೆ ಮಾಡಿ. ನಮಸ್ಕಾರ.",
 }
+DUE_YES = {
+    "en-IN": f"Yes, that is correct. Your EMI of {AMOUNT_SPOKEN['en-IN']} was due on the fifth of this month and is twelve days overdue. When can you pay it?",
+    "hi-IN": f"जी हाँ, यह सही है। आपकी {AMOUNT_SPOKEN['hi-IN']} की ईएमआई इस महीने की पाँच तारीख को देय थी और बारह दिन से बकाया है। आप कब भुगतान कर सकते हैं?",
+    "kn-IN": f"ಹೌದು, ಅದು ಸರಿ. ನಿಮ್ಮ {AMOUNT_SPOKEN['kn-IN']} ಇಎಂಐ ಈ ತಿಂಗಳ ಐದನೇ ತಾರೀಖಿಗೆ ಬಾಕಿಯಿತ್ತು, ಹನ್ನೆರಡು ದಿನ ತಡವಾಗಿದೆ. ಯಾವಾಗ ಪಾವತಿಸಬಹುದು?",
+}
+DUE_SLOW = {
+    "en-IN": f"Certainly, slowly this time. The due date was the fifth of this month. The amount is {AMOUNT_SPOKEN['en-IN']}. It is now twelve days overdue. When can you pay?",
+    "hi-IN": f"जी, इस बार धीरे बताती हूँ। देय तारीख इस महीने की पाँच थी। राशि {AMOUNT_SPOKEN['hi-IN']} है। यह अब बारह दिन से बकाया है। आप कब भुगतान कर सकते हैं?",
+    "kn-IN": f"ಖಂಡಿತ, ಈ ಬಾರಿ ನಿಧಾನವಾಗಿ ಹೇಳುತ್ತೇನೆ. ಬಾಕಿ ದಿನಾಂಕ ಈ ತಿಂಗಳ ಐದನೇ ತಾರೀಖು. ಮೊತ್ತ {AMOUNT_SPOKEN['kn-IN']}. ಈಗ ಹನ್ನೆರಡು ದಿನ ತಡವಾಗಿದೆ. ಯಾವಾಗ ಪಾವತಿಸಬಹುದು?",
+}
+LOAN_ID_AGAIN = {
+    "en-IN": "I understand, but I really cannot verify account details on this call. A human agent can do that. Meanwhile, how can I help you with your EMI today?",
+    "hi-IN": "मैं समझती हूँ, लेकिन मैं इस कॉल पर खाते की जानकारी सत्यापित नहीं कर सकती। यह मानव एजेंट कर सकते हैं। तब तक, ईएमआई के बारे में मैं आपकी क्या मदद कर सकती हूँ?",
+    "kn-IN": "ಅರ್ಥವಾಯಿತು, ಆದರೆ ಈ ಕರೆಯಲ್ಲಿ ಖಾತೆ ವಿವರಗಳನ್ನು ಪರಿಶೀಲಿಸಲು ನನಗೆ ಸಾಧ್ಯವಿಲ್ಲ. ಮಾನವ ಏಜೆಂಟ್ ಅದನ್ನು ಮಾಡಬಲ್ಲರು. ಅಲ್ಲಿಯವರೆಗೆ, ಇಎಂಐ ಬಗ್ಗೆ ನಾನು ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?",
+}
 BOT_ID = {
     "en-IN": f"I am an automated voice assistant from Suraksha Finance. I can connect you to a human agent if you prefer. Your EMI is rupees {AMOUNT}; when can you pay?",
     "hi-IN": f"मैं सुरक्षा फाइनेंस की एक स्वचालित वॉइस असिस्टेंट हूँ। आप चाहें तो मैं आपको मानव एजेंट से जोड़ सकती हूँ। आपकी ईएमआई {AMOUNT} रुपये है; आप कब भुगतान कर सकते हैं?",
@@ -275,16 +296,25 @@ _NEGATED_AFTER_RE = re.compile(
 )
 
 
+_TODAY_RE = re.compile(r"^(today|tonight|आज|टुडे|ಇಂದು|ಇವತ್ತು|ಟುಡೇ)$", re.IGNORECASE)
+
+
 def extract_when(text: str) -> str:
-    """The date the caller commits to: the last date word that is not negated ("not today, Friday")."""
-    found = ""
+    """The date the caller commits to: the last date word that is not negated ("not today, Friday").
+
+    Callers who say "I cannot pay today, I will pay Friday" in a language where the negation comes
+    after the date are caught too: a specific date (a weekday, tomorrow, a day number) always wins
+    over a bare "today", which in an overdue-EMI call is almost always the date being ruled out.
+    """
+    found: list[str] = []
     for m in _WHEN_RE.finditer(text):
         if _NEGATED_RE.search(text[: m.start()]) or _NEGATED_AFTER_RE.search(
             text[m.end() :]
         ):
             continue
-        found = m.group(0)
-    return found
+        found.append(m.group(0))
+    specific = [w for w in found if not _TODAY_RE.match(w)]
+    return (specific or found or [""])[-1]
 
 
 def detect_language(text: str, fallback: str) -> str:
@@ -328,6 +358,8 @@ class Dialog:
     loan_asks: int = 0
     disputes: int = 0
     offtopics: int = 0
+    repeats: int = 0
+    opening_replays: int = 0
 
     def _speak_lang(self) -> str:
         """Bug 3: Kannada callers get English replies."""
@@ -406,9 +438,11 @@ class Dialog:
         self.language = detect_language(text, self.language)
         lang = self._speak_lang()
 
-        if self.opening_cut and self.stage == "identify":
+        if self.opening_cut and self.stage == "identify" and self.opening_replays < 1:
             self.opening_cut = False
+            self.opening_replays += 1
             return self.opening()
+        self.opening_cut = False
 
         if self.stage == "await_utr":
             return self._end(PAID_NOTE, lang)
@@ -446,7 +480,9 @@ class Dialog:
             return self._say(BOT_ID, lang, stage="ask_pay")
         if _LOAN_RE.search(text) and open_stage:
             self.loan_asks += 1
-            if self.loan_asks > 1:
+            if self.loan_asks == 2:
+                return self._say(LOAN_ID_AGAIN, lang)
+            if self.loan_asks > 2:
                 tool = (
                     "transfer_to_human",
                     {"reason": "loan_id_verification"},
@@ -464,13 +500,32 @@ class Dialog:
                 )
                 return self._end(TRANSFER, lang, (tool,))
             return self._say(DISPUTE, lang, stage="ask_pay")
-        if _AMOUNT_RE.search(text) and open_stage and not when_hint(text):
-            return self._say(AMOUNT_SAY, lang, stage="ask_pay")
         if _PRESENT_RE.search(text) and open_stage:
             again = self._re_ask(lang)
             return Reply(f"{PRESENT[lang]} {again.text}", lang, stage=again.stage)
         if _REPEAT_RE.search(text) and open_stage:
-            return self._say(DUE_REPEAT, lang, stage="ask_pay")
+            self.repeats += 1
+            return self._say(
+                (DUE_REPEAT, DUE_YES, DUE_SLOW)[min(self.repeats, 3) - 1],
+                lang,
+                stage="ask_pay",
+            )
+        if (
+            _CONFIRMQ_RE.search(text)
+            and self.stage in ("identify", "ask_pay")
+            and not extract_when(text)
+        ):
+            self.repeats += 1
+            return self._say(
+                DUE_YES if self.repeats < 3 else DUE_SLOW, lang, stage="ask_pay"
+            )
+        if (
+            _AMOUNT_RE.search(text)
+            and open_stage
+            and not when_hint(text)
+            and not _REPEAT_RE.search(text)
+        ):
+            return self._say(AMOUNT_SAY, lang, stage="ask_pay")
         if _OFFTOPIC_RE.search(text) and open_stage:
             self.offtopics += 1
             if self.offtopics == 1:
@@ -490,6 +545,8 @@ class Dialog:
                 return self._say(ASK_PAY, lang, stage="ask_pay")
             return self._re_ask(lang)
         if self.stage == "confirm":
+            if when and _TODAY_RE.match(when) and self.when:
+                when = ""  # "not today" in the caller's own words: keep the date they committed to
             if when and when.lower() != self.when.lower():
                 self.when = when
                 return self._confirm_when(lang)

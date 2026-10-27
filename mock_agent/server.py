@@ -156,13 +156,14 @@ class CallSession:
             await self._send(
                 TranscriptMessage(role="user", text=heard, t_ms=self.now_ms())
             )
-            if not self.opening_finished:
+            replaying = not self.opening_finished
+            if replaying:
                 self.dialog.opening_cut = (
                     True  # the caller spoke over the disclosure: say it again
                 )
             reply = self.dialog.respond(heard)
             await self._cancel_playback()
-            await self._start_playback(reply)
+            await self._start_playback(reply, opening=replaying)
 
     async def _cancel_playback(self) -> None:
         task = self.playing
