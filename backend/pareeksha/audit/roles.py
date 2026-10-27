@@ -68,6 +68,30 @@ class RoleDecision:
         }
 
 
+ROLE_LOW_CONFIDENCE = "role_detection_low_confidence"
+ROLE_DISAGREEMENT = "role_detection_disagreement"
+
+
+def role_review_reasons(event_log: object) -> list[str]:
+    """Why an audited call's speaker roles need a human look (``[]`` when they do not).
+
+    Reads the ``role_detection`` entry of ``calls.event_log``: the LLM was low-confidence, or the
+    first-speaker heuristic and the LLM disagree (whichever was used, one of them is wrong about
+    who the agent is, and the whole evaluation depends on that). Simulated calls have no entry.
+    """
+    if not isinstance(event_log, list):
+        return []
+    reasons: list[str] = []
+    for entry in event_log:
+        if not isinstance(entry, dict) or entry.get("event") != "role_detection":
+            continue
+        if entry.get("llm_confidence") == "low" and ROLE_LOW_CONFIDENCE not in reasons:
+            reasons.append(ROLE_LOW_CONFIDENCE)
+        if entry.get("agrees_with_heuristic") is False and ROLE_DISAGREEMENT not in reasons:
+            reasons.append(ROLE_DISAGREEMENT)
+    return reasons
+
+
 def heuristic_roles(segments: Sequence[LabelledSegment]) -> dict[str, Role]:
     """First speaker = agent, everyone else = caller."""
     labels = labels_in_order(segments)

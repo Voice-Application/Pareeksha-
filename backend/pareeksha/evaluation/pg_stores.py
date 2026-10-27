@@ -16,6 +16,7 @@ import psycopg
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
+from pareeksha.audit.roles import role_review_reasons
 from pareeksha.evaluation.evaluator import CallSnapshot, EvaluationRecord
 from pareeksha.evaluation.handlers import (
     TERMINAL_ITEM_STATUSES,
@@ -84,7 +85,7 @@ class PgEvaluatorStore:
     async def load_snapshot(self, call_id: uuid.UUID) -> CallSnapshot | None:
         calls = await self._rows(
             """
-            SELECT c.id, c.agent_id, c.run_item_id, c.language, c.source,
+            SELECT c.id, c.agent_id, c.run_item_id, c.language, c.source, c.event_log,
                    ri.run_id, ri.scenario_id, ri.persona_id,
                    a.name AS agent_name, a.description AS agent_description,
                    a.languages AS agent_languages, a.glass_box,
@@ -193,6 +194,7 @@ class PgEvaluatorStore:
             agent_id=call["agent_id"],
             run_id=call["run_id"],
             run_item_id=call["run_item_id"],
+            review_reasons=role_review_reasons(call["event_log"]),
         )
 
     async def _rubric_id(self, version: str) -> uuid.UUID:

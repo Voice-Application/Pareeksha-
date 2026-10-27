@@ -1,0 +1,118 @@
+[
+  {
+    "recording": "pipecat_mixed.wav",
+    "stt_seconds": 100.062,
+    "turns": [
+      [
+        0,
+        "agent",
+        "hello this is an automated assistant calling on behalf of sampoorna finance and this call "
+      ],
+      [
+        1,
+        "caller",
+        "yes this is a good time but i believe my em i should be ₹4,000 not 4,500 can you tell me w"
+      ],
+      [
+        2,
+        "agent",
+        "i understand your concern but i'm not able to break down the charges on this call could yo"
+      ],
+      [
+        3,
+        "caller",
+        "i see but i want to understand this before i pay can you at least confirm my emi is 4,500 "
+      ],
+      [
+        4,
+        "agent",
+        "i am sorry but"
+      ],
+      [
+        5,
+        "caller",
+        "hello are you still there"
+      ],
+      [
+        6,
+        "agent",
+        "yes i am here our records show the overdue amount as ₹4,500 but for a detailed breakdown i"
+      ]
+    ],
+    "role_detection": {
+      "event": "role_detection",
+      "method": "llm",
+      "roles": {
+        "spk_0": "agent",
+        "spk_1": "caller"
+      },
+      "heuristic": {
+        "spk_0": "agent",
+        "spk_1": "caller"
+      },
+      "llm": {
+        "spk_0": "agent",
+        "spk_1": "caller"
+      },
+      "llm_confidence": "high",
+      "agrees_with_heuristic": true,
+      "note": "spk_0 introduces as automated assistant for Sampoorna Finance, mentions overdue EMI, and provides account details; spk_1 asks about own EMI amount.",
+      "llm_model": "deepseek-v4-pro"
+    },
+    "review_reasons_from_roles": [],
+    "judge_status": "ok",
+    "overall_score": 70.0,
+    "needs_human_review": false,
+    "review_reasons": []
+  },
+  {
+    "recording": "trimmed_caller_first.wav",
+    "stt_seconds": 49.0,
+    "turns": [
+      [
+        0,
+        "caller",
+        "yes this is a good time but i believe my em i should be ₹4,000 not 4,500 can you tell me w"
+      ],
+      [
+        1,
+        "agent",
+        "i understand your concern but i'm not able to break down the charges on this call could yo"
+      ],
+      [
+        2,
+        "caller",
+        "i see but i want to understand this before i pay can you at least confirm my emi is 4,500 "
+      ]
+    ],
+    "role_detection": {
+      "event": "role_detection",
+      "method": "llm",
+      "roles": {
+        "spk_0": "caller",
+        "spk_1": "agent"
+      },
+      "heuristic": {
+        "spk_0": "agent",
+        "spk_1": "caller"
+      },
+      "llm": {
+        "spk_0": "caller",
+        "spk_1": "agent"
+      },
+      "llm_confidence": "high",
+      "agrees_with_heuristic": false,
+      "note": "llm overrides first-speaker rule: spk_0 asks about their own EMI and wants to understand charges; spk_1 responds with policy and directs to office, typical agent behavior.",
+      "llm_model": "deepseek-v4-pro"
+    },
+    "review_reasons_from_roles": [
+      "role_detection_disagreement"
+    ],
+    "judge_status": "ok",
+    "overall_score": 63.75,
+    "needs_human_review": true,
+    "review_reasons": [
+      "role_detection_disagreement"
+    ]
+  }
+]

@@ -52,6 +52,8 @@ class CallSnapshot:
     run_id: uuid.UUID | None = None
     run_item_id: uuid.UUID | None = None
     ws_open_ms: int = 0
+    #: Extra reasons to route the call to a human (e.g. uncertain audit role detection).
+    review_reasons: Sequence[str] = ()
 
 
 @dataclass
@@ -118,7 +120,7 @@ def judge_error_record(
         passed=None,
         critical_failure=False,
         needs_human_review=True,
-        review_reasons=["judge_error"],
+        review_reasons=list(dict.fromkeys(["judge_error", *snap.review_reasons])),
         failure_types=merge_failure_types([], checks),
         summary=error[:400],
         confidence=None,
@@ -181,8 +183,8 @@ async def evaluate_call(snap: CallSnapshot, client: LLMClient) -> EvaluationReco
         overall_score=outcome.overall_score,
         passed=outcome.passed,
         critical_failure=outcome.critical_failure,
-        needs_human_review=outcome.needs_human_review,
-        review_reasons=outcome.review_reasons,
+        needs_human_review=outcome.needs_human_review or bool(snap.review_reasons),
+        review_reasons=list(dict.fromkeys([*outcome.review_reasons, *snap.review_reasons])),
         failure_types=merge_failure_types(judge.failure_types, checks),
         summary=judge.summary,
         confidence=judge.confidence,

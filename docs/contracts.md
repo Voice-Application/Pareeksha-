@@ -77,3 +77,11 @@ Stub owners: API-02 (31), API-04 (11), API-05 (9), EVAL-05 (8), API-03 (6), INT-
 ## 4. Speech provider abstraction (VOICE-07, owner-approved 2026-10-24)
 
 `backend/pareeksha/speech/base.py` defines `STTProvider` (`transcribe` batch, `transcribe_stream` live, `capabilities`: streaming, word timings, word confidence, diarization) and `TTSProvider` (`synthesize` to a WAV at a stated sample rate, `list_voices`, `capabilities`), plus the value types and errors. Providers: `gnani` (default, wraps `pareeksha.gnani`), `google`, `azure`, `elevenlabs`, `deepgram`. `speech/registry.py` selects by `STT_PROVIDER` / `TTS_PROVIDER` (default `gnani`) or per agent/run via `SpeechSelection{stt,tts}`. `GET /api/v1/speech/providers` (scope `read`) reports configured/default/capabilities. EVAL-04 adds an optional `denoise` argument and `STTCapabilities.denoise` (Gnani only; others refuse). `pareeksha.gnani` is unchanged.
+
+### 4.1 Per-agent speech override (EVAL-04b, additive)
+
+The frozen agent schema has no speech-provider field, so the override lives in the existing free-form `agents.adapter_config` JSON: `{"speech": {"stt": "<provider>", "tts": "<provider>"}}` (either key optional; providers as above). It is exactly `SpeechSelection`; `pareeksha.speech.agent_config.speech_selection(adapter_config)` parses it, `POST/PATCH /agents` reject unknown providers or extra keys with `400 validation_error`, and the `auditor` passes it to `get_stt_provider(selection=...)`. Agents without the key use `STT_PROVIDER` / `TTS_PROVIDER`. No existing field or response changed.
+
+### 4.2 Audit review reasons (EVAL-04b, additive)
+
+`evaluations.review_reasons` (already a list of strings) gains `role_detection_low_confidence` (the LLM role check reported `low` confidence) and `role_detection_disagreement` (first-speaker rule and LLM check disagree). Either sets `needs_human_review = true` regardless of score, like critical failures (docs/08 section 1.5). Source: the `role_detection` entry of `calls.event_log`.

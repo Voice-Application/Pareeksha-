@@ -46,6 +46,7 @@ from pareeksha.events.schemas import AuditRequested, CallCompleted, Envelope
 from pareeksha.events.topics import MAX_ATTEMPTS
 from pareeksha.llm.base import LLMRetryableError
 from pareeksha.llm.client import LLMClient
+from pareeksha.speech.agent_config import speech_selection
 from pareeksha.speech.base import (
     SpeechConfigError,
     SpeechPermanentError,
@@ -98,7 +99,8 @@ def _event(kind: str, **fields: object) -> dict[str, object]:
 @dataclass
 class AuditDeps:
     blobs: BlobStore
-    stt_factory: Callable[[], STTProvider]
+    #: Called with ``selection=`` only when the agent overrides its speech providers.
+    stt_factory: Callable[..., STTProvider]
     llm: LLMClient | None
     fetch: Fetcher
 
@@ -121,7 +123,7 @@ class Auditor:
             await cur.execute(
                 "SELECT c.id, c.source, c.status, c.agent_id, c.language, c.metadata, "
                 "a.name AS agent_name, a.description AS agent_description, "
-                "a.bias_list AS bias_list "
+                "a.bias_list AS bias_list, a.adapter_config AS adapter_config "
                 "FROM calls c LEFT JOIN agents a ON a.id = c.agent_id "
                 "WHERE c.id = %s FOR UPDATE OF c",
                 (p.call_id,),
@@ -237,7 +239,11 @@ class Auditor:
         except AudioError as exc:
             raise _Unusable(str(exc)) from exc
 
-        stt = self.deps.stt_factory()
+        try:
+            selection = speech_selection(call["adapter_config"])
+        except SpeechConfigError as exc:
+            raise PermanentError(str(exc)) from exc
+        stt = self.deps.stt_factory(selection=selection) if selection else self.deps.stt_factory()
         if not stt.capabilities.diarization:
             await stt.aclose()
             raise PermanentError(
