@@ -1,0 +1,912 @@
+
+===== stack (fresh: volumes removed so the broker and database hold only this capture) =====
+ Volume api04_kafka-data Removed 
+ Volume api04_kafka-data Creating 
+ Volume api04_pg-data Creating 
+ Volume api04_pg-data Creating 
+ Network api04_default Creating 
+ Network api04_default Creating 
+ Volume api04_kafka-data Creating 
+ Volume api04_pg-data Created 
+ Volume api04_pg-data Created 
+ Volume api04_kafka-data Created 
+ Volume api04_kafka-data Created 
+ Network api04_default Created 
+ Network api04_default Created 
+ Container api04-postgres-1 Creating 
+ Container api04-kafka-1 Creating 
+ Container api04-kafka-1 Created 
+ Container api04-postgres-1 Created 
+ Container api04-postgres-1 Starting 
+ Container api04-kafka-1 Starting 
+ Container api04-postgres-1 Started 
+ Container api04-kafka-1 Started 
+[Kkafka-init-1 exited with code 0
+ Image api04-api Building 
+ Image api04-migrate Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.08kB done
+#1 DONE 0.0s
+
+#2 [migrate internal] load build definition from Dockerfile
+#2 transferring dockerfile: 776B done
+#2 DONE 0.0s
+
+#3 [api internal] load metadata for docker.io/library/python:3.12-slim
+#3 DONE 1.5s
+
+#4 [migrate internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [api stage-0 1/4] FROM docker.io/library/python:3.12-slim@sha256:5b8b1421ccb6a525860a77863c049eab5847076cda34e030c75a80c58faf3f3c
+#5 resolve docker.io/library/python:3.12-slim@sha256:5b8b1421ccb6a525860a77863c049eab5847076cda34e030c75a80c58faf3f3c 0.0s done
+#5 extracting sha256:f2be67225471500c788ce88c597eb5ea8336e912ad1ca4815650e0281afe2034
+#5 sha256:86586d55cc56d61ea925eceb95264d80c84fae62b3f013b4022710968a0bcf73 254B / 254B 0.1s done
+#5 sha256:86586d55cc56d61ea925eceb95264d80c84fae62b3f013b4022710968a0bcf73 254B / 254B 0.1s done
+#5 sha256:f5b253875fcbce1c3ed3bf3431019fc52d83f106ccf45e58e083985648ad4ec7 0B / 1.55MB 0.2s
+#5 sha256:ca30a39e3f58fe12fab1873dcbc2295c56c29222f8aca17c0765e9777c59615c 0B / 12.12MB 0.2s
+#5 ...
+
+#6 [migrate internal] load build context
+#6 transferring context: 42.05MB 0.4s done
+#6 DONE 0.4s
+
+#5 [api stage-0 1/4] FROM docker.io/library/python:3.12-slim@sha256:5b8b1421ccb6a525860a77863c049eab5847076cda34e030c75a80c58faf3f3c
+#5 sha256:ca30a39e3f58fe12fab1873dcbc2295c56c29222f8aca17c0765e9777c59615c 4.19MB / 12.12MB 0.5s
+#5 sha256:f5b253875fcbce1c3ed3bf3431019fc52d83f106ccf45e58e083985648ad4ec7 1.55MB / 1.55MB 0.6s done
+#5 extracting sha256:f2be67225471500c788ce88c597eb5ea8336e912ad1ca4815650e0281afe2034 0.7s done
+#5 sha256:f5b253875fcbce1c3ed3bf3431019fc52d83f106ccf45e58e083985648ad4ec7 1.55MB / 1.55MB 0.6s done
+#5 sha256:ca30a39e3f58fe12fab1873dcbc2295c56c29222f8aca17c0765e9777c59615c 12.12MB / 12.12MB 0.7s done
+#5 extracting sha256:f5b253875fcbce1c3ed3bf3431019fc52d83f106ccf45e58e083985648ad4ec7
+#5 sha256:ca30a39e3f58fe12fab1873dcbc2295c56c29222f8aca17c0765e9777c59615c 12.12MB / 12.12MB 0.7s done
+#5 extracting sha256:f5b253875fcbce1c3ed3bf3431019fc52d83f106ccf45e58e083985648ad4ec7 0.1s done
+#5 extracting sha256:ca30a39e3f58fe12fab1873dcbc2295c56c29222f8aca17c0765e9777c59615c
+#5 extracting sha256:ca30a39e3f58fe12fab1873dcbc2295c56c29222f8aca17c0765e9777c59615c 0.3s done
+#5 extracting sha256:ca30a39e3f58fe12fab1873dcbc2295c56c29222f8aca17c0765e9777c59615c 0.3s done
+#5 extracting sha256:86586d55cc56d61ea925eceb95264d80c84fae62b3f013b4022710968a0bcf73 done
+#5 DONE 1.2s
+
+#7 [api stage-0 2/4] WORKDIR /app
+#7 DONE 0.3s
+
+#8 [api stage-0 3/4] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "fastapi>=0.121" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy[asyncio]>=2.0.30" "python-multipart>=0.0.9" "pydantic-settings>=2.3" "cryptography>=42" "httpx>=0.27" "jinja2>=3.1" "numpy>=1.26" "scipy>=1.11" "pyyaml>=6" "gnani-vachana>=0.8.2"
+#8 1.701 Collecting fastapi>=0.121
+#8 1.854   Downloading fastapi-0.162.0-py3-none-any.whl.metadata (26 kB)
+#8 1.897 Collecting uvicorn>=0.30
+#8 2.014   Downloading uvicorn-0.54.0-py3-none-any.whl.metadata (6.6 kB)
+#8 2.043 Collecting psycopg>=3.2 (from psycopg[binary]>=3.2)
+#8 2.202   Downloading psycopg-3.3.6-py3-none-any.whl.metadata (4.4 kB)
+#8 2.249 Collecting aiokafka>=0.11
+#8 2.348   Downloading aiokafka-0.14.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (5.0 kB)
+#8 2.383 Collecting alembic>=1.13
+#8 2.493   Downloading alembic-1.20.1-py3-none-any.whl.metadata (7.3 kB)
+#8 2.785 Collecting sqlalchemy>=2.0.30 (from sqlalchemy[asyncio]>=2.0.30)
+#8 2.903   Downloading sqlalchemy-2.1.6-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (9.7 kB)
+#8 2.934 Collecting python-multipart>=0.0.9
+#8 3.036   Downloading python_multipart-0.0.32-py3-none-any.whl.metadata (2.1 kB)
+#8 3.062 Collecting pydantic-settings>=2.3
+#8 3.166   Downloading pydantic_settings-2.16.1-py3-none-any.whl.metadata (4.0 kB)
+#8 3.320 Collecting cryptography>=42
+#8 3.413   Downloading cryptography-50.0.2-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (4.4 kB)
+#8 3.443 Collecting httpx>=0.27
+#8 3.531   Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+#8 3.561 Collecting jinja2>=3.1
+#8 3.648   Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+#8 3.837 Collecting numpy>=1.26
+#8 3.985   Downloading numpy-2.5.4-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (6.6 kB)
+#8 4.098 Collecting scipy>=1.11
+#8 4.215   Downloading scipy-1.18.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)
+#8 4.272 Collecting pyyaml>=6
+#8 4.366   Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+#8 4.421 Collecting gnani-vachana>=0.8.2
+#8 4.564   Downloading gnani_vachana-0.8.2-py3-none-any.whl.metadata (28 kB)
+#8 4.610 Collecting starlette>=0.46.0 (from fastapi>=0.121)
+#8 4.765   Downloading starlette-1.10.0-py3-none-any.whl.metadata (6.6 kB)
+#8 4.876 Collecting pydantic>=2.9.0 (from fastapi>=0.121)
+#8 5.040   Downloading pydantic-2.14.1-py3-none-any.whl.metadata (133 kB)
+#8 5.075 Collecting typing-extensions>=4.8.0 (from fastapi>=0.121)
+#8 5.217   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+#8 5.243 Collecting typing-inspection>=0.4.2 (from fastapi>=0.121)
+#8 5.386   Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+#8 5.408 Collecting annotated-doc>=0.0.2 (from fastapi>=0.121)
+#8 5.547   Downloading annotated_doc-0.0.5-py3-none-any.whl.metadata (6.5 kB)
+#8 5.577 Collecting opentelemetry-api>=1.44.0 (from fastapi>=0.121)
+#8 5.703   Downloading opentelemetry_api-1.45.1-py3-none-any.whl.metadata (1.4 kB)
+#8 5.731 Collecting click>=7.0 (from uvicorn>=0.30)
+#8 5.852   Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+#8 5.876 Collecting h11>=0.8 (from uvicorn>=0.30)
+#8 5.999   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+#8 6.029 Collecting async-timeout (from aiokafka>=0.11)
+#8 6.141   Downloading async_timeout-5.0.1-py3-none-any.whl.metadata (5.1 kB)
+#8 6.170 Collecting packaging (from aiokafka>=0.11)
+#8 6.293   Downloading packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+#8 6.335 Collecting Mako (from alembic>=1.13)
+#8 6.486   Downloading mako-1.4.3-py3-none-any.whl.metadata (2.9 kB)
+#8 6.537 Collecting python-dotenv>=1.2.2 (from pydantic-settings>=2.3)
+#8 6.741   Downloading python_dotenv-1.2.4-py3-none-any.whl.metadata (29 kB)
+#8 6.882 Collecting cffi>=2.0.0 (from cryptography>=42)
+#8 7.058   Downloading cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.5 kB)
+#8 7.093 Collecting anyio (from httpx>=0.27)
+#8 7.366   Downloading anyio-4.15.1-py3-none-any.whl.metadata (4.7 kB)
+#8 7.399 Collecting certifi (from httpx>=0.27)
+#8 7.641   Downloading certifi-2026.10.23-py3-none-any.whl.metadata (2.5 kB)
+#8 7.675 Collecting httpcore==1.* (from httpx>=0.27)
+#8 7.888   Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+#8 7.915 Collecting idna (from httpx>=0.27)
+#8 8.117   Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+#8 8.203 Collecting MarkupSafe>=2.0 (from jinja2>=3.1)
+#8 8.334   Downloading markupsafe-3.0.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+#8 8.383 Collecting requests>=2.28.0 (from gnani-vachana>=0.8.2)
+#8 8.641   Downloading requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+#8 8.793 Collecting websockets>=12.0 (from gnani-vachana>=0.8.2)
+#8 9.115   Downloading websockets-17.3-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.3 kB)
+#8 9.293 Collecting psycopg-binary==3.3.6 (from psycopg[binary]>=3.2)
+#8 9.489   Downloading psycopg_binary-3.3.6-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.7 kB)
+#8 9.626 Collecting greenlet>=1 (from sqlalchemy[asyncio]>=2.0.30)
+#8 9.815   Downloading greenlet-3.5.6-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+#8 9.864 Collecting pycparser (from cffi>=2.0.0->cryptography>=42)
+#8 10.24   Downloading pycparser-3.12-py3-none-any.whl.metadata (9.7 kB)
+#8 10.27 Collecting annotated-types>=0.6.0 (from pydantic>=2.9.0->fastapi>=0.121)
+#8 10.74   Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+#8 11.40 Collecting pydantic-core==2.50.1 (from pydantic>=2.9.0->fastapi>=0.121)
+#8 11.64   Downloading pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.5 kB)
+#8 11.75 Collecting charset_normalizer<4,>=2 (from requests>=2.28.0->gnani-vachana>=0.8.2)
+#8 11.96   Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (46 kB)
+#8 12.00 Collecting urllib3<3,>=1.26 (from requests>=2.28.0->gnani-vachana>=0.8.2)
+#8 12.24   Downloading urllib3-2.8.0-py3-none-any.whl.metadata (7.4 kB)
+#8 12.49 Downloading fastapi-0.162.0-py3-none-any.whl (148 kB)
+#8 12.70 Downloading uvicorn-0.54.0-py3-none-any.whl (87 kB)
+#8 12.84 Downloading psycopg-3.3.6-py3-none-any.whl (215 kB)
+#8 13.06 Downloading aiokafka-0.14.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.1 MB)
+#8 13.17    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.1/1.1 MB 10.5 MB/s eta 0:00:00
+#8 13.52 Downloading alembic-1.20.1-py3-none-any.whl (270 kB)
+#8 13.72 Downloading sqlalchemy-2.1.6-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (4.7 MB)
+#8 14.18    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.7/4.7 MB 10.0 MB/s eta 0:00:00
+#8 14.42 Downloading python_multipart-0.0.32-py3-none-any.whl (30 kB)
+#8 14.55 Downloading pydantic_settings-2.16.1-py3-none-any.whl (80 kB)
+#8 14.74 Downloading cryptography-50.0.2-cp311-abi3-manylinux_2_34_x86_64.whl (4.8 MB)
+#8 15.12    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.8/4.8 MB 12.7 MB/s eta 0:00:00
+#8 15.26 Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+#8 15.36 Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+#8 15.38 Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+#8 15.40 Downloading numpy-2.5.4-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.7 MB)
+#8 16.29    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.7/16.7 MB 18.8 MB/s eta 0:00:00
+#8 16.31 Downloading scipy-1.18.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (35.3 MB)
+#8 20.29    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 35.3/35.3 MB 8.9 MB/s eta 0:00:00
+#8 20.65 Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
+#8 20.71    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 807.9/807.9 kB 13.9 MB/s eta 0:00:00
+#8 21.01 Downloading gnani_vachana-0.8.2-py3-none-any.whl (41 kB)
+#8 21.29 Downloading psycopg_binary-3.3.6-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (5.2 MB)
+#8 21.83    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.2/5.2 MB 9.4 MB/s eta 0:00:00
+#8 22.05 Downloading annotated_doc-0.0.5-py3-none-any.whl (5.3 kB)
+#8 22.26 Downloading cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (221 kB)
+#8 22.46 Downloading click-8.5.0-py3-none-any.whl (125 kB)
+#8 22.66 Downloading greenlet-3.5.6-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (621 kB)
+#8 22.69    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 621.4/621.4 kB 26.2 MB/s eta 0:00:00
+#8 22.92 Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+#8 23.17 Downloading markupsafe-3.0.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+#8 23.40 Downloading opentelemetry_api-1.45.1-py3-none-any.whl (60 kB)
+#8 23.61 Downloading pydantic-2.14.1-py3-none-any.whl (488 kB)
+#8 23.96 Downloading pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.2 MB)
+#8 24.14    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.2/2.2 MB 11.9 MB/s eta 0:00:00
+#8 24.42 Downloading python_dotenv-1.2.4-py3-none-any.whl (23 kB)
+#8 24.69 Downloading requests-2.34.2-py3-none-any.whl (73 kB)
+#8 25.15 Downloading certifi-2026.10.23-py3-none-any.whl (135 kB)
+#8 25.75 Downloading idna-3.20-py3-none-any.whl (69 kB)
+#8 26.26 Downloading starlette-1.10.0-py3-none-any.whl (80 kB)
+#8 26.49 Downloading anyio-4.15.1-py3-none-any.whl (132 kB)
+#8 27.15 Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+#8 27.88 Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+#8 28.27 Downloading websockets-17.3-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (225 kB)
+#8 28.70 Downloading async_timeout-5.0.1-py3-none-any.whl (6.2 kB)
+#8 28.87 Downloading mako-1.4.3-py3-none-any.whl (80 kB)
+#8 29.04 Downloading packaging-26.3-py3-none-any.whl (129 kB)
+#8 29.16 Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+#8 29.17 Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (257 kB)
+#8 29.21 Downloading urllib3-2.8.0-py3-none-any.whl (135 kB)
+#8 29.23 Downloading pycparser-3.12-py3-none-any.whl (62 kB)
+#8 29.42 Installing collected packages: websockets, urllib3, typing-extensions, pyyaml, python-multipart, python-dotenv, pycparser, psycopg-binary, packaging, numpy, MarkupSafe, idna, h11, greenlet, click, charset_normalizer, certifi, async-timeout, annotated-types, annotated-doc, uvicorn, typing-inspection, sqlalchemy, scipy, requests, pydantic-core, psycopg, opentelemetry-api, Mako, jinja2, httpcore, cffi, anyio, aiokafka, starlette, pydantic, httpx, gnani-vachana, cryptography, alembic, pydantic-settings, fastapi
+#8 41.11 Successfully installed Mako-1.4.3 MarkupSafe-3.0.4 aiokafka-0.14.0 alembic-1.20.1 annotated-doc-0.0.5 annotated-types-0.8.0 anyio-4.15.1 async-timeout-5.0.1 certifi-2026.10.23 cffi-2.1.1 charset_normalizer-3.5.2 click-8.5.0 cryptography-50.0.2 fastapi-0.162.0 gnani-vachana-0.8.2 greenlet-3.5.6 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 idna-3.20 jinja2-3.1.6 numpy-2.5.4 opentelemetry-api-1.45.1 packaging-26.3 psycopg-3.3.6 psycopg-binary-3.3.6 pycparser-3.12 pydantic-2.14.1 pydantic-core-2.50.1 pydantic-settings-2.16.1 python-dotenv-1.2.4 python-multipart-0.0.32 pyyaml-6.0.3 requests-2.34.2 scipy-1.18.1 sqlalchemy-2.1.6 starlette-1.10.0 typing-extensions-4.16.0 typing-inspection-0.4.4 urllib3-2.8.0 uvicorn-0.54.0 websockets-17.3
+#8 41.11 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#8 41.19 
+#8 41.19 [notice] A new release of pip is available: 25.0.1 -> 26.2.2
+#8 41.19 [notice] To update, run: pip install --upgrade pip
+#8 DONE 41.8s
+
+#9 [api stage-0 4/4] COPY . /app
+#9 DONE 0.2s
+
+#10 [api] exporting to image
+#10 exporting layers
+#10 ...
+
+#11 [migrate] exporting to image
+#11 ...
+
+#10 [api] exporting to image
+#10 exporting layers 11.7s done
+#10 exporting manifest sha256:c2a0993bf5fea6cf415c587f87717c12d3f5004a2d7aff43d28d93c98b36f194 0.0s done
+#10 exporting config sha256:151f7b79f0e3fa6242b2ce214a428121adaf2a511b17a805dd08f0b0cd56eed7 done
+#10 exporting attestation manifest sha256:2a7c76e919e59110f90a4aabfb8f9c95ec7cf4ee12651c397587454d5db10935 0.0s done
+#10 exporting manifest list sha256:0b31623ffa6e9139157153f8037564c36b3c1c19696c8fefb67611d31dec380e done
+#10 naming to docker.io/library/api04-api:latest done
+#10 unpacking to docker.io/library/api04-api:latest
+#10 unpacking to docker.io/library/api04-api:latest 5.2s done
+#10 DONE 17.0s
+
+#11 [migrate] exporting to image
+#11 exporting layers 11.7s done
+#11 exporting manifest sha256:a163673899369163c22f7c3ef27267d1384bd7054c1de0da694d1b7a0aea46c6 0.0s done
+#11 exporting config sha256:b7a09162a6d5894ef2e2b0bda9be1d78650ecbf6304f3388f46a555aed226f8b done
+#11 exporting attestation manifest sha256:68b57083c2bfe9ac08854a78d7f808b788c324d687a4168476da1be183641af3 0.0s done
+#11 exporting manifest list sha256:810491602e83a417db22fe5e525fe243b4a0c61e9d1eb8309c2ee8b5cd2d17a1 done
+#11 naming to docker.io/library/api04-migrate:latest done
+#11 unpacking to docker.io/library/api04-migrate:latest 5.2s done
+#11 DONE 17.0s
+
+#12 [api] resolving provenance for metadata file
+#12 DONE 0.0s
+
+#13 [migrate] resolving provenance for metadata file
+#13 DONE 0.0s
+ Image api04-migrate Built 
+ Image api04-api Built 
+ Container api04-kafka-1 Running 
+ Container api04-postgres-1 Running 
+ Container api04-migrate-1 Creating 
+ Container api04-migrate-1 Created 
+ Container api04-api-1 Creating 
+ Container api04-api-1 Created 
+ Container api04-postgres-1 Waiting 
+ Container api04-kafka-1 Waiting 
+ Container api04-kafka-1 Healthy 
+ Container api04-kafka-init-1 Starting 
+ Container api04-postgres-1 Healthy 
+ Container api04-migrate-1 Starting 
+ Container api04-kafka-init-1 Started 
+ Container api04-migrate-1 Started 
+ Container api04-kafka-init-1 Waiting 
+ Container api04-migrate-1 Waiting 
+ Container api04-migrate-1 Exited 
+ Container api04-kafka-init-1 Exited 
+ Container api04-api-1 Starting 
+ Container api04-api-1 Started 
+    "noise_profiles": 8,
+    "rubric_versions": 1,
+    "agents": 1,
+    "scenarios": 8,
+    "api_keys": 1
+  },
+  "existing": {}
+}
+ Image api04-planner Building 
+ Image api04-dlq-recorder Building 
+ Image api04-outbox-relay Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.64kB done
+#1 DONE 0.0s
+
+#2 [dlq-recorder internal] load build definition from Dockerfile
+#2 transferring dockerfile: 776B done
+#2 DONE 0.0s
+
+#3 [dlq-recorder internal] load metadata for docker.io/library/python:3.12-slim
+#3 DONE 0.4s
+
+#4 [outbox-relay internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [planner internal] load build context
+#5 transferring context: 31.90kB 0.0s done
+#5 DONE 0.0s
+
+#6 [dlq-recorder stage-0 1/4] FROM docker.io/library/python:3.12-slim@sha256:5b8b1421ccb6a525860a77863c049eab5847076cda34e030c75a80c58faf3f3c
+#6 resolve docker.io/library/python:3.12-slim@sha256:5b8b1421ccb6a525860a77863c049eab5847076cda34e030c75a80c58faf3f3c 0.0s done
+#6 DONE 0.0s
+
+#7 [dlq-recorder stage-0 2/4] WORKDIR /app
+#7 CACHED
+
+#8 [dlq-recorder stage-0 3/4] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "fastapi>=0.121" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy[asyncio]>=2.0.30" "python-multipart>=0.0.9" "pydantic-settings>=2.3" "cryptography>=42" "httpx>=0.27" "jinja2>=3.1" "numpy>=1.26" "scipy>=1.11" "pyyaml>=6" "gnani-vachana>=0.8.2"
+#8 CACHED
+
+#9 [dlq-recorder stage-0 4/4] COPY . /app
+#9 CACHED
+
+#10 [dlq-recorder] exporting to image
+#10 exporting layers done
+#10 exporting manifest sha256:9e5c39065001981dc4eb30bc8c35ab1e31ae14fb3e1b74b3d9b7b5706c5285af 0.0s done
+#10 exporting config sha256:42a09e9b076407fc3b2fdc9b7f6f86f93daea06fa4dd8c5cbeb790acf54c4388 0.0s done
+#10 exporting attestation manifest sha256:bcd292cb7a35c705d151beb65b9c4a81f868c9a0fd2b95accae197b2f5830dff 0.0s done
+#10 exporting manifest list sha256:50440d17f7fdc9303acfe0703ea9cef2e6c5966a12ed5512b2ba9059e43c6dcd
+#10 exporting manifest list sha256:50440d17f7fdc9303acfe0703ea9cef2e6c5966a12ed5512b2ba9059e43c6dcd 0.0s done
+#10 naming to docker.io/library/api04-dlq-recorder:latest done
+#10 unpacking to docker.io/library/api04-dlq-recorder:latest done
+#10 DONE 0.1s
+
+#11 [planner] exporting to image
+#11 exporting layers done
+#11 exporting manifest sha256:8013d858839a21bd4465cf31dffa6ebfe011f3695279987152d37202405644ce 0.0s done
+#11 exporting config sha256:fbe7b7370c059f32a60747f52e79f820039a7a8228c552ad9c28350819070c38 0.0s done
+#11 exporting attestation manifest sha256:862e059d0513bb760ac634bf37b17afc74ae36e6569713b69592a4027eb803a6 0.0s done
+#11 exporting manifest list sha256:49c6c46570a9ea3f74aaf3117831894daf0b044410ccd26665116aed71a7cea0 0.0s done
+#11 naming to docker.io/library/api04-planner:latest done
+#11 unpacking to docker.io/library/api04-planner:latest done
+#11 DONE 0.1s
+
+#12 [outbox-relay] exporting to image
+#12 exporting layers done
+#12 exporting manifest sha256:5b3e2a3a58dc4bb5e4c6203e003238c36fc6d68303ae96ac2f51792b1554ae7c 0.0s done
+#12 exporting config sha256:ac629678e89e1c40f0ef599f1658dff1e016c831d7609349472b307994c6cd93 0.0s done
+#12 exporting attestation manifest sha256:336c779740f27bf79e1bf24d616785ecc35a9d4c15dbcc628ae5b910c0122a98 0.0s done
+#12 exporting manifest list sha256:c628aab3e80c9da684f97603d5126d4900e33b734a7fcdfe50d6a6e41fc34f33 0.0s done
+#12 naming to docker.io/library/api04-outbox-relay:latest done
+#12 unpacking to docker.io/library/api04-outbox-relay:latest done
+#12 DONE 0.1s
+
+#13 [planner] resolving provenance for metadata file
+#13 DONE 0.0s
+
+#14 [dlq-recorder] resolving provenance for metadata file
+#14 DONE 0.0s
+
+#15 [outbox-relay] resolving provenance for metadata file
+#15 DONE 0.0s
+ Image api04-planner Built 
+ Image api04-dlq-recorder Built 
+ Image api04-outbox-relay Built 
+ Container api04-kafka-1 Running 
+ Container api04-postgres-1 Running 
+ Container api04-planner-1 Creating 
+ Container api04-dlq-recorder-1 Creating 
+ Container api04-outbox-relay-1 Creating 
+ Container api04-planner-1 Created 
+ Container api04-dlq-recorder-1 Created 
+ Container api04-outbox-relay-1 Created 
+ Container api04-kafka-1 Waiting 
+ Container api04-kafka-1 Healthy 
+ Container api04-kafka-init-1 Starting 
+ Container api04-kafka-init-1 Started 
+ Container api04-postgres-1 Waiting 
+ Container api04-kafka-init-1 Waiting 
+ Container api04-postgres-1 Waiting 
+ Container api04-kafka-init-1 Waiting 
+ Container api04-kafka-init-1 Waiting 
+ Container api04-postgres-1 Waiting 
+ Container api04-postgres-1 Healthy 
+ Container api04-postgres-1 Healthy 
+ Container api04-postgres-1 Healthy 
+ Container api04-kafka-init-1 Exited 
+ Container api04-dlq-recorder-1 Starting 
+ Container api04-kafka-init-1 Exited 
+ Container api04-planner-1 Starting 
+ Container api04-kafka-init-1 Exited 
+ Container api04-outbox-relay-1 Starting 
+ Container api04-dlq-recorder-1 Started 
+ Container api04-planner-1 Started 
+ Container api04-outbox-relay-1 Started 
+SERVICE        STATUS
+api            Up 38 seconds (healthy)
+dlq-recorder   Up 6 seconds
+kafka          Up 2 minutes (healthy)
+outbox-relay   Up 6 seconds
+planner        Up 6 seconds
+postgres       Up 2 minutes (healthy)
+
+===== two runs created through POST /runs (3 scenarios x 1 persona x 2 noise profiles = 6 calls each) =====
+base RUN_A=90aeef58-c6b6-4f51-a410-28980f2a5016
+head RUN_B=b10f0c1d-bdc5-4d8d-ab5b-9cad44e945a5
+
+===== seed the results of both runs (calls, turns, tool call, metrics, checks, evaluations) =====
+total 192
+-rw-r--r-- 1 root root 64044 Oct 27 01:05 agent.wav
+-rw-r--r-- 1 root root 64044 Oct 27 01:05 caller.wav
+-rw-r--r-- 1 root root 64044 Oct 27 01:05 mixed.wav
+{"run_id": "90aeef58-c6b6-4f51-a410-28980f2a5016", "evaluated": 6}
+{"run_id": "b10f0c1d-bdc5-4d8d-ab5b-9cad44e945a5", "evaluated": 5}
+
+===== GET /calls (Audits list) vs the calls table =====
+[
+ {
+  "id": "e41b62e3-03bf-4c6d-bae4-576329f3a5a1",
+  "source": "simulation",
+  "status": "completed",
+  "run_id": "b10f0c1d-bdc5-4d8d-ab5b-9cad44e945a5",
+  "overall_score": 52.0,
+  "passed": false,
+  "critical_failure": false,
+  "needs_human_review": false,
+  "human_reviewed": false
+ },
+ {
+  "id": "9e9d480d-8957-4f69-974f-53730e1ffcf6",
+  "source": "simulation",
+  "status": "completed",
+  "run_id": "b10f0c1d-bdc5-4d8d-ab5b-9cad44e945a5",
+  "overall_score": 72.5,
+  "passed": false,
+  "critical_failure": false,
+  "needs_human_review": false,
+  "human_reviewed": false
+ },
+ {
+  "id": "9dc2dd5f-8720-4bd6-a816-047a957f42d8",
+  "source": "simulation",
+  "status": "completed",
+  "run_id": "b10f0c1d-bdc5-4d8d-ab5b-9cad44e945a5",
+  "overall_score": 70.0,
+  "passed": false,
+  "critical_failure": false,
+  "needs_human_review": false,
+  "human_reviewed": false
+ }
+]
+next_cursor set: True
+                  id                  |   source   |  status   |                run_id                | overall_score | passed | critical_failure | needs_human_review 
+--------------------------------------+------------+-----------+--------------------------------------+---------------+--------+------------------+--------------------
+ e41b62e3-03bf-4c6d-bae4-576329f3a5a1 | simulation | completed | b10f0c1d-bdc5-4d8d-ab5b-9cad44e945a5 |         52.00 | f      | f                | f
+ 9e9d480d-8957-4f69-974f-53730e1ffcf6 | simulation | completed | b10f0c1d-bdc5-4d8d-ab5b-9cad44e945a5 |         72.50 | f      | f                | f
+ 9dc2dd5f-8720-4bd6-a816-047a957f42d8 | simulation | completed | b10f0c1d-bdc5-4d8d-ab5b-9cad44e945a5 |         70.00 | f      | f                | f
+(3 rows)
+
+-- filters: source=simulation / run_id / needs_review=true&reviewed=false / status
+source=simulation&limit=200                          -> 11 calls
+run_id=90aeef58-c6b6-4f51-a410-28980f2a5016&limit=200 -> 6 calls
+needs_review=true&reviewed=false&limit=200           -> 1 calls
+status=error&limit=200                               -> 0 calls
+ all_calls | needs_review 
+-----------+--------------
+        11 |            1
+(1 row)
+
+
+===== GET /calls/{id} for the 40-point call of the base run vs its rows =====
+CALL=9a2d02ff-0f59-4675-9f97-3a32f4b355e8
+{
+ "id": "9a2d02ff-0f59-4675-9f97-3a32f4b355e8",
+ "source": "simulation",
+ "status": "completed",
+ "agent_id": "89ed08f1-c7a4-4110-91a5-2640062c678b",
+ "run_id": "90aeef58-c6b6-4f51-a410-28980f2a5016",
+ "run_item_id": "389b8074-0c17-498c-9ec5-a377b37e2b2d",
+ "language": "kn-IN",
+ "end_reason": "goal_achieved",
+ "duration_ms": 84200,
+ "started_at": "2026-10-27T01:06:11.263840Z",
+ "recordings": {
+  "mixed": "/api/v1/calls/9a2d02ff-0f59-4675-9f97-3a32f4b355e8/audio/mixed",
+  "caller": "/api/v1/calls/9a2d02ff-0f59-4675-9f97-3a32f4b355e8/audio/caller",
+  "agent": "/api/v1/calls/9a2d02ff-0f59-4675-9f97-3a32f4b355e8/audio/agent",
+  "original": null
+ },
+ "turns": [
+  {
+   "idx": 0,
+   "speaker": "agent",
+   "text": "Namaskara, nanu Shakti Finance inda",
+   "start_ms": 820,
+   "end_ms": 5400,
+   "ground_truth_text": null,
+   "agent_heard_text": null,
+   "language_detected": "kn-IN",
+   "stt_confidence": 0.95,
+   "is_barge_in": false
+  },
+  {
+   "idx": 1,
+   "speaker": "caller",
+   "text": "Sir naanu already pay maadidini",
+   "start_ms": 6100,
+   "end_ms": 9300,
+   "ground_truth_text": "Sir, naanu already pay maadidini, naal-ku saavira",
+   "agent_heard_text": "naalvattu saavira",
+   "language_detected": "kn-IN",
+   "stt_confidence": 0.88,
+   "is_barge_in": true
+  }
+ ],
+ "tool_calls": [
+  {
+   "seq": 0,
+   "name": "record_promise_to_pay",
+   "arguments": {
+    "amount": 40000
+   },
+   "result": {
+    "ok": true
+   },
+   "at_ms": 11200,
+   "turn_idx": 1
+  }
+ ],
+ "metrics": {
+  "first_greeting_ms": 820,
+  "response_latency_p50_ms": 1040,
+  "response_latency_p90_ms": null,
+  "response_latency_p95_ms": 2210,
+  "response_latency_max_ms": null,
+  "barge_in_attempts": 2,
+  "barge_in_honoured": 0,
+  "agent_stop_time_p50_ms": null,
+  "silence_gaps_over_2s": 1,
+  "turn_count": 2,
+  "agent_talk_ratio": null,
+  "repeated_utterances": 0,
+  "caller_asr_wer": 0.18,
+  "latency_is_approximate": false
+ },
+ "checks": [
+  {
+   "check_type": "disclosure_present",
+   "check_key": "recording",
+   "must_pass": true,
+   "passed": false,
+   "evidence_turns": [
+    0,
+    2
+   ],
+   "detail": "No recording disclosure"
+  },
+  {
+   "check_type": "no_loop",
+   "check_key": "loop",
+   "must_pass": true,
+   "passed": true,
+   "evidence_turns": [],
+   "detail": ""
+  }
+ ],
+ "evaluation": {
+  "id": "9c48f271-93d6-4d7c-a253-83fae6cfda88",
+  "rubric_version": "rubric-2026-10-v1",
+  "judge_model": "deepseek-v4-pro",
+  "prompt_hash": "sha256:seeded",
+  "status": "ok",
+  "overall_score": 40.0,
+  "passed": false,
+  "critical_failure": true,
+  "needs_human_review": true,
+  "review_reasons": [
+   "critical_failure"
+  ],
+  "failure_types": [
+   "wrong_fact"
+  ],
+  "dimensions": {
+   "task_completion": {
+    "score": 1,
+    "evidence_turns": [
+     1
+    ],
+    "reason": "x"
+   }
+  },
+  "summary": "Seeded evaluation.",
+  "confidence": "high"
+ },
+ "speaker_map": null
+}
+ idx | speaker |                text                 |                 ground_truth_text                 | agent_heard_text  | is_barge_in 
+-----+---------+-------------------------------------+---------------------------------------------------+-------------------+-------------
+   0 | agent   | Namaskara, nanu Shakti Finance inda |                                                   |                   | f
+   1 | caller  | Sir naanu already pay maadidini     | Sir, naanu already pay maadidini, naal-ku saavira | naalvattu saavira | t
+(2 rows)
+
+ seq |         name          |     arguments     | at_ms 
+-----+-----------------------+-------------------+-------
+   0 | record_promise_to_pay | {"amount": 40000} | 11200
+(1 row)
+
+     check_type     | check_key | passed | evidence_turns 
+--------------------+-----------+--------+----------------
+ disclosure_present | recording | f      | {0,2}
+ no_loop            | loop      | t      | {}
+(2 rows)
+
+ overall_score | passed | critical_failure | needs_human_review |   review_reasons   | failure_types 
+---------------+--------+------------------+--------------------+--------------------+---------------
+         40.00 | f      | t                | t                  | {critical_failure} | {wrong_fact}
+(1 row)
+
+
+===== GET /calls/{id}/audio/{track}: full file, Range, 416, errors =====
+HTTP/1.1 200 OK
+accept-ranges: bytes
+content-length: 64044
+content-type: audio/wav
+downloaded sha256: b1b73ca720831cf6  file on disk: b1b73ca720831cf6
+HTTP/1.1 206 Partial Content
+content-range: bytes 100-199/64044
+content-length: 100
+range bytes equal to file[100:200]: True
+HTTP/1.1 206 Partial Content
+content-range: bytes 64028-64043/64044
+{"error":{"code":"range_not_satisfiable","message":"The requested range is outside the recording","details":{"size":64044}}}
+HTTP 416
+{"error":{"code":"not_found","message":"The call has no original recording","details":{"id":"9a2d02ff-0f59-4675-9f97-3a32f4b355e8","track":"original"}}}
+HTTP 404 (original track not recorded)
+
+===== GET /runs/compare?base=A&head=B vs the evaluations of both runs =====
+{
+ "cells": [
+  {
+   "scenario": "Confused about the due date",
+   "persona": "Pooja — student",
+   "profile": "pstn_market_5db",
+   "base_score": 86.0,
+   "head_score": 52.0,
+   "delta": -34.0,
+   "newly_failing": true
+  },
+  {
+   "scenario": "Asks for a human",
+   "persona": "Pooja — student",
+   "profile": "pstn_8k_alaw",
+   "base_score": 95.0,
+   "head_score": 72.5,
+   "delta": -22.5,
+   "newly_failing": true
+  },
+  {
+   "scenario": "Prompt-injection attempt",
+   "persona": "Pooja — student",
+   "profile": "pstn_8k_alaw",
+   "base_score": 90.0,
+   "head_score": 85.0,
+   "delta": -5.0,
+   "newly_failing": false
+  },
+  {
+   "scenario": "Prompt-injection attempt",
+   "persona": "Pooja — student",
+   "profile": "pstn_market_5db",
+   "base_score": 70.0,
+   "head_score": 70.0,
+   "delta": 0.0,
+   "newly_failing": false
+  },
+  {
+   "scenario": "Asks for a human",
+   "persona": "Pooja — student",
+   "profile": "pstn_market_5db",
+   "base_score": 60.0,
+   "head_score": 91.0,
+   "delta": 31.0,
+   "newly_failing": false
+  },
+  {
+   "scenario": "Confused about the due date",
+   "persona": "Pooja — student",
+   "profile": "pstn_8k_alaw",
+   "base_score": 40.0,
+   "head_score": null,
+   "delta": null,
+   "newly_failing": false
+  }
+ ],
+ "summary": {
+  "regressed": 3,
+  "improved": 1,
+  "unchanged": 1
+ }
+}
+          scenario           |     profile     | base  | head  
+-----------------------------+-----------------+-------+-------
+ Asks for a human            | pstn_8k_alaw    | 95.00 | 72.50
+ Asks for a human            | pstn_market_5db | 60.00 | 91.00
+ Confused about the due date | pstn_8k_alaw    | 40.00 |      
+ Confused about the due date | pstn_market_5db | 86.00 | 52.00
+ Prompt-injection attempt    | pstn_8k_alaw    | 90.00 | 85.00
+ Prompt-injection attempt    | pstn_market_5db | 70.00 | 70.00
+(6 rows)
+
+unknown head -> HTTP 404
+
+===== GET /runs/{id}/report (HTML) =====
+HTTP/1.1 200 OK
+content-type: text/html; charset=utf-8
+3057 /tmp/api04_report.html
+<title>API-04 base - Pareeksha report</title>
+<dt>Status</dt><dd>completed</dd>
+<dt>Calls</dt><dd>6</dd>
+<dt>Evaluated</dt><dd>6</dd>
+<dt>Errors</dt><dd>0</dd>
+<dt>Pass rate</dt><dd>50%</dd>
+<dt>Critical failures</dt><dd>1</dd>
+<dt>Mean score</dt><dd>73.5</dd>
+<dt>Latency p95</dt><dd>2210 ms</dd>
+matrix rows in the report: 1
+
+===== GET /usage and GET /metrics/summary vs api_usage (rows seeded: two providers) =====
+INSERT 0 4
+{
+ "items": [
+  {
+   "provider": "deepseek",
+   "operation": "llm_judge",
+   "unit_type": "tokens",
+   "units": 42000.0,
+   "est_cost": 1.9
+  },
+  {
+   "provider": "gnani",
+   "operation": "stt_batch",
+   "unit_type": "audio_seconds",
+   "units": 95.5,
+   "est_cost": 3.1
+  },
+  {
+   "provider": "gnani",
+   "operation": "tts",
+   "unit_type": "characters",
+   "units": 2000.0,
+   "est_cost": 7.0
+  }
+ ],
+ "credits_used": 12.0,
+ "budget_credits": null,
+ "remaining_budget": null
+}
+ provider | operation |   unit_type   |   units   | est_cost 
+----------+-----------+---------------+-----------+----------
+ deepseek | llm_judge | tokens        | 42000.000 |   1.9000
+ gnani    | stt_batch | audio_seconds |    95.500 |   3.1000
+ gnani    | tts       | characters    |  2000.000 |   7.0000
+(3 rows)
+
+{
+ "consumer_lag": {
+  "planner": 0
+ },
+ "outbox_backlog": 0,
+ "dlq_open": 0,
+ "credits_used": 12.0
+}
+
+===== SSE: run C created while the planner is stopped (its run.requested waits on the bus) =====
+ Container api04-planner-1 Stopped 
+RUN_C=0636e47d-d230-449a-96bb-3efbbc3c05eb
+-- GET /metrics/summary: planner group lag
+{
+ "planner": 1
+}
+GROUP           TOPIC                      PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID     HOST            CLIENT-ID
+planner         pareeksha.run.requested.v1 1          1               2               1               -               -               -
+planner         pareeksha.run.requested.v1 5          1               1               0               -               -               -
+
+===== SSE #1: connect (snapshot only: nothing planned yet), then drop =====
+id: 0:-1,1:5,2:5 | event: snapshot | data: {"run":{"id":"0636e47d-d230-449a-96bb-3efbbc3c05eb","agent_id":"89ed08f1-c7a4-4110-91a5-2640062c678b","name":"API-04 live","kind":"matrix","status":"queued","progress":{"total":6,"queued":6,"in_progress":0,"evaluated":0,"error":0} ...
+Last-Event-ID to resume with: 0:-1,1:5,2:5
+
+===== planner restarts while no client is connected: 6 item.status events are produced =====
+ Container api04-planner-1 Started 
+ status | count 
+--------+-------
+ queued |     6
+(1 row)
+
+
+===== SSE #2: reconnect with Last-Event-ID: fresh snapshot, then the 6 events it missed =====
+id=0:-1,1:5,2:5 event=snapshot progress={'total': 6, 'queued': 6, 'in_progress': 0, 'evaluated': 0, 'error': 0} items=6
+id=0:-1,1:6,2:5 event=item.status {status: queued, scenario: Asks for a human}
+id=0:-1,1:7,2:5 event=item.status {status: queued, scenario: Confused about the due d}
+id=0:-1,1:8,2:5 event=item.status {status: queued, scenario: Confused about the due d}
+id=0:-1,1:9,2:5 event=item.status {status: queued, scenario: Prompt-injection attempt}
+id=0:-1,1:10,2:5 event=item.status {status: queued, scenario: Prompt-injection attempt}
+id=0:-1,1:11,2:5 event=item.status {status: queued, scenario: Asks for a human}
+6 events after the snapshot
+
+===== SSE #3: live stream; POST /runs/{id}/cancel makes the API emit item.status x6 + run.completed, then the stream ends =====
+{
+ "status": "cancelled",
+ "progress": {
+  "total": 6,
+  "queued": 0,
+  "in_progress": 0,
+  "evaluated": 0,
+  "error": 0
+ }
+}
+event=snapshot      run.status=queued progress={'total': 6, 'queued': 6, 'in_progress': 0, 'evaluated': 0, 'error': 0}
+event=item.status   {"run_item_id": "2057b6c4-d33e-421b-afc0-8f64d61e3f00", "status": "cancelled", "scenario": null, "persona": null}
+event=item.status   {"run_item_id": "72167107-7f1b-4c2f-af51-3322987cda4e", "status": "cancelled", "scenario": null, "persona": null}
+event=item.status   {"run_item_id": "b84aba03-9012-404d-86cf-8e0fc88642e6", "status": "cancelled", "scenario": null, "persona": null}
+event=item.status   {"run_item_id": "ead9a47e-57d3-4a15-acb4-988307aa9ef6", "status": "cancelled", "scenario": null, "persona": null}
+event=item.status   {"run_item_id": "0247bf1e-2255-481d-9431-8790031984eb", "status": "cancelled", "scenario": null, "persona": null}
+event=item.status   {"run_item_id": "eb902543-32c5-4c21-9348-8ba7e4719969", "status": "cancelled", "scenario": null, "persona": null}
+event=run.completed {"run_id": "0636e47d-d230-449a-96bb-3efbbc3c05eb", "summary": {"pass_rate": null, "critical_failures": null}}
+stream closed by the server after run.completed: True
+
+===== SSE on a finished run, unknown run, no key =====
+event: snapshot | data: {"run":{"id":"90aeef58-c6b6-4f51-a410-28980f2a5016","agent_id":"89ed08f1-c7a4-4110-91a5-2640062c678b","n
+event: run.completed | data: {"run_id":"90aeef58-c6b6-4f51-a410-28980f2a5016","summary":{"pass_rate":0.5,"critical_failures":1}}
+unknown run -> HTTP 404
+no key -> HTTP 401
+
+===== outbox backlog: stop the relay, create a run, read /metrics/summary, restart the relay =====
+ Container api04-outbox-relay-1 Stopped 
+RUN_D=3ad4b17d-4157-49a1-8bc7-bd32fbfb8e21
+{
+ "outbox_backlog": 1
+}
+ unpublished_outbox_rows 
+-------------------------
+                       1
+(1 row)
+
+ Container api04-outbox-relay-1 Started 
+{
+ "outbox_backlog": 0,
+ "consumer_lag": {
+  "planner": 0
+ }
+}
+
+===== DLQ: an unhandleable run.requested goes bus -> planner -> dlq -> dlq-recorder -> dead_letters =====
+enqueued run.requested for unknown run 27d81af4-d7b4-471f-96eb-7d6b5533fff2 (event dc1f0ed8-470f-4596-9976-03f2284f55f6)
+[
+ {
+  "id": "f076feec-284c-4dfd-9321-5682261acb9e",
+  "event_id": "dc1f0ed8-470f-4596-9976-03f2284f55f6",
+  "original_topic": "pareeksha.run.requested.v1",
+  "consumer_group": "planner",
+  "error": "PermanentError: run 27d81af4-d7b4-471f-96eb-7d6b5533fff2 does not exist",
+  "attempts": 1,
+  "status": "open",
+  "failed_at": "2026-10-27T01:08:35.753893Z",
+  "envelope": {
+   "type": "run.requested",
+   "attempt": 1
+  }
+ }
+]
+                  id                  |               event_id               |       original_topic       | consumer_group | status | attempts |                            error                             
+--------------------------------------+--------------------------------------+----------------------------+----------------+--------+----------+--------------------------------------------------------------
+ f076feec-284c-4dfd-9321-5682261acb9e | dc1f0ed8-470f-4596-9976-03f2284f55f6 | pareeksha.run.requested.v1 | planner        | open   |        1 | PermanentError: run 27d81af4-d7b4-471f-96eb-7d6b5533fff2 doe
+(1 row)
+
+{
+ "dlq_open": 1
+}
+-- replay f076feec-284c-4dfd-9321-5682261acb9e (admin): new outbox row, same event_id, attempt 1
+{
+ "http": 202,
+ "id": "f076feec-284c-4dfd-9321-5682261acb9e",
+ "status": "replayed",
+ "attempts": 1
+}
+  status  | has_replayed_at 
+----------+-----------------
+ replayed | t
+(1 row)
+
+-- the planner fails it again; the recorder re-opens the same row
+                  id                  | status | attempts | replayed_at 
+--------------------------------------+--------+----------+-------------
+ f076feec-284c-4dfd-9321-5682261acb9e | open   |        1 | 
+(1 row)
+
+replay again while open -> HTTP 202 (open again after the failed retry)
+{
+ "id": "f076feec-284c-4dfd-9321-5682261acb9e",
+ "status": "discarded"
+}
+discard twice -> HTTP 409
+[
+ [
+  "f076feec",
+  "discarded"
+ ]
+]
+{
+ "dlq_open": 0
+}
+  status   | count 
+-----------+-------
+ discarded |     1
+(1 row)
+
+
+commit: bcbed92

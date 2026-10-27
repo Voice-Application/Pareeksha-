@@ -3,15 +3,19 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import APIRouter, Header, Response
+from fastapi import APIRouter, Depends, Header, Response
+from fastapi.responses import HTMLResponse, StreamingResponse
+from starlette.background import BackgroundTask
 
-from pareeksha.api.auth import ReadKey, WriteKey, scoped
+from pareeksha.api.auth import ReadKey, WriteKey
 from pareeksha.api.deps import AUTH_ERRORS, Db, Pagination, binary_response, errors
-from pareeksha.api.stubs import not_implemented
-from pareeksha.runs import service
+from pareeksha.db.session import SessionFactory, get_session_factory
+from pareeksha.events.settings import kafka_bootstrap
+from pareeksha.runs import compare, report, service
+from pareeksha.runs.stream import ProgressStream
 from pareeksha.schemas.common import Page
 from pareeksha.schemas.runs import (
     RunCompareOut,
@@ -83,13 +87,11 @@ async def list_runs(
 # Declared before /runs/{run_id} so "compare" is never parsed as a run id.
 @router.get(
     "/runs/compare",
-    dependencies=[scoped("read")],
     responses=errors(404),
     summary="Per-cell score deltas between two runs",
 )
-async def compare_runs(base: UUID, head: UUID) -> RunCompareOut:
-    # STUB(API-04)
-    not_implemented("API-04")
+async def compare_runs(base: UUID, head: UUID, key: ReadKey, session: Db) -> RunCompareOut:
+    return await compare.compare_runs(session, key.project_id, base, head)
 
 
 @router.get("/runs/{run_id}", responses=errors(404))
@@ -99,17 +101,27 @@ async def get_run(run_id: UUID, key: ReadKey, session: Db) -> RunOut:
 
 @router.get(
     "/runs/{run_id}/events",
-    dependencies=[scoped("read")],
     response_class=Response,
-    responses={**_SSE_RESPONSE, **errors(404)},
+    responses={**_SSE_RESPONSE, **errors(404), 502: {"description": "Kafka unreachable"}},
     summary="Live progress (Server-Sent Events)",
 )
 async def stream_run_events(
     run_id: UUID,
+    key: ReadKey,
+    session: Db,
+    factory: Annotated[SessionFactory, Depends(get_session_factory)],
+    bootstrap: Annotated[str, Depends(kafka_bootstrap)],
     last_event_id: str | None = Header(default=None, alias="Last-Event-ID"),
 ) -> Response:
-    # STUB(API-04)
-    not_implemented("API-04")
+    await service.get_run(session, key.project_id, run_id)  # 404 before any stream starts
+    stream = ProgressStream(bootstrap, factory, key.project_id, run_id, last_event_id=last_event_id)
+    await stream.open()
+    return StreamingResponse(
+        stream.events(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+        background=BackgroundTask(stream.close),
+    )
 
 
 @router.get(
@@ -135,11 +147,9 @@ async def cancel_run(run_id: UUID, key: WriteKey, session: Db) -> RunOut:
 
 @router.get(
     "/runs/{run_id}/report",
-    dependencies=[scoped("read")],
-    response_class=Response,
+    response_class=HTMLResponse,
     responses={**binary_response("text/html", "Exportable HTML report"), **errors(404)},
     summary="Exportable HTML report of a run",
 )
-async def get_run_report(run_id: UUID) -> Response:
-    # STUB(API-04)
-    not_implemented("API-04")
+async def get_run_report(run_id: UUID, key: ReadKey, session: Db) -> HTMLResponse:
+    return HTMLResponse(await report.build(session, key.project_id, run_id))

@@ -160,11 +160,11 @@ def test_budget_helpers(monkeypatch: pytest.MonkeyPatch) -> None:
 # ------------------------------------------------------------------------------------ stubs
 
 
-def test_no_stub_api03_marker_remains_in_the_source() -> None:
+def test_no_stub_api03_or_api04_marker_remains_in_the_source() -> None:
     offenders = [
         str(path.relative_to(PACKAGE))
         for path in PACKAGE.rglob("*.py")
-        if "STUB(API-03)" in path.read_text(encoding="utf-8")
+        if any(m in path.read_text(encoding="utf-8") for m in ("STUB(API-03)", "STUB(API-04)"))
     ]
     assert offenders == []
 

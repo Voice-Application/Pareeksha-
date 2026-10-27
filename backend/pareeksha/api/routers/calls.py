@@ -7,13 +7,15 @@ from datetime import UTC, datetime
 from typing import Annotated, Any, Literal, cast
 from uuid import UUID
 
-from fastapi import APIRouter, Header, Query, Response
+from fastapi import APIRouter, Header, Query, Request, Response
 from sqlalchemy import delete, select
 
-from pareeksha.api.auth import WriteAuditKey, scoped
+from pareeksha.api.auth import ReadKey, WriteAuditKey, scoped
 from pareeksha.api.deps import AUTH_ERRORS, Blobs, Db, Pagination, binary_response, errors
 from pareeksha.api.errors import ApiError
 from pareeksha.api.stubs import not_implemented
+from pareeksha.calls import service
+from pareeksha.calls.audio import audio_response
 from pareeksha.audit.pipeline import primary_language, stt_blob_key
 from pareeksha.audit.turns import LabelledSegment, build_turns, labels_in_order
 from pareeksha.db.models import Calls, Turns
@@ -32,7 +34,7 @@ from pareeksha.schemas.calls import (
     ReviewCreate,
     Speaker,
 )
-from pareeksha.schemas.common import CallRef, CallSource, Page
+from pareeksha.schemas.common import CallRef, CallSource, ErrorResponse, Page
 from pareeksha.storage.blob import BlobNotFoundError
 
 router = APIRouter(tags=["calls"], responses=AUTH_ERRORS)
@@ -40,7 +42,6 @@ router = APIRouter(tags=["calls"], responses=AUTH_ERRORS)
 
 @router.get(
     "/calls",
-    dependencies=[scoped("read")],
     summary="List calls (Audits page, review queue, Calibration)",
     description=(
         "Filters combine with AND. `source` may be repeated (e.g. `source=upload&source=import` "
@@ -48,6 +49,8 @@ router = APIRouter(tags=["calls"], responses=AUTH_ERRORS)
     ),
 )
 async def list_calls(
+    key: ReadKey,
+    session: Db,
     page: Pagination,
     source: Annotated[list[CallSource] | None, Query()] = None,
     status: CallStatus | None = None,
@@ -56,34 +59,47 @@ async def list_calls(
     needs_review: bool | None = None,
     reviewed: bool | None = None,
 ) -> Page[CallSummaryOut]:
-    # STUB(API-04)
-    not_implemented("API-04")
+    return await service.list_calls(
+        session,
+        key.project_id,
+        page,
+        source=list(source) if source else None,
+        status=status,
+        agent_id=agent_id,
+        run_id=run_id,
+        needs_review=needs_review,
+        reviewed=reviewed,
+    )
 
 
-@router.get("/calls/{call_id}", dependencies=[scoped("read")], responses=errors(404))
-async def get_call(call_id: UUID) -> CallOut:
-    # STUB(API-04)
-    not_implemented("API-04")
+@router.get("/calls/{call_id}", responses=errors(404))
+async def get_call(call_id: UUID, key: ReadKey, session: Db, request: Request) -> CallOut:
+    def audio_url(cid: UUID, track: str) -> str:
+        return str(request.app.url_path_for("get_call_audio", call_id=cid, track=track))
+
+    return await service.get_call(session, key.project_id, call_id, audio_url)
 
 
 @router.get(
     "/calls/{call_id}/audio/{track}",
-    dependencies=[scoped("read")],
     response_class=Response,
     responses={
         **binary_response("audio/wav", "WAV audio; supports HTTP Range requests"),
         206: {"description": "Partial content (Range request)"},
         **errors(404),
+        416: {"model": ErrorResponse, "description": "range_not_satisfiable"},
     },
     summary="Download a recording track",
 )
 async def get_call_audio(
     call_id: UUID,
     track: AudioTrack,
+    key: ReadKey,
+    session: Db,
     range_: str | None = Header(default=None, alias="Range"),
 ) -> Response:
-    # STUB(API-04)
-    not_implemented("API-04")
+    blob_path = await service.recording_path(session, key.project_id, call_id, track)
+    return audio_response(blob_path, range_)
 
 
 @router.post(

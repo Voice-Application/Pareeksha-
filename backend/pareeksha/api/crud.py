@@ -5,6 +5,7 @@ from __future__ import annotations
 import base64
 import binascii
 import json
+from collections.abc import Callable
 from datetime import datetime
 from typing import Any
 from uuid import UUID
@@ -49,6 +50,30 @@ async def paginate(
         return rows, None
     rows = rows[: page.limit]
     return rows, encode_cursor(rows[-1].created_at, rows[-1].id)
+
+
+async def paginate_rows(
+    session: AsyncSession,
+    stmt: Any,
+    ts_column: Any,
+    id_column: Any,
+    page: PageParams,
+    *,
+    key_of: Callable[[Any], tuple[datetime, UUID]],
+) -> tuple[list[Any], str | None]:
+    """Newest first over ``(ts_column, id_column)`` for a statement that is not a plain entity.
+
+    ``key_of(row)`` returns that pair for a result row (used for the next cursor).
+    """
+    if page.cursor:
+        ts, row_id = decode_cursor(page.cursor)
+        stmt = stmt.where(tuple_(ts_column, id_column) < tuple_(ts, row_id))
+    stmt = stmt.order_by(ts_column.desc(), id_column.desc()).limit(page.limit + 1)
+    rows = list((await session.execute(stmt)).all())
+    if len(rows) <= page.limit:
+        return rows, None
+    rows = rows[: page.limit]
+    return rows, encode_cursor(*key_of(rows[-1]))
 
 
 async def get_or_404(
