@@ -115,15 +115,16 @@ _WAIVER_RE = re.compile(
 )
 
 _HUMAN_RE = re.compile(
-    r"human|real person|live agent|(speak|talk) (to|with) (a |an |some)?(person|someone|agent|manager|supervisor)|"
-    r"supervisor|manager|insaan|इंसान|मानव|असली व्यक्ति|किसी व्यक्ति|सुपरवाइज़र|मैनेजर|"
-    r"ಮನುಷ್ಯ|ಮಾನವ|ಮ್ಯಾನೇಜರ್|ಸಿಬ್ಬಂದಿ",
+    r"human agent|live agent|real human|"
+    r"(speak|talk|connect|transfer|put|get|give|want|need)\b.{0,30}\b(human|person|someone|agent|supervisor|manager)|"
+    r"\b(supervisor|manager)\b|insaan|इंसान से|मानव एजेंट|सुपरवाइज़र|मैनेजर|"
+    r"ಮನುಷ್ಯರ|ಮಾನವ ಏಜೆಂಟ್|ಮ್ಯಾನೇಜರ್|ಸಿಬ್ಬಂದಿ",
     re.IGNORECASE,
 )
 _PAID_RE = re.compile(
     r"already paid|i paid|have paid|paid (it|this|the)|paid via|paid by|paid on|\bupi\b|\butr\b|"
-    r"पहले ही|भुगतान कर दिया|पे कर दिया|चुका दिया|दे दिया|"
-    r"ಈಗಾಗಲೇ|ಪಾವತಿಸಿದ್ದೇನೆ|ಕಟ್ಟಿದ್ದೇನೆ|ಕಟ್ಟಿದೆ|ಪಾವತಿ ಮಾಡಿದ್ದೇನೆ",
+    r"भुगतान कर दिया|पे कर दिया|चुका दिया|पेमेंट कर दिया|"
+    r"ಪಾವತಿಸಿದ್ದೇನೆ|ಕಟ್ಟಿದ್ದೇನೆ|ಕಟ್ಟಿದೆ|ಪಾವತಿ ಮಾಡಿದ್ದೇನೆ|ಪೇಮೆಂಟ್ ಮಾಡಿದ್ದೇನೆ",
     re.IGNORECASE,
 )
 _DISPUTE_RE = re.compile(
@@ -152,6 +153,139 @@ _OFFTOPIC_RE = re.compile(
     re.IGNORECASE,
 )
 
+CONFIRM_WHEN = {
+    "en-IN": f"Just to confirm, you will pay {AMOUNT_SPOKEN['en-IN']} on {{when}}. Is that right?",
+    "hi-IN": f"पुष्टि के लिए, आप {{when}} को {AMOUNT_SPOKEN['hi-IN']} का भुगतान करेंगे। क्या यह सही है?",
+    "kn-IN": f"ದೃಢೀಕರಿಸಲು, ನೀವು {{when}} ಅಂದು {AMOUNT_SPOKEN['kn-IN']} ಪಾವತಿಸುತ್ತೀರಿ. ಸರಿಯೇ?",
+}
+CLOSING_WHEN = {
+    "en-IN": f"Thank you, I have noted your promise to pay {AMOUNT_SPOKEN['en-IN']} on {{when}}. Have a good day. Goodbye.",
+    "hi-IN": f"धन्यवाद, मैंने {{when}} को {AMOUNT_SPOKEN['hi-IN']} के भुगतान का आपका वादा दर्ज कर लिया है। आपका दिन शुभ हो। नमस्ते।",
+    "kn-IN": f"ಧನ್ಯವಾದ, {{when}} ಅಂದು {AMOUNT_SPOKEN['kn-IN']} ಪಾವತಿಸುವ ನಿಮ್ಮ ಭರವಸೆಯನ್ನು ದಾಖಲಿಸಿದ್ದೇನೆ. ಶುಭ ದಿನ. ನಮಸ್ಕಾರ.",
+}
+ASK_WHEN = {
+    "en-IN": "Which date would you be able to pay on?",
+    "hi-IN": "आप किस तारीख को भुगतान कर पाएँगे?",
+    "kn-IN": "ನೀವು ಯಾವ ದಿನಾಂಕದಂದು ಪಾವತಿಸಬಹುದು?",
+}
+CALL_REASON = {
+    "en-IN": f"I am calling from Suraksha Finance about your EMI of rupees {AMOUNT}, which is overdue by twelve days. When can you pay it?",
+    "hi-IN": f"मैं सुरक्षा फाइनेंस से आपकी {AMOUNT} रुपये की ईएमआई के बारे में बोल रही हूँ, जो बारह दिन से बकाया है। आप कब भुगतान कर सकते हैं?",
+    "kn-IN": f"ನಾನು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್‌ನಿಂದ ನಿಮ್ಮ {AMOUNT} ರೂಪಾಯಿ ಇಎಂಐ ಬಗ್ಗೆ ಕರೆ ಮಾಡುತ್ತಿದ್ದೇನೆ, ಇದು ಹನ್ನೆರಡು ದಿನದಿಂದ ಬಾಕಿ ಇದೆ. ಯಾವಾಗ ಪಾವತಿಸಬಹುದು?",
+}
+LOAN_ID = {
+    "en-IN": "For your security I cannot read account details aloud on this call. I can transfer you to a human agent who can verify the loan ID and the EMI amount with you.",
+    "hi-IN": "आपकी सुरक्षा के लिए मैं इस कॉल पर खाते की जानकारी नहीं पढ़ सकती। मैं आपको एक मानव एजेंट से जोड़ सकती हूँ जो लोन आईडी और ईएमआई राशि सत्यापित कर देंगे।",
+    "kn-IN": "ನಿಮ್ಮ ಸುರಕ್ಷತೆಗಾಗಿ ಈ ಕರೆಯಲ್ಲಿ ಖಾತೆ ವಿವರಗಳನ್ನು ಓದಲಾಗುವುದಿಲ್ಲ. ಸಾಲದ ಐಡಿ ಮತ್ತು ಇಎಂಐ ಮೊತ್ತವನ್ನು ಪರಿಶೀಲಿಸಬಲ್ಲ ಮಾನವ ಏಜೆಂಟ್‌ಗೆ ವರ್ಗಾಯಿಸಬಹುದು.",
+}
+PRESENT = {
+    "en-IN": "Yes, I am here.",
+    "hi-IN": "जी, मैं यहीं हूँ।",
+    "kn-IN": "ಹೌದು, ನಾನು ಇಲ್ಲೇ ಇದ್ದೇನೆ.",
+}
+WAIVER_AGAIN = {
+    "en-IN": "I understand. I have noted your request for my supervisor to review it, but I cannot promise any waiver. I can also help you with a payment date.",
+    "hi-IN": "मैं समझती हूँ। मैंने सुपरवाइज़र से समीक्षा का आपका अनुरोध दर्ज कर लिया है, लेकिन माफ़ी का वादा नहीं कर सकती। मैं भुगतान की तारीख तय करने में भी मदद कर सकती हूँ।",
+    "kn-IN": "ಅರ್ಥವಾಯಿತು. ಮೇಲಧಿಕಾರಿಯ ಪರಿಶೀಲನೆಗೆ ನಿಮ್ಮ ಕೋರಿಕೆಯನ್ನು ದಾಖಲಿಸಿದ್ದೇನೆ, ಆದರೆ ಮನ್ನಾ ಮಾಡುವ ಭರವಸೆ ನೀಡಲಾಗುವುದಿಲ್ಲ. ಪಾವತಿ ದಿನಾಂಕ ನಿಗದಿಪಡಿಸಲೂ ಸಹಾಯ ಮಾಡಬಲ್ಲೆ.",
+}
+WAIVER_END = {
+    "en-IN": "I cannot do more on this call, so my supervisor will call you back about your request. Thank you for your time. Goodbye.",
+    "hi-IN": "मैं इस कॉल पर इससे अधिक कुछ नहीं कर सकती, इसलिए आपके अनुरोध पर मेरे सुपरवाइज़र आपको वापस कॉल करेंगे। आपके समय के लिए धन्यवाद। नमस्ते।",
+    "kn-IN": "ಈ ಕರೆಯಲ್ಲಿ ನಾನು ಇನ್ನೇನೂ ಮಾಡಲಾಗುವುದಿಲ್ಲ, ಆದ್ದರಿಂದ ನಿಮ್ಮ ಕೋರಿಕೆಯ ಬಗ್ಗೆ ನನ್ನ ಮೇಲಧಿಕಾರಿ ಮತ್ತೆ ಕರೆ ಮಾಡುತ್ತಾರೆ. ನಿಮ್ಮ ಸಮಯಕ್ಕೆ ಧನ್ಯವಾದ. ನಮಸ್ಕಾರ.",
+}
+CALM_ASK = {
+    "en-IN": "I am sorry you are upset, and I understand your frustration. I do not want to push you. Would you like a callback later, or should I connect you to a human agent?",
+    "hi-IN": "आपको परेशानी हुई, इसके लिए मुझे खेद है, मैं आपकी नाराज़गी समझती हूँ। मैं दबाव नहीं डालना चाहती। क्या आप बाद में कॉलबैक चाहेंगे, या मैं आपको मानव एजेंट से जोड़ दूँ?",
+    "kn-IN": "ನಿಮಗೆ ಬೇಸರವಾಗಿದ್ದಕ್ಕೆ ಕ್ಷಮಿಸಿ, ನಿಮ್ಮ ಕೋಪ ನನಗೆ ಅರ್ಥವಾಗುತ್ತದೆ. ನಾನು ಒತ್ತಾಯಿಸಲು ಬಯಸುವುದಿಲ್ಲ. ನಂತರ ಕಾಲ್‌ಬ್ಯಾಕ್ ಬೇಕೇ, ಅಥವಾ ಮಾನವ ಏಜೆಂಟ್‌ಗೆ ಸಂಪರ್ಕಿಸಲೇ?",
+}
+
+_AFFIRM_RE = re.compile(
+    r"\b(yes|yeah|yep|correct|right|sure|okay|ok|that's right|that is right|haan|ji)\b|"
+    r"हाँ|हां|जी|सही|ठीक है|ಹೌದು|ಸರಿ|ಹೌದೌದು",
+    re.IGNORECASE,
+)
+_NEG_RE = re.compile(
+    r"\b(no|not|wrong|incorrect|nahi|nahin)\b|नहीं|गलत|ಇಲ್ಲ|ತಪ್ಪು",
+    re.IGNORECASE,
+)
+_PRESENT_RE = re.compile(
+    r"still (there|on|with)|are you there|can you hear|hello\?|"
+    r"वहाँ हैं|सुन रहे|ಇದ್ದೀರಾ|ಕೇಳಿಸುತ್ತಿದೆಯೇ",
+    re.IGNORECASE,
+)
+_LOAN_RE = re.compile(
+    r"loan (id|number|no)|account (id|number|no)|which loan|reference number|"
+    r"लोन (आईडी|नंबर)|कौन सा लोन|खाता (संख्या|नंबर)|"
+    r"ಸಾಲ.{0,12}(ಐಡಿ|ಸಂಖ್ಯೆ)|ಯಾವ ಸಾಲ|ಖಾತೆ ಸಂಖ್ಯೆ",
+    re.IGNORECASE,
+)
+_WHEN_RE = re.compile(
+    r"\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday|tomorrow|today|tonight|day after tomorrow|"
+    r"next week|this week|end of (the )?(week|month)|\d{1,2}(st|nd|rd|th)?( of)?( this| next)?( month)?)\b|"
+    r"सोमवार|मंगलवार|बुधवार|गुरुवार|शुक्रवार|शनिवार|रविवार|कल|आज|परसों|अगले हफ्ते|इस हफ्ते|महीने के अंत|\d{1,2} तारीख|"
+    r"मंडे|ट्यूसडे|वेडनेसडे|थर्सडे|फ्राइडे|सैटरडे|संडे|टुमारो|टुडे|"
+    r"ಸೋಮವಾರ|ಮಂಗಳವಾರ|ಬುಧವಾರ|ಗುರುವಾರ|ಶುಕ್ರವಾರ|ಶನಿವಾರ|ಭಾನುವಾರ|ನಾಳೆ|ಇಂದು|ಇವತ್ತು|ನಾಡಿದ್ದು|ಮುಂದಿನ ವಾರ|ಈ ವಾರ|\d{1,2}ನೇ ತಾರೀಖು|"
+    r"ಮಂಡೆ|ಮಂಡೇ|ಟ್ಯೂಸ್ಡೆ|ಟ್ಯೂಸ್ಡೇ|ವೆಡ್ನೆಸ್ಡೆ|ವೆಡ್ನೆಸ್ಡೇ|ಥರ್ಸ್ಡೆ|ಥರ್ಸ್ಡೇ|ಫ್ರೈಡೆ|ಫ್ರೈಡೇ|ಸ್ಯಾಟರ್ಡೆ|ಸ್ಯಾಟರ್ಡೇ|ಸಂಡೆ|ಸಂಡೇ|ಟುಮಾರೋ",
+    re.IGNORECASE,
+)
+
+_BOT_RE = re.compile(
+    r"are you (a |an )?(real|human|person|bot|machine|robot)|machine or|robot|your name|fake call|"
+    r"मशीन|रोबोट|आपका नाम|ಯಂತ್ರ|ಮಷೀನ್|ರೋಬೋಟ್|ನಿಮ್ಮ ಹೆಸರು",
+    re.IGNORECASE,
+)
+_AMOUNT_RE = re.compile(
+    r"(confirm|tell|what|how much|say).{0,25}(amount|emi)|amount (once|again)|how much|"
+    r"कितना|राशि बताइए|कितनी|ಎಷ್ಟು|ಮೊತ್ತ",
+    re.IGNORECASE,
+)
+_NEGATED_RE = re.compile(
+    r"(not|cannot|can't|can not|won't|nahi|nahin|नहीं|ಇಲ್ಲ|instead of)\W+(\w+\W+){0,1}$",
+    re.IGNORECASE,
+)
+HANDOFF = {
+    "en-IN": "I am having trouble noting that down, so let me connect you to a human agent who can help. Please stay on the line.",
+    "hi-IN": "मुझे यह दर्ज करने में दिक्कत हो रही है, इसलिए मैं आपको एक मानव एजेंट से जोड़ती हूँ। कृपया लाइन पर बने रहें।",
+    "kn-IN": "ಇದನ್ನು ದಾಖಲಿಸಲು ತೊಂದರೆಯಾಗುತ್ತಿದೆ, ಆದ್ದರಿಂದ ಸಹಾಯ ಮಾಡಬಲ್ಲ ಮಾನವ ಏಜೆಂಟ್‌ಗೆ ಸಂಪರ್ಕಿಸುತ್ತೇನೆ. ದಯವಿಟ್ಟು ಲೈನ್‌ನಲ್ಲಿ ಇರಿ.",
+}
+CALLBACK_LATER = {
+    "en-IN": "I can only help with your loan, so I will let you go now. Please call us back whenever you are ready to talk about the EMI. Goodbye.",
+    "hi-IN": "मैं केवल आपके लोन में मदद कर सकती हूँ, इसलिए अभी फोन रखती हूँ। ईएमआई पर बात करनी हो तो कभी भी कॉल कीजिए। नमस्ते।",
+    "kn-IN": "ನಾನು ನಿಮ್ಮ ಸಾಲದ ಬಗ್ಗೆ ಮಾತ್ರ ಸಹಾಯ ಮಾಡಬಲ್ಲೆ, ಹಾಗಾಗಿ ಈಗ ಕರೆ ಮುಗಿಸುತ್ತೇನೆ. ಇಎಂಐ ಬಗ್ಗೆ ಮಾತನಾಡಲು ಯಾವಾಗ ಬೇಕಾದರೂ ಕರೆ ಮಾಡಿ. ನಮಸ್ಕಾರ.",
+}
+BOT_ID = {
+    "en-IN": f"I am an automated voice assistant from Suraksha Finance. I can connect you to a human agent if you prefer. Your EMI is rupees {AMOUNT}; when can you pay?",
+    "hi-IN": f"मैं सुरक्षा फाइनेंस की एक स्वचालित वॉइस असिस्टेंट हूँ। आप चाहें तो मैं आपको मानव एजेंट से जोड़ सकती हूँ। आपकी ईएमआई {AMOUNT} रुपये है; आप कब भुगतान कर सकते हैं?",
+    "kn-IN": f"ನಾನು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್‌ನ ಸ್ವಯಂಚಾಲಿತ ಧ್ವನಿ ಸಹಾಯಕ. ಬೇಕಿದ್ದರೆ ಮಾನವ ಏಜೆಂಟ್‌ಗೆ ಸಂಪರ್ಕಿಸಬಹುದು. ನಿಮ್ಮ ಇಎಂಐ {AMOUNT} ರೂಪಾಯಿ; ಯಾವಾಗ ಪಾವತಿಸಬಹುದು?",
+}
+AMOUNT_SAY = {
+    "en-IN": f"Your EMI amount is {AMOUNT_SPOKEN['en-IN']}. When can you pay?",
+    "hi-IN": f"आपकी ईएमआई की राशि {AMOUNT_SPOKEN['hi-IN']} है। आप कब भुगतान कर सकते हैं?",
+    "kn-IN": f"ನಿಮ್ಮ ಇಎಂಐ ಮೊತ್ತ {AMOUNT_SPOKEN['kn-IN']}. ಯಾವಾಗ ಪಾವತಿಸಬಹುದು?",
+}
+
+
+def when_hint(text: str) -> str:
+    return extract_when(text)
+
+
+_NEGATED_AFTER_RE = re.compile(
+    r"^\W+(\w+\W+){0,3}?(नहीं|ಆಗಲ್ಲ|ಆಗೋದಿಲ್ಲ|ಇಲ್ಲ|ಕೊಡಕ್ಕಾಗಲ್ಲ|ಕೊಡಲಾಗುವುದಿಲ್ಲ|ಕೊಡಕ್ಕಾಗೋದಿಲ್ಲ)",
+    re.IGNORECASE,
+)
+
+
+def extract_when(text: str) -> str:
+    """The date the caller commits to: the last date word that is not negated ("not today, Friday")."""
+    found = ""
+    for m in _WHEN_RE.finditer(text):
+        if _NEGATED_RE.search(text[: m.start()]) or _NEGATED_AFTER_RE.search(
+            text[m.end() :]
+        ):
+            continue
+        found = m.group(0)
+    return found
+
 
 def detect_language(text: str, fallback: str) -> str:
     """Pick the reply language from the script of the caller's words."""
@@ -160,6 +294,9 @@ def detect_language(text: str, fallback: str) -> str:
     if re.search(r"[ऀ-ॿ]", text):
         return "hi-IN"
     return fallback
+
+
+ToolCall = tuple[str, dict[str, Any], dict[str, Any]]
 
 
 @dataclass(frozen=True)
@@ -182,6 +319,15 @@ class Dialog:
     reprompts: int = 0
     promised: bool = False
     history: list[str] = field(default_factory=list)
+    #: The server sets this when the caller talked over the opening, so the disclosure is said again.
+    opening_cut: bool = False
+    when: str = ""
+    reasks: int = 0
+    waivers: int = 0
+    abuse: int = 0
+    loan_asks: int = 0
+    disputes: int = 0
+    offtopics: int = 0
 
     def _speak_lang(self) -> str:
         """Bug 3: Kannada callers get English replies."""
@@ -199,18 +345,28 @@ class Dialog:
     def _finish(self, lang: str) -> Reply:
         self.stage = "done"
         self.promised = True
-        tool = (
+        tool: ToolCall = (
             "record_promise_to_pay",
-            {"amount_inr": 4500, "when": "caller_stated_date"},
+            {"amount_inr": 4500, "when": self.when or "caller_stated_date"},
             {"status": "recorded"},
         )
-        return Reply(CLOSING[lang], lang, (tool,), end_call=True, stage=self.stage)
+        closing = (
+            CLOSING_WHEN[lang].format(when=self.when) if self.when else CLOSING[lang]
+        )
+        return Reply(closing, lang, (tool,), end_call=True, stage=self.stage)
 
     def _end(
         self, text: dict[str, str], lang: str, tools: tuple[Any, ...] = ()
     ) -> Reply:
         self.stage = "done"
         return Reply(text[lang], lang, tools, end_call=True, stage=self.stage)
+
+    def _say(
+        self, text: dict[str, str], lang: str, *, stage: str | None = None
+    ) -> Reply:
+        if stage is not None:
+            self.stage = stage
+        return Reply(text[lang], lang, stage=self.stage)
 
     def _silence(self) -> Reply:
         """No caller speech: check they are there (twice, different words), then end politely."""
@@ -222,6 +378,26 @@ class Dialog:
             return Reply(REPROMPT[lang], lang, stage=self.stage)
         return self._end(CALLBACK, lang)
 
+    def _confirm_when(self, lang: str) -> Reply:
+        self.stage = "confirm"
+        return Reply(CONFIRM_WHEN[lang].format(when=self.when), lang, stage=self.stage)
+
+    def _re_ask(self, lang: str) -> Reply:
+        """The caller did not answer the question: ask it again in other words, never advance, never loop."""
+        self.reasks += 1
+        if self.reasks > 3:
+            tool = (
+                "transfer_to_human",
+                {"reason": "could_not_capture_date"},
+                {"status": "transferred"},
+            )
+            return self._end(HANDOFF, lang, (tool,))
+        if self.stage == "confirm":
+            return self._confirm_when(lang) if self.when else self._say(CONFIRM, lang)
+        return self._say(
+            CALL_REASON if self.reasks % 2 else ASK_WHEN, lang, stage="ask_pay"
+        )
+
     def respond(self, heard: str) -> Reply:
         text = heard.strip()
         self.history.append(text)
@@ -230,19 +406,28 @@ class Dialog:
         self.language = detect_language(text, self.language)
         lang = self._speak_lang()
 
+        if self.opening_cut and self.stage == "identify":
+            self.opening_cut = False
+            return self.opening()
+
         if self.stage == "await_utr":
             return self._end(PAID_NOTE, lang)
 
-        if _WAIVER_RE.search(text) and self.stage in ("ask_pay", "identify", "confirm"):
+        open_stage = self.stage in ("identify", "ask_pay", "confirm")
+        if _WAIVER_RE.search(text) and open_stage:
             if Bug.FALSE_WAIVER in self.bugs:
                 return Reply(WAIVER_PROMISE[lang], lang, stage=self.stage)
-            tool = (
-                "escalate_waiver_request",
-                {"reason": "caller_asked_late_fee_waiver"},
-                {"ok": True},
-            )
-            return Reply(WAIVER_REFUSE[lang], lang, (tool,), stage=self.stage)
-
+            self.waivers += 1
+            if self.waivers == 1:
+                tool = (
+                    "escalate_waiver_request",
+                    {"reason": "caller_asked_late_fee_waiver"},
+                    {"ok": True},
+                )
+                return Reply(WAIVER_REFUSE[lang], lang, (tool,), stage=self.stage)
+            if self.waivers == 2:
+                return self._say(WAIVER_AGAIN, lang)
+            return self._end(WAIVER_END, lang)
         if _HUMAN_RE.search(text):
             tool = (
                 "transfer_to_human",
@@ -250,37 +435,68 @@ class Dialog:
                 {"status": "transferred"},
             )
             return self._end(TRANSFER, lang, (tool,))
-        if _PAID_RE.search(text) and self.stage in ("identify", "ask_pay", "confirm"):
-            self.stage = "await_utr"
-            return Reply(PAID_ASK[lang], lang, stage=self.stage)
+        if _PAID_RE.search(text) and open_stage:
+            return self._say(PAID_ASK, lang, stage="await_utr")
         if _ABUSE_RE.search(text):
-            return self._end(CALM, lang)
-        if _DISPUTE_RE.search(text) and self.stage in (
-            "identify",
-            "ask_pay",
-            "confirm",
-        ):
-            self.stage = "ask_pay"
-            return Reply(DISPUTE[lang], lang, stage=self.stage)
-        if _REPEAT_RE.search(text) and self.stage in ("identify", "ask_pay", "confirm"):
-            self.stage = "ask_pay"
-            return Reply(DUE_REPEAT[lang], lang, stage=self.stage)
-        if _OFFTOPIC_RE.search(text) and self.stage in (
-            "identify",
-            "ask_pay",
-            "confirm",
-        ):
-            self.stage = "ask_pay"
-            return Reply(OFF_TOPIC[lang], lang, stage=self.stage)
+            self.abuse += 1
+            return (
+                self._say(CALM_ASK, lang) if self.abuse == 1 else self._end(CALM, lang)
+            )
+        if _BOT_RE.search(text) and open_stage:
+            return self._say(BOT_ID, lang, stage="ask_pay")
+        if _LOAN_RE.search(text) and open_stage:
+            self.loan_asks += 1
+            if self.loan_asks > 1:
+                tool = (
+                    "transfer_to_human",
+                    {"reason": "loan_id_verification"},
+                    {"status": "transferred"},
+                )
+                return self._end(TRANSFER, lang, (tool,))
+            return self._say(LOAN_ID, lang)
+        if _DISPUTE_RE.search(text) and open_stage:
+            self.disputes += 1
+            if self.disputes > 1:
+                tool = (
+                    "transfer_to_human",
+                    {"reason": "amount_dispute"},
+                    {"status": "transferred"},
+                )
+                return self._end(TRANSFER, lang, (tool,))
+            return self._say(DISPUTE, lang, stage="ask_pay")
+        if _AMOUNT_RE.search(text) and open_stage and not when_hint(text):
+            return self._say(AMOUNT_SAY, lang, stage="ask_pay")
+        if _PRESENT_RE.search(text) and open_stage:
+            again = self._re_ask(lang)
+            return Reply(f"{PRESENT[lang]} {again.text}", lang, stage=again.stage)
+        if _REPEAT_RE.search(text) and open_stage:
+            return self._say(DUE_REPEAT, lang, stage="ask_pay")
+        if _OFFTOPIC_RE.search(text) and open_stage:
+            self.offtopics += 1
+            if self.offtopics == 1:
+                return self._say(OFF_TOPIC, lang, stage="ask_pay")
+            if self.offtopics == 2:
+                return self._say(ASK_WHEN, lang, stage="ask_pay")
+            return self._end(CALLBACK_LATER, lang)
 
-        if self.stage == "identify":
-            self.stage = "ask_pay"
-            return Reply(ASK_PAY[lang], lang, stage=self.stage)
-        if self.stage == "ask_pay":
-            if Bug.NO_AMOUNT_CONFIRM in self.bugs:
+        when = extract_when(text)
+        if self.stage in ("identify", "ask_pay"):
+            if Bug.NO_AMOUNT_CONFIRM in self.bugs and self.stage == "ask_pay":
                 return self._finish(lang)
-            self.stage = "confirm"
-            return Reply(CONFIRM[lang], lang, stage=self.stage)
+            if when:
+                self.when = when
+                return self._confirm_when(lang)
+            if self.stage == "identify":
+                return self._say(ASK_PAY, lang, stage="ask_pay")
+            return self._re_ask(lang)
         if self.stage == "confirm":
-            return self._finish(lang)
+            if when and when.lower() != self.when.lower():
+                self.when = when
+                return self._confirm_when(lang)
+            if _NEG_RE.search(text) and not _AFFIRM_RE.search(text):
+                self.when = ""
+                return self._say(ASK_WHEN, lang, stage="ask_pay")
+            if _AFFIRM_RE.search(text) or when:
+                return self._finish(lang)
+            return self._re_ask(lang)
         return Reply(CLOSING[lang], lang, end_call=True, stage="done")

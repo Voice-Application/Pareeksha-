@@ -9,12 +9,21 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import dataclasses
 import json
 import logging
 import os
 import time
 from typing import Any
 
+from pareeksha.adapters.base import (
+    AUDIO_FRAME_BYTES,
+    AUDIO_FRAME_MS,
+    CallEndMessage,
+    StartMessage,
+    ToolCallMessage,
+    TranscriptMessage,
+)
 from pydantic import ValidationError
 from websockets.asyncio.server import ServerConnection, serve
 from websockets.datastructures import Headers
@@ -25,14 +34,6 @@ from mock_agent.bugs import Bug, bugs_from_env, parse_bugs
 from mock_agent.policy import Dialog, Reply
 from mock_agent.speech import GnaniAgentSpeech, Speech
 from mock_agent.vad import UtteranceDetector
-from pareeksha.adapters.base import (
-    AUDIO_FRAME_BYTES,
-    AUDIO_FRAME_MS,
-    CallEndMessage,
-    StartMessage,
-    ToolCallMessage,
-    TranscriptMessage,
-)
 
 log = logging.getLogger("mock_agent")
 
@@ -44,15 +45,21 @@ BARGE_IN_FRAMES = 6
 
 def health_response(connection: ServerConnection, request: Request) -> Response | None:
     if request.path == "/health":
-        body = json.dumps({"status": "ok", "agent": "mock-emi", "protocol": "pareeksha-audio-v1"})
-        return Response(200, "OK", Headers({"Content-Type": "application/json"}), body.encode())
+        body = json.dumps(
+            {"status": "ok", "agent": "mock-emi", "protocol": "pareeksha-audio-v1"}
+        )
+        return Response(
+            200, "OK", Headers({"Content-Type": "application/json"}), body.encode()
+        )
     return None
 
 
 class CallSession:
     """One call: VAD -> STT -> scripted dialog -> TTS paced at real time, with glass-box events."""
 
-    def __init__(self, ws: ServerConnection, speech: Speech, default_bugs: frozenset[Bug]) -> None:
+    def __init__(
+        self, ws: ServerConnection, speech: Speech, default_bugs: frozenset[Bug]
+    ) -> None:
         self.ws = ws
         self.speech = speech
         self.bugs = default_bugs
@@ -63,6 +70,8 @@ class CallSession:
         self.utterances: asyncio.Queue[bytes | None] = asyncio.Queue()
         self.barge_frames = 0
         self.ended = False
+        self.opening_finished = False
+        self.last_reply: Reply | None = None
 
     def now_ms(self) -> int:
         return int((time.monotonic() - self.t0) * 1000)
@@ -85,11 +94,14 @@ class CallSession:
         self.t0 = time.monotonic()
         self.dialog = Dialog(language=start.language_hint or "en-IN", bugs=self.bugs)
         log.info(
-            "call %s start lang=%s bugs=%s", start.call_id, self.dialog.language, sorted(self.bugs)
+            "call %s start lang=%s bugs=%s",
+            start.call_id,
+            self.dialog.language,
+            sorted(self.bugs),
         )
         responder = asyncio.create_task(self._respond_loop())
         try:
-            await self._start_playback(self.dialog.opening())
+            await self._start_playback(self.dialog.opening(), opening=True)
             await asyncio.wait_for(self._receive_loop(), timeout=MAX_CALL_S)
         except (TimeoutError, ConnectionClosed):
             pass
@@ -132,8 +144,22 @@ class CallSession:
             utterance = await self.utterances.get()
             if utterance is None:
                 return
+            if self.dialog.stage == "done" and self.last_reply is not None:
+                # The agent already ended the call: never talk over its goodbye; if the caller cut it off,
+                # say the same goodbye again (its tool calls were already reported).
+                if self.playing is None or self.playing.done():
+                    await self._start_playback(
+                        dataclasses.replace(self.last_reply, tool_calls=())
+                    )
+                continue
             heard = await self.speech.hear(utterance, self.dialog.language)
-            await self._send(TranscriptMessage(role="user", text=heard, t_ms=self.now_ms()))
+            await self._send(
+                TranscriptMessage(role="user", text=heard, t_ms=self.now_ms())
+            )
+            if not self.opening_finished:
+                self.dialog.opening_cut = (
+                    True  # the caller spoke over the disclosure: say it again
+                )
             reply = self.dialog.respond(heard)
             await self._cancel_playback()
             await self._start_playback(reply)
@@ -145,21 +171,29 @@ class CallSession:
             with contextlib.suppress(asyncio.CancelledError):
                 await task
 
-    async def _start_playback(self, reply: Reply) -> None:
-        self.playing = asyncio.create_task(self._speak(reply))
+    async def _start_playback(self, reply: Reply, opening: bool = False) -> None:
+        self.playing = asyncio.create_task(self._speak(reply, opening))
 
-    async def _speak(self, reply: Reply) -> None:
-        await self._send(TranscriptMessage(role="agent", text=reply.text, t_ms=self.now_ms()))
+    async def _speak(self, reply: Reply, opening: bool = False) -> None:
+        self.last_reply = reply
+        await self._send(
+            TranscriptMessage(role="agent", text=reply.text, t_ms=self.now_ms())
+        )
         try:
             pcm = await self.speech.say(reply.text, reply.language)
             await self._stream_pcm(pcm)
+            if opening:
+                self.opening_finished = True
         finally:
             # The tool call was decided with the reply; a caller who talks over the reply (which
             # cancels this task) must not make the agent forget it.
             for name, arguments, result in reply.tool_calls:
                 await self._send(
                     ToolCallMessage(
-                        name=name, arguments=arguments, result=result, t_ms=self.now_ms()
+                        name=name,
+                        arguments=arguments,
+                        result=result,
+                        t_ms=self.now_ms(),
                     )
                 )
         if reply.end_call:
@@ -185,7 +219,9 @@ async def serve_forever(
     async def handler(ws: ServerConnection) -> None:
         await CallSession(ws, engine, default_bugs).run()
 
-    async with serve(handler, host, port, process_request=health_response, max_size=2**20):
+    async with serve(
+        handler, host, port, process_request=health_response, max_size=2**20
+    ):
         log.info("mock agent on :%d bugs=%s", port, sorted(default_bugs))
         await asyncio.Future()
 

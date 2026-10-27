@@ -79,6 +79,7 @@ function latencyThreshold(ms: number | null | undefined, target: number): Thresh
   if (ms == null) return null;
   return ms <= target ? "ok" : ms <= target * 1.25 ? "warn" : "fail";
 }
+const NOT_MEASURED = <span className="text-base text-muted">not measured</span>;
 const sec = (ms: number | null | undefined) => (ms == null ? "-" : ms < 10000 ? `${(ms / 1000).toFixed(1)} s` : `${Math.round(ms / 1000)} s`);
 
 export function RunDetailSkeleton() {
@@ -132,8 +133,10 @@ export function RunDetail({ runId }: { runId: string }) {
   const total = p.total;
   const done = p.evaluated + p.error;
   const running = ACTIVE.has(r.status);
-  const failed = s?.pass_rate != null && p.evaluated ? Math.round(p.evaluated * (1 - s.pass_rate)) : 0;
-  const crit = s?.critical_failures ?? 0;
+  // Verdict counts come from the scored items themselves so the title can never contradict the table.
+  const scored = (items.data ?? []).filter((i) => i.overall_score != null);
+  const failed = scored.length ? scored.filter((i) => !i.passed).length : s?.pass_rate != null && p.evaluated ? Math.round(p.evaluated * (1 - s.pass_rate)) : 0;
+  const crit = scored.length ? scored.filter((i) => i.critical_failure).length : (s?.critical_failures ?? 0);
   const title =
     r.status === "queued" && !total ? "Run queued"
     : running ? `Run is ${done} of ${total} done`
@@ -142,7 +145,10 @@ export function RunDetail({ runId }: { runId: string }) {
     : p.evaluated === 0 ? "No calls were scored"
     : failed === 0 ? `All ${p.evaluated} calls passed`
     : `${failed} of ${p.evaluated} calls failed${crit ? `, ${crit} critical` : ""}`;
-  const tops = (s?.top_failure_types ?? []).map((t) => [String(t[0]), Number(t[1])] as const);
+  const serverTops = (s?.top_failure_types ?? []).map((t) => [String(t[0]), Number(t[1])] as const);
+  const tagCounts = new Map<string, number>();
+  for (const c of calls.data?.items ?? []) for (const t of c.failure_types ?? []) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
+  const tops = serverTops.length ? serverTops : [...tagCounts].sort((a, b) => b[1] - a[1]);
   const top = tops[0];
   const desc = running
     ? "Results appear as each call is evaluated."
@@ -151,7 +157,8 @@ export function RunDetail({ runId }: { runId: string }) {
   const all = items.data ?? [];
   const stale = !running ? false : now - updatedAt > 15000;
   const errored = p.error;
-  const bins = s?.score_distribution?.length === 10 ? s.score_distribution : new Array(10).fill(0);
+  const serverBins = s?.score_distribution?.length === 10 ? s.score_distribution : null;
+  const bins = serverBins && serverBins.reduce((a, b) => a + b, 0) > 0 ? serverBins : (provisional(all, undefined)?.score_distribution ?? new Array<number>(10).fill(0));
 
   const sorters: Sorters<RunItem> = {
     scenario: (i) => i.scenario.toLowerCase(),
@@ -176,8 +183,8 @@ export function RunDetail({ runId }: { runId: string }) {
     sort,
   );
   const columns: Column<RunItem>[] = [
-    { key: "scenario", header: "Scenario", sortable: true, cell: (i) => (i.call_id ? <Link className="font-medium underline-offset-2 hover:underline" href={`/calls/${i.call_id}`}>{i.scenario}</Link> : i.scenario) },
-    { key: "persona", header: "Persona", sortable: true, cell: (i) => i.persona },
+    { key: "scenario", header: "Scenario", sortable: true, className: "min-w-[14rem]", cell: (i) => (i.call_id ? <Link className="font-medium underline-offset-2 hover:underline" href={`/calls/${i.call_id}`}>{i.scenario}</Link> : i.scenario) },
+    { key: "persona", header: "Persona", sortable: true, className: "min-w-[10rem]", cell: (i) => i.persona },
     { key: "line", header: "Line", sortable: true, hidePhone: true, cell: (i) => i.noise_profile },
     { key: "status", header: "Status", sortable: true, cell: (i) => <StatusPill status={i.status} /> },
     { key: "score", header: "Score", sortable: true, cell: (i) => <ScoreChip score={i.overall_score} /> },
@@ -188,7 +195,7 @@ export function RunDetail({ runId }: { runId: string }) {
       hidePhone: true,
       cell: (i) => {
         const c = i.call_id ? callInfo.get(i.call_id) : undefined;
-        return c?.needs_human_review ? <FlagChip iconOnly reasons={c.review_reasons} /> : <span className="text-subtle">-</span>;
+        return c?.needs_human_review ? <FlagChip reasons={c.review_reasons} label="Review" /> : <span className="text-subtle">-</span>;
       },
     },
     {
@@ -243,9 +250,9 @@ export function RunDetail({ runId }: { runId: string }) {
         <StatTile hero label={`Pass rate${running ? " so far" : ""}`} value={s?.pass_rate != null ? `${Math.round(s.pass_rate * 100)}%` : "-"} caption={p.evaluated ? `${p.evaluated} scored` : undefined} />
         <StatTile label="Critical" value={s?.critical_failures ?? "-"} threshold={s?.critical_failures == null ? null : s.critical_failures > 0 ? "fail" : "ok"} caption="target 0" />
         <StatTile label="Mean score" value={s?.score_mean != null ? s.score_mean.toFixed(1) : "-"} caption="pass line 80" />
-        <StatTile label="Latency p50" value={sec(s?.latency_p50_ms)} threshold={latencyThreshold(s?.latency_p50_ms, 1000)} caption="target under 1.0 s" />
-        <StatTile label="Latency p95" value={sec(s?.latency_p95_ms)} threshold={latencyThreshold(s?.latency_p95_ms, 2000)} caption="target under 2.0 s" />
-        <StatTile label="Barge-in honoured" value={s?.barge_in_honoured_rate != null ? `${Math.round(s.barge_in_honoured_rate * 100)}%` : "-"} caption="target at least 90%" threshold={s?.barge_in_honoured_rate == null ? null : s.barge_in_honoured_rate >= 0.9 ? "ok" : "fail"} />
+        <StatTile label="Latency p50" value={s?.latency_p50_ms == null && !running ? NOT_MEASURED : sec(s?.latency_p50_ms)} threshold={latencyThreshold(s?.latency_p50_ms, 1000)} caption={s?.latency_p50_ms == null && !running ? "no per-turn timing was reported" : "target under 1.0 s"} />
+        <StatTile label="Latency p95" value={s?.latency_p95_ms == null && !running ? NOT_MEASURED : sec(s?.latency_p95_ms)} threshold={latencyThreshold(s?.latency_p95_ms, 2000)} caption={s?.latency_p95_ms == null && !running ? "no per-turn timing was reported" : "target under 2.0 s"} />
+        <StatTile label="Barge-in honoured" value={s?.barge_in_honoured_rate != null ? `${Math.round(s.barge_in_honoured_rate * 100)}%` : running ? "-" : NOT_MEASURED} caption={s?.barge_in_honoured_rate == null && !running ? "no caller interruptions in this run" : "target at least 90%"} threshold={s?.barge_in_honoured_rate == null ? null : s.barge_in_honoured_rate >= 0.9 ? "ok" : "fail"} />
       </TileRow>
       {errored > 0 && (
         <p className="-mt-3 mb-6 text-sm text-muted">

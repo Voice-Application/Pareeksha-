@@ -1,5 +1,5 @@
 from mock_agent.bugs import Bug, bugs_from_env, parse_bugs
-from mock_agent.policy import DISCLOSURE, Dialog, Reply, detect_language
+from mock_agent.policy import DISCLOSURE, Dialog, Reply, detect_language, extract_when
 
 
 def _run(dialog: Dialog, *heard: str) -> list[Reply]:
@@ -116,7 +116,8 @@ def test_clean_off_topic_is_redirected_and_abuse_is_met_calmly() -> None:
     redirect = d.respond("what do you think of the cricket match")
     assert "come back" in redirect.text and not redirect.end_call
     calm = d.respond("you are stupid, I will stop paying")
-    assert calm.end_call and "frustration" in calm.text and "human" in calm.text
+    assert not calm.end_call and "frustration" in calm.text and "human" in calm.text
+    assert d.respond("stop calling me, nonsense").end_call
 
 
 def test_clean_waiver_request_is_declined_without_promising() -> None:
@@ -133,3 +134,60 @@ def test_clean_silence_checks_presence_without_looping_the_same_sentence() -> No
     first, second, third = _clean("", "", "")
     assert "still on the line" in first.text
     assert second.text != first.text and third.end_call
+
+
+def test_clean_never_records_a_promise_the_caller_did_not_make() -> None:
+    d = Dialog("en-IN")
+    d.opening()
+    replies = _run(
+        d, "yes speaking", "why are you calling me, who is this", "which loan is this about"
+    )
+    assert not any(r.tool_calls for r in replies)
+    assert "overdue" in replies[1].text and "transfer" in replies[2].text
+
+
+def test_clean_promise_is_confirmed_with_the_callers_date_before_recording() -> None:
+    d = Dialog("en-IN")
+    d.opening()
+    _, confirm, unclear, closing = _run(
+        d, "yes", "I will pay on Friday", "sorry which date", "yes that is right"
+    )
+    assert "Friday" in confirm.text and "four thousand five hundred" in confirm.text
+    assert "Friday" in unclear.text and not unclear.tool_calls
+    assert closing.end_call and closing.tool_calls[0][1]["when"] == "Friday"
+
+
+def test_clean_repeated_waiver_pushes_get_different_answers_and_one_escalation() -> None:
+    d = Dialog("en-IN")
+    d.opening()
+    first, second, third = _run(
+        d, "waive the late fee", "please push it again, waive it", "just waive it"
+    )
+    assert first.tool_calls and not second.tool_calls
+    assert len({first.text, second.text, third.text}) == 3 and third.end_call
+
+
+def test_clean_restates_the_disclosure_when_the_caller_talked_over_the_opening() -> None:
+    d = Dialog("en-IN")
+    d.opening()
+    d.opening_cut = True
+    again = d.respond("hello?")
+    assert DISCLOSURE["en-IN"] in again.text and not again.end_call
+    assert "overdue" in d.respond("yes this is Anita").text
+
+
+def test_clean_records_the_date_the_caller_commits_to_not_the_one_they_ruled_out() -> None:
+    d = Dialog("en-IN")
+    d.opening()
+    _, confirm, closing = _run(d, "yes", "I cannot pay today, but I will pay this Friday", "yes")
+    assert "Friday" in confirm.text and "today" not in confirm.text
+    assert closing.tool_calls[0][1]["when"] == "Friday"
+    assert extract_when("No, not today, I said Friday") == "Friday"
+
+
+def test_clean_answers_are_you_a_bot_and_amount_questions_without_ending_or_transferring() -> None:
+    d = Dialog("en-IN")
+    d.opening()
+    bot, amount = _run(d, "are you a real person or a machine?", "confirm the amount once more")
+    assert "automated" in bot.text and not bot.tool_calls and not bot.end_call
+    assert "four thousand five hundred" in amount.text and not amount.end_call

@@ -52,7 +52,7 @@ export function Heatmap({ items, line, sortBy, flashIds, runKey }: { items: RunI
   if (!rows.length) return null;
   return (
     <div className="overflow-x-auto">
-      <div ref={grid} role="grid" aria-label={`Run matrix, scenarios by personas`} className="grid w-full gap-0.5" style={{ gridTemplateColumns: `minmax(140px,220px) repeat(${cols.length}, minmax(64px,1fr))` }}>
+      <div ref={grid} role="grid" aria-label={`Run matrix, scenarios by personas`} className="grid w-full gap-0.5" style={{ gridTemplateColumns: `minmax(140px,220px) repeat(${cols.length}, minmax(64px,1fr))`, maxWidth: 220 + cols.length * 140 }}>
         <div role="row" className="contents">
           <div role="columnheader" className="sticky left-0 bg-surface" />
           {cols.map((c) => (

@@ -152,7 +152,7 @@ export function Meter({ value, max = 100, passLine = 80, width = 56, label }: { 
   const pct = value === null || value === undefined ? 0 : Math.max(0, Math.min(100, (value / max) * 100));
   const step = value === null || value === undefined ? null : overallStep((value / max) * 100);
   return (
-    <span role="img" aria-label={label} className="relative inline-block h-2 rounded-full bg-sunken align-middle" style={{ width }}>
+    <span role="img" aria-label={label} className="relative inline-block h-2 rounded-full bg-sunken align-middle ring-1 ring-inset ring-border-strong" style={{ width }}>
       <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${pct}%`, background: step ? `var(--score-${step})` : "transparent" }} />
       {passLine !== null && <span className="absolute -inset-y-0.5 w-0.5 bg-fg" style={{ left: `${(passLine / max) * 100}%` }} aria-hidden />}
     </span>

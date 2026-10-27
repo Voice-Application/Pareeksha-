@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Bot, Play } from "lucide-react";
 import { api } from "@/lib/api/client";
@@ -49,15 +49,19 @@ export function Overview() {
   const urlAgent = url.get("agent");
   let stored = "";
   try { stored = typeof window !== "undefined" ? (window.localStorage.getItem(STORE) ?? "") : ""; } catch { /* storage unavailable */ }
-  const agent = active.find((a) => a.id === urlAgent) ?? active.find((a) => a.id === stored) ?? active[0];
-  useEffect(() => {
-    if (agent) try { window.localStorage.setItem(STORE, agent.id); } catch { /* convenience only */ }
-  }, [agent]);
+  // With no explicit choice, open on the agent that ran most recently, not the first in the list.
+  const newest = useQuery({ queryKey: ["runs", "overview", "newest"], queryFn: () => listRuns({ limit: 1 }) });
+  const newestAgentId = newest.data?.items?.[0]?.agent_id;
+  const agent = active.find((a) => a.id === urlAgent) ?? active.find((a) => a.id === stored) ?? active.find((a) => a.id === newestAgentId) ?? active[0];
+  const choose = (id: string) => {
+    try { window.localStorage.setItem(STORE, id); } catch { /* convenience only */ }
+    url.set({ agent: id });
+  };
 
   const runs = useQuery({ queryKey: ["runs", "overview", agent?.id], enabled: !!agent, queryFn: () => listRuns({ agent_id: agent!.id, limit: 6 }), refetchOnWindowFocus: true });
   const latest = runs.data?.items?.find((r) => r.status !== "draft");
   const items = useQuery({ queryKey: ["run-items", latest?.id, "overview"], enabled: !!latest, queryFn: () => listRunItems(latest!.id) });
-  const review = useQuery({ queryKey: ["calls", "needs-review"], queryFn: () => call(api.GET("/api/v1/calls", { params: { query: { needs_review: true, reviewed: false, limit: 5 } } })) });
+  const review = useQuery({ queryKey: ["calls", "needs-review", agent?.id], enabled: !!agent, queryFn: () => call(api.GET("/api/v1/calls", { params: { query: { agent_id: agent!.id, needs_review: true, reviewed: false, limit: 5 } } })) });
   const metrics = useQuery({ queryKey: ["metrics"], queryFn: () => call(api.GET("/api/v1/metrics/summary")), refetchInterval: 15000 });
   const usage = useQuery({ queryKey: ["usage"], queryFn: () => call(api.GET("/api/v1/usage")) });
   const health = useQuery({ queryKey: ["health"], queryFn: () => call(api.GET("/api/v1/health")), refetchInterval: 15000 });
@@ -90,7 +94,7 @@ export function Overview() {
         eyebrow={
           <span className="inline-flex items-center gap-3">
             <span>{agent.name}</span>
-            {active.length > 1 && <FilterSelect label="Agent" value={agent.id} onChange={(v) => url.set({ agent: v })} options={active.map((a) => ({ value: a.id, label: a.name }))} />}
+            {active.length > 1 && <FilterSelect label="Agent" value={agent.id} onChange={choose} options={active.map((a) => ({ value: a.id, label: a.name }))} />}
           </span>
         }
         title={title}
@@ -104,7 +108,7 @@ export function Overview() {
         <StatTile label="Credits used" value={inr(usage.data?.credits_used)} caption={budget != null ? <span className="inline-flex items-center gap-2">of {inr(budget)} <Meter value={Math.min(100, ((usage.data?.credits_used ?? 0) / budget) * 100)} passLine={null} label="Budget used" /></span> : "no budget set"} />
       </TileRow>
 
-      <div className="mb-6 grid items-start gap-6 min-[1180px]:grid-cols-[minmax(0,1fr)_408px]">
+      <div className="mb-6 grid items-stretch gap-6 min-[1180px]:grid-cols-[minmax(0,1fr)_408px]">
         <Panel title="Worst calls, latest run" aux={latest && <Link className="text-accent-fg underline-offset-2 hover:underline" href={`/runs/${latest.id}`}>Open run</Link>}>
           {!latest ? (
             <EmptyState icon={Play} title="No runs yet" body="A run sends synthetic callers to your agent." action={<LinkButton variant="primary" href={`/runs/new?agent=${agent.id}`}>Create run</LinkButton>} />
@@ -169,7 +173,7 @@ export function Overview() {
             </PanelBody>
           </div>
         </Panel>
-        <Panel title="Needs human review" aux={<Link className="text-accent-fg underline-offset-2 hover:underline" href="/calibration">Calibration</Link>}>
+        <Panel title={`Needs human review: ${agent.name}`} aux={<Link className="text-accent-fg underline-offset-2 hover:underline" href="/calibration">Calibration</Link>}>
           <PanelBody q={review} rows={review.data?.items?.length ?? 0} empty="No calls are waiting for review.">
             <ul className="flex flex-col divide-y divide-border">
               {review.data?.items?.map((c) => (

@@ -1,0 +1,4 @@
+run clean-scenarios 5bfc1a7a-1ebf-421f-bb7a-482423d74d74
+clean-scenarios completed {'total': 8, 'queued': 0, 'in_progress': 0, 'evaluated': 8, 'error': 0} 240s
+run clean-personas 3892b951-7aac-43a5-a39b-63845439f439
+clean-personas completed {'total': 4, 'queued': 0, 'in_progress': 0, 'evaluated': 4, 'error': 0} 230s
