@@ -1,6 +1,10 @@
-// STUB(FE-03): placeholder body, replaced when FE-03 builds this page
-import { RouteStub } from "@/components/layout/route-stub";
+import { Suspense } from "react";
+import { RunsList, RunsListSkeleton } from "@/components/runs/runs-list";
 
 export default function Page() {
-  return <RouteStub title="Runs" />;
+  return (
+    <Suspense fallback={<RunsListSkeleton />}>
+      <RunsList />
+    </Suspense>
+  );
 }

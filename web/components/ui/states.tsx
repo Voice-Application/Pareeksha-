@@ -132,3 +132,13 @@ export function PageError({ error, onRetry, backHref, backLabel }: { error: unkn
     </div>
   );
 }
+
+/** The endpoint answered 501 not_implemented: say so plainly and name the owner (00-shared 5.2 "not enabled"). */
+export function isNotImplemented(error: unknown): boolean {
+  return error instanceof ApiError && error.status === 501;
+}
+
+export function NotEnabled({ icon, what, error }: { icon: LucideIcon; what: string; error: unknown }) {
+  const owner = error instanceof ApiError ? (error.details as { owner?: string }).owner : undefined;
+  return <EmptyState icon={icon} title={`${what} is not enabled in this build`} body={owner ? `The API endpoint behind this page is not implemented yet (owner task ${owner}). It will appear here once it is.` : "The API endpoint behind this page is not implemented yet."} />;
+}
