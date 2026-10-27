@@ -1,0 +1,6 @@
+no_disclosure        2/2   caught=True  run e5bb49ec-8be4-4d09-a414-257c0f17b708
+no_amount_confirm    2/2   caught=True  run 7d852287-846a-420d-8622-f2fb0fd548f0
+english_to_kannada   2/2   caught=True  run 3455ece5-13dc-4ab4-8151-f308504d268a
+ignore_interrupt     2/2   caught=True  run 308bb511-3d9a-4ef8-9b6f-b1a04c3e4bdf
+false_waiver         0/2   caught=False  run 6d3ebf05-f19b-45c6-a3d0-7eaca92e4eb4
+control (bugs off) pass rate 1/2; caught 4/5
