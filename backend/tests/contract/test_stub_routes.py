@@ -170,17 +170,8 @@ def test_every_declared_route_is_in_openapi() -> None:
     assert len(ROUTES) == in_openapi  # the unprefixed /health alias is hidden from the schema
 
 
-@pytest.mark.parametrize("route", _stub_routes(), ids=lambda r: f"{_method(r)} {r.path}")
-def test_stub_route_returns_501_with_owner(route: APIRoute) -> None:
-    owner = _stub_owner(route)
-    assert owner is not None, "handler is missing its # STUB(<TASK-ID>) marker"
-    assert owner != "TL-01"
-    key = (_method(route), route.path)
-    response = _call(route, headers={} if key in NO_AUTH_501 else AUTH)
-    assert response.status_code == 501, response.text
-    error = response.json()["error"]
-    assert error["code"] == "not_implemented"
-    assert error["details"] == {"owner": owner}
+def test_every_route_is_implemented() -> None:
+    assert _stub_routes() == []
 
 
 @pytest.mark.parametrize("route", ROUTES, ids=lambda r: f"{_method(r)} {r.path}")
@@ -222,18 +213,6 @@ def test_stub_owner_ids_exist_on_the_task_board() -> None:
     for owner in owners:
         assert owner is not None
         assert f"**{owner}**" in board, f"{owner} is not a task in AGENTS.md section 7"
-
-
-@pytest.mark.parametrize(
-    "route",
-    [r for r in _stub_routes() if (_method(r), r.path) not in NO_AUTH_501],
-    ids=lambda r: f"{_method(r)} {r.path}",
-)
-def test_authenticated_routes_reject_missing_key(route: APIRoute) -> None:
-    response = _call(route, headers={})
-    assert response.status_code == 401, response.text
-    assert response.json()["error"]["code"] == "unauthorized"
-    assert response.headers["www-authenticate"] == "Bearer"
 
 
 def test_validation_error_is_400_in_the_standard_envelope() -> None:
