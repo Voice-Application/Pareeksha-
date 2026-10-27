@@ -26,7 +26,7 @@ def sink(record: UsageRecord) -> None:
         fh.write(record.model_dump_json() + "\n")
 
 
-async def run(name: str, snap: CallSnapshot, client) -> None:  # type: ignore[no-untyped-def]
+async def run(name: str, snap: CallSnapshot, client) -> None:
     rec = await evaluate_call(snap, client)
     data = dataclasses.asdict(rec)
     data["id"], data["call_id"] = str(rec.id), str(rec.call_id)

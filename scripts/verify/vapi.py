@@ -54,7 +54,7 @@ def request(method: str, path: str, body: Any = None, *, timeout: int = 60) -> A
         },
     )
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:  # noqa: S310 (operator-set URL)
+        with urllib.request.urlopen(req, timeout=timeout) as r:
             text = r.read().decode()
     except urllib.error.HTTPError as exc:
         raise SystemExit(f"{method} {path} -> {exc.code}: {exc.read().decode()[:300]}") from exc

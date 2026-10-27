@@ -13,7 +13,7 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[2] / "sdk" / "python"))
-from tests.fake_platform import API_KEY, State, serve  # noqa: E402
+from tests.fake_platform import API_KEY, State, serve
 
 EXAMPLE = Path(__file__).parents[2] / "sdk" / "python" / "pareeksha.example.yaml"
 

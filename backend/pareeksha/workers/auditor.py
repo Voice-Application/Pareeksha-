@@ -28,7 +28,8 @@ def _llm_or_none() -> LLMClient | None:
     """The role-detection LLM, or ``None`` when its key is not configured (heuristic only)."""
     try:
         settings = LLMSettings()
-        settings.api_key  # noqa: B018 - raises LLMConfigError when the key is missing
+        if not settings.api_key:  # the property raises LLMConfigError when the key is missing
+            return None
         return build_client(settings)
     except LLMConfigError:
         return None

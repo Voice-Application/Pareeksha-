@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 from uuid import UUID
 
 from fastapi import APIRouter
@@ -142,7 +142,7 @@ async def _out_many(session: AsyncSession, tests: list[RegressionTests]) -> list
                 noise_profile_id=t.noise_profile_id,
                 source_call_id=t.source_call_id,
                 failure_type=t.failure_type,
-                status=t.status,  # type: ignore[arg-type]
+                status=cast(RegressionStatus, t.status),
                 baseline_score=float(t.baseline_score),
                 tolerance=float(t.tolerance),
                 notes=t.notes,

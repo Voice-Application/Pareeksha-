@@ -18,7 +18,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pareeksha.api.auth import authenticate, bearer_scheme
 from pareeksha.api.errors import ApiError
 from pareeksha.api.main import ROUTERS, app
-from pareeksha.api.stubs import not_implemented
 from pareeksha.db.session import get_session_factory
 
 client = TestClient(app)
@@ -250,15 +249,6 @@ def test_runs_compare_is_not_shadowed_by_run_id() -> None:
 def test_bad_enum_for_audio_track_is_400() -> None:
     response = client.get(f"{API}/calls/{ID}/audio/bogus", headers=AUTH)
     assert response.status_code == 400
-
-
-def test_not_implemented_helper_validates_owner() -> None:
-    with pytest.raises(ApiError) as caught:
-        not_implemented("API-02")
-    assert caught.value.status_code == 501
-    for bad in ("TL-01", "api-02", "oops", ""):
-        with pytest.raises(ValueError):
-            not_implemented(bad)
 
 
 def test_health_reports_down_dependencies_with_503(monkeypatch: pytest.MonkeyPatch) -> None:

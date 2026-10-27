@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useLatest } from "@/lib/hooks/use-latest";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getRun, listRunItems, type Run, type RunItem } from "@/lib/api/runs";
 
@@ -85,16 +86,17 @@ export function useRunLive(runId: string) {
   }, [runId, terminal, qc]);
 
   // Fallback polling.
+  const runRef = useLatest(run);
+  const itemsRef = useLatest(items);
   useEffect(() => {
     if (live !== "polling") return;
     const t = setInterval(() => {
-      void run.refetch();
-      void items.refetch();
+      void runRef.current.refetch();
+      void itemsRef.current.refetch();
       setUpdatedAt(Date.now());
     }, 5000);
     return () => clearInterval(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [live]);
+  }, [live, runRef, itemsRef]);
 
   return { run, items, live: terminal ? ("closed" as LiveState) : live, updatedAt, flash };
 }

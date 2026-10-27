@@ -42,7 +42,7 @@ from pareeksha.schemas.scenarios import ScenarioCreate
 from pareeksha.speech.registry import get_stt_provider, get_tts_provider
 
 sys.path.insert(0, str(Path(__file__).parent))
-from scripts import HI, KN, LATENCY  # noqa: E402
+from scripts import HI, KN, LATENCY
 
 DATA = Path(os.environ.get("DATA_DIR", "/data"))
 LEDGER = Path(os.environ.get("LEDGER", str(DATA / "fe04_usage.jsonl")))
@@ -76,18 +76,18 @@ def f32_to_wav(x: np.ndarray, sr: int = SR) -> bytes:
     return buf.getvalue()
 
 
-async def retry(fn):  # type: ignore[no-untyped-def]
+async def retry(fn):
     """Gnani allows one active request at a time; a 429 means another request is still finishing, so wait and retry."""
     for attempt in range(8):
         try:
             return await fn()
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             if "429" not in str(exc) and "RATE_LIMITED" not in str(exc) or attempt == 7:
                 raise
             await asyncio.sleep(4 + attempt * 2)
 
 
-async def tts(provider, text: str, voice: str, language: str) -> np.ndarray:  # type: ignore[no-untyped-def]
+async def tts(provider, text: str, voice: str, language: str) -> np.ndarray:
     cache = DATA / "ttscache" / (hashlib.sha256(f"{voice}|{language}|{text}".encode()).hexdigest() + ".wav")
     if cache.exists():
         return wav_to_f32(cache.read_bytes())
@@ -107,11 +107,11 @@ def agent_info(row: dict) -> AgentInfo:
     )
 
 
-def model_from(cls, row: dict):  # type: ignore[no-untyped-def]
+def model_from(cls, row: dict):
     return cls.model_validate({k: v for k, v in row.items() if k in cls.model_fields})
 
 
-async def build_call(item: dict, scenario_row: dict, persona_row: dict, noise_name: str, bug: bool, idx: int):  # type: ignore[no-untyped-def]
+async def build_call(item: dict, scenario_row: dict, persona_row: dict, noise_name: str, bug: bool, idx: int):
     """Voice the script, apply the line, transcribe the caller turns. Returns turns, audio tracks, tool call."""
     lang = persona_row["language"]
     scripts = (KN if lang == "kn-IN" else HI)[scenario_row["title"]][bug]
@@ -180,7 +180,7 @@ def wer(ref: str, hyp: str) -> float:
     return d[-1] / max(1, len(r))
 
 
-def write_call(conn, item: dict, agent_id, project_id, lang: str, turns, caller, agent, tool, rec, source="simulation", run_id=None):  # type: ignore[no-untyped-def]
+def write_call(conn, item: dict, agent_id, project_id, lang: str, turns, caller, agent, tool, rec, source="simulation", run_id=None):
     rel = f"fe04/{uuid.uuid4().hex[:12]}"
     out = DATA / rel
     out.mkdir(parents=True, exist_ok=True)
@@ -241,7 +241,7 @@ def write_call(conn, item: dict, agent_id, project_id, lang: str, turns, caller,
     return call_id
 
 
-def finalize_run(conn, run_id) -> dict:  # type: ignore[no-untyped-def]
+def finalize_run(conn, run_id) -> dict:
     rows = conn.execute(
         """SELECT e.overall_score, e.passed, e.critical_failure, e.needs_human_review, e.failure_types, m.response_latency_p50_ms,
                   m.response_latency_p95_ms, m.barge_in_attempts, m.barge_in_honoured

@@ -24,11 +24,11 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 sys.path.insert(0, str(ROOT))
 
-from mock_agent.speech import wav_to_pcm  # noqa: E402
-from websockets.asyncio.client import connect  # noqa: E402
+from mock_agent.speech import wav_to_pcm
+from websockets.asyncio.client import connect
 
-from pareeksha.adapters.base import AUDIO_FRAME_BYTES, AUDIO_FRAME_MS  # noqa: E402
-from pareeksha.gnani import GnaniSpeech, UsageLedger  # noqa: E402
+from pareeksha.adapters.base import AUDIO_FRAME_BYTES, AUDIO_FRAME_MS
+from pareeksha.gnani import GnaniSpeech, UsageLedger
 
 CALLER_VOICE = "Lakshmi"
 LINES = {

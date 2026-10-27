@@ -190,13 +190,13 @@ async def main() -> None:
                     result["raw_stt_segments"] = [s.model_dump() for s in t.segments]
                     return t
 
-                stt.transcribe = traced  # type: ignore[method-assign]
+                stt.transcribe = traced
                 auditor = Auditor(
                     AuditDeps(blobs=blobs, stt_factory=lambda: stt, llm=llm, fetch=_no_fetch)
                 )
                 async with pg.transaction():
                     ctx = Ctx(pg, "auditor", "t", 0, 0, 1)
-                    outputs = await auditor.handle(audit_env, ctx)  # type: ignore[arg-type]
+                    outputs = await auditor.handle(audit_env, ctx)
                 completed = make_envelope(
                     outputs[0].payload, producer="auditor", correlation_id=call_id
                 )
@@ -204,7 +204,7 @@ async def main() -> None:
 
                 async def dump(sql: str, *a: Any) -> list[dict[str, Any]]:
                     cur = pg.cursor(row_factory=dict_row)
-                    await cur.execute(sql, a)  # type: ignore[arg-type]
+                    await cur.execute(sql, a)
                     return await cur.fetchall()
 
                 call = (await dump("SELECT * FROM calls WHERE id = %s", call_id))[0]
@@ -220,7 +220,7 @@ async def main() -> None:
                 # --- 3. judge with the same rubric (FR-AU-4)
                 async with pg.transaction():
                     ctx = Ctx(pg, "evaluator", "t", 0, 0, 1)
-                    ev_out = await evaluate(completed, ctx, llm)  # type: ignore[arg-type]
+                    ev_out = await evaluate(completed, ctx, llm)
                 ev1 = (await dump("SELECT e.*, rv.version FROM evaluations e JOIN rubric_versions rv ON rv.id = e.rubric_version_id WHERE call_id = %s", call_id))[0]
                 checks1 = await dump(
                     "SELECT check_type, check_key, passed, detail FROM deterministic_checks "
@@ -254,7 +254,7 @@ async def main() -> None:
                 again = parse_envelope(json.dumps(requeued["envelope"]).encode())
                 async with pg.transaction():
                     ctx = Ctx(pg, "evaluator", "t", 0, 0, 1)
-                    ev_out2 = await evaluate(again, ctx, llm)  # type: ignore[arg-type]
+                    ev_out2 = await evaluate(again, ctx, llm)
                 turns2 = await dump(
                     "SELECT idx, speaker, text FROM turns WHERE call_id = %s ORDER BY idx", call_id
                 )

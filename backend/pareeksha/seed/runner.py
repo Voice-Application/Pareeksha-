@@ -18,7 +18,7 @@ import json
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal, cast
 
 import yaml
 from sqlalchemy import select
@@ -36,7 +36,7 @@ from pareeksha.db.models import (
     Scenarios,
 )
 from pareeksha.schemas.agents import AgentCreate
-from pareeksha.schemas.personas import NoiseProfileCreate, PersonaCreate
+from pareeksha.schemas.personas import Codec, NoiseProfileCreate, PersonaCreate
 from pareeksha.schemas.scenarios import ScenarioCreate
 
 DATA_DIR = Path(__file__).parent / "data"
@@ -121,8 +121,8 @@ async def _seed_noise_profiles(session: AsyncSession, project: Projects, out: Se
         if found is None:
             profile = NoiseProfileCreate(
                 name=name,
-                sample_rate=line.sample_rate,  # type: ignore[arg-type]
-                codec=line.codec,  # type: ignore[arg-type]
+                sample_rate=cast(Literal[8000, 16000], line.sample_rate),
+                codec=cast(Codec, line.codec),
                 pstn_bandpass=line.pstn_bandpass,
                 background_category=line.background,
                 snr_db=line.snr_db,

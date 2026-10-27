@@ -6,14 +6,15 @@ import { Button } from "./button";
 import { useAudioPreview } from "@/lib/hooks/use-audio-preview";
 import { Strip } from "./states";
 import { cn } from "@/lib/utils";
+import { useLatest } from "@/lib/hooks/use-latest";
 
 /** 28px play button for table rows. Loads the clip on first press. */
 export function RowPlayButton({ label, load, cacheKey, onError }: { label: string; load: () => Promise<Blob>; cacheKey: string; onError?: (message: string) => void }) {
   const p = useAudioPreview(load, cacheKey);
+  const onErrorRef = useLatest(onError);
   useEffect(() => {
-    if (p.state === "error" && p.error) onError?.(p.error);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [p.state, p.error]);
+    if (p.state === "error" && p.error) onErrorRef.current?.(p.error);
+  }, [p.state, p.error, onErrorRef]);
   return (
     <button
       type="button"

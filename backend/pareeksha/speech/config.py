@@ -69,12 +69,14 @@ class SpeechSettings(BaseSettings):
                 "stt_rest": self.cost_stt_rest_per_min,
                 "stt_stream": self.cost_stt_stream_per_min,
             }.get(operation, self.cost_stt_batch_per_min)
-        return getattr(self, f"cost_{provider.value}_stt_per_min")  # type: ignore[no-any-return]
+        rate: float | None = getattr(self, f"cost_{provider.value}_stt_per_min")
+        return rate
 
     def tts_rate_per_1k_chars(self, provider: SpeechProviderName) -> float | None:
         if provider is SpeechProviderName.GNANI:
             return self.cost_tts_per_1k_chars
-        return getattr(self, f"cost_{provider.value}_tts_per_1k_chars")  # type: ignore[no-any-return]
+        rate: float | None = getattr(self, f"cost_{provider.value}_tts_per_1k_chars")
+        return rate
 
     def stt_cost(
         self, provider: SpeechProviderName, audio_seconds: float, operation: str = "stt_batch"

@@ -27,10 +27,10 @@ def main(run_id: uuid.UUID, scores: list[str]) -> None:
     with psycopg.connect(libpq_url(os.environ["DATABASE_URL"]), autocommit=False) as conn:
         project_id, agent_id = conn.execute(
             "SELECT project_id, agent_id FROM test_runs WHERE id = %s", (run_id,)
-        ).fetchone()  # type: ignore[misc]
+        ).fetchone()
         rubric_id = conn.execute(
             "SELECT id FROM rubric_versions ORDER BY is_active DESC, created_at LIMIT 1"
-        ).fetchone()[0]  # type: ignore[index]
+        ).fetchone()[0]
         items = conn.execute(
             "SELECT id FROM run_items WHERE run_id = %s ORDER BY created_at, id", (run_id,)
         ).fetchall()
@@ -49,7 +49,7 @@ def main(run_id: uuid.UUID, scores: list[str]) -> None:
                            'proof/api04/mixed.wav','proof/api04/caller.wav','proof/api04/agent.wav')
                    RETURNING id""",
                 (project_id, agent_id, item_id),
-            ).fetchone()[0]  # type: ignore[index]
+            ).fetchone()[0]
             conn.execute(
                 """INSERT INTO turns (call_id, idx, speaker, text, text_masked, ground_truth_text,
                        agent_heard_text, language_detected, start_ms, end_ms, stt_confidence,

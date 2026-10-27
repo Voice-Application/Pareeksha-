@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import secrets
 from datetime import UTC, datetime
+from typing import Any, Literal, cast
 from uuid import UUID
 
 import psycopg
@@ -26,6 +27,7 @@ from pareeksha.integrations.registry import get_registry
 from pareeksha.integrations.sql_store import PsycopgDeliveryStore
 from pareeksha.schemas.common import Page
 from pareeksha.schemas.integrations import (
+    ConnectorDirection,
     ConnectorInfo,
     DeliveryOut,
     DeliveryStatus,
@@ -79,9 +81,9 @@ def _out(row: Integrations, *, signing_secret: str | None = None) -> Integration
         id=row.id,
         connector=row.connector,
         name=row.name,
-        direction=row.direction,  # type: ignore[arg-type]
+        direction=cast(ConnectorDirection, row.direction),
         enabled=row.enabled,
-        config=dict(row.config),  # type: ignore[call-overload]
+        config=dict(cast(dict[str, Any], row.config)),
         secrets_set=bool(row.secrets_encrypted),
         event_filter=EventFilter.model_validate(row.event_filter or {}),
         last_test_at=row.last_test_at,
@@ -228,8 +230,8 @@ def _delivery_out(row: IntegrationDeliveries | DeliveryRecord) -> DeliveryOut:
     return DeliveryOut(
         id=row.id,
         event_id=row.event_id,
-        direction=row.direction,  # type: ignore[arg-type]
-        status=row.status,  # type: ignore[arg-type]
+        direction=cast(Literal["inbound", "outbound"], row.direction),
+        status=cast(DeliveryStatus, row.status),
         http_status=row.http_status,
         external_id=row.external_id,
         attempts=row.attempts,

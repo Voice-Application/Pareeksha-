@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useLatest } from "@/lib/hooks/use-latest";
 import { CircleCheck, CircleX, Plug } from "lucide-react";
 import { api } from "@/lib/api/client";
 import { call, ApiError } from "@/lib/api/call";
@@ -46,13 +47,13 @@ export function ConnectionTest({ agentId, settingsKey, autoRun }: { agentId: str
   }
 
   const ran = useRef(false);
+  const runRef = useLatest(run);
   useEffect(() => {
     if (autoRun && agentId && !ran.current) {
       ran.current = true;
-      void run();
+      void runRef.current();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoRun, agentId]);
+  }, [autoRun, agentId, runRef]);
 
   const running = state.phase === "running";
   return (

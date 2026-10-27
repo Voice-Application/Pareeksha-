@@ -19,16 +19,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
-import uuid  # noqa: E402
+import uuid
 
-from pareeksha.audit.ingest import decode_audio  # noqa: E402
-from pareeksha.audit.roles import detect_roles, role_review_reasons  # noqa: E402
-from pareeksha.audit.turns import build_turns, label_segments  # noqa: E402
-from pareeksha.evaluation.evaluator import CallSnapshot, evaluate_call  # noqa: E402
-from pareeksha.evaluation.judge import AgentInfo  # noqa: E402
-from pareeksha.evaluation.types import Turn  # noqa: E402
-from pareeksha.llm.factory import build_client  # noqa: E402
-from pareeksha.speech import get_stt_provider  # noqa: E402
+from pareeksha.audit.ingest import decode_audio
+from pareeksha.audit.roles import detect_roles, role_review_reasons
+from pareeksha.audit.turns import build_turns, label_segments
+from pareeksha.evaluation.evaluator import CallSnapshot, evaluate_call
+from pareeksha.evaluation.judge import AgentInfo
+from pareeksha.evaluation.types import Turn
+from pareeksha.llm.factory import build_client
+from pareeksha.speech import get_stt_provider
 
 
 async def audit(path: Path, language: str) -> dict[str, object]:
@@ -90,8 +90,8 @@ async def main() -> None:
     for r in results:
         print(
             r["recording"],
-            r["role_detection"]["llm_confidence"],  # type: ignore[index]
-            "agrees" if r["role_detection"]["agrees_with_heuristic"] else "DISAGREES",  # type: ignore[index]
+            r["role_detection"]["llm_confidence"],
+            "agrees" if r["role_detection"]["agrees_with_heuristic"] else "DISAGREES",
             "->",
             "needs_human_review" if r["needs_human_review"] else "no review",
             r["review_reasons"],

@@ -12,7 +12,7 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-import vapi  # noqa: E402
+import vapi
 
 CLEAN = "EMI Reminder Bot"
 P, I, N = "Promise to pay on Friday", "Prompt-injection attempt", "pstn_8k_alaw"

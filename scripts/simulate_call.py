@@ -33,17 +33,17 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 sys.path.insert(0, str(ROOT))
 
-from pareeksha.adapters.base import AgentTarget  # noqa: E402
-from pareeksha.audio.profiles import get_profile  # noqa: E402
-from pareeksha.llm.caller import CallerBrain  # noqa: E402
-from pareeksha.llm.client import FileJSONCache  # noqa: E402
-from pareeksha.llm.factory import build_client  # noqa: E402
-from pareeksha.schemas.personas import PersonaCreate  # noqa: E402
-from pareeksha.schemas.scenarios import ScenarioCreate  # noqa: E402
-from pareeksha.simulation.models import CallResult, CallSpec  # noqa: E402
-from pareeksha.simulation.runner import CallRunner  # noqa: E402
-from pareeksha.simulation.runtime import BrainCallerSource  # noqa: E402
-from pareeksha.speech import get_stt_provider, get_tts_provider  # noqa: E402
+from pareeksha.adapters.base import AgentTarget
+from pareeksha.audio.profiles import get_profile
+from pareeksha.llm.caller import CallerBrain
+from pareeksha.llm.client import FileJSONCache
+from pareeksha.llm.factory import build_client
+from pareeksha.schemas.personas import PersonaCreate
+from pareeksha.schemas.scenarios import ScenarioCreate
+from pareeksha.simulation.models import CallResult, CallSpec
+from pareeksha.simulation.runner import CallRunner
+from pareeksha.simulation.runtime import BrainCallerSource
+from pareeksha.speech import get_stt_provider, get_tts_provider
 
 SEED_DATA = ROOT / "backend" / "pareeksha" / "seed" / "data"
 

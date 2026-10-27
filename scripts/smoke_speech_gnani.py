@@ -15,7 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 
-from pareeksha.speech import get_stt_provider, get_tts_provider, provider_status  # noqa: E402
+from pareeksha.speech import get_stt_provider, get_tts_provider, provider_status
 
 TEXT = "नमस्ते, आपकी ई एम आई बाकी है।"
 LANGUAGE = "hi-IN"

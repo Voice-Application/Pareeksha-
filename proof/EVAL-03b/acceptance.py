@@ -30,7 +30,7 @@ BOOTSTRAP = os.environ["KAFKA_BOOTSTRAP_SERVERS"]
 
 def q(sql: str, *params: object) -> list[tuple[object, ...]]:
     with psycopg.connect(URL, autocommit=True) as conn:
-        return conn.execute(sql, params).fetchall()  # type: ignore[arg-type]
+        return conn.execute(sql, params).fetchall()
 
 
 def show(title: str, sql: str, *params: object) -> None:

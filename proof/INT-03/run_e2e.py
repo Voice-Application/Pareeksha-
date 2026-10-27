@@ -268,7 +268,7 @@ def main() -> None:
         # timeline from the database
         with psycopg.connect(url, row_factory=dict_row) as pg:
             def rows(sql: str, *a: Any) -> list[dict[str, Any]]:
-                return pg.execute(sql, a).fetchall()  # type: ignore[arg-type]
+                return pg.execute(sql, a).fetchall()
 
             call = rows("SELECT * FROM calls WHERE id = %s", call_id)[0]
             turns = rows("SELECT idx, speaker, start_ms, end_ms, text FROM turns WHERE call_id = %s ORDER BY idx", call_id)

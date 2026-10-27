@@ -30,10 +30,10 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from pareeksha.api.auth import generate_api_key  # noqa: E402
-from pareeksha.audio.profiles import BUILTIN_PROFILES  # noqa: E402
-from pareeksha.gnani import GnaniSpeech  # noqa: E402
-from tests.conftest import alembic_config  # noqa: E402
+from pareeksha.api.auth import generate_api_key
+from pareeksha.audio.profiles import BUILTIN_PROFILES
+from pareeksha.gnani import GnaniSpeech
+from tests.conftest import alembic_config
 
 KAFKA = os.environ.get("KAFKA", "localhost:19094")
 PG = os.environ.get("PG", "postgresql://pareeksha:pareeksha@localhost:5432")

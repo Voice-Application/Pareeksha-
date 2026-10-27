@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pause, Play, TriangleAlert } from "lucide-react";
 import { audioUrl, mmss, type CallDetailData, type Turn } from "@/lib/api/calls";
+import { useLatest } from "@/lib/hooks/use-latest";
 import { Button } from "@/components/ui/button";
 import { ErrorPanel, Skeleton } from "@/components/ui/states";
 import { Panel } from "@/components/ui/layout";
@@ -136,10 +137,12 @@ export function AudioPanel({
     },
     [duration, playTrack, setPlayhead],
   );
+  const seekRef = useLatest(seek);
+  const seekN = seekRequest?.n;
+  const seekMs = seekRequest?.ms;
   useEffect(() => {
-    if (seekRequest) seek(seekRequest.ms);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seekRequest?.n]);
+    if (seekN !== undefined && seekMs !== undefined) seekRef.current(seekMs);
+  }, [seekN, seekMs, seekRef]);
   useEffect(() => {
     if (audio.current) audio.current.playbackRate = speed;
   }, [speed]);

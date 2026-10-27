@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLatest } from "@/lib/hooks/use-latest";
 import { Link2, Flag as FlagIcon } from "lucide-react";
 import { api } from "@/lib/api/client";
 import { call as callApi } from "@/lib/api/call";
@@ -80,10 +81,10 @@ export function CallDetail({ callId }: { callId: string }) {
 
   // ?turn=4 opens the page already seeked to that turn.
   const turnParam = params.get("turn");
+  const goTurnRef = useLatest(goTurn);
   useEffect(() => {
-    if (turnParam !== null && turns.length) queueMicrotask(() => goTurn(Number(turnParam)));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [turnParam, turns.length]);
+    if (turnParam !== null && turns.length) queueMicrotask(() => goTurnRef.current(Number(turnParam)));
+  }, [turnParam, turns.length, goTurnRef]);
 
   // Failing evidence: dimensions scored 0-2 and failed checks. Tags point at their check's turns, else their dimension's.
   const { evidenceTurns, turnTags, tagList, firstTurn } = useMemo(() => {

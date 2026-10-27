@@ -2,8 +2,7 @@
 
 Every route of docs/06-api-spec.md is declared here under ``/api/v1`` with its final path, method,
 typed request/response models and status codes, so ``GET /openapi.json`` is the complete contract
-for the web app's generated client and the SDK. Handlers owned by later tasks return
-``501 not_implemented`` through ``pareeksha.api.stubs.not_implemented``.
+for the web app's generated client and the SDK.
 """
 
 from __future__ import annotations

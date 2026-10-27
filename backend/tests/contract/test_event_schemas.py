@@ -6,6 +6,7 @@ import asyncio
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 import pytest
 from jsonschema import Draft202012Validator
@@ -55,7 +56,7 @@ def test_envelope_rejects_unknown_fields_and_type_payload_mismatch(event_type: E
     payload_model = EVENT_PAYLOADS[event_type]
     schema = payload_model.model_json_schema()
     # an unknown top-level envelope field is rejected
-    raw = {
+    raw: dict[str, Any] = {
         "event_id": str(uuid.uuid4()),
         "type": event_type.value,
         "version": ENVELOPE_VERSION,

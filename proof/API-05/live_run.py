@@ -36,19 +36,19 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
-from pareeksha.db.session import make_engine  # noqa: E402
-from pareeksha.evaluation.handlers import RunState, summarize_run  # noqa: E402
-from pareeksha.regression.outcomes import run_outcomes  # noqa: E402
-from pareeksha.schemas.scenarios import ScenarioCreate  # noqa: E402
-from tests.conftest import alembic_config, new_tenant  # noqa: E402
-from tests.integration.domain import (  # noqa: E402
+from pareeksha.db.session import make_engine
+from pareeksha.evaluation.handlers import RunState, summarize_run
+from pareeksha.regression.outcomes import run_outcomes
+from pareeksha.schemas.scenarios import ScenarioCreate
+from tests.conftest import alembic_config, new_tenant
+from tests.integration.domain import (
     build_world,
     dimensions,
     make_call,
     make_run,
 )
-from tests.integration.support import read_topic, wait_for  # noqa: E402
-from pareeksha.events.topics import Topics  # noqa: E402
+from tests.integration.support import read_topic, wait_for
+from pareeksha.events.topics import Topics
 
 KAFKA = os.environ.get("INFRA_TEST_KAFKA_BOOTSTRAP", "localhost:19094")
 PG = os.environ.get("PG", "postgresql://pareeksha:pareeksha@localhost:5432")
