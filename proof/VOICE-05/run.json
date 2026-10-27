@@ -1,0 +1,30 @@
+{
+    "id": "0141c63b-794e-4eea-9516-3c273a21aed1",
+    "agent_id": "c2095b52-2898-4583-b8dc-5deb715db0be",
+    "name": "voice05-12-calls",
+    "kind": "matrix",
+    "status": "completed",
+    "progress": {
+        "total": 12,
+        "queued": 0,
+        "in_progress": 0,
+        "evaluated": 12,
+        "error": 0
+    },
+    "summary": {
+        "pass_rate": 0.0,
+        "critical_failures": 11,
+        "needs_review": 12,
+        "score_mean": 54.9,
+        "latency_p50_ms": null,
+        "latency_p95_ms": null,
+        "barge_in_honoured_rate": null,
+        "top_failure_types": [],
+        "suite_passed": null,
+        "score_distribution": []
+    },
+    "estimated_cost": 0.0,
+    "created_at": "2026-10-27T01:57:34.643575Z",
+    "started_at": "2026-10-27T01:57:35.203436Z",
+    "finished_at": "2026-10-27T02:03:07.674088Z"
+}

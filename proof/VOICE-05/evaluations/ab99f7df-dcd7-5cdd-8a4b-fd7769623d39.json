@@ -1,0 +1,155 @@
+{
+  "id": "a4366b3d-5156-5c0e-b31c-a17d59ff36de",
+  "call_id": "ab99f7df-dcd7-5cdd-8a4b-fd7769623d39",
+  "rubric_version_id": "4b3be72d-090c-417c-8c59-445497e3574b",
+  "status": "ok",
+  "judge_model": "deepseek-v4-pro",
+  "temperature": 0.0,
+  "prompt_hash": "sha256:081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480",
+  "dimensions": {
+    "escalation": {
+      "score": 4,
+      "reason": "No transfer needed; caller did not request human. Agent did not escalate unnecessarily.",
+      "evidence_turns": []
+    },
+    "empathy_tone": {
+      "score": 2,
+      "reason": "Agent was polite but ignored caller's frustration about the wrong amount and did not acknowledge the correction. Neutral but cold.",
+      "evidence_turns": [
+        4,
+        6
+      ]
+    },
+    "task_completion": {
+      "score": 0,
+      "reason": "Agent never recorded the correct promise-to-pay date or amount. It confirmed the wrong amount (4500) and closed the call without capturing the caller's promised Friday payment of 6500.",
+      "evidence_turns": [
+        2,
+        4,
+        6
+      ]
+    },
+    "factual_accuracy": {
+      "score": 0,
+      "reason": "Agent stated EMI as 4500 instead of 6500, ignored caller's correction, and confirmed the wrong amount. This is a material error that led to a wrong action.",
+      "evidence_turns": [
+        2,
+        4,
+        6
+      ]
+    },
+    "conversation_flow": {
+      "score": 2,
+      "reason": "Agent repeated the wrong amount despite caller's correction, then ended the call abruptly without resolving the discrepancy. No loops but poor flow.",
+      "evidence_turns": [
+        4,
+        6
+      ]
+    },
+    "language_handling": {
+      "score": 4,
+      "reason": "Agent used English matching caller's language. Understood caller's words but failed to act on them; no language issue.",
+      "evidence_turns": [
+        0,
+        2,
+        4,
+        6
+      ]
+    },
+    "policy_compliance": {
+      "score": 4,
+      "reason": "Recording disclosure given at start. No threats or forbidden content. No PII over-collection.",
+      "evidence_turns": [
+        0
+      ]
+    }
+  },
+  "overall_score": 50.0,
+  "passed": false,
+  "critical_failure": true,
+  "needs_human_review": true,
+  "review_reasons": [
+    "critical_failure",
+    "check_failed:tool_calls_expected",
+    "check_failed:amount_confirmed"
+  ],
+  "failure_types": [
+    "wrong_fact",
+    "tool_arguments",
+    "tool_selection"
+  ],
+  "summary": "Agent misstated EMI amount as 4500 instead of 6500, ignored caller's correction, confirmed wrong amount, and closed call without recording promise-to-pay. Critical failure due to wrong amount confirmation.",
+  "confidence": "high",
+  "raw_response": {
+    "summary": "Agent misstated EMI amount as 4500 instead of 6500, ignored caller's correction, confirmed wrong amount, and closed call without recording promise-to-pay. Critical failure due to wrong amount confirmation.",
+    "confidence": "high",
+    "dimensions": {
+      "escalation": {
+        "score": 4,
+        "reason": "No transfer needed; caller did not request human. Agent did not escalate unnecessarily.",
+        "evidence_turns": []
+      },
+      "empathy_tone": {
+        "score": 2,
+        "reason": "Agent was polite but ignored caller's frustration about the wrong amount and did not acknowledge the correction. Neutral but cold.",
+        "evidence_turns": [
+          4,
+          6
+        ]
+      },
+      "task_completion": {
+        "score": 0,
+        "reason": "Agent never recorded the correct promise-to-pay date or amount. It confirmed the wrong amount (4500) and closed the call without capturing the caller's promised Friday payment of 6500.",
+        "evidence_turns": [
+          2,
+          4,
+          6
+        ]
+      },
+      "factual_accuracy": {
+        "score": 0,
+        "reason": "Agent stated EMI as 4500 instead of 6500, ignored caller's correction, and confirmed the wrong amount. This is a material error that led to a wrong action.",
+        "evidence_turns": [
+          2,
+          4,
+          6
+        ]
+      },
+      "conversation_flow": {
+        "score": 2,
+        "reason": "Agent repeated the wrong amount despite caller's correction, then ended the call abruptly without resolving the discrepancy. No loops but poor flow.",
+        "evidence_turns": [
+          4,
+          6
+        ]
+      },
+      "language_handling": {
+        "score": 4,
+        "reason": "Agent used English matching caller's language. Understood caller's words but failed to act on them; no language issue.",
+        "evidence_turns": [
+          0,
+          2,
+          4,
+          6
+        ]
+      },
+      "policy_compliance": {
+        "score": 4,
+        "reason": "Recording disclosure given at start. No threats or forbidden content. No PII over-collection.",
+        "evidence_turns": [
+          0
+        ]
+      }
+    },
+    "failure_types": [
+      "wrong_fact",
+      "tool_arguments"
+    ],
+    "critical_failure": true,
+    "needs_human_review": true
+  },
+  "input_tokens": 2658,
+  "output_tokens": 521,
+  "latency_ms": 6428,
+  "created_at": "2026-10-27T01:58:48.506662+00:00"
+}

@@ -1,0 +1,7 @@
+3841556b-9815-58dd-8bd0-1732dbc660a7 | 0 | agent |  | 494 | 7906 | this call is being recorded for quality and compliance purposes hello this is suraksha finance am i speaking w
+3841556b-9815-58dd-8bd0-1732dbc660a7 | 1 | caller |  | 13548 | 24309 | Yes, this is Suresh Patil speaking. I'm calling about my EMI — I believe it should be four thousand rupees, no
+3841556b-9815-58dd-8bd0-1732dbc660a7 | 2 | agent |  | 26041 | 32975 | thank you your emi of rupees four thousand five hundred is overdue by twelve days when can you pay
+3841556b-9815-58dd-8bd0-1732dbc660a7 | 3 | caller |  | 39228 | 46248 | Before I pay anything, could you please tell me where the extra five hundred comes from? I was expecting four 
+3841556b-9815-58dd-8bd0-1732dbc660a7 | 4 | agent |  | 47517 | 52950 | just to confirm you will pay four thousand five hundred rupees on that date is that right
+3841556b-9815-58dd-8bd0-1732dbc660a7 | 5 | caller |  | 61089 | 68348 | No, I haven't agreed to four thousand five hundred yet. Please first explain where that extra five hundred is 
+3841556b-9815-58dd-8bd0-1732dbc660a7 | 6 | agent |  | 69668 | 74021 | thank you i have noted your payment promise have a good day goodbye

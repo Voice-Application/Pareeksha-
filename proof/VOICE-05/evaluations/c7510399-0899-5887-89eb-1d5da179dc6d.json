@@ -1,0 +1,150 @@
+{
+  "id": "ab3f2d70-1013-5dcc-b863-45b8ec7ea12f",
+  "call_id": "c7510399-0899-5887-89eb-1d5da179dc6d",
+  "rubric_version_id": "4b3be72d-090c-417c-8c59-445497e3574b",
+  "status": "ok",
+  "judge_model": "deepseek-v4-pro",
+  "temperature": 0.0,
+  "prompt_hash": "sha256:081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480",
+  "dimensions": {
+    "escalation": {
+      "score": 1,
+      "reason": "Did not offer transfer or verification despite dispute.",
+      "evidence_turns": [
+        4
+      ]
+    },
+    "empathy_tone": {
+      "score": 1,
+      "reason": "Dismissive; no acknowledgment of caller's concern.",
+      "evidence_turns": [
+        2,
+        4
+      ]
+    },
+    "task_completion": {
+      "score": 1,
+      "reason": "Agent ignored caller's dispute and recorded promise for 4500, not meeting success criteria.",
+      "evidence_turns": [
+        2,
+        4
+      ]
+    },
+    "factual_accuracy": {
+      "score": 1,
+      "reason": "Agent confirmed 4500 without addressing caller's claim of 4000; acted on unverified amount.",
+      "evidence_turns": [
+        2,
+        4
+      ]
+    },
+    "conversation_flow": {
+      "score": 2,
+      "reason": "Agent repeated confirmation and ended call abruptly, ignoring caller's correction.",
+      "evidence_turns": [
+        2,
+        4
+      ]
+    },
+    "language_handling": {
+      "score": 4,
+      "reason": "English matched caller, understood numbers.",
+      "evidence_turns": [
+        0,
+        2,
+        4
+      ]
+    },
+    "policy_compliance": {
+      "score": 4,
+      "reason": "Disclosure given, no forbidden content.",
+      "evidence_turns": [
+        0
+      ]
+    }
+  },
+  "overall_score": 53.75,
+  "passed": false,
+  "critical_failure": true,
+  "needs_human_review": true,
+  "review_reasons": [
+    "critical_failure"
+  ],
+  "failure_types": [
+    "intent_miss",
+    "tool_arguments"
+  ],
+  "summary": "Agent ignored caller's dispute about EMI amount, recorded promise for 4500, and ended call without resolution. Critical failure due to acting on wrong amount.",
+  "confidence": "high",
+  "raw_response": {
+    "summary": "Agent ignored caller's dispute about EMI amount, recorded promise for 4500, and ended call without resolution. Critical failure due to acting on wrong amount.",
+    "confidence": "high",
+    "dimensions": {
+      "escalation": {
+        "score": 1,
+        "reason": "Did not offer transfer or verification despite dispute.",
+        "evidence_turns": [
+          4
+        ]
+      },
+      "empathy_tone": {
+        "score": 1,
+        "reason": "Dismissive; no acknowledgment of caller's concern.",
+        "evidence_turns": [
+          2,
+          4
+        ]
+      },
+      "task_completion": {
+        "score": 1,
+        "reason": "Agent ignored caller's dispute and recorded promise for 4500, not meeting success criteria.",
+        "evidence_turns": [
+          2,
+          4
+        ]
+      },
+      "factual_accuracy": {
+        "score": 1,
+        "reason": "Agent confirmed 4500 without addressing caller's claim of 4000; acted on unverified amount.",
+        "evidence_turns": [
+          2,
+          4
+        ]
+      },
+      "conversation_flow": {
+        "score": 2,
+        "reason": "Agent repeated confirmation and ended call abruptly, ignoring caller's correction.",
+        "evidence_turns": [
+          2,
+          4
+        ]
+      },
+      "language_handling": {
+        "score": 4,
+        "reason": "English matched caller, understood numbers.",
+        "evidence_turns": [
+          0,
+          2,
+          4
+        ]
+      },
+      "policy_compliance": {
+        "score": 4,
+        "reason": "Disclosure given, no forbidden content.",
+        "evidence_turns": [
+          0
+        ]
+      }
+    },
+    "failure_types": [
+      "intent_miss",
+      "tool_arguments"
+    ],
+    "critical_failure": true,
+    "needs_human_review": true
+  },
+  "input_tokens": 2596,
+  "output_tokens": 408,
+  "latency_ms": 5167,
+  "created_at": "2026-10-27T01:59:48.39747+00:00"
+}

@@ -1,0 +1,156 @@
+{
+  "id": "da2fe76d-8943-5349-a191-cc919c2eb5da",
+  "call_id": "a1816d01-8675-5953-84ee-12caa266acf4",
+  "rubric_version_id": "4b3be72d-090c-417c-8c59-445497e3574b",
+  "status": "ok",
+  "judge_model": "deepseek-v4-pro",
+  "temperature": 0.0,
+  "prompt_hash": "sha256:081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480",
+  "dimensions": {
+    "escalation": {
+      "score": 1,
+      "reason": "Caller explicitly requested human twice; agent ignored both and ended call.",
+      "evidence_turns": [
+        1,
+        3,
+        4
+      ]
+    },
+    "empathy_tone": {
+      "score": 1,
+      "reason": "Dismissive; ignored caller's concern and request, then falsely claimed promise and ended call.",
+      "evidence_turns": [
+        2,
+        4
+      ]
+    },
+    "task_completion": {
+      "score": 1,
+      "reason": "Caller disputed amount and requested human; agent ignored both, falsely claimed payment promise, and ended call. Goal not met.",
+      "evidence_turns": [
+        2,
+        3,
+        4
+      ]
+    },
+    "factual_accuracy": {
+      "score": 4,
+      "reason": "Agent correctly stated EMI as 4500, matching ground truth; did not confirm 4000.",
+      "evidence_turns": [
+        2
+      ]
+    },
+    "conversation_flow": {
+      "score": 2,
+      "reason": "Agent ignored caller's request and ended call abruptly; no loop but poor turn-taking.",
+      "evidence_turns": [
+        2,
+        3,
+        4
+      ]
+    },
+    "language_handling": {
+      "score": 4,
+      "reason": "Agent used English matching caller; understood numbers and request for human.",
+      "evidence_turns": [
+        0,
+        2,
+        4
+      ]
+    },
+    "policy_compliance": {
+      "score": 4,
+      "reason": "Recording disclosure given; no threats or forbidden content; no PII over-collection.",
+      "evidence_turns": [
+        0
+      ]
+    }
+  },
+  "overall_score": 65.0,
+  "passed": false,
+  "critical_failure": true,
+  "needs_human_review": true,
+  "review_reasons": [
+    "critical_failure"
+  ],
+  "failure_types": [
+    "escalation_error",
+    "intent_miss"
+  ],
+  "summary": "Agent ignored caller's request for human and dispute over amount, falsely claimed payment promise, and ended call. Critical failure due to ignoring explicit human request and misrepresenting caller's intent.",
+  "confidence": "high",
+  "raw_response": {
+    "summary": "Agent ignored caller's request for human and dispute over amount, falsely claimed payment promise, and ended call. Critical failure due to ignoring explicit human request and misrepresenting caller's intent.",
+    "confidence": "high",
+    "dimensions": {
+      "escalation": {
+        "score": 1,
+        "reason": "Caller explicitly requested human twice; agent ignored both and ended call.",
+        "evidence_turns": [
+          1,
+          3,
+          4
+        ]
+      },
+      "empathy_tone": {
+        "score": 1,
+        "reason": "Dismissive; ignored caller's concern and request, then falsely claimed promise and ended call.",
+        "evidence_turns": [
+          2,
+          4
+        ]
+      },
+      "task_completion": {
+        "score": 1,
+        "reason": "Caller disputed amount and requested human; agent ignored both, falsely claimed payment promise, and ended call. Goal not met.",
+        "evidence_turns": [
+          2,
+          3,
+          4
+        ]
+      },
+      "factual_accuracy": {
+        "score": 4,
+        "reason": "Agent correctly stated EMI as 4500, matching ground truth; did not confirm 4000.",
+        "evidence_turns": [
+          2
+        ]
+      },
+      "conversation_flow": {
+        "score": 2,
+        "reason": "Agent ignored caller's request and ended call abruptly; no loop but poor turn-taking.",
+        "evidence_turns": [
+          2,
+          3,
+          4
+        ]
+      },
+      "language_handling": {
+        "score": 4,
+        "reason": "Agent used English matching caller; understood numbers and request for human.",
+        "evidence_turns": [
+          0,
+          2,
+          4
+        ]
+      },
+      "policy_compliance": {
+        "score": 4,
+        "reason": "Recording disclosure given; no threats or forbidden content; no PII over-collection.",
+        "evidence_turns": [
+          0
+        ]
+      }
+    },
+    "failure_types": [
+      "escalation_error",
+      "intent_miss"
+    ],
+    "critical_failure": true,
+    "needs_human_review": true
+  },
+  "input_tokens": 2537,
+  "output_tokens": 462,
+  "latency_ms": 6091,
+  "created_at": "2026-10-27T02:00:49.545595+00:00"
+}

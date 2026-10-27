@@ -1,0 +1,108 @@
+01:57:35|queued|0|
+01:57:38|running|3|in_progress=3 queued=9
+01:57:41|running|3|in_progress=3 queued=9
+01:57:44|running|3|in_progress=3 queued=9
+01:57:47|running|3|in_progress=3 queued=9
+01:57:50|running|3|in_progress=3 queued=9
+01:57:54|running|3|in_progress=3 queued=9
+01:57:57|running|3|in_progress=3 queued=9
+01:58:00|running|3|in_progress=3 queued=9
+01:58:03|running|3|in_progress=3 queued=9
+01:58:06|running|3|in_progress=3 queued=9
+01:58:09|running|3|in_progress=3 queued=9
+01:58:12|running|3|in_progress=3 queued=9
+01:58:15|running|3|in_progress=3 queued=9
+01:58:19|running|3|in_progress=3 queued=9
+01:58:22|running|3|in_progress=3 queued=9
+01:58:25|running|3|in_progress=3 queued=9
+01:58:28|running|3|in_progress=3 queued=9
+01:58:31|running|3|in_progress=3 queued=9
+01:58:34|running|3|in_progress=3 queued=9
+01:58:37|running|3|in_progress=3 queued=9
+01:58:40|running|3|in_progress=3 queued=9
+01:58:43|running|3|in_progress=3 queued=9
+01:58:47|running|3|in_progress=3 queued=9
+01:58:50|running|3|evaluating=1 in_progress=3 queued=8
+01:58:53|running|3|completed=2 evaluating=1 in_progress=3 queued=6
+01:58:56|running|3|completed=1 evaluated=1 evaluating=1 in_progress=3 queued=6
+01:58:59|running|3|completed=1 evaluated=1 evaluating=1 in_progress=3 queued=6
+01:59:02|running|3|evaluated=2 evaluating=1 in_progress=3 queued=6
+01:59:05|running|3|evaluated=2 evaluating=1 in_progress=3 queued=6
+01:59:08|running|3|evaluated=3 in_progress=3 queued=6
+01:59:12|running|3|evaluated=3 in_progress=3 queued=6
+01:59:15|running|3|evaluated=3 in_progress=3 queued=6
+01:59:18|running|3|evaluated=3 in_progress=3 queued=6
+01:59:21|running|3|evaluated=3 in_progress=3 queued=6
+01:59:24|running|3|evaluated=3 in_progress=3 queued=6
+01:59:27|running|3|evaluated=3 in_progress=3 queued=6
+01:59:30|running|3|evaluated=3 in_progress=3 queued=6
+01:59:33|running|3|evaluated=3 in_progress=3 queued=6
+01:59:36|running|3|evaluated=3 in_progress=3 queued=6
+01:59:40|running|3|evaluated=3 in_progress=3 queued=6
+01:59:43|running|3|evaluated=3 in_progress=3 queued=6
+01:59:46|running|3|evaluated=3 in_progress=3 queued=6
+01:59:49|running|3|completed=1 evaluated=3 evaluating=1 in_progress=3 queued=4
+01:59:52|running|3|completed=1 evaluated=3 evaluating=1 in_progress=3 queued=4
+01:59:55|running|3|evaluated=4 evaluating=1 in_progress=3 queued=4
+01:59:58|running|3|evaluated=4 evaluating=1 in_progress=3 queued=4
+02:00:01|running|3|evaluated=5 evaluating=1 in_progress=3 queued=3
+02:00:05|running|3|evaluated=5 evaluating=1 in_progress=3 queued=3
+02:00:08|running|3|evaluated=6 in_progress=3 queued=3
+02:00:11|running|3|evaluated=6 in_progress=3 queued=3
+02:00:14|running|3|evaluated=6 in_progress=3 queued=3
+02:00:17|running|3|evaluated=6 in_progress=3 queued=3
+02:00:20|running|3|evaluated=6 in_progress=3 queued=3
+02:00:23|running|3|evaluated=6 in_progress=3 queued=3
+02:00:26|running|3|evaluated=6 in_progress=3 queued=3
+02:00:30|running|3|evaluated=6 in_progress=3 queued=3
+02:00:33|running|3|evaluated=6 in_progress=3 queued=3
+02:00:36|running|3|evaluated=6 in_progress=3 queued=3
+02:00:39|running|3|evaluated=6 in_progress=3 queued=3
+02:00:42|running|3|evaluated=6 in_progress=3 queued=3
+02:00:45|running|2|evaluated=6 evaluating=1 in_progress=2 queued=3
+02:00:48|running|2|evaluated=6 evaluating=1 in_progress=2 queued=3
+02:00:51|running|2|evaluated=7 evaluating=1 in_progress=2 queued=2
+02:00:54|running|2|completed=1 evaluated=7 evaluating=1 in_progress=2 queued=1
+02:00:58|running|2|evaluated=8 evaluating=1 in_progress=2 queued=1
+02:01:01|running|2|evaluated=8 evaluating=1 in_progress=2 queued=1
+02:01:04|running|2|evaluated=9 in_progress=2 queued=1
+02:01:07|running|2|evaluated=9 in_progress=2 queued=1
+02:01:10|running|2|evaluated=9 in_progress=2 queued=1
+02:01:13|running|2|evaluated=9 in_progress=2 queued=1
+02:01:16|running|2|evaluated=9 in_progress=2 queued=1
+02:01:19|running|2|evaluated=9 in_progress=2 queued=1
+02:01:23|running|2|evaluated=9 in_progress=2 queued=1
+02:01:26|running|2|evaluated=9 in_progress=2 queued=1
+02:01:29|running|2|evaluated=9 in_progress=2 queued=1
+02:01:32|running|2|evaluated=9 in_progress=2 queued=1
+02:01:35|running|2|evaluated=9 in_progress=2 queued=1
+02:01:38|running|2|evaluated=9 in_progress=2 queued=1
+02:01:41|running|2|evaluated=9 in_progress=2 queued=1
+02:01:44|running|2|evaluated=9 evaluating=1 in_progress=2
+02:01:48|running|2|evaluated=10 in_progress=2
+02:01:51|running|1|evaluated=10 evaluating=1 in_progress=1
+02:01:54|running|1|evaluated=10 evaluating=1 in_progress=1
+02:01:57|running|1|evaluated=11 in_progress=1
+02:02:00|running|1|evaluated=11 in_progress=1
+02:02:03|running|1|evaluated=11 in_progress=1
+02:02:06|running|1|evaluated=11 in_progress=1
+02:02:09|running|1|evaluated=11 in_progress=1
+02:02:13|running|1|evaluated=11 in_progress=1
+02:02:16|running|1|evaluated=11 in_progress=1
+02:02:19|running|1|evaluated=11 in_progress=1
+02:02:22|running|1|evaluated=11 in_progress=1
+02:02:25|running|1|evaluated=11 in_progress=1
+02:02:28|running|1|evaluated=11 in_progress=1
+02:02:31|running|1|evaluated=11 in_progress=1
+02:02:34|running|1|evaluated=11 in_progress=1
+02:02:38|running|1|evaluated=11 in_progress=1
+02:02:41|running|1|evaluated=11 in_progress=1
+02:02:44|running|1|evaluated=11 in_progress=1
+02:02:47|running|1|evaluated=11 in_progress=1
+02:02:50|running|1|evaluated=11 in_progress=1
+02:02:53|running|1|evaluated=11 in_progress=1
+02:02:56|running|1|evaluated=11 in_progress=1
+02:02:59|running|1|evaluated=11 in_progress=1
+02:03:02|running|0|evaluated=11 evaluating=1
+02:03:06|running|0|evaluated=11 evaluating=1
+02:03:09|completed|0|evaluated=12

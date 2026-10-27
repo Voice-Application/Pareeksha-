@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import io
+import random
 import time
 import wave
 from collections.abc import Callable, Iterable
@@ -136,15 +137,37 @@ def is_retryable(exc: BaseException) -> bool:
     return isinstance(exc, (requests.Timeout, requests.ConnectionError, TimeoutError))
 
 
+#: 429 is Gnani's one-active-request-per-key limit: other processes' calls hold the key for a
+#: second or two, so wait with jitter (each process picks its own delay, which de-synchronizes
+#: them) and keep trying for about a minute before giving up.
+RATE_LIMIT_ATTEMPTS = 25
+RATE_LIMIT_MAX_WAIT_S = 3.0
+
+
+def _is_rate_limited(exc: BaseException) -> bool:
+    return isinstance(exc, APIError | TTSAPIError) and exc.status_code == 429
+
+
 def _retry(fn: Callable[[], T], *, attempts: int = 3, base_delay: float = 1.0) -> T:
-    for attempt in range(attempts):
+    failures = rate_limited = 0
+    while True:
         try:
             return fn()
         except Exception as exc:
-            if attempt == attempts - 1 or not is_retryable(exc):
+            if not is_retryable(exc):
                 raise
-            time.sleep(base_delay * 2**attempt)
-    raise AssertionError("unreachable")  # pragma: no cover
+            if _is_rate_limited(exc):
+                rate_limited += 1
+                if rate_limited >= RATE_LIMIT_ATTEMPTS:
+                    raise
+                time.sleep(
+                    random.uniform(0.2, min(RATE_LIMIT_MAX_WAIT_S, 0.5 + 0.25 * rate_limited))
+                )
+                continue
+            failures += 1
+            if failures >= attempts:
+                raise
+            time.sleep(base_delay * 2 ** (failures - 1))
 
 
 class GnaniSpeech:

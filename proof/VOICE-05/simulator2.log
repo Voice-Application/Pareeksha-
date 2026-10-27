@@ -1,0 +1,181 @@
+2026-10-27 01:57:02.395 | INFO     | pipecat:<module>:54 - ᓚᘏᗢ Pipecat 1.14.0 (Python 3.13.17 (main, Oct 22 2026, 14:06:04) [GCC 13.3.0]) ᓚᘏᗢ
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_0a82a6063549 | language=en-IN
+{"ts": "2026-10-27T01:57:43.902181+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_0a82a6063549 | language=en-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_0a82a6063549
+{"ts": "2026-10-27T01:57:44.911791+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_0a82a6063549"}
+{"ts": "2026-10-27T01:57:45.646108+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-27T01:57:46.208346+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-flash purpose=caller in=720 out=29 cached_in=512 cost=None latency_ms=1286 repair=False cache_hit=False"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_0fe508238971 | model=timbre-v3.0 | voice=Vasudha
+{"ts": "2026-10-27T01:57:46.221487+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_0fe508238971 | model=timbre-v3.0 | voice=Vasudha"}
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_0fe508238971
+{"ts": "2026-10-27T01:57:47.984603+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize complete | request_id=req_0fe508238971"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_be39669e7663 | model=timbre-v3.0 | voice=Vasudha
+{"ts": "2026-10-27T01:57:47.987319+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_be39669e7663 | model=timbre-v3.0 | voice=Vasudha"}
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_be39669e7663
+{"ts": "2026-10-27T01:57:49.448930+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize complete | request_id=req_be39669e7663"}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_650d7c696b17 | language=en-IN
+{"ts": "2026-10-27T01:58:02.661922+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_650d7c696b17 | language=en-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_650d7c696b17
+{"ts": "2026-10-27T01:58:03.673518+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_650d7c696b17"}
+{"ts": "2026-10-27T01:58:04.446268+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-27T01:58:05.386739+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-flash purpose=caller in=763 out=42 cached_in=512 cost=None latency_ms=1708 repair=False cache_hit=False"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_736ddc63e45f | model=timbre-v3.0 | voice=Vasudha
+{"ts": "2026-10-27T01:58:05.391077+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_736ddc63e45f | model=timbre-v3.0 | voice=Vasudha"}
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_736ddc63e45f
+{"ts": "2026-10-27T01:58:08.524390+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize complete | request_id=req_736ddc63e45f"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_4018274cceb5 | model=timbre-v3.0 | voice=Vasudha
+{"ts": "2026-10-27T01:58:08.527253+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_4018274cceb5 | model=timbre-v3.0 | voice=Vasudha"}
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_4018274cceb5
+{"ts": "2026-10-27T01:58:10.347424+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize complete | request_id=req_4018274cceb5"}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_ca7d803b722c | language=en-IN
+{"ts": "2026-10-27T01:58:26.041665+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_ca7d803b722c | language=en-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_ca7d803b722c
+{"ts": "2026-10-27T01:58:26.872663+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_ca7d803b722c"}
+{"ts": "2026-10-27T01:58:27.530529+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-27T01:58:28.153448+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-flash purpose=caller in=816 out=46 cached_in=640 cost=None latency_ms=1276 repair=False cache_hit=False"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_d817fa5c11dd | model=timbre-v3.0 | voice=Vasudha
+{"ts": "2026-10-27T01:58:28.158914+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_d817fa5c11dd | model=timbre-v3.0 | voice=Vasudha"}
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_d817fa5c11dd
+{"ts": "2026-10-27T01:58:29.669860+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize complete | request_id=req_d817fa5c11dd"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_119a5ec51244 | model=timbre-v3.0 | voice=Vasudha
+{"ts": "2026-10-27T01:58:29.672326+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_119a5ec51244 | model=timbre-v3.0 | voice=Vasudha"}
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_119a5ec51244
+{"ts": "2026-10-27T01:58:32.529236+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize complete | request_id=req_119a5ec51244"}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_48abdf9151e8 | language=en-IN
+{"ts": "2026-10-27T01:58:47.645917+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_48abdf9151e8 | language=en-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_48abdf9151e8
+{"ts": "2026-10-27T01:58:48.396888+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_48abdf9151e8"}
+{"ts": "2026-10-27T01:58:48.493892+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "simulator", "event_id": "6ca476fd-fe58-5f09-959c-a64f0f98db79", "correlation_id": "0141c63b-794e-4eea-9516-3c273a21aed1", "topic": "pareeksha.call.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_f6b2921e3c5f | language=en-IN
+{"ts": "2026-10-27T01:58:57.039106+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_f6b2921e3c5f | language=en-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_f6b2921e3c5f
+{"ts": "2026-10-27T01:58:57.860793+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_f6b2921e3c5f"}
+{"ts": "2026-10-27T01:58:58.531549+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-27T01:58:59.353134+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-flash purpose=caller in=720 out=28 cached_in=512 cost=None latency_ms=1487 repair=False cache_hit=False"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_d2e809d4620f | model=timbre-v3.0 | voice=Vasudha
+{"ts": "2026-10-27T01:58:59.356632+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_d2e809d4620f | model=timbre-v3.0 | voice=Vasudha"}
+ERROR gnani | [TTS REST] synthesize failed | request_id=req_d2e809d4620f | status=429
+{"ts": "2026-10-27T01:58:59.977230+00:00", "level": "error", "logger": "gnani", "msg": "[TTS REST] synthesize failed | request_id=req_d2e809d4620f | status=429"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_193a48fae396 | model=timbre-v3.0 | voice=Vasudha
+{"ts": "2026-10-27T01:59:00.544022+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_193a48fae396 | model=timbre-v3.0 | voice=Vasudha"}
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_193a48fae396
+{"ts": "2026-10-27T01:59:02.418878+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize complete | request_id=req_193a48fae396"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_134b742a61f8 | model=timbre-v3.0 | voice=Vasudha
+{"ts": "2026-10-27T01:59:02.421592+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_134b742a61f8 | model=timbre-v3.0 | voice=Vasudha"}
+ERROR gnani | [TTS REST] synthesize failed | request_id=req_134b742a61f8 | status=429
+{"ts": "2026-10-27T01:59:03.359854+00:00", "level": "error", "logger": "gnani", "msg": "[TTS REST] synthesize failed | request_id=req_134b742a61f8 | status=429"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_63c54de37337 | model=timbre-v3.0 | voice=Vasudha
+{"ts": "2026-10-27T01:59:03.590731+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_63c54de37337 | model=timbre-v3.0 | voice=Vasudha"}
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_63c54de37337
+{"ts": "2026-10-27T01:59:05.133343+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize complete | request_id=req_63c54de37337"}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_02e5d0b811f6 | language=en-IN
+{"ts": "2026-10-27T01:59:16.119229+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_02e5d0b811f6 | language=en-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_02e5d0b811f6
+{"ts": "2026-10-27T01:59:17.129647+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_02e5d0b811f6"}
+{"ts": "2026-10-27T01:59:17.811454+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-27T01:59:18.798734+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-flash purpose=caller in=762 out=39 cached_in=512 cost=None latency_ms=1663 repair=False cache_hit=False"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_2c797d484a70 | model=timbre-v3.0 | voice=Vasudha
+{"ts": "2026-10-27T01:59:18.801555+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_2c797d484a70 | model=timbre-v3.0 | voice=Vasudha"}
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_2c797d484a70
+{"ts": "2026-10-27T01:59:20.599725+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize complete | request_id=req_2c797d484a70"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_b1bca8551c28 | model=timbre-v3.0 | voice=Vasudha
+{"ts": "2026-10-27T01:59:20.602479+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_b1bca8551c28 | model=timbre-v3.0 | voice=Vasudha"}
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_b1bca8551c28
+{"ts": "2026-10-27T01:59:22.886878+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize complete | request_id=req_b1bca8551c28"}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_62a8f37ef843 | language=en-IN
+{"ts": "2026-10-27T01:59:36.946576+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_62a8f37ef843 | language=en-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_62a8f37ef843
+{"ts": "2026-10-27T01:59:37.818685+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_62a8f37ef843"}
+{"ts": "2026-10-27T01:59:38.401665+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-27T01:59:38.821035+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-flash purpose=caller in=812 out=42 cached_in=640 cost=None latency_ms=998 repair=False cache_hit=False"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_4bb841610c89 | model=timbre-v3.0 | voice=Vasudha
+{"ts": "2026-10-27T01:59:38.824778+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_4bb841610c89 | model=timbre-v3.0 | voice=Vasudha"}
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_4bb841610c89
+{"ts": "2026-10-27T01:59:40.244877+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize complete | request_id=req_4bb841610c89"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_53c94a85f64f | model=timbre-v3.0 | voice=Vasudha
+{"ts": "2026-10-27T01:59:40.247813+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_53c94a85f64f | model=timbre-v3.0 | voice=Vasudha"}
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_53c94a85f64f
+{"ts": "2026-10-27T01:59:43.076010+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize complete | request_id=req_53c94a85f64f"}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_d223a3e606a0 | language=en-IN
+{"ts": "2026-10-27T01:59:58.472349+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_d223a3e606a0 | language=en-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_d223a3e606a0
+{"ts": "2026-10-27T01:59:59.205054+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_d223a3e606a0"}
+{"ts": "2026-10-27T01:59:59.305409+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "simulator", "event_id": "11c05d1e-b226-562f-8edc-da57b3ba09b7", "correlation_id": "0141c63b-794e-4eea-9516-3c273a21aed1", "topic": "pareeksha.call.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_ce0305f291cf | language=en-IN
+{"ts": "2026-10-27T02:00:07.862447+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_ce0305f291cf | language=en-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_ce0305f291cf
+{"ts": "2026-10-27T02:00:09.180876+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_ce0305f291cf"}
+{"ts": "2026-10-27T02:00:09.793108+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-27T02:00:10.668768+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-flash purpose=caller in=728 out=36 cached_in=512 cost=None latency_ms=1482 repair=False cache_hit=False"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_355b2ff9c601 | model=timbre-v3.0 | voice=Yashraj
+{"ts": "2026-10-27T02:00:10.671932+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_355b2ff9c601 | model=timbre-v3.0 | voice=Yashraj"}
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_355b2ff9c601
+{"ts": "2026-10-27T02:00:12.594388+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize complete | request_id=req_355b2ff9c601"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_ea949a2cd8d8 | model=timbre-v3.0 | voice=Yashraj
+{"ts": "2026-10-27T02:00:12.597476+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_ea949a2cd8d8 | model=timbre-v3.0 | voice=Yashraj"}
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_ea949a2cd8d8
+{"ts": "2026-10-27T02:00:14.914298+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize complete | request_id=req_ea949a2cd8d8"}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_05e9d20266d2 | language=en-IN
+{"ts": "2026-10-27T02:00:29.582140+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_05e9d20266d2 | language=en-IN"}
+ERROR gnani | [STT REST] transcribe_bytes failed | request_id=req_05e9d20266d2 | status=429
+{"ts": "2026-10-27T02:00:30.163888+00:00", "level": "error", "logger": "gnani", "msg": "[STT REST] transcribe_bytes failed | request_id=req_05e9d20266d2 | status=429"}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_637c81496467 | language=en-IN
+{"ts": "2026-10-27T02:00:30.368599+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_637c81496467 | language=en-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_637c81496467
+{"ts": "2026-10-27T02:00:31.260338+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_637c81496467"}
+{"ts": "2026-10-27T02:00:31.959630+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-27T02:00:32.772910+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-flash purpose=caller in=778 out=47 cached_in=640 cost=None latency_ms=1506 repair=False cache_hit=False"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_68a40e2d1842 | model=timbre-v3.0 | voice=Yashraj
+{"ts": "2026-10-27T02:00:32.775976+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_68a40e2d1842 | model=timbre-v3.0 | voice=Yashraj"}
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_68a40e2d1842
+{"ts": "2026-10-27T02:00:34.720772+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize complete | request_id=req_68a40e2d1842"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_2f9024262aa1 | model=timbre-v3.0 | voice=Yashraj
+{"ts": "2026-10-27T02:00:34.723386+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_2f9024262aa1 | model=timbre-v3.0 | voice=Yashraj"}
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_2f9024262aa1
+{"ts": "2026-10-27T02:00:37.506773+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize complete | request_id=req_2f9024262aa1"}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_53f05877836b | language=en-IN
+{"ts": "2026-10-27T02:00:53.413222+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_53f05877836b | language=en-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_53f05877836b
+{"ts": "2026-10-27T02:00:54.271385+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_53f05877836b"}
+{"ts": "2026-10-27T02:00:54.319164+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "simulator", "event_id": "18981757-9e90-5e7e-af52-9fd016c5d556", "correlation_id": "0141c63b-794e-4eea-9516-3c273a21aed1", "topic": "pareeksha.call.requested.v1", "attempt": 1}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_6989b00d32fc | language=en-IN
+{"ts": "2026-10-27T02:01:02.876916+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_6989b00d32fc | language=en-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_6989b00d32fc
+{"ts": "2026-10-27T02:01:03.757633+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_6989b00d32fc"}
+{"ts": "2026-10-27T02:01:04.403079+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-27T02:01:05.223850+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-flash purpose=caller in=720 out=28 cached_in=512 cost=None latency_ms=1460 repair=False cache_hit=False"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_bb4cf7d9586d | model=timbre-v3.0 | voice=Vasudha
+{"ts": "2026-10-27T02:01:05.227376+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_bb4cf7d9586d | model=timbre-v3.0 | voice=Vasudha"}
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_bb4cf7d9586d
+{"ts": "2026-10-27T02:01:06.898121+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize complete | request_id=req_bb4cf7d9586d"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_1df9214032c2 | model=timbre-v3.0 | voice=Vasudha
+{"ts": "2026-10-27T02:01:06.900326+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_1df9214032c2 | model=timbre-v3.0 | voice=Vasudha"}
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_1df9214032c2
+{"ts": "2026-10-27T02:01:08.307655+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize complete | request_id=req_1df9214032c2"}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_227341d70908 | language=en-IN
+{"ts": "2026-10-27T02:01:20.430771+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_227341d70908 | language=en-IN"}
+ERROR gnani | [STT REST] transcribe_bytes failed | request_id=req_227341d70908 | status=429
+{"ts": "2026-10-27T02:01:21.003574+00:00", "level": "error", "logger": "gnani", "msg": "[STT REST] transcribe_bytes failed | request_id=req_227341d70908 | status=429"}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_6777c763cd58 | language=en-IN
+{"ts": "2026-10-27T02:01:21.486581+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_6777c763cd58 | language=en-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_6777c763cd58
+{"ts": "2026-10-27T02:01:23.238537+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_6777c763cd58"}
+{"ts": "2026-10-27T02:01:23.940492+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-27T02:01:24.912026+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-flash purpose=caller in=762 out=50 cached_in=512 cost=None latency_ms=1669 repair=False cache_hit=False"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_6b5fb7ac5249 | model=timbre-v3.0 | voice=Vasudha
+{"ts": "2026-10-27T02:01:24.915012+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_6b5fb7ac5249 | model=timbre-v3.0 | voice=Vasudha"}
+ERROR gnani | [TTS REST] synthesize failed | request_id=req_6b5fb7ac5249 | status=429
+{"ts": "2026-10-27T02:01:25.508549+00:00", "level": "error", "logger": "gnani", "msg": "[TTS REST] synthesize failed | request_id=req_6b5fb7ac5249 | status=429"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_3bf03443cbcf | model=timbre-v3.0 | voice=Vasudha
+{"ts": "2026-10-27T02:01:25.862021+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_3bf03443cbcf | model=timbre-v3.0 | voice=Vasudha"}
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_3bf03443cbcf
+{"ts": "2026-10-27T02:01:27.284831+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize complete | request_id=req_3bf03443cbcf"}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_28b2eb4471d6 | model=timbre-v3.0 | voice=Vasudha
+{"ts": "2026-10-27T02:01:27.287286+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize start | request_id=req_28b2eb4471d6 | model=timbre-v3.0 | voice=Vasudha"}
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_28b2eb4471d6
+{"ts": "2026-10-27T02:01:30.457691+00:00", "level": "info", "logger": "gnani", "msg": "[TTS REST] synthesize complete | request_id=req_28b2eb4471d6"}
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_dffc74df3f72 | language=en-IN
+{"ts": "2026-10-27T02:01:47.909522+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes start | request_id=req_dffc74df3f72 | language=en-IN"}
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_dffc74df3f72
+{"ts": "2026-10-27T02:01:48.734738+00:00", "level": "info", "logger": "gnani", "msg": "[STT REST] transcribe_bytes complete | request_id=req_dffc74df3f72"}
+{"ts": "2026-10-27T02:01:48.779661+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "simulator", "event_id": "6a694371-1b87-5e6b-ae55-168ec47f2994", "correlation_id": "0141c63b-794e-4eea-9516-3c273a21aed1", "topic": "pareeksha.call.requested.v1", "attempt": 1}
