@@ -252,3 +252,16 @@ def test_bug_no_amount_confirm_also_skips_the_read_back_when_the_date_comes_earl
     d.opening()
     closing = d.respond("yes, I will pay on Friday")
     assert closing.end_call and "four thousand five hundred" not in closing.text
+
+
+def test_clean_a_yes_to_the_read_back_is_recorded_even_with_an_aside() -> None:
+    d = Dialog("en-IN")
+    d.opening()
+    _, confirm, closing = _run(
+        d,
+        "yes",
+        "I will pay on Friday",
+        "Yes, that is correct. But please confirm it is against my loan account SHK-000456.",
+    )
+    assert "Friday" in confirm.text
+    assert closing.end_call and closing.tool_calls[0][0] == "record_promise_to_pay"

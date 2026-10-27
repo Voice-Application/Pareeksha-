@@ -2,6 +2,9 @@
 
 Contract changes after Day 1 need Tech Lead approval and an entry here.
 
+## Verifier fixes (FIX-02) — 27 Oct 2026
+- No contract change. Dev dependencies declared (`python-multipart` in the SDK extras; `jsonschema`, `types-PyYAML`, `types-jsonschema` in `backend/requirements-dev.txt`); both workflows install the backend package so connector entry points resolve; the mock agent's clean policy was rewritten (see `mock_agent/README.md`); V6 starts its own HTTPS webhook sink (`scripts/verify/webhook_sink.py`). UI: Overview defaults to the agent with the newest run and scopes the review list to it, Run detail derives its title, failure tags and histogram from the scored calls, Dialect marks synthetic groups.
+
 ## Docs and compose (DOC-02) — 27 Oct 2026
 - No contract change. `docs/guides/` holds the 8 adopter guides plus an SDK reference; `docs/README.md` lists the build decisions that supersede older text (DeepSeek default LLM with Gemini optional, pluggable speech providers, SDK import `pareeksha_sdk`, `PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS`). `make demo` does not exist; the seed is `docker compose run --rm api python -m pareeksha.seed`.
 - `docker-compose.yml`: host ports are overridable (`API_HOST_PORT`, `WEB_HOST_PORT`, `POSTGRES_HOST_PORT`, `KAFKA_HOST_PORT`, `MOCK_AGENT_HOST_PORT`, `KAFKA_UI_HOST_PORT`) and the backend services map `host.docker.internal` to the host so a bot on the host can be called.

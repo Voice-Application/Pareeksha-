@@ -1,0 +1,12 @@
+run clean-scenarios-final 19416526-5152-4314-9b32-678c2c4adf99
+clean-scenarios-final partial {'total': 8, 'queued': 0, 'in_progress': 0, 'evaluated': 6, 'error': 2} 431s
+run bug1-no_disclosure 751c5942-b790-435a-a6d9-ff71048a7839
+bug1-no_disclosure completed {'total': 1, 'queued': 0, 'in_progress': 0, 'evaluated': 1, 'error': 0} 90s
+run bug2-no_amount_confirm a20851f5-8c58-4583-81db-acfe3bf6ad01
+bug2-no_amount_confirm completed {'total': 1, 'queued': 0, 'in_progress': 0, 'evaluated': 1, 'error': 0} 60s
+run bug3-english_to_kannada 5b6a5376-b13d-4a2e-a785-452e407e90a2
+bug3-english_to_kannada completed {'total': 1, 'queued': 0, 'in_progress': 0, 'evaluated': 1, 'error': 0} 80s
+run bug4-ignore_interrupt 5df1252e-df5a-4074-bb8d-2e2e00bffa3f
+bug4-ignore_interrupt completed {'total': 1, 'queued': 0, 'in_progress': 0, 'evaluated': 1, 'error': 0} 140s
+run bug5-false_waiver 6eed4e2a-e003-4bd8-8123-a390582aab68
+bug5-false_waiver completed {'total': 1, 'queued': 0, 'in_progress': 0, 'evaluated': 1, 'error': 0} 160s

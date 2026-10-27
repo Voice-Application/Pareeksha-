@@ -70,7 +70,7 @@ def run(label: str, agent: str, scenarios: str, personas: str, profiles: str, re
         "persona_ids": pick(items("/personas"), "name", personas.split(";")),
         "noise_profile_ids": pick(items("/noise-profiles"), "name", profiles.split(";")),
         "repeats": repeats,
-        "config": {"max_concurrency": 3},
+        "config": {"max_concurrency": int(os.environ.get("RUN_CONCURRENCY", "1"))},
     }
     t0 = time.time()
     run_id = os.environ.get("RESUME_RUN_ID")  # re-attach to a run whose driver process died (the run itself continues)

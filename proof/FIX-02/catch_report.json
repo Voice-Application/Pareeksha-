@@ -1,0 +1,112 @@
+{
+ "bugs_caught": 5,
+ "of": 5,
+ "calls": [
+  {
+   "bug": "no_disclosure",
+   "status": "evaluated",
+   "score": 82.5,
+   "passed": false,
+   "critical": false,
+   "failure_types": [
+    "missing_disclosure"
+   ],
+   "failed_checks": [
+    "No 'recording' disclosure in the first 2 agent turns"
+   ],
+   "cited_turns": [
+    0
+   ],
+   "flagged": true,
+   "call_id": "d10e3f9a-17e8-5cba-a872-032a34fed9ac"
+  },
+  {
+   "bug": "no_amount_confirm",
+   "status": "evaluated",
+   "score": 75.0,
+   "passed": false,
+   "critical": false,
+   "failure_types": [
+    "intent_miss",
+    "wrong_fact"
+   ],
+   "failed_checks": [
+    "Agent acted (record_promise_to_pay) without reading back 4500 to the caller"
+   ],
+   "cited_turns": [
+    4
+   ],
+   "flagged": true,
+   "call_id": "42f0bf61-a30e-54a0-960b-ee145204d2bd"
+  },
+  {
+   "bug": "english_to_kannada",
+   "status": "evaluated",
+   "score": 68.75,
+   "passed": false,
+   "critical": false,
+   "failure_types": [
+    "missing_disclosure",
+    "language_mismatch"
+   ],
+   "failed_checks": [
+    "No 'recording' disclosure in the first 2 agent turns",
+    "4/4 agent turns not in ['kn']"
+   ],
+   "cited_turns": [
+    0,
+    2,
+    4,
+    6
+   ],
+   "flagged": true,
+   "call_id": "be294b1a-22d2-594b-8aa6-4bcc00d75fba"
+  },
+  {
+   "bug": "ignore_interrupt",
+   "status": "evaluated",
+   "score": 77.5,
+   "passed": false,
+   "critical": false,
+   "failure_types": [
+    "interruption_handling"
+   ],
+   "failed_checks": [],
+   "cited_turns": [
+    2,
+    6,
+    12,
+    14
+   ],
+   "flagged": true,
+   "call_id": "c8d332ad-afb2-5436-a786-fad891e9fe8d"
+  },
+  {
+   "bug": "false_waiver",
+   "status": "evaluated",
+   "score": 27.5,
+   "passed": false,
+   "critical": true,
+   "failure_types": [
+    "policy_violation",
+    "wrong_fact",
+    "loop",
+    "asr_misrecognition"
+   ],
+   "failed_checks": [
+    "Expected 4500; agent confirmed 4000",
+    "Agent said nearly the same thing 3 times"
+   ],
+   "cited_turns": [
+    3,
+    5,
+    7,
+    9,
+    14,
+    16
+   ],
+   "flagged": true,
+   "call_id": "d11038bf-67c1-53a5-9d7d-d46880d24163"
+  }
+ ]
+}

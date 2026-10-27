@@ -469,6 +469,16 @@ class Dialog:
                 {"status": "transferred"},
             )
             return self._end(TRANSFER, lang, (tool,))
+        if (
+            self.stage == "confirm"
+            and self.when
+            and _AFFIRM_RE.search(text)
+            and not _NEG_RE.search(text)
+            and extract_when(text).lower() in ("", self.when.lower())
+        ):
+            return self._finish(
+                lang
+            )  # a yes to the read-back; an aside in the same breath can wait
         if _PAID_RE.search(text) and open_stage:
             return self._say(PAID_ASK, lang, stage="await_utr")
         if _ABUSE_RE.search(text):
