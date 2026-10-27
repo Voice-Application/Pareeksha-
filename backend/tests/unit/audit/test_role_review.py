@@ -59,7 +59,7 @@ async def test_review_reasons_force_human_review_on_a_clean_call() -> None:
 async def test_review_reasons_are_kept_when_the_judge_fails() -> None:
     snap = dataclasses.replace(sc.clean_call(), review_reasons=(ROLE_LOW_CONFIDENCE,))
     bad = judge_json(evidence=[99])
-    rec = await evaluate_call(snap, client_for(ScriptedProvider([bad, bad])))
+    rec = await evaluate_call(snap, client_for(ScriptedProvider([bad, bad, bad])))
     assert rec.status == "judge_error" and rec.needs_human_review
     assert rec.review_reasons == ["judge_error", ROLE_LOW_CONFIDENCE]
 
