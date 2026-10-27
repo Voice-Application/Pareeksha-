@@ -9,15 +9,28 @@ WORKERS="outbox-relay planner simulator auditor evaluator finalizer integrations
 pgport=$(grep -E '^POSTGRES_HOST_PORT=' .env | cut -d= -f2 | cut -d' ' -f1); kport=$(grep -E '^KAFKA_HOST_PORT=' .env | cut -d= -f2 | cut -d' ' -f1)
 $COMPOSE --profile workers stop $WORKERS >/dev/null 2>&1
 (set -o pipefail; cd backend && DATABASE_URL="postgresql+psycopg://pareeksha:pareeksha@localhost:${pgport:-5432}/pareeksha" \
-  KAFKA_BOOTSTRAP_SERVERS="localhost:${kport:-9094}" python3 -m pytest tests/kafka -q -p no:cacheprovider 2>&1 | tail -15) > "$OUT/V6.kafka_suite.txt"
+  INFRA_TEST_KAFKA_BOOTSTRAP="localhost:${kport:-9094}" KAFKA_BOOTSTRAP_SERVERS="localhost:${kport:-9094}" python3 -m pytest tests/kafka -q -p no:cacheprovider 2>&1 | tail -15) > "$OUT/V6.kafka_suite.txt"
 suite=$?
 $COMPOSE --profile workers up -d $WORKERS >/dev/null 2>&1
 sleep 20
 block < "$OUT/V6.kafka_suite.txt"
+# One fresh call, so its evaluation.completed is delivered to the sink integration while it exists.
+$PY - <<'PYEOF' 2>&1 | block
+import sys; sys.path.insert(0, "scripts/verify")
+import vapi
+scen = [s["title"] for s in vapi.items("/scenarios")][:1]
+pers = [p["name"] for p in vapi.items("/personas")][:1]
+prof = [n["name"] for n in vapi.items("/noise-profiles")][:1]
+res = vapi.run_and_wait("EMI Reminder Bot", scen, pers, prof, name="v6-one-call")
+print({"run_id": res["run_id"], "wall_s": res["wall_s"], "items": [i["status"] for i in res["items"]]})
+PYEOF
+sleep 30
 [ "$(psql_q "SELECT count(*) FROM evaluations")" -gt 0 ] || finish FAIL "no evaluation in the database to replay"
 
-call_id=$(psql_q "SELECT call_id FROM evaluations WHERE status='ok' ORDER BY id LIMIT 1")
+call_id=$(psql_q "SELECT call_id FROM evaluations WHERE status='ok' ORDER BY id DESC LIMIT 1")
 before_eval=$(psql_q "SELECT count(*) FROM evaluations WHERE call_id='$call_id'")
+sink_before=$([ -n "${V6_SINK_LOG:-}" ] && grep -c "\"call_id\": \"$call_id\"" "$V6_SINK_LOG" || echo n/a)
+note "sink hits before replay: $sink_before"
 before_del=$(psql_q "SELECT count(*) FROM integration_deliveries")
 sink_log=${V6_SINK_LOG:-}
 $COMPOSE exec -T api python - "$call_id" <<'PYEOF' 2>&1 | block
