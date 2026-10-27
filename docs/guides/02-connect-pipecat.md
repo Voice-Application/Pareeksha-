@@ -65,7 +65,6 @@ suites:
     scenarios: {tags: [payment_dispute]}
     personas: ["Rohit — millennial"]
     noise_profiles: [clean_16k]
-    fail_under: 50
 YAML
 pareeksha apply -f pareeksha.yaml
 ```
@@ -84,6 +83,8 @@ curl -s -X POST -H "Authorization: Bearer $PAREEKSHA_API_KEY" \
 ```bash
 pareeksha run --suite smoke --wait
 ```
+
+The call takes a couple of minutes (the bot's own STT, LLM and TTS run in real time). The suite has no `fail_under` here, so the exit code is 0 once the run completes; add `fail_under` to gate on it.
 
 The transcript in the web app shows glass-box rows (what your bot heard versus what the caller said), which feeds the ASR-error metrics.
 
