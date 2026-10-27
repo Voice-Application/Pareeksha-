@@ -1,0 +1,51 @@
+F..                                                                      [100%]
+=================================== FAILURES ===================================
+________ test_three_failures_walk_the_retry_topics_into_one_dead_letter ________
+
+settings = EventSettings(bootstrap_servers='localhost:19094', database_url='postgresql://pareeksha:pareeksha@localhost:5432/pareeksha_test_98603116')
+
+    async def test_three_failures_walk_the_retry_topics_into_one_dead_letter(
+        settings: EventSettings,
+    ) -> None:
+        [call_id] = seed_calls(settings)
+        key = str(call_id)
+        group = unique("fail3")
+        env = call_completed(call_id)
+        seen: list[tuple[int, float]] = []
+    
+        async def always_fails(e: Any, ctx: Ctx) -> Sequence[Outgoing]:
+            seen.append((e.attempt, time.monotonic()))
+            await evaluate(e, ctx)  # a real INSERT that must be rolled back every time
+            raise RetryableError("judge provider returned 503")
+    
+        async with consumer(
+            settings, spec_for(group, IN, always_fails), policy=FAST, with_retry_path=True
+        ) as c:
+            await c.send(env)
+    
+            async def letter() -> Any:
+                return scalar(
+                    settings,
+                    "SELECT attempts FROM dead_letters WHERE event_id = %s AND consumer_group = %s",
+                    env.event_id,
+                    group,
+                )
+    
+>           assert await wait_for(letter, timeout=60, what="the dead_letters row") == 3
+E           assert 2 == 3
+
+tests/kafka/test_retry_dlq_throttle.py:83: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, initial schema (docs/schema.sql v0.2)
+----------------------------- Captured stderr call -----------------------------
+WARNI [pareeksha.events.consumer] handler failed (RetryableError: judge provider returned 503) -> retry attempt 2
+ERROR [pareeksha.events.consumer] handler failed (RetryableError: judge provider returned 503) -> DLQ after 2 attempt(s)
+------------------------------ Captured log call -------------------------------
+WARNING  pareeksha.events.consumer:consumer.py:457 handler failed (RetryableError: judge provider returned 503) -> retry attempt 2
+ERROR    pareeksha.events.consumer:consumer.py:469 handler failed (RetryableError: judge provider returned 503) -> DLQ after 2 attempt(s)
+=========================== short test summary info ============================
+FAILED tests/kafka/test_retry_dlq_throttle.py::test_three_failures_walk_the_retry_topics_into_one_dead_letter
+1 failed, 2 passed in 4.61s
+RESTORED

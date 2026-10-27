@@ -1,0 +1,13 @@
+# Mutation check 1: the processed_events dedupe disabled in backend/pareeksha/events/consumer.py
+# (line 405 "ON CONFLICT DO NOTHING RETURNING 1" replaced by
+#  "ON CONFLICT (consumer_group, event_id) DO UPDATE SET consumer_group = EXCLUDED.consumer_group
+#   RETURNING 1", so a duplicate is never detected), suite run, then `git checkout` of the file.
+# Command: pytest tests/kafka/test_duplicate_and_crash.py   (broker localhost:19094, 135 s)
+FAILED tests/kafka/test_duplicate_and_crash.py::test_duplicate_deliveries_give_one_evaluation_and_one_output_id
+FAILED tests/kafka/test_duplicate_and_crash.py::test_kill_9_after_the_commit_but_before_the_offset_does_not_run_the_handler_twice
+FAILED tests/kafka/test_duplicate_and_crash.py::test_chain_with_duplicates_and_a_failing_sink_ends_with_one_note_per_call
+3 failed, 1 passed in 135.11s (0:02:15)
+# Failure mode seen in the log: the re-run handler's INSERT violates evaluations_pkey
+# ("handler failed (UniqueViolation: duplicate key value violates unique constraint
+#  evaluations_pkey)"), so the suite catches a broken dedupe through the database, not by luck.
+# The kill-9-inside-the-handler test still passes: nothing was committed, so no duplicate exists.
