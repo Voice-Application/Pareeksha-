@@ -1,0 +1,5 @@
+Running 1 test using 1 worker
+
+  ✓  1 tests/real/compare.spec.ts:8:5 › run compare renders two real runs: regressions, deltas, dimensions, no console errors (2.3s)
+
+  1 passed (3.3s)

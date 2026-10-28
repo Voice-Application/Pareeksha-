@@ -30,7 +30,7 @@ test.afterAll(async () => {
 });
 
 /** Pages whose h1 states the current finding ("Latest run passed 7 of 12 calls") instead of the nav label (00-shared 3). */
-const SENTENCE_TITLES = new Set(["/", "/dlq", "/audits", "/dialect", "/regression", "/calibration", "/integrations"]);
+const SENTENCE_TITLES = new Set(["/", "/dlq", "/audits", "/dialect", "/regression", "/calibration", "/integrations", "/runs/compare"]);
 
 for (const item of NAV_ITEMS) {
   test(`page ${item.href} renders inside layout with sidebar`, async ({ page }) => {

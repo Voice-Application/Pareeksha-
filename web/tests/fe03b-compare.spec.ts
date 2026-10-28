@@ -6,7 +6,6 @@ import { callDetail, run } from "./support/fe03-mock";
 const BASE = uuid(1000);
 const HEAD = uuid(1001);
 const OTHER = uuid(1002);
-const ts = "2026-10-24T10:00:00Z";
 
 async function axeClean(page: Page) {
   const r = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze();

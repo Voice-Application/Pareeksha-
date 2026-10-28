@@ -49,7 +49,7 @@ function direction(delta: number | null, goodWhenUp: boolean, unit: string): Ver
   return { threshold: up === goodWhenUp ? "ok" : "fail", word: `${up ? "up" : "down"} ${Math.abs(delta)} ${Math.abs(delta) === 1 ? unit.replace(/s$/, "") : unit}, ${up === goodWhenUp ? "better" : "worse"}` };
 }
 
-function DeltaTile({ label, base, head, delta, goodWhenUp, unit, digits = 0, show }: { label: string; base: string; head: string; delta: number | null; goodWhenUp: boolean; unit: string; digits?: number; show?: string }) {
+function DeltaTile({ label, base, head, delta, goodWhenUp, unit, digits = 0, show, note }: { label: string; base: string; head: string; delta: number | null; goodWhenUp: boolean; unit: string; digits?: number; show?: string; note?: string }) {
   const v = direction(delta == null ? null : Number(delta.toFixed(digits)), goodWhenUp, unit);
   const Arrow = delta == null || delta === 0 ? Minus : delta > 0 ? ArrowUp : ArrowDown;
   return (
@@ -57,7 +57,7 @@ function DeltaTile({ label, base, head, delta, goodWhenUp, unit, digits = 0, sho
       label={label}
       threshold={v.threshold}
       value={<><Arrow size={16} strokeWidth={1.6} aria-hidden />{delta == null ? head : show ?? `${signed(delta, digits)} ${unit}`}</>}
-      caption={<>{v.word}. {base} to {head}.</>}
+      caption={note ?? <>{v.word}. {base} to {head}.</>}
     />
   );
 }
@@ -219,7 +219,7 @@ export function RunCompare() {
         <DeltaTile label="Pass rate" base={bp != null ? `${bp}%` : "-"} head={hp != null ? `${hp}%` : "-"} delta={bp != null && hp != null ? hp - bp : null} goodWhenUp unit="points" />
         <DeltaTile label="Critical" base={String(bs?.critical_failures ?? "-")} head={String(hs?.critical_failures ?? "-")} delta={bs?.critical_failures != null && hs?.critical_failures != null ? hs.critical_failures - bs.critical_failures : null} goodWhenUp={false} unit="failures" />
         <DeltaTile label="Mean score" base={bs?.score_mean != null ? bs.score_mean.toFixed(1) : "-"} head={hs?.score_mean != null ? hs.score_mean.toFixed(1) : "-"} delta={bs?.score_mean != null && hs?.score_mean != null ? hs.score_mean - bs.score_mean : null} goodWhenUp unit="points" digits={1} />
-        <DeltaTile label="Latency p95" base={bs?.latency_p95_ms != null ? sec(bs.latency_p95_ms) : "not measured"} head={hs?.latency_p95_ms != null ? sec(hs.latency_p95_ms) : "not measured"} delta={bs?.latency_p95_ms != null && hs?.latency_p95_ms != null ? (hs.latency_p95_ms - bs.latency_p95_ms) / 1000 : null} goodWhenUp={false} unit="s" digits={1} show={bs?.latency_p95_ms != null && hs?.latency_p95_ms != null ? `${signed((hs.latency_p95_ms - bs.latency_p95_ms) / 1000, 1)} s` : undefined} />
+        <DeltaTile label="Latency p95" base={bs?.latency_p95_ms != null ? sec(bs.latency_p95_ms) : "not measured"} head={hs?.latency_p95_ms != null ? sec(hs.latency_p95_ms) : "not measured"} delta={bs?.latency_p95_ms != null && hs?.latency_p95_ms != null ? (hs.latency_p95_ms - bs.latency_p95_ms) / 1000 : null} goodWhenUp={false} unit="s" digits={1} note={bs?.latency_p95_ms == null && hs?.latency_p95_ms == null ? "No per-turn timing was reported in either run." : undefined} show={bs?.latency_p95_ms != null && hs?.latency_p95_ms != null ? `${signed((hs.latency_p95_ms - bs.latency_p95_ms) / 1000, 1)} s` : undefined} />
       </TileRow>
 
       {!same && cmp.isError && <div className="mb-6"><ErrorPanel error={cmp.error} what="the comparison" onRetry={() => void cmp.refetch()} /></div>}
@@ -344,7 +344,7 @@ function DiffCell({ c, r, col, ri, ci, onKey, callId }: { c?: Compared; r: strin
     <>
       {muted && <span className="absolute inset-0 opacity-45" style={stepStyle(c.head_score != null ? overallStep(c.head_score) : null)} aria-hidden />}
       <span className="relative" style={muted ? { color: "var(--fg)" } : undefined}>{c.head_score != null ? fmtScore(c.head_score) : "-"}</span>
-      {c.delta != null && c.delta !== 0 && <span className="absolute bottom-0 left-0.5 text-[10px] font-normal" aria-hidden>{signed(c.delta)}</span>}
+      {c.delta != null && c.delta !== 0 && <span className="absolute bottom-0 left-0.5 text-[10px] font-normal" style={{ color: muted || c.head_score == null ? "var(--fg)" : `var(--score-${overallStep(c.head_score)}-on)` }} aria-hidden>{signed(c.delta)}</span>}
     </>
   );
   const style = muted ? undefined : stepStyle(c.head_score != null ? overallStep(c.head_score) : null);
