@@ -46,7 +46,7 @@ function direction(delta: number | null, goodWhenUp: boolean, unit: string): Ver
   if (delta == null) return { threshold: null, word: "no comparison" };
   if (delta === 0) return { threshold: null, word: "no change" };
   const up = delta > 0;
-  return { threshold: up === goodWhenUp ? "ok" : "fail", word: `${up ? "up" : "down"} ${Math.abs(delta)} ${unit}, ${up === goodWhenUp ? "better" : "worse"}` };
+  return { threshold: up === goodWhenUp ? "ok" : "fail", word: `${up ? "up" : "down"} ${Math.abs(delta)} ${Math.abs(delta) === 1 ? unit.replace(/s$/, "") : unit}, ${up === goodWhenUp ? "better" : "worse"}` };
 }
 
 function DeltaTile({ label, base, head, delta, goodWhenUp, unit, digits = 0, show }: { label: string; base: string; head: string; delta: number | null; goodWhenUp: boolean; unit: string; digits?: number; show?: string }) {
