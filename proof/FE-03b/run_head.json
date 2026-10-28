@@ -1,0 +1,43 @@
+{
+ "run_id": "d1d39879-9f24-4152-aa64-fb649c3aad27",
+ "wall_s": 210.3,
+ "status": "completed",
+ "summary": {
+  "pass_rate": 0.0,
+  "critical_failures": 2,
+  "needs_review": 4,
+  "score_mean": 41.25,
+  "latency_p50_ms": null,
+  "latency_p95_ms": null,
+  "barge_in_honoured_rate": null,
+  "top_failure_types": [],
+  "suite_passed": null,
+  "score_distribution": []
+ },
+ "items": [
+  [
+   "Promise to pay on Friday",
+   "Sunita \u2014 worried borrower",
+   "evaluated",
+   57.5
+  ],
+  [
+   "Promise to pay on Friday",
+   "Manju \u2014 auto driver",
+   "evaluated",
+   45.0
+  ],
+  [
+   "Already paid, wants confirmation",
+   "Manju \u2014 auto driver",
+   "evaluated",
+   30.0
+  ],
+  [
+   "Already paid, wants confirmation",
+   "Sunita \u2014 worried borrower",
+   "evaluated",
+   32.5
+  ]
+ ]
+}

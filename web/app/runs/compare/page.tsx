@@ -1,6 +1,10 @@
-// STUB(FE-03): placeholder body, replaced when FE-03 builds this page
-import { RouteStub } from "@/components/layout/route-stub";
+import { Suspense } from "react";
+import { RunCompare, RunCompareSkeleton } from "@/components/runs/run-compare";
 
 export default function Page() {
-  return <RouteStub title="Run compare" />;
+  return (
+    <Suspense fallback={<RunCompareSkeleton />}>
+      <RunCompare />
+    </Suspense>
+  );
 }

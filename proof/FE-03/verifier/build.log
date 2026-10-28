@@ -1,0 +1,60 @@
+
+> pareeksha-web@0.1.0 build
+> next build
+
+▲ Next.js 16.4.3 (Turbopack)
+✓ Running next.config.ts took 50ms
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 5.8s
+  Running TypeScript ...
+  Finished TypeScript in 9.8s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/20) ...
+  Generating static pages using 3 workers (5/20) 
+  Generating static pages using 3 workers (10/20) 
+  Generating static pages using 3 workers (15/20) 
+✓ Generating static pages using 3 workers (20/20) in 617ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /agents
+├ ƒ /agents/[id]
+├ ○ /agents/new
+├ ƒ /api/proxy/[...path]
+├ ○ /audits
+├ ○ /audits/new
+├ ○ /calibration
+├ ƒ /calls/[id]
+├ ○ /dialect
+├ ƒ /dialect/[reportId]
+├ ○ /dlq
+├ ○ /integrations
+├ ƒ /integrations/[id]
+├ ○ /noise-profiles
+├ ƒ /noise-profiles/[id]
+├ ○ /personas
+├ ƒ /personas/[id]
+├ ○ /regression
+├ ○ /runs
+├ ƒ /runs/[id]
+├ ○ /runs/compare
+├ ○ /runs/new
+├ ○ /scenarios
+├ ƒ /scenarios/[id]
+├ ○ /scenarios/new
+└ ○ /settings/api-keys
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

@@ -1,0 +1,32 @@
+[
+  {
+    "path": "/runs/compare",
+    "scheme": "light",
+    "violations": []
+  },
+  {
+    "path": "/runs/compare?base=62f28756-1dcf-47c3-b49d-6c755173f602&head=d1d39879-9f24-4152-aa64-fb649c3aad27",
+    "scheme": "light",
+    "violations": []
+  },
+  {
+    "path": "/runs/compare?base=d1d39879-9f24-4152-aa64-fb649c3aad27&head=62f28756-1dcf-47c3-b49d-6c755173f602",
+    "scheme": "light",
+    "violations": []
+  },
+  {
+    "path": "/runs/compare",
+    "scheme": "dark",
+    "violations": []
+  },
+  {
+    "path": "/runs/compare?base=62f28756-1dcf-47c3-b49d-6c755173f602&head=d1d39879-9f24-4152-aa64-fb649c3aad27",
+    "scheme": "dark",
+    "violations": []
+  },
+  {
+    "path": "/runs/compare?base=d1d39879-9f24-4152-aa64-fb649c3aad27&head=62f28756-1dcf-47c3-b49d-6c755173f602",
+    "scheme": "dark",
+    "violations": []
+  }
+]

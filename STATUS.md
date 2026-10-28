@@ -37,7 +37,7 @@ State values: todo / doing / blocked / review / done. Verified = QA sign-off (`y
 | INT-02 | HubSpot sink: contact match → note, idempotent | INT | INT-01 | done (live HubSpot note pending owner token) | — | proof/INT-02/verified.md |
 | INT-03 | Generic Webhook source: verify → dedupe → audit | INT | INT-01, EVAL-04 | done (live HubSpot step pending owner token) | — | proof/INT-03/verified.md |
 | API-04 | SSE progress, run compare, DLQ endpoints, `/metrics/summary` | BE-API | API-03 | done | — | proof/API-04/verified.md |
-| FE-03 | Runs list, new-run wizard, live run detail (SSE), heatmap | FE | FE-02, API-04 | NOT DONE — Run compare page is a placeholder (owner: cut or build) | — | proof/FE-03/rejected.md |
+| FE-03 | Runs list, new-run wizard, live run detail (SSE), heatmap | FE | FE-02, API-04 | done | — | proof/FE-03/verified.md |
 | QA-03 | Planted-bug test: at least 4 of 5 caught | QA | VOICE-05, EVAL-03 | done | — | proof/QA-03/verified.md |
 | H-02 | ≥ 20 consented clips per dialect group | Preetham (human) | — | waiting on Preetham | — | no |
 | EVAL-05 | Dialect pipeline: WER/CER, entity accuracy, HTML report | EVAL | EVAL-03 | done (real dialect clips pending H-02) | — | proof/EVAL-05/verified.md |
@@ -110,8 +110,8 @@ Never cut: mock agent with planted bugs, judge with evidence, Kafka outbox + ide
 - Open STUBs now: api/stubs.py handlers owned by API-02..05, EVAL-04/05, INT-01/03, VOICE-04; STUB(API-01) auth; STUB(VOICE-03) mock_agent; STUB(FE-02/03/05) pages.
 
 ## Release candidate — merged 2026-10-28 (qa/RC2 17c51b9)
-- Independent verification: 41 task proofs signed (incl. EVAL-03b, EVAL-04b, INT-01b, FIX-01, VOICE-07). FE-03 rejected (Run compare placeholder; owner decision: cut or build).
+- Independent verification: 41 task proofs signed (incl. EVAL-03b, EVAL-04b, INT-01b, FIX-01, VOICE-07). FE-03 now verified (Run compare built, qa/FE-03b d8b92f2, 2026-10-28).
 - make verify: V2 PASS (156 s warm, 1581 s cold cache pulls), V3 97.5% (QA-03 run 8422cb13), V4 PASS (5/5), V6 PASS (1 delivery, 1 evaluation). V1 FAIL (unfinished owner tasks + FE-03), V11 FAIL (no tag/public repo). V5/V7/V8/V9/V10 PENDING owner inputs.
-- UI review: 16/17 pages pass; Run compare pending decision.
+- UI review: 17/17 pages pass (Run compare PASS with 8 minor non-blocking fixes listed).
 - NOT DONE (owner-blocked): H-02 dialect clips, EVAL-06 (30 labels), DOC-03 demo, PJM-01 release (public repo + v1.0.0), ALL-01, HubSpot token, provider keys, GitHub Actions run links (V8).
 - Known caveats: clean pass rate not fully deterministic (V4 control 2/2 one run, 1/2 another); Gnani allows one concurrent request per key.
