@@ -1,0 +1,52 @@
+[
+  {
+    "path": "/",
+    "scheme": "light",
+    "violations": []
+  },
+  {
+    "path": "/runs",
+    "scheme": "light",
+    "violations": []
+  },
+  {
+    "path": "/runs/f6c7c5f3-e612-482b-99df-0dd64a250b33",
+    "scheme": "light",
+    "violations": []
+  },
+  {
+    "path": "/runs/new?agent=e9a57731-e981-4de1-b2e9-e43d43b74899&s=f4ef6ea1-9b4d-4de7-9817-7bd1ad00d13d,f1f09546-6eaa-4403-bb77-f11f3dd63c6c,eae3c897-f704-4bff-8528-6a4693727869&p=eed204b8-f105-4e1a-b59c-80e2a4a5cce8,ee7e4ba1-abbb-4c92-abff-e3094a7fceb7&l=f5f0ae83-0fa4-437e-9760-b1f498077599,a479eb30-5faa-4a4e-b074-1c15144197bc&step=review",
+    "scheme": "light",
+    "violations": []
+  },
+  {
+    "path": "/runs/new?agent=e9a57731-e981-4de1-b2e9-e43d43b74899&s=f4ef6ea1-9b4d-4de7-9817-7bd1ad00d13d,f1f09546-6eaa-4403-bb77-f11f3dd63c6c,eae3c897-f704-4bff-8528-6a4693727869&p=eed204b8-f105-4e1a-b59c-80e2a4a5cce8,ee7e4ba1-abbb-4c92-abff-e3094a7fceb7&l=f5f0ae83-0fa4-437e-9760-b1f498077599,a479eb30-5faa-4a4e-b074-1c15144197bc&step=scenarios",
+    "scheme": "light",
+    "violations": []
+  },
+  {
+    "path": "/",
+    "scheme": "dark",
+    "violations": []
+  },
+  {
+    "path": "/runs",
+    "scheme": "dark",
+    "violations": []
+  },
+  {
+    "path": "/runs/f6c7c5f3-e612-482b-99df-0dd64a250b33",
+    "scheme": "dark",
+    "violations": []
+  },
+  {
+    "path": "/runs/new?agent=e9a57731-e981-4de1-b2e9-e43d43b74899&s=f4ef6ea1-9b4d-4de7-9817-7bd1ad00d13d,f1f09546-6eaa-4403-bb77-f11f3dd63c6c,eae3c897-f704-4bff-8528-6a4693727869&p=eed204b8-f105-4e1a-b59c-80e2a4a5cce8,ee7e4ba1-abbb-4c92-abff-e3094a7fceb7&l=f5f0ae83-0fa4-437e-9760-b1f498077599,a479eb30-5faa-4a4e-b074-1c15144197bc&step=review",
+    "scheme": "dark",
+    "violations": []
+  },
+  {
+    "path": "/runs/new?agent=e9a57731-e981-4de1-b2e9-e43d43b74899&s=f4ef6ea1-9b4d-4de7-9817-7bd1ad00d13d,f1f09546-6eaa-4403-bb77-f11f3dd63c6c,eae3c897-f704-4bff-8528-6a4693727869&p=eed204b8-f105-4e1a-b59c-80e2a4a5cce8,ee7e4ba1-abbb-4c92-abff-e3094a7fceb7&l=f5f0ae83-0fa4-437e-9760-b1f498077599,a479eb30-5faa-4a4e-b074-1c15144197bc&step=scenarios",
+    "scheme": "dark",
+    "violations": []
+  }
+]

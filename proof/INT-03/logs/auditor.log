@@ -1,0 +1,10 @@
+{"ts": "2026-10-27T01:37:19.411351+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: GET https://127.0.0.1:28443/recordings/CA-int03.wav \"HTTP/1.0 200 OK\""}
+INFO  gnani | [STT Batch] create start | request_id=req_c233dd9e473a | files=1
+{"ts": "2026-10-27T01:37:19.502321+00:00", "level": "info", "logger": "gnani", "msg": "[STT Batch] create start | request_id=req_c233dd9e473a | files=1"}
+INFO  gnani | [STT Batch] job created | job_id=e4d04b4f-f7d3-47dc-a688-2f4530b8682b
+{"ts": "2026-10-27T01:37:21.150068+00:00", "level": "info", "logger": "gnani", "msg": "[STT Batch] job created | job_id=e4d04b4f-f7d3-47dc-a688-2f4530b8682b"}
+WARNING gnani | [STT Batch] GET /stt/v3/batch/jobs/e4d04b4f-f7d3-47dc-a688-2f4530b8682b/files -> 429; retrying in 1.0s (1/5)
+{"ts": "2026-10-27T01:37:33.824955+00:00", "level": "warning", "logger": "gnani", "msg": "[STT Batch] GET /stt/v3/batch/jobs/e4d04b4f-f7d3-47dc-a688-2f4530b8682b/files -> 429; retrying in 1.0s (1/5)"}
+{"ts": "2026-10-27T01:37:37.404059+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-27T01:37:38.821543+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-v4-pro purpose=role_detect in=754 out=73 cached_in=640 cost=0.00128436 latency_ms=2132 repair=False cache_hit=False"}
+{"ts": "2026-10-27T01:37:38.835953+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "auditor", "event_id": "562524b9-2e3f-4bc8-a8f4-57a9888c2d62", "correlation_id": "abf1edee-a9bc-446a-bd64-b713182f8806", "topic": "pareeksha.audit.requested.v1", "attempt": 1}

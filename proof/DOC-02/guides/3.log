@@ -1,0 +1,10 @@
+# Guide 3: echo_bot.py extracted verbatim from the guide's code block; run on the host (python echo_bot.py, port 8770)
+$ pareeksha apply -f pareeksha.yaml
+created   agent: Echo Bot
+1 change(s)
+exit=0
+$ curl .../agents
+[('Echo Bot', '03f70e42-33b4-4716-8094-e065dddc9790'), ('EMI Reminder Bot', 'fc0f1790-b694-43db-88e8-2978708d43a3')]
+$ curl -X POST .../agents/<id>/test-connection
+{"ok":true,"first_audio_ms":1,"protocol":"pareeksha-audio-v1","glass_box_messages_seen":true,"error":null,"detail":null}
+RESULT: PASS (apply ok, test-connection ok:true, glass_box_messages_seen:true) exit=0

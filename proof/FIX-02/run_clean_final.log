@@ -1,0 +1,2 @@
+run clean-scenarios-final 8090478b-3976-4ec0-8658-f0021a9ba58a
+clean-scenarios-final partial {'total': 8, 'queued': 0, 'in_progress': 0, 'evaluated': 7, 'error': 1} 671s

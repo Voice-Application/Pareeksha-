@@ -1,0 +1,105 @@
+# Guide 1 quickstart, followed from a fresh clone of origin task/DOC-02 (69f600e); started 2026-10-27T04:00:44Z
+$ cp .env.example .env
+$ (edit .env: keys, SECRET_KEY, PAREEKSHA_API_KEY, non-default ports; keys not printed)
+127
+$ docker compose --profile workers up -d --build   (sandbox: proxy overlay + BUILDX_BAKE_ENTITLEMENTS_FS=0)
+$ docker compose ps  (all services up; api, kafka, postgres, mock-agent healthy)
+time="2026-10-27T10:57:30Z" level=warning msg="The \"CA_BUNDLE\" variable is not set. Defaulting to a blank string."
+api Up 2 minutes (healthy)
+auditor Up About a minute
+dialect Up About a minute
+dlq-recorder Up 56 seconds
+evaluator Up 40 seconds
+evaluator Up 39 seconds
+finalizer Up 54 seconds
+generator Up 37 seconds
+integrations Up 45 seconds
+kafka Up 2 minutes (healthy)
+mock-agent Up 2 minutes (healthy)
+outbox-relay Up 2 minutes
+planner Up 47 seconds
+postgres Up 2 minutes (healthy)
+reconciler Up 2 minutes
+retrier Up 45 seconds
+simulator Up About a minute
+simulator Up About a minute
+simulator Up About a minute
+web Up 2 minutes
+$ curl -s http://localhost:$API_HOST_PORT/health
+{"db":"ok","kafka":"ok"}
+$ docker compose run --rm api python -m pareeksha.seed
+time="2026-10-27T10:57:31Z" level=warning msg="The \"CA_BUNDLE\" variable is not set. Defaulting to a blank string."
+ Container doc02a-postgres-1 Running 
+ Container doc02a-kafka-1 Running 
+ Container doc02a-kafka-1 Waiting 
+ Container doc02a-postgres-1 Waiting 
+ Container doc02a-postgres-1 Healthy 
+ Container doc02a-migrate-1 Starting 
+ Container doc02a-kafka-1 Healthy 
+ Container doc02a-kafka-init-1 Starting 
+ Container doc02a-migrate-1 Started 
+ Container doc02a-kafka-init-1 Started 
+ Container doc02a-kafka-init-1 Waiting 
+ Container doc02a-migrate-1 Waiting 
+ Container doc02a-migrate-1 Exited 
+ Container doc02a-kafka-init-1 Exited 
+ Container doc02a-api-run-7cda8ec55bdb Creating 
+ Container doc02a-api-run-7cda8ec55bdb Created 
+{
+  "created": {
+    "personas": 20,
+    "noise_profiles": 8,
+    "rubric_versions": 1,
+    "agents": 1,
+    "scenarios": 8,
+    "api_keys": 1
+  },
+  "existing": {}
+}
+exit=0
+$ docker compose up -d web
+ Container doc02a-api-1 Waiting 
+ Container doc02a-api-1 Healthy 
+$ python3 -m venv .venv && . .venv/bin/activate && pip install ./sdk/python
+$ pareeksha login ...
+logged in; profile saved to <profile>
+$ pareeksha doctor
+ok   db: ok
+ok   kafka: ok
+ok   api: reachable and key accepted
+info dlq_open=0 outbox_backlog=0
+n/a  gnani, gemini: the API exposes no connectivity probe for these yet
+$ pareeksha run ... --wait
+10:59:24
+created run bcdab464-b7d9-459b-85a6-16e2f9fa1710 (2 items)
+  queued: 0/2 evaluated, 0 error
+  running: 0/2 evaluated, 0 error
+  running: 0/2 evaluated, 0 error
+  running: 0/2 evaluated, 0 error
+  running: 0/2 evaluated, 2 error
+  failed: 0/2 evaluated, 2 error
+run bcdab464-b7d9-459b-85a6-16e2f9fa1710: failed, pass rate n/a, critical 0
+FAIL: run failed
+exit=1
+10:59:39
+# NOTE: first run failed (2 errors): sandbox TLS-intercepting proxy, containers did not trust its CA (SSLError to api.vachana.ai). Fixed in docker-compose.proxy.yml (runtime CA mount + SSL_CERT_FILE); not needed on a normal machine. Re-running:
+$ pareeksha run ... --wait
+11:00:57
+created run 28247e6f-edda-4784-89d2-ced33734b571 (2 items)
+  queued: 0/2 evaluated, 0 error
+  partial: 1/2 evaluated, 1 error
+run 28247e6f-edda-4784-89d2-ced33734b571: partial, pass rate 0.0%, critical 1
+FAIL: run finished partially (some items errored)
+exit=1
+11:02:28
+# NOTE: second run: 1 of 2 calls evaluated (score 30, critical), the other errored with Gnani 429 (two simultaneous calls on one Gnani key). Guide changed: SIMULATOR_REPLICAS=1 and a single-scenario tag. Re-running:
+$ pareeksha run --agent "EMI Reminder Bot" --tags promise_to_pay --persona "Manju — auto driver" --noise clean_16k --wait
+11:03:50
+created run d33b61bb-b755-4c54-840d-4b39cdd57829 (1 items)
+  queued: 0/1 evaluated, 0 error
+  completed: 1/1 evaluated, 0 error
+run d33b61bb-b755-4c54-840d-4b39cdd57829: completed, pass rate 0.0%, critical 1
+exit=0
+11:05:39
+RESULT: PASS: stack up, seed ok, CLI run completed with 1/1 call evaluated (judge: score 60, critical failure wrong EMI amount), exit=0, 1m49s for the run. Image build was not timed from cold (layers were cached from earlier builds in this sandbox), so the NFR-14 20-minute figure is unmeasured here.
+Step 5 (planted bug) not executed live to save Gnani spend; mechanism = MOCK_BUGS env, same as the unit-tested mock agent (guide 4 of VOICE-03 proof).

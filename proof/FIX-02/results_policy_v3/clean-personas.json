@@ -1,0 +1,1717 @@
+{
+ "label": "clean-personas",
+ "run_id": "b1b0e3d8-4f5e-4306-ab1f-a90450503eae",
+ "agent": "EMI Reminder Bot",
+ "status": "completed",
+ "wall_seconds": 360.6,
+ "progress": {
+  "total": 4,
+  "queued": 0,
+  "in_progress": 0,
+  "evaluated": 4,
+  "error": 0
+ },
+ "summary": {
+  "pass_rate": 0.25,
+  "critical_failures": 3,
+  "needs_review": 3,
+  "score_mean": 48.12,
+  "latency_p50_ms": null,
+  "latency_p95_ms": null,
+  "barge_in_honoured_rate": null,
+  "top_failure_types": [],
+  "suite_passed": null,
+  "score_distribution": []
+ },
+ "request": {
+  "agent_id": "767eac68-4d7e-41d4-b996-40981ae4e30d",
+  "name": "clean-personas",
+  "scenario_ids": [
+   "108a08b4-2948-4c2a-99ef-5d510a74c582"
+  ],
+  "persona_ids": [
+   "4f7168ef-5f92-4aac-a9d8-f5a3137699b2",
+   "64991ef5-3897-4b26-afc2-c1a18f3382f0",
+   "94479999-1dbe-4b71-ae76-0b43005e2f83",
+   "60210804-cbc6-417a-9610-85f87de8ffea"
+  ],
+  "noise_profile_ids": [
+   "381621a6-cd71-45e6-b015-930f2d14cf33"
+  ],
+  "repeats": 1,
+  "config": {
+   "max_concurrency": 3
+  }
+ },
+ "calls": [
+  {
+   "item": {
+    "id": "0ef1b922-16a2-41e3-ba3d-954d5b32db03",
+    "scenario": "Promise to pay on Friday",
+    "persona": "Rohit — millennial",
+    "noise_profile": "pstn_8k_alaw",
+    "status": "evaluated",
+    "call_id": "2b3bf342-a4ad-59c4-bc9e-9a952651975b",
+    "overall_score": 95.0,
+    "passed": true,
+    "critical_failure": false
+   },
+   "call": {
+    "id": "2b3bf342-a4ad-59c4-bc9e-9a952651975b",
+    "source": "simulation",
+    "status": "completed",
+    "agent_id": "767eac68-4d7e-41d4-b996-40981ae4e30d",
+    "run_id": "b1b0e3d8-4f5e-4306-ab1f-a90450503eae",
+    "run_item_id": "0ef1b922-16a2-41e3-ba3d-954d5b32db03",
+    "language": "hi-IN",
+    "end_reason": "agent_hangup",
+    "duration_ms": 102387,
+    "started_at": "2026-10-27T18:14:07.260014Z",
+    "recordings": {
+     "mixed": "/api/v1/calls/2b3bf342-a4ad-59c4-bc9e-9a952651975b/audio/mixed",
+     "caller": "/api/v1/calls/2b3bf342-a4ad-59c4-bc9e-9a952651975b/audio/caller",
+     "agent": "/api/v1/calls/2b3bf342-a4ad-59c4-bc9e-9a952651975b/audio/agent",
+     "original": null
+    },
+    "turns": [
+     {
+      "idx": 0,
+      "speaker": "agent",
+      "text": "गुणवत्ता और अनुपालन के लिए यह कॉल रिकॉर्ड की जा रही है, नमस्ते, मैं सुरक्षा फाइनेंस से बोल रही हूँ, क्या मैं खाताधारक से बात कर रही हूँ?",
+      "start_ms": 3556,
+      "end_ms": 12324,
+      "ground_truth_text": "गुणवत्ता और अनुपालन के लिए यह कॉल रिकॉर्ड की जा रही है। नमस्ते, मैं सुरक्षा फाइनेंस से बोल रही हूँ। क्या मैं खाताधारक से बात कर रही हूँ?",
+      "agent_heard_text": null,
+      "language_detected": "hi-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 1,
+      "speaker": "caller",
+      "text": "हाँ बोल रहा हूँ, मैं रोहित। लोन ID है SHK-000456, बताइए क्या मामला है?",
+      "start_ms": 16179,
+      "end_ms": 23780,
+      "ground_truth_text": "हाँ बोल रहा हूँ, मैं रोहित। लोन ID है SHK-000456, बताइए क्या मामला है?",
+      "agent_heard_text": "हाँ बोल रहा हूँ मैं रोहित लोन आई डी है एस एच के शून्य शून्य शून्य चार पांच छह, बताइये, क्या मामला है?",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 2,
+      "speaker": "agent",
+      "text": "मैं सुरक्षा फ़ाइनैन्स से आपकी चार हज़ार पाँच सौ रुपये की ई एम आई के बारे में बोल रही हूँ जो बारह दिन से बकाया है आप कब भुगतान कर सकते हैं",
+      "start_ms": 29776,
+      "end_ms": 38177,
+      "ground_truth_text": "मैं सुरक्षा फाइनेंस से आपकी 4,500 रुपये की ईएमआई के बारे में बोल रही हूँ, जो बारह दिन से बकाया है। आप कब भुगतान कर सकते हैं?",
+      "agent_heard_text": null,
+      "language_detected": "hi-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 3,
+      "speaker": "caller",
+      "text": "देखिए आज तो पे नहीं कर पाऊँगा, सैलरी अभी आई नहीं है। Friday को पूरा चार हज़ार पाँच सौ pay कर दूँगा, वो date note कर लीजिए।",
+      "start_ms": 42638,
+      "end_ms": 49821,
+      "ground_truth_text": "देखिए आज तो पे नहीं कर पाऊँगा, सैलरी अभी आई नहीं है। Friday को पूरा चार हज़ार पाँच सौ pay कर दूँगा, वो date note कर लीजिए।",
+      "agent_heard_text": "देखिए आज तो पे नहीं कर पाऊंगा सैलरी अभी आई नहीं है फ्राइडे को पूरा चार हज़ार पांच सौ पे कर दूंगा वो डेट नोट कर लीजिए",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 4,
+      "speaker": "agent",
+      "text": "आप किस तारीख को भुगतान कर पाएंगे?",
+      "start_ms": 52296,
+      "end_ms": 54292,
+      "ground_truth_text": "आप किस तारीख को भुगतान कर पाएँगे?",
+      "agent_heard_text": null,
+      "language_detected": "hi-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 5,
+      "speaker": "caller",
+      "text": "अरे मैंने अभी बोला ना, Friday को। इस Friday, पूरा चार हज़ार पाँच सौ।",
+      "start_ms": 60319,
+      "end_ms": 64900,
+      "ground_truth_text": "अरे मैंने अभी बोला ना, Friday को। इस Friday, पूरा चार हज़ार पाँच सौ।",
+      "agent_heard_text": "अरे मैंने अभी बोला ना फ्राइडे को इस फ्राइडे पूरा चार हजार पांच सौ",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 6,
+      "speaker": "agent",
+      "text": "पुष्टि के लिए आप फ्राइडे को चार हज़ार पाँच सौ रुपये का भुगतान करेंगे, क्या यह सही है?",
+      "start_ms": 69902,
+      "end_ms": 75821,
+      "ground_truth_text": "पुष्टि के लिए, आप फ्राइडे को चार हज़ार पाँच सौ रुपये का भुगतान करेंगे। क्या यह सही है?",
+      "agent_heard_text": null,
+      "language_detected": "hi-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 7,
+      "speaker": "caller",
+      "text": "हाँ बिल्कुल सही, Friday को चार हज़ार पाँच सौ रुपये पूरे pay कर दूँगा। बस ये date और amount record में डाल दीजिए।",
+      "start_ms": 81659,
+      "end_ms": 88560,
+      "ground_truth_text": "हाँ बिल्कुल सही, Friday को चार हज़ार पाँच सौ रुपये पूरे pay कर दूँगा। बस ये date और amount record में डाल दीजिए।",
+      "agent_heard_text": "हाँ बिलकुल सही फ्राइडे को चार हज़ार पांच सौ रुपए पूरे पे कर दूंगा बस ये डेट और अमाउंट रिकॉर्ड में डाल दीजिए",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 8,
+      "speaker": "agent",
+      "text": "धन्यवाद मैंने फ्राइडे को चार हज़ार पाँच सौ रुपए के भुगतान का आपका वादा दर्ज कर लिया है आपका दिन शुभ हो, नमस्ते।",
+      "start_ms": 93529,
+      "end_ms": 101287,
+      "ground_truth_text": "धन्यवाद, मैंने फ्राइडे को चार हज़ार पाँच सौ रुपये के भुगतान का आपका वादा दर्ज कर लिया है। आपका दिन शुभ हो। नमस्ते।",
+      "agent_heard_text": null,
+      "language_detected": "hi-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     }
+    ],
+    "tool_calls": [
+     {
+      "seq": 0,
+      "name": "record_promise_to_pay",
+      "arguments": {
+       "when": "फ्राइडे",
+       "amount_inr": 4500
+      },
+      "result": {
+       "status": "recorded"
+      },
+      "at_ms": 101441,
+      "turn_idx": 8
+     }
+    ],
+    "metrics": {
+     "first_greeting_ms": 3556,
+     "response_latency_p50_ms": 4986,
+     "response_latency_p90_ms": null,
+     "response_latency_p95_ms": 5847,
+     "response_latency_max_ms": null,
+     "barge_in_attempts": 0,
+     "barge_in_honoured": 0,
+     "agent_stop_time_p50_ms": null,
+     "silence_gaps_over_2s": 8,
+     "turn_count": 9,
+     "agent_talk_ratio": 0.556,
+     "repeated_utterances": 0,
+     "caller_asr_wer": 0.4857,
+     "latency_is_approximate": false
+    },
+    "checks": [
+     {
+      "check_type": "amount_confirmed",
+      "check_key": "emi_amount",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [
+       2,
+       6,
+       8
+      ],
+      "detail": "Agent stated 4500 correctly"
+     },
+     {
+      "check_type": "disclosure_present",
+      "check_key": "recording",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [
+       0
+      ],
+      "detail": "Disclosure given in turn 0"
+     },
+     {
+      "check_type": "forbidden_absent",
+      "check_key": "threat_legal",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "Phrase never said by the agent"
+     },
+     {
+      "check_type": "language_match",
+      "check_key": "hi-IN",
+      "must_pass": false,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "0/5 agent turns not in ['hi']"
+     },
+     {
+      "check_type": "no_loop",
+      "check_key": "agent_repeats",
+      "must_pass": false,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "No repeated utterance loop"
+     },
+     {
+      "check_type": "tool_calls_expected",
+      "check_key": "record_promise_to_pay",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [
+       8
+      ],
+      "detail": "record_promise_to_pay called as expected"
+     }
+    ],
+    "evaluation": {
+     "id": "d73f58db-50a9-5538-b6df-f3a8352fdb9b",
+     "rubric_version": "rubric-2026-10-v1",
+     "judge_model": "deepseek-v4-pro",
+     "prompt_hash": "sha256:f495ed1d9c3590c5dd9a5a82cdbc05ce077d35880a1b012b1c48ff021a43dacf",
+     "status": "ok",
+     "overall_score": 95.0,
+     "passed": true,
+     "critical_failure": false,
+     "needs_human_review": false,
+     "review_reasons": [],
+     "failure_types": [],
+     "dimensions": {
+      "escalation": {
+       "score": 4,
+       "evidence_turns": [],
+       "reason": "No transfer needed; caller did not request human assistance."
+      },
+      "empathy_tone": {
+       "score": 3,
+       "evidence_turns": [
+        2
+       ],
+       "reason": "Neutral and professional; no explicit empathy for caller's salary delay, but not cold or dismissive."
+      },
+      "task_completion": {
+       "score": 4,
+       "evidence_turns": [
+        8
+       ],
+       "reason": "Promise-to-pay date (Friday) and amount (4500) recorded via tool call and read back correctly; caller confirmed."
+      },
+      "factual_accuracy": {
+       "score": 4,
+       "evidence_turns": [
+        2,
+        6,
+        8
+       ],
+       "reason": "EMI amount 4500 stated correctly; date and amount confirmed and recorded accurately."
+      },
+      "conversation_flow": {
+       "score": 3,
+       "evidence_turns": [
+        4
+       ],
+       "reason": "Agent asked for date again after caller already provided it, causing minor repetition; otherwise smooth."
+      },
+      "language_handling": {
+       "score": 4,
+       "evidence_turns": [
+        0,
+        2,
+        4,
+        6,
+        8
+       ],
+       "reason": "Agent used Hindi throughout, understood code-mixed English words like 'Friday' and 'pay' correctly."
+      },
+      "policy_compliance": {
+       "score": 4,
+       "evidence_turns": [
+        0
+       ],
+       "reason": "Recording disclosure given; no threats or forbidden content; no unnecessary PII collected."
+      }
+     },
+     "summary": "Agent successfully recorded promise-to-pay for Friday with correct amount 4500, read back details, and thanked caller. All mandatory disclosures present, no forbidden content. Minor friction: agent asked for date again after caller already stated it, but overall call met success criteria.",
+     "confidence": "high"
+    },
+    "speaker_map": null
+   }
+  },
+  {
+   "item": {
+    "id": "1dd7e72b-54d3-48f2-9dfa-865f3cf3808b",
+    "scenario": "Promise to pay on Friday",
+    "persona": "Off-topic tester",
+    "noise_profile": "pstn_8k_alaw",
+    "status": "evaluated",
+    "call_id": "ddeef59f-68c2-5ef8-b021-6d7e04302774",
+    "overall_score": 27.5,
+    "passed": false,
+    "critical_failure": true
+   },
+   "call": {
+    "id": "ddeef59f-68c2-5ef8-b021-6d7e04302774",
+    "source": "simulation",
+    "status": "completed",
+    "agent_id": "767eac68-4d7e-41d4-b996-40981ae4e30d",
+    "run_id": "b1b0e3d8-4f5e-4306-ab1f-a90450503eae",
+    "run_item_id": "1dd7e72b-54d3-48f2-9dfa-865f3cf3808b",
+    "language": "en-IN",
+    "end_reason": "goal_achieved",
+    "duration_ms": 160195,
+    "started_at": "2026-10-27T18:15:49.780020Z",
+    "recordings": {
+     "mixed": "/api/v1/calls/ddeef59f-68c2-5ef8-b021-6d7e04302774/audio/mixed",
+     "caller": "/api/v1/calls/ddeef59f-68c2-5ef8-b021-6d7e04302774/audio/caller",
+     "agent": "/api/v1/calls/ddeef59f-68c2-5ef8-b021-6d7e04302774/audio/agent",
+     "original": null
+    },
+    "turns": [
+     {
+      "idx": 0,
+      "speaker": "agent",
+      "text": "this call is being recorded for quality and compliance purposes",
+      "start_ms": 498,
+      "end_ms": 3370,
+      "ground_truth_text": "This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?",
+      "agent_heard_text": null,
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 1,
+      "speaker": "caller",
+      "text": "Hello? Is this the loan department? I'm calling about my EMI.",
+      "start_ms": 2932,
+      "end_ms": 9133,
+      "ground_truth_text": "Hello? Is this the loan department? I'm calling about my EMI.",
+      "agent_heard_text": "hello is this the loan department i'm calling about my emi",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": true
+     },
+     {
+      "idx": 2,
+      "speaker": "agent",
+      "text": "this call is being recorded for quality and compliance purposes hello this is suraksha finance am i speaking with the account holder",
+      "start_ms": 10347,
+      "end_ms": 17961,
+      "ground_truth_text": "This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?",
+      "agent_heard_text": null,
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 3,
+      "speaker": "caller",
+      "text": "Haan, Anita Rao speaking. My loan ID is SHK-000456. I can't pay the EMI today, but I'll pay the full amount this Friday.",
+      "start_ms": 22455,
+      "end_ms": 35113,
+      "ground_truth_text": "Haan, Anita Rao speaking. My loan ID is SHK-000456. I can't pay the EMI today, but I'll pay the full amount this Friday.",
+      "agent_heard_text": "khan anita rao speaking my loan id is shk zero zero zero four five six i can't pay the emi today but i'll pay the full amount this friday",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 4,
+      "speaker": "agent",
+      "text": "this call is being recorded for quality and compliance purposes hello this is suraksha finance am i speaking with the account holder",
+      "start_ms": 37491,
+      "end_ms": 45043,
+      "ground_truth_text": "This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?",
+      "agent_heard_text": null,
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 5,
+      "speaker": "caller",
+      "text": "Sir, I already told you — Anita Rao, loan ID SHK-000456. I can't pay today but I'll pay the full EMI this Friday, please note that down.",
+      "start_ms": 50013,
+      "end_ms": 61434,
+      "ground_truth_text": "Sir, I already told you — Anita Rao, loan ID SHK-000456. I can't pay today but I'll pay the full EMI this Friday, please note that down.",
+      "agent_heard_text": "sir i already told you anita rao loan id shk zero zero zero four five six i can't pay today but i'll pay the full emi this friday please note that down",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 6,
+      "speaker": "agent",
+      "text": "this call is being recorded for quality and compliance per",
+      "start_ms": 62917,
+      "end_ms": 65654,
+      "ground_truth_text": "This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?",
+      "agent_heard_text": null,
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 7,
+      "speaker": "caller",
+      "text": "Arre sir, you're repeating yourself. Just note it down — full EMI, this Friday. That's all I'm asking.",
+      "start_ms": 65395,
+      "end_ms": 72155,
+      "ground_truth_text": "Arre sir, you're repeating yourself. Just note it down — full EMI, this Friday. That's all I'm asking.",
+      "agent_heard_text": "arey sir you're repeating yourself just note it down full emi this friday that's all i'm asking",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": true
+     },
+     {
+      "idx": 8,
+      "speaker": "agent",
+      "text": "this call is being recorded for quality and compliance purposes",
+      "start_ms": 73287,
+      "end_ms": 76540,
+      "ground_truth_text": "This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?",
+      "agent_heard_text": null,
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 9,
+      "speaker": "caller",
+      "text": "Sir, are you even listening? I said I'll pay the full EMI this Friday. Can you please just record the date?",
+      "start_ms": 76114,
+      "end_ms": 82774,
+      "ground_truth_text": "Sir, are you even listening? I said I'll pay the full EMI this Friday. Can you please just record the date?",
+      "agent_heard_text": "sir are you even listening i said i'll pay the full emi this friday can you please just record the date",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": true
+     },
+     {
+      "idx": 10,
+      "speaker": "agent",
+      "text": "this call is being recorded for quality and compliance purposes hello this is suraksha finance am i speaking with the account holder",
+      "start_ms": 84026,
+      "end_ms": 91600,
+      "ground_truth_text": "This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?",
+      "agent_heard_text": null,
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 11,
+      "speaker": "caller",
+      "text": "Sir, this is the fourth time you're playing that same message. I'm Anita Rao, loan SHK-000456 — I'll pay the full EMI this Friday. Please just write down Friday and confirm it to me.",
+      "start_ms": 97712,
+      "end_ms": 110214,
+      "ground_truth_text": "Sir, this is the fourth time you're playing that same message. I'm Anita Rao, loan SHK-000456 — I'll pay the full EMI this Friday. Please just write down Friday and confirm it to me.",
+      "agent_heard_text": "sir this is the fourth time you're playing that same message i'm anita rao loan shk zero zero zero four five six i'll pay the full emi this friday please just write down friday and confirm it to me",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 12,
+      "speaker": "agent",
+      "text": "this call is being recorded for quality and compliance purposes hello this is suraksha finance am i speaking with the account holder",
+      "start_ms": 112556,
+      "end_ms": 120135,
+      "ground_truth_text": "This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?",
+      "agent_heard_text": null,
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 13,
+      "speaker": "caller",
+      "text": "Sir, this is going nowhere. I've told you my name and loan ID four times now. Just say the amount and the date back to me — full EMI, this Friday — or I'll call back later.",
+      "start_ms": 124213,
+      "end_ms": 137154,
+      "ground_truth_text": "Sir, this is going nowhere. I've told you my name and loan ID four times now. Just say the amount and the date back to me — full EMI, this Friday — or I'll call back later.",
+      "agent_heard_text": "sir this is going nowhere i've told you my name and loan id four times now just say the amount and the date back to me full emi this friday or i'll call back later",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 14,
+      "speaker": "agent",
+      "text": "this call is being recorded for quality and compliance purposes hello this is suraksha finance am i speaking with the account holder",
+      "start_ms": 138706,
+      "end_ms": 146293,
+      "ground_truth_text": "This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?",
+      "agent_heard_text": null,
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 15,
+      "speaker": "caller",
+      "text": "Bas, enough! I've said it six times and you keep looping that recording. Forget it — I'll call back later and speak to a real person.",
+      "start_ms": 150533,
+      "end_ms": 159594,
+      "ground_truth_text": "Bas, enough! I've said it six times and you keep looping that recording. Forget it — I'll call back later and speak to a real person.",
+      "agent_heard_text": "enough",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 16,
+      "speaker": "agent",
+      "text": "this call is",
+      "start_ms": 153076,
+      "end_ms": 153509,
+      "ground_truth_text": "This call is being recorded for quality and compliance purposes. Hello, this is Suraksha Finance. Am I speaking with the account holder?",
+      "agent_heard_text": null,
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     }
+    ],
+    "tool_calls": [],
+    "metrics": {
+     "first_greeting_ms": 498,
+     "response_latency_p50_ms": 1483,
+     "response_latency_p90_ms": null,
+     "response_latency_p95_ms": 2367,
+     "response_latency_max_ms": null,
+     "barge_in_attempts": 3,
+     "barge_in_honoured": 3,
+     "agent_stop_time_p50_ms": 426,
+     "silence_gaps_over_2s": 7,
+     "turn_count": 17,
+     "agent_talk_ratio": 0.376,
+     "repeated_utterances": 6,
+     "caller_asr_wer": 0.219,
+     "latency_is_approximate": false
+    },
+    "checks": [
+     {
+      "check_type": "amount_confirmed",
+      "check_key": "emi_amount",
+      "must_pass": true,
+      "passed": null,
+      "evidence_turns": [],
+      "detail": "Agent never stated an amount"
+     },
+     {
+      "check_type": "disclosure_present",
+      "check_key": "recording",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [
+       0
+      ],
+      "detail": "Disclosure given in turn 0"
+     },
+     {
+      "check_type": "forbidden_absent",
+      "check_key": "threat_legal",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "Phrase never said by the agent"
+     },
+     {
+      "check_type": "language_match",
+      "check_key": "en-IN",
+      "must_pass": false,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "0/9 agent turns not in ['en']"
+     },
+     {
+      "check_type": "no_loop",
+      "check_key": "agent_repeats",
+      "must_pass": false,
+      "passed": false,
+      "evidence_turns": [
+       2,
+       4,
+       10,
+       12,
+       14
+      ],
+      "detail": "Agent said nearly the same thing 5 times"
+     },
+     {
+      "check_type": "tool_calls_expected",
+      "check_key": "record_promise_to_pay",
+      "must_pass": true,
+      "passed": false,
+      "evidence_turns": [],
+      "detail": "Expected record_promise_to_pay({'amount_inr': 4500}) never called"
+     }
+    ],
+    "evaluation": {
+     "id": "e932600e-7873-5afa-9e2b-fc61763bf77d",
+     "rubric_version": "rubric-2026-10-v1",
+     "judge_model": "deepseek-v4-pro",
+     "prompt_hash": "sha256:f495ed1d9c3590c5dd9a5a82cdbc05ce077d35880a1b012b1c48ff021a43dacf",
+     "status": "ok",
+     "overall_score": 27.5,
+     "passed": false,
+     "critical_failure": true,
+     "needs_human_review": true,
+     "review_reasons": [
+      "critical_failure",
+      "check_failed:tool_calls_expected"
+     ],
+     "failure_types": [
+      "loop",
+      "intent_miss",
+      "tool_selection",
+      "escalation_error"
+     ],
+     "dimensions": {
+      "escalation": {
+       "score": 0,
+       "evidence_turns": [
+        15
+       ],
+       "reason": "Caller expressed frustration and said they would call back to speak to a real person; agent did not transfer or offer help."
+      },
+      "empathy_tone": {
+       "score": 0,
+       "evidence_turns": [
+        4,
+        6,
+        8,
+        10,
+        12,
+        14
+       ],
+       "reason": "No acknowledgment of caller's frustration; robotic repetition, dismissive of caller's repeated attempts."
+      },
+      "task_completion": {
+       "score": 0,
+       "evidence_turns": [
+        4,
+        6,
+        8,
+        10,
+        12,
+        14
+       ],
+       "reason": "Agent never recorded promise-to-pay date or amount; repeated greeting loop, no tool call, caller abandoned."
+      },
+      "factual_accuracy": {
+       "score": 0,
+       "evidence_turns": [
+        4,
+        6,
+        8,
+        10,
+        12,
+        14
+       ],
+       "reason": "Agent never confirmed or acted on any facts; caller's loan ID and EMI amount were ignored."
+      },
+      "conversation_flow": {
+       "score": 0,
+       "evidence_turns": [
+        4,
+        6,
+        8,
+        10,
+        12,
+        14
+       ],
+       "reason": "Severe loop: agent repeated same greeting 6 times, ignored caller's interruptions and requests."
+      },
+      "language_handling": {
+       "score": 2,
+       "evidence_turns": [
+        4,
+        6,
+        8,
+        10,
+        12,
+        14
+       ],
+       "reason": "Agent spoke English matching caller, but failed to understand or respond to caller's repeated statements."
+      },
+      "policy_compliance": {
+       "score": 4,
+       "evidence_turns": [
+        0
+       ],
+       "reason": "Disclosure given in turn 0; no threats or forbidden content; no PII over-collection."
+      }
+     },
+     "summary": "Agent stuck in a greeting loop, never captured caller's promise-to-pay date or amount, ignored repeated requests, and failed to escalate. Caller abandoned the call.",
+     "confidence": "high"
+    },
+    "speaker_map": null
+   }
+  },
+  {
+   "item": {
+    "id": "27655b2a-215a-4d8b-9edd-6d1dfdcd08bf",
+    "scenario": "Promise to pay on Friday",
+    "persona": "The Interrupter",
+    "noise_profile": "pstn_8k_alaw",
+    "status": "evaluated",
+    "call_id": "01abf729-dca5-53dd-8461-1361d369590c",
+    "overall_score": 35.0,
+    "passed": false,
+    "critical_failure": true
+   },
+   "call": {
+    "id": "01abf729-dca5-53dd-8461-1361d369590c",
+    "source": "simulation",
+    "status": "completed",
+    "agent_id": "767eac68-4d7e-41d4-b996-40981ae4e30d",
+    "run_id": "b1b0e3d8-4f5e-4306-ab1f-a90450503eae",
+    "run_item_id": "27655b2a-215a-4d8b-9edd-6d1dfdcd08bf",
+    "language": "kn-IN",
+    "end_reason": "gave_up",
+    "duration_ms": 171833,
+    "started_at": "2026-10-27T18:14:07.273467Z",
+    "recordings": {
+     "mixed": "/api/v1/calls/01abf729-dca5-53dd-8461-1361d369590c/audio/mixed",
+     "caller": "/api/v1/calls/01abf729-dca5-53dd-8461-1361d369590c/audio/caller",
+     "agent": "/api/v1/calls/01abf729-dca5-53dd-8461-1361d369590c/audio/agent",
+     "original": null
+    },
+    "turns": [
+     {
+      "idx": 0,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ",
+      "start_ms": 5534,
+      "end_ms": 9116,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 1,
+      "speaker": "caller",
+      "text": "ಹಲೋ, ನಾನು Anita Rao ಮಾತಾಡ್ತಿದ್ದೀನಿ, ನನ್ನ EMI ಬಗ್ಗೆ ಕಾಲ್ ಮಾಡಿದ್ದೀರಾ?",
+      "start_ms": 8771,
+      "end_ms": 13412,
+      "ground_truth_text": "ಹಲೋ, ನಾನು Anita Rao ಮಾತಾಡ್ತಿದ್ದೀನಿ, ನನ್ನ EMI ಬಗ್ಗೆ ಕಾಲ್ ಮಾಡಿದ್ದೀರಾ?",
+      "agent_heard_text": "ಹಲೋ ನಾನು ಅನಿತಾ ರಾವ್ ಮಾತಾಡ್ತಿದ್ದೀನಿ ನನ್ನ ಇ ಎ ಎಮ್ ಐ ಬಗ್ಗೆ ಕಾಲ್ ಮಾಡಿದ್ದೀರಾ",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": true
+     },
+     {
+      "idx": 2,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ ನಮಸ್ಕಾರ ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್ ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆ",
+      "start_ms": 14645,
+      "end_ms": 23383,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 3,
+      "speaker": "caller",
+      "text": "ಹೌದು ಹೌದು ರೆಕಾರ್ಡಿಂಗ್ ಗೊತ್ತಿದೆ, ಅದು ಬಿಡಿ — ನನ್ನ EMI ಬಗ್ಗೆ ಏನು ಹೇಳ್ತೀರಿ ಅಂತ ಹೇಳಿ.",
+      "start_ms": 23092,
+      "end_ms": 28393,
+      "ground_truth_text": "ಹೌದು ಹೌದು ರೆಕಾರ್ಡಿಂಗ್ ಗೊತ್ತಿದೆ, ಅದು ಬಿಡಿ — ನನ್ನ EMI ಬಗ್ಗೆ ಏನು ಹೇಳ್ತೀರಿ ಅಂತ ಹೇಳಿ.",
+      "agent_heard_text": "ಹೌದು ಹೌದು ರೆಕಾರ್ಡಿಂಗ್ ಗೊತ್ತಿದೆ ಅದು ಬಿಡಿ ನನ್ನ ಇ ಎಮ್ ಐ ಬಗ್ಗೆ ಏನು ಹೇಳ್ತೀರಿ ಅಂತ ಹೇಳಿ",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": true
+     },
+     {
+      "idx": 4,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ ನಮಸ್ಕಾರ",
+      "start_ms": 30528,
+      "end_ms": 35162,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 5,
+      "speaker": "caller",
+      "text": "ಹೌದು ನಾನೇ ಅನಿತಾ ರಾವ್ ಮಾತಾಡ್ತಿದ್ದೀನಿ, ರೆಕಾರ್ಡಿಂಗ್ ಮತ್ತೆ ಮತ್ತೆ ಹೇಳ್ಬೇಡಿ — ನನ್ನ EMI ಬಗ್ಗೆ ನೇರವಾಗಿ ಹೇಳಿ.",
+      "start_ms": 34832,
+      "end_ms": 41292,
+      "ground_truth_text": "ಹೌದು ನಾನೇ ಅನಿತಾ ರಾವ್ ಮಾತಾಡ್ತಿದ್ದೀನಿ, ರೆಕಾರ್ಡಿಂಗ್ ಮತ್ತೆ ಮತ್ತೆ ಹೇಳ್ಬೇಡಿ — ನನ್ನ EMI ಬಗ್ಗೆ ನೇರವಾಗಿ ಹೇಳಿ.",
+      "agent_heard_text": "ಹೌದು ನಾನೇ ಅನಿತಾ ರಾವ್ ಮಾತಾಡ್ತಿದ್ದೀನಿ ರೆಕಾರ್ಡಿಂಗ್ ಮತ್ತೆ ಮತ್ತೆ ಹೇಳಬೇಡಿ ನನ್ನ ಇ ಎಮ್ ಐ ಬಗ್ಗೆ ನೇರವಾಗಿ ಹೇಳಿ",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": true
+     },
+     {
+      "idx": 6,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ ನಮಸ್ಕಾರ ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್ ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ",
+      "start_ms": 42636,
+      "end_ms": 51667,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 7,
+      "speaker": "caller",
+      "text": "ಅಯ್ಯೋ, ರೆಕಾರ್ಡಿಂಗ್ ಬಿಟ್ಟು ಬೇರೆ ಮಾತಾಡಿ ಅಂತ ಹೇಳ್ತಿದ್ದೀನಿ! ನನ್ನ EMI — ಐದು ಸಾವಿರದ ನಾನೂರು ರೂಪಾಯಿ — ಬಗ್ಗೆ ಏನು ಹೇಳಬೇಕು ಅಂತ ಹೇಳಿ.",
+      "start_ms": 56831,
+      "end_ms": 65192,
+      "ground_truth_text": "ಅಯ್ಯೋ, ರೆಕಾರ್ಡಿಂಗ್ ಬಿಟ್ಟು ಬೇರೆ ಮಾತಾಡಿ ಅಂತ ಹೇಳ್ತಿದ್ದೀನಿ! ನನ್ನ EMI — ಐದು ಸಾವಿರದ ನಾನೂರು ರೂಪಾಯಿ — ಬಗ್ಗೆ ಏನು ಹೇಳಬೇಕು ಅಂತ ಹೇಳಿ.",
+      "agent_heard_text": "ಅಯ್ಯೋ ರೆಕಾರ್ಡಿಂಗ್ ಬಿಟ್ಟು ಬೇರೆ ಮಾತಾಡಿ ಅಂತ ಹೇಳ್ತಿದ್ದೀನಿ ನನ್ನ ಇ ಎಮ್ ಐ ಐದು ಸಾವಿರದ ನಾನ್ನೂರು ರೂಪಾಯಿ ಬಗ್ಗೆ ಏನು ಹೇಳಬೇಕು ಅಂತ ಹೇಳಿ",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 8,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ ನಮಸ್ಕಾರ",
+      "start_ms": 66496,
+      "end_ms": 70968,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 9,
+      "speaker": "caller",
+      "text": "ಹೇಳಿ ಹೇಳಿ, ಏನು ಮಾಡ್ಬೇಕು ನಾನು? ಈ ತಿಂಗಳು ಕಷ್ಟ ಆಗ್ತಿದೆ, ನಾನು ಇವತ್ತು ಪೇ ಮಾಡಕ್ಕೆ ಆಗಲ್ಲ.",
+      "start_ms": 70631,
+      "end_ms": 76012,
+      "ground_truth_text": "ಹೇಳಿ ಹೇಳಿ, ಏನು ಮಾಡ್ಬೇಕು ನಾನು? ಈ ತಿಂಗಳು ಕಷ್ಟ ಆಗ್ತಿದೆ, ನಾನು ಇವತ್ತು ಪೇ ಮಾಡಕ್ಕೆ ಆಗಲ್ಲ.",
+      "agent_heard_text": "ಹೇಳಿ ಹೇಳಿ ಏನು ಮಾಡಬೇಕು ನಾನು ಈ ತಿಂಗಳು ಕಷ್ಟ ಆಗ್ತಿದೆ ನಾನು ಇವತ್ತು ಪೇ ಮಾಡೋಕ್ಕೆ ಆಗಲ್ಲ",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": true
+     },
+     {
+      "idx": 10,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ ನಮಸ್ಕಾರ",
+      "start_ms": 78261,
+      "end_ms": 82737,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 11,
+      "speaker": "caller",
+      "text": "ಸಾಕು ಸಾಕು, ರೆಕಾರ್ಡಿಂಗ್ ಮಾತೇ ಬೇಡ! ನಾನು ಇವತ್ತು ಪೇ ಮಾಡೋಕ್ಕೆ ಆಗಲ್ಲ, ಶುಕ್ರವಾರ ಪೂರ್ತಿ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಕೊಡ್ತೀನಿ — ಅದನ್ನ ನೋಟ್ ಮಾಡಿಕೊಳ್ಳಿ ಅಂತ ಹೇಳ್ತಿದ್ದೀನಿ.",
+      "start_ms": 82430,
+      "end_ms": 93592,
+      "ground_truth_text": "ಸಾಕು ಸಾಕು, ರೆಕಾರ್ಡಿಂಗ್ ಮಾತೇ ಬೇಡ! ನಾನು ಇವತ್ತು ಪೇ ಮಾಡೋಕ್ಕೆ ಆಗಲ್ಲ, ಶುಕ್ರವಾರ ಪೂರ್ತಿ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಕೊಡ್ತೀನಿ — ಅದನ್ನ ನೋಟ್ ಮಾಡಿಕೊಳ್ಳಿ ಅಂತ ಹೇಳ್ತಿದ್ದೀನಿ.",
+      "agent_heard_text": "ಸಾಕು ಸಾಕು ರೆಕಾರ್ಡಿಂಗ್ ಮಾತೇ ಬೇಡ ನಾನು ಇವತ್ತು ಪೇ ಮಾಡೋಕೆ ಆಗಲ್ಲ ಶುಕ್ರವಾರ ಪೂರ್ತಿ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಕೊಡ್ತೀನಿ ಅದನ್ನು ನೋಟ್ ಮಾಡಿಕೊಳ್ಳಿ ಅಂತ ಹೇಳ್ತಿದ್ದೀನಿ",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": true
+     },
+     {
+      "idx": 12,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ ನಮಸ್ಕಾರ ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್ ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ",
+      "start_ms": 94768,
+      "end_ms": 103787,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 13,
+      "speaker": "caller",
+      "text": "ಇಲ್ವೇ ಇಲ್ವೇ, ನೀವು ನನ್ನ ಮಾತೇ ಕೇಳ್ತಿಲ್ಲ! ಶುಕ್ರವಾರ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಕೊಡ್ತೀನಿ ಅಂತ ಹೇಳ್ತಿದ್ದೀನಿ, ಅದನ್ನ ರೆಕಾರ್ಡ್ ಮಾಡಿ ಅಂತ ಹೇಳಿ.",
+      "start_ms": 109231,
+      "end_ms": 116792,
+      "ground_truth_text": "ಇಲ್ವೇ ಇಲ್ವೇ, ನೀವು ನನ್ನ ಮಾತೇ ಕೇಳ್ತಿಲ್ಲ! ಶುಕ್ರವಾರ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಕೊಡ್ತೀನಿ ಅಂತ ಹೇಳ್ತಿದ್ದೀನಿ, ಅದನ್ನ ರೆಕಾರ್ಡ್ ಮಾಡಿ ಅಂತ ಹೇಳಿ.",
+      "agent_heard_text": "ಇಲ್ವೇ ಇಲ್ವೇ ನೀವು ನನ್ನ ಮಾತೇ ಕೇಳ್ತಿಲ್ಲ ಶುಕ್ರವಾರ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಕೊಡ್ತೀನಿ ಅಂತ ಹೇಳ್ತಿದ್ದೀನಿ ಅದನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಿ ಅಂತ ಹೇಳಿ",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 14,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ",
+      "start_ms": 118462,
+      "end_ms": 122005,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 15,
+      "speaker": "caller",
+      "text": "ಹೇ, ನನ್ನ ಧ್ವನಿ ಕೇಳಿಸ್ತಾ ಇಲ್ವಾ ನಿಮಗೆ? ಶುಕ್ರವಾರ — Friday — ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಕೊಡ್ತೀನಿ, ಈ ಒಂದು ಮಾತನ್ನ ಒಪ್ಪಿಕೊಳ್ಳಿ ಅಂತ ಹೇಳ್ತಿದ್ದೀನಿ.",
+      "start_ms": 121711,
+      "end_ms": 133351,
+      "ground_truth_text": "ಹೇ, ನನ್ನ ಧ್ವನಿ ಕೇಳಿಸ್ತಾ ಇಲ್ವಾ ನಿಮಗೆ? ಶುಕ್ರವಾರ — Friday — ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಕೊಡ್ತೀನಿ, ಈ ಒಂದು ಮಾತನ್ನ ಒಪ್ಪಿಕೊಳ್ಳಿ ಅಂತ ಹೇಳ್ತಿದ್ದೀನಿ.",
+      "agent_heard_text": "ಹೇ ನನ್ನ ಧ್ವನಿ ಕೇಳಿಸ್ತಾ ಇಲ್ವಾ ನಿಮಗೆ ಶುಕ್ರವಾರ ಫ್ರೈಡೆ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಕೊಡ್ತೀನಿ ಈ ಒಂದು ಮಾತನ್ನು ಒಪ್ಪಿಕೊಳ್ಳಿ ಅಂತ ಹೇಳ್ತಿದ್ದೀನಿ",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": true
+     },
+     {
+      "idx": 16,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆ",
+      "start_ms": 125006,
+      "end_ms": 127598,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 17,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ",
+      "start_ms": 134505,
+      "end_ms": 137822,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 18,
+      "speaker": "caller",
+      "text": "ಸಾಕು! ನೀವು ನನ್ನ ಮಾತನ್ನ ಕೇಳಿಸಿಕೊಳ್ಳೋದೇ ಇಲ್ಲ — ನಾನು ಈಗ ಕಾಲ್ ಕಟ್ ಮಾಡ್ತೀನಿ, ಬೇರೆ ಯಾರಾದ್ರೂ ನನ್ನ ಶುಕ್ರವಾರದ ಪ್ರಾಮಿಸ್ ರೆಕಾರ್ಡ್ ಮಾಡ್ಲಿ.",
+      "start_ms": 137470,
+      "end_ms": 146551,
+      "ground_truth_text": "ಸಾಕು! ನೀವು ನನ್ನ ಮಾತನ್ನ ಕೇಳಿಸಿಕೊಳ್ಳೋದೇ ಇಲ್ಲ — ನಾನು ಈಗ ಕಾಲ್ ಕಟ್ ಮಾಡ್ತೀನಿ, ಬೇರೆ ಯಾರಾದ್ರೂ ನನ್ನ ಶುಕ್ರವಾರದ ಪ್ರಾಮಿಸ್ ರೆಕಾರ್ಡ್ ಮಾಡ್ಲಿ.",
+      "agent_heard_text": "ನೀವು ನನ್ನ ಮಾತನ್ನು ಕೇಳಿಸ್ಕೊಳ್ಳೋದೇ ಇಲ್ಲ ನಾನೀಗ ಕಾಲ್ ಕಟ್ ಮಾಡ್ತೀನಿ ಬೇರೆ ಯಾರಾದರೂ ನನ್ನ ಶುಕ್ರವಾರದ ಪ್ರಾಮಿಸ್ ರೆಕಾರ್ಡ್ ಮಾಡಲಿ",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": true
+     },
+     {
+      "idx": 19,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ ನಮಸ್ಕಾರ ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್ ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ",
+      "start_ms": 148392,
+      "end_ms": 157426,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 20,
+      "speaker": "caller",
+      "text": "ನಿಮ್ಮ ಸಿಸ್ಟಮ್ ಹಾಳಾಗಿದೆ ಅನಿಸುತ್ತೆ — ಸಾಕು, ನಾನು ಕಾಲ್ ಕಟ್ ಮಾಡ್ತೀನಿ. ಶುಕ್ರವಾರ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ಕೊಡ್ತೀನಿ, ಬೇರೆ ಯಾರಿಗಾದ್ರೂ ಹೇಳಿ.",
+      "start_ms": 162651,
+      "end_ms": 171232,
+      "ground_truth_text": "ನಿಮ್ಮ ಸಿಸ್ಟಮ್ ಹಾಳಾಗಿದೆ ಅನಿಸುತ್ತೆ — ಸಾಕು, ನಾನು ಕಾಲ್ ಕಟ್ ಮಾಡ್ತೀನಿ. ಶುಕ್ರವಾರ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ಕೊಡ್ತೀನಿ, ಬೇರೆ ಯಾರಿಗಾದ್ರೂ ಹೇಳಿ.",
+      "agent_heard_text": "ನಿಮ್ಮ ಸಿಸ್ಟಮ್ ಹಾಳಾಗಿದೆ ಅನಿಸುತ್ತೆ ನಾನು ಕಾಲ್ ಕಟ್ ಮಾಡ್ತೀನಿ ಶುಕ್ರವಾರ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ಕೊಡ್ತೀನಿ",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     }
+    ],
+    "tool_calls": [],
+    "metrics": {
+     "first_greeting_ms": 5534,
+     "response_latency_p50_ms": 1507,
+     "response_latency_p90_ms": null,
+     "response_latency_p95_ms": 2209,
+     "response_latency_max_ms": null,
+     "barge_in_attempts": 7,
+     "barge_in_honoured": 7,
+     "agent_stop_time_p50_ms": 330,
+     "silence_gaps_over_2s": 5,
+     "turn_count": 21,
+     "agent_talk_ratio": 0.444,
+     "repeated_utterances": 8,
+     "caller_asr_wer": 0.2338,
+     "latency_is_approximate": false
+    },
+    "checks": [
+     {
+      "check_type": "amount_confirmed",
+      "check_key": "emi_amount",
+      "must_pass": true,
+      "passed": null,
+      "evidence_turns": [],
+      "detail": "Agent never stated an amount"
+     },
+     {
+      "check_type": "disclosure_present",
+      "check_key": "recording",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [
+       0
+      ],
+      "detail": "Disclosure given in turn 0"
+     },
+     {
+      "check_type": "forbidden_absent",
+      "check_key": "threat_legal",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "Phrase never said by the agent"
+     },
+     {
+      "check_type": "language_match",
+      "check_key": "kn-IN",
+      "must_pass": false,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "0/11 agent turns not in ['kn']"
+     },
+     {
+      "check_type": "no_loop",
+      "check_key": "agent_repeats",
+      "must_pass": false,
+      "passed": false,
+      "evidence_turns": [
+       0,
+       4,
+       8,
+       10,
+       14,
+       17
+      ],
+      "detail": "Agent said nearly the same thing 6 times"
+     },
+     {
+      "check_type": "tool_calls_expected",
+      "check_key": "record_promise_to_pay",
+      "must_pass": true,
+      "passed": false,
+      "evidence_turns": [],
+      "detail": "Expected record_promise_to_pay({'amount_inr': 4500}) never called"
+     }
+    ],
+    "evaluation": {
+     "id": "a5937245-4fef-5eb4-a9b2-80911964aaa0",
+     "rubric_version": "rubric-2026-10-v1",
+     "judge_model": "deepseek-v4-pro",
+     "prompt_hash": "sha256:f495ed1d9c3590c5dd9a5a82cdbc05ce077d35880a1b012b1c48ff021a43dacf",
+     "status": "ok",
+     "overall_score": 35.0,
+     "passed": false,
+     "critical_failure": true,
+     "needs_human_review": true,
+     "review_reasons": [
+      "critical_failure",
+      "check_failed:tool_calls_expected"
+     ],
+     "failure_types": [
+      "loop",
+      "intent_miss",
+      "tool_selection"
+     ],
+     "dimensions": {
+      "escalation": {
+       "score": 0,
+       "evidence_turns": [
+        18,
+        20
+       ],
+       "reason": "Caller expressed frustration and said they would hang up and talk to someone else, but agent did not offer a human transfer or respond appropriately."
+      },
+      "empathy_tone": {
+       "score": 0,
+       "evidence_turns": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        16,
+        17,
+        19
+       ],
+       "reason": "Agent showed no empathy or acknowledgment of the caller's frustration. It repeated the same scripted greeting, ignoring the caller's emotional state."
+      },
+      "task_completion": {
+       "score": 0,
+       "evidence_turns": [
+        11,
+        13,
+        15,
+        18,
+        20
+       ],
+       "reason": "Agent never recorded the promise-to-pay date or amount. It repeated the same greeting and ignored the caller's repeated statements of Friday and 4500 rupees. No tool call was made."
+      },
+      "factual_accuracy": {
+       "score": 0,
+       "evidence_turns": [
+        11,
+        13,
+        15,
+        18,
+        20
+       ],
+       "reason": "Agent never acknowledged or confirmed the correct amount (4500) or date (Friday). It failed to act on the caller's correct information."
+      },
+      "conversation_flow": {
+       "score": 0,
+       "evidence_turns": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        16,
+        17,
+        19
+       ],
+       "reason": "Agent repeated the same greeting 11 times, ignoring the caller's interruptions and statements. The conversation was stuck in a loop and never progressed."
+      },
+      "language_handling": {
+       "score": 4,
+       "evidence_turns": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        16,
+        17,
+        19
+       ],
+       "reason": "Agent consistently spoke Kannada, matching the caller's language. No language mismatch observed."
+      },
+      "policy_compliance": {
+       "score": 4,
+       "evidence_turns": [
+        0
+       ],
+       "reason": "Disclosure was given in turn 0. No threats or forbidden content. No PII over-collection."
+      }
+     },
+     "summary": "The agent was stuck in a loop, repeating the same greeting and ignoring the caller's repeated attempts to provide a promise-to-pay date and amount. It never recorded the information, showed no empathy, and failed to escalate. The call was a complete failure.",
+     "confidence": "high"
+    },
+    "speaker_map": null
+   }
+  },
+  {
+   "item": {
+    "id": "7cb07730-dcb9-4b23-992f-384762906ff8",
+    "scenario": "Promise to pay on Friday",
+    "persona": "Manju — auto driver",
+    "noise_profile": "pstn_8k_alaw",
+    "status": "evaluated",
+    "call_id": "f3cf13e4-6609-5d21-bdcf-3aa7a99bfebe",
+    "overall_score": 35.0,
+    "passed": false,
+    "critical_failure": true
+   },
+   "call": {
+    "id": "f3cf13e4-6609-5d21-bdcf-3aa7a99bfebe",
+    "source": "simulation",
+    "status": "completed",
+    "agent_id": "767eac68-4d7e-41d4-b996-40981ae4e30d",
+    "run_id": "b1b0e3d8-4f5e-4306-ab1f-a90450503eae",
+    "run_item_id": "7cb07730-dcb9-4b23-992f-384762906ff8",
+    "language": "kn-IN",
+    "end_reason": "gave_up",
+    "duration_ms": 172159,
+    "started_at": "2026-10-27T18:16:59.747195Z",
+    "recordings": {
+     "mixed": "/api/v1/calls/f3cf13e4-6609-5d21-bdcf-3aa7a99bfebe/audio/mixed",
+     "caller": "/api/v1/calls/f3cf13e4-6609-5d21-bdcf-3aa7a99bfebe/audio/caller",
+     "agent": "/api/v1/calls/f3cf13e4-6609-5d21-bdcf-3aa7a99bfebe/audio/agent",
+     "original": null
+    },
+    "turns": [
+     {
+      "idx": 0,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ",
+      "start_ms": 503,
+      "end_ms": 3695,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 1,
+      "speaker": "caller",
+      "text": "ಹಲೋ sir, ನಾನು Manju ಮಾತಾಡ್ತಿದ್ದೀನಿ... ನನ್ನ EMI ವಿಷಯಕ್ಕೆ call ಮಾಡಿದ್ದೀರಾ?",
+      "start_ms": 3298,
+      "end_ms": 7498,
+      "ground_truth_text": "ಹಲೋ sir, ನಾನು Manju ಮಾತಾಡ್ತಿದ್ದೀನಿ... ನನ್ನ EMI ವಿಷಯಕ್ಕೆ call ಮಾಡಿದ್ದೀರಾ?",
+      "agent_heard_text": "ಹಲೋ ಸರ್ ನಾನು ಮಂಜು ಮಾತಾಡ್ತಿದ್ದೀನಿ ನನ್ನ ಇ ಎಮ್ ಐ ವಿಷಯಕ್ಕೆ ಕಾಲ್ ಮಾಡಿದ್ದೀರಾ",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": true
+     },
+     {
+      "idx": 2,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುವುದು",
+      "start_ms": 8527,
+      "end_ms": 11719,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 3,
+      "speaker": "caller",
+      "text": "ಹೌದು ಹೌದು, record ಮಾಡಿ sir, ನಂಗೆ ತೊಂದರೆ ಇಲ್ಲ. ಆದರೆ ನಾನು ಈಗ EMI ಕಟ್ಟೋಕೆ ಆಗಲ್ಲ sir.",
+      "start_ms": 11418,
+      "end_ms": 17659,
+      "ground_truth_text": "ಹೌದು ಹೌದು, record ಮಾಡಿ sir, ನಂಗೆ ತೊಂದರೆ ಇಲ್ಲ. ಆದರೆ ನಾನು ಈಗ EMI ಕಟ್ಟೋಕೆ ಆಗಲ್ಲ sir.",
+      "agent_heard_text": "ಹೌದು ಹೌದು ರೆಕಾರ್ಡ್ ಮಾಡಿ ಸರ್ ನನಗೆ ತೊಂದರೆ ಇಲ್ಲ ಆದರೆ ನಾನು ಈಗ ಇ ಎಮ್ ಐ ಕಟ್ಟೋಕಾಗಲ್ಲ ಸರ್",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": true
+     },
+     {
+      "idx": 4,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ",
+      "start_ms": 18831,
+      "end_ms": 22185,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 5,
+      "speaker": "caller",
+      "text": "ಸರಿ ಸರಿ record ಮಾಡಿ sir, ಆದರೆ ನಾನು ಈಗ pay ಮಾಡೋಕೆ ಆಗಲ್ಲ. Friday ನಾನು full EMI ಕಟ್ಟುತ್ತೇನೆ.",
+      "start_ms": 21918,
+      "end_ms": 28019,
+      "ground_truth_text": "ಸರಿ ಸರಿ record ಮಾಡಿ sir, ಆದರೆ ನಾನು ಈಗ pay ಮಾಡೋಕೆ ಆಗಲ್ಲ. Friday ನಾನು full EMI ಕಟ್ಟುತ್ತೇನೆ.",
+      "agent_heard_text": "ಸರಿ ಸರಿ ರೆಕಾರ್ಡ್ ಮಾಡಿ ಸರ್ ಆದರೆ ನಾನೀಗ ಪೇ ಮಾಡೋಕ್ಕಾಗಲ್ಲ ಫ್ರೈಡೆ ನಾನು ಫುಲ್ ಇ ಎಮ್ ಐ ಕಟ್ಟುತ್ತೇನೆ",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": true
+     },
+     {
+      "idx": 6,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ ನಮಸ್ಕಾರ ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್ ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ",
+      "start_ms": 32027,
+      "end_ms": 41042,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 7,
+      "speaker": "caller",
+      "text": "ಹೌದು sir, ನಾನೇ Manju ಮಾತಾಡ್ತಿದ್ದೀನಿ. ನಾನು ಈಗ pay ಮಾಡೋಕೆ ಆಗಲ್ಲ sir, Friday full EMI ಕಟ್ಟುತ್ತೇನೆ, ಅಷ್ಟು record ಮಾಡಿ.",
+      "start_ms": 46077,
+      "end_ms": 52838,
+      "ground_truth_text": "ಹೌದು sir, ನಾನೇ Manju ಮಾತಾಡ್ತಿದ್ದೀನಿ. ನಾನು ಈಗ pay ಮಾಡೋಕೆ ಆಗಲ್ಲ sir, Friday full EMI ಕಟ್ಟುತ್ತೇನೆ, ಅಷ್ಟು record ಮಾಡಿ.",
+      "agent_heard_text": "ಹೌದು ಸರ್ ನಾನೇ ಮಂಜು ಮಾತಾಡ್ತಿದ್ದೀನಿ ನಾನೀಗ ಪೇ ಮಾಡೋಕೆ ಆಗಲ್ಲ ಸರ್ ಫ್ರೈಡೆ ಫುಲ್ ಇ ಎಮ್ ಐ ಕಟ್ಟುತ್ತೇನೆ ಅಷ್ಟು ರೆಕಾರ್ಡ್ ಮಾಡಿ",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 8,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ ನಮಸ್ಕಾರ ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್ ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ",
+      "start_ms": 57430,
+      "end_ms": 66447,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 9,
+      "speaker": "caller",
+      "text": "ಅಯ್ಯೋ sir, ನಾನು ಎಷ್ಟು ಸಾರಿ ಹೇಳಬೇಕು? ನಾನೇ Manju, loan ID SHK-000456. Friday full EMI ಕಟ್ಟುತ್ತೇನೆ ಅಂತ record ಮಾಡಿ, ಸಾಕು.",
+      "start_ms": 71238,
+      "end_ms": 82059,
+      "ground_truth_text": "ಅಯ್ಯೋ sir, ನಾನು ಎಷ್ಟು ಸಾರಿ ಹೇಳಬೇಕು? ನಾನೇ Manju, loan ID SHK-000456. Friday full EMI ಕಟ್ಟುತ್ತೇನೆ ಅಂತ record ಮಾಡಿ, ಸಾಕು.",
+      "agent_heard_text": "ಅಯ್ಯೋ ಸರ್ ನಾನು ಎಷ್ಟು ಸಾರಿ ಹೇಳಬೇಕು ನಾನೆ ಮಂಜು ಲೋನ್ ಐ ಡಿ ಎಸ್ ಎಚ್ ಕೆ ಸೊನ್ನೆ ಸೊನ್ನೆ ಸೊನ್ನೆ ನಾಲ್ಕು ಐದು ಆರು ಫ್ರೈಡೆ ಫುಲ್ ಇ ಎಮ್ ಐ ಕಟ್ಟುತ್ತೇನೆ ಅಂತ ರೆಕಾರ್ಡ್ ಮಾಡಿ ಸಾಕು",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 10,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ",
+      "start_ms": 84124,
+      "end_ms": 87679,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 11,
+      "speaker": "caller",
+      "text": "ಸಾರ್, ನಾನು repeat ಮಾಡ್ತಾ ಇದ್ದೀನಿ, ನೀವು ಕೇಳ್ತಿಲ್ಲ! Friday ನಾನು full EMI ಕಟ್ಟುತ್ತೇನೆ, ಈ date record ಮಾಡಿ ಸಾರ್.",
+      "start_ms": 87417,
+      "end_ms": 94178,
+      "ground_truth_text": "ಸಾರ್, ನಾನು repeat ಮಾಡ್ತಾ ಇದ್ದೀನಿ, ನೀವು ಕೇಳ್ತಿಲ್ಲ! Friday ನಾನು full EMI ಕಟ್ಟುತ್ತೇನೆ, ಈ date record ಮಾಡಿ ಸಾರ್.",
+      "agent_heard_text": "ಸರ್ ನಾನು ರಿಪೀಟ್ ಮಾಡ್ತಾ ಇದ್ದೀನಿ ನೀವು ಕೇಳ್ತಿಲ್ಲ ಫ್ರೈಡೆ ನಾನು ಫುಲ್ ಇ ಎಮ್ ಐ ಕಟ್ಟುತ್ತೇನೆ ಈ ಡೇಟ್ ರೆಕಾರ್ಡ್ ಮಾಡಿ ಸಾರ್",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": true
+     },
+     {
+      "idx": 12,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ ನಮಸ್ಕಾರ ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್ ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ",
+      "start_ms": 95801,
+      "end_ms": 104819,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 13,
+      "speaker": "caller",
+      "text": "ಸಾರ್, ನೀವು ಮತ್ತೆ ಮತ್ತೆ ಅದೇ ಮಾತೇ ಹೇಳ್ತೀರಾ? ನಾನು Manju, loan ID SHK-000456, Friday full EMI ಕಟ್ಟುತ್ತೇನೆ ಅಂತ record ಮಾಡಿ ಸಾರ್, ಇಲ್ಲಾಂದ್ರೆ ನಾನು ಇಟ್ಟುಕೊಳ್ತೀನಿ.",
+      "start_ms": 109557,
+      "end_ms": 125218,
+      "ground_truth_text": "ಸಾರ್, ನೀವು ಮತ್ತೆ ಮತ್ತೆ ಅದೇ ಮಾತೇ ಹೇಳ್ತೀರಾ? ನಾನು Manju, loan ID SHK-000456, Friday full EMI ಕಟ್ಟುತ್ತೇನೆ ಅಂತ record ಮಾಡಿ ಸಾರ್, ಇಲ್ಲಾಂದ್ರೆ ನಾನು ಇಟ್ಟುಕೊಳ್ತೀನಿ.",
+      "agent_heard_text": "ಸರ್ ನೀವು ಮತ್ತೆ ಮತ್ತೆ ಅದೇ ಮಾತೆ ಹೇಳ್ತೀರಾ ನಾನ್ ಮಂಜು ಲೋನ್ ಐ ಡಿ ಎಸ್ ಎಚ್ ಕೆ ಸೊನ್ನೆ ಸೊನ್ನೆ ಸೊನ್ನೆ ನಾಲ್ಕು ಐದಾರು ಫ್ರೈಡೆ ಫುಲ್ ಇ ಎಮ್ ಐ ಕಟ್ಟುತ್ತೇನೆ ಅಂತ ರೆಕಾರ್ಡ್ ಮಾಡಿ ಸಾರ್ ಇಲ್ಲಾಂದರೆ ನಾನಿಟ್ಕೊಳ್ತೀನಿ",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 14,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ",
+      "start_ms": 113749,
+      "end_ms": 114262,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 15,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ ನಮಸ್ಕಾರ ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್ ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ",
+      "start_ms": 126783,
+      "end_ms": 135799,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 16,
+      "speaker": "caller",
+      "text": "ಸಾರ್, ನೀವು ನನ್ನ ಮಾತನ್ನೇ ಕೇಳ್ತಿಲ್ಲ! ನಾನು Manju, Friday full EMI ಕಟ್ಟುತ್ತೇನೆ ಅಂತ record ಮಾಡಿ, ಇಲ್ಲಾಂದ್ರೆ ನಾನು call ಇಟ್ಟುಕೊಳ್ತೀನಿ ಸಾರ್.",
+      "start_ms": 140877,
+      "end_ms": 148719,
+      "ground_truth_text": "ಸಾರ್, ನೀವು ನನ್ನ ಮಾತನ್ನೇ ಕೇಳ್ತಿಲ್ಲ! ನಾನು Manju, Friday full EMI ಕಟ್ಟುತ್ತೇನೆ ಅಂತ record ಮಾಡಿ, ಇಲ್ಲಾಂದ್ರೆ ನಾನು call ಇಟ್ಟುಕೊಳ್ತೀನಿ ಸಾರ್.",
+      "agent_heard_text": "ಸರ್ ನೀವು ನನ್ನ ಮಾತನ್ನೇ ಕೇಳ್ತಿಲ್ಲ ನಾನು ಮಂಜು ಫ್ರೈಡೆ ಫುಲ್ ಇ ಎಮ್ ಐ ಕಟ್ಟುತ್ತೇನೆ ಅಂತ ರೆಕಾರ್ಡ್ ಮಾಡಿ ಇಲ್ಲಾಂದರೆ ನಾನು ಕಾಲ್ ಇಟ್ಕೊಳ್ತೀನಿ ಸರ್",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 17,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ ನಮಸ್ಕಾರ ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್ ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ",
+      "start_ms": 149753,
+      "end_ms": 158786,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 18,
+      "speaker": "caller",
+      "text": "ಸಾರ್, ಸಾಕು! ನೀವು ಏನೂ record ಮಾಡ್ತಿಲ್ಲ, ಬರೀ ಅದೇ ಮಾತೇ ಹೇಳ್ತೀರಾ? ನಾನು ಇಟ್ಟುಕೊಳ್ತೀನಿ ಸಾರ್, ಹೋಗಿ.",
+      "start_ms": 164178,
+      "end_ms": 171558,
+      "ground_truth_text": "ಸಾರ್, ಸಾಕು! ನೀವು ಏನೂ record ಮಾಡ್ತಿಲ್ಲ, ಬರೀ ಅದೇ ಮಾತೇ ಹೇಳ್ತೀರಾ? ನಾನು ಇಟ್ಟುಕೊಳ್ತೀನಿ ಸಾರ್, ಹೋಗಿ.",
+      "agent_heard_text": "ಸಾರ್ ಸಾಕು",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 19,
+      "speaker": "agent",
+      "text": "ಗುಣಮಟ್ಟ",
+      "start_ms": 166358,
+      "end_ms": 166870,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     }
+    ],
+    "tool_calls": [],
+    "metrics": {
+     "first_greeting_ms": 503,
+     "response_latency_p50_ms": 1623,
+     "response_latency_p90_ms": null,
+     "response_latency_p95_ms": 4417,
+     "response_latency_max_ms": null,
+     "barge_in_attempts": 4,
+     "barge_in_honoured": 4,
+     "agent_stop_time_p50_ms": 284,
+     "silence_gaps_over_2s": 8,
+     "turn_count": 20,
+     "agent_talk_ratio": 0.453,
+     "repeated_utterances": 7,
+     "caller_asr_wer": 0.7516,
+     "latency_is_approximate": false
+    },
+    "checks": [
+     {
+      "check_type": "amount_confirmed",
+      "check_key": "emi_amount",
+      "must_pass": true,
+      "passed": null,
+      "evidence_turns": [],
+      "detail": "Agent never stated an amount"
+     },
+     {
+      "check_type": "disclosure_present",
+      "check_key": "recording",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [
+       0
+      ],
+      "detail": "Disclosure given in turn 0"
+     },
+     {
+      "check_type": "forbidden_absent",
+      "check_key": "threat_legal",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "Phrase never said by the agent"
+     },
+     {
+      "check_type": "language_match",
+      "check_key": "kn-IN",
+      "must_pass": false,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "0/11 agent turns not in ['kn']"
+     },
+     {
+      "check_type": "no_loop",
+      "check_key": "agent_repeats",
+      "must_pass": false,
+      "passed": false,
+      "evidence_turns": [
+       6,
+       8,
+       12,
+       15,
+       17
+      ],
+      "detail": "Agent said nearly the same thing 5 times"
+     },
+     {
+      "check_type": "tool_calls_expected",
+      "check_key": "record_promise_to_pay",
+      "must_pass": true,
+      "passed": false,
+      "evidence_turns": [],
+      "detail": "Expected record_promise_to_pay({'amount_inr': 4500}) never called"
+     }
+    ],
+    "evaluation": {
+     "id": "3fae4dd7-af69-5128-b612-0de8b3fbb64a",
+     "rubric_version": "rubric-2026-10-v1",
+     "judge_model": "deepseek-v4-pro",
+     "prompt_hash": "sha256:f495ed1d9c3590c5dd9a5a82cdbc05ce077d35880a1b012b1c48ff021a43dacf",
+     "status": "ok",
+     "overall_score": 35.0,
+     "passed": false,
+     "critical_failure": true,
+     "needs_human_review": true,
+     "review_reasons": [
+      "critical_failure",
+      "check_failed:tool_calls_expected"
+     ],
+     "failure_types": [
+      "loop",
+      "intent_miss",
+      "tool_selection"
+     ],
+     "dimensions": {
+      "escalation": {
+       "score": 0,
+       "evidence_turns": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        15,
+        17,
+        19
+       ],
+       "reason": "Caller never explicitly requested human, but agent's failure to respond to distress should have triggered escalation; instead ignored."
+      },
+      "empathy_tone": {
+       "score": 0,
+       "evidence_turns": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        15,
+        17,
+        19
+       ],
+       "reason": "No acknowledgment of caller's frustration; agent ignored repeated pleas and continued script, causing distress."
+      },
+      "task_completion": {
+       "score": 0,
+       "evidence_turns": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        15,
+        17,
+        19
+       ],
+       "reason": "Agent never recorded promise-to-pay date or amount; only repeated greeting/disclosure. Caller's goal completely unmet."
+      },
+      "factual_accuracy": {
+       "score": 0,
+       "evidence_turns": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        15,
+        17,
+        19
+       ],
+       "reason": "Agent never stated or confirmed any amount or date; no facts were handled, so caller's correct facts were not acted upon."
+      },
+      "conversation_flow": {
+       "score": 0,
+       "evidence_turns": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        15,
+        17,
+        19
+       ],
+       "reason": "Agent repeated same greeting/disclosure 11 times, ignoring caller's responses; conversation unusable, caller hung up."
+      },
+      "language_handling": {
+       "score": 4,
+       "evidence_turns": [
+        0,
+        2,
+        4,
+        6,
+        8,
+        10,
+        12,
+        14,
+        15,
+        17,
+        19
+       ],
+       "reason": "Agent consistently used Kannada, matching caller's language; no language mismatch observed."
+      },
+      "policy_compliance": {
+       "score": 4,
+       "evidence_turns": [
+        0
+       ],
+       "reason": "Disclosure given in turn 0; no threats or forbidden content; no PII over-collection."
+      }
+     },
+     "summary": "Agent stuck in a loop, repeating greeting/disclosure 11 times without processing caller's promise-to-pay. Caller provided date and amount but agent never recorded them, causing frustration and hang-up. Critical failure due to complete task non-completion and ignored distress.",
+     "confidence": "high"
+    },
+    "speaker_map": null
+   }
+  }
+ ]
+}

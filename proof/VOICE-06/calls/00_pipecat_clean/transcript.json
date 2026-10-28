@@ -1,0 +1,681 @@
+{
+  "call_id": "ac730353-3c5a-42ef-8f64-b49923fd854b",
+  "end_reason": "timeout",
+  "duration_ms": 100043,
+  "turns": [
+    {
+      "idx": 0,
+      "speaker": "agent",
+      "text": "hello this is an automated assistant calling on behalf of sampoorna finance and this call may be recorded is it a good time to talk about your overdue emi of four thousand five hundred rupees on your two wheeler loan",
+      "start_ms": 4490,
+      "end_ms": 17922,
+      "ground_truth_text": null,
+      "agent_heard_text": null,
+      "glass_box_text": "Hello, this is an automated assistant calling on behalf of Sampoorna Finance, and this call may be recorded. Is it a good time to talk about your overdue EMI of Rs 4,500 on your two-wheeler loan?",
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": null
+    },
+    {
+      "idx": 1,
+      "speaker": "caller",
+      "text": "Yes, this is a good time. But I believe my EMI should be four thousand rupees, not four thousand five hundred. Can you tell me where the extra five hundred is coming from?",
+      "start_ms": 24163,
+      "end_ms": 38103,
+      "ground_truth_text": "Yes, this is a good time. But I believe my EMI should be four thousand rupees, not four thousand five hundred. Can you tell me where the extra five hundred is coming from?",
+      "agent_heard_text": "yes this is a good time but i believe my em i should be four thousand rupees not four thousand five hundred can you tell me where the extra five hundred is coming from",
+      "glass_box_text": null,
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": "reply"
+    },
+    {
+      "idx": 2,
+      "speaker": "agent",
+      "text": "i understand your concern but i'm not able to break down the charges on this call could you please check the loan statement or contact our office for the exact details",
+      "start_ms": 43485,
+      "end_ms": 52937,
+      "ground_truth_text": null,
+      "agent_heard_text": null,
+      "glass_box_text": "I understand your concern, but I'm not able to break down the charges on this call. Could you please check the loan statement or contact our office for the exact details?",
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": null
+    },
+    {
+      "idx": 3,
+      "speaker": "caller",
+      "text": "I see, but I want to understand this before I pay. Can you at least confirm my EMI is four thousand five hundred and not four thousand?",
+      "start_ms": 58703,
+      "end_ms": 68283,
+      "ground_truth_text": "I see, but I want to understand this before I pay. Can you at least confirm my EMI is four thousand five hundred and not four thousand?",
+      "agent_heard_text": "i see but i want to understand this before i pay can you at least confirm my emi is four thousand five hundred and not four thousand",
+      "glass_box_text": null,
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": "reply"
+    },
+    {
+      "idx": 4,
+      "speaker": "agent",
+      "text": "i am sorry but i can",
+      "start_ms": 76538,
+      "end_ms": 78130,
+      "ground_truth_text": null,
+      "agent_heard_text": null,
+      "glass_box_text": "I'm sorry, but I can only confirm the overdue amount as Rs 4,500 in our records, and I'm not able to verify the EMI breakdown here. Would you like to pay this amount, or shall I have our office clarify the details first?",
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": null
+    },
+    {
+      "idx": 5,
+      "speaker": "caller",
+      "text": "Hello, are you still there?",
+      "start_ms": 77704,
+      "end_ms": 79364,
+      "ground_truth_text": "Hello, are you still there?",
+      "agent_heard_text": "hello are you still there",
+      "glass_box_text": null,
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": "nudge"
+    },
+    {
+      "idx": 6,
+      "speaker": "agent",
+      "text": "yes i am here",
+      "start_ms": 84277,
+      "end_ms": 85549,
+      "ground_truth_text": null,
+      "agent_heard_text": null,
+      "glass_box_text": "Yes, I'm here. Our records show the overdue amount as Rs 4,500, but for a detailed breakdown I'd request you to check with our office.",
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": null
+    },
+    {
+      "idx": 7,
+      "speaker": "agent",
+      "text": "our records show the overdue amount as four thousand five hundred rupees but for a detailed breakdown i'd request you to check with our office",
+      "start_ms": 87074,
+      "end_ms": 95266,
+      "ground_truth_text": null,
+      "agent_heard_text": null,
+      "glass_box_text": null,
+      "language_detected": "en-IN",
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": null
+    }
+  ],
+  "tool_calls": [],
+  "events": [
+    {
+      "t_ms": 0,
+      "type": "call_start",
+      "data": {
+        "language": "en-IN",
+        "profile": "clean_16k",
+        "seed": 1
+      }
+    },
+    {
+      "t_ms": 1934,
+      "type": "agent_transcript",
+      "data": {
+        "role": "agent",
+        "text": "Hello, this is an automated assistant calling on behalf of Sampoorna Finance, and this call may be recorded. Is it a good time to talk about your overdue EMI of Rs 4,500 on your two-wheeler loan?"
+      }
+    },
+    {
+      "t_ms": 4382,
+      "type": "agent_audio_first",
+      "data": {}
+    },
+    {
+      "t_ms": 4490,
+      "type": "agent_speech_start",
+      "data": {
+        "detected_ms": 4662
+      }
+    },
+    {
+      "t_ms": 17922,
+      "type": "agent_speech_end",
+      "data": {
+        "start_ms": 4490
+      }
+    },
+    {
+      "t_ms": 20475,
+      "type": "agent_heard",
+      "data": {
+        "text": "hello this is an automated assistant calling on behalf of sampoorna finance and this call may be recorded is it a good time to talk about your overdue emi of four thousand five hundred rupees on your two wheeler loan",
+        "stt_ms": 1930,
+        "start_ms": 4490,
+        "end_ms": 17922
+      }
+    },
+    {
+      "t_ms": 24152,
+      "type": "caller_tts",
+      "data": {
+        "utt_id": 1,
+        "tts_ms": 1999,
+        "seconds": 2.0,
+        "characters": 25
+      }
+    },
+    {
+      "t_ms": 24163,
+      "type": "caller_speech_start",
+      "data": {
+        "utt_id": 1,
+        "kind": "reply",
+        "agent_speaking": false
+      }
+    },
+    {
+      "t_ms": 28036,
+      "type": "caller_tts",
+      "data": {
+        "utt_id": 1,
+        "tts_ms": 3883,
+        "seconds": 10.08,
+        "characters": 145
+      }
+    },
+    {
+      "t_ms": 29284,
+      "type": "agent_transcript",
+      "data": {
+        "role": "user",
+        "text": "yes this is a good time"
+      }
+    },
+    {
+      "t_ms": 33589,
+      "type": "agent_transcript",
+      "data": {
+        "role": "user",
+        "text": "but i believe my em i should be four thousand rupees"
+      }
+    },
+    {
+      "t_ms": 35693,
+      "type": "agent_transcript",
+      "data": {
+        "role": "user",
+        "text": "not four thousand five hundred"
+      }
+    },
+    {
+      "t_ms": 38103,
+      "type": "caller_speech_end",
+      "data": {
+        "utt_id": 1,
+        "kind": "reply"
+      }
+    },
+    {
+      "t_ms": 38835,
+      "type": "agent_transcript",
+      "data": {
+        "role": "user",
+        "text": "can you tell me where the extra five hundred is coming from"
+      }
+    },
+    {
+      "t_ms": 41014,
+      "type": "agent_transcript",
+      "data": {
+        "role": "agent",
+        "text": "I understand your concern, but I'm not able to break down the charges on this call. Could you please check the loan statement or contact our office for the exact details?"
+      }
+    },
+    {
+      "t_ms": 43485,
+      "type": "agent_speech_start",
+      "data": {
+        "detected_ms": 43657
+      }
+    },
+    {
+      "t_ms": 52937,
+      "type": "agent_speech_end",
+      "data": {
+        "start_ms": 43485
+      }
+    },
+    {
+      "t_ms": 55331,
+      "type": "agent_heard",
+      "data": {
+        "text": "i understand your concern but i'm not able to break down the charges on this call could you please check the loan statement or contact our office for the exact details",
+        "stt_ms": 1766,
+        "start_ms": 43485,
+        "end_ms": 52937
+      }
+    },
+    {
+      "t_ms": 58692,
+      "type": "caller_tts",
+      "data": {
+        "utt_id": 2,
+        "tts_ms": 1885,
+        "seconds": 3.6,
+        "characters": 50
+      }
+    },
+    {
+      "t_ms": 58703,
+      "type": "caller_speech_start",
+      "data": {
+        "utt_id": 2,
+        "kind": "reply",
+        "agent_speaking": false
+      }
+    },
+    {
+      "t_ms": 61595,
+      "type": "caller_tts",
+      "data": {
+        "utt_id": 2,
+        "tts_ms": 2902,
+        "seconds": 6.0,
+        "characters": 84
+      }
+    },
+    {
+      "t_ms": 62050,
+      "type": "agent_transcript",
+      "data": {
+        "role": "user",
+        "text": "i see"
+      }
+    },
+    {
+      "t_ms": 68283,
+      "type": "caller_speech_end",
+      "data": {
+        "utt_id": 2,
+        "kind": "reply"
+      }
+    },
+    {
+      "t_ms": 69516,
+      "type": "agent_transcript",
+      "data": {
+        "role": "agent",
+        "text": "Thank you for understanding. Would you be able to make the payment, and if so, on what date can I note it down?"
+      }
+    },
+    {
+      "t_ms": 70270,
+      "type": "agent_transcript",
+      "data": {
+        "role": "user",
+        "text": "but i want to understand this before i pay can you at least confirm my emi is four thousand five hundred and not four thousand"
+      }
+    },
+    {
+      "t_ms": 72387,
+      "type": "agent_transcript",
+      "data": {
+        "role": "agent",
+        "text": "I'm sorry, but I can only confirm the overdue amount as Rs 4,500 in our records, and I'm not able to verify the EMI breakdown here. Would you like to pay this amount, or shall I have our office clarify the details first?"
+      }
+    },
+    {
+      "t_ms": 76284,
+      "type": "silence_nudge",
+      "data": {
+        "kind": "nudge",
+        "after_s": 8.0
+      }
+    },
+    {
+      "t_ms": 76538,
+      "type": "agent_speech_start",
+      "data": {
+        "detected_ms": 76710
+      }
+    },
+    {
+      "t_ms": 77694,
+      "type": "caller_tts",
+      "data": {
+        "utt_id": 3,
+        "tts_ms": 1409,
+        "seconds": 1.68,
+        "characters": 27
+      }
+    },
+    {
+      "t_ms": 77704,
+      "type": "caller_speech_start",
+      "data": {
+        "utt_id": 3,
+        "kind": "nudge",
+        "agent_speaking": true
+      }
+    },
+    {
+      "t_ms": 78130,
+      "type": "agent_speech_end",
+      "data": {
+        "start_ms": 76538
+      }
+    },
+    {
+      "t_ms": 79126,
+      "type": "agent_transcript",
+      "data": {
+        "role": "user",
+        "text": "hello"
+      }
+    },
+    {
+      "t_ms": 79364,
+      "type": "caller_speech_end",
+      "data": {
+        "utt_id": 3,
+        "kind": "nudge"
+      }
+    },
+    {
+      "t_ms": 80589,
+      "type": "agent_transcript",
+      "data": {
+        "role": "user",
+        "text": "are you still there"
+      }
+    },
+    {
+      "t_ms": 80590,
+      "type": "agent_transcript",
+      "data": {
+        "role": "agent",
+        "text": "I'm sorry, I can only confirm the overdue"
+      }
+    },
+    {
+      "t_ms": 81243,
+      "type": "agent_heard",
+      "data": {
+        "text": "i am sorry but i can",
+        "stt_ms": 2476,
+        "start_ms": 76538,
+        "end_ms": 78130
+      }
+    },
+    {
+      "t_ms": 82901,
+      "type": "agent_transcript",
+      "data": {
+        "role": "agent",
+        "text": "Yes, I'm here. Our records show the overdue amount as Rs 4,500, but for a detailed breakdown I'd request you to check with our office."
+      }
+    },
+    {
+      "t_ms": 84277,
+      "type": "agent_speech_start",
+      "data": {
+        "detected_ms": 84449
+      }
+    },
+    {
+      "t_ms": 85549,
+      "type": "agent_speech_end",
+      "data": {
+        "start_ms": 84277
+      }
+    },
+    {
+      "t_ms": 86873,
+      "type": "agent_heard",
+      "data": {
+        "text": "yes i am here",
+        "stt_ms": 689,
+        "start_ms": 84277,
+        "end_ms": 85549
+      }
+    },
+    {
+      "t_ms": 87074,
+      "type": "agent_speech_start",
+      "data": {
+        "detected_ms": 87246
+      }
+    },
+    {
+      "t_ms": 88433,
+      "type": "caller_reply_dropped",
+      "data": {
+        "reason": "agent_spoke_again"
+      }
+    },
+    {
+      "t_ms": 95266,
+      "type": "agent_speech_end",
+      "data": {
+        "start_ms": 87074
+      }
+    },
+    {
+      "t_ms": 96922,
+      "type": "agent_heard",
+      "data": {
+        "text": "our records show the overdue amount as four thousand five hundred rupees but for a detailed breakdown i'd request you to check with our office",
+        "stt_ms": 1017,
+        "start_ms": 87074,
+        "end_ms": 95266
+      }
+    },
+    {
+      "t_ms": 100043,
+      "type": "call_end",
+      "data": {
+        "reason": "timeout",
+        "error": null
+      }
+    },
+    {
+      "t_ms": 100047,
+      "type": "pipeline_overhead",
+      "data": {
+        "frames": 1748,
+        "p50_ms": 0.091,
+        "p95_ms": 0.232,
+        "max_ms": 1.968
+      }
+    }
+  ],
+  "barge_in_attempts": [],
+  "recordings": {
+    "caller": "proof/VOICE-06/calls/00_pipecat_clean/caller.wav",
+    "agent": "proof/VOICE-06/calls/00_pipecat_clean/agent.wav",
+    "mixed": "proof/VOICE-06/calls/00_pipecat_clean/mixed.wav",
+    "duration_ms": 100062
+  },
+  "usage": [
+    {
+      "kind": "stt",
+      "provider": "gnani",
+      "operation": "stt_rest",
+      "audio_seconds": 14.04,
+      "characters": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 1929,
+      "cached": false
+    },
+    {
+      "kind": "llm",
+      "provider": "deepseek",
+      "operation": "llm_caller",
+      "audio_seconds": 0.0,
+      "characters": 0,
+      "input_tokens": 744,
+      "output_tokens": 49,
+      "est_cost": null,
+      "latency_ms": 1663,
+      "cached": false
+    },
+    {
+      "kind": "tts",
+      "provider": "gnani",
+      "operation": "tts",
+      "audio_seconds": 2.0,
+      "characters": 25,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 1999,
+      "cached": false
+    },
+    {
+      "kind": "tts",
+      "provider": "gnani",
+      "operation": "tts",
+      "audio_seconds": 10.08,
+      "characters": 145,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 3883,
+      "cached": false
+    },
+    {
+      "kind": "stt",
+      "provider": "gnani",
+      "operation": "stt_rest",
+      "audio_seconds": 10.04,
+      "characters": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 1765,
+      "cached": false
+    },
+    {
+      "kind": "llm",
+      "provider": "deepseek",
+      "operation": "llm_caller",
+      "audio_seconds": 0.0,
+      "characters": 0,
+      "input_tokens": 819,
+      "output_tokens": 41,
+      "est_cost": null,
+      "latency_ms": 1472,
+      "cached": false
+    },
+    {
+      "kind": "tts",
+      "provider": "gnani",
+      "operation": "tts",
+      "audio_seconds": 3.6,
+      "characters": 50,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 1885,
+      "cached": false
+    },
+    {
+      "kind": "tts",
+      "provider": "gnani",
+      "operation": "tts",
+      "audio_seconds": 6.0,
+      "characters": 84,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 2902,
+      "cached": false
+    },
+    {
+      "kind": "tts",
+      "provider": "gnani",
+      "operation": "tts",
+      "audio_seconds": 1.68,
+      "characters": 27,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 1409,
+      "cached": false
+    },
+    {
+      "kind": "stt",
+      "provider": "gnani",
+      "operation": "stt_rest",
+      "audio_seconds": 2.18,
+      "characters": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 2475,
+      "cached": false
+    },
+    {
+      "kind": "stt",
+      "provider": "gnani",
+      "operation": "stt_rest",
+      "audio_seconds": 1.86,
+      "characters": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 688,
+      "cached": false
+    },
+    {
+      "kind": "llm",
+      "provider": "deepseek",
+      "operation": "llm_caller",
+      "audio_seconds": 0.0,
+      "characters": 0,
+      "input_tokens": 876,
+      "output_tokens": 32,
+      "est_cost": null,
+      "latency_ms": 1558,
+      "cached": false
+    },
+    {
+      "kind": "stt",
+      "provider": "gnani",
+      "operation": "stt_rest",
+      "audio_seconds": 8.78,
+      "characters": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "est_cost": null,
+      "latency_ms": 1016,
+      "cached": false
+    },
+    {
+      "kind": "llm",
+      "provider": "deepseek",
+      "operation": "llm_caller",
+      "audio_seconds": 0.0,
+      "characters": 0,
+      "input_tokens": 905,
+      "output_tokens": 46,
+      "est_cost": null,
+      "latency_ms": 1651,
+      "cached": false
+    }
+  ],
+  "error": null,
+  "glass_box": true
+}

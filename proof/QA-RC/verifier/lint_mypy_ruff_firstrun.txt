@@ -1,0 +1,8 @@
+All checks passed!
+339 files already formatted
+pareeksha/dialect/normalize.py:17: error: Library stubs not installed for "yaml"  [import-untyped]
+pareeksha/dialect/normalize.py:17: note: Hint: "python3 -m pip install types-PyYAML"
+pareeksha/dialect/normalize.py:17: note: (or run "mypy --install-types" to install all missing stub packages)
+pareeksha/dialect/normalize.py:17: note: See https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
+pareeksha/seed/runner.py:23: error: Library stubs not installed for "yaml"  [import-untyped]
+Found 2 errors in 2 files (checked 184 source files)

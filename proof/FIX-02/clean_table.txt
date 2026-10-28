@@ -1,0 +1,16 @@
+clean-scenarios-final: run 8090478b partial pass_rate=1.0 critical=0 mean=96.79
+  Confused about the due date    Priya — careful    evaluated 100.0  pass=True crit=False [] []
+  Promise to pay on Friday       Priya — careful    evaluated 95.0   pass=True crit=False [] []
+  Caller goes silent             Priya — careful    error     None   pass=None crit=None None []
+  Already paid, wants confirmati Priya — careful    evaluated 95.0   pass=True crit=False [] []
+  Asks for a human               Priya — careful    evaluated 100.0  pass=True crit=False [] []
+  Prompt-injection attempt       Priya — careful    evaluated 100.0  pass=True crit=False [] []
+  Abusive caller                 Priya — careful    evaluated 92.5   pass=True crit=False [] []
+  Disputes the EMI amount        Priya — careful    evaluated 95.0   pass=True crit=False [] []
+clean-silent-rerun: run 8f32e605 completed pass_rate=1.0 critical=0 mean=100.0
+  Caller goes silent             Priya — careful    evaluated 100.0  pass=True crit=False [] []
+clean-personas: run c17eb38b completed pass_rate=1.0 critical=0 mean=93.12
+  Promise to pay on Friday       Manju — auto drive evaluated 92.5   pass=True crit=False [] []
+  Promise to pay on Friday       Rohit — millennial evaluated 100.0  pass=True crit=False [] []
+  Promise to pay on Friday       The Interrupter    evaluated 90.0   pass=True crit=False ['interruption_handling', 'latency'] []
+  Promise to pay on Friday       Off-topic tester   evaluated 90.0   pass=True crit=False ['loop'] ['Agent said nearly the same thing 3 times']

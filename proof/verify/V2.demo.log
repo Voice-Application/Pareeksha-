@@ -1,0 +1,638 @@
+[16:45:37] make demo (compose up --build, health wait, seed, 10-call demo run)
+scripts/demo.sh
+ Image pqa-web Building 
+ Image pqa-outbox-relay Building 
+ Image pqa-integrations Building 
+ Image pqa-finalizer Building 
+ Image pqa-api Building 
+ Image pqa-migrate Building 
+ Image pqa-generator Building 
+ Image pqa-evaluator Building 
+ Image pqa-reconciler Building 
+ Image pqa-dialect Building 
+ Image pqa-retrier Building 
+ Image pqa-planner Building 
+ Image pqa-auditor Building 
+ Image pqa-mock-agent Building 
+ Image pqa-dlq-recorder Building 
+ Image pqa-simulator Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 10.25kB done
+#1 DONE 0.0s
+
+#2 [web internal] load build definition from Dockerfile
+#2 transferring dockerfile: 702B 0.0s done
+#2 DONE 0.0s
+
+#3 [mock-agent internal] load build definition from Dockerfile
+#3 transferring dockerfile: 669B 0.0s done
+#3 DONE 0.0s
+
+#4 [outbox-relay internal] load build definition from Dockerfile
+#4 transferring dockerfile: 1.22kB 0.0s done
+#4 DONE 0.0s
+
+#5 [web internal] load metadata for docker.io/library/node:22-alpine
+#5 DONE 0.0s
+
+#6 [planner internal] load metadata for docker.io/library/python:3.12-slim
+#6 DONE 0.0s
+
+#7 [web internal] load .dockerignore
+#7 transferring context: 90B done
+#7 DONE 0.0s
+
+#8 [mock-agent internal] load .dockerignore
+#8 transferring context: 2B done
+#8 DONE 0.0s
+
+#9 [api internal] load .dockerignore
+#9 transferring context: 2B done
+#9 DONE 0.0s
+
+#10 [web internal] load build context
+#10 DONE 0.0s
+
+#11 [dlq-recorder internal] load build context
+#11 DONE 0.0s
+
+#12 [mock-agent internal] load build context
+#12 transferring context: 29.60kB 0.0s done
+#12 DONE 0.0s
+
+#13 [web build 1/6] FROM docker.io/library/node:22-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914
+#13 resolve docker.io/library/node:22-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914 0.0s done
+#13 DONE 0.0s
+
+#14 [dlq-recorder stage-0 1/5] FROM docker.io/library/python:3.12-slim@sha256:12316debbfb86890f6b2d825820612741ba527ad5a44e3902759141d572bfe8f
+#14 resolve docker.io/library/python:3.12-slim@sha256:12316debbfb86890f6b2d825820612741ba527ad5a44e3902759141d572bfe8f
+#14 resolve docker.io/library/python:3.12-slim@sha256:12316debbfb86890f6b2d825820612741ba527ad5a44e3902759141d572bfe8f 0.0s done
+#14 DONE 0.0s
+
+#15 [mock-agent stage-0 4/5] COPY backend/pareeksha /app/pareeksha
+#15 CACHED
+
+#16 [mock-agent stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "pydantic>=2.7" "requests"
+#16 CACHED
+
+#17 [mock-agent stage-0 5/5] COPY mock_agent /app/mock_agent
+#17 CACHED
+
+#10 [web internal] load build context
+#10 transferring context: 171.16kB 0.0s done
+#10 DONE 0.0s
+
+#18 [web build 3/6] COPY package.json package-lock.json ./
+#18 CACHED
+
+#19 [web build 2/6] WORKDIR /app
+#19 CACHED
+
+#20 [web build 4/6] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/ca; fi;     npm ci
+#20 CACHED
+
+#11 [auditor internal] load build context
+#11 transferring context: 52.03kB 0.0s done
+#11 DONE 0.0s
+
+#21 [auditor stage-0 3/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "fastapi>=0.121" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy[asyncio]>=2.0.30" "python-multipart>=0.0.9" "pydantic-settings>=2.3" "cryptography>=42" "httpx>=0.27" "jinja2>=3.1" "numpy>=1.26" "scipy>=1.11" "pyyaml>=6" "rapidfuzz>=3.9" "soundfile>=0.12" "gnani-vachana>=0.8.2" "websockets>=12.0,<16.0" "google-auth>=2.30" "pipecat-ai[silero]>=1.13.0"
+#21 CACHED
+
+#22 [auditor stage-0 2/5] WORKDIR /app
+#22 CACHED
+
+#23 [auditor stage-0 4/5] COPY . /app
+#23 CACHED
+
+#24 [web build 5/6] COPY . .
+#24 DONE 0.1s
+
+#25 [mock-agent] exporting to image
+#25 exporting layers done
+#25 exporting manifest sha256:2516aa9c317781a4852ed27b68192efc449a8e90fecba4c02dd88fb593781e83 done
+#25 exporting config sha256:6e3b124d4832a797f042a19e4e78a3e44872330c4440fd6c7566973208c779c8 done
+#25 exporting attestation manifest sha256:e9c99dc7e0e7329b3f7b4d7c3898a5fe23637f34e06dfcb4658ce18e9fb5e306 done
+#25 exporting manifest list sha256:9787930475208d5735b35521e1aacfa624ce5b040d898e89e0dab1c040b28f3b done
+#25 naming to docker.io/library/pqa-mock-agent:latest done
+#25 unpacking to docker.io/library/pqa-mock-agent:latest 0.0s done
+#25 DONE 0.1s
+
+#26 [simulator stage-0 5/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir --no-deps /app
+#26 ...
+
+#27 [mock-agent] resolving provenance for metadata file
+#27 DONE 0.0s
+
+#28 [web build 6/6] RUN npm run build
+#28 0.407 
+#28 0.407 > pareeksha-web@0.1.0 build
+#28 0.407 > next build
+#28 0.407 
+#28 0.998 ▲ Next.js 16.4.3 (Turbopack)
+#28 1.051 ✓ Running next.config.ts took 52ms
+#28 1.059 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+#28 1.059 This information is used to shape Next.js' roadmap and prioritize features.
+#28 1.059 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+#28 1.059 https://nextjs.org/telemetry
+#28 1.059 
+#28 1.111 
+#28 1.161   Creating an optimized production build ...
+#28 ...
+
+#26 [reconciler stage-0 5/5] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir --no-deps /app
+#26 0.679 Processing /app
+#26 0.683   Installing build dependencies: started
+#26 2.030   Installing build dependencies: finished with status 'done'
+#26 2.034   Getting requirements to build wheel: started
+#26 2.278   Getting requirements to build wheel: finished with status 'done'
+#26 2.280   Preparing metadata (pyproject.toml): started
+#26 2.560   Preparing metadata (pyproject.toml): finished with status 'done'
+#26 2.567 Building wheels for collected packages: pareeksha
+#26 2.567   Building wheel for pareeksha (pyproject.toml): started
+#26 2.934   Building wheel for pareeksha (pyproject.toml): finished with status 'done'
+#26 2.935   Created wheel for pareeksha: filename=pareeksha-0.2.0-py3-none-any.whl size=354747 sha256=4cc469b704f876c74ef48c5f9180e36caf5e4c55005b969dca4b69aa886b027f
+#26 2.936   Stored in directory: /tmp/pip-ephem-wheel-cache-vc1g9ucx/wheels/54/1b/b7/aa63e25c8f14f4f2ae7b04e6097bdecb770e455c5c1ee0a600
+#26 2.939 Successfully built pareeksha
+#26 2.940 Installing collected packages: pareeksha
+#26 3.251 Successfully installed pareeksha-0.2.0
+#26 3.251 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#26 3.385 
+#26 3.385 [notice] A new release of pip is available: 25.0.1 -> 26.2.2
+#26 3.385 [notice] To update, run: pip install --upgrade pip
+#26 DONE 3.5s
+
+#29 [outbox-relay] exporting to image
+#29 exporting layers 1.6s done
+#29 exporting manifest sha256:4528f90cda2fccbc9be429b35602bbb1383be811c84a624fba2868fe30ed6918
+#29 exporting manifest sha256:4528f90cda2fccbc9be429b35602bbb1383be811c84a624fba2868fe30ed6918 0.1s done
+#29 exporting config sha256:f8bb76803a131788717428607a738fb37d2be6038608a10fe17fd0b87f744012 0.1s done
+#29 exporting attestation manifest sha256:d697551683525e06548d1f28978c2e68bc55f0490e7aa192ff5f999ec5a12701
+#29 exporting attestation manifest sha256:d697551683525e06548d1f28978c2e68bc55f0490e7aa192ff5f999ec5a12701 0.1s done
+#29 exporting manifest list sha256:0375e63fad7b8a1ff2f04fa129b09e20f6d1a6febc456c01f9a9115c2626aa61 0.0s done
+#29 naming to docker.io/library/pqa-outbox-relay:latest 0.0s done
+#29 unpacking to docker.io/library/pqa-outbox-relay:latest
+#29 ...
+
+#30 [dialect] exporting to image
+#30 exporting layers 1.6s done
+#30 exporting manifest sha256:7658977fe4309511c1c5310a07273e5ffe71faea2eda9895ba25b98aa93dc450 0.1s done
+#30 exporting config sha256:73d365590a1ac1bc6d8def79473226684f19d5aa0b450d00215baf4721f366a5 0.1s done
+#30 exporting attestation manifest sha256:8247f84046bd842c727633f89dfa59da5034769e950753ddfb47dbaa86811e18 0.1s done
+#30 exporting manifest list sha256:919460bff292b5dde4a3d4a63171a050a34e184fec83d7e84a91dbbef79e2dd1 0.0s done
+#30 naming to docker.io/library/pqa-dialect:latest 0.0s done
+#30 unpacking to docker.io/library/pqa-dialect:latest 4.8s done
+#30 ...
+
+#31 [planner] exporting to image
+#31 exporting layers 1.6s done
+#31 exporting manifest sha256:d5e312d9376b45400dcec51b2f48276deedcb982a1903b225b36312a7b214cfb 0.1s done
+#31 exporting config sha256:076241f9ec0ddfeb90e4ab1caf60f470fe980c67e76cd37198e1286c15786e54 0.1s done
+#31 exporting attestation manifest sha256:310db315bcd9fb3ffdd4c20143469ca28ee25f99a5244f523ec8928022d478c1 0.1s done
+#31 exporting manifest list sha256:4e86df33db20c07437169b3d9e134c914fb6d1c129f5aa1793336592bc82a3da 0.0s done
+#31 naming to docker.io/library/pqa-planner:latest 0.0s done
+#31 unpacking to docker.io/library/pqa-planner:latest 5.1s done
+#31 ...
+
+#29 [outbox-relay] exporting to image
+#29 unpacking to docker.io/library/pqa-outbox-relay:latest 5.1s done
+#29 DONE 7.4s
+
+#30 [dialect] exporting to image
+#30 DONE 7.3s
+
+#32 [finalizer] exporting to image
+#32 exporting layers 1.7s done
+#32 exporting manifest sha256:c6767ec6e58f5890e2accc8df07f08fcdaadece7f1eb4c18f5fae0328a3b7ffe 0.1s done
+#32 exporting config sha256:ccd76e31b624d334c19cce791fbec4328a00fa94222df1ffd0a554390c20b43e 0.1s done
+#32 exporting attestation manifest sha256:2370b78263fadd27f6806a50b1269412755c58fe2046162476cff37dae87a9b3 0.1s done
+#32 exporting manifest list sha256:7f703d69df3c5c86156850996ec85db67e6e7b0050e2b827588ac1dd36a30095 0.0s done
+#32 naming to docker.io/library/pqa-finalizer:latest 0.0s done
+#32 unpacking to docker.io/library/pqa-finalizer:latest 5.1s done
+#32 DONE 7.4s
+
+#33 [generator] exporting to image
+#33 exporting layers 1.7s done
+#33 exporting manifest sha256:753dc73766f2773b5c052245e6c08937152dafc95a690472d229b3a87c997955 0.1s done
+#33 exporting config sha256:bc99922114a803e14ecbb8f03972025858487111e04929fa6ad6d9d7262ed175 0.1s done
+#33 exporting attestation manifest sha256:76ded67aa02a6b9f940fd72976948c321d2bd2ba7eb478c958df46ea24f18c30 0.1s done
+#33 exporting manifest list sha256:ac6dc19b71df2c3f57ddc19171e720c58dd45dd9d2cb3a16be8042d8f1710910 0.0s done
+#33 naming to docker.io/library/pqa-generator:latest 0.0s done
+#33 unpacking to docker.io/library/pqa-generator:latest 5.1s done
+#33 DONE 7.4s
+
+#34 [evaluator] exporting to image
+#34 exporting layers 1.6s done
+#34 exporting manifest sha256:a35d319bf4d9aa0415a9afd6c958a54308442f7d77620e8498abb00e591a738c 0.1s done
+#34 exporting config sha256:f8bb4b885c909500861d87615bf350d89d261a07c616f109363f48b464bb6948 0.1s done
+#34 exporting attestation manifest sha256:5a7fbbf8ae62df0c840d9d4414272b7729198d78d9c78e8626e0898a9034f34d 0.1s done
+#34 exporting manifest list sha256:fedaf235f56917dd933fdea0909c57731b26e1f81c3039658efe376cd070ff4a 0.0s done
+#34 naming to docker.io/library/pqa-evaluator:latest 0.0s done
+#34 unpacking to docker.io/library/pqa-evaluator:latest 5.1s done
+#34 DONE 7.4s
+
+#35 [migrate] exporting to image
+#35 exporting layers 1.7s done
+#35 exporting manifest sha256:08308a714956e93d34141198c9df4dbb5d389a718c4f5b857eaeeefcd8740a75 0.1s done
+#35 exporting config sha256:8438415c245d40416277fa4c2abbd6b46f18b6b1959157899dbb4b959611b8d7 0.1s done
+#35 exporting attestation manifest sha256:19420999fb8c763a45b6b3729e57929ba43d87d0a2edaf7bd47b281bcc2837c5 0.1s done
+#35 exporting manifest list sha256:ad7c6298c4991b3e12bf9f73f5d9020961327538825cedaf63fc730b1f9d5cfc 0.0s done
+#35 naming to docker.io/library/pqa-migrate:latest 0.0s done
+#35 unpacking to docker.io/library/pqa-migrate:latest 5.1s done
+#35 DONE 7.4s
+
+#36 [retrier] exporting to image
+#36 exporting layers 1.7s done
+#36 exporting manifest sha256:e7fe2b2b8b135c834865fe59c9b3120d2252ba53ff016b274631c1683634ecee 0.1s done
+#36 exporting config sha256:77ebee4e946135278c770d12e06441153f7b8c3b9ab451850008e54014a04f36 0.1s done
+#36 exporting attestation manifest sha256:126485411177d1ad3f63d408996e31cbf66735fbef52706c6699d16f1475f9ec 0.1s done
+#36 exporting manifest list sha256:6c044af4c8edfd8bf6a4ac18d7b2ed08d58bf52b7a7c018e888593c135fae105 0.0s done
+#36 naming to docker.io/library/pqa-retrier:latest done
+#36 unpacking to docker.io/library/pqa-retrier:latest 5.1s done
+#36 DONE 7.4s
+
+#31 [planner] exporting to image
+#31 DONE 7.4s
+
+#37 [auditor] exporting to image
+#37 exporting layers 1.6s done
+#37 exporting manifest sha256:c4fba01de174759b25a170e27f0a0ef76f9292a525ed957fb665f3e3093d9c24 0.1s done
+#37 exporting config sha256:8886af02d4aac7ab50dc76c7799cd9151e9fd4ccaede1ae16be095c15a852101 0.1s done
+#37 exporting attestation manifest sha256:694a0201f4d206511baaa4be91913ad46493cd669203c039b5c46d531fc8cdb5 0.1s done
+#37 exporting manifest list sha256:52f97beb194888572711c3b8470926b3366dc8c090bdf6af4c5ad277be62bace 0.0s done
+#37 naming to docker.io/library/pqa-auditor:latest 0.0s done
+#37 unpacking to docker.io/library/pqa-auditor:latest 5.1s done
+#37 DONE 7.4s
+
+#38 [reconciler] exporting to image
+#38 exporting layers 1.6s done
+#38 exporting manifest sha256:c30a1f61dc0a11f9e3e41a9fcc78c8e9710847014f28baf316dbd0af865b376a 0.1s done
+#38 exporting config sha256:612433a863b1f8a080cc8f03b1c18f8e013b53caf5520dee716c9bf8ec5967d8 0.1s done
+#38 exporting attestation manifest sha256:54433a98c9c11456de1d371c69df049d4ed5b27f52fb28952b54a4bf0298aa0c 0.1s done
+#38 exporting manifest list sha256:a6575e3192de47721009c4d1fe53598054c42ba4b754662583f2b3662a811be1 0.0s done
+#38 naming to docker.io/library/pqa-reconciler:latest 0.0s done
+#38 unpacking to docker.io/library/pqa-reconciler:latest 5.1s done
+#38 DONE 7.4s
+
+#39 [api] exporting to image
+#39 exporting layers 1.6s done
+#39 exporting manifest sha256:f1041fb022cb1dc5560807fd97c06872f17e7567819709cf1d380d4c5baa8528 0.1s done
+#39 exporting config sha256:2940a077ae954f7faa055a388195ce8ee6865f2f82e285413e3f73bbda6f526e 0.1s done
+#39 exporting attestation manifest sha256:70e65f5e7dd8935900d46128b90bc6a51d0d7af856f6267822f9574ff71b8352 0.1s done
+#39 exporting manifest list sha256:4783e8e30f1768bd5cd78d4a09d8a7a5ee09d04f9c30cdbadff993dd4deba283 0.0s done
+#39 naming to docker.io/library/pqa-api:latest 0.0s done
+#39 unpacking to docker.io/library/pqa-api:latest 5.1s done
+#39 DONE 7.4s
+
+#40 [simulator] exporting to image
+#40 exporting layers 1.7s done
+#40 exporting manifest sha256:4fdf34bd48ba138be2035d68048af8e22829201b1ca46e7f1058c0e74643fdfd 0.1s done
+#40 exporting config sha256:2c2cd3a83412e7c9ee05c1a3470a1d442bca700716d3b740e00500658d73e3b1 0.1s done
+#40 exporting attestation manifest sha256:50587bce5183243bb25933556972c66a7094d2a588ed242afd7135b5de40a61c 0.1s done
+#40 exporting manifest list sha256:da6445d77d1e4a58d6effe8791b476dd4064864abcd782767d87ba92f8750b44 0.0s done
+#40 naming to docker.io/library/pqa-simulator:latest done
+#40 unpacking to docker.io/library/pqa-simulator:latest 5.1s done
+#40 DONE 7.4s
+
+#41 [dlq-recorder] exporting to image
+#41 exporting layers 1.6s done
+#41 exporting manifest sha256:64cd48c548bbf25c3fc9327be9e2224f5115f2caaa280de6330c34f29b460dc6 0.1s done
+#41 exporting config sha256:34435d65e436edb69e9f88e134b4c9924a332d302977d49b4ef545eebfe6e13b 0.1s done
+#41 exporting attestation manifest sha256:066f4a4e4ba90ae74bd87a3ea97f01681262aaa9c6241622f630c15e0f6f9e17 0.1s done
+#41 exporting manifest list sha256:ed92c856bdb5bc1ab05b084221b0b7e183e4e44338805350e7c348632b66fa2a 0.0s done
+#41 naming to docker.io/library/pqa-dlq-recorder:latest 0.0s done
+#41 unpacking to docker.io/library/pqa-dlq-recorder:latest 5.3s done
+#41 DONE 7.5s
+
+#42 [integrations] exporting to image
+#42 exporting layers 1.7s done
+#42 exporting manifest sha256:5d36c69842105be252bdbf4b0010f4261861e9a26e29d1b204d01f0f5ebf56e4 0.1s done
+#42 exporting config sha256:11c983debe1012236a0e40bf319db6a84281a825fb0bea4fd09b2b907443f709 0.1s done
+#42 exporting attestation manifest sha256:1e579f0186a1a4f9cfa3d015f3ee9b33538fe8ebdb9ddbeea1cdfa366a911771 0.1s done
+#42 exporting manifest list sha256:74f38a04c53c5448e8b51e19f6456d9664326429488ca2d90eb4c6f0afb088de 0.0s done
+#42 naming to docker.io/library/pqa-integrations:latest 0.0s done
+#42 unpacking to docker.io/library/pqa-integrations:latest 5.3s done
+#42 DONE 7.5s
+
+#28 [web build 6/6] RUN npm run build
+#28 ...
+
+#43 [dialect] resolving provenance for metadata file
+#43 DONE 0.8s
+
+#44 [reconciler] resolving provenance for metadata file
+#44 DONE 0.3s
+
+#45 [evaluator] resolving provenance for metadata file
+#45 DONE 0.7s
+
+#46 [integrations] resolving provenance for metadata file
+#46 DONE 0.1s
+
+#47 [api] resolving provenance for metadata file
+#47 DONE 0.3s
+
+#48 [outbox-relay] resolving provenance for metadata file
+#48 DONE 0.8s
+
+#49 [retrier] resolving provenance for metadata file
+#49 DONE 0.5s
+
+#50 [finalizer] resolving provenance for metadata file
+#50 DONE 0.8s
+
+#51 [auditor] resolving provenance for metadata file
+#51 DONE 0.2s
+
+#52 [generator] resolving provenance for metadata file
+#52 DONE 0.8s
+
+#53 [migrate] resolving provenance for metadata file
+#53 DONE 0.7s
+
+#54 [simulator] resolving provenance for metadata file
+#54 DONE 0.5s
+
+#55 [dlq-recorder] resolving provenance for metadata file
+#55 DONE 0.2s
+
+#56 [planner] resolving provenance for metadata file
+#56 DONE 0.6s
+
+#28 [web build 6/6] RUN npm run build
+#28 11.60 ✓ Compiled successfully in 10.4s
+#28 11.61   Running TypeScript ...
+#28 22.91   Finished TypeScript in 11.3s ...
+#28 22.91   Collecting page data using 3 workers ...
+#28 23.75   Generating static pages using 3 workers (0/20) ...
+#28 24.37   Generating static pages using 3 workers (5/20) 
+#28 24.61   Generating static pages using 3 workers (10/20) 
+#28 24.62   Generating static pages using 3 workers (15/20) 
+#28 24.74 ✓ Generating static pages using 3 workers (20/20) in 988ms
+#28 24.75   Finalizing page optimization ...
+#28 24.76 
+#28 24.76 Route (app)
+#28 24.76 ┌ ○ /
+#28 24.76 ├ ○ /_not-found
+#28 24.76 ├ ○ /agents
+#28 24.76 ├ ƒ /agents/[id]
+#28 24.76 ├ ○ /agents/new
+#28 24.76 ├ ƒ /api/proxy/[...path]
+#28 24.76 ├ ○ /audits
+#28 24.76 ├ ○ /audits/new
+#28 24.76 ├ ○ /calibration
+#28 24.76 ├ ƒ /calls/[id]
+#28 24.76 ├ ○ /dialect
+#28 24.76 ├ ƒ /dialect/[reportId]
+#28 24.76 ├ ○ /dlq
+#28 24.76 ├ ○ /integrations
+#28 24.76 ├ ƒ /integrations/[id]
+#28 24.76 ├ ○ /noise-profiles
+#28 24.76 ├ ƒ /noise-profiles/[id]
+#28 24.76 ├ ○ /personas
+#28 24.76 ├ ƒ /personas/[id]
+#28 24.76 ├ ○ /regression
+#28 24.76 ├ ○ /runs
+#28 24.76 ├ ƒ /runs/[id]
+#28 24.76 ├ ○ /runs/compare
+#28 24.76 ├ ○ /runs/new
+#28 24.76 ├ ○ /scenarios
+#28 24.76 ├ ƒ /scenarios/[id]
+#28 24.76 ├ ○ /scenarios/new
+#28 24.76 └ ○ /settings/api-keys
+#28 24.76 
+#28 24.76 
+#28 24.76 ƒ Proxy (Middleware)
+#28 24.76 
+#28 24.76 ○  (Static)   prerendered as static content
+#28 24.76 ƒ  (Dynamic)  server-rendered on demand
+#28 24.76 
+#28 DONE 25.5s
+
+#57 [web stage-1 3/6] COPY --from=build /app/package.json ./
+#57 CACHED
+
+#58 [web stage-1 4/6] COPY --from=build /app/node_modules ./node_modules
+#58 CACHED
+
+#59 [web stage-1 5/6] COPY --from=build /app/.next ./.next
+#59 DONE 0.3s
+
+#60 [web stage-1 6/6] COPY --from=build /app/next.config.ts ./
+#60 DONE 0.0s
+
+#61 [web] exporting to image
+#61 exporting layers
+#61 exporting layers 2.4s done
+#61 exporting manifest sha256:5302c7751dba9a2d529b78a724b15cdc4915f0d99c6b523cc3b1ee54c7334550 done
+#61 exporting config sha256:6a56043c1123c3876fd6f4bd619b538261fc7deb36769de84a0824e389155fed done
+#61 exporting attestation manifest sha256:f0fbdfdd6531d8e7b1a8b0514c48b74dc6db18aac7387af203fae4d942f584bd done
+#61 exporting manifest list sha256:b62741f59e4eae5c47a89d89e7a5889f418148b4fdfedd9ef476153c4bf61f4b done
+#61 naming to docker.io/library/pqa-web:latest done
+#61 unpacking to docker.io/library/pqa-web:latest
+#61 unpacking to docker.io/library/pqa-web:latest 0.5s done
+#61 DONE 2.9s
+
+#62 [web] resolving provenance for metadata file
+#62 DONE 0.0s
+ Image pqa-mock-agent Built 
+ Image pqa-simulator Built 
+ Image pqa-dialect Built 
+ Image pqa-api Built 
+ Image pqa-generator Built 
+ Image pqa-outbox-relay Built 
+ Image pqa-finalizer Built 
+ Image pqa-migrate Built 
+ Image pqa-dlq-recorder Built 
+ Image pqa-integrations Built 
+ Image pqa-evaluator Built 
+ Image pqa-planner Built 
+ Image pqa-retrier Built 
+ Image pqa-auditor Built 
+ Image pqa-web Built 
+ Image pqa-reconciler Built 
+ Container pqa-postgres-1 Running 
+ Container pqa-kafka-1 Running 
+ Container pqa-dialect-1 Recreate 
+ Container pqa-mock-agent-1 Creating 
+ Container pqa-integrations-1 Recreate 
+ Container pqa-auditor-1 Recreate 
+ Container pqa-migrate-1 Creating 
+ Container pqa-outbox-relay-1 Recreate 
+ Container pqa-planner-1 Recreate 
+ Container pqa-retrier-1 Recreate 
+ Container pqa-simulator-1 Recreate 
+ Container pqa-simulator-2 Recreate 
+ Container pqa-simulator-3 Recreate 
+ Container pqa-reconciler-1 Recreate 
+ Container pqa-dlq-recorder-1 Recreate 
+ Container pqa-evaluator-1 Recreate 
+ Container pqa-evaluator-2 Recreate 
+ Container pqa-finalizer-1 Recreate 
+ Container pqa-generator-1 Recreate 
+ Container pqa-migrate-1 Created 
+ Container pqa-api-1 Creating 
+ Container pqa-mock-agent-1 Created 
+ Container pqa-api-1 Created 
+ Container pqa-web-1 Creating 
+ Container pqa-web-1 Created 
+ Container pqa-reconciler-1 Recreated 
+ Container pqa-generator-1 Recreated 
+ Container pqa-auditor-1 Recreated 
+ Container pqa-dlq-recorder-1 Recreated 
+ Container pqa-planner-1 Recreated 
+ Container pqa-evaluator-2 Recreated 
+ Container pqa-outbox-relay-1 Recreated 
+ Container pqa-dialect-1 Recreated 
+ Container pqa-integrations-1 Recreated 
+ Container pqa-retrier-1 Recreated 
+ Container pqa-finalizer-1 Recreated 
+ Container pqa-evaluator-1 Recreated 
+ Container pqa-simulator-2 Recreated 
+ Container pqa-simulator-1 Recreated 
+ Container pqa-simulator-3 Recreated 
+ Container pqa-mock-agent-1 Starting 
+ Container pqa-kafka-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-mock-agent-1 Started 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-migrate-1 Starting 
+ Container pqa-kafka-1 Healthy 
+ Container pqa-kafka-init-1 Starting 
+ Container pqa-migrate-1 Started 
+ Container pqa-kafka-init-1 Started 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-migrate-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-migrate-1 Exited 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-api-1 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-retrier-1 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-evaluator-2 Starting 
+ Container pqa-generator-1 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-reconciler-1 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-integrations-1 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-auditor-1 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-planner-1 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-outbox-relay-1 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-finalizer-1 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-dialect-1 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-simulator-3 Starting 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-dlq-recorder-1 Starting 
+ Container pqa-api-1 Started 
+ Container pqa-api-1 Waiting 
+ Container pqa-retrier-1 Started 
+ Container pqa-evaluator-2 Started 
+ Container pqa-evaluator-1 Starting 
+ Container pqa-evaluator-1 Started 
+ Container pqa-generator-1 Started 
+ Container pqa-reconciler-1 Started 
+ Container pqa-integrations-1 Started 
+ Container pqa-auditor-1 Started 
+ Container pqa-planner-1 Started 
+ Container pqa-outbox-relay-1 Started 
+ Container pqa-finalizer-1 Started 
+ Container pqa-dialect-1 Started 
+ Container pqa-simulator-3 Started 
+ Container pqa-simulator-1 Starting 
+ Container pqa-dlq-recorder-1 Started 
+ Container pqa-simulator-1 Started 
+ Container pqa-simulator-2 Starting 
+ Container pqa-simulator-2 Started 
+ Container pqa-api-1 Healthy 
+ Container pqa-web-1 Starting 
+ Container pqa-web-1 Started 
+waiting for the API on :18000 ...
+ Container pqa-postgres-1 Running 
+ Container pqa-kafka-1 Running 
+ Container pqa-kafka-1 Waiting 
+ Container pqa-postgres-1 Waiting 
+ Container pqa-kafka-1 Healthy 
+ Container pqa-postgres-1 Healthy 
+ Container pqa-migrate-1 Starting 
+ Container pqa-kafka-init-1 Starting 
+ Container pqa-migrate-1 Started 
+ Container pqa-kafka-init-1 Started 
+ Container pqa-kafka-init-1 Waiting 
+ Container pqa-migrate-1 Waiting 
+ Container pqa-migrate-1 Exited 
+ Container pqa-kafka-init-1 Exited 
+ Container pqa-api-run-adfddfdded92 Creating 
+ Container pqa-api-run-adfddfdded92 Created 
+{
+  "created": {
+    "personas": 20,
+    "noise_profiles": 8,
+    "rubric_versions": 1,
+    "agents": 1,
+    "scenarios": 8,
+    "api_keys": 1
+  },
+  "existing": {}
+}
+{
+ "run_id": "0fcd964f-1b4f-4654-9a45-46a86009a0ad",
+ "wall_s": 280.5,
+ "evaluated": 7,
+ "of": 10,
+ "summary": {
+  "pass_rate": 0.0,
+  "critical_failures": 7,
+  "needs_review": 7,
+  "score_mean": 48.04,
+  "latency_p50_ms": null,
+  "latency_p95_ms": null,
+  "barge_in_honoured_rate": null,
+  "top_failure_types": [],
+  "suite_passed": null,
+  "score_distribution": []
+ }
+}
+Demo done. Web app: http://localhost:13000  (API key is PAREEKSHA_API_KEY in .env)
+[16:52:10] demo returned 0

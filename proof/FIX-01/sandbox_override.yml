@@ -1,0 +1,21 @@
+x-ca: &ca
+  environment: { SSL_CERT_FILE: /etc/ssl/proxy-ca.crt, REQUESTS_CA_BUNDLE: /etc/ssl/proxy-ca.crt, CURL_CA_BUNDLE: /etc/ssl/proxy-ca.crt }
+  volumes: ["/root/.ccr/ca-bundle.crt:/etc/ssl/proxy-ca.crt:ro"]
+services:
+  kafka: { ports: !override ["39094:9094"], environment: { KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,EXTERNAL://localhost:39094" } }
+  postgres: { ports: !override ["35432:5432"] }
+  api:
+    <<: *ca
+    ports: !override ["38000:8000"]
+  web: { ports: !override ["33000:3000"] }
+  mock-agent:
+    <<: *ca
+    ports: !override ["38765:8765"]
+  simulator: *ca
+  evaluator: *ca
+  auditor: *ca
+  generator: *ca
+  integrations: *ca
+  dialect: *ca
+  planner: *ca
+  finalizer: *ca

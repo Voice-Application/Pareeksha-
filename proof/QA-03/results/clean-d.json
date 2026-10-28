@@ -1,0 +1,611 @@
+{
+ "label": "clean-d",
+ "run_id": "06819957-8e65-4297-b1e4-d4f72681f237",
+ "agent": "EMI Reminder Bot",
+ "status": "completed",
+ "wall_seconds": 140.2,
+ "progress": {
+  "total": 2,
+  "queued": 0,
+  "in_progress": 0,
+  "evaluated": 2,
+  "error": 0
+ },
+ "summary": {
+  "pass_rate": 1.0,
+  "critical_failures": 0,
+  "needs_review": 0,
+  "score_mean": 100.0,
+  "latency_p50_ms": null,
+  "latency_p95_ms": null,
+  "barge_in_honoured_rate": null,
+  "top_failure_types": [],
+  "suite_passed": null,
+  "score_distribution": []
+ },
+ "request": {
+  "agent_id": "534e4db1-beda-4299-9cf1-f84dfe38975b",
+  "name": "clean-d",
+  "scenario_ids": [
+   "4376cdd5-8cf9-4419-a56b-49c6067128a4"
+  ],
+  "persona_ids": [
+   "feee5b71-1be7-47fe-8a6b-14dbd2bc176a"
+  ],
+  "noise_profile_ids": [
+   "e30954c5-01e5-452d-9554-e3aec4643005"
+  ],
+  "repeats": 2,
+  "config": {
+   "max_concurrency": 3
+  }
+ },
+ "calls": [
+  {
+   "item": {
+    "id": "2546b12f-cee5-4cb2-8de6-82984eaa5875",
+    "scenario": "Promise to pay on Friday",
+    "persona": "Deepa — homemaker",
+    "noise_profile": "pstn_8k_alaw",
+    "status": "evaluated",
+    "call_id": "d11cdde3-7077-5c37-b139-14547d1c1d2a",
+    "overall_score": 100.0,
+    "passed": true,
+    "critical_failure": false
+   },
+   "call": {
+    "id": "d11cdde3-7077-5c37-b139-14547d1c1d2a",
+    "source": "simulation",
+    "status": "completed",
+    "agent_id": "534e4db1-beda-4299-9cf1-f84dfe38975b",
+    "run_id": "06819957-8e65-4297-b1e4-d4f72681f237",
+    "run_item_id": "2546b12f-cee5-4cb2-8de6-82984eaa5875",
+    "language": "kn-IN",
+    "end_reason": "agent_hangup",
+    "duration_ms": 63716,
+    "started_at": "2026-10-27T04:01:06.301826Z",
+    "recordings": {
+     "mixed": "/api/v1/calls/d11cdde3-7077-5c37-b139-14547d1c1d2a/audio/mixed",
+     "caller": "/api/v1/calls/d11cdde3-7077-5c37-b139-14547d1c1d2a/audio/caller",
+     "agent": "/api/v1/calls/d11cdde3-7077-5c37-b139-14547d1c1d2a/audio/agent",
+     "original": null
+    },
+    "turns": [
+     {
+      "idx": 0,
+      "speaker": "agent",
+      "text": "ಗುಣಮತ್ತೆ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ ನಮಸ್ಕಾರ ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್ ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ",
+      "start_ms": 482,
+      "end_ms": 9554,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 1,
+      "speaker": "caller",
+      "text": "ಹೌದು, ನಾನೇ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆ. ಹೇಳಿ ಸರ್.",
+      "start_ms": 14076,
+      "end_ms": 17496,
+      "ground_truth_text": "ಹೌದು, ನಾನೇ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆ. ಹೇಳಿ ಸರ್.",
+      "agent_heard_text": "ಹೌದು ನಾನೇ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆ ಹೇಳಿ ಸರ್",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 2,
+      "speaker": "agent",
+      "text": "ಧನ್ಯವಾದ ನಿಮ್ಮ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಇ ಎಮ್ ಐ ಹನ್ನೆರಡು ದಿನದಿಂದ ಬಾಕಿಯಿದೆ ಯಾವಾಗ ಪಾವತಿಸಬಹುದು",
+      "start_ms": 18587,
+      "end_ms": 26104,
+      "ground_truth_text": "ಧನ್ಯವಾದ. ನಿಮ್ಮ 4,500 ರೂಪಾಯಿ ಇಎಂಐ ಹನ್ನೆರಡು ದಿನದಿಂದ ಬಾಕಿ ಇದೆ. ಯಾವಾಗ ಪಾವತಿಸಬಹುದು?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 3,
+      "speaker": "caller",
+      "text": "ನಾನು ಇವತ್ತು ಪಾವತಿಸಲು ಆಗುವುದಿಲ್ಲ ಸರ್. ಶುಕ್ರವಾರ ಪೂರ್ತಿ ಇಎಂಐ ಕಟ್ಟುತ್ತೇನೆ.",
+      "start_ms": 30416,
+      "end_ms": 36076,
+      "ground_truth_text": "ನಾನು ಇವತ್ತು ಪಾವತಿಸಲು ಆಗುವುದಿಲ್ಲ ಸರ್. ಶುಕ್ರವಾರ ಪೂರ್ತಿ ಇಎಂಐ ಕಟ್ಟುತ್ತೇನೆ.",
+      "agent_heard_text": "ನಾನು ಇವತ್ತು ಪಾವತಿಸಲು ಆಗುವುದಿಲ್ಲ ಸರ್ ಶುಕ್ರವಾರ ಪೂರ್ತಿ ಇ ಎಮ್ ಐ ಕಟ್ಟುತ್ತೇನೆ",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 4,
+      "speaker": "agent",
+      "text": "ದೃಢೀಕರಿಸಲು ನೀವು ಆ ದಿನ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಪಾವತಿಸುತ್ತೀರಿ ಸರಿಯೇ",
+      "start_ms": 37229,
+      "end_ms": 43032,
+      "ground_truth_text": "ದೃಢೀಕರಿಸಲು, ನೀವು ಆ ದಿನ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಪಾವತಿಸುತ್ತೀರಿ. ಸರಿಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 5,
+      "speaker": "caller",
+      "text": "ಹೌದು, ಶುಕ್ರವಾರ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಕಟ್ಟುತ್ತೇನೆ. ದಯವಿಟ್ಟು ಆ ದಿನಾಂಕ ಮತ್ತು ಮೊತ್ತವನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಿ ಸರ್.",
+      "start_ms": 47656,
+      "end_ms": 55877,
+      "ground_truth_text": "ಹೌದು, ಶುಕ್ರವಾರ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಕಟ್ಟುತ್ತೇನೆ. ದಯವಿಟ್ಟು ಆ ದಿನಾಂಕ ಮತ್ತು ಮೊತ್ತವನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಿ ಸರ್.",
+      "agent_heard_text": "ಹೌದು ಶುಕ್ರವಾರ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಕಟ್ಟುತ್ತೇನೆ ದಯವಿಟ್ಟು ಆ ದಿನಾಂಕ ಮತ್ತು ಮೊತ್ತವನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಿ ಸರ್",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 6,
+      "speaker": "agent",
+      "text": "ಧನ್ಯವಾದ ನಿಮ್ಮ ಪಾವತಿ ಭರವಸೆಯನ್ನು ದಾಖಲಿಸಿದ್ದೇನೆ ಶುಭದಿನ ನಮಸ್ಕಾರ",
+      "start_ms": 57631,
+      "end_ms": 63066,
+      "ground_truth_text": "ಧನ್ಯವಾದ, ನಿಮ್ಮ ಪಾವತಿ ಭರವಸೆಯನ್ನು ದಾಖಲಿಸಿದ್ದೇನೆ. ಶುಭ ದಿನ. ನಮಸ್ಕಾರ.",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     }
+    ],
+    "tool_calls": [
+     {
+      "seq": 0,
+      "name": "record_promise_to_pay",
+      "arguments": {
+       "when": "caller_stated_date",
+       "amount_inr": 4500
+      },
+      "result": {
+       "status": "recorded"
+      },
+      "at_ms": 63144,
+      "turn_idx": 6
+     }
+    ],
+    "metrics": {
+     "first_greeting_ms": 482,
+     "response_latency_p50_ms": 1153,
+     "response_latency_p90_ms": null,
+     "response_latency_p95_ms": 1694,
+     "response_latency_max_ms": null,
+     "barge_in_attempts": 0,
+     "barge_in_honoured": 0,
+     "agent_stop_time_p50_ms": null,
+     "silence_gaps_over_2s": 3,
+     "turn_count": 7,
+     "agent_talk_ratio": 0.617,
+     "repeated_utterances": 0,
+     "caller_asr_wer": 0.1111,
+     "latency_is_approximate": false
+    },
+    "checks": [
+     {
+      "check_type": "amount_confirmed",
+      "check_key": "emi_amount",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [
+       2,
+       4
+      ],
+      "detail": "Agent stated 4500 correctly"
+     },
+     {
+      "check_type": "disclosure_present",
+      "check_key": "recording",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [
+       0
+      ],
+      "detail": "Disclosure given in turn 0"
+     },
+     {
+      "check_type": "forbidden_absent",
+      "check_key": "threat_legal",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "Phrase never said by the agent"
+     },
+     {
+      "check_type": "language_match",
+      "check_key": "kn-IN",
+      "must_pass": false,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "0/4 agent turns not in ['kn']"
+     },
+     {
+      "check_type": "no_loop",
+      "check_key": "agent_repeats",
+      "must_pass": false,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "No repeated utterance loop"
+     },
+     {
+      "check_type": "tool_calls_expected",
+      "check_key": "record_promise_to_pay",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [
+       6
+      ],
+      "detail": "record_promise_to_pay called as expected"
+     }
+    ],
+    "evaluation": {
+     "id": "1b75e979-27b0-5649-8052-75ccc140bf8d",
+     "rubric_version": "rubric-2026-10-v1",
+     "judge_model": "deepseek-v4-pro",
+     "prompt_hash": "sha256:081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480",
+     "status": "ok",
+     "overall_score": 100.0,
+     "passed": true,
+     "critical_failure": false,
+     "needs_human_review": false,
+     "review_reasons": [],
+     "failure_types": [],
+     "dimensions": {
+      "escalation": {
+       "score": 4,
+       "evidence_turns": [],
+       "reason": "No escalation needed; agent handled request directly."
+      },
+      "empathy_tone": {
+       "score": 4,
+       "evidence_turns": [
+        2,
+        4,
+        6
+       ],
+       "reason": "Polite and respectful throughout. Acknowledged caller's situation without being cold."
+      },
+      "task_completion": {
+       "score": 4,
+       "evidence_turns": [
+        6
+       ],
+       "reason": "Promise-to-pay date (Friday) and amount (4500) were recorded via tool call and confirmed. Caller's goal fully met."
+      },
+      "factual_accuracy": {
+       "score": 4,
+       "evidence_turns": [
+        2,
+        4,
+        6
+       ],
+       "reason": "EMI amount 4500 correctly stated and confirmed. No factual errors."
+      },
+      "conversation_flow": {
+       "score": 4,
+       "evidence_turns": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+       ],
+       "reason": "Smooth turn-taking, no loops, no interruptions. Call ended appropriately."
+      },
+      "language_handling": {
+       "score": 4,
+       "evidence_turns": [
+        0,
+        2,
+        4,
+        6
+       ],
+       "reason": "Agent consistently used Kannada, matching caller's language. Understood numbers and domain terms correctly."
+      },
+      "policy_compliance": {
+       "score": 4,
+       "evidence_turns": [
+        0
+       ],
+       "reason": "Recording disclosure given in turn 0. No threats or forbidden content. No PII over-collection."
+      }
+     },
+     "summary": "Agent successfully recorded promise-to-pay date (Friday) and amount (4500) as requested. All mandatory disclosures present, no forbidden content, language matched, and conversation flowed smoothly. No issues found.",
+     "confidence": "high"
+    },
+    "speaker_map": null
+   }
+  },
+  {
+   "item": {
+    "id": "87852563-5799-4551-b82c-fdef0cab6e40",
+    "scenario": "Promise to pay on Friday",
+    "persona": "Deepa — homemaker",
+    "noise_profile": "pstn_8k_alaw",
+    "status": "evaluated",
+    "call_id": "ed22c3f4-94cc-57fb-9b5f-ce9ec7cdd89d",
+    "overall_score": 100.0,
+    "passed": true,
+    "critical_failure": false
+   },
+   "call": {
+    "id": "ed22c3f4-94cc-57fb-9b5f-ce9ec7cdd89d",
+    "source": "simulation",
+    "status": "completed",
+    "agent_id": "534e4db1-beda-4299-9cf1-f84dfe38975b",
+    "run_id": "06819957-8e65-4297-b1e4-d4f72681f237",
+    "run_item_id": "87852563-5799-4551-b82c-fdef0cab6e40",
+    "language": "kn-IN",
+    "end_reason": "agent_hangup",
+    "duration_ms": 65907,
+    "started_at": "2026-10-27T04:02:10.550636Z",
+    "recordings": {
+     "mixed": "/api/v1/calls/ed22c3f4-94cc-57fb-9b5f-ce9ec7cdd89d/audio/mixed",
+     "caller": "/api/v1/calls/ed22c3f4-94cc-57fb-9b5f-ce9ec7cdd89d/audio/caller",
+     "agent": "/api/v1/calls/ed22c3f4-94cc-57fb-9b5f-ce9ec7cdd89d/audio/agent",
+     "original": null
+    },
+    "turns": [
+     {
+      "idx": 0,
+      "speaker": "agent",
+      "text": "ಗುಣಮತ್ತೆ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ ನಮಸ್ಕಾರ ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್ ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ",
+      "start_ms": 486,
+      "end_ms": 9564,
+      "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 1,
+      "speaker": "caller",
+      "text": "ಹೌದು, ನಾನೇ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆ. ನನ್ನ ಹೆಸರು ಅನಿತಾ ರಾವ್.",
+      "start_ms": 14320,
+      "end_ms": 18780,
+      "ground_truth_text": "ಹೌದು, ನಾನೇ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆ. ನನ್ನ ಹೆಸರು ಅನಿತಾ ರಾವ್.",
+      "agent_heard_text": "ಹೌದು ನಾನೇ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆ ನನ್ನ ಹೆಸರು ಅನಿತಾ ರಾವ್",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 2,
+      "speaker": "agent",
+      "text": "ಧನ್ಯವಾದ ನಿಮ್ಮ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಇ ಎಮ್ ಐ ಹನ್ನೆರಡು ದಿನದಿಂದ ಬಾಕಿಯಿದೆ ಯಾವಾಗ ಪಾವತಿಸಬಹುದು",
+      "start_ms": 19969,
+      "end_ms": 27403,
+      "ground_truth_text": "ಧನ್ಯವಾದ. ನಿಮ್ಮ 4,500 ರೂಪಾಯಿ ಇಎಂಐ ಹನ್ನೆರಡು ದಿನದಿಂದ ಬಾಕಿ ಇದೆ. ಯಾವಾಗ ಪಾವತಿಸಬಹುದು?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 3,
+      "speaker": "caller",
+      "text": "ನಾನು ಇವತ್ತು ಪಾವತಿಸಲು ಆಗುವುದಿಲ್ಲ sir, ಶುಕ್ರವಾರ ಪೂರ್ತಿ EMI ಕಟ್ಟುತ್ತೇನೆ. ದಯವಿಟ್ಟು ಆ ದಿನಾಂಕವನ್ನು ನೋಂದಿಸಿಬಿಡಿ.",
+      "start_ms": 32459,
+      "end_ms": 41081,
+      "ground_truth_text": "ನಾನು ಇವತ್ತು ಪಾವತಿಸಲು ಆಗುವುದಿಲ್ಲ sir, ಶುಕ್ರವಾರ ಪೂರ್ತಿ EMI ಕಟ್ಟುತ್ತೇನೆ. ದಯವಿಟ್ಟು ಆ ದಿನಾಂಕವನ್ನು ನೋಂದಿಸಿಬಿಡಿ.",
+      "agent_heard_text": "ನಾನು ಇವತ್ತು ಪಾವತಿಸಲು ಆಗುವುದಿಲ್ಲ ಸರ್ ಶುಕ್ರವಾರ ಪೂರ್ತಿ ಇ ಎಮ್ ಐ ಕಟ್ಟುತ್ತೇನೆ ದಯವಿಟ್ಟು ಆ ದಿನಾಂಕವನ್ನು ನೋಂದಿಸಿಬಿಡಿ",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 4,
+      "speaker": "agent",
+      "text": "ದೃಢೀಕರಿಸಲು ನೀವು ಆ ದಿನ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಪಾವತಿಸುತ್ತೀರಿ ಸರಿಯೇ",
+      "start_ms": 42443,
+      "end_ms": 48259,
+      "ground_truth_text": "ದೃಢೀಕರಿಸಲು, ನೀವು ಆ ದಿನ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಪಾವತಿಸುತ್ತೀರಿ. ಸರಿಯೇ?",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 5,
+      "speaker": "caller",
+      "text": "ಹೌದು, ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ತಾನೇ, ಶುಕ್ರವಾರ ಪೂರ್ತಿ ಕಟ್ಟುತ್ತೇನೆ.",
+      "start_ms": 53180,
+      "end_ms": 58520,
+      "ground_truth_text": "ಹೌದು, ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ತಾನೇ, ಶುಕ್ರವಾರ ಪೂರ್ತಿ ಕಟ್ಟುತ್ತೇನೆ.",
+      "agent_heard_text": "ಹೌದು ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ತಾನೇ ಶುಕ್ರವಾರ ಪೂರ್ತಿ ಕಟ್ಟುತ್ತೇನೆ",
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false
+     },
+     {
+      "idx": 6,
+      "speaker": "agent",
+      "text": "ಧನ್ಯವಾದ ನಿಮ್ಮ ಪಾವತಿ ಭರವಸೆಯನ್ನು ದಾಖಲಿಸಿದ್ದೇನೆ ಶುಭದಿನ ನಮಸ್ಕಾರ",
+      "start_ms": 59831,
+      "end_ms": 65281,
+      "ground_truth_text": "ಧನ್ಯವಾದ, ನಿಮ್ಮ ಪಾವತಿ ಭರವಸೆಯನ್ನು ದಾಖಲಿಸಿದ್ದೇನೆ. ಶುಭ ದಿನ. ನಮಸ್ಕಾರ.",
+      "agent_heard_text": null,
+      "language_detected": "kn-IN",
+      "stt_confidence": null,
+      "is_barge_in": false
+     }
+    ],
+    "tool_calls": [
+     {
+      "seq": 0,
+      "name": "record_promise_to_pay",
+      "arguments": {
+       "when": "caller_stated_date",
+       "amount_inr": 4500
+      },
+      "result": {
+       "status": "recorded"
+      },
+      "at_ms": 65324,
+      "turn_idx": 6
+     }
+    ],
+    "metrics": {
+     "first_greeting_ms": 486,
+     "response_latency_p50_ms": 1311,
+     "response_latency_p90_ms": null,
+     "response_latency_p95_ms": 1357,
+     "response_latency_max_ms": null,
+     "barge_in_attempts": 0,
+     "barge_in_honoured": 0,
+     "agent_stop_time_p50_ms": null,
+     "silence_gaps_over_2s": 3,
+     "turn_count": 7,
+     "agent_talk_ratio": 0.601,
+     "repeated_utterances": 0,
+     "caller_asr_wer": 0.1481,
+     "latency_is_approximate": false
+    },
+    "checks": [
+     {
+      "check_type": "amount_confirmed",
+      "check_key": "emi_amount",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [
+       2,
+       4
+      ],
+      "detail": "Agent stated 4500 correctly"
+     },
+     {
+      "check_type": "disclosure_present",
+      "check_key": "recording",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [
+       0
+      ],
+      "detail": "Disclosure given in turn 0"
+     },
+     {
+      "check_type": "forbidden_absent",
+      "check_key": "threat_legal",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "Phrase never said by the agent"
+     },
+     {
+      "check_type": "language_match",
+      "check_key": "kn-IN",
+      "must_pass": false,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "0/4 agent turns not in ['kn']"
+     },
+     {
+      "check_type": "no_loop",
+      "check_key": "agent_repeats",
+      "must_pass": false,
+      "passed": true,
+      "evidence_turns": [],
+      "detail": "No repeated utterance loop"
+     },
+     {
+      "check_type": "tool_calls_expected",
+      "check_key": "record_promise_to_pay",
+      "must_pass": true,
+      "passed": true,
+      "evidence_turns": [
+       6
+      ],
+      "detail": "record_promise_to_pay called as expected"
+     }
+    ],
+    "evaluation": {
+     "id": "be93aa92-4d40-51d2-b59a-8646d897efbf",
+     "rubric_version": "rubric-2026-10-v1",
+     "judge_model": "deepseek-v4-pro",
+     "prompt_hash": "sha256:081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480",
+     "status": "ok",
+     "overall_score": 100.0,
+     "passed": true,
+     "critical_failure": false,
+     "needs_human_review": false,
+     "review_reasons": [],
+     "failure_types": [],
+     "dimensions": {
+      "escalation": {
+       "score": 4,
+       "evidence_turns": [],
+       "reason": "No transfer needed; correct decision."
+      },
+      "empathy_tone": {
+       "score": 4,
+       "evidence_turns": [
+        2,
+        4,
+        6
+       ],
+       "reason": "Polite and respectful; thanked caller and acknowledged promise."
+      },
+      "task_completion": {
+       "score": 4,
+       "evidence_turns": [
+        4,
+        6
+       ],
+       "reason": "Promise-to-pay date (Friday) and amount (4500) captured and confirmed; tool called with correct args."
+      },
+      "factual_accuracy": {
+       "score": 4,
+       "evidence_turns": [
+        2,
+        4
+       ],
+       "reason": "EMI amount 4500 correctly stated and confirmed; no errors."
+      },
+      "conversation_flow": {
+       "score": 4,
+       "evidence_turns": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+       ],
+       "reason": "Smooth turn-taking, no loops or interruptions; call ended appropriately."
+      },
+      "language_handling": {
+       "score": 4,
+       "evidence_turns": [
+        0,
+        2,
+        4,
+        6
+       ],
+       "reason": "All agent turns in Kannada, matching caller; numbers and domain terms understood."
+      },
+      "policy_compliance": {
+       "score": 4,
+       "evidence_turns": [
+        0
+       ],
+       "reason": "Recording disclosure given; no threats or forbidden content."
+      }
+     },
+     "summary": "Agent successfully recorded promise-to-pay for Friday with correct amount 4500, provided mandatory disclosure, used Kannada throughout, and maintained polite tone. No issues found.",
+     "confidence": "high"
+    },
+    "speaker_map": null
+   }
+  }
+ ]
+}

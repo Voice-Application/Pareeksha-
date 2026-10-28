@@ -1,0 +1,10 @@
+# Sandbox override for project `fe03` (private ports; other containers may hold 5432/9094/8000).
+services:
+  kafka:
+    ports: !override ["62094:9094"]
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:62094
+  postgres:
+    ports: !override ["62432:5432"]
+  api:
+    ports: !override ["62800:8000"]

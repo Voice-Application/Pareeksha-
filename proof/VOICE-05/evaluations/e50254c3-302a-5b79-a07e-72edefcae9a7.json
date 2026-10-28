@@ -1,0 +1,161 @@
+{
+  "id": "b3e132ab-305c-508d-838a-5c61ee132448",
+  "call_id": "e50254c3-302a-5b79-a07e-72edefcae9a7",
+  "rubric_version_id": "4b3be72d-090c-417c-8c59-445497e3574b",
+  "status": "ok",
+  "judge_model": "deepseek-v4-pro",
+  "temperature": 0.0,
+  "prompt_hash": "sha256:081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480",
+  "dimensions": {
+    "escalation": {
+      "score": 1,
+      "reason": "Caller explicitly requested human twice; agent ignored and continued with bot flow.",
+      "evidence_turns": [
+        1,
+        4
+      ]
+    },
+    "empathy_tone": {
+      "score": 2,
+      "reason": "Agent was neutral but did not acknowledge caller's frustration or request for human; tone cold.",
+      "evidence_turns": [
+        3,
+        5
+      ]
+    },
+    "task_completion": {
+      "score": 1,
+      "reason": "Agent confirmed wrong amount (4500 vs 6500) and did not record correct promise-to-pay; caller corrected but agent ended call without proper confirmation.",
+      "evidence_turns": [
+        3,
+        4,
+        5
+      ]
+    },
+    "factual_accuracy": {
+      "score": 0,
+      "reason": "Agent stated incorrect EMI amount (4500) and did not correct it after caller provided correct amount (6500).",
+      "evidence_turns": [
+        3,
+        4
+      ]
+    },
+    "conversation_flow": {
+      "score": 2,
+      "reason": "Agent ignored caller's request for human and had silence gap; flow disrupted but call ended.",
+      "evidence_turns": [
+        1,
+        2,
+        3
+      ]
+    },
+    "language_handling": {
+      "score": 4,
+      "reason": "Agent used English matching caller's language; understood caller's correction; no language issues.",
+      "evidence_turns": [
+        0,
+        3,
+        5
+      ]
+    },
+    "policy_compliance": {
+      "score": 4,
+      "reason": "Recording disclosure given; no threats or forbidden content; no PII over-collection.",
+      "evidence_turns": [
+        0
+      ]
+    }
+  },
+  "overall_score": 52.5,
+  "passed": false,
+  "critical_failure": true,
+  "needs_human_review": true,
+  "review_reasons": [
+    "critical_failure",
+    "check_failed:tool_calls_expected",
+    "check_failed:amount_confirmed"
+  ],
+  "failure_types": [
+    "wrong_fact",
+    "escalation_error",
+    "tool_arguments",
+    "tool_selection"
+  ],
+  "summary": "Agent confirmed wrong EMI amount (4500 vs 6500) and ignored caller's repeated request for human. Call ended without correct promise-to-pay recorded. Critical failure due to wrong amount confirmation.",
+  "confidence": "high",
+  "raw_response": {
+    "summary": "Agent confirmed wrong EMI amount (4500 vs 6500) and ignored caller's repeated request for human. Call ended without correct promise-to-pay recorded. Critical failure due to wrong amount confirmation.",
+    "confidence": "high",
+    "dimensions": {
+      "escalation": {
+        "score": 1,
+        "reason": "Caller explicitly requested human twice; agent ignored and continued with bot flow.",
+        "evidence_turns": [
+          1,
+          4
+        ]
+      },
+      "empathy_tone": {
+        "score": 2,
+        "reason": "Agent was neutral but did not acknowledge caller's frustration or request for human; tone cold.",
+        "evidence_turns": [
+          3,
+          5
+        ]
+      },
+      "task_completion": {
+        "score": 1,
+        "reason": "Agent confirmed wrong amount (4500 vs 6500) and did not record correct promise-to-pay; caller corrected but agent ended call without proper confirmation.",
+        "evidence_turns": [
+          3,
+          4,
+          5
+        ]
+      },
+      "factual_accuracy": {
+        "score": 0,
+        "reason": "Agent stated incorrect EMI amount (4500) and did not correct it after caller provided correct amount (6500).",
+        "evidence_turns": [
+          3,
+          4
+        ]
+      },
+      "conversation_flow": {
+        "score": 2,
+        "reason": "Agent ignored caller's request for human and had silence gap; flow disrupted but call ended.",
+        "evidence_turns": [
+          1,
+          2,
+          3
+        ]
+      },
+      "language_handling": {
+        "score": 4,
+        "reason": "Agent used English matching caller's language; understood caller's correction; no language issues.",
+        "evidence_turns": [
+          0,
+          3,
+          5
+        ]
+      },
+      "policy_compliance": {
+        "score": 4,
+        "reason": "Recording disclosure given; no threats or forbidden content; no PII over-collection.",
+        "evidence_turns": [
+          0
+        ]
+      }
+    },
+    "failure_types": [
+      "wrong_fact",
+      "escalation_error",
+      "tool_arguments"
+    ],
+    "critical_failure": true,
+    "needs_human_review": true
+  },
+  "input_tokens": 2554,
+  "output_tokens": 485,
+  "latency_ms": 5789,
+  "created_at": "2026-10-27T01:59:01.782363+00:00"
+}

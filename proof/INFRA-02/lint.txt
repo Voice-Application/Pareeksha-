@@ -1,0 +1,8 @@
+$ ruff check .
+All checks passed!
+
+$ ruff format --check .
+96 files already formatted
+
+$ python -m mypy   (strict; files = pareeksha tests)
+Success: no issues found in 96 source files

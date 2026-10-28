@@ -1,0 +1,4 @@
+[185/186] tests/screens.spec.ts:150:7 › accessibility and visual rules › the whole list page can be driven with the keyboard
+[186/186] tests/screens.spec.ts:170:7 › accessibility and visual rules › theme toggle switches and remembers the choice
+  186 passed (2.7m)
+exit=0

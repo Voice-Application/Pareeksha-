@@ -1,0 +1,12 @@
+calls/00_clean/caller.wav 16000 Hz 1 ch 32.9 s
+calls/00_clean/agent.wav 16000 Hz 1 ch 32.9 s
+calls/00_clean/mixed.wav 16000 Hz 2 ch 32.9 s
+  loopback overhead {'frames': 636, 'p50_ms': 0.061, 'p95_ms': 0.103, 'max_ms': 0.977} end agent_hangup turns 3
+  usage {('stt', 'gnani', 'stt_rest'): 2, ('llm', 'deepseek', 'llm_caller'): 1, ('tts', 'gnani', 'tts'): 2}
+  llm tokens in/out 725 51 est_cost 0
+calls/01_false_waiver/caller.wav 16000 Hz 1 ch 101.6 s
+calls/01_false_waiver/agent.wav 16000 Hz 1 ch 101.6 s
+calls/01_false_waiver/mixed.wav 16000 Hz 2 ch 101.6 s
+  loopback overhead {'frames': 1513, 'p50_ms': 0.059, 'p95_ms': 0.103, 'max_ms': 2.898} end agent_hangup turns 14
+  usage {('llm', 'deepseek', 'llm_caller'): 7, ('tts', 'gnani', 'tts'): 14, ('stt', 'gnani', 'stt_rest'): 8}
+  llm tokens in/out 5877 352 est_cost 0

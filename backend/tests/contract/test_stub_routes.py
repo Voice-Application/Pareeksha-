@@ -5,17 +5,44 @@ from __future__ import annotations
 import inspect
 import re
 import uuid
-from typing import Any
+from collections.abc import Iterator
+from typing import Annotated, Any
 
 import pytest
+from fastapi import Security
 from fastapi.routing import APIRoute
+from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.testclient import TestClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from pareeksha.api.auth import authenticate, bearer_scheme
 from pareeksha.api.errors import ApiError
 from pareeksha.api.main import ROUTERS, app
-from pareeksha.api.stubs import not_implemented
+from pareeksha.db.session import get_session_factory
 
 client = TestClient(app)
+
+
+async def _fake_authenticate(
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Security(bearer_scheme)],
+) -> None:
+    """Stands in for the DB-backed key check (covered against real Postgres in tests/db)."""
+    if credentials is None or not credentials.credentials:
+        raise ApiError(
+            401, "unauthorized", "Missing API key", headers={"WWW-Authenticate": "Bearer"}
+        )
+
+
+@pytest.fixture(autouse=True)
+def _no_database_auth() -> Iterator[None]:
+    app.dependency_overrides[authenticate] = _fake_authenticate
+    # Routes that validate their input before touching the database still resolve a session.
+    app.dependency_overrides[get_session_factory] = lambda: AsyncSession
+    yield
+    app.dependency_overrides.pop(authenticate, None)
+    app.dependency_overrides.pop(get_session_factory, None)
+
+
 AUTH = {"Authorization": "Bearer pk_live_test"}
 ID = str(uuid.uuid4())
 API = "/api/v1"
@@ -127,11 +154,13 @@ def _stub_owner(route: APIRoute) -> str | None:
     return match.group(1) if match else None
 
 
-IMPLEMENTED = {("GET", "/health"), ("GET", "/events/schemas")}
-
-
 def _stub_routes() -> list[APIRoute]:
-    return [r for r in ROUTES if (_method(r), r.path) not in IMPLEMENTED]
+    """Routes whose handler still carries a ``# STUB(<TASK-ID>)`` marker."""
+    return [r for r in ROUTES if _stub_owner(r) is not None]
+
+
+def _implemented_routes() -> list[APIRoute]:
+    return [r for r in ROUTES if _stub_owner(r) is None]
 
 
 def test_every_declared_route_is_in_openapi() -> None:
@@ -140,25 +169,39 @@ def test_every_declared_route_is_in_openapi() -> None:
     assert len(ROUTES) == in_openapi  # the unprefixed /health alias is hidden from the schema
 
 
-@pytest.mark.parametrize("route", _stub_routes(), ids=lambda r: f"{_method(r)} {r.path}")
-def test_stub_route_returns_501_with_owner(route: APIRoute) -> None:
-    owner = _stub_owner(route)
-    assert owner is not None, "handler is missing its # STUB(<TASK-ID>) marker"
-    assert owner != "TL-01"
-    key = (_method(route), route.path)
-    response = _call(route, headers={} if key in NO_AUTH_501 else AUTH)
-    assert response.status_code == 501, response.text
-    error = response.json()["error"]
-    assert error["code"] == "not_implemented"
-    assert error["details"] == {"owner": owner}
+def test_every_route_is_implemented() -> None:
+    assert _stub_routes() == []
 
 
 @pytest.mark.parametrize("route", ROUTES, ids=lambda r: f"{_method(r)} {r.path}")
 def test_no_stub_marker_names_the_contract_task(route: APIRoute) -> None:
-    owner = _stub_owner(route)
-    assert owner != "TL-01"
-    if (_method(route), route.path) in IMPLEMENTED:
-        assert owner is None
+    assert _stub_owner(route) != "TL-01"
+
+
+def test_no_stub_remains_for_finished_tasks() -> None:
+    """API-02 (CRUD), API-03 (runs) and API-04 (reads) implemented every route they owned."""
+    owners = {_stub_owner(r) for r in _stub_routes()}
+    assert not owners & {"API-02", "API-03", "API-04"}
+    implemented = {(_method(r), r.path) for r in _implemented_routes()}
+    assert ("POST", "/agents") in implemented and (
+        "DELETE",
+        "/api-keys/{api_key_id}",
+    ) in implemented
+    assert ("POST", "/runs") in implemented and ("GET", "/runs/{run_id}") in implemented
+    for method, path in (
+        ("GET", "/runs/compare"),
+        ("GET", "/runs/{run_id}/events"),
+        ("GET", "/runs/{run_id}/report"),
+        ("GET", "/calls"),
+        ("GET", "/calls/{call_id}"),
+        ("GET", "/calls/{call_id}/audio/{track}"),
+        ("GET", "/dlq"),
+        ("POST", "/dlq/{dead_letter_id}/replay"),
+        ("POST", "/dlq/{dead_letter_id}/discard"),
+        ("GET", "/usage"),
+        ("GET", "/metrics/summary"),
+    ):
+        assert (method, path) in implemented
 
 
 def test_stub_owner_ids_exist_on_the_task_board() -> None:
@@ -166,22 +209,9 @@ def test_stub_owner_ids_exist_on_the_task_board() -> None:
         __import__("pathlib").Path(__file__).resolve().parents[3] / "docs" / "AGENTS.md"
     ).read_text(encoding="utf-8")
     owners = {_stub_owner(r) for r in _stub_routes()}
-    assert owners, "no stubs found"
     for owner in owners:
         assert owner is not None
         assert f"**{owner}**" in board, f"{owner} is not a task in AGENTS.md section 7"
-
-
-@pytest.mark.parametrize(
-    "route",
-    [r for r in _stub_routes() if (_method(r), r.path) not in NO_AUTH_501],
-    ids=lambda r: f"{_method(r)} {r.path}",
-)
-def test_authenticated_routes_reject_missing_key(route: APIRoute) -> None:
-    response = _call(route, headers={})
-    assert response.status_code == 401, response.text
-    assert response.json()["error"]["code"] == "unauthorized"
-    assert response.headers["www-authenticate"] == "Bearer"
 
 
 def test_validation_error_is_400_in_the_standard_envelope() -> None:
@@ -211,9 +241,9 @@ def test_unknown_route_uses_error_envelope() -> None:
 
 
 def test_runs_compare_is_not_shadowed_by_run_id() -> None:
-    response = client.get(f"{API}/runs/compare", params={"base": ID, "head": ID}, headers=AUTH)
-    assert response.status_code == 501
-    assert response.json()["error"]["details"]["owner"] == "API-04"
+    """``/runs/compare`` must be matched before ``/runs/{run_id}`` (declaration order)."""
+    paths = [r.path for r in ROUTES if _method(r) == "GET"]
+    assert paths.index("/runs/compare") < paths.index("/runs/{run_id}")
 
 
 def test_bad_enum_for_audio_track_is_400() -> None:
@@ -221,16 +251,9 @@ def test_bad_enum_for_audio_track_is_400() -> None:
     assert response.status_code == 400
 
 
-def test_not_implemented_helper_validates_owner() -> None:
-    with pytest.raises(ApiError) as caught:
-        not_implemented("API-02")
-    assert caught.value.status_code == 501
-    for bad in ("TL-01", "api-02", "oops", ""):
-        with pytest.raises(ValueError):
-            not_implemented(bad)
-
-
-def test_health_reports_down_dependencies_with_503() -> None:
+def test_health_reports_down_dependencies_with_503(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DATABASE_URL", "postgresql+psycopg://x:x@127.0.0.1:1/none")
+    monkeypatch.setenv("KAFKA_BOOTSTRAP_SERVERS", "127.0.0.1:1")
     response = client.get(f"{API}/health")  # no auth, no DB or Kafka configured in tests
     assert response.status_code == 503
     body = response.json()

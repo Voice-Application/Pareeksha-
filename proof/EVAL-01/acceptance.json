@@ -1,0 +1,48 @@
+{
+  "schema_valid": {
+    "parsed": {
+      "sentiment": "neutral",
+      "confidence": 0.9
+    },
+    "model": "deepseek-v4-pro",
+    "tokens": {
+      "input_tokens": 142,
+      "output_tokens": 15,
+      "cached_input_tokens": 128
+    },
+    "est_cost_usd": 6.059999999999999e-05
+  },
+  "repair": {
+    "first_rejected": "positive",
+    "final": {
+      "sentiment": "positive",
+      "confidence": 0.9
+    },
+    "repaired": true,
+    "tokens": {
+      "input_tokens": 294,
+      "output_tokens": 30,
+      "cached_input_tokens": 128
+    }
+  },
+  "caller": {
+    "kn": {
+      "utterance": "ಹೌದಾ? ಸ್ವಲ್ಪ ದೊಡ್ಡದಾಗಿ ಹೇಳಿ, ಕೇಳಿಸಲಿಲ್ಲ.",
+      "end_call": false,
+      "same_seed_identical": true,
+      "second_was_cache_hit": true,
+      "model": "deepseek-flash",
+      "prompt_hash": "ad57edb5c12831884ee1b6e232769d3398c08ef608a0492e9bc6ba400474455f"
+    },
+    "hi": {
+      "utterance": "हाँ sir, मैं Friday को ही EMI pay कर दूँगा, चार हज़ार दो सौ। बस एक बात पूछनी थी — अगर late हो गया तो क्या होता है?",
+      "end_call": false,
+      "same_seed_identical": true,
+      "second_was_cache_hit": true,
+      "model": "deepseek-flash",
+      "prompt_hash": "ad57edb5c12831884ee1b6e232769d3398c08ef608a0492e9bc6ba400474455f"
+    },
+    "kn_uncached_repeat_identical": false
+  },
+  "gemini": "blocked: GEMINI_API_KEY is empty in this environment (needs H-01 key)"
+}

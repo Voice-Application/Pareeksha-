@@ -67,11 +67,11 @@ Owner decision applied: the default LLM (caller brain, judge, scenario generator
 | FR-RG-2 | S | T-FR-RG-2 | integration | `backend/tests/integration/test_regression_suite.py` | API-05 | API-05 | fails on score < baseline - tolerance(5) or critical failure |
 | FR-RG-3 | S | T-FR-RG-3 | integration | `backend/tests/integration/test_run_compare.py` | API-04 | API-04, FE-03 | per-cell delta, regressions first |
 | FR-RG-4 | C | T-FR-RG-4 | integration | `sdk/python/tests/test_cli_exit_codes.py` | INT-04 | INT-04 | exit 1 on suite failure |
-| FR-DB-1 | M | T-FR-DB-1 | playwright | `web/tests/smoke.spec.ts` | QA-04 | FE-02, FE-03, FE-04, FE-05 | every page reachable from sidebar; screenshot with real data |
-| FR-DB-2 | M | T-FR-DB-2 | playwright | `web/tests/run_detail.spec.ts` | QA-04 | FE-03 | 40-call run renders <3 s; new evaluated call appears <2 s without reload |
-| FR-DB-3 | M | T-FR-DB-3 | playwright | `web/tests/call_detail.spec.ts` | QA-04 | FE-04 | evidence turn click seeks audio |
-| FR-DB-4 | M | T-FR-DB-4 | playwright | `web/tests/dialect.spec.ts` | QA-04 | FE-05 | heatmap, metric selector, drill-down |
-| FR-DB-5 | M | T-FR-DB-5 | contract | `web/tests/bundle_scan.spec.ts` | QA-04 | FE-01, FE-02 | no API key in client bundles or responses |
+| FR-DB-1 | M | T-FR-DB-1 | playwright | `web/tests/real/smoke.spec.ts` | QA-04 | FE-02, FE-03, FE-04, FE-05 | every page reachable from sidebar; screenshot with real data |
+| FR-DB-2 | M | T-FR-DB-2 | playwright | `web/tests/real/run_detail.spec.ts` | QA-04 | FE-03 | 40-call run renders <3 s; new evaluated call appears <2 s without reload |
+| FR-DB-3 | M | T-FR-DB-3 | playwright | `web/tests/real/call_detail.spec.ts` | QA-04 | FE-04 | evidence turn click seeks audio |
+| FR-DB-4 | M | T-FR-DB-4 | playwright | `web/tests/real/dialect.spec.ts` | QA-04 | FE-05 | heatmap, metric selector, drill-down |
+| FR-DB-5 | M | T-FR-DB-5 | contract | `web/tests/real/bundle_scan.spec.ts` | QA-04 | FE-01, FE-02 | no API key in client bundles or responses |
 | FR-DB-6 | M | T-FR-DB-6 | contract | `backend/tests/contract/test_schema_dts_fresh.py` | QA-04 | FE-01 | regenerated schema.d.ts equals committed; CI fails if stale |
 | FR-MK-1 | M | T-FR-MK-1 | e2e | `backend/tests/e2e/test_mock_agent_connect.py` | VOICE-03 | VOICE-03 | responds to test-connection |
 | FR-MK-2 | M | T-FR-MK-2 | integration | `backend/tests/integration/test_mock_agent_glass_box.py` | VOICE-03 | VOICE-03 | control messages received |
@@ -86,7 +86,7 @@ Owner decision applied: the default LLM (caller brain, judge, scenario generator
 | FR-IN-6 | M | T-FR-IN-6 | connectors | `backend/tests/connectors/test_webhook_sink_signature.py` | INT-01 | INT-01 | receiver verifies HMAC; no transcript by default |
 | FR-IN-7 | M | T-FR-IN-7 | connectors | `backend/tests/connectors/test_webhook_source.py` | INT-03 | INT-03 | bad sig 401, duplicate external_id one call, private IP 422, stale timestamp rejected |
 | FR-IN-8 | M | T-FR-IN-8 | connectors | `backend/tests/connectors/test_hubspot_sink.py` | INT-02 | INT-02 | respx: note body has score, pass/fail, failure types, link; no match skipped |
-| FR-IN-9 | S | T-FR-IN-9 | playwright | `web/tests/integrations.spec.ts` | QA-04 | API-04, FE-05 | delivery log + redeliver |
+| FR-IN-9 | S | T-FR-IN-9 | playwright | `web/tests/real/integrations.spec.ts` | QA-04 | API-04, FE-05 | delivery log + redeliver |
 | FR-IN-10 | S | T-FR-IN-10 | kafka | `backend/tests/kafka/test_dlq_replay.py` | QA-02 | API-04, FE-05 | replay republishes attempt=1, status replayed |
 | FR-DX-1 | M | T-FR-DX-1 | e2e | `scripts/verify/step2_demo_timed.sh` | QA-05 | INFRA-01, DOC-02 | fresh clone, compose up + make demo, evaluated call < 20 min (timed log) |
 | FR-DX-2 | M | T-FR-DX-2 | integration | `backend/tests/integration/test_api_key_scopes.py` | API-01 | API-01 | wrong scope 403; hashed; shown once |

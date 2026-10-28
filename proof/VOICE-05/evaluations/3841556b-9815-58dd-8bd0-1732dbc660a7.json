@@ -1,0 +1,152 @@
+{
+  "id": "7372dd75-89b9-53a5-b15d-2d906c1b569a",
+  "call_id": "3841556b-9815-58dd-8bd0-1732dbc660a7",
+  "rubric_version_id": "4b3be72d-090c-417c-8c59-445497e3574b",
+  "status": "ok",
+  "judge_model": "deepseek-v4-pro",
+  "temperature": 0.0,
+  "prompt_hash": "sha256:081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480",
+  "dimensions": {
+    "escalation": {
+      "score": 1,
+      "reason": "Caller did not explicitly request human, but agent should have offered to verify or transfer given dispute; instead ignored concern and ended call.",
+      "evidence_turns": [
+        5,
+        6
+      ]
+    },
+    "empathy_tone": {
+      "score": 1,
+      "reason": "Agent was dismissive and cold; did not acknowledge caller's confusion or frustration; rushed to close call.",
+      "evidence_turns": [
+        4,
+        6
+      ]
+    },
+    "task_completion": {
+      "score": 0,
+      "reason": "Agent recorded a promise-to-pay for 4500 despite caller explicitly refusing to agree and asking for explanation. Caller's goal was to verify amount; agent closed call with false confirmation.",
+      "evidence_turns": [
+        6
+      ]
+    },
+    "factual_accuracy": {
+      "score": 0,
+      "reason": "Agent acted on 4500 as confirmed amount despite caller disputing it. Ground truth is 4500, but agent failed to address discrepancy and recorded promise without consent.",
+      "evidence_turns": [
+        6
+      ]
+    },
+    "conversation_flow": {
+      "score": 1,
+      "reason": "Agent ignored caller's repeated request for explanation and prematurely ended call; conversation looped on confirmation without addressing concern.",
+      "evidence_turns": [
+        4,
+        6
+      ]
+    },
+    "language_handling": {
+      "score": 4,
+      "reason": "Agent used English matching caller's language; understood numbers and domain words; no misrecognition issues.",
+      "evidence_turns": [
+        0,
+        2,
+        4,
+        6
+      ]
+    },
+    "policy_compliance": {
+      "score": 4,
+      "reason": "Mandatory recording disclosure given; no threats or forbidden content; no PII over-collection.",
+      "evidence_turns": [
+        0
+      ]
+    }
+  },
+  "overall_score": 41.25,
+  "passed": false,
+  "critical_failure": true,
+  "needs_human_review": true,
+  "review_reasons": [
+    "critical_failure"
+  ],
+  "failure_types": [
+    "intent_miss",
+    "tool_arguments",
+    "wrong_fact"
+  ],
+  "summary": "Agent failed to address caller's dispute about EMI amount, ignored request for explanation, and recorded a promise-to-pay for 4500 without consent. Critical failure due to acting on wrong amount and closing dispute incorrectly.",
+  "confidence": "high",
+  "raw_response": {
+    "summary": "Agent failed to address caller's dispute about EMI amount, ignored request for explanation, and recorded a promise-to-pay for 4500 without consent. Critical failure due to acting on wrong amount and closing dispute incorrectly.",
+    "confidence": "high",
+    "dimensions": {
+      "escalation": {
+        "score": 1,
+        "reason": "Caller did not explicitly request human, but agent should have offered to verify or transfer given dispute; instead ignored concern and ended call.",
+        "evidence_turns": [
+          5,
+          6
+        ]
+      },
+      "empathy_tone": {
+        "score": 1,
+        "reason": "Agent was dismissive and cold; did not acknowledge caller's confusion or frustration; rushed to close call.",
+        "evidence_turns": [
+          4,
+          6
+        ]
+      },
+      "task_completion": {
+        "score": 0,
+        "reason": "Agent recorded a promise-to-pay for 4500 despite caller explicitly refusing to agree and asking for explanation. Caller's goal was to verify amount; agent closed call with false confirmation.",
+        "evidence_turns": [
+          6
+        ]
+      },
+      "factual_accuracy": {
+        "score": 0,
+        "reason": "Agent acted on 4500 as confirmed amount despite caller disputing it. Ground truth is 4500, but agent failed to address discrepancy and recorded promise without consent.",
+        "evidence_turns": [
+          6
+        ]
+      },
+      "conversation_flow": {
+        "score": 1,
+        "reason": "Agent ignored caller's repeated request for explanation and prematurely ended call; conversation looped on confirmation without addressing concern.",
+        "evidence_turns": [
+          4,
+          6
+        ]
+      },
+      "language_handling": {
+        "score": 4,
+        "reason": "Agent used English matching caller's language; understood numbers and domain words; no misrecognition issues.",
+        "evidence_turns": [
+          0,
+          2,
+          4,
+          6
+        ]
+      },
+      "policy_compliance": {
+        "score": 4,
+        "reason": "Mandatory recording disclosure given; no threats or forbidden content; no PII over-collection.",
+        "evidence_turns": [
+          0
+        ]
+      }
+    },
+    "failure_types": [
+      "intent_miss",
+      "tool_arguments",
+      "wrong_fact"
+    ],
+    "critical_failure": true,
+    "needs_human_review": true
+  },
+  "input_tokens": 2721,
+  "output_tokens": 519,
+  "latency_ms": 6659,
+  "created_at": "2026-10-27T01:58:55.080368+00:00"
+}

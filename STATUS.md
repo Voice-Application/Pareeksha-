@@ -14,43 +14,43 @@ State values: todo / doing / blocked / review / done. Verified = QA sign-off (`y
 | PM-01 | Scope v0.2 vs PRD §7; acceptance criteria per task | PM | — | done | — | proof/PM-01/verified.md |
 | TL-01 | Freeze §6 contracts as code; full OpenAPI stubs | TL | PM-01 | done | — | proof/TL-01/verified.md |
 | INFRA-01 | Compose from `docs/starter/` runs (Kafka KRaft, Postgres, topics) | BE-INFRA | — | done | — | proof/INFRA-01/verified.md |
-| INFRA-02 | Consumer framework, producer, outbox relay, retrier, DLQ recorder | BE-INFRA | TL-01 | todo | — | no |
-| API-01 | SQLAlchemy models, Alembic `0001_initial`, API-key auth | BE-API | TL-01 | todo | — | no |
+| INFRA-02 | Consumer framework, producer, outbox relay, retrier, DLQ recorder | BE-INFRA | TL-01 | done | — | proof/INFRA-02/verified.md |
+| API-01 | SQLAlchemy models, Alembic `0001_initial`, API-key auth | BE-API | TL-01 | done | — | proof/API-01/verified.md |
 | VOICE-01 | `scripts/smoke_gnani.py`: TTS/STT round trip, voices, `COST_*` | VOICE | H-01 | done | — | proof/VOICE-01/verified.md |
 | VOICE-02 | Audio DSP + LineSimulator (8 profiles) | VOICE | — | done | — | proof/VOICE-02/verified.md |
 | DES-01 | IA, wireframe specs, tokens, score scale, states | DES | PM-01 | done | — | proof/DES-01/verified.md |
 | FE-01 | Next.js scaffold, Tailwind, shadcn/ui, BFF proxy, `gen:api` | FE | — | done | — | proof/FE-01/verified.md |
 | QA-01 | Test plan mapping every FR/NFR to a test | QA | PM-01 | done | — | proof/QA-01/verified.md |
 | DOC-01 | Docs pack in `docs/`, README skeleton, STATUS, CHANGELOG | DOC | — | done | — | proof/DOC-01/verified.md |
-| API-02 | CRUD routers + seed script (personas, profiles, rubric, demo key) | BE-API | API-01 | todo | — | no |
-| API-03 | `POST /runs` outbox + planner + run-slot reconciler | BE-API | API-01, INFRA-02 | todo | — | no |
-| VOICE-03 | Mock EMI agent over `pareeksha-audio-v1` with 5 bugs | VOICE | VOICE-01 | todo | — | no |
-| VOICE-04 | `audio_v1` adapter + caller pipeline | VOICE | VOICE-02, VOICE-03, TL-01 | todo | — | no |
-| EVAL-01 | Gemini client, `caller_v1.j2`, caller brain wiring | EVAL | TL-01 | todo | — | no |
+| API-02 | CRUD routers + seed script (personas, profiles, rubric, demo key) | BE-API | API-01 | done | — | proof/API-02/verified.md |
+| API-03 | `POST /runs` outbox + planner + run-slot reconciler | BE-API | API-01, INFRA-02 | done | — | proof/API-03/verified.md |
+| VOICE-03 | Mock EMI agent over `pareeksha-audio-v1` with 5 bugs | VOICE | VOICE-01 | done | — | proof/VOICE-03/verified.md |
+| VOICE-04 | `audio_v1` adapter + caller pipeline | VOICE | VOICE-02, VOICE-03, TL-01 | done | — | proof/VOICE-04/verified.md |
+| EVAL-01 | Gemini client, `caller_v1.j2`, caller brain wiring | EVAL | TL-01 | done | — | proof/EVAL-01/verified.md |
 | EVAL-02 | Metrics, checks, Indian numeral parser, PII masking | EVAL | — | done | — | proof/EVAL-02/verified.md |
-| INT-01 | Connector registry, Fernet, HMAC, SSRF-safe fetch, webhook sink | INT | TL-01 | todo | — | no |
-| FE-02 | Agents, Scenarios, Personas, Noise profiles pages | FE | DES-01, FE-01 | todo | — | no |
-| QA-02 | Kafka integration suite green in CI | QA | INFRA-02 | todo | — | no |
-| VOICE-05 | `simulator` consumer; 12-call run end to end | VOICE | VOICE-04, API-03 | todo | — | no |
-| EVAL-03 | `judge_v1.j2`, evidence validation, `evaluator`, `finalizer` | EVAL | EVAL-02 | todo | — | no |
-| EVAL-04 | `auditor` consumer: upload → batch STT → role detection | EVAL | EVAL-03 | todo | — | no |
-| INT-02 | HubSpot sink: contact match → note, idempotent | INT | INT-01 | todo | — | no |
-| INT-03 | Generic Webhook source: verify → dedupe → audit | INT | INT-01, EVAL-04 | todo | — | no |
-| API-04 | SSE progress, run compare, DLQ endpoints, `/metrics/summary` | BE-API | API-03 | todo | — | no |
-| FE-03 | Runs list, new-run wizard, live run detail (SSE), heatmap | FE | FE-02, API-04 | todo | — | no |
-| QA-03 | Planted-bug test: at least 4 of 5 caught | QA | VOICE-05, EVAL-03 | todo | — | no |
+| INT-01 | Connector registry, Fernet, HMAC, SSRF-safe fetch, webhook sink | INT | TL-01 | done | — | proof/INT-01/verified.md |
+| FE-02 | Agents, Scenarios, Personas, Noise profiles pages | FE | DES-01, FE-01 | done | — | proof/FE-02/verified.md |
+| QA-02 | Kafka integration suite green in CI | QA | INFRA-02 | done (local CI-equivalent run; GitHub Actions green link pending) | — | proof/QA-02/verified.md |
+| VOICE-05 | `simulator` consumer; 12-call run end to end | VOICE | VOICE-04, API-03 | done | — | proof/VOICE-05/verified.md |
+| EVAL-03 | `judge_v1.j2`, evidence validation, `evaluator`, `finalizer` | EVAL | EVAL-02 | done | — | proof/EVAL-03/verified.md |
+| EVAL-04 | `auditor` consumer: upload → batch STT → role detection | EVAL | EVAL-03 | done | — | proof/EVAL-04/verified.md |
+| INT-02 | HubSpot sink: contact match → note, idempotent | INT | INT-01 | done (live HubSpot note pending owner token) | — | proof/INT-02/verified.md |
+| INT-03 | Generic Webhook source: verify → dedupe → audit | INT | INT-01, EVAL-04 | done (live HubSpot step pending owner token) | — | proof/INT-03/verified.md |
+| API-04 | SSE progress, run compare, DLQ endpoints, `/metrics/summary` | BE-API | API-03 | done | — | proof/API-04/verified.md |
+| FE-03 | Runs list, new-run wizard, live run detail (SSE), heatmap | FE | FE-02, API-04 | NOT DONE — Run compare page is a placeholder (owner: cut or build) | — | proof/FE-03/rejected.md |
+| QA-03 | Planted-bug test: at least 4 of 5 caught | QA | VOICE-05, EVAL-03 | done | — | proof/QA-03/verified.md |
 | H-02 | ≥ 20 consented clips per dialect group | Preetham (human) | — | waiting on Preetham | — | no |
-| EVAL-05 | Dialect pipeline: WER/CER, entity accuracy, HTML report | EVAL | EVAL-03 | todo | — | no |
-| VOICE-06 | Pipecat adapter + serializer + example (Must); LiveKit (Should) | VOICE | VOICE-04 | todo | — | no |
-| INT-04 | `pareeksha-sdk` + CLI, `pareeksha.yaml`, GitHub Action | INT | TL-01 | todo | — | no |
-| API-05 | Regression promote/suite, calibration, scenario generation | BE-API | EVAL-03 | todo | — | no |
-| FE-04 | Call detail: waveform, transcript, evidence seeking, promote | FE | FE-03 | todo | — | no |
-| FE-05 | Audits, Dialect, Regression, Integrations, DLQ, Calibration, API keys | FE | FE-04 | todo | — | no |
-| QA-04 | Playwright smoke per page; OpenAPI + event contract tests | QA | FE-04 | todo | — | no |
-| QA-05 | 40-call demo run + full PRD §8 acceptance | QA | all | todo | — | no |
+| EVAL-05 | Dialect pipeline: WER/CER, entity accuracy, HTML report | EVAL | EVAL-03 | done (real dialect clips pending H-02) | — | proof/EVAL-05/verified.md |
+| VOICE-06 | Pipecat adapter + serializer + example (Must); LiveKit (Should) | VOICE | VOICE-04 | done (LiveKit/Vapi not built — cut pending owner approval) | — | proof/VOICE-06/verified.md |
+| INT-04 | `pareeksha-sdk` + CLI, `pareeksha.yaml`, GitHub Action | INT | TL-01 | done | — | proof/INT-04/verified.md |
+| API-05 | Regression promote/suite, calibration, scenario generation | BE-API | EVAL-03 | done | — | proof/API-05/verified.md |
+| FE-04 | Call detail: waveform, transcript, evidence seeking, promote | FE | FE-03 | done | — | proof/FE-04/verified.md |
+| FE-05 | Audits, Dialect, Regression, Integrations, DLQ, Calibration, API keys | FE | FE-04 | done | — | proof/FE-05/verified.md |
+| QA-04 | Playwright smoke per page; OpenAPI + event contract tests | QA | FE-04 | done | — | proof/QA-04/verified.md |
+| QA-05 | 40-call demo run + full PRD §8 acceptance | QA | all | done | — | proof/QA-05/verified.md |
 | ALL-01 | Fix QA P0/P1 bugs only | engineers | QA-05 | todo | — | no |
 | EVAL-06 | Label 30 calls; publish κ and Spearman | EVAL + Preetham | QA-05 | todo | — | no |
-| DOC-02 | README, clean-clone quick start, 8 adopter guides, SDK reference | DOC | all | todo | — | no |
+| DOC-02 | README, clean-clone quick start, 8 adopter guides, SDK reference | DOC | all | done | — | proof/DOC-02/verified.md |
 | DOC-03 | 60-second demo script; Preetham records | DOC + Preetham | QA-05 | todo | — | no |
 | PJM-01 | Release checklist, tag v1.0.0, repo public, launch post | PJM | all | todo | — | no |
 
@@ -108,3 +108,10 @@ Never cut: mock agent with planted bugs, judge with evidence, Kafka outbox + ide
 - Gnani credit use: VOICE-01 build 17 calls (23.3 s TTS, 67 s STT); verify 11 calls (23.4 s TTS, 33.6 s STT).
 - Follow-ups: add gnani-vachana to backend dev deps; VOICE voices chosen by STT only (Preetham to listen); HubSpot token (HUBSPOT_ACCESS_TOKEN) needed for INT-*.
 - Open STUBs now: api/stubs.py handlers owned by API-02..05, EVAL-04/05, INT-01/03, VOICE-04; STUB(API-01) auth; STUB(VOICE-03) mock_agent; STUB(FE-02/03/05) pages.
+
+## Release candidate — merged 2026-10-28 (qa/RC2 17c51b9)
+- Independent verification: 41 task proofs signed (incl. EVAL-03b, EVAL-04b, INT-01b, FIX-01, VOICE-07). FE-03 rejected (Run compare placeholder; owner decision: cut or build).
+- make verify: V2 PASS (156 s warm, 1581 s cold cache pulls), V3 97.5% (QA-03 run 8422cb13), V4 PASS (5/5), V6 PASS (1 delivery, 1 evaluation). V1 FAIL (unfinished owner tasks + FE-03), V11 FAIL (no tag/public repo). V5/V7/V8/V9/V10 PENDING owner inputs.
+- UI review: 16/17 pages pass; Run compare pending decision.
+- NOT DONE (owner-blocked): H-02 dialect clips, EVAL-06 (30 labels), DOC-03 demo, PJM-01 release (public repo + v1.0.0), ALL-01, HubSpot token, provider keys, GitHub Actions run links (V8).
+- Known caveats: clean pass rate not fully deterministic (V4 control 2/2 one run, 1/2 another); Gnani allows one concurrent request per key.

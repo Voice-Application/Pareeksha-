@@ -1,0 +1,26 @@
+# The demo agent: the mock EMI reminder bot (VOICE-03) for the fictional lender "Suraksha Finance".
+name: EMI Reminder Bot
+description: >-
+  Outbound bot for Suraksha Finance (fictional). Reminds customers of EMI due dates in Kannada, Hindi
+  or English, records promise-to-pay date, never threatens, offers human transfer on request.
+adapter: audio_v1
+adapter_config: {}
+endpoint_url: ws://mock-agent:8765/ws
+languages: [kn-IN, hi-IN, en-IN]
+glass_box: true
+mandatory_disclosures:
+  - id: recording
+    text: This call is being recorded for quality purposes
+    regex: "(record|ರೆಕಾರ್ಡ್|रिकॉर्ड)"
+    within_turns: 2
+forbidden_phrases:
+  - id: threat_legal
+    text: legal action
+    regex: "(legal action|police|ಪೊಲೀಸ್|पुलिस)"
+expected_tools:
+  - name: record_promise_to_pay
+    description: Save PTP date and amount
+  - name: transfer_to_human
+    description: Warm transfer
+bias_list: [EMI, UPI, NEFT, Suraksha Finance, ಕಂತು, किस्त]
+max_call_seconds: 240

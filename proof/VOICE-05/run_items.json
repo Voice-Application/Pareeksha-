@@ -1,0 +1,137 @@
+{
+    "items": [
+        {
+            "id": "1a52d9d9-abbb-4703-9370-3db80163dfb8",
+            "scenario": "Promise to pay on Friday",
+            "persona": "Priya \u2014 careful",
+            "noise_profile": "pstn_8k_alaw",
+            "status": "evaluated",
+            "call_id": "ab99f7df-dcd7-5cdd-8a4b-fd7769623d39",
+            "overall_score": 50.0,
+            "passed": false,
+            "critical_failure": true
+        },
+        {
+            "id": "1d8a255d-cfc8-4a6b-b102-1da263c0d117",
+            "scenario": "Promise to pay on Friday",
+            "persona": "Mr. Iyer \u2014 formal",
+            "noise_profile": "pstn_8k_alaw",
+            "status": "evaluated",
+            "call_id": "e50254c3-302a-5b79-a07e-72edefcae9a7",
+            "overall_score": 52.5,
+            "passed": false,
+            "critical_failure": true
+        },
+        {
+            "id": "23de19e6-6257-4a6b-8254-4f0b604d1372",
+            "scenario": "Promise to pay on Friday",
+            "persona": "Priya \u2014 careful",
+            "noise_profile": "pstn_8k_alaw",
+            "status": "evaluated",
+            "call_id": "1a71b0cf-87d9-5e8e-873f-f4c86c1e7a9d",
+            "overall_score": 56.25,
+            "passed": false,
+            "critical_failure": true
+        },
+        {
+            "id": "3395ab3a-2964-4bb1-8083-b7e6c4485a45",
+            "scenario": "Disputes the EMI amount",
+            "persona": "Mr. Iyer \u2014 formal",
+            "noise_profile": "pstn_8k_alaw",
+            "status": "evaluated",
+            "call_id": "a1816d01-8675-5953-84ee-12caa266acf4",
+            "overall_score": 65.0,
+            "passed": false,
+            "critical_failure": true
+        },
+        {
+            "id": "7ae36d9c-d634-4352-b7a8-cc6fa27d3316",
+            "scenario": "Disputes the EMI amount",
+            "persona": "Mr. Iyer \u2014 formal",
+            "noise_profile": "pstn_8k_alaw",
+            "status": "evaluated",
+            "call_id": "d66121bc-07f6-5cb9-9e05-d36ae93da6d9",
+            "overall_score": 63.75,
+            "passed": false,
+            "critical_failure": true
+        },
+        {
+            "id": "7b6d21cd-f45c-4d11-afc1-8421ca890c66",
+            "scenario": "Disputes the EMI amount",
+            "persona": "Priya \u2014 careful",
+            "noise_profile": "pstn_8k_alaw",
+            "status": "evaluated",
+            "call_id": "3841556b-9815-58dd-8bd0-1732dbc660a7",
+            "overall_score": 41.25,
+            "passed": false,
+            "critical_failure": true
+        },
+        {
+            "id": "b752aa4e-c918-40a1-a1d0-f20f82ed0143",
+            "scenario": "Promise to pay on Friday",
+            "persona": "Mr. Iyer \u2014 formal",
+            "noise_profile": "pstn_8k_alaw",
+            "status": "evaluated",
+            "call_id": "70e9a86b-c4bf-566d-ac79-2e1baba69dd5",
+            "overall_score": 56.25,
+            "passed": false,
+            "critical_failure": true
+        },
+        {
+            "id": "b8db7438-97be-45eb-85fb-9595356d269c",
+            "scenario": "Promise to pay on Friday",
+            "persona": "Mr. Iyer \u2014 formal",
+            "noise_profile": "pstn_8k_alaw",
+            "status": "evaluated",
+            "call_id": "7949b8a8-a1e1-5ba3-bd05-80e3e528ed83",
+            "overall_score": 42.5,
+            "passed": false,
+            "critical_failure": true
+        },
+        {
+            "id": "c407bfe4-2ef5-4922-9a5a-d0c71de1b277",
+            "scenario": "Promise to pay on Friday",
+            "persona": "Priya \u2014 careful",
+            "noise_profile": "pstn_8k_alaw",
+            "status": "evaluated",
+            "call_id": "86641046-42d3-5583-bb50-e88f51aa7bb0",
+            "overall_score": 56.25,
+            "passed": false,
+            "critical_failure": true
+        },
+        {
+            "id": "da2eec9b-21bd-41ad-a384-1c705f0a855f",
+            "scenario": "Disputes the EMI amount",
+            "persona": "Priya \u2014 careful",
+            "noise_profile": "pstn_8k_alaw",
+            "status": "evaluated",
+            "call_id": "7c41f15d-9eae-5e83-8901-7801f249d542",
+            "overall_score": 56.25,
+            "passed": false,
+            "critical_failure": true
+        },
+        {
+            "id": "df826732-1ea5-46fe-9406-3c64f8325afd",
+            "scenario": "Disputes the EMI amount",
+            "persona": "Priya \u2014 careful",
+            "noise_profile": "pstn_8k_alaw",
+            "status": "evaluated",
+            "call_id": "c7510399-0899-5887-89eb-1d5da179dc6d",
+            "overall_score": 53.75,
+            "passed": false,
+            "critical_failure": true
+        },
+        {
+            "id": "e976ab33-2b53-496c-8908-c8e57e621c8a",
+            "scenario": "Disputes the EMI amount",
+            "persona": "Mr. Iyer \u2014 formal",
+            "noise_profile": "pstn_8k_alaw",
+            "status": "evaluated",
+            "call_id": "93ad8b38-0821-548f-8cd3-844b340a7e9d",
+            "overall_score": 65.0,
+            "passed": false,
+            "critical_failure": false
+        }
+    ],
+    "next_cursor": null
+}

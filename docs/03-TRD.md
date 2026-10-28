@@ -23,7 +23,7 @@ This document explains **how** each part is built. Diagrams: `04-system-design.m
 | Gnani SDK | `gnani-vachana` ≥ 0.8.2 | REST/stream/batch STT, TTS outside Pipecat |
 | STT | Gnani Prisma (stream for live calls; batch for audits; REST for dialect clips) | India-trained, 8 kHz-aware |
 | TTS | Gnani Timbre **v3.0** (13 voices, every voice speaks all 10 languages) | v2.5 has only 2 Kannada voices |
-| LLM | Gemini via `google-genai`, pinned model ID | Caller brain, judge, scenario generation |
+| LLM | DeepSeek (default, OpenAI-compatible API) or Gemini via `google-genai` (`LLM_PROVIDER`), pinned model IDs | Caller brain, judge, scenario generation |
 | Audio DSP | numpy, scipy.signal, soundfile, `audioop` | Exact SNR, bandpass, A-law round trip |
 | Text metrics | jiwer, indic-nlp-library, rapidfuzz | WER/CER, Indic normalisation, fuzzy checks |
 | **Web app** | **Next.js 16 (App Router) + React 19 + TypeScript + Tailwind 4 + shadcn/ui** | Production-grade UI, portfolio quality |

@@ -1,0 +1,546 @@
+
+===== stack =====
+ Container api03-postgres-1 Running 
+ Container api03-kafka-1 Running 
+[Kkafka-init-1 exited with code 0
+ Image api03-api Building 
+ Image api03-migrate Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.25kB done
+#1 DONE 0.0s
+
+#2 [migrate internal] load build definition from Dockerfile
+#2 transferring dockerfile: 776B done
+#2 DONE 0.0s
+
+#3 [migrate internal] load metadata for docker.io/library/python:3.12-slim
+#3 DONE 0.0s
+
+#4 [migrate internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [migrate stage-0 1/4] FROM docker.io/library/python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704
+#5 resolve docker.io/library/python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704 0.0s done
+#5 DONE 0.0s
+
+#6 [migrate stage-0 2/4] WORKDIR /app
+#6 CACHED
+
+#7 [migrate internal] load build context
+#7 transferring context: 30.26kB 0.0s done
+#7 transferring context: 30.26kB 0.0s done
+#7 DONE 0.0s
+
+#8 [migrate stage-0 3/4] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "fastapi>=0.121" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy[asyncio]>=2.0.30" "python-multipart>=0.0.9" "pydantic-settings>=2.3" "cryptography>=42" "httpx>=0.27" "jinja2>=3.1" "numpy>=1.26" "scipy>=1.11" "pyyaml>=6" "gnani-vachana>=0.8.2"
+#8 2.204 Collecting fastapi>=0.121
+#8 2.482   Downloading fastapi-0.162.0-py3-none-any.whl.metadata (26 kB)
+#8 2.610 Collecting uvicorn>=0.30
+#8 2.810   Downloading uvicorn-0.54.0-py3-none-any.whl.metadata (6.6 kB)
+#8 2.893 Collecting psycopg>=3.2 (from psycopg[binary]>=3.2)
+#8 3.078   Downloading psycopg-3.3.6-py3-none-any.whl.metadata (4.4 kB)
+#8 3.160 Collecting aiokafka>=0.11
+#8 3.402   Downloading aiokafka-0.14.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (5.0 kB)
+#8 3.522 Collecting alembic>=1.13
+#8 3.770   Downloading alembic-1.20.1-py3-none-any.whl.metadata (7.3 kB)
+#8 4.179 Collecting sqlalchemy>=2.0.30 (from sqlalchemy[asyncio]>=2.0.30)
+#8 4.417   Downloading sqlalchemy-2.1.6-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (9.7 kB)
+#8 4.541 Collecting python-multipart>=0.0.9
+#8 4.750   Downloading python_multipart-0.0.32-py3-none-any.whl.metadata (2.1 kB)
+#8 4.924 Collecting pydantic-settings>=2.3
+#8 5.222   Downloading pydantic_settings-2.16.1-py3-none-any.whl.metadata (4.0 kB)
+#8 5.624 Collecting cryptography>=42
+#8 5.898   Downloading cryptography-50.0.2-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (4.4 kB)
+#8 6.064 Collecting httpx>=0.27
+#8 6.288   Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+#8 6.504 Collecting jinja2>=3.1
+#8 6.707   Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+#8 7.143 Collecting numpy>=1.26
+#8 7.412   Downloading numpy-2.5.4-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (6.6 kB)
+#8 7.670 Collecting scipy>=1.11
+#8 7.889   Downloading scipy-1.18.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)
+#8 8.388 Collecting pyyaml>=6
+#8 8.634   Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+#8 8.723 Collecting gnani-vachana>=0.8.2
+#8 9.022   Downloading gnani_vachana-0.8.2-py3-none-any.whl.metadata (28 kB)
+#8 9.308 Collecting starlette>=0.46.0 (from fastapi>=0.121)
+#8 9.624   Downloading starlette-1.9.0-py3-none-any.whl.metadata (6.6 kB)
+#8 9.761 Collecting pydantic>=2.9.0 (from fastapi>=0.121)
+#8 10.02   Downloading pydantic-2.14.1-py3-none-any.whl.metadata (133 kB)
+#8 10.69 Collecting typing-extensions>=4.8.0 (from fastapi>=0.121)
+#8 10.99   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+#8 11.08 Collecting typing-inspection>=0.4.2 (from fastapi>=0.121)
+#8 11.47   Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+#8 11.62 Collecting annotated-doc>=0.0.2 (from fastapi>=0.121)
+#8 11.96   Downloading annotated_doc-0.0.5-py3-none-any.whl.metadata (6.5 kB)
+#8 12.02 Collecting opentelemetry-api>=1.44.0 (from fastapi>=0.121)
+#8 12.31   Downloading opentelemetry_api-1.45.1-py3-none-any.whl.metadata (1.4 kB)
+#8 12.38 Collecting click>=7.0 (from uvicorn>=0.30)
+#8 12.67   Downloading click-8.5.0-py3-none-any.whl.metadata (2.6 kB)
+#8 12.73 Collecting h11>=0.8 (from uvicorn>=0.30)
+#8 13.01   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+#8 13.11 Collecting async-timeout (from aiokafka>=0.11)
+#8 13.35   Downloading async_timeout-5.0.1-py3-none-any.whl.metadata (5.1 kB)
+#8 13.45 Collecting packaging (from aiokafka>=0.11)
+#8 13.65   Downloading packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+#8 13.77 Collecting Mako (from alembic>=1.13)
+#8 13.98   Downloading mako-1.4.3-py3-none-any.whl.metadata (2.9 kB)
+#8 14.12 Collecting python-dotenv>=1.2.2 (from pydantic-settings>=2.3)
+#8 14.33   Downloading python_dotenv-1.2.4-py3-none-any.whl.metadata (29 kB)
+#8 14.57 Collecting cffi>=2.0.0 (from cryptography>=42)
+#8 14.75   Downloading cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.5 kB)
+#8 14.96 Collecting anyio (from httpx>=0.27)
+#8 15.12   Downloading anyio-4.15.1-py3-none-any.whl.metadata (4.7 kB)
+#8 15.28 Collecting certifi (from httpx>=0.27)
+#8 15.46   Downloading certifi-2026.10.23-py3-none-any.whl.metadata (2.5 kB)
+#8 15.59 Collecting httpcore==1.* (from httpx>=0.27)
+#8 15.76   Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+#8 16.07 Collecting idna (from httpx>=0.27)
+#8 16.21   Downloading idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+#8 16.35 Collecting MarkupSafe>=2.0 (from jinja2>=3.1)
+#8 16.57   Downloading markupsafe-3.0.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+#8 16.91 Collecting requests>=2.28.0 (from gnani-vachana>=0.8.2)
+#8 17.16   Downloading requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+#8 17.44 Collecting websockets>=12.0 (from gnani-vachana>=0.8.2)
+#8 17.67   Downloading websockets-17.3-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.3 kB)
+#8 17.94 Collecting psycopg-binary==3.3.6 (from psycopg[binary]>=3.2)
+#8 18.14   Downloading psycopg_binary-3.3.6-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.7 kB)
+#8 18.48 Collecting greenlet>=1 (from sqlalchemy[asyncio]>=2.0.30)
+#8 18.69   Downloading greenlet-3.5.6-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+#8 18.83 Collecting pycparser (from cffi>=2.0.0->cryptography>=42)
+#8 19.01   Downloading pycparser-3.12-py3-none-any.whl.metadata (9.7 kB)
+#8 19.11 Collecting annotated-types>=0.6.0 (from pydantic>=2.9.0->fastapi>=0.121)
+#8 19.29   Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+#8 20.11 Collecting pydantic-core==2.50.1 (from pydantic>=2.9.0->fastapi>=0.121)
+#8 20.30   Downloading pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.5 kB)
+#8 20.61 Collecting charset_normalizer<4,>=2 (from requests>=2.28.0->gnani-vachana>=0.8.2)
+#8 20.79   Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (46 kB)
+#8 21.26 Collecting urllib3<3,>=1.26 (from requests>=2.28.0->gnani-vachana>=0.8.2)
+#8 21.42   Downloading urllib3-2.8.0-py3-none-any.whl.metadata (7.4 kB)
+#8 21.70 Downloading fastapi-0.162.0-py3-none-any.whl (148 kB)
+#8 23.69 Downloading uvicorn-0.54.0-py3-none-any.whl (87 kB)
+#8 25.61 Downloading psycopg-3.3.6-py3-none-any.whl (215 kB)
+#8 29.29 Downloading aiokafka-0.14.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.1 MB)
+#8 36.18    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.1/1.1 MB 325.5 kB/s eta 0:00:00
+#8 36.46 Downloading alembic-1.20.1-py3-none-any.whl (270 kB)
+#8 37.86 Downloading sqlalchemy-2.1.6-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (4.7 MB)
+#8 45.77    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.7/4.7 MB 649.6 kB/s eta 0:00:00
+#8 45.90 Downloading python_multipart-0.0.32-py3-none-any.whl (30 kB)
+#8 46.06 Downloading pydantic_settings-2.16.1-py3-none-any.whl (80 kB)
+#8 46.35 Downloading cryptography-50.0.2-cp311-abi3-manylinux_2_34_x86_64.whl (4.8 MB)
+#8 52.65    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.8/4.8 MB 746.3 kB/s eta 0:00:00
+#8 52.95 Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+#8 53.57 Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+#8 54.30 Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+#8 54.97 Downloading numpy-2.5.4-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.7 MB)
+#8 89.33    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.7/16.7 MB 489.4 kB/s eta 0:00:00
+#8 89.59 Downloading scipy-1.18.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (35.3 MB)
+#8 125.1    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 35.3/35.3 MB 1.1 MB/s eta 0:00:00
+#8 125.4 Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
+#8 126.0    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 807.9/807.9 kB 1.5 MB/s eta 0:00:00
+#8 126.2 Downloading gnani_vachana-0.8.2-py3-none-any.whl (41 kB)
+#8 126.5 Downloading psycopg_binary-3.3.6-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (5.2 MB)
+#8 130.0    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.2/5.2 MB 1.5 MB/s eta 0:00:00
+#8 130.3 Downloading annotated_doc-0.0.5-py3-none-any.whl (5.3 kB)
+#8 130.6 Downloading cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (221 kB)
+#8 131.1 Downloading click-8.5.0-py3-none-any.whl (125 kB)
+#8 131.4 Downloading greenlet-3.5.6-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (621 kB)
+#8 131.8    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 621.4/621.4 kB 1.6 MB/s eta 0:00:00
+#8 132.0 Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+#8 132.2 Downloading markupsafe-3.0.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+#8 132.5 Downloading opentelemetry_api-1.45.1-py3-none-any.whl (60 kB)
+#8 132.7 Downloading pydantic-2.14.1-py3-none-any.whl (488 kB)
+#8 133.3 Downloading pydantic_core-2.50.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.2 MB)
+#8 134.7    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.2/2.2 MB 1.7 MB/s eta 0:00:00
+#8 134.8 Downloading python_dotenv-1.2.4-py3-none-any.whl (23 kB)
+#8 135.0 Downloading requests-2.34.2-py3-none-any.whl (73 kB)
+#8 135.3 Downloading certifi-2026.10.23-py3-none-any.whl (135 kB)
+#8 135.7 Downloading idna-3.20-py3-none-any.whl (69 kB)
+#8 136.1 Downloading starlette-1.9.0-py3-none-any.whl (80 kB)
+#8 136.4 Downloading anyio-4.15.1-py3-none-any.whl (132 kB)
+#8 136.7 Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+#8 136.9 Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+#8 137.2 Downloading websockets-17.3-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (225 kB)
+#8 137.5 Downloading async_timeout-5.0.1-py3-none-any.whl (6.2 kB)
+#8 137.7 Downloading mako-1.4.3-py3-none-any.whl (80 kB)
+#8 138.0 Downloading packaging-26.3-py3-none-any.whl (129 kB)
+#8 138.2 Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+#8 138.4 Downloading charset_normalizer-3.5.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (257 kB)
+#8 138.7 Downloading urllib3-2.8.0-py3-none-any.whl (135 kB)
+#8 138.9 Downloading pycparser-3.12-py3-none-any.whl (62 kB)
+#8 139.1 Installing collected packages: websockets, urllib3, typing-extensions, pyyaml, python-multipart, python-dotenv, pycparser, psycopg-binary, packaging, numpy, MarkupSafe, idna, h11, greenlet, click, charset_normalizer, certifi, async-timeout, annotated-types, annotated-doc, uvicorn, typing-inspection, sqlalchemy, scipy, requests, pydantic-core, psycopg, opentelemetry-api, Mako, jinja2, httpcore, cffi, anyio, aiokafka, starlette, pydantic, httpx, gnani-vachana, cryptography, alembic, pydantic-settings, fastapi
+#8 150.1 Successfully installed Mako-1.4.3 MarkupSafe-3.0.4 aiokafka-0.14.0 alembic-1.20.1 annotated-doc-0.0.5 annotated-types-0.8.0 anyio-4.15.1 async-timeout-5.0.1 certifi-2026.10.23 cffi-2.1.1 charset_normalizer-3.5.2 click-8.5.0 cryptography-50.0.2 fastapi-0.162.0 gnani-vachana-0.8.2 greenlet-3.5.6 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 idna-3.20 jinja2-3.1.6 numpy-2.5.4 opentelemetry-api-1.45.1 packaging-26.3 psycopg-3.3.6 psycopg-binary-3.3.6 pycparser-3.12 pydantic-2.14.1 pydantic-core-2.50.1 pydantic-settings-2.16.1 python-dotenv-1.2.4 python-multipart-0.0.32 pyyaml-6.0.3 requests-2.34.2 scipy-1.18.1 sqlalchemy-2.1.6 starlette-1.9.0 typing-extensions-4.16.0 typing-inspection-0.4.4 urllib3-2.8.0 uvicorn-0.54.0 websockets-17.3
+#8 150.1 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+#8 150.2 
+#8 150.2 [notice] A new release of pip is available: 25.0.1 -> 26.2.2
+#8 150.2 [notice] To update, run: pip install --upgrade pip
+#8 DONE 150.8s
+
+#9 [api stage-0 4/4] COPY . /app
+#9 DONE 0.2s
+
+#10 [migrate] exporting to image
+#10 exporting layers
+#10 ...
+
+#11 [api] exporting to image
+#11 ...
+
+#10 [migrate] exporting to image
+#10 exporting layers 13.0s done
+#10 exporting manifest sha256:5b5905d5fda322d8b10d592a5e51ebf894341e195e37c002d0d0ae0efc553e7a
+#10 exporting manifest sha256:5b5905d5fda322d8b10d592a5e51ebf894341e195e37c002d0d0ae0efc553e7a done
+#10 exporting config sha256:5d670ec3efadb3c4e12f0ae8732cddc836e736431c0f51ab318b4a6c697fbdaa done
+#10 exporting attestation manifest sha256:71f8ec5d5230a2c49f76366df918ae473ebfd1ee40842285e1f0642a43f21814 done
+#10 exporting manifest list sha256:3cf90f4ddb5e85da4169f4dbbd3132bef9901b9d22d8c90a9ed04b2769bc3704 done
+#10 naming to docker.io/library/api03-migrate:latest done
+#10 unpacking to docker.io/library/api03-migrate:latest
+#10 unpacking to docker.io/library/api03-migrate:latest 3.9s done
+#10 DONE 17.0s
+
+#11 [api] exporting to image
+#11 exporting layers 13.0s done
+#11 exporting manifest sha256:cf4e011b47a5f6cd6fe8db7d0297d6f03adfc22174e832ceef4d78d959efd993 0.0s done
+#11 exporting config sha256:fcca44e07e65904868301f8d525f1a4a52d3e4fbddbc6ad4305948764f62f312 done
+#11 exporting attestation manifest sha256:0bef560a361493bd2049f1e5e1475f36f9af53cd185e8a1af1f4f1671979f589 done
+#11 exporting manifest list sha256:342bd9a408d60c8b4b29046cc944a350440359e22272973729b3c3dd09ac8b61 done
+#11 naming to docker.io/library/api03-api:latest done
+#11 unpacking to docker.io/library/api03-api:latest 3.9s done
+#11 DONE 17.0s
+
+#12 [api] resolving provenance for metadata file
+#12 DONE 0.0s
+
+#13 [migrate] resolving provenance for metadata file
+#13 DONE 0.0s
+ Image api03-api Built 
+ Image api03-migrate Built 
+ Container api03-kafka-1 Running 
+ Container api03-postgres-1 Running 
+ Container api03-migrate-1 Recreate 
+ Container api03-migrate-1 Recreated 
+ Container api03-api-1 Recreate 
+ Container api03-api-1 Recreated 
+ Container api03-kafka-1 Waiting 
+ Container api03-postgres-1 Waiting 
+ Container api03-postgres-1 Healthy 
+ Container api03-migrate-1 Starting 
+ Container api03-kafka-1 Healthy 
+ Container api03-kafka-init-1 Starting 
+ Container api03-migrate-1 Started 
+ Container api03-kafka-init-1 Started 
+ Container api03-migrate-1 Waiting 
+ Container api03-kafka-init-1 Waiting 
+ Container api03-migrate-1 Exited 
+ Container api03-kafka-init-1 Exited 
+ Container api03-api-1 Starting 
+ Container api03-api-1 Started 
+{
+  "created": {
+    "personas": 20,
+    "noise_profiles": 8,
+    "rubric_versions": 1,
+    "agents": 1,
+    "scenarios": 8,
+    "api_keys": 1
+  },
+  "existing": {}
+}
+ Image api03-planner Building 
+ Image api03-reconciler Building 
+ Image api03-outbox-relay Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.89kB done
+#1 DONE 0.0s
+
+#2 [planner internal] load build definition from Dockerfile
+#2 transferring dockerfile: 776B done
+#2 DONE 0.0s
+
+#3 [reconciler internal] load metadata for docker.io/library/python:3.12-slim
+#3 DONE 0.0s
+
+#4 [outbox-relay internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [planner internal] load build context
+#5 transferring context: 29.51kB 0.0s done
+#5 DONE 0.0s
+
+#6 [planner stage-0 1/4] FROM docker.io/library/python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704
+#6 resolve docker.io/library/python:3.12-slim@sha256:a0f57064cbdcd6285fa45f51237ab0b35ea8ebaed06a1f5973e89e19dfb86704 0.0s done
+#6 DONE 0.0s
+
+#7 [outbox-relay stage-0 2/4] WORKDIR /app
+#7 CACHED
+
+#8 [outbox-relay stage-0 3/4] RUN --mount=type=secret,id=ca,required=false     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi;     pip install --no-cache-dir "fastapi>=0.121" "uvicorn>=0.30" "psycopg[binary]>=3.2" "aiokafka>=0.11" "alembic>=1.13" "sqlalchemy[asyncio]>=2.0.30" "python-multipart>=0.0.9" "pydantic-settings>=2.3" "cryptography>=42" "httpx>=0.27" "jinja2>=3.1" "numpy>=1.26" "scipy>=1.11" "pyyaml>=6" "gnani-vachana>=0.8.2"
+#8 CACHED
+
+#9 [outbox-relay stage-0 4/4] COPY . /app
+#9 CACHED
+
+#10 [reconciler] exporting to image
+#10 exporting layers done
+#10 exporting manifest sha256:a4847ca00923bb102d6793851fbb895fc1f7ca932a0e0e2f6a4a88bf6b46d2d3
+#10 exporting manifest sha256:a4847ca00923bb102d6793851fbb895fc1f7ca932a0e0e2f6a4a88bf6b46d2d3 0.0s done
+#10 exporting config sha256:a3976eac8bdf85dc24193dfda598168fef509e5361025a1b9052c28657502bc3 0.0s done
+#10 exporting attestation manifest sha256:0af05f5ec0c0faea2f5ba96373dde4b2fa9bcbf0262c3a5d606d14d5cfd62ca9 0.1s done
+#10 exporting manifest list sha256:8d055b63b60e0c6e34ec429c6f0ecf46692371aa8302abe1efec8988adfc140c
+#10 exporting manifest list sha256:8d055b63b60e0c6e34ec429c6f0ecf46692371aa8302abe1efec8988adfc140c 0.0s done
+#10 naming to docker.io/library/api03-reconciler:latest done
+#10 unpacking to docker.io/library/api03-reconciler:latest 0.0s done
+#10 DONE 0.3s
+
+#11 [outbox-relay] exporting to image
+#11 exporting layers done
+#11 exporting manifest sha256:5fd715c26224543af66e121be9f37e1688b2026788c333f4332f8c8210303eba 0.0s done
+#11 exporting config sha256:70d44c0111105627da6e801b41ee071e5257e1620eee7d04cb69821e95b6cb06 0.0s done
+#11 exporting attestation manifest sha256:41f12db7d2fd1187c36deb237c026c426d3fd7ac39e9bf697a275d38790a68fd 0.1s done
+#11 exporting manifest list sha256:51e238d8c18e9da689fe8f6fdab5cf5b12633ef6eb85936cb8ca91ff85cf87a2 0.0s done
+#11 naming to docker.io/library/api03-outbox-relay:latest 0.0s done
+#11 unpacking to docker.io/library/api03-outbox-relay:latest done
+#11 DONE 0.3s
+
+#12 [planner] exporting to image
+#12 exporting layers done
+#12 exporting manifest sha256:17a1c4f037abc1a7c69cf9b290cd452d7b161b58623a79aab0899d2d150a3eb7 0.0s done
+#12 exporting config sha256:8e1162bd85085deda2da1ebbea8d9dee620bfdf90edb9a02dbc1e7e3323246e8 done
+#12 exporting attestation manifest sha256:1ae9652a0499e731a01ea1f63d75f971426c3410ceab459250e1c399cddec440 0.1s done
+#12 exporting manifest list sha256:aaf22230389ff25b0486ff4f0f9a8cb85d3973fa1755cd74a986dec0735a5e5a 0.0s done
+#12 naming to docker.io/library/api03-planner:latest done
+#12 unpacking to docker.io/library/api03-planner:latest 0.1s done
+#12 DONE 0.3s
+
+#13 [reconciler] resolving provenance for metadata file
+#13 DONE 0.1s
+
+#14 [outbox-relay] resolving provenance for metadata file
+#14 DONE 0.1s
+
+#15 [planner] resolving provenance for metadata file
+#15 DONE 0.0s
+ Image api03-outbox-relay Built 
+ Image api03-planner Built 
+ Image api03-reconciler Built 
+ Container api03-kafka-1 Running 
+ Container api03-postgres-1 Running 
+ Container api03-outbox-relay-1 Creating 
+ Container api03-planner-1 Creating 
+ Container api03-reconciler-1 Creating 
+ Container api03-outbox-relay-1 Created 
+ Container api03-planner-1 Created 
+ Container api03-reconciler-1 Created 
+ Container api03-kafka-1 Waiting 
+ Container api03-kafka-1 Healthy 
+ Container api03-kafka-init-1 Starting 
+ Container api03-kafka-init-1 Started 
+ Container api03-kafka-init-1 Waiting 
+ Container api03-postgres-1 Waiting 
+ Container api03-kafka-init-1 Waiting 
+ Container api03-postgres-1 Waiting 
+ Container api03-kafka-init-1 Waiting 
+ Container api03-postgres-1 Waiting 
+ Container api03-postgres-1 Healthy 
+ Container api03-postgres-1 Healthy 
+ Container api03-postgres-1 Healthy 
+ Container api03-kafka-init-1 Exited 
+ Container api03-outbox-relay-1 Starting 
+ Container api03-kafka-init-1 Exited 
+ Container api03-reconciler-1 Starting 
+ Container api03-kafka-init-1 Exited 
+ Container api03-planner-1 Starting 
+ Container api03-outbox-relay-1 Started 
+ Container api03-reconciler-1 Started 
+ Container api03-planner-1 Started 
+SERVICE        STATUS
+api            Up About a minute (healthy)
+kafka          Up 26 minutes (healthy)
+outbox-relay   Up 5 seconds
+planner        Up 5 seconds
+postgres       Up 26 minutes (healthy)
+reconciler     Up 5 seconds
+
+===== POST /runs (3 scenarios x 2 personas x 2 noise profiles = 12 calls, max_concurrency 3) =====
+{
+    "id": "6e2a3822-0d68-4315-ab92-95cf89773a66",
+    "status": "queued",
+    "item_count": 12,
+    "estimate": {
+        "tts_seconds": 468.0,
+        "stt_seconds": 936.0,
+        "judge_calls": 12,
+        "caller_llm_calls": 80,
+        "est_cost": 0.0
+    }
+}
+RUN_ID=6e2a3822-0d68-4315-ab92-95cf89773a66
+
+===== POST /runs:estimate (same body, creates nothing) =====
+{
+    "item_count": 12,
+    "estimate": {
+        "tts_seconds": 468.0,
+        "stt_seconds": 936.0,
+        "judge_calls": 12,
+        "caller_llm_calls": 80,
+        "est_cost": 0.0
+    },
+    "remaining_budget": null,
+    "over_budget": false
+}
+
+===== outbox row for the run (written in the same transaction; published by outbox-relay) =====
+           topic            |                 key                  | published | attempts |               event_id               | producer 
+----------------------------+--------------------------------------+-----------+----------+--------------------------------------+----------
+ pareeksha.run.requested.v1 | 6e2a3822-0d68-4315-ab92-95cf89773a66 | t         |        1 | 6ed6bf62-ec10-47ce-92c5-41d5f664d05f | api
+(1 row)
+
+
+===== run row =====
+                  id                  | status |  kind  | active_calls | cap | item_count | estimated_cost 
+--------------------------------------+--------+--------+--------------+-----+------------+----------------
+ 6e2a3822-0d68-4315-ab92-95cf89773a66 | queued | matrix |            0 | 3   | 12         |           0.00
+(1 row)
+
+
+===== run_items created by the planner (the 12 calls) =====
+             run_item_id              |          scenario           |      persona      |   noise_profile    |        seed         | status 
+--------------------------------------+-----------------------------+-------------------+--------------------+---------------------+--------
+ 1e7ace0c-2af8-4dcc-853b-de2787c479bf | Confused about the due date | Pooja — student   | auto_rickshaw_0db  | 5834942304373270504 | queued
+ 333420c7-f7ae-4366-ac75-97aa7506bc79 | Confused about the due date | Pooja — student   | mobile_weak_signal | 8832179802426974646 | queued
+ 3834641c-fdf7-4e28-aeda-d25634ab987e | Disputes the EMI amount     | Deepa — homemaker | auto_rickshaw_0db  | 6712133448978283352 | queued
+ 38e93741-5723-4fd7-bb5b-1737b471f45a | Abusive caller              | Deepa — homemaker | auto_rickshaw_0db  | 1879244808372526146 | queued
+ 3f214967-e697-436d-986f-be60280eff77 | Confused about the due date | Deepa — homemaker | mobile_weak_signal | 1657388225474202238 | queued
+ 621762e3-c4a1-435b-9f41-b25e15ddac95 | Disputes the EMI amount     | Pooja — student   | mobile_weak_signal | 6562594901239324120 | queued
+ 9fd74212-a45e-435f-83f2-f4640e8497dc | Confused about the due date | Deepa — homemaker | auto_rickshaw_0db  | 4723281298823824804 | queued
+ b1bf55e6-daf2-4712-a190-8af61993ab6a | Abusive caller              | Deepa — homemaker | mobile_weak_signal |  982116955916890942 | queued
+ bd2b0bd7-d8b9-4454-83e0-2472aa9dd12c | Abusive caller              | Pooja — student   | mobile_weak_signal | 8956683255125129671 | queued
+ c56650e4-8a13-4991-ab2f-9e0f52f1898f | Disputes the EMI amount     | Deepa — homemaker | mobile_weak_signal | 3462826675364843363 | queued
+ e14292c3-94d6-4eb6-abae-8e1406a763ed | Abusive caller              | Pooja — student   | auto_rickshaw_0db  | 6602522484580294312 | queued
+ e2118978-9271-4fd9-81bc-614a5a29cd59 | Disputes the EMI amount     | Pooja — student   | auto_rickshaw_0db  | 8341103098171660266 | queued
+(12 rows)
+
+
+===== Kafka: call.requested for this run (key = run_item_id) with partition / offset =====
+12 call.requested messages for run 6e2a3822-0d68-4315-ab92-95cf89773a66
+Partition:1 Offset:9   key=1e7ace0c-2af8-4dcc-853b-de2787c479bf event_id=28428442-6052-57fa-93cd-5b1506344795 causation=6ed6bf62.. seed=5834942304373270504
+Partition:1 Offset:10  key=333420c7-f7ae-4366-ac75-97aa7506bc79 event_id=5b56ee50-1e75-5d5d-99f7-e42a2e7e7ffd causation=6ed6bf62.. seed=8832179802426974646
+Partition:5 Offset:13  key=3834641c-fdf7-4e28-aeda-d25634ab987e event_id=5da761b0-5205-57f5-b6d7-2e133d78bd2d causation=6ed6bf62.. seed=6712133448978283352
+Partition:5 Offset:14  key=38e93741-5723-4fd7-bb5b-1737b471f45a event_id=1a9040a4-f918-5ae7-8f9d-4ba89ac64223 causation=6ed6bf62.. seed=1879244808372526146
+Partition:3 Offset:10  key=3f214967-e697-436d-986f-be60280eff77 event_id=3360d3e1-05a3-5a53-9f86-daa6e53147d5 causation=6ed6bf62.. seed=1657388225474202238
+Partition:5 Offset:15  key=621762e3-c4a1-435b-9f41-b25e15ddac95 event_id=23575c8f-a2a1-5e3e-a28b-e852a3aebeb2 causation=6ed6bf62.. seed=6562594901239324120
+Partition:2 Offset:16  key=9fd74212-a45e-435f-83f2-f4640e8497dc event_id=e75c6ae1-c79e-502e-b4d4-689634c2661f causation=6ed6bf62.. seed=4723281298823824804
+Partition:0 Offset:15  key=b1bf55e6-daf2-4712-a190-8af61993ab6a event_id=75d0188c-963b-5f9f-b470-7056744c50d6 causation=6ed6bf62.. seed=982116955916890942
+Partition:1 Offset:11  key=bd2b0bd7-d8b9-4454-83e0-2472aa9dd12c event_id=5581775c-a2b3-59ec-84a0-6bda6fbe3bfb causation=6ed6bf62.. seed=8956683255125129671
+Partition:3 Offset:11  key=c56650e4-8a13-4991-ab2f-9e0f52f1898f event_id=d988d17f-829f-5237-8230-de677d6760df causation=6ed6bf62.. seed=3462826675364843363
+Partition:1 Offset:12  key=e14292c3-94d6-4eb6-abae-8e1406a763ed event_id=1467663e-c124-5bae-bd6c-e0aab0cf5128 causation=6ed6bf62.. seed=6602522484580294312
+Partition:1 Offset:13  key=e2118978-9271-4fd9-81bc-614a5a29cd59 event_id=cc8cd7a9-2f04-5bdc-bf84-c98becad0710 causation=6ed6bf62.. seed=8341103098171660266
+
+===== Kafka: consumer group planner (offsets / lag on pareeksha.run.requested.v1) =====
+GROUP           TOPIC                      PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                    HOST            CLIENT-ID
+planner         pareeksha.run.requested.v1 0          2               2               0               planner-1-9d49d311-b469-45a5-905e-0a65a1a1e5c6 /172.20.0.7     planner-1
+planner         pareeksha.run.requested.v1 1          4               4               0               planner-1-9d49d311-b469-45a5-905e-0a65a1a1e5c6 /172.20.0.7     planner-1
+planner         pareeksha.run.requested.v1 2          -               0               -               planner-1-9d49d311-b469-45a5-905e-0a65a1a1e5c6 /172.20.0.7     planner-1
+planner         pareeksha.run.requested.v1 3          -               0               -               planner-1-9d49d311-b469-45a5-905e-0a65a1a1e5c6 /172.20.0.7     planner-1
+planner         pareeksha.run.requested.v1 4          1               1               0               planner-1-9d49d311-b469-45a5-905e-0a65a1a1e5c6 /172.20.0.7     planner-1
+planner         pareeksha.run.requested.v1 5          -               0               -               planner-1-9d49d311-b469-45a5-905e-0a65a1a1e5c6 /172.20.0.7     planner-1
+
+===== planner container log =====
+planner-1  | {"ts": "2026-10-24T03:23:02.760603+00:00", "level": "info", "logger": "__main__", "msg": "planned run 6e2a3822-0d68-4315-ab92-95cf89773a66: 12 item(s)"}
+planner-1  | {"ts": "2026-10-24T03:23:02.805820+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "planner", "event_id": "6ed6bf62-ec10-47ce-92c5-41d5f664d05f", "correlation_id": "6e2a3822-0d68-4315-ab92-95cf89773a66", "topic": "pareeksha.run.requested.v1", "attempt": 1}
+
+===== run slots: 12 simulators race for the slots of this run (cap 3) =====
+run 6e2a3822-0d68-4315-ab92-95cf89773a66: 12 queued items, max_concurrency=3
+start_item results: {'throttled': 9, 'taken': 3}
+test_runs (active_calls, status): (3, 'running')
+run_items by status: [('connecting', 3), ('queued', 9)]
+
+===== leak a slot, let the reconciler container heal it (runs every 60 s) =====
+UPDATE 1
+ active_calls_after_leak | really_active 
+-------------------------+---------------
+                       7 |             3
+(1 row)
+
+ active_calls_after_reconcile 
+------------------------------
+                            3
+(1 row)
+
+reconciler-1  | {"ts": "2026-10-24T03:23:57.155329+00:00", "level": "warning", "logger": "pareeksha.runs.slots", "msg": "repaired run slot counter"}
+
+===== GET /runs/{id} and /items (progress and joined names) =====
+{
+  "id": "6e2a3822-0d68-4315-ab92-95cf89773a66",
+  "status": "running",
+  "kind": "matrix",
+  "progress": {
+    "total": 12,
+    "queued": 9,
+    "in_progress": 3,
+    "evaluated": 0,
+    "error": 0
+  },
+  "estimated_cost": 0.0
+}
+[
+ {
+  "id": "1e7ace0c-2af8-4dcc-853b-de2787c479bf",
+  "scenario": "Confused about the due date",
+  "persona": "Pooja \u2014 student",
+  "noise_profile": "auto_rickshaw_0db",
+  "status": "queued",
+  "call_id": null,
+  "overall_score": null,
+  "passed": null,
+  "critical_failure": null
+ },
+ {
+  "id": "333420c7-f7ae-4366-ac75-97aa7506bc79",
+  "scenario": "Confused about the due date",
+  "persona": "Pooja \u2014 student",
+  "noise_profile": "mobile_weak_signal",
+  "status": "queued",
+  "call_id": null,
+  "overall_score": null,
+  "passed": null,
+  "critical_failure": null
+ },
+ {
+  "id": "3834641c-fdf7-4e28-aeda-d25634ab987e",
+  "scenario": "Disputes the EMI amount",
+  "persona": "Deepa \u2014 homemaker",
+  "noise_profile": "auto_rickshaw_0db",
+  "status": "connecting",
+  "call_id": null,
+  "overall_score": null,
+  "passed": null,
+  "critical_failure": null
+ }
+]
+next_cursor set: True
+GET /runs -> [('6e2a3822', 'running')]
+
+===== POST /runs/{id}/cancel (queued items cancelled, the 3 in-flight calls are left to finish) =====
+cancelled {'total': 12, 'queued': 0, 'in_progress': 3, 'evaluated': 0, 'error': 0}
+   status   | count 
+------------+-------
+ cancelled  |     9
+ connecting |     3
+(2 rows)
+
+{"error":{"code":"conflict","message":"Run is already cancelled","details":{"status":"cancelled"}}}
+second cancel -> HTTP 409
+
+===== consumer group offsets after everything =====
+GROUP           TOPIC                      PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                    HOST            CLIENT-ID
+planner         pareeksha.run.requested.v1 0          2               2               0               planner-1-9d49d311-b469-45a5-905e-0a65a1a1e5c6 /172.20.0.7     planner-1
+planner         pareeksha.run.requested.v1 1          4               4               0               planner-1-9d49d311-b469-45a5-905e-0a65a1a1e5c6 /172.20.0.7     planner-1
+planner         pareeksha.run.requested.v1 2          -               0               -               planner-1-9d49d311-b469-45a5-905e-0a65a1a1e5c6 /172.20.0.7     planner-1
+planner         pareeksha.run.requested.v1 3          -               0               -               planner-1-9d49d311-b469-45a5-905e-0a65a1a1e5c6 /172.20.0.7     planner-1
+planner         pareeksha.run.requested.v1 4          1               1               0               planner-1-9d49d311-b469-45a5-905e-0a65a1a1e5c6 /172.20.0.7     planner-1
+planner         pareeksha.run.requested.v1 5          -               0               -               planner-1-9d49d311-b469-45a5-905e-0a65a1a1e5c6 /172.20.0.7     planner-1
+
+commit: 71a1022

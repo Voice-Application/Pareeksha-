@@ -568,7 +568,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Override diarization roles of an uploaded call; re-evaluates it */
+        /**
+         * Override diarization roles of an uploaded call; re-evaluates it
+         * @description Rebuild the turns from the stored diarized segments with the given roles, then ask the
+         *     evaluator to judge the call again (same rubric version; the evaluation row is replaced).
+         */
         post: operations["set_speaker_map"];
         delete?: never;
         options?: never;
@@ -810,7 +814,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Redeliver Integration Delivery */
+        /** Send a logged delivery again (same event id; the receiver dedupes on it) */
         post: operations["redeliver_integration_delivery"];
         delete?: never;
         options?: never;
@@ -948,7 +952,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Judge vs human agreement (kappa, Spearman, per-dimension MAE) */
+        /**
+         * Judge vs human agreement (kappa, Spearman, per-dimension MAE)
+         * @description One human label per evaluation (the newest review) against the judge's verdict. Without `rubric_version` the active rubric is used (all versions when none is active).
+         */
         get: operations["get_calibration"];
         put?: never;
         post?: never;
@@ -1004,6 +1011,26 @@ export interface paths {
          * @description For consumers outside the API (e.g. a data team reading `evaluation.completed`). The Pydantic models in `pareeksha/events/schemas.py` are the source of truth.
          */
         get: operations["get_event_schemas"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/speech/providers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Speech (STT/TTS) providers: configured?, defaults, capabilities
+         * @description Reports which of the pluggable speech providers have their credentials set in the environment, which ones are the `STT_PROVIDER` / `TTS_PROVIDER` defaults, and what each can do. Presence of a key is reported, never the key; validity is not checked.
+         */
+        get: operations["get_speech_providers"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2579,6 +2606,23 @@ export interface components {
             regression_test_id: string;
         };
         /**
+         * ProviderStatus
+         * @description One row of ``GET /api/v1/speech/providers``. Never contains key material.
+         */
+        ProviderStatus: {
+            name: components["schemas"]["SpeechProviderName"];
+            /** Configured */
+            configured: boolean;
+            /** Missing Env */
+            missing_env: string[];
+            /** Stt Default */
+            stt_default: boolean;
+            /** Tts Default */
+            tts_default: boolean;
+            stt: components["schemas"]["STTCapabilities"];
+            tts: components["schemas"]["TTSCapabilities"];
+        };
+        /**
          * Recordings
          * @description Download URLs (``GET /calls/{id}/audio/{track}``); a track is null when not recorded.
          */
@@ -3003,6 +3047,34 @@ export interface components {
              */
             score_distribution?: number[];
         };
+        /** STTCapabilities */
+        STTCapabilities: {
+            /** Streaming */
+            streaming: boolean;
+            /**
+             * Batch
+             * @default true
+             */
+            batch: boolean;
+            /** Word Timings */
+            word_timings: boolean;
+            /** Word Confidence */
+            word_confidence: boolean;
+            /** Diarization */
+            diarization: boolean;
+            /**
+             * Denoise
+             * @default false
+             */
+            denoise: boolean;
+            /** Max Batch Seconds */
+            max_batch_seconds?: number | null;
+            /**
+             * Languages Note
+             * @default
+             */
+            languages_note: string;
+        };
         /** SamplesUploadResult */
         SamplesUploadResult: {
             /** Accepted */
@@ -3226,6 +3298,35 @@ export interface components {
             tags?: string[] | null;
         };
         /**
+         * SpeechProviderName
+         * @enum {string}
+         */
+        SpeechProviderName: "gnani" | "google" | "azure" | "elevenlabs" | "deepgram";
+        /** SpeechProvidersOut */
+        SpeechProvidersOut: {
+            /** Items */
+            items: components["schemas"]["ProviderStatus"][];
+        };
+        /** TTSCapabilities */
+        TTSCapabilities: {
+            /** Sample Rates */
+            sample_rates: number[];
+            /** Voice Listing */
+            voice_listing: boolean;
+            /** Speed Control */
+            speed_control: boolean;
+            /**
+             * Voices Per Language
+             * @default false
+             */
+            voices_per_language: boolean;
+            /**
+             * Languages Note
+             * @default
+             */
+            languages_note: string;
+        };
+        /**
          * TestConnectionResult
          * @description ``ok=true`` carries the timing fields; ``ok=false`` carries ``error`` and ``detail``.
          */
@@ -3326,7 +3427,7 @@ export interface components {
              * Provider
              * @enum {string}
              */
-            provider: "gnani" | "gemini" | "deepseek" | "other";
+            provider: "gnani" | "gemini" | "deepseek" | "google" | "azure" | "elevenlabs" | "deepgram" | "other";
             /**
              * Operation
              * @example tts
@@ -5138,6 +5239,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
     estimate_run: {
@@ -5191,6 +5301,15 @@ export interface operations {
             };
             /** @description not_found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5375,6 +5494,13 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description Kafka unreachable */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     list_run_items: {
@@ -5533,7 +5659,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "text/html": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description unauthorized: missing or invalid API key */
@@ -5542,7 +5668,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "text/html": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description forbidden: key lacks the required scope */
@@ -5551,7 +5677,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "text/html": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description not_found */
@@ -5560,7 +5686,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "text/html": components["schemas"]["ErrorResponse"];
                 };
             };
         };
@@ -5625,6 +5751,15 @@ export interface operations {
             };
             /** @description not_found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5932,6 +6067,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description range_not_satisfiable */
+            416: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
     reevaluate_call: {
@@ -5987,6 +6131,15 @@ export interface operations {
             };
             /** @description not_found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7292,6 +7445,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
     receive_inbound_webhook: {
@@ -7887,6 +8049,13 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description upstream_error: Kafka unreachable */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     get_event_schemas: {
@@ -7907,6 +8076,53 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_speech_providers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SpeechProvidersOut"];
                 };
             };
             /** @description validation_error */

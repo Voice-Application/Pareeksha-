@@ -1,0 +1,38 @@
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, initial schema (docs/schema.sql v0.2)
+database pareeksha_demo_70646962 migrated with Alembic
+receiver listening on https://localhost:36013/hook (self-signed TLS, verifies HMAC, dedupes on event id)
+integration 865e3c3e-861c-425c-972c-9856251343b9 (connector webhook, secret stored Fernet-encrypted)
+ERROR [aiokafka.consumer.group_coordinator] Group Coordinator Request failed: [Error 15] GroupCoordinatorNotAvailableError
+WARNI [aiokafka.consumer.group_coordinator] Marking the coordinator dead (node 1)for group integrations.
+WARNI [aiokafka.consumer.group_coordinator] Marking the coordinator dead (node 1)for group integrations.
+
+=== A. one evaluation.completed event -> one signed POST + one delivery-log row
+  SELECT event, direction, status, attempts, http_status, event_type FROM integration_deliveries ...
+    ('6382e73c', 'outbound', 'succeeded', 1, 200, 'evaluation.completed')
+  -> 1 row(s)
+  receiver: 1 POST(s), unique event ids = 1, signatures valid = True
+  payload: type=evaluation.completed score=42.0 passed=False link=https://pareeksha.example.com/calls/42866e38-5c70-4db9-ba42-e8dcd1d6065f
+
+=== B. the SAME event delivered to Kafka three more times -> still one delivery
+  SELECT event, direction, status, attempts, http_status, event_type FROM integration_deliveries ...
+    ('6382e73c', 'outbound', 'succeeded', 1, 200, 'evaluation.completed')
+  -> 1 row(s)
+  receiver: 1 POST(s), unique event ids = 1, signatures valid = True
+  processed_events rows for this event: (1,)
+
+=== C. kill -9 the worker while its HTTP request is in flight, restart it
+  receiver has the request, holding the response; row before the crash:
+  SELECT event, direction, status, attempts, http_status, event_type FROM integration_deliveries ...
+    ('6382e73c', 'outbound', 'succeeded', 1, 200, 'evaluation.completed')
+    ('99bd4be5', 'outbound', 'pending', 1, None, 'evaluation.completed')
+  -> 2 row(s)
+  worker killed with SIGKILL; Kafka offset committed? -> False
+  after restart:
+  SELECT event, direction, status, attempts, http_status, event_type FROM integration_deliveries ...
+    ('6382e73c', 'outbound', 'succeeded', 1, 200, 'evaluation.completed')
+    ('99bd4be5', 'outbound', 'succeeded', 2, 200, 'evaluation.completed')
+  -> 2 row(s)
+  receiver saw 2 POST(s) for the crashed event, 1 unique event id (receiver dedupes on X-Pareeksha-Event-Id)
+  receiver: 3 POST(s), unique event ids = 2, signatures valid = True

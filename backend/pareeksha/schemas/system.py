@@ -9,6 +9,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 from pareeksha.schemas.common import RequestModel, Scope
+from pareeksha.speech.registry import ProviderStatus
 
 
 class CalibrationOut(BaseModel):
@@ -19,7 +20,9 @@ class CalibrationOut(BaseModel):
 
 
 class UsageRow(BaseModel):
-    provider: Literal["gnani", "gemini", "deepseek", "other"]
+    provider: Literal[
+        "gnani", "gemini", "deepseek", "google", "azure", "elevenlabs", "deepgram", "other"
+    ]
     operation: str = Field(examples=["tts", "stt_batch", "llm_judge"])
     unit_type: Literal["audio_seconds", "characters", "tokens"]
     units: float
@@ -38,6 +41,10 @@ class HealthOut(BaseModel):
 
     db: str
     kafka: str
+
+
+class SpeechProvidersOut(BaseModel):
+    items: list[ProviderStatus]
 
 
 class MetricsSummary(BaseModel):

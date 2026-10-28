@@ -1,0 +1,99 @@
+{"kind": "tts", "voice": "Vasudha", "language": "kn-IN", "chars": 124, "audio_s": 10.48}
+{"kind": "tts", "voice": "Prakash", "language": "kn-IN", "chars": 52, "audio_s": 4.24}
+{"kind": "stt", "language": "kn-IN", "audio_s": 4.24, "line": "pstn_market_5db"}
+{"kind": "tts", "voice": "Vasudha", "language": "kn-IN", "chars": 68, "audio_s": 5.52}
+{"kind": "tts", "voice": "Prakash", "language": "kn-IN", "chars": 14, "audio_s": 1.68}
+{"kind": "stt", "language": "kn-IN", "audio_s": 1.68, "line": "pstn_market_5db"}
+{"kind": "tts", "voice": "Vasudha", "language": "kn-IN", "chars": 26, "audio_s": 1.92}
+{"kind": "llm", "provider": "deepseek", "model": "deepseek-v4-pro", "purpose": "judge", "input_tokens": 2559, "output_tokens": 422, "cached_input_tokens": 768, "est_cost": 0.005049, "latency_ms": 4750, "prompt_hash": "081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480", "repair": false, "cache_hit": false}
+{"kind": "stt", "language": "kn-IN", "audio_s": 4.24, "line": "pstn_market_5db"}
+{"kind": "stt", "language": "kn-IN", "audio_s": 1.68, "line": "pstn_market_5db"}
+{"kind": "llm", "provider": "deepseek", "model": "deepseek-v4-pro", "purpose": "judge", "input_tokens": 2559, "output_tokens": 428, "cached_input_tokens": 2432, "est_cost": 0.00507276, "latency_ms": 5072, "prompt_hash": "081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480", "repair": false, "cache_hit": false}
+{"kind": "stt", "language": "kn-IN", "audio_s": 4.24, "line": "pstn_market_5db"}
+{"kind": "stt", "language": "kn-IN", "audio_s": 1.68, "line": "pstn_market_5db"}
+{"kind": "llm", "provider": "deepseek", "model": "deepseek-v4-pro", "purpose": "judge", "input_tokens": 2559, "output_tokens": 431, "cached_input_tokens": 2432, "est_cost": 0.00508464, "latency_ms": 5038, "prompt_hash": "081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480", "repair": false, "cache_hit": false}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 76, "audio_s": 6.0}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 68, "audio_s": 5.04}
+{"kind": "stt", "language": "hi-IN", "audio_s": 5.04, "line": "pstn_market_5db"}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 57, "audio_s": 4.56}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 39, "audio_s": 2.8}
+{"kind": "stt", "language": "hi-IN", "audio_s": 2.8, "line": "pstn_market_5db"}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 61, "audio_s": 4.72}
+{"kind": "llm", "provider": "deepseek", "model": "deepseek-v4-pro", "purpose": "judge", "input_tokens": 2534, "output_tokens": 428, "cached_input_tokens": 768, "est_cost": 0.00503976, "latency_ms": 4751, "prompt_hash": "081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480", "repair": false, "cache_hit": false}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 102, "audio_s": 7.84}
+{"kind": "stt", "language": "hi-IN", "audio_s": 5.04, "line": "clean_16k"}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 84, "audio_s": 6.0}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 48, "audio_s": 4.08}
+{"kind": "stt", "language": "hi-IN", "audio_s": 4.08, "line": "clean_16k"}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 69, "audio_s": 4.96}
+{"kind": "llm", "provider": "deepseek", "model": "deepseek-v4-pro", "purpose": "judge", "input_tokens": 2581, "output_tokens": 452, "cached_input_tokens": 768, "est_cost": 0.0051968399999999994, "latency_ms": 6543, "prompt_hash": "081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480", "repair": false, "cache_hit": false}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 84, "audio_s": 6.56}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 51, "audio_s": 3.76}
+{"kind": "stt", "language": "hi-IN", "audio_s": 3.76, "line": "pstn_market_5db"}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 57, "audio_s": 4.56}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 14, "audio_s": 1.44}
+{"kind": "stt", "language": "hi-IN", "audio_s": 1.44, "line": "pstn_market_5db"}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 22, "audio_s": 2.0}
+{"kind": "llm", "provider": "deepseek", "model": "deepseek-v4-pro", "purpose": "judge", "input_tokens": 2485, "output_tokens": 475, "cached_input_tokens": 768, "est_cost": 0.0051611999999999995, "latency_ms": 10569, "prompt_hash": "081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480", "repair": false, "cache_hit": false}
+{"kind": "tts", "voice": "Vasudha", "language": "kn-IN", "chars": 157, "audio_s": 13.12}
+{"kind": "tts", "voice": "Prakash", "language": "kn-IN", "chars": 61, "audio_s": 4.96}
+{"kind": "stt", "language": "kn-IN", "audio_s": 4.96, "line": "clean_16k"}
+{"kind": "tts", "voice": "Vasudha", "language": "kn-IN", "chars": 47, "audio_s": 3.84}
+{"kind": "tts", "voice": "Prakash", "language": "kn-IN", "chars": 58, "audio_s": 4.56}
+{"kind": "stt", "language": "kn-IN", "audio_s": 4.56, "line": "clean_16k"}
+{"kind": "tts", "voice": "Vasudha", "language": "kn-IN", "chars": 121, "audio_s": 10.8}
+{"kind": "stt", "language": "kn-IN", "audio_s": 4.24, "line": "pstn_market_5db"}
+{"kind": "tts", "voice": "Vasudha", "language": "kn-IN", "chars": 65, "audio_s": 6.16}
+{"kind": "stt", "language": "kn-IN", "audio_s": 1.68, "line": "pstn_market_5db"}
+{"kind": "llm", "provider": "deepseek", "model": "deepseek-v4-pro", "purpose": "judge", "input_tokens": 2528, "output_tokens": 461, "cached_input_tokens": 896, "est_cost": 0.00516252, "latency_ms": 5524, "prompt_hash": "081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480", "repair": false, "cache_hit": false}
+{"kind": "stt", "language": "hi-IN", "audio_s": 5.04, "line": "pstn_market_5db"}
+{"kind": "stt", "language": "hi-IN", "audio_s": 2.8, "line": "pstn_market_5db"}
+{"kind": "llm", "provider": "deepseek", "model": "deepseek-v4-pro", "purpose": "judge", "input_tokens": 2534, "output_tokens": 438, "cached_input_tokens": 2432, "est_cost": 0.00507936, "latency_ms": 5488, "prompt_hash": "081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480", "repair": false, "cache_hit": false}
+{"kind": "stt", "language": "hi-IN", "audio_s": 5.04, "line": "clean_16k"}
+{"kind": "stt", "language": "hi-IN", "audio_s": 4.08, "line": "clean_16k"}
+{"kind": "llm", "provider": "deepseek", "model": "deepseek-v4-pro", "purpose": "judge", "input_tokens": 2581, "output_tokens": 446, "cached_input_tokens": 2560, "est_cost": 0.00517308, "latency_ms": 5348, "prompt_hash": "081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480", "repair": false, "cache_hit": false}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 83, "audio_s": 6.64}
+{"kind": "stt", "language": "hi-IN", "audio_s": 3.76, "line": "pstn_market_5db"}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 56, "audio_s": 4.16}
+{"kind": "stt", "language": "hi-IN", "audio_s": 1.44, "line": "pstn_market_5db"}
+{"kind": "llm", "provider": "deepseek", "model": "deepseek-v4-pro", "purpose": "judge", "input_tokens": 2462, "output_tokens": 434, "cached_input_tokens": 896, "est_cost": 0.004968480000000001, "latency_ms": 5357, "prompt_hash": "081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480", "repair": false, "cache_hit": false}
+{"kind": "tts", "voice": "Vasudha", "language": "kn-IN", "chars": 150, "audio_s": 12.0}
+{"kind": "stt", "language": "kn-IN", "audio_s": 4.96, "line": "clean_16k"}
+{"kind": "stt", "language": "kn-IN", "audio_s": 4.56, "line": "clean_16k"}
+{"kind": "tts", "voice": "Vasudha", "language": "kn-IN", "chars": 110, "audio_s": 8.72}
+{"kind": "llm", "provider": "deepseek", "model": "deepseek-v4-pro", "purpose": "judge", "input_tokens": 2717, "output_tokens": 446, "cached_input_tokens": 768, "est_cost": 0.005352600000000001, "latency_ms": 5692, "prompt_hash": "081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480", "repair": false, "cache_hit": false}
+{"kind": "tts", "voice": "Vasudha", "language": "kn-IN", "chars": 112, "audio_s": 8.88}
+{"kind": "tts", "voice": "Prakash", "language": "kn-IN", "chars": 72, "audio_s": 5.44}
+{"kind": "stt", "language": "kn-IN", "audio_s": 5.44, "line": "clean_16k"}
+{"kind": "tts", "voice": "Vasudha", "language": "kn-IN", "chars": 88, "audio_s": 7.36}
+{"kind": "tts", "voice": "Prakash", "language": "kn-IN", "chars": 42, "audio_s": 4.16}
+{"kind": "stt", "language": "kn-IN", "audio_s": 4.16, "line": "clean_16k"}
+{"kind": "tts", "voice": "Vasudha", "language": "kn-IN", "chars": 80, "audio_s": 7.44}
+{"kind": "llm", "provider": "deepseek", "model": "deepseek-v4-pro", "purpose": "judge", "input_tokens": 2692, "output_tokens": 441, "cached_input_tokens": 896, "est_cost": 0.0052998, "latency_ms": 5605, "prompt_hash": "081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480", "repair": false, "cache_hit": false}
+{"kind": "stt", "language": "kn-IN", "audio_s": 4.24, "line": "clean_16k"}
+{"kind": "stt", "language": "kn-IN", "audio_s": 1.68, "line": "clean_16k"}
+{"kind": "llm", "provider": "deepseek", "model": "deepseek-v4-pro", "purpose": "judge", "input_tokens": 2559, "output_tokens": 460, "cached_input_tokens": 896, "est_cost": 0.00519948, "latency_ms": 5098, "prompt_hash": "081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480", "repair": false, "cache_hit": false}
+{"kind": "stt", "language": "kn-IN", "audio_s": 4.96, "line": "pstn_market_5db"}
+{"kind": "stt", "language": "kn-IN", "audio_s": 4.56, "line": "pstn_market_5db"}
+{"kind": "llm", "provider": "deepseek", "model": "deepseek-v4-pro", "purpose": "judge", "input_tokens": 2719, "output_tokens": 464, "cached_input_tokens": 768, "est_cost": 0.00542652, "latency_ms": 6434, "prompt_hash": "081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480", "repair": false, "cache_hit": false}
+{"kind": "tts", "voice": "Vasudha", "language": "kn-IN", "chars": 86, "audio_s": 7.36}
+{"kind": "stt", "language": "kn-IN", "audio_s": 5.44, "line": "pstn_market_5db"}
+{"kind": "tts", "voice": "Vasudha", "language": "kn-IN", "chars": 56, "audio_s": 4.88}
+{"kind": "tts", "voice": "Prakash", "language": "kn-IN", "chars": 39, "audio_s": 3.04}
+{"kind": "stt", "language": "kn-IN", "audio_s": 3.04, "line": "pstn_market_5db"}
+{"kind": "tts", "voice": "Vasudha", "language": "kn-IN", "chars": 73, "audio_s": 6.96}
+{"kind": "llm", "provider": "deepseek", "model": "deepseek-v4-pro", "purpose": "judge", "input_tokens": 2644, "output_tokens": 437, "cached_input_tokens": 896, "est_cost": 0.0052206, "latency_ms": 5921, "prompt_hash": "081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480", "repair": false, "cache_hit": false}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 120, "audio_s": 8.88}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 54, "audio_s": 3.92}
+{"kind": "stt", "language": "hi-IN", "audio_s": 3.92, "line": "clean_16k"}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 33, "audio_s": 3.28}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 42, "audio_s": 3.6}
+{"kind": "stt", "language": "hi-IN", "audio_s": 3.6, "line": "clean_16k"}
+{"kind": "tts", "voice": "Shivani", "language": "hi-IN", "chars": 88, "audio_s": 6.48}
+{"kind": "llm", "provider": "deepseek", "model": "deepseek-v4-pro", "purpose": "judge", "input_tokens": 2538, "output_tokens": 452, "cached_input_tokens": 768, "est_cost": 0.00514008, "latency_ms": 6645, "prompt_hash": "081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480", "repair": false, "cache_hit": false}
+{"kind": "stt", "language": "hi-IN", "audio_s": 3.92, "line": "pstn_market_5db"}
+{"kind": "stt", "language": "hi-IN", "audio_s": 3.6, "line": "pstn_market_5db"}
+{"kind": "llm", "provider": "deepseek", "model": "deepseek-v4-pro", "purpose": "judge", "input_tokens": 2532, "output_tokens": 479, "cached_input_tokens": 896, "est_cost": 0.00523908, "latency_ms": 6061, "prompt_hash": "081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480", "repair": false, "cache_hit": false}
+{"kind": "stt", "language": "hi-IN", "audio_s": 3.76, "line": "clean_16k"}
+{"kind": "stt", "language": "hi-IN", "audio_s": 1.44, "line": "clean_16k"}
+{"kind": "llm", "provider": "deepseek", "model": "deepseek-v4-pro", "purpose": "judge", "input_tokens": 2470, "output_tokens": 435, "cached_input_tokens": 896, "est_cost": 0.004983, "latency_ms": 5470, "prompt_hash": "081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480", "repair": false, "cache_hit": false}

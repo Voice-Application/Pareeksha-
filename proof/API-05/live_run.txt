@@ -1,0 +1,7 @@
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, initial schema (docs/schema.sql v0.2)
+generation: {"status": "ready", "error": null, "seconds": 16, "count": 10, "schema_valid": 10, "mix": {"happy_path": 3, "edge_case": 4, "adversarial": 3}}
+calibration: {'n': 4, 'kappa_pass_fail': 0.5, 'spearman_overall': 1.0, 'dimension_mae': {'conversation_flow': 0.5, 'empathy_tone': 0.5, 'escalation': 0.5, 'factual_accuracy': 0.5, 'language_handling': 0.5, 'policy_compliance': 0.5, 'task_completion': 0.5}}
+usage: [['deepseek', 'llm_scenario_gen', 3477.0, 'tokens', 1]]
+done

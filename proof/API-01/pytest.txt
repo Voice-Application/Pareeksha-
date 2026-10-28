@@ -1,0 +1,6 @@
+pareeksha/schemas/personas.py          68      1      2      1    97%   69
+-------------------------------------------------------------------------------
+TOTAL                                3695     53    460     36    98%
+
+45 files skipped due to complete coverage.
+560 passed in 115.06s (0:01:55)

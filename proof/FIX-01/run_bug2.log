@@ -1,0 +1,2 @@
+run bug2-no_amount_confirm d03ca72b-a41d-46e7-b8e8-da7ece5c85ad
+bug2-no_amount_confirm completed {'total': 2, 'queued': 0, 'in_progress': 0, 'evaluated': 2, 'error': 0} 100s

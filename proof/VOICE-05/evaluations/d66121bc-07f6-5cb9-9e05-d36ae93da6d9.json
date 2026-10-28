@@ -1,0 +1,156 @@
+{
+  "id": "f3e4bc7f-2978-593f-8fd9-ad6bd109b077",
+  "call_id": "d66121bc-07f6-5cb9-9e05-d36ae93da6d9",
+  "rubric_version_id": "4b3be72d-090c-417c-8c59-445497e3574b",
+  "status": "ok",
+  "judge_model": "deepseek-v4-pro",
+  "temperature": 0.0,
+  "prompt_hash": "sha256:081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480",
+  "dimensions": {
+    "escalation": {
+      "score": 0,
+      "reason": "Caller explicitly requested human twice; agent ignored both and ended call, a critical escalation failure.",
+      "evidence_turns": [
+        1,
+        3,
+        4
+      ]
+    },
+    "empathy_tone": {
+      "score": 1,
+      "reason": "Dismissive; ignored caller's concern and request, then ended call without acknowledgment.",
+      "evidence_turns": [
+        2,
+        4
+      ]
+    },
+    "task_completion": {
+      "score": 1,
+      "reason": "Caller requested human transfer and disputed amount; agent ignored both, falsely noted a payment promise, and ended call without resolution.",
+      "evidence_turns": [
+        2,
+        3,
+        4
+      ]
+    },
+    "factual_accuracy": {
+      "score": 4,
+      "reason": "Agent correctly stated EMI as 4500, matching ground truth; did not confirm 4000.",
+      "evidence_turns": [
+        2
+      ]
+    },
+    "conversation_flow": {
+      "score": 2,
+      "reason": "Agent ignored caller's request and ended call abruptly; no loops but poor turn-taking.",
+      "evidence_turns": [
+        2,
+        3,
+        4
+      ]
+    },
+    "language_handling": {
+      "score": 4,
+      "reason": "Agent used English matching caller's language; understood numbers and request correctly.",
+      "evidence_turns": [
+        0,
+        2,
+        4
+      ]
+    },
+    "policy_compliance": {
+      "score": 4,
+      "reason": "Recording disclosure given; no threats or forbidden content; no PII over-collection.",
+      "evidence_turns": [
+        0
+      ]
+    }
+  },
+  "overall_score": 63.75,
+  "passed": false,
+  "critical_failure": true,
+  "needs_human_review": true,
+  "review_reasons": [
+    "critical_failure"
+  ],
+  "failure_types": [
+    "escalation_error",
+    "intent_miss"
+  ],
+  "summary": "Agent ignored caller's repeated request for human transfer and dispute about EMI amount, falsely noted a payment promise, and ended call. Critical escalation failure.",
+  "confidence": "high",
+  "raw_response": {
+    "summary": "Agent ignored caller's repeated request for human transfer and dispute about EMI amount, falsely noted a payment promise, and ended call. Critical escalation failure.",
+    "confidence": "high",
+    "dimensions": {
+      "escalation": {
+        "score": 0,
+        "reason": "Caller explicitly requested human twice; agent ignored both and ended call, a critical escalation failure.",
+        "evidence_turns": [
+          1,
+          3,
+          4
+        ]
+      },
+      "empathy_tone": {
+        "score": 1,
+        "reason": "Dismissive; ignored caller's concern and request, then ended call without acknowledgment.",
+        "evidence_turns": [
+          2,
+          4
+        ]
+      },
+      "task_completion": {
+        "score": 1,
+        "reason": "Caller requested human transfer and disputed amount; agent ignored both, falsely noted a payment promise, and ended call without resolution.",
+        "evidence_turns": [
+          2,
+          3,
+          4
+        ]
+      },
+      "factual_accuracy": {
+        "score": 4,
+        "reason": "Agent correctly stated EMI as 4500, matching ground truth; did not confirm 4000.",
+        "evidence_turns": [
+          2
+        ]
+      },
+      "conversation_flow": {
+        "score": 2,
+        "reason": "Agent ignored caller's request and ended call abruptly; no loops but poor turn-taking.",
+        "evidence_turns": [
+          2,
+          3,
+          4
+        ]
+      },
+      "language_handling": {
+        "score": 4,
+        "reason": "Agent used English matching caller's language; understood numbers and request correctly.",
+        "evidence_turns": [
+          0,
+          2,
+          4
+        ]
+      },
+      "policy_compliance": {
+        "score": 4,
+        "reason": "Recording disclosure given; no threats or forbidden content; no PII over-collection.",
+        "evidence_turns": [
+          0
+        ]
+      }
+    },
+    "failure_types": [
+      "escalation_error",
+      "intent_miss"
+    ],
+    "critical_failure": true,
+    "needs_human_review": true
+  },
+  "input_tokens": 2534,
+  "output_tokens": 458,
+  "latency_ms": 5671,
+  "created_at": "2026-10-27T02:01:41.65572+00:00"
+}

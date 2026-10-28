@@ -1,0 +1,120 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.17, pytest-9.1.1, pluggy-1.7.0
+rootdir: /home/user/Pareeksha-/.claude/worktrees/agent-a5bc7f66519e61c3a/backend
+configfile: pyproject.toml
+testpaths: tests
+plugins: respx-0.23.1, typeguard-4.6.0, asyncio-1.4.0, anyio-4.15.1, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 879 items
+
+tests/contract/test_openapi_routes.py .............                      [  1%]
+tests/contract/test_stub_routes.py ..................................... [  5%]
+........................................................................ [ 13%]
+..........................................                               [ 18%]
+tests/contract/test_topics_contract.py ........                          [ 19%]
+tests/db/test_auth.py ..........                                         [ 20%]
+tests/db/test_migrations.py ......                                       [ 21%]
+tests/evaluation/test_checks.py ...........                              [ 22%]
+tests/evaluation/test_metrics.py ............                            [ 24%]
+tests/evaluation/test_numbers.py ....................................... [ 28%]
+...................                                                      [ 30%]
+tests/evaluation/test_pii.py ...........................                 [ 33%]
+tests/integration/test_agents_api.py ........                            [ 34%]
+tests/integration/test_api_keys_api.py .....                             [ 35%]
+tests/integration/test_consumer_framework.py ........                    [ 36%]
+tests/integration/test_crash_recovery.py ..                              [ 36%]
+tests/integration/test_human_review.py ....                              [ 36%]
+tests/integration/test_integrations_api.py ............                  [ 38%]
+tests/integration/test_noise_profiles_api.py .........                   [ 39%]
+tests/integration/test_outbox.py .......                                 [ 39%]
+tests/integration/test_personas_api.py .........                         [ 40%]
+tests/integration/test_promote_to_regression.py ....                     [ 41%]
+tests/integration/test_real_delays.py .                                  [ 41%]
+tests/integration/test_regression_fields.py .......                      [ 42%]
+tests/integration/test_regression_suite.py .....                         [ 42%]
+tests/integration/test_retrier_and_recorder.py ...                       [ 43%]
+tests/integration/test_scenario_generation.py ........                   [ 44%]
+tests/integration/test_scenario_source.py .                              [ 44%]
+tests/integration/test_scenarios_api.py .......                          [ 45%]
+tests/integration/test_seed.py ............                              [ 46%]
+tests/judge/test_scenario_generator.py ...........                       [ 47%]
+tests/unit/audio/test_line_simulator.py ................................ [ 51%]
+........................................                                 [ 55%]
+tests/unit/evaluation/test_handlers.py ...............                   [ 57%]
+tests/unit/evaluation/test_judge_evaluator.py .........                  [ 58%]
+tests/unit/evaluation/test_scoring_evidence.py ...............           [ 60%]
+tests/unit/gnani/test_clients.py .............                           [ 61%]
+tests/unit/integrations/test_hubspot_sink.py .....................       [ 64%]
+tests/unit/integrations/test_security.py ............................... [ 67%]
+......                                                                   [ 68%]
+tests/unit/integrations/test_webhook_sink.py ...............             [ 70%]
+tests/unit/llm/test_client.py ................                           [ 71%]
+tests/unit/llm/test_providers.py ..............                          [ 73%]
+tests/unit/speech/test_azure.py .....                                    [ 74%]
+tests/unit/speech/test_core.py .................                         [ 75%]
+tests/unit/speech/test_deepgram.py ..........                            [ 77%]
+tests/unit/speech/test_elevenlabs.py .....                               [ 77%]
+tests/unit/speech/test_gnani_adapter.py .......                          [ 78%]
+tests/unit/speech/test_google.py ........                                [ 79%]
+tests/unit/test_adapter_interface.py ..........                          [ 80%]
+tests/unit/test_api_helpers.py ........                                  [ 81%]
+tests/unit/test_calibration.py ........                                  [ 82%]
+tests/unit/test_connector_interface.py ........                          [ 83%]
+tests/unit/test_consumer_logic.py ..........................             [ 86%]
+tests/unit/test_db_session.py ....                                       [ 86%]
+tests/unit/test_event_schemas.py ....................................... [ 91%]
+..........................                                               [ 94%]
+tests/unit/test_generator_worker.py ...                                  [ 94%]
+tests/unit/test_llm_provider_interface.py ............                   [ 95%]
+tests/unit/test_no_api02_stubs.py ..                                     [ 96%]
+tests/unit/test_persona_schema.py ...................                    [ 98%]
+tests/unit/test_regression_verdict.py ................                   [100%]
+
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.13.17-final-0 _______________
+
+Name                                       Stmts   Miss Branch BrPart  Cover   Missing
+--------------------------------------------------------------------------------------
+pareeksha/api/health.py                       27      7      0      0    74%   21-22, 29-34
+pareeksha/api/main.py                         49      1     16      1    97%   79
+pareeksha/api/routers/calls.py                69      1     16      2    96%   117->121, 122
+pareeksha/api/routers/system.py               50      1      6      2    95%   71->73, 96
+pareeksha/audio/dsp.py                        82      4     14      2    94%   53-54, 87, 119
+pareeksha/audio/line_simulator.py            124      4     30      2    96%   85, 188-190
+pareeksha/audio/noise.py                     128      1     16      1    99%   191
+pareeksha/audio/profiles.py                   38      3     12      3    88%   28, 33, 37
+pareeksha/db/session.py                       33      2      6      0    95%   41, 45
+pareeksha/evaluation/calibration.py           64      0     22      1    99%   82->81
+pareeksha/evaluation/checks.py               166      7     74      8    93%   38, 133, 163, 238-240, 371->369, 416, 447->449, 451->453
+pareeksha/evaluation/metrics.py              142      2     46      1    98%   195, 225
+pareeksha/evaluation/numbers.py              304     13    102      9    94%   301, 335-336, 346-351, 377->381, 398, 408, 426->417, 430, 434
+pareeksha/evaluation/pii.py                   91      1     34      1    98%   71
+pareeksha/evaluation/types.py                 66      1      6      1    97%   68
+pareeksha/events/consumer.py                 220     18     46      6    90%   273->275, 293, 301, 304->306, 306->308, 321-333, 381, 392, 395, 433-435, 505-508
+pareeksha/events/producer.py                  31      3      4      0    91%   72-74
+pareeksha/events/runtime.py                   60      9     12      0    85%   46-51, 102-104
+pareeksha/events/schemas.py                  249      5     26      3    97%   286, 292, 380-381, 389
+pareeksha/gnani/clients.py                   147      1     24      1    99%   94
+pareeksha/integrations/hubspot.py            139      1     40      1    99%   267
+pareeksha/integrations/ssrf.py                76      1     24      1    98%   130
+pareeksha/llm/_http.py                        21      2      6      0    93%   16-17
+pareeksha/llm/deepseek.py                     65      0     16      1    99%   77->81
+pareeksha/regression/outcomes.py              36      1      8      1    95%   57
+pareeksha/regression/promote.py               43      0     10      1    98%   37->39
+pareeksha/scenario_gen/generator.py           89      0     28      1    99%   73->71
+pareeksha/seed/__main__.py                    19      3      4      2    78%   23-24, 29
+pareeksha/speech/providers/_common.py         29      1      4      1    94%   41->exit, 50
+pareeksha/speech/providers/deepgram.py       121      1     28      2    98%   200, 214->216
+pareeksha/speech/providers/elevenlabs.py      78      0     24      1    99%   201->203
+pareeksha/speech/providers/gnani.py          114      4     32      4    95%   71, 181, 189, 204
+pareeksha/speech/providers/google.py         102      0     18      1    99%   64->66
+pareeksha/workers/dlq_recorder.py             96     12     12      2    87%   134, 167-172, 179-182, 186
+pareeksha/workers/generator.py                71      3      8      1    95%   138, 142, 146
+pareeksha/workers/outbox_relay.py             62      8     16      4    85%   67, 78, 82, 91-94, 98
+pareeksha/workers/retrier.py                  90     13     22      3    86%   82, 93, 147-152, 159-162, 166
+--------------------------------------------------------------------------------------
+TOTAL                                       7208    134   1154     71    97%
+
+85 files skipped due to complete coverage.
+======================= 879 passed in 532.71s (0:08:52) ========================
+EXIT 0

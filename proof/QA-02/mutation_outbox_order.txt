@@ -1,0 +1,279 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_api_accepts_while_kafka_is_down_and_the_outbox_drains_in_per_key_order __
+
+api = <httpx.AsyncClient object at 0x7f06c3c18590>
+tenant = Tenant(project_id=UUID('4a729ff4-f313-4cbb-9077-56be43bfceeb'), admin={'Authorization': 'Bearer pk_live_lyj_XpsyrBr-ax2329JzMriW1ZVuPzaP-Uj-hhva0mo'}, read={'Authorization': 'Bearer pk_live_YXEOJqbi2i0x1oChfLI9DAK9llm0Le0kL2_uNWEQe8M'})
+database_url = 'postgresql+psycopg://pareeksha:pareeksha@localhost:5432/pareeksha_test_bfddda09'
+broker = <tests.kafka.kit.Broker object at 0x7f06c3d9bb60>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7f06c3d117b0>
+
+    async def test_api_accepts_while_kafka_is_down_and_the_outbox_drains_in_per_key_order(
+        api: AsyncClient,
+        tenant: Tenant,
+        database_url: str,
+        broker: Broker,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setenv("DATABASE_URL", database_url)
+        monkeypatch.setenv("KAFKA_BOOTSTRAP_SERVERS", BOOTSTRAP)
+        settings = settings_for(database_url)
+        keys = [uuid.uuid4() for _ in range(KEYS)]
+    
+        relay = OutboxRelay(settings, poll_interval=0.2, request_timeout_ms=3000)
+        relay_task = asyncio.create_task(relay.run())
+        conn = await psycopg.AsyncConnection.connect(settings.database_url, autocommit=True)
+        try:
+            healthy = await api.get("/api/v1/health")
+            assert healthy.status_code == 200 and healthy.json() == {"db": "ok", "kafka": "ok"}
+    
+            broker.stop()
+            down = await api.get("/api/v1/health")
+            assert down.status_code == 503
+            assert down.json()["db"] == "ok" and down.json()["kafka"].startswith("down")
+    
+            # requests that need only the database keep succeeding
+            created = await api.post(
+                "/api/v1/agents",
+                json={"name": "Written while Kafka is down", "endpoint_url": "ws://x:1/ws"},
+                headers=tenant.admin,
+            )
+            assert created.status_code == 201
+    
+            # events accepted during the outage, interleaved across keys, each in its own transaction
+            for seq in range(PER_KEY):
+                for key in keys:
+                    async with conn.transaction():
+                        await enqueue(conn, audit(key, seq))
+            assert await backlog(conn) == KEYS * PER_KEY
+    
+            async def relay_tried() -> bool:
+                row = await (
+                    await conn.execute(
+                        "SELECT count(*) FROM outbox_events WHERE published_at IS NULL AND attempts > 0"
+                    )
+                ).fetchone()
+                return row is not None and row[0] > 0
+    
+            await wait_for(relay_tried, timeout=90, what="the relay to try, fail and record last_error")
+            failed = await (
+                await conn.execute(
+                    "SELECT last_error FROM outbox_events WHERE published_at IS NULL AND attempts > 0"
+                )
+            ).fetchone()
+            assert failed is not None and failed[0]
+            assert await backlog(conn) == KEYS * PER_KEY  # nothing was lost or half-published
+    
+            broker.start()
+    
+            async def drained() -> bool:
+                return await backlog(conn) == 0
+    
+            await wait_for(drained, timeout=120, interval=1.0, what="the outbox to drain")
+            recovered = await api.get("/api/v1/health")
+            assert recovered.status_code == 200
+        finally:
+            relay.stop_event.set()
+            await asyncio.wait_for(relay_task, 30)
+            await conn.close()
+    
+        duplicates = 0
+        for key in keys:
+            messages = await read_topic(Topics.AUDIT_REQUESTED, key=str(key))
+            seen: dict[str, str] = {}
+            for m in messages:  # topic order = per-key partition order
+                body = json.loads(m.value)
+                if body["event_id"] in seen:
+                    duplicates += 1  # a send that timed out during the outage can land later
+                    continue
+                seen[body["event_id"]] = body["payload"]["recording_ref"]
+>           assert list(seen.values()) == [f"seq-{n}" for n in range(PER_KEY)], (
+                f"key {key}: events left the outbox out of order"
+            )
+E           AssertionError: key a1910880-8ea1-40b2-875c-d03a7700ec38: events left the outbox out of order
+E           assert ['seq-3', 'se...q-0', 'seq-2'] == ['seq-0', 'se...q-2', 'seq-3']
+E             
+E             At index 0 diff: 'seq-3' != 'seq-0'
+E             Use -v to get more diff
+
+tests/kafka/test_kafka_down_outbox.py:124: AssertionError
+---------------------------- Captured stderr setup -----------------------------
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, initial schema (docs/schema.sql v0.2)
+----------------------------- Captured stderr call -----------------------------
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to "localhost:19094": [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+ERROR [aiokafka] Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR [aiokafka] Unable to update metadata from [1]
+WARNI [pareeksha.events.outbox] outbox publish failed
+Traceback (most recent call last):
+  File "/home/user/Pareeksha-/.claude/worktrees/agent-a5bc7f66519e61c3a/backend/pareeksha/events/outbox.py", line 75, in relay_once
+    await producer.send(
+        topic, json.dumps(envelope).encode("utf-8"), key=key.encode("utf-8")
+    )
+  File "/home/user/Pareeksha-/.claude/worktrees/agent-a5bc7f66519e61c3a/backend/pareeksha/events/producer.py", line 65, in send
+    delivered = await asyncio.wait_for(
+                ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+    )
+    ^
+  File "/usr/lib/python3.13/asyncio/tasks.py", line 514, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/aiokafka/producer/producer.py", line 481, in send
+    await self.client._wait_on_metadata(topic)
+  File "/usr/local/lib/python3.13/dist-packages/aiokafka/client.py", line 515, in _wait_on_metadata
+    raise UnknownTopicOrPartitionError()
+aiokafka.errors.UnknownTopicOrPartitionError: [Error 3] UnknownTopicOrPartitionError
+------------------------------ Captured log call -------------------------------
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:216 Unable connect to "localhost:19094": [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+ERROR    aiokafka:client.py:435 Unable connect to node with id 1: [Errno 111] Connect call failed ('127.0.0.1', 19094)
+ERROR    aiokafka:client.py:325 Unable to update metadata from [1]
+WARNING  pareeksha.events.outbox:outbox.py:86 outbox publish failed
+Traceback (most recent call last):
+  File "/home/user/Pareeksha-/.claude/worktrees/agent-a5bc7f66519e61c3a/backend/pareeksha/events/outbox.py", line 75, in relay_once
+    await producer.send(
+        topic, json.dumps(envelope).encode("utf-8"), key=key.encode("utf-8")
+    )
+  File "/home/user/Pareeksha-/.claude/worktrees/agent-a5bc7f66519e61c3a/backend/pareeksha/events/producer.py", line 65, in send
+    delivered = await asyncio.wait_for(
+                ^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+    )
+    ^
+  File "/usr/lib/python3.13/asyncio/tasks.py", line 514, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/aiokafka/producer/producer.py", line 481, in send
+    await self.client._wait_on_metadata(topic)
+  File "/usr/local/lib/python3.13/dist-packages/aiokafka/client.py", line 515, in _wait_on_metadata
+    raise UnknownTopicOrPartitionError()
+aiokafka.errors.UnknownTopicOrPartitionError: [Error 3] UnknownTopicOrPartitionError
+=========================== short test summary info ============================
+FAILED tests/kafka/test_kafka_down_outbox.py::test_api_accepts_while_kafka_is_down_and_the_outbox_drains_in_per_key_order
+1 failed in 24.84s
+RESTORED

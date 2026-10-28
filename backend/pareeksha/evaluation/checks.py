@@ -338,10 +338,10 @@ def check_tool_calls(
 _YEAR = range(1900, 2101)
 
 
-def _agent_amounts(turn: Turn) -> list[ParsedNumber]:
+def _agent_amounts(turn: Turn, text: str | None = None) -> list[ParsedNumber]:
     """Numbers in an agent turn that plausibly state money."""
     out = []
-    for n in extract_numbers(turn.text):
+    for n in extract_numbers(turn.text if text is None else text):
         if n.currency or (
             1000 <= n.value < 10**8 and not (float(n.value).is_integer() and int(n.value) in _YEAR)
         ):
@@ -349,8 +349,24 @@ def _agent_amounts(turn: Turn) -> list[ParsedNumber]:
     return out
 
 
+def _reported_amounts(turn: Turn) -> set[float]:
+    """Amounts in what the agent was heard saying plus what it reports it said (glass box)."""
+    texts = (turn.text, turn.ground_truth_text or "")
+    return {float(n.value) for text in texts for n in _agent_amounts(turn, text)}
+
+
+def _acted_on_amount(tool_calls: Iterable | None) -> ToolCall | None:
+    """The first tool call whose arguments carry an amount (the agent committed money)."""
+    for tc in tool_calls or ():
+        if any("amount" in str(k).lower() for k in getattr(tc, "args", {}) or {}):
+            return tc
+    return None
+
+
 def check_amounts(
-    turns: Iterable, expected_amounts: Mapping[str, int | float | str]
+    turns: Iterable,
+    expected_amounts: Mapping[str, int | float | str],
+    tool_calls: Iterable | None = None,
 ) -> list[CheckResult]:
     """Did the agent read back each expected amount correctly?
 
@@ -363,8 +379,18 @@ def check_amounts(
                        in that turn set is not a wrong one (self-corrections pass)
       * passed=False - the agent stated a wrong amount and its last amount statement is wrong,
                        or never stated the expected value
+    Read-back rule: when the agent acted on an amount (a tool call with an ``*amount*`` argument)
+    it must have stated the expected value again after the caller replied to its first statement
+    (a read-back/confirmation); acting without one fails the check. A statement counts when it is
+    in the transcribed audio or in the text the agent reports it said (glass box), so a read-back
+    the caller talked over is an interruption problem, not a missing confirmation. A call with
+    no such action is
+    unaffected, so a caller hanging up early never fails it.
     """
-    ts = [t for t in as_turns(turns) if t.speaker == "agent"]
+    all_turns = as_turns(turns)
+    ts = [t for t in all_turns if t.speaker == "agent"]
+    caller_idx = [t.idx for t in all_turns if t.speaker != "agent"]
+    action = _acted_on_amount(tool_calls)
     truth: dict[str, float] = {}
     for k, v in expected_amounts.items():
         val = parse_number(v) if isinstance(v, str) else v
@@ -374,6 +400,22 @@ def check_amounts(
     stated = [(t.idx, float(n.value)) for t in ts for n in _agent_amounts(t)]
     results = []
     for key, want in truth.items():
+        said = [t.idx for t in ts if want in _reported_amounts(t)]
+        if action is not None and not any(
+            said[0] < c < later for later in said[1:] for c in caller_idx
+        ):
+            at = action.turn_idx if action.turn_idx is not None else ts[-1].idx
+            results.append(
+                CheckResult(
+                    "amount_confirmed",
+                    key,
+                    False,
+                    True,
+                    tuple(sorted({*said[:1], at})),
+                    f"Agent acted ({action.name}) without reading back {want:g} to the caller",
+                )
+            )
+            continue
         if not stated:
             results.append(
                 CheckResult(
@@ -449,5 +491,5 @@ def run_checks(
     out.append(check_no_loop(ts))
     out += check_tool_calls(expected_tool_calls, None if tool_calls is None else list(tool_calls))
     if expected_amounts:
-        out += check_amounts(ts, expected_amounts)
+        out += check_amounts(ts, expected_amounts, tool_calls)
     return out

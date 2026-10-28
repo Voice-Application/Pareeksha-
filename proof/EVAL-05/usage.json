@@ -1,0 +1,25 @@
+{
+  "api_usage": [
+    [
+      "deepseek",
+      "llm_asr_intent",
+      2384.0,
+      "tokens",
+      7
+    ],
+    [
+      "gnani",
+      "stt_rest",
+      92.16,
+      "audio_seconds",
+      36
+    ]
+  ],
+  "samples_total_and_consented": [
+    12,
+    12
+  ],
+  "dialect_events_processed": [
+    36
+  ]
+}

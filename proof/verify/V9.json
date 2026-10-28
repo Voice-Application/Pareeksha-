@@ -1,0 +1,10 @@
+{
+ "api": {
+  "n": 0,
+  "kappa_pass_fail": null,
+  "spearman_overall": null,
+  "dimension_mae": {}
+ },
+ "labelled_pairs_in_db": 0,
+ "kappa_recomputed": null
+}

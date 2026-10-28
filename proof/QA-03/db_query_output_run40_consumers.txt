@@ -1,0 +1,22 @@
+select consumer_group, count(*) from processed_events group by 1 order by 1;
+ consumer_group | count 
+----------------+-------
+ evaluator      |    65
+ finalizer      |    65
+ planner        |    15
+ simulator      |    70
+(4 rows)
+
+select count(*) unpublished_outbox from outbox_events where published_at is null;
+ unpublished_outbox 
+--------------------
+                  0
+(1 row)
+
+select original_topic, consumer_group, status, left(error,60) err, count(*) from dead_letters group by 1,2,3,4;
+          original_topic           | consumer_group | status |          err           | count 
+-----------------------------------+----------------+--------+------------------------+-------
+ pareeksha.run.completed.v1        | integrations   | open   | KeyError: 'SECRET_KEY' |    15
+ pareeksha.evaluation.completed.v1 | integrations   | open   | KeyError: 'SECRET_KEY' |    65
+(2 rows)
+

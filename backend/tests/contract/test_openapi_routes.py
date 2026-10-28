@@ -107,6 +107,7 @@ ADDITIONS: set[tuple[str, str]] = {
     ("GET", "/dialect-datasets"),  # FR-DI-1
     ("GET", "/dialect-reports"),  # FR-DI-4
     ("GET", "/dialect-reports/{id}/clips"),  # FR-DB-4 drill-down to worst clips
+    ("GET", "/speech/providers"),  # VOICE-07 (owner-approved 2026-10-24)
 }
 
 

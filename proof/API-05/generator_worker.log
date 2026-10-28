@@ -1,0 +1,3 @@
+{"ts": "2026-10-24T03:41:33.826345+00:00", "level": "info", "logger": "httpx", "msg": "HTTP Request: POST https://api.deepseek.com/chat/completions \"HTTP/1.1 200 OK\""}
+{"ts": "2026-10-24T03:41:47.622067+00:00", "level": "info", "logger": "pareeksha.llm", "msg": "llm_call provider=deepseek model=deepseek-flash purpose=scenario_gen in=1213 out=2264 cached_in=0 cost=None latency_ms=14634 repair=False cache_hit=False"}
+{"ts": "2026-10-24T03:41:47.627160+00:00", "level": "info", "logger": "pareeksha.events.consumer", "msg": "processed", "group": "generator", "event_id": "fc3a1882-91a0-4a84-864f-5322258bf712", "correlation_id": "d625ac2e-5493-4fc4-aa4c-b3d3e6a6b41f", "topic": "pareeksha.scenario.generate.requested.v1", "attempt": 1}

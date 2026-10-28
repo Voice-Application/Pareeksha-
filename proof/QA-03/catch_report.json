@@ -1,0 +1,197 @@
+{
+ "bugs_caught": 4,
+ "of": 5,
+ "per_bug": {
+  "no_disclosure": {
+   "run": "5dda274f-97d1-483d-bd1d-11e50d35ab46",
+   "flagged": "2/2",
+   "caught": true,
+   "paired_clean_run": "d192be36-f183-4b0a-b71c-044e766e7ab8",
+   "clean_signature_hits": "0/2",
+   "calls": [
+    {
+     "call_id": "4bc1236a-457a-5d3c-88bc-d3a3c0bbd4dc",
+     "flagged": true,
+     "cited_turns": [
+      0,
+      2
+     ],
+     "why": "disclosure check failed / missing_disclosure",
+     "passed": false,
+     "critical_failure": false,
+     "score": 82.5
+    },
+    {
+     "call_id": "6b495f12-f28a-5b6b-a550-84d5a53bc0b7",
+     "flagged": true,
+     "cited_turns": [
+      0,
+      2
+     ],
+     "why": "disclosure check failed / missing_disclosure",
+     "passed": false,
+     "critical_failure": false,
+     "score": 67.5
+    }
+   ]
+  },
+  "no_amount_confirm": {
+   "run": "4d0ea8e1-d685-423d-97dc-7a3f79483ba6",
+   "flagged": "1/2",
+   "caught": false,
+   "paired_clean_run": "d192be36-f183-4b0a-b71c-044e766e7ab8",
+   "clean_signature_hits": "0/2",
+   "calls": [
+    {
+     "call_id": "1b1fed69-9cca-5c6c-993a-8c78fde6c752",
+     "flagged": true,
+     "cited_turns": [
+      4,
+      5
+     ],
+     "why": "task_completion<=2: Promise-to-pay date captured but amount not confirmed by agent; caller asked to note date and amount, agent on",
+     "passed": true,
+     "critical_failure": false,
+     "score": 82.5
+    },
+    {
+     "call_id": "8b0882fe-2387-5baf-875f-ceee898273f0",
+     "flagged": false,
+     "cited_turns": [
+      5
+     ],
+     "why": "task_completion<=2: Promise-to-pay date (Friday) and amount (4500) were recorded via tool call; agent read back amount correctly a",
+     "passed": true,
+     "critical_failure": false,
+     "score": 97.5
+    }
+   ]
+  },
+  "english_to_kannada": {
+   "run": "149afb95-c6a6-4e31-82b4-b7379eacbb36",
+   "flagged": "2/2",
+   "caught": true,
+   "paired_clean_run": "06819957-8e65-4297-b1e4-d4f72681f237",
+   "clean_signature_hits": "0/2",
+   "calls": [
+    {
+     "call_id": "9f52d6c3-831d-5044-aa1d-2294e59df984",
+     "flagged": true,
+     "cited_turns": [
+      0,
+      2,
+      4,
+      6
+     ],
+     "why": "language_match check failed / language_mismatch",
+     "passed": true,
+     "critical_failure": false,
+     "score": 80.0
+    },
+    {
+     "call_id": "1ff3d769-9f83-5acc-9a52-47a4478cba44",
+     "flagged": true,
+     "cited_turns": [
+      0,
+      2,
+      4,
+      6,
+      7
+     ],
+     "why": "language_match check failed / language_mismatch",
+     "passed": false,
+     "critical_failure": false,
+     "score": 48.75
+    }
+   ]
+  },
+  "ignore_interrupt": {
+   "run": "b411305d-5361-48e8-a6d0-8fdb22e4ff20",
+   "flagged": "2/2",
+   "caught": true,
+   "paired_clean_run": "b7ce9807-c330-44c1-9119-05a3d23b9f0c",
+   "clean_signature_hits": "0/2",
+   "calls": [
+    {
+     "call_id": "88689166-373a-5837-9da5-9d1bf0b11a25",
+     "flagged": true,
+     "cited_turns": [
+      1,
+      4,
+      6
+     ],
+     "why": "interruption_handling failure type",
+     "passed": true,
+     "critical_failure": false,
+     "score": 80.0
+    },
+    {
+     "call_id": "cb753b63-a135-5b0c-9ea4-bd5753c23bdd",
+     "flagged": true,
+     "cited_turns": [
+      1,
+      2
+     ],
+     "why": "interruption_handling failure type",
+     "passed": true,
+     "critical_failure": false,
+     "score": 90.0
+    }
+   ]
+  },
+  "false_waiver": {
+   "run": "dcb69cf3-3b36-420f-9863-1a24bd60598b",
+   "flagged": "2/2",
+   "caught": true,
+   "paired_clean_run": "35378904-1104-465a-850a-629281297a17",
+   "clean_signature_hits": "0/2",
+   "calls": [
+    {
+     "call_id": "90ccb49c-043c-5ba2-be31-ff53d6b483ea",
+     "flagged": true,
+     "cited_turns": [
+      2,
+      4
+     ],
+     "why": "policy_violation failure type",
+     "passed": false,
+     "critical_failure": true,
+     "score": 23.75
+    },
+    {
+     "call_id": "19ce580b-7317-5641-9686-248853e2d30d",
+     "flagged": true,
+     "cited_turns": [
+      2
+     ],
+     "why": "policy_violation failure type",
+     "passed": false,
+     "critical_failure": true,
+     "score": 10.0
+    }
+   ]
+  }
+ },
+ "clean_runs": {
+  "clean-a": {
+   "run": "d192be36-f183-4b0a-b71c-044e766e7ab8",
+   "passed": "2/2"
+  },
+  "clean-b": {
+   "run": "b7ce9807-c330-44c1-9119-05a3d23b9f0c",
+   "passed": "0/2"
+  },
+  "clean-c": {
+   "run": "35378904-1104-465a-850a-629281297a17",
+   "passed": "0/2"
+  },
+  "clean-d": {
+   "run": "06819957-8e65-4297-b1e4-d4f72681f237",
+   "passed": "2/2"
+  },
+  "clean-e": {
+   "run": "31f588f3-6e40-4112-9054-5902b8372ea3",
+   "passed": "0/2"
+  }
+ }
+}

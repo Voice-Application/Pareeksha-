@@ -1,0 +1,76 @@
+== run
+                  id                  |       name       |  status   | active_calls | cap |          started_at           |          finished_at          |      took       
+--------------------------------------+------------------+-----------+--------------+-----+-------------------------------+-------------------------------+-----------------
+ 0141c63b-794e-4eea-9516-3c273a21aed1 | voice05-12-calls | completed |            0 | 3   | 2026-10-27 01:57:35.203436+00 | 2026-10-27 02:03:07.674088+00 | 00:05:32.470652
+(1 row)
+
+== items
+  status   | count 
+-----------+-------
+ evaluated |    12
+(1 row)
+
+== calls (one per item)
+               call_id                |             run_item_id              |  end_reason  |  status   | duration_ms | turns | tools | has_audio 
+--------------------------------------+--------------------------------------+--------------+-----------+-------------+-------+-------+-----------
+ ab99f7df-dcd7-5cdd-8a4b-fd7769623d39 | 1a52d9d9-abbb-4703-9370-3db80163dfb8 | agent_hangup | completed |       73027 |     7 |     0 | t
+ e50254c3-302a-5b79-a07e-72edefcae9a7 | 1d8a255d-cfc8-4a6b-b102-1da263c0d117 | agent_hangup | completed |       76773 |     6 |     0 | t
+ 3841556b-9815-58dd-8bd0-1732dbc660a7 | 7b6d21cd-f45c-4d11-afc1-8421ca890c66 | agent_hangup | completed |       74833 |     7 |     1 | t
+ 1a71b0cf-87d9-5e8e-873f-f4c86c1e7a9d | 23de19e6-6257-4a6b-8254-4f0b604d1372 | agent_hangup | completed |       70691 |     7 |     0 | t
+ c7510399-0899-5887-89eb-1d5da179dc6d | df826732-1ea5-46fe-9406-3c64f8325afd | agent_hangup | completed |       57618 |     5 |     1 | t
+ 70e9a86b-c4bf-566d-ac79-2e1baba69dd5 | b752aa4e-c918-40a1-a1d0-f20f82ed0143 | agent_hangup | completed |       56530 |     6 |     0 | t
+ 93ad8b38-0821-548f-8cd3-844b340a7e9d | e976ab33-2b53-496c-8908-c8e57e621c8a | agent_hangup | completed |       54244 |     5 |     0 | t
+ a1816d01-8675-5953-84ee-12caa266acf4 | 3395ab3a-2964-4bb1-8083-b7e6c4485a45 | agent_hangup | completed |       59338 |     5 |     0 | t
+ 7949b8a8-a1e1-5ba3-bd05-80e3e528ed83 | b8db7438-97be-45eb-85fb-9595356d269c | agent_hangup | completed |       54939 |     5 |     0 | t
+ d66121bc-07f6-5cb9-9e05-d36ae93da6d9 | 7ae36d9c-d634-4352-b7a8-cc6fa27d3316 | agent_hangup | completed |       53363 |     5 |     0 | t
+ 86641046-42d3-5583-bb50-e88f51aa7bb0 | c407bfe4-2ef5-4922-9a5a-d0c71de1b277 | agent_hangup | completed |       54391 |     5 |     1 | t
+ 7c41f15d-9eae-5e83-8901-7801f249d542 | da2eec9b-21bd-41ad-a384-1c705f0a855f | agent_hangup | completed |       79324 |     8 |     0 | t
+(12 rows)
+
+== evaluations
+               call_id                | status | overall_score | passed | critical_failure | needs_human_review |   judge_model   
+--------------------------------------+--------+---------------+--------+------------------+--------------------+-----------------
+ ab99f7df-dcd7-5cdd-8a4b-fd7769623d39 | ok     |         50.00 | f      | t                | t                  | deepseek-v4-pro
+ 3841556b-9815-58dd-8bd0-1732dbc660a7 | ok     |         41.25 | f      | t                | t                  | deepseek-v4-pro
+ e50254c3-302a-5b79-a07e-72edefcae9a7 | ok     |         52.50 | f      | t                | t                  | deepseek-v4-pro
+ c7510399-0899-5887-89eb-1d5da179dc6d | ok     |         53.75 | f      | t                | t                  | deepseek-v4-pro
+ 70e9a86b-c4bf-566d-ac79-2e1baba69dd5 | ok     |         56.25 | f      | t                | t                  | deepseek-v4-pro
+ 1a71b0cf-87d9-5e8e-873f-f4c86c1e7a9d | ok     |         56.25 | f      | t                | t                  | deepseek-v4-pro
+ 93ad8b38-0821-548f-8cd3-844b340a7e9d | ok     |         65.00 | f      | f                | t                  | deepseek-v4-pro
+ a1816d01-8675-5953-84ee-12caa266acf4 | ok     |         65.00 | f      | t                | t                  | deepseek-v4-pro
+ 7949b8a8-a1e1-5ba3-bd05-80e3e528ed83 | ok     |         42.50 | f      | t                | t                  | deepseek-v4-pro
+ d66121bc-07f6-5cb9-9e05-d36ae93da6d9 | ok     |         63.75 | f      | t                | t                  | deepseek-v4-pro
+ 86641046-42d3-5583-bb50-e88f51aa7bb0 | ok     |         56.25 | f      | t                | t                  | deepseek-v4-pro
+ 7c41f15d-9eae-5e83-8901-7801f249d542 | ok     |         56.25 | f      | t                | t                  | deepseek-v4-pro
+(12 rows)
+
+== usage by provider/operation
+ provider | operation  |   unit_type   | rows |  units  
+----------+------------+---------------+------+---------
+ deepseek | llm_caller | tokens        |   28 | 22547.0
+ deepseek | llm_judge  | tokens        |   12 | 36826.0
+ gnani    | stt_rest   | audio_seconds |   42 |   265.3
+ gnani    | tts        | characters    |   57 |  3858.0
+(4 rows)
+
+== processed_events per consumer group
+ consumer_group | count 
+----------------+-------
+ evaluator      |    12
+ finalizer      |    12
+ planner        |     1
+ simulator      |    12
+(4 rows)
+
+== dead letters
+ dead_letters 
+--------------
+            0
+(1 row)
+
+== outbox
+ unpublished | total 
+-------------+-------
+           0 |     1
+(1 row)
+

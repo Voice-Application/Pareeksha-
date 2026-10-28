@@ -1,0 +1,8 @@
+### fresh checkout, deps only (what the old workflow ran): no pareeksha dist-info => no pareeksha.connectors entry points
+FAILED tests/integration/test_integrations_api.py::test_wrong_secret_key_when_patching_a_webhook_is_a_500
+FAILED tests/integration/test_integrations_api.py::test_connector_directions_include_shipped_and_entry_point_connectors
+26 failed, 2 passed in 5.91s
+
+### same, then `pip install --no-deps -e backend` (what the workflows run now)
+............................                                             [100%]
+28 passed in 8.47s

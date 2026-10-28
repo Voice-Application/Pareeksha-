@@ -1,0 +1,42 @@
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, initial schema (docs/schema.sql v0.2)
+seeded: {'personas': 20, 'noise_profiles': 8, 'rubric_versions': 1, 'agents': 1, 'scenarios': 8, 'api_keys': 1}
+INFO  gnani | [TTS REST] synthesize start | request_id=req_f7a181c110f7 | model=timbre-v3.0 | voice=Shivani
+INFO  [gnani] [TTS REST] synthesize start | request_id=req_f7a181c110f7 | model=timbre-v3.0 | voice=Shivani
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_f7a181c110f7
+INFO  [gnani] [TTS REST] synthesize complete | request_id=req_f7a181c110f7
+tts agent/Shivani: 130 chars -> 9.4s
+INFO  gnani | [TTS REST] synthesize start | request_id=req_fc98e4d16e05 | model=timbre-v3.0 | voice=Shubham
+INFO  [gnani] [TTS REST] synthesize start | request_id=req_fc98e4d16e05 | model=timbre-v3.0 | voice=Shubham
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_fc98e4d16e05
+INFO  [gnani] [TTS REST] synthesize complete | request_id=req_fc98e4d16e05
+tts caller/Shubham: 39 chars -> 3.0s
+INFO  gnani | [TTS REST] synthesize start | request_id=req_7aeca397e9a1 | model=timbre-v3.0 | voice=Shivani
+INFO  [gnani] [TTS REST] synthesize start | request_id=req_7aeca397e9a1 | model=timbre-v3.0 | voice=Shivani
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_7aeca397e9a1
+INFO  [gnani] [TTS REST] synthesize complete | request_id=req_7aeca397e9a1
+tts agent/Shivani: 41 chars -> 3.0s
+POST /audits -> 202 {"call_id":"434eae20-0902-4a72-8f10-b351deabdbaf"}
+INFO  gnani | [STT Batch] create start | request_id=req_bbf5c1b1bfe9 | files=1
+INFO  [gnani] [STT Batch] create start | request_id=req_bbf5c1b1bfe9 | files=1
+ERROR gnani | [STT Batch] POST /stt/v3/batch/jobs failed | status=400
+ERROR [gnani] [STT Batch] POST /stt/v3/batch/jobs failed | status=400
+WARNI [pareeksha.audit.pipeline] audit failed: speech-to-text rejected the recording: gnani: APIError: HTTP 400: {"error":"INVALID_CONFIG","message":"Invalid config: 1 validation error for STTConfig\nbias_list\n  Value error, bias_list entries must be single words, not phrases [type=value_error, input_value=['EMI', 'UPI', 'NEFT', 'S...ು', 'किस्त'], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.14/v/value_error"}
+Traceback (most recent call last):
+  File "/home/user/Pareeksha-/.claude/worktrees/agent-a7b0cac6ad8f18279/backend/../proof/EVAL-04/run_acceptance.py", line 304, in <module>
+    asyncio.run(main())
+    ~~~~~~~~~~~^^^^^^^^
+  File "/usr/lib/python3.13/asyncio/runners.py", line 196, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.13/asyncio/runners.py", line 119, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.13/asyncio/base_events.py", line 726, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/home/user/Pareeksha-/.claude/worktrees/agent-a7b0cac6ad8f18279/backend/../proof/EVAL-04/run_acceptance.py", line 196, in main
+    outputs[0].payload, producer="auditor", correlation_id=call_id
+    ~~~~~~~^^^
+IndexError: list index out of range

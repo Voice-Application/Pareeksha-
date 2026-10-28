@@ -1,0 +1,159 @@
+{
+  "id": "1cbd20e9-09b0-5e64-b0ae-f08bd7186016",
+  "call_id": "7949b8a8-a1e1-5ba3-bd05-80e3e528ed83",
+  "rubric_version_id": "4b3be72d-090c-417c-8c59-445497e3574b",
+  "status": "ok",
+  "judge_model": "deepseek-v4-pro",
+  "temperature": 0.0,
+  "prompt_hash": "sha256:081ce3f8483a63f7a3703a2b48883ad1fbed799b9c84bd511e9f4cac31692480",
+  "dimensions": {
+    "escalation": {
+      "score": 0,
+      "reason": "Caller explicitly requested a human representative twice; agent ignored both requests and ended the call.",
+      "evidence_turns": [
+        1,
+        2,
+        4
+      ]
+    },
+    "empathy_tone": {
+      "score": 1,
+      "reason": "Agent was dismissive, ignored caller's correction and request, and ended call without addressing concerns.",
+      "evidence_turns": [
+        2,
+        4
+      ]
+    },
+    "task_completion": {
+      "score": 0,
+      "reason": "Agent never recorded the promise-to-pay date or correct amount; instead it falsely claimed a payment promise and ended the call. Caller's goal completely unmet.",
+      "evidence_turns": [
+        2,
+        4
+      ]
+    },
+    "factual_accuracy": {
+      "score": 0,
+      "reason": "Agent stated EMI as 4500 instead of 6500 and then claimed to have noted a payment promise that was never made. Material errors.",
+      "evidence_turns": [
+        2,
+        4
+      ]
+    },
+    "conversation_flow": {
+      "score": 2,
+      "reason": "Agent ignored caller's request for human and ended call abruptly; no loops but flow was poor.",
+      "evidence_turns": [
+        2,
+        4
+      ]
+    },
+    "language_handling": {
+      "score": 4,
+      "reason": "Agent used English matching caller's language; understood caller's words but ignored them.",
+      "evidence_turns": [
+        0,
+        2,
+        4
+      ]
+    },
+    "policy_compliance": {
+      "score": 4,
+      "reason": "Recording disclosure given; no threats or forbidden content; no PII over-collection.",
+      "evidence_turns": [
+        0
+      ]
+    }
+  },
+  "overall_score": 42.5,
+  "passed": false,
+  "critical_failure": true,
+  "needs_human_review": true,
+  "review_reasons": [
+    "critical_failure",
+    "check_failed:tool_calls_expected",
+    "check_failed:amount_confirmed"
+  ],
+  "failure_types": [
+    "wrong_fact",
+    "escalation_error",
+    "intent_miss",
+    "tool_selection"
+  ],
+  "summary": "Agent ignored caller's request for human, stated wrong EMI amount, falsely claimed a payment promise, and ended call without recording correct details. Critical failure.",
+  "confidence": "high",
+  "raw_response": {
+    "summary": "Agent ignored caller's request for human, stated wrong EMI amount, falsely claimed a payment promise, and ended call without recording correct details. Critical failure.",
+    "confidence": "high",
+    "dimensions": {
+      "escalation": {
+        "score": 0,
+        "reason": "Caller explicitly requested a human representative twice; agent ignored both requests and ended the call.",
+        "evidence_turns": [
+          1,
+          2,
+          4
+        ]
+      },
+      "empathy_tone": {
+        "score": 1,
+        "reason": "Agent was dismissive, ignored caller's correction and request, and ended call without addressing concerns.",
+        "evidence_turns": [
+          2,
+          4
+        ]
+      },
+      "task_completion": {
+        "score": 0,
+        "reason": "Agent never recorded the promise-to-pay date or correct amount; instead it falsely claimed a payment promise and ended the call. Caller's goal completely unmet.",
+        "evidence_turns": [
+          2,
+          4
+        ]
+      },
+      "factual_accuracy": {
+        "score": 0,
+        "reason": "Agent stated EMI as 4500 instead of 6500 and then claimed to have noted a payment promise that was never made. Material errors.",
+        "evidence_turns": [
+          2,
+          4
+        ]
+      },
+      "conversation_flow": {
+        "score": 2,
+        "reason": "Agent ignored caller's request for human and ended call abruptly; no loops but flow was poor.",
+        "evidence_turns": [
+          2,
+          4
+        ]
+      },
+      "language_handling": {
+        "score": 4,
+        "reason": "Agent used English matching caller's language; understood caller's words but ignored them.",
+        "evidence_turns": [
+          0,
+          2,
+          4
+        ]
+      },
+      "policy_compliance": {
+        "score": 4,
+        "reason": "Recording disclosure given; no threats or forbidden content; no PII over-collection.",
+        "evidence_turns": [
+          0
+        ]
+      }
+    },
+    "failure_types": [
+      "wrong_fact",
+      "escalation_error",
+      "intent_miss"
+    ],
+    "critical_failure": true,
+    "needs_human_review": true
+  },
+  "input_tokens": 2518,
+  "output_tokens": 482,
+  "latency_ms": 6142,
+  "created_at": "2026-10-27T02:00:55.676224+00:00"
+}

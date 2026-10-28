@@ -97,6 +97,15 @@ def test_is_retryable() -> None:
     assert not is_retryable(ValueError("x"))
 
 
+def test_rate_limits_and_tts_errors_are_retryable() -> None:
+    """Gnani allows one active request per key; the TTS client has its own APIError class."""
+    from gnani.tts.exceptions import APIError as TTSAPIError
+
+    assert is_retryable(APIError(429, "x")) and is_retryable(TTSAPIError(429, "x"))
+    assert is_retryable(TTSAPIError(503, "x"))
+    assert not is_retryable(TTSAPIError(400, "x")) and not is_retryable(TTSAPIError(401, "x"))
+
+
 def test_ledger_totals_ignore_cache_hits() -> None:
     ledger = UsageLedger()
     ledger.add(UsageRecord("tts", "kn-IN", 2.0, 10))
@@ -243,3 +252,34 @@ def test_transcribe_batch_returns_plain_segments(monkeypatch: pytest.MonkeyPatch
     assert FakeBatch.args["speakers"] == 2
     assert FakeBatch.args["bias_words"] == ["EMI"]
     assert g.ledger.totals()["stt_batch"]["calls"] == 1
+
+
+def test_rate_limit_is_retried_patiently_but_other_failures_stay_at_three(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+
+    monkeypatch.setattr("time.sleep", lambda _s: None)
+
+    def flaky(failures: int, error: Exception) -> Any:
+        calls = {"n": 0}
+
+        def fn() -> str:
+            calls["n"] += 1
+            if calls["n"] <= failures:
+                raise error
+            return "ok"
+
+        return fn, calls
+
+    fn, calls = flaky(10, APIError(429, "Only 1 active request is allowed at a time"))
+    assert clients._retry(fn) == "ok" and calls["n"] == 11
+
+    fn, calls = flaky(10, APIError(503, "down"))
+    with pytest.raises(APIError):
+        clients._retry(fn)
+    assert calls["n"] == 3
+
+    fn, calls = flaky(100, APIError(429, "still busy"))
+    with pytest.raises(APIError):
+        clients._retry(fn)
+    assert calls["n"] == clients.RATE_LIMIT_ATTEMPTS

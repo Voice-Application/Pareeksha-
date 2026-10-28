@@ -29,6 +29,9 @@ test.afterAll(async () => {
   await new Promise<void>((r) => upstream.close(() => r()));
 });
 
+/** Pages whose h1 states the current finding ("Latest run passed 7 of 12 calls") instead of the nav label (00-shared 3). */
+const SENTENCE_TITLES = new Set(["/", "/dlq", "/audits", "/dialect", "/regression", "/calibration", "/integrations"]);
+
 for (const item of NAV_ITEMS) {
   test(`page ${item.href} renders inside layout with sidebar`, async ({ page }) => {
     const res = await page.goto(item.href);
@@ -36,7 +39,8 @@ for (const item of NAV_ITEMS) {
     const nav = page.getByRole("navigation", { name: "Primary" });
     await expect(nav).toBeVisible();
     await expect(nav.getByRole("link", { name: item.label, exact: true })).toHaveAttribute("aria-current", "page");
-    await expect(page.getByRole("heading", { level: 1, name: item.label, exact: true })).toBeVisible();
+    if (SENTENCE_TITLES.has(item.href)) await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    else await expect(page.getByRole("heading", { level: 1, name: item.label, exact: true })).toBeVisible();
   });
 }
 

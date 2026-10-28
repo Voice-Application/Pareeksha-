@@ -145,6 +145,8 @@ Standard `GET` (list/one), `PATCH`, `DELETE` exist for all three resources. Dele
 
 The run row and its `run.requested` event are written in one transaction; the planner then creates the items. `item_count` is computed up front so the UI can show it immediately.
 
+Implementation notes (API-03): ids repeated in a list count once; a matrix above 1000 calls is refused with `400 validation_error` (`details: {item_count, max_items}`); an unknown or other-project agent, scenario, persona or noise profile is `404`, an archived agent `409`. The `402` body carries `details.estimate`, `details.remaining_budget` and `details.item_count`. `est_cost` is priced with the `COST_*` rates of `.env` (unset rate = 0) against `BUDGET_CREDITS` minus the `api_usage.est_cost` already spent; with no `BUDGET_CREDITS` there is no guard. `kind: dry_run` (or `config.dry_run`) is estimated without TTS or STT. The planner (`python -m pareeksha.workers.planner`, group `planner`) inserts one `run_items` row per cell with a deterministic seed and emits `call.requested` (key `run_item_id`) plus an `item.status` progress event per item. `progress.total` is `item_count` until the items exist. `POST /runs/{id}/cancel` moves queued items to `cancelled` and the run to `cancelled`; calls already in flight finish and are evaluated; a finished or already cancelled run answers `409`.
+
 ### `GET /runs/{id}/events` — live progress (Server-Sent Events)
 `Content-Type: text/event-stream`. Sends a `snapshot` first, then:
 ```
@@ -158,6 +160,8 @@ event: run.completed
 data: {"run_id":"…","summary":{"pass_rate":0.7,"critical_failures":1}}
 ```
 Heartbeat comment every 15 s. Clients reconnect with `Last-Event-ID`; on reconnect the server sends a fresh `snapshot`.
+
+Implementation notes (API-04): the `snapshot` is read from Postgres (`{run, items}`), the rest from `pareeksha.progress.v1` through a private group-less consumer per connection (no consumer group, no commits). Each message's `id:` is the last offset read per partition (`0:41,1:7,2:19`); with `Last-Event-ID` the server sends the fresh `snapshot` and then replays what the client missed from those offsets, so a reconnect loses nothing (events are at-least-once and can be older than the snapshot; the last one wins). Without a valid id the stream starts at the end of the topic. The stream ends after `run.completed`; a run that is already finished gets `snapshot` + `run.completed` and the stream closes. `502 upstream_error` when Kafka is unreachable.
 
 ### `POST /runs:regression`
 ```json
@@ -194,8 +198,10 @@ Rows for the matrix view: `scenario`, `persona`, `noise_profile`, `status`, `cal
   "summary": { "regressed": 2, "improved": 3, "unchanged": 3 }
 }
 ```
+A cell is (scenario title, persona name, noise profile name); repeats are averaged and a cell counts as passed only if all repeats passed. `delta = head - base` (null if either side has no evaluated call); `newly_failing` = passed in `base`, not passed in `head`. `summary` counts cells scored in both runs. Cells come worst delta first, cells without a delta last. (API-04)
 
 ### `GET /runs/{id}/report` → `text/html` exportable report.
+One self-contained page (inline CSS, no scripts): summary figures, top failure types, score distribution and the matrix. Names are HTML-escaped. (API-04)
 
 ---
 
@@ -223,6 +229,9 @@ Rows for the matrix view: `scenario`, `persona`, `noise_profile`, `status`, `cal
 ```
 
 ### `GET /calls/{id}/audio/{track}` — `track ∈ {mixed, caller, agent, original}` → `audio/wav` (supports `Range`).
+Files are read from `DATA_DIR` (`calls.recording_*` hold relative paths; a path escaping `DATA_DIR` is a 404). Single ranges (`bytes=a-b`, `a-`, `-n`) answer `206` with `Content-Range`; an unsatisfiable range is `416 range_not_satisfiable`; a multi-range or malformed header gets the whole file. A call without that track, or a missing file, is `404`. (API-04)
+
+`GET /calls` (API-04): newest first by `started_at`; `source` repeats; `needs_review` / `reviewed` look at the call's latest evaluation (a call with no evaluation counts as `needs_review=false`, `reviewed=false`); `run_id` goes through the run item. The detail's `evaluation` is the latest evaluation row (re-evaluation adds rows).
 
 ### 4.1 Evaluation object
 ```json
@@ -261,6 +270,7 @@ Rows for the matrix view: `scenario`, `persona`, `noise_profile`, `status`, `cal
 → `201 { "scenario_id": "…", "regression_test_id": "…" }`
 
 ### `POST /calls/{id}/speaker-map` (uploads) `{ "spk_0": "caller", "spk_1": "agent" }` → re-evaluates.
+Keys are the labels in the call's `speaker_map` (`spk_0`, `spk_1`, ... in order of first appearance); a speaker left out keeps its current role. → `202 { "call_id": "…" }`: the turns are rebuilt from the stored diarization (no new transcription) and a new `call.completed` makes the evaluator judge the call again under the same rubric version. `400` for unknown speakers or a map without both an agent and a caller, `409` for simulated calls or a call that is not `completed` yet.
 
 ### `POST /audits` (multipart)
 | Field | Type | Notes |
@@ -312,6 +322,8 @@ Rows for the matrix view: `scenario`, `persona`, `noise_profile`, `status`, `cal
 | `GET /usage?from=&to=` | Aggregated `api_usage` + remaining budget |
 | `GET /health` | `{ "db": "ok", "kafka": "ok" }` (no auth) |
 | `GET /metrics/summary` | `{ "consumer_lag": {"simulator": 4, "evaluator": 0, …}, "outbox_backlog": 0, "dlq_open": 1, "credits_used": 812.4 }` |
+
+Implementation notes (API-04): `consumer_lag[group]` is the sum over the group's committed topic partitions of log end offset minus committed offset (a partition the group has no commit on counts from the log start); groups that never committed do not appear. `outbox_backlog` = unpublished `outbox_events`, `dlq_open` = open `dead_letters`, `credits_used` = all-time `sum(api_usage.est_cost)`. `502 upstream_error` when Kafka cannot be reached. `GET /usage?from=&to=` groups `api_usage` by provider / operation / unit type inside the window; `credits_used` is the window's cost, `budget_credits` is `BUDGET_CREDITS`, `remaining_budget` is the all-time budget left (as in the run estimate); both are null without `BUDGET_CREDITS`.
 
 ---
 
@@ -396,7 +408,7 @@ Headers: `X-Pareeksha-Timestamp`, `X-Pareeksha-Signature: v1=<hex hmac_sha256(se
 { "external_id": "exotel-CA123", "recording_url": "https://…/CA123.mp3", "agent_name": "EMI Reminder Bot",
   "language": "kn-IN", "metadata": { "phone": "+91XXXXXXXX00", "crm_contact_id": "1234" } }
 ```
-→ `202 { "call_id": "…", "duplicate": false }` · `401 invalid_signature` · `408 timestamp_out_of_window` · `422 unsafe_url`
+→ `202 { "call_id": "…", "duplicate": false }` · `401 invalid_signature` · `408 timestamp_out_of_window` · `422 unsafe_url` · `422 unknown_agent` (no agent matches `agent_name` and the integration has no `default_agent_id`). A repeated `external_id` returns the first call with `duplicate: true`; nothing new is created.
 
 Outbound webhook payloads and signing: `10-integrations-and-dx.md §2.1`.
 
@@ -407,6 +419,8 @@ Outbound webhook payloads and signing: `10-integrations-and-dx.md §2.1`.
 | `GET /dlq?status=open` | `{ "items": [ { "id", "event_id", "original_topic", "consumer_group", "error", "attempts", "failed_at", "envelope" } ] }` |
 | `POST /dlq/{id}/replay` | `202` — re-publishes the envelope with `attempt=1` to `original_topic` via the outbox; status → `replayed` |
 | `POST /dlq/{id}/discard` | `200` — status → `discarded` |
+
+Implementation notes (API-04): list is newest first by `failed_at`, `status` defaults to `open`. Replay re-publishes the stored envelope with `attempt=1` and the **same** `event_id` (groups that already processed it skip it through `processed_events`; if it fails again the DLQ recorder re-opens the same row); the outbox row itself gets a fresh id. Replaying or discarding a row that is not `open` is `409`, and so is replaying a message that was not a valid envelope (the recorder stores those as `{"raw": ...}`).
 
 ## 10. API keys
 
@@ -435,5 +449,6 @@ Added on 23 Oct 2026 after DES-01 listed API data gaps for the FR-DB-1 pages (se
 | `GET /dialect-reports?dataset_id=` | Dialect page report picker (FR-DI-4) | page of report summaries |
 | `GET /dialect-reports/{id}/clips?dialect=&condition=&engine=` | Heatmap drill-down to the worst clips (FR-DB-4) | page of clip results, worst WER first |
 | `GET /dialect-reports/{id}/html` | The `html` link already returned by `GET /dialect-reports/{id}` | `text/html` |
+| `GET /speech/providers` | Speech provider abstraction (VOICE-07, owner-approved 2026-10-24): which of gnani / google / azure / elevenlabs / deepgram have credentials set, which are the `STT_PROVIDER` / `TTS_PROVIDER` defaults, and their capabilities; scope `read`; never returns key material | `{ items: [{ name, configured, missing_env, stt_default, tts_default, stt: {streaming, batch, word_timings, word_confidence, diarization, ...}, tts: {sample_rates, voice_listing, speed_control, ...} }] }` |
 
 Field additions: `RunSummary.score_distribution` (10 buckets, FR-DB-2); `run_id` and `run_item_id` on the call object.

@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from pareeksha.schemas.common import (
     AdapterType,
@@ -14,6 +14,18 @@ from pareeksha.schemas.common import (
     ForbiddenPhrase,
     RequestModel,
 )
+
+
+def _check_speech_override(value: dict[str, object] | None) -> dict[str, object] | None:
+    """``adapter_config.speech`` (per-agent STT/TTS provider) must name known providers."""
+    from pareeksha.speech.agent_config import speech_selection
+    from pareeksha.speech.base import SpeechConfigError
+
+    try:
+        speech_selection(value)
+    except SpeechConfigError as exc:
+        raise ValueError(str(exc)) from exc
+    return value
 
 
 class AgentCreate(RequestModel):
@@ -29,6 +41,8 @@ class AgentCreate(RequestModel):
     expected_tools: list[ExpectedTool] = Field(default_factory=list)
     bias_list: list[str] = Field(default_factory=list)
     max_call_seconds: int = Field(default=300, ge=10, le=1800)
+
+    _speech = field_validator("adapter_config")(_check_speech_override)
 
 
 class AgentUpdate(RequestModel):
@@ -46,6 +60,8 @@ class AgentUpdate(RequestModel):
     expected_tools: list[ExpectedTool] | None = None
     bias_list: list[str] | None = None
     max_call_seconds: int | None = Field(default=None, ge=10, le=1800)
+
+    _speech = field_validator("adapter_config")(_check_speech_override)
 
 
 class AgentOut(AgentCreate):

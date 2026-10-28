@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import io
+import random
 import time
 import wave
 from collections.abc import Callable, Iterable
@@ -22,6 +23,7 @@ from gnani.stt import GnaniSTTBatchClient, GnaniSTTClient, GnaniSTTStreamClient
 from gnani.stt.client import StreamTranscriptEvent
 from gnani.stt.exceptions import APIError
 from gnani.tts import AudioConfig, GnaniTTSClient
+from gnani.tts.exceptions import APIError as TTSAPIError
 
 T = TypeVar("T")
 
@@ -124,21 +126,48 @@ def cache_key(
 
 
 def is_retryable(exc: BaseException) -> bool:
-    """5xx and timeouts retry; 4xx never does (TRD section 3)."""
-    if isinstance(exc, APIError):
-        return exc.status_code >= 500
+    """5xx, 429 and timeouts retry; other 4xx never do (TRD section 3).
+
+    429 is retried because Gnani allows one active request per key ("Only 1 active request is
+    allowed at a time"), so concurrent callers sharing a key collide briefly. The TTS client raises
+    its own ``APIError`` class, distinct from the STT one.
+    """
+    if isinstance(exc, APIError | TTSAPIError):
+        return exc.status_code >= 500 or exc.status_code == 429
     return isinstance(exc, (requests.Timeout, requests.ConnectionError, TimeoutError))
 
 
+#: 429 is Gnani's one-active-request-per-key limit: other processes' calls hold the key for a
+#: second or two, so wait with jitter (each process picks its own delay, which de-synchronizes
+#: them) and keep trying for about a minute before giving up.
+RATE_LIMIT_ATTEMPTS = 25
+RATE_LIMIT_MAX_WAIT_S = 3.0
+
+
+def _is_rate_limited(exc: BaseException) -> bool:
+    return isinstance(exc, APIError | TTSAPIError) and exc.status_code == 429
+
+
 def _retry(fn: Callable[[], T], *, attempts: int = 3, base_delay: float = 1.0) -> T:
-    for attempt in range(attempts):
+    failures = rate_limited = 0
+    while True:
         try:
             return fn()
         except Exception as exc:
-            if attempt == attempts - 1 or not is_retryable(exc):
+            if not is_retryable(exc):
                 raise
-            time.sleep(base_delay * 2**attempt)
-    raise AssertionError("unreachable")  # pragma: no cover
+            if _is_rate_limited(exc):
+                rate_limited += 1
+                if rate_limited >= RATE_LIMIT_ATTEMPTS:
+                    raise
+                time.sleep(
+                    random.uniform(0.2, min(RATE_LIMIT_MAX_WAIT_S, 0.5 + 0.25 * rate_limited))
+                )
+                continue
+            failures += 1
+            if failures >= attempts:
+                raise
+            time.sleep(base_delay * 2 ** (failures - 1))
 
 
 class GnaniSpeech:

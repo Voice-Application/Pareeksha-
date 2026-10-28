@@ -1,0 +1,52 @@
+
+> pareeksha-web@0.1.0 build
+> next build
+
+▲ Next.js 16.4.3 (Turbopack)
+✓ Running next.config.ts took 25ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 732ms
+  Running TypeScript ...
+  Finished TypeScript in 3.6s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/19) ...
+  Generating static pages using 3 workers (4/19) 
+  Generating static pages using 3 workers (9/19) 
+  Generating static pages using 3 workers (14/19) 
+✓ Generating static pages using 3 workers (19/19) in 590ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /agents
+├ ƒ /agents/[id]
+├ ○ /agents/new
+├ ƒ /api/proxy/[...path]
+├ ○ /audits
+├ ○ /calibration
+├ ƒ /calls/[id]
+├ ○ /dialect
+├ ○ /dlq
+├ ○ /integrations
+├ ○ /noise-profiles
+├ ƒ /noise-profiles/[id]
+├ ○ /personas
+├ ƒ /personas/[id]
+├ ○ /regression
+├ ○ /runs
+├ ƒ /runs/[id]
+├ ○ /runs/compare
+├ ○ /runs/new
+├ ○ /scenarios
+├ ƒ /scenarios/[id]
+├ ○ /scenarios/new
+└ ○ /settings/api-keys
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

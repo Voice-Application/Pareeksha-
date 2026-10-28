@@ -1,0 +1,51 @@
+{
+  "provider_status": [
+    {
+      "name": "gnani",
+      "configured": true
+    },
+    {
+      "name": "google",
+      "configured": false
+    },
+    {
+      "name": "azure",
+      "configured": false
+    },
+    {
+      "name": "elevenlabs",
+      "configured": false
+    },
+    {
+      "name": "deepgram",
+      "configured": false
+    }
+  ],
+  "tts": {
+    "voice": "Shivani",
+    "chars": 29,
+    "sample_rate": 16000,
+    "duration_s": 2.56,
+    "usage": {
+      "provider": "gnani",
+      "operation": "tts",
+      "audio_seconds": 2.56,
+      "characters": 29,
+      "latency_ms": 2415,
+      "est_cost": null
+    }
+  },
+  "stt": {
+    "text": "नमस्ते, आपकी ई एम आई बाकी है।",
+    "model": "gnani-prisma-v2.5",
+    "usage": {
+      "provider": "gnani",
+      "operation": "stt_rest",
+      "audio_seconds": 2.56,
+      "characters": 0,
+      "latency_ms": 1615,
+      "est_cost": null
+    }
+  },
+  "reference": "नमस्ते, आपकी ई एम आई बाकी है।"
+}

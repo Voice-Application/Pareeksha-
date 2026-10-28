@@ -1,0 +1,191 @@
+{
+  "integration": {
+    "id": "bffd6c06-668e-4682-bc2a-812816f85e34",
+    "connector": "webhook",
+    "direction": "both",
+    "inbound_url": "http://127.0.0.1:28000/api/v1/webhooks/inbound/bffd6c06-668e-4682-bc2a-812816f85e34",
+    "enabled": true
+  },
+  "integration_test": {
+    "ok": true,
+    "detail": "HTTP 200"
+  },
+  "negative": {
+    "bad_signature": [
+      401,
+      "invalid_signature"
+    ],
+    "stale_timestamp": [
+      408,
+      "timestamp_out_of_window"
+    ],
+    "non_https_url": [
+      422,
+      "unsafe_url"
+    ]
+  },
+  "replay": {
+    "status": 202,
+    "body": {
+      "call_id": "abf1edee-a9bc-446a-bd64-b713182f8806",
+      "duplicate": true
+    }
+  },
+  "seconds_webhook_to_note": 24.7,
+  "within_3_minutes": true,
+  "sink_delivery": {
+    "data": {
+      "agent": {
+        "id": "39dd7040-1a91-4088-95b8-57c6703cf358",
+        "name": "EMI Reminder Bot"
+      },
+      "call_id": "abf1edee-a9bc-446a-bd64-b713182f8806",
+      "critical_failure": false,
+      "duration_ms": 17460,
+      "external_id": null,
+      "failure_types": [],
+      "language": "hi-IN",
+      "link": "http://127.0.0.1:28000/calls/abf1edee-a9bc-446a-bd64-b713182f8806",
+      "metadata": {
+        "crm_contact_id": "int03-contact",
+        "phone": "+910000000000"
+      },
+      "overall_score": 100.0,
+      "passed": true,
+      "persona": null,
+      "scenario": null,
+      "source": "import",
+      "summary": "Caller confirmed EMI payment on Friday; agent recorded promise-to-pay. All disclosures present, language matched, no issues.",
+      "top_failing_dimensions": []
+    },
+    "event_id": "4588ae30-7794-5b29-8709-bb03d3eb0786",
+    "occurred_at": "2026-10-27T01:37:43.667287+00:00",
+    "type": "evaluation.completed"
+  },
+  "recording_fetches": 1,
+  "call": {
+    "source": "import",
+    "status": "completed",
+    "language": "hi-IN",
+    "speaker_map": {
+      "spk_0": "agent",
+      "spk_1": "caller"
+    },
+    "duration_ms": 17460,
+    "recording_original": "imports/abf1edee-a9bc-446a-bd64-b713182f8806/original",
+    "metadata": {
+      "phone": "+910000000000",
+      "crm_contact_id": "int03-contact"
+    }
+  },
+  "turns": [
+    {
+      "idx": 0,
+      "speaker": "agent",
+      "start_ms": 0,
+      "end_ms": 10080,
+      "text": "नमस्ते, मैं शक्ति फाइनांस से बोल रही हूँ, ये कॉल रिकॉर्ड की जा रही है, आपकी इ एम आई ₹4,200 है जो शुक्रवार को देय है"
+    },
+    {
+      "idx": 1,
+      "speaker": "caller",
+      "start_ms": 10080,
+      "end_ms": 13824,
+      "text": "हाँ, मैं शुक्रवार को पैसे जमा कर दूँगा।"
+    },
+    {
+      "idx": 2,
+      "speaker": "agent",
+      "start_ms": 13824,
+      "end_ms": 17440,
+      "text": "धन्यवाद, मैंने आपका वादा दर्ज कर लिया है।"
+    }
+  ],
+  "evaluation": [
+    {
+      "overall_score": "100.00",
+      "passed": true,
+      "needs_human_review": false,
+      "failure_types": [],
+      "created_at": "2026-10-27 01:37:38.851171+00:00",
+      "version": "rubric-2026-10-v1"
+    }
+  ],
+  "outbox_timeline": [
+    {
+      "topic": "pareeksha.audit.requested.v1",
+      "created_at": "2026-10-27 01:37:19.212025+00:00"
+    }
+  ],
+  "deliveries": [
+    {
+      "direction": "outbound",
+      "status": "succeeded",
+      "http_status": 200,
+      "attempts": 1,
+      "created_at": "2026-10-27 01:37:43.775544+00:00",
+      "updated_at": "2026-10-27 01:37:43.871246+00:00"
+    }
+  ],
+  "external_refs": [
+    {
+      "external_id": "exotel-CA-int03"
+    }
+  ],
+  "db_usage": [
+    {
+      "provider": "gnani",
+      "operation": "stt_batch",
+      "units": "17.460",
+      "unit_type": "audio_seconds",
+      "est_cost": null
+    },
+    {
+      "provider": "deepseek",
+      "operation": "llm_role_detect",
+      "units": "827.000",
+      "unit_type": "tokens",
+      "est_cost": "0.0013"
+    },
+    {
+      "provider": "deepseek",
+      "operation": "llm_judge",
+      "units": "2529.000",
+      "unit_type": "tokens",
+      "est_cost": "0.0044"
+    }
+  ],
+  "health": {
+    "db": "ok",
+    "kafka": "ok"
+  },
+  "timeline": [
+    {
+      "event": "stack up (api + outbox_relay + auditor + evaluator + integrations)",
+      "at": "2026-10-27T01:37:18.876+00:00"
+    },
+    {
+      "event": "POST /webhooks/inbound (signed)",
+      "at": "2026-10-27T01:37:19.192+00:00"
+    },
+    {
+      "event": "webhook accepted",
+      "at": "2026-10-27T01:37:19.215+00:00",
+      "status": 202,
+      "response": {
+        "call_id": "abf1edee-a9bc-446a-bd64-b713182f8806",
+        "duplicate": false
+      }
+    },
+    {
+      "event": "recording downloaded from the import URL",
+      "at": "2026-10-27T01:37:19.410+00:00",
+      "bytes": 558764
+    },
+    {
+      "event": "sink delivery received (CRM-note stand-in)",
+      "at": "2026-10-27T01:37:43.868+00:00",
+      "signature_ok": true
+    }
+  ]
+}

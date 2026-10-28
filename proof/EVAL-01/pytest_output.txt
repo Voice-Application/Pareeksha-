@@ -1,0 +1,9 @@
+$ cd backend && python -m pytest -q --cov=pareeksha.llm --cov-report=term
+570 passed in 88.51s (0:01:28)    (0 failed, 0 skipped; full backend suite, python 3.13)
+Name                        Stmts   Miss Branch BrPart  Cover   Missing
+pareeksha/llm/_http.py         21      2      6      0    93%   16-17
+pareeksha/llm/client.py       132      0     20      1    99%   336->exit
+pareeksha/llm/deepseek.py      65      0     16      1    99%   77->81
+TOTAL (pareeksha.llm)         482      2     82      2    99%
+$ ruff check pareeksha tests && ruff format --check .   -> All checks passed
+$ python -m mypy                                        -> Success: no issues found in 87 source files

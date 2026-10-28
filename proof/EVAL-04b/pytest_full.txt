@@ -1,0 +1,73 @@
+........................................................................ [  6%]
+........................................................................ [ 13%]
+........................................................................ [ 20%]
+........................................................................ [ 27%]
+........................................................................ [ 34%]
+........................................................................ [ 41%]
+........................................................................ [ 48%]
+........................................................................ [ 54%]
+........................................................................ [ 61%]
+........................................................................ [ 68%]
+........................................................................ [ 75%]
+........................................................................ [ 82%]
+........................................................................ [ 89%]
+........................................................................ [ 96%]
+.........................................                                [100%]
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.13.17-final-0 _______________
+
+Name                                            Stmts   Miss Branch BrPart  Cover   Missing
+-------------------------------------------------------------------------------------------
+pareeksha/api/deps.py                              26      1      0      0    96%   40
+pareeksha/api/health.py                            27      5      0      0    81%   22, 30-34
+pareeksha/api/main.py                              49      1     16      1    97%   79
+pareeksha/api/routers/integrations.py             146      2     26      0    99%   220-221
+pareeksha/audio/dsp.py                             82      4     14      2    94%   53-54, 87, 119
+pareeksha/audio/line_simulator.py                 124      4     30      2    96%   85, 188-190
+pareeksha/audio/noise.py                          128      1     16      1    99%   191
+pareeksha/audio/profiles.py                        38      3     12      3    88%   28, 33, 37
+pareeksha/audit/pipeline.py                       168      1     26      1    99%   220
+pareeksha/audit/turns.py                           66      0     14      1    99%   93->91
+pareeksha/db/session.py                            33      2      6      0    95%   41, 45
+pareeksha/evaluation/checks.py                    166      7     74      7    93%   38, 133, 163, 238-240, 371->369, 416, 447->449
+pareeksha/evaluation/completion_reconciler.py      43      3     12      1    93%   46, 69-70
+pareeksha/evaluation/metrics.py                   142      1     46      1    99%   195
+pareeksha/evaluation/numbers.py                   304     13    102      9    94%   301, 335-336, 346-351, 377->381, 398, 408, 426->417, 430, 434
+pareeksha/evaluation/pg_stores.py                 113      1     24      3    97%   125->128, 139->142, 386
+pareeksha/evaluation/pii.py                        91      1     34      1    98%   71
+pareeksha/evaluation/types.py                      66      1      6      1    97%   68
+pareeksha/events/consumer.py                      221     18     46      6    90%   276->278, 296, 304, 307->309, 309->311, 324-336, 384, 395, 398, 436-438, 508-511
+pareeksha/events/producer.py                       31      3      4      0    91%   72-74
+pareeksha/events/runtime.py                        60      9     12      0    85%   46-51, 102-104
+pareeksha/events/schemas.py                       249      5     26      3    97%   286, 292, 380-381, 389
+pareeksha/gnani/clients.py                        147      1     24      1    99%   94
+pareeksha/integrations/dispatch.py                132     12     42      7    88%   80->84, 91-94, 188, 208-209, 216, 219, 241-243, 273
+pareeksha/integrations/hubspot.py                 139      1     40      1    99%   267
+pareeksha/integrations/sql_store.py                41      1      6      1    96%   82
+pareeksha/integrations/ssrf.py                     76      1     24      1    98%   138
+pareeksha/integrations/webhook.py                  91      0     20      1    99%   74->76
+pareeksha/llm/_http.py                             21      2      6      0    93%   16-17
+pareeksha/llm/deepseek.py                          65      0     16      1    99%   77->81
+pareeksha/runs/service.py                         163      1     42      0    99%   113
+pareeksha/runs/slots.py                            62      1     16      2    96%   141, 149->134
+pareeksha/seed/__main__.py                         19      3      4      2    78%   23-24, 29
+pareeksha/speech/providers/_common.py              29      1      4      1    94%   41->exit, 50
+pareeksha/speech/providers/deepgram.py            123      1     30      2    98%   205, 219->221
+pareeksha/speech/providers/elevenlabs.py           80      0     26      1    99%   206->208
+pareeksha/speech/providers/gnani.py               114      4     32      4    95%   71, 184, 192, 207
+pareeksha/speech/providers/google.py              104      1     20      2    98%   64->66, 122
+pareeksha/workers/auditor.py                       34      2      2      1    92%   65, 69
+pareeksha/workers/dlq_recorder.py                  96     12     12      2    87%   134, 167-172, 179-182, 186
+pareeksha/workers/evaluator.py                     65      9     14      1    80%   111-119, 123
+pareeksha/workers/finalizer.py                     25      7      2      1    70%   42-48, 52
+pareeksha/workers/integrations.py                  33     33      4      0     0%   16-81
+pareeksha/workers/outbox_relay.py                  62     11     16      4    78%   64-67, 78, 82, 91-94, 98
+pareeksha/workers/planner.py                       76      4     20      3    93%   77, 228, 236, 240
+pareeksha/workers/reconciler.py                    36      5      4      1    85%   52-55, 59
+pareeksha/workers/retrier.py                       90     13     22      3    86%   82, 93, 147-152, 159-162, 166
+-------------------------------------------------------------------------------------------
+TOTAL                                            8300    212   1346     86    97%
+
+90 files skipped due to complete coverage.
+1049 passed in 597.15s (0:09:57)
+done

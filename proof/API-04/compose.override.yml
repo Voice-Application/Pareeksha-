@@ -1,0 +1,11 @@
+# Sandbox override: other containers on this host hold 5432 / 9094, so this project
+# (`docker compose -p api04 -f docker-compose.yml -f proof/API-04/compose.override.yml ...`) remaps both.
+services:
+  kafka:
+    ports: !override ["61094:9094"]
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:61094
+  postgres:
+    ports: !override ["61432:5432"]
+  api:
+    ports: !override ["61800:8000"]

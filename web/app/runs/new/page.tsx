@@ -1,6 +1,10 @@
-// STUB(FE-03): placeholder body, replaced when FE-03 builds this page
-import { RouteStub } from "@/components/layout/route-stub";
+import { Suspense } from "react";
+import { RunWizard, RunWizardSkeleton } from "@/components/runs/run-wizard";
 
 export default function Page() {
-  return <RouteStub title="New run" />;
+  return (
+    <Suspense fallback={<RunWizardSkeleton />}>
+      <RunWizard />
+    </Suspense>
+  );
 }

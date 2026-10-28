@@ -1,0 +1,175 @@
+........................................................................ [  6%]
+........................................................................ [ 13%]
+........................................................................ [ 19%]
+........................................................................ [ 26%]
+........................................................................ [ 32%]
+.F...................................................................... [ 39%]
+.............FFF........................................................ [ 45%]
+........................................................................ [ 52%]
+........................................................................ [ 58%]
+........................................................................ [ 65%]
+........................................................................ [ 71%]
+........................................................................ [ 78%]
+........................................................................ [ 85%]
+........................................................................ [ 91%]
+........................................................................ [ 98%]
+.....................                                                    [100%]
+=================================== FAILURES ===================================
+_________ test_three_failures_go_through_retry_30s_and_retry_5m_to_dlq _________
+
+    async def test_three_failures_go_through_retry_30s_and_retry_5m_to_dlq() -> None:
+        group = unique_group("fail3")
+        env = audit_envelope()
+        key = str(env.payload.call_id)
+        attempts: list[int] = []
+        times: list[float] = []
+    
+        async def handle(e: Any, ctx: Ctx) -> Sequence[Outgoing]:
+            attempts.append(e.attempt)
+            times.append(time.monotonic())
+            await _insert_side_effect(ctx, e)  # must be rolled back every time
+            raise RetryableError("agent unreachable")
+    
+        async with pipeline(_spec(group, handle), policy=FAST) as p:
+            await p.send(env)
+            row = await wait_for(
+                lambda: _async(_dead_letter(group, env.event_id)), what="dead_letters row"
+            )
+            await _wait_lag_zero(p, [AUDIT])
+            retrier_lag = await group_lag(p.retrier_group, [Topics.RETRY_30S, Topics.RETRY_5M])
+            recorder_lag = await group_lag(p.recorder_group, [Topics.DLQ])
+    
+>       assert attempts == [1, 2, 3]
+E       assert [1, 2, 2, 3, 3, 3, ...] == [1, 2, 3]
+E         
+E         At index 2 diff: 2 != 3
+E         Left contains 4 more items, first extra item: 3
+E         Use -v to get more diff
+
+tests/integration/test_consumer_framework.py:173: AssertionError
+----------------------------- Captured stderr call -----------------------------
+WARNI [pareeksha.events.consumer] handler failed (RetryableError: agent unreachable) -> retry attempt 2
+WARNI [pareeksha.events.consumer] handler failed (RetryableError: agent unreachable) -> retry attempt 3
+WARNI [pareeksha.events.consumer] handler failed (RetryableError: agent unreachable) -> retry attempt 3
+ERROR [pareeksha.events.consumer] handler failed (RetryableError: agent unreachable) -> DLQ after 3 attempt(s)
+ERROR [pareeksha.events.consumer] handler failed (RetryableError: agent unreachable) -> DLQ after 3 attempt(s)
+ERROR [pareeksha.events.consumer] handler failed (RetryableError: agent unreachable) -> DLQ after 3 attempt(s)
+ERROR [pareeksha.events.consumer] handler failed (RetryableError: agent unreachable) -> DLQ after 3 attempt(s)
+------------------------------ Captured log call -------------------------------
+WARNING  pareeksha.events.consumer:consumer.py:460 handler failed (RetryableError: agent unreachable) -> retry attempt 2
+WARNING  pareeksha.events.consumer:consumer.py:460 handler failed (RetryableError: agent unreachable) -> retry attempt 3
+WARNING  pareeksha.events.consumer:consumer.py:460 handler failed (RetryableError: agent unreachable) -> retry attempt 3
+ERROR    pareeksha.events.consumer:consumer.py:472 handler failed (RetryableError: agent unreachable) -> DLQ after 3 attempt(s)
+ERROR    pareeksha.events.consumer:consumer.py:472 handler failed (RetryableError: agent unreachable) -> DLQ after 3 attempt(s)
+ERROR    pareeksha.events.consumer:consumer.py:472 handler failed (RetryableError: agent unreachable) -> DLQ after 3 attempt(s)
+ERROR    pareeksha.events.consumer:consumer.py:472 handler failed (RetryableError: agent unreachable) -> DLQ after 3 attempt(s)
+________ test_three_failures_with_real_30s_and_5m_delays_end_in_the_dlq ________
+
+    async def test_three_failures_with_real_30s_and_5m_delays_end_in_the_dlq() -> None:
+        group = unique_group("real-delays")
+        env = audit_envelope()
+        key = str(env.payload.call_id)
+        calls: list[tuple[int, float]] = []
+    
+        async def handle(e: Any, ctx: Ctx) -> Sequence[Outgoing]:
+            calls.append((e.attempt, time.monotonic()))
+            raise RetryableError("agent unreachable")
+    
+        spec = ConsumerSpec(group=group, topics=(AUDIT,), handler=handle)
+        async with pipeline(spec) as p:  # default RetryPolicy = the contract (30 s / 5 min)
+            await p.send(env)
+    
+            async def dead() -> Any:
+                with db() as conn:
+                    return conn.execute(
+                        "SELECT attempts, status FROM dead_letters WHERE event_id = %s", (env.event_id,)
+                    ).fetchone()
+    
+            row = await wait_for(dead, timeout=420, interval=2, what="dead letter after 30s + 5m")
+            lag = await group_lag(group, [AUDIT])
+    
+        attempts = [a for a, _ in calls]
+        gaps = [calls[1][1] - calls[0][1], calls[2][1] - calls[1][1]]
+>       assert attempts == [1, 2, 3]
+E       assert [1, 2, 2, 3, 3, 3, ...] == [1, 2, 3]
+E         
+E         At index 2 diff: 2 != 3
+E         Left contains 4 more items, first extra item: 3
+E         Use -v to get more diff
+
+tests/integration/test_real_delays.py:54: AssertionError
+----------------------------- Captured stderr call -----------------------------
+WARNI [pareeksha.events.consumer] handler failed (RetryableError: agent unreachable) -> retry attempt 2
+WARNI [pareeksha.events.consumer] handler failed (RetryableError: agent unreachable) -> retry attempt 3
+WARNI [pareeksha.events.consumer] handler failed (RetryableError: agent unreachable) -> retry attempt 3
+ERROR [pareeksha.events.consumer] handler failed (RetryableError: agent unreachable) -> DLQ after 3 attempt(s)
+ERROR [pareeksha.events.consumer] handler failed (RetryableError: agent unreachable) -> DLQ after 3 attempt(s)
+ERROR [pareeksha.events.consumer] handler failed (RetryableError: agent unreachable) -> DLQ after 3 attempt(s)
+ERROR [pareeksha.events.consumer] handler failed (RetryableError: agent unreachable) -> DLQ after 3 attempt(s)
+------------------------------ Captured log call -------------------------------
+WARNING  pareeksha.events.consumer:consumer.py:460 handler failed (RetryableError: agent unreachable) -> retry attempt 2
+WARNING  pareeksha.events.consumer:consumer.py:460 handler failed (RetryableError: agent unreachable) -> retry attempt 3
+WARNING  pareeksha.events.consumer:consumer.py:460 handler failed (RetryableError: agent unreachable) -> retry attempt 3
+ERROR    pareeksha.events.consumer:consumer.py:472 handler failed (RetryableError: agent unreachable) -> DLQ after 3 attempt(s)
+ERROR    pareeksha.events.consumer:consumer.py:472 handler failed (RetryableError: agent unreachable) -> DLQ after 3 attempt(s)
+ERROR    pareeksha.events.consumer:consumer.py:472 handler failed (RetryableError: agent unreachable) -> DLQ after 3 attempt(s)
+ERROR    pareeksha.events.consumer:consumer.py:472 handler failed (RetryableError: agent unreachable) -> DLQ after 3 attempt(s)
+____ test_retrier_pauses_until_not_before_then_redelivers_with_group_header ____
+
+    async def test_retrier_pauses_until_not_before_then_redelivers_with_group_header() -> None:
+        env = audit_envelope()
+        key = str(env.payload.call_id)
+        due = datetime.now(UTC) + timedelta(seconds=3)
+        async with pipeline(_spec(), with_recorder=False) as p:
+            sent = time.monotonic()
+            await p.send_raw(
+                Topics.RETRY_30S,
+                env.to_json_bytes(),
+                key=key,
+                headers={
+                    HEADER_TARGET_TOPIC: AUDIT.value,
+                    HEADER_NOT_BEFORE: utc_iso(due),
+                    HEADER_CONSUMER_GROUP: "evaluator",
+                    HEADER_ERROR: "boom",
+                },
+            )
+    
+            async def delivered() -> list[Any]:
+                return await read_topic(AUDIT, key=key)
+    
+>           (msg,) = await wait_for(delivered, what="message redelivered to its topic")
+            ^^^^^^
+E           ValueError: too many values to unpack (expected 1)
+
+tests/integration/test_retrier_and_recorder.py:62: ValueError
+_________ test_retry_message_without_target_topic_is_parked_in_the_dlq _________
+
+    async def test_retry_message_without_target_topic_is_parked_in_the_dlq() -> None:
+        key = f"misrouted-{uuid.uuid4()}"
+        async with pipeline(_spec()) as p:
+            body = json.dumps({"hello": key}).encode()  # unique: identical garbage dedupes by content
+            await p.send_raw(Topics.RETRY_5M, body, key=key)
+    
+            def row() -> Any:
+                with db() as conn:
+                    return conn.execute(
+                        "SELECT consumer_group, error, envelope FROM dead_letters WHERE key = %s",
+                        (key,),
+                    ).fetchone()
+    
+            async def recorded() -> Any:
+                return row()
+    
+            got = await wait_for(recorded, what="misrouted message recorded as dead letter")
+        assert got[0] == "unknown" and "x-target-topic" in got[1] and got[2] == {"hello": key}
+>       assert len(await read_topic(Topics.DLQ, key=key)) == 1
+E       assert 2 == 1
+E        +  where 2 = len([Seen(topic='pareeksha.dlq.v1', partition=0, offset=13, key='misrouted-903b93fd-4ea5-4e8d-91e2-254053cab62e', value=b'...llo": "misrouted-903b93fd-4ea5-4e8d-91e2-254053cab62e"}', headers={'x-error': 'retry message without x-target-topic'})])
+
+tests/integration/test_retrier_and_recorder.py:92: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_consumer_framework.py::test_three_failures_go_through_retry_30s_and_retry_5m_to_dlq
+FAILED tests/integration/test_real_delays.py::test_three_failures_with_real_30s_and_5m_delays_end_in_the_dlq
+FAILED tests/integration/test_retrier_and_recorder.py::test_retrier_pauses_until_not_before_then_redelivers_with_group_header
+FAILED tests/integration/test_retrier_and_recorder.py::test_retry_message_without_target_topic_is_parked_in_the_dlq
+4 failed, 1097 passed in 625.27s (0:10:25)

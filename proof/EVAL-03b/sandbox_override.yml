@@ -1,0 +1,10 @@
+# Sandbox only (TLS-intercepting proxy, host port 5432 taken): remap Postgres and give the
+# evaluator container the proxy CA so httpx can reach api.deepseek.com.
+services:
+  postgres:
+    ports: !override ["55432:5432"]
+  evaluator:
+    environment:
+      SSL_CERT_FILE: /etc/ssl/proxy-ca.crt
+    volumes:
+      - /root/.ccr/ca-bundle.crt:/etc/ssl/proxy-ca.crt:ro
