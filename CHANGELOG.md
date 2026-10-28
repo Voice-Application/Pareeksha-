@@ -55,3 +55,4 @@ Contract changes after Day 1 need Tech Lead approval and an entry here.
 ## 2026-10-27 — EVAL-04b (additive, no frozen contract changed)
 - Audits with low-confidence or heuristic-vs-LLM-disagreeing role detection set `needs_human_review` (new `review_reasons` values, docs/contracts.md §4.2).
 - Per-agent STT/TTS provider override stored in `agents.adapter_config["speech"]` (docs/contracts.md §4.1); validated on create/patch, honoured by the auditor.
+- 2026-10-28 Owner approval (Preetham, written): CUT from v1 per AGENTS.md §10 — Vapi adapter and LiveKit adapter. Run compare view: owner chose BUILD (not cut).

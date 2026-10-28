@@ -41,7 +41,7 @@ State values: todo / doing / blocked / review / done. Verified = QA sign-off (`y
 | QA-03 | Planted-bug test: at least 4 of 5 caught | QA | VOICE-05, EVAL-03 | done | — | proof/QA-03/verified.md |
 | H-02 | ≥ 20 consented clips per dialect group | Preetham (human) | — | waiting on Preetham | — | no |
 | EVAL-05 | Dialect pipeline: WER/CER, entity accuracy, HTML report | EVAL | EVAL-03 | done (real dialect clips pending H-02) | — | proof/EVAL-05/verified.md |
-| VOICE-06 | Pipecat adapter + serializer + example (Must); LiveKit (Should) | VOICE | VOICE-04 | done (LiveKit/Vapi not built — cut pending owner approval) | — | proof/VOICE-06/verified.md |
+| VOICE-06 | Pipecat adapter + serializer + example (Must); LiveKit (Should) | VOICE | VOICE-04 | done (LiveKit/Vapi cut by owner 2026-10-28, see CHANGELOG) | — | proof/VOICE-06/verified.md |
 | INT-04 | `pareeksha-sdk` + CLI, `pareeksha.yaml`, GitHub Action | INT | TL-01 | done | — | proof/INT-04/verified.md |
 | API-05 | Regression promote/suite, calibration, scenario generation | BE-API | EVAL-03 | done | — | proof/API-05/verified.md |
 | FE-04 | Call detail: waveform, transcript, evidence seeking, promote | FE | FE-03 | done | — | proof/FE-04/verified.md |
