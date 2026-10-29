@@ -178,7 +178,7 @@ def test_regress_failed_run_status_exits_1(logged_in: str, state: State, yaml_pa
     state.final_status = "failed"
     state.pass_rate = None
     code, out = invoke("regress", "--agent", "EMI Reminder Bot", "--poll", "0.01")
-    assert code == 1 and "run failed" in out
+    assert code == 1 and "ERROR: run had infrastructure errors, no verdict" in out
 
 
 def test_audit_uploads_and_prints_result(
