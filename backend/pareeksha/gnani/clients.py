@@ -126,48 +126,60 @@ def cache_key(
 
 
 def is_retryable(exc: BaseException) -> bool:
-    """5xx, 429 and timeouts retry; other 4xx never do (TRD section 3).
+    """5xx, 429, timeouts and broken connections retry; other 4xx never do (TRD section 3).
 
     429 is retried because Gnani allows one active request per key ("Only 1 active request is
     allowed at a time"), so concurrent callers sharing a key collide briefly. The TTS client raises
-    its own ``APIError`` class, distinct from the STT one.
+    its own ``APIError`` class, distinct from the STT one. Transport faults (``requests`` raises
+    ``ChunkedEncodingError`` for a connection dropped mid-body, which is not a ``ConnectionError``)
+    are retryable too.
     """
     if isinstance(exc, APIError | TTSAPIError):
         return exc.status_code >= 500 or exc.status_code == 429
-    return isinstance(exc, (requests.Timeout, requests.ConnectionError, TimeoutError))
+    return isinstance(
+        exc,
+        (
+            requests.Timeout,
+            requests.ConnectionError,
+            requests.exceptions.ChunkedEncodingError,
+            TimeoutError,
+            ConnectionError,
+        ),
+    )
 
 
-#: 429 is Gnani's one-active-request-per-key limit: other processes' calls hold the key for a
-#: second or two, so wait with jitter (each process picks its own delay, which de-synchronizes
-#: them) and keep trying for about a minute before giving up.
-RATE_LIMIT_ATTEMPTS = 25
+#: Retryable failures (429 busy key, 5xx, dropped connections) back off with jitter and keep
+#: trying until about a minute of waiting has been spent: concurrent processes sharing the key
+#: each pick their own delay, which de-synchronizes them. ``MAX_ATTEMPTS`` bounds a zero delay.
+RETRY_BUDGET_S = 60.0
+RETRY_MAX_DELAY_S = 8.0
 RATE_LIMIT_MAX_WAIT_S = 3.0
+MAX_ATTEMPTS = 40
 
 
 def _is_rate_limited(exc: BaseException) -> bool:
     return isinstance(exc, APIError | TTSAPIError) and exc.status_code == 429
 
 
-def _retry(fn: Callable[[], T], *, attempts: int = 3, base_delay: float = 1.0) -> T:
-    failures = rate_limited = 0
+def _retry(fn: Callable[[], T], *, base_delay: float = 1.0) -> T:
+    waited = 0.0
+    attempt = 0
     while True:
         try:
             return fn()
         except Exception as exc:
             if not is_retryable(exc):
                 raise
+            attempt += 1
             if _is_rate_limited(exc):
-                rate_limited += 1
-                if rate_limited >= RATE_LIMIT_ATTEMPTS:
-                    raise
-                time.sleep(
-                    random.uniform(0.2, min(RATE_LIMIT_MAX_WAIT_S, 0.5 + 0.25 * rate_limited))
-                )
-                continue
-            failures += 1
-            if failures >= attempts:
+                delay = random.uniform(0.2, min(RATE_LIMIT_MAX_WAIT_S, 0.5 + 0.25 * attempt))
+            else:
+                ceiling = min(RETRY_MAX_DELAY_S, base_delay * 2 ** (attempt - 1))
+                delay = random.uniform(ceiling / 2, ceiling)
+            waited += delay
+            if attempt >= MAX_ATTEMPTS or waited > RETRY_BUDGET_S:
                 raise
-            time.sleep(base_delay * 2 ** (failures - 1))
+            time.sleep(delay)
 
 
 class GnaniSpeech:

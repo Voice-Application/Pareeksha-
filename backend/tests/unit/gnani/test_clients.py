@@ -174,12 +174,12 @@ def test_synthesize_does_not_retry_4xx(monkeypatch: pytest.MonkeyPatch) -> None:
     assert len(FakeTTS.calls) == 1
 
 
-def test_synthesize_gives_up_after_three_5xx(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_synthesize_gives_up_after_the_retry_cap_on_5xx(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(clients, "GnaniTTSClient", FakeTTS)
     FakeTTS.fail_times = 99
     with pytest.raises(APIError):
         GnaniSpeech("k", retry_delay=0).synthesize("hi", "x", "hi-IN")
-    assert len(FakeTTS.calls) == 3
+    assert len(FakeTTS.calls) == clients.MAX_ATTEMPTS
 
 
 def test_transcribe_rest_records_usage(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -254,11 +254,11 @@ def test_transcribe_batch_returns_plain_segments(monkeypatch: pytest.MonkeyPatch
     assert g.ledger.totals()["stt_batch"]["calls"] == 1
 
 
-def test_rate_limit_is_retried_patiently_but_other_failures_stay_at_three(
+def test_retryable_failures_back_off_with_jitter_within_a_time_budget(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-
-    monkeypatch.setattr("time.sleep", lambda _s: None)
+    sleeps: list[float] = []
+    monkeypatch.setattr("time.sleep", sleeps.append)
 
     def flaky(failures: int, error: Exception) -> Any:
         calls = {"n": 0}
@@ -274,12 +274,35 @@ def test_rate_limit_is_retried_patiently_but_other_failures_stay_at_three(
     fn, calls = flaky(10, APIError(429, "Only 1 active request is allowed at a time"))
     assert clients._retry(fn) == "ok" and calls["n"] == 11
 
-    fn, calls = flaky(10, APIError(503, "down"))
-    with pytest.raises(APIError):
-        clients._retry(fn)
-    assert calls["n"] == 3
+    for error in (
+        APIError(503, "down"),
+        APIError(504, "gateway timeout"),
+        requests.exceptions.ChunkedEncodingError(
+            "Connection broken: BrokenPipeError(32, 'Broken pipe')"
+        ),
+    ):
+        sleeps.clear()
+        fn, calls = flaky(5, error)
+        assert clients._retry(fn) == "ok" and calls["n"] == 6
+        assert all(0 < d <= clients.RETRY_MAX_DELAY_S for d in sleeps)
+        assert sleeps[0] <= 1.0 < sleeps[-1]  # exponential
 
-    fn, calls = flaky(100, APIError(429, "still busy"))
+    sleeps.clear()
+    fn, calls = flaky(1000, APIError(503, "down for good"))
     with pytest.raises(APIError):
         clients._retry(fn)
-    assert calls["n"] == clients.RATE_LIMIT_ATTEMPTS
+    assert calls["n"] > 3 and sum(sleeps) <= clients.RETRY_BUDGET_S
+
+    fn, calls = flaky(1000, APIError(429, "still busy"))
+    with pytest.raises(APIError):
+        clients._retry(fn)
+
+    fn, calls = flaky(5, APIError(401, "bad key"))
+    with pytest.raises(APIError):
+        clients._retry(fn)
+    assert calls["n"] == 1
+
+
+def test_broken_pipe_is_retryable() -> None:
+    assert is_retryable(requests.exceptions.ChunkedEncodingError("Connection broken"))
+    assert is_retryable(BrokenPipeError(32, "Broken pipe"))
