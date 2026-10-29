@@ -115,3 +115,9 @@ Never cut: mock agent with planted bugs, judge with evidence, Kafka outbox + ide
 - UI review: 17/17 pages pass (Run compare PASS with 8 minor non-blocking fixes listed).
 - NOT DONE (owner-blocked): H-02 dialect clips, EVAL-06 (30 labels), DOC-03 demo, PJM-01 release (public repo + v1.0.0), ALL-01, HubSpot token, provider keys, GitHub Actions run links (V8).
 - Known caveats: clean pass rate not fully deterministic (V4 control 2/2 one run, 1/2 another); Gnani allows one concurrent request per key.
+
+## GOAL item 8 — GitHub Action regression gate (2026-10-29)
+- PR voice-application/pareeksha-#1 (planted bug `no_disclosure` ON): `suite` FAILED with a judged verdict — 1/1 call evaluated, pass rate 0.0% < 80%, 0 infra errors. Run: https://github.com/Voice-Application/Pareeksha-/actions/runs/40894601670
+- PR voice-application/pareeksha-#2 (bug removed): `suite` PASSED, plus backend/web/sdk/kafka/build-fail-grep all green on ea08f12. Run: https://github.com/Voice-Application/Pareeksha-/actions/runs/40894620111
+- Fix that made CI reliable: task/FIX-CI (speech retry on retryable errors, regression workflow concurrency group, personas filter race fix) — merged here.
+- Live HubSpot acceptance (GOAL item 5/6/10) evidence on task/LIVE-ACCEPT (note 412826916601, 9.1 s) — pending independent verification in the final make verify.

@@ -11,6 +11,8 @@ from pareeksha_sdk.models import Run, RunItem
 class Verdict:
     ok: bool
     reasons: list[str] = field(default_factory=list)
+    #: The run itself broke (failed / partial): there is no verdict on the agent under test.
+    errored: bool = False
 
 
 def judge_run(run: Run, *, fail_under: float | None = None, require_suite: bool = False) -> Verdict:
@@ -20,10 +22,15 @@ def judge_run(run: Run, *, fail_under: float | None = None, require_suite: bool 
     server's ``suite_passed`` is the verdict.
     """
     reasons: list[str] = []
-    if run.status in ("failed", "cancelled"):
+    errored = False
+    if run.status == "failed":
+        reasons.append("run had infrastructure errors, no verdict")
+        errored = True
+    elif run.status == "cancelled":
         reasons.append(f"run {run.status}")
     elif run.status == "partial":
         reasons.append("run finished partially (some items errored)")
+        errored = True
     elif not run.is_final:
         reasons.append(f"run not finished ({run.status})")
     if require_suite and run.summary.suite_passed is not True:
@@ -34,7 +41,7 @@ def judge_run(run: Run, *, fail_under: float | None = None, require_suite: bool 
             reasons.append("no pass rate available")
         elif rate * 100 < fail_under:
             reasons.append(f"pass rate {rate * 100:.1f}% is below {fail_under:g}%")
-    return Verdict(ok=not reasons, reasons=reasons)
+    return Verdict(ok=not reasons, reasons=reasons, errored=errored)
 
 
 def render_summary(
@@ -47,7 +54,7 @@ def render_summary(
     run_url: str | None = None,
 ) -> str:
     s = run.summary
-    mark = "PASS" if verdict.ok else "FAIL"
+    mark = "PASS" if verdict.ok else "ERROR" if verdict.errored else "FAIL"
     lines = [f"## Pareeksha: {title} - {mark}", ""]
     rate = "n/a" if s.pass_rate is None else f"{s.pass_rate * 100:.1f}%"
     score = "n/a" if s.score_mean is None else f"{s.score_mean:.1f}"
