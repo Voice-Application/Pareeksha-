@@ -12,7 +12,7 @@ FR-EV-8, `GET /api/v1/calibration` (backend/pareeksha/api/routers/system.py), `P
   them once the owner has labelled the calls.
 - No API or DB contract was changed.
 
-Code commit: see the "Commit" section at the end.
+Code commit: `9f2a41f` (full SHA in the Commit section).
 
 ## What was built
 
@@ -171,4 +171,4 @@ budget for everything that has a price.
 
 ## Commit
 
-Code + packet + batch evidence: see the commit hash in the task report and `git log -- proof/EVAL-06`.
+Code + packet + batch evidence: `9f2a41f261b122c14f9b0388e74d8fa17f1d3579` on branch `task/EVAL-06` (base main @5ccf328).
