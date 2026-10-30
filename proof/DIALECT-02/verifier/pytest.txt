@@ -1,0 +1,25 @@
+pareeksha/simulation/turn_tracker.py               82      2     32      3    96%   31, 136->131, 154
+pareeksha/speech/providers/_common.py              29      1      4      1    94%   41->exit, 50
+pareeksha/speech/providers/deepgram.py            123      1     30      2    98%   205, 219->221
+pareeksha/speech/providers/elevenlabs.py           80      0     26      1    99%   206->208
+pareeksha/speech/providers/gnani.py               115      4     32      4    95%   72, 185, 193, 208
+pareeksha/speech/providers/google.py              104      1     20      2    98%   64->66, 122
+pareeksha/workers/auditor.py                       35     35      4      0     0%   7-70
+pareeksha/workers/dialect.py                       42      4      4      1    89%   31, 60, 64, 68
+pareeksha/workers/dlq_recorder.py                  96     47     12      1    46%   88, 110-117, 120-128, 131-138, 141-147, 157-175, 179-182, 186
+pareeksha/workers/evaluator.py                     65     12     14      2    75%   71, 88, 107, 111-119, 123
+pareeksha/workers/finalizer.py                     25      9      2      1    63%   33, 38, 42-48, 52
+pareeksha/workers/generator.py                     71     37      8      1    44%   46-47, 57, 68-133, 138, 142, 146
+pareeksha/workers/integrations.py                  37     13      6      2    60%   51, 56-59, 64, 73-84, 88-89
+pareeksha/workers/outbox_relay.py                  62     62     16      0     0%   7-98
+pareeksha/workers/planner.py                       76     76     20      0     0%   15-240
+pareeksha/workers/reconciler.py                    36     36      4      0     0%   10-59
+pareeksha/workers/retrier.py                       90     90     22      0     0%   11-166
+pareeksha/workers/simulator.py                    113    113     30      0     0%   23-219
+-------------------------------------------------------------------------------------------
+TOTAL                                           11759   2644   2140    100    75%
+
+85 files skipped due to complete coverage.
+=========================== short test summary info ============================
+FAILED tests/contract/test_schema_dts_fresh.py::test_committed_schema_dts_matches_the_backend_openapi
+1 failed, 991 passed, 1 warning in 265.76s (0:04:25)

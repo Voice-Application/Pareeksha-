@@ -1,0 +1,13 @@
+'[Errno 104] Connection reset by peer' thrown while requesting GET https://huggingface.co/datasets/ARTPARK-IISc/Vaani/resolve/9e6ed4f94f7060e633cbc500480623ae7521522c/audio/Karnataka/Dharwad/train-00000-of-00074.parquet
+Retrying in 1s [Retry 1/5].
+OK   hi-standard | Delhi NewDelhi Hindi | 1238000083199_GENERIC_0915_1191_9488.wav | code-mix glosses: -
+OK   hi-standard | Delhi NewDelhi Hindi | 6_NewDelhi-SPECIFIC_01597_6215_11659.wav | code-mix glosses: -
+OK   kn-coastal | Karnataka DakshinaKannada Kannada | 476_12298967_GENERIC_0905_8931_19897.wav | code-mix glosses: -
+OK   kn-coastal | Karnataka DakshinaKannada Kannada | 147815_13392662_GENERIC_0274_8_11822.wav | code-mix glosses: -
+OK   kn-en-mix | Karnataka Bangalore Kannada | 11_Bangalore-SPECIFIC_02017_900_6338.wav | code-mix glosses: 2
+OK   kn-en-mix | Karnataka Bangalore Kannada | _Bangalore-SPECIFIC_01144_5615_12490.wav | code-mix glosses: 2
+OK   kn-mysuru | Karnataka Mysore Kannada | 37646_12861593_GENERIC_0274_118_8340.wav | code-mix glosses: -
+OK   kn-mysuru | Karnataka Chamarajanagar Kannada | 22_13905924_GENERIC_0255_15685_20950.wav | code-mix glosses: -
+OK   kn-north | Karnataka Dharwad Kannada | 0_Dharwad-SPECIFIC_00950_13184_21248.wav | code-mix glosses: -
+OK   kn-north | Karnataka Dharwad Kannada | 133392_12674218_GENERIC_0613_0_11399.wav | code-mix glosses: -
+mismatches: 0

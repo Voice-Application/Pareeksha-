@@ -1,0 +1,8 @@
+rows 110 consent all true: True
+{'hi-standard': 22, 'kn-coastal': 22, 'kn-en-mix': 22, 'kn-mysuru': 22, 'kn-north': 22}
+wrong-district clips (all 110): []
+lang mismatches: []
+{'hi-standard': 17, 'kn-coastal': 22, 'kn-en-mix': 22, 'kn-mysuru': 22, 'kn-north': 22}
+kn-en-mix: all 22 have >=2 Latin glosses and >=10% of words
+e.g. ಇಲ್ಲಿ ಒಂದು <pause> ಬೋರ್ಡ್{board} ಅಲ್ಲಿ ವೇರ್{wear} ಹೆಲ್ಮೆಟ್{helmet} ಅಂಡ್{and} ಬಿ{be} ಸೇಫ್{safe} ಹಾಗೂ ಹಲವಾರು ರೀತಿಯ ಕಾರ್{car} ಗಳು ಆಟೋ{auto} ಇತ್
+non-mix clips containing Latin glosses: 68

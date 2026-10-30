@@ -1,0 +1,33 @@
+{
+  "project_id": "29018902-ac6a-497e-9236-5e905720bd64",
+  "dataset_id": "fcd18302-25cb-4912-b722-011963035404",
+  "report_id": "691da054-2a13-4cd9-a49e-a63d24684cd0",
+  "api_usage(provider, operation, units, unit_type, calls, est_cost)": [
+    [
+      "deepseek",
+      "llm_asr_intent",
+      137589.0,
+      "tokens",
+      298,
+      null
+    ],
+    [
+      "gnani",
+      "stt_rest",
+      2840.883,
+      "audio_seconds",
+      330,
+      null
+    ]
+  ],
+  "samples_total_and_consented": [
+    110,
+    110
+  ],
+  "asr_results": [
+    330
+  ],
+  "dialect_events_processed": [
+    330
+  ]
+}
