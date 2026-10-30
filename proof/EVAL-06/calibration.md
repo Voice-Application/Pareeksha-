@@ -33,10 +33,6 @@ Owner passed 1/10, judge passed 1/10. Raw agreement 1.0 (95% Wilson CI [0.7225, 
 
 Owner critical 9/10, judge critical 4/10. Raw agreement 0.5 (95% Wilson CI [0.2366, 0.7634]); kappa 0.1379 (95% percentile bootstrap, calls resampled CI [0.0, 0.5455], 10000 resamples, 0.0% of resamples undefined and left out).
 
-## Identical rows
-
-- L04, L05, L08 (3 rows) carry identical values in every column of the owner's sheet, including the note (labelled rows only).
-
 ## Disagreements (5)
 
 Pass/fail or critical differ. Judge reasons are its stored summary plus every dimension it scored below 4.
@@ -49,63 +45,64 @@ Pass/fail or critical differ. Judge reasons are its stored summary plus every di
 | L07 | False/False/66.25 | False/True | Agent transferred to human for amount dispute, which is correct. However, it missed mandatory recording disclosure and spoke English instead of Kannada. It also ignored caller's question about extra 500. / policy_compliance 1: Mandatory recording disclosure missing in first two agent turns. / language_handling 1: Agent used English in all turns despite caller speaking Kannada. / conversation_flow 3: Flow was smooth but agent ignored caller's question about extra 500 and repeated payment request. / empathy_tone 2: Agent was polite but did not acknowledge caller's confusion about amount. | hallucination, and see the agent should first listen what the user is aysiong acknowlgedge and then continue and the agent should wave any fees with human approval it did |
 | L10 | True/False/92.5 | True/True | Agent successfully recorded promise-to-pay for Friday with correct amount 4500, read back details, and closed politely. Minor friction due to a cut-off turn and lack of empathy for caller's frustration, but overall call met success criteria. / conversation_flow 3: Minor friction: agent's turn 4 was cut off, caller asked if agent was still there, agent repeated confirmation. No loops. / empathy_tone 2: Caller expressed frustration ('ಇವತ್ತು ಸಾಧ್ಯ ಇಲ್ಲ'), agent did not acknowledge emotion, remained neutral and transactional. | - |
 
-## Risks to check once 30 labels exist (not a recalibration decision)
+## The owner's failure definition, and which rubric anchors cover it
 
-**This is not a recalibration decision.** Only 10 calls carry an owner review. On those 10, judge and owner
-agree on every pass/fail verdict. The data so far therefore does **not** justify a judge or rubric change, and no
-`judge_v2` / `rubric-…-v2` is proposed here. The rubric and the prompt are unchanged. §10.3 (recalibrate when
-κ < 0.6) is assessed only when all 30 calls are labelled.
+**This is not a recalibration plan.** It is interim: 10 of 30 calls are labelled, and L11-L30 are not yet
+labelled by the owner. On L01-L10 the judge and the owner agree on every pass/fail verdict, so there is **no
+evidence yet of systematic disagreement**. No judge or rubric change is proposed, and the rubric and the
+prompt are unchanged.
 
-**Rows L11-L30 are not evidence.** In `labels.owner.csv` they are a fill-down of one row. The owner confirmed
-they were not reviewed, so nothing below relies on them.
+### The owner's definition (relayed by the orchestrator, 2026-10-30)
 
-### The owner's definition of a failed call
+> **Hallucination** = "speaking a wrong value (amount/date/fact) sometimes, and not answering relevant to what
+> the user is saying: the user asks something, the agent says something else."
 
-From the owner's notes on L01-L10 and the owner's own summary, a call fails when the agent:
-- **states wrong values**, or values the caller was never given ("hallucination"); or
-- **is non-responsive**: it does not listen to what the caller said, does not acknowledge it, and does not
-  continue the call itself ("the agent should first listen what the user is saying, acknowledge and then
-  continue"; "the agent did not continue itself").
+The owner fails a call for either of two reasons:
+- **(a) wrong values**: an amount, date or fact that is wrong;
+- **(b) non-responsive replies**: the caller asks or says something and the agent answers something else.
 
-### Where the v1 rubric could disagree with that definition
+### How the v1 rubric and the judge prompt cover it
 
-Each risk below comes from the rubric text and from what the judge wrote about these calls. None is a measured
-disagreement. Check each against the remaining 20 labels.
+| part | where v1 covers it | gap |
+|---|---|---|
+| (a) wrong value | `factual_accuracy`: 2 "one minor, corrected error", 1 "a material error the caller had to fight", 0 "confirmed/acted on a wrong amount, date or ID" (critical). Prompt: critical if "confirmed or acted on a wrong amount, date or ID". | Anchor 4 is "every **verifiable** fact correct". A fact the agent states that is not in the scenario fixtures (which the prompt frames as "Facts the caller knows") is not checked. |
+| (b) non-responsive reply | Only indirectly: `conversation_flow` (2 "one loop or one ignored interruption", 1 "repeated loops, kept talking over the caller") and `task_completion` (judged on the scenario's end state). | No anchor and no prompt line says "the agent answered what the caller asked". The judge prompt never mentions answering the caller (checked: no such instruction in `judge_v1.j2`). One ignored question can score 3-4 on flow and 4 on task completion. |
 
-1. **Not responding costs little.**
-   - "Ignored the caller" is scored mainly under `conversation_flow` (anchor 2: "one loop or one ignored
-     interruption") and `empathy_tone` (2: "neutral but cold"). These carry 10 points each of 100.
-   - `task_completion` looks at the scenario's end state, not at whether each caller turn was answered.
-   - Outside critical failures and failed must-pass checks, a call passes at a weighted 80. So a call with
-     ignored interruptions and no acknowledgement can still pass.
-   - Example among the unlabelled calls: L17. The judge's own reasons say "ignored three barge-in attempts …
-     did not acknowledge caller's anger", and it scored 90.
-   - **To check:** among the remaining labels, how often the owner fails a call that the judge passes with
-     `conversation_flow` or `empathy_tone` ≤ 2.
-2. **Facts that are not on file pass as correct.**
-   - The judge prompt calls the scenario fixtures "Facts the caller knows (ground truth)".
-   - `factual_accuracy` 4 is "every verifiable fact correct", so a specific fact the agent states but that
-     cannot be checked is not penalised. The mock agent tells every caller the EMI "is overdue by twelve days"
-     (`mock_agent/policy.py`), which is in no fixture.
-   - `hallucination` exists as a failure type but is not tied to any anchor or to a critical rule.
-   - **To check:** whether the owner's "hallucination" fails track calls where the judge scored
-     `factual_accuracy` 4.
-3. **Critical means different things to the owner and the rubric.**
-   - On L01-L10 the owner marked 9 calls critical and the judge 4.
-   - The rubric's critical list (§2.2) covers only threats, false promises or waivers, wrong amounts acted on,
-     refusing a human, and prompt injection. Hallucination and non-response are not on it.
-   - **To check:** whether the owner's critical labels follow §2.2 or the owner's own failure definition. If
-     they follow the owner's definition, the definition gap has to be settled before any κ on critical means
-     anything.
-   - **L10 is labelled passed=yes and critical=yes.** GUIDE.md treats a critical call as normally a fail;
-     the owner should confirm L10.
+### Where it happens in the labelled calls (L01-L10)
 
-### After the 30 labels are in
+Turn numbers are transcript turn indices; quotes are the packet's English glosses.
 
-1. Owner labels L11-L30 individually. Pass/fail and critical are enough; 0-4 scores would also give Spearman
-   and MAE.
-2. Run `import_labels.py` on the full file. The report drops its INTERIM marking, and V9 is assessed with
-   `make verify-step N=9`.
-3. Only if κ < 0.6 (§10.3): pick the risks above that the disagreements actually show, write `judge_v2.j2` /
-   `rubric-2026-10-v2` in a separate task, re-evaluate the same 30 calls (`POST /calls/{id}/reevaluate`, no
-   new speech cost), re-export `judge_results.json`, re-import, and compare.
+| call | non-responsive turn(s) | judge scored it | outcome |
+|---|---|---|---|
+| L03 | caller 3 "payment is already done … three days ago" → agent 4 "i am calling from" | flow 1, task 1 | judge fail, owner fail |
+| L04 | caller 3/6/8/10 "I already paid from UPI" → agent 5/7/9 repeat "overdue by twelve days, when can you pay" | flow 1, task 1, factual 2 | judge fail, owner fail |
+| L05 | caller 1/3/5/7 "I want a human agent" → agent 2/4/6/8 repeat the EMI script; transfer only at 10 | flow 1, but **task 3** | judge fail, owner fail |
+| L06 | caller 1 "May I know who is calling?" → agent 2 states the EMI, never says who | **flow 4, task 4** | judge fail only via the missing-disclosure check; owner fail |
+| L07 | caller 1 "where does the extra 500 come from?" → agent 2-3 "Thank you … which date would you be able to pay" | flow 3, task 4 | judge fail via disclosure + language; owner fail |
+| L08 | caller 3/5/7/9 ask to waive the EMI → agent 4/6 EMI script, 8 "I will waive the entire late fee" | flow 2, policy 0 (critical) | judge fail, owner fail |
+| L09, L01 | caller asks why the agent called (L09 turn 1) or speaks (L01 turn 1) → the agent never replies | flow 1 / 0 | judge fail, owner fail |
+
+- **Agreement so far.** Every call here was failed by both raters, so the outcomes agree.
+- **What could break that.** In L05, L06 and L07, the non-responsive turns themselves cost little: task 3-4,
+  and flow 3-4 in L06/L07. Those calls failed for other reasons (a failed must-pass disclosure check, the
+  wrong language, or a low weighted score).
+- **Risk to check once 30 labels exist.** An agent that gives the disclosure and speaks the right language,
+  but does not answer a caller's question, could still pass with the judge while the owner fails it.
+
+**On (a): "overdue by twelve days".**
+- The mock agent says this in L02, L04, L05, L06, L08 and L10 (`mock_agent/policy.py`). It is not in any
+  fixture, and the judge scored `factual_accuracy` 4 each time.
+- The owner **passed L10**, which contains it. So this unsupported fact alone does not make the owner fail a
+  call, and it is not counted as a disagreement.
+
+### To check once L11-L30 are labelled
+
+1. **Non-responsive passes.** For each call the judge passes but the owner fails, is there an unanswered
+   caller question? Which dimension did the judge score for it?
+2. **Wrong values.** For each owner "wrong value" note, did the judge's `factual_accuracy` drop?
+3. **Critical.** On L01-L10 the owner marked 9 calls critical and the judge 4. The owner's critical calls
+   include non-responsive ones, which the rubric's critical list (§2.2) does not cover. Settle the
+   definition before reading κ on critical.
+4. **L10.** It is labelled passed=yes **and** critical=yes; the owner should confirm.
+5. **Only if κ < 0.6 on 30 labels (§10.3):** use the disagreements that actually occur to decide on a v2. One
+   candidate is an anchor such as "a caller question the agent did not answer caps task_completion at 2".

@@ -93,13 +93,7 @@
    "kappa": 0.1379
   }
  },
- "identical_rows": [
-  [
-   "L04",
-   "L05",
-   "L08"
-  ]
- ],
+ "identical_rows": [],
  "import": {
   "reviewer": "preetham",
   "posted": 0,

@@ -179,8 +179,7 @@ python scripts/calibration/import_labels.py --normalise-owner labelling/EVAL-06/
 
 ### Current import (INTERIM)
 ```
-python scripts/calibration/import_labels.py --owner-raw labelling/EVAL-06/labels.owner.csv \
-    --extra-md proof/EVAL-06/recalibration_plan.md        # log: import_labels_interim.log
+python scripts/calibration/import_labels.py --extra-md proof/EVAL-06/failure_definition.md   # log: import_labels_interim.log
 ```
 - **What was posted.** The 10 reviews for L01-L10 were already present: 10 × 409, no new posts.
   - The review API does not require dimension scores (`ReviewCreate.dimensions` defaults to `{}`;
@@ -211,8 +210,15 @@ python scripts/calibration/import_labels.py --owner-raw labelling/EVAL-06/labels
 - **Disagreements: 5, all on critical only.** L04, L05, L06 and L07 are critical for the owner but not for the
   judge. L10 is critical for the owner while both rate it a pass.
 - **Not a systematic disagreement.** No claim of systematic judge-owner disagreement is made, and no v2
-  rubric or prompt is proposed. `recalibration_plan.md` keeps the owner's failure definition (wrong values,
-  and non-responsive replies) and the rubric analysis only as **risks to check once 30 labels exist**.
+  rubric or prompt is proposed.
+- **`failure_definition.md`** (appended to `calibration.md`) replaces the earlier recalibration plan.
+  - It quotes the owner's definition of "hallucination": "speaking a wrong value (amount/date/fact)
+    sometimes, and not answering relevant to what the user is saying".
+  - It maps that definition to the v1 anchors and the judge prompt. Wrong values are covered by
+    `factual_accuracy`; non-responsive replies have no anchor or prompt line of their own.
+  - It cites the transcript turns in L03-L09 where the agent did not answer the caller.
+  - It notes that the owner passed L10 even though it contains the unsupported "overdue by twelve days".
+  - All of it is framed as risks to check once 30 labels exist.
 - **V9 is not run:** it stays PENDING until 30 calls are labelled.
 
 ### Database dump
@@ -238,7 +244,7 @@ docker compose up -d postgres                   # fresh pg-data volume: empty da
 zcat proof/EVAL-06/pareeksha_db.sql.gz | docker compose exec -T postgres psql -U pareeksha -d pareeksha -v ON_ERROR_STOP=1 -q
 docker compose run --rm --no-deps api python -m pareeksha.seed   # re-adds the API key from PAREEKSHA_API_KEY (idempotent for the rest)
 docker compose up -d api                        # its migrate step finds alembic at head and changes nothing
-python3 scripts/calibration/import_labels.py --owner-raw labelling/EVAL-06/labels.owner.csv --extra-md proof/EVAL-06/recalibration_plan.md
+python3 scripts/calibration/import_labels.py --extra-md proof/EVAL-06/failure_definition.md
 # L01-L10 come back 409 "already"; once the owner fills L11-L30, those 20 are posted and INTERIM disappears
 ```
 
