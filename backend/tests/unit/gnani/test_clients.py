@@ -162,6 +162,25 @@ def test_synthesize_retries_5xx_then_succeeds(monkeypatch: pytest.MonkeyPatch) -
     assert len(FakeTTS.calls) == 3
 
 
+def test_no_audio_generated_is_not_retryable_and_called_once(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from gnani.tts.exceptions import APIError as TTSAPIError
+
+    class NoAudio(FakeTTS):
+        def synthesize(self, *a: Any, **kw: Any) -> bytes:
+            FakeTTS.calls.append({})
+            raise TTSAPIError(500, "No audio generated during synthesis")
+
+    assert not is_retryable(TTSAPIError(500, "No audio generated during synthesis"))
+    assert is_retryable(TTSAPIError(500, "internal error"))
+    monkeypatch.setattr(clients, "GnaniTTSClient", NoAudio)
+    FakeTTS.calls = []
+    with pytest.raises(TTSAPIError):
+        GnaniSpeech("k", retry_delay=0).synthesize("...", "x", "hi-IN")
+    assert len(FakeTTS.calls) == 1
+
+
 def test_synthesize_does_not_retry_4xx(monkeypatch: pytest.MonkeyPatch) -> None:
     class Bad(FakeTTS):
         def synthesize(self, *a: Any, **kw: Any) -> bytes:

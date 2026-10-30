@@ -3,6 +3,7 @@
 from pareeksha.speech.base import (
     SpeechConfigError,
     SpeechError,
+    SpeechNoAudioError,
     SpeechPermanentError,
     SpeechProviderName,
     SpeechRetryableError,
@@ -34,6 +35,7 @@ __all__ = [
     "STTProvider",
     "SpeechConfigError",
     "SpeechError",
+    "SpeechNoAudioError",
     "SpeechPermanentError",
     "SpeechProviderName",
     "SpeechRetryableError",

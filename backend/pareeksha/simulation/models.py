@@ -46,6 +46,9 @@ class SimulationSettings:
     #: ``goes_silent`` persona: probability and length of a silent stretch before replying.
     goes_silent_probability: float = 0.25
     goes_silent_s: float = 10.0
+    #: A caller line with nothing to speak (punctuation only, e.g. "...") is this long a stretch of
+    #: real silence on the line; the TTS is not called for it.
+    silent_turn_s: float = 5.0
     #: Agent turns STT could not read, in a row, before the call is abandoned as infra_error.
     max_unintelligible: int = 3
     #: How long to wait for the agent to start talking after the stop message at the very end.

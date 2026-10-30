@@ -50,6 +50,11 @@ class SpeechPermanentError(SpeechError):
     """Bad credentials, other 4xx, unsupported language / voice / audio. Not retried."""
 
 
+class SpeechNoAudioError(SpeechPermanentError):
+    """The provider produced no audio for this text (e.g. HTTP 500 "No audio generated during
+    synthesis" for punctuation only). The same text fails every time, so it is never retried."""
+
+
 class SpeechConfigError(SpeechError, ValueError):
     """The selected provider is not configured (missing key or region)."""
 

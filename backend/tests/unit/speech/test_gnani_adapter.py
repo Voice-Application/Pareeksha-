@@ -15,6 +15,7 @@ from gnani.tts.exceptions import APIError as TTSAPIError
 from pareeksha.gnani import GnaniSpeech, TTSResult
 from pareeksha.speech import (
     SpeechConfigError,
+    SpeechNoAudioError,
     SpeechPermanentError,
     SpeechRetryableError,
     UnsupportedCapabilityError,
@@ -104,6 +105,16 @@ async def test_tts_sdk_errors_are_mapped_too() -> None:
     speech.fail = TTSAPIError(400, "bad voice")
     with pytest.raises(SpeechPermanentError):
         await tts.synthesize("x", "Lakshmi", "kn-IN")
+
+
+async def test_no_audio_generated_maps_to_a_permanent_no_audio_error() -> None:
+    speech = FakeSpeech()
+    speech.fail = TTSAPIError(500, "No audio generated during synthesis")
+    with pytest.raises(SpeechNoAudioError):
+        await GnaniTTS(SETTINGS, speech=speech).synthesize("...", "Lakshmi", "hi-IN")
+    speech.fail = TTSAPIError(500, "internal error")
+    with pytest.raises(SpeechRetryableError):
+        await GnaniTTS(SETTINGS, speech=speech).synthesize("hi", "Lakshmi", "hi-IN")
 
 
 async def test_tts_wav_voices_and_cache_accounting(tmp_path: Path) -> None:

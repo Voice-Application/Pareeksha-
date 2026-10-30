@@ -71,6 +71,7 @@ from pareeksha.simulation.recorder import SAMPLE_RATE
 from pareeksha.simulation.runtime import CallRuntime
 from pareeksha.simulation.vad import SpeechGate
 from pareeksha.speech.base import STTProvider, TTSProvider
+from pareeksha.speech.text import has_speakable_text
 from pareeksha.speech.wav import pcm_to_wav
 
 log = logging.getLogger(__name__)
@@ -387,7 +388,10 @@ class CallerTTS(CallProcessor):
         await self.push_frame(frame, direction)
 
     async def _speak(self, req: SpeakRequestFrame) -> None:
-        texts = split_for_tts(req.text)
+        texts = [t for t in split_for_tts(req.text) if has_speakable_text(t)]
+        if not texts:
+            await self._stay_silent(req)
+            return
         for index, text in enumerate(texts):
             pcm = await self._synthesize(req, text)
             if pcm is None:
@@ -403,6 +407,21 @@ class CallerTTS(CallProcessor):
                     last_part=index == len(texts) - 1,
                 )
             )
+
+    async def _stay_silent(self, req: SpeakRequestFrame) -> None:
+        """A line with nothing to speak is real silence of ``silent_turn_s``; no TTS request."""
+        seconds = self.rt.settings.silent_turn_s
+        self.rt.log("caller_silence", utt_id=req.utt_id, seconds=seconds, text=req.text)
+        await self.push_frame(
+            CallerSpeechFrame(
+                utt_id=req.utt_id,
+                text=req.text,
+                kind=req.kind,
+                pcm=bytes(2 * int(SAMPLE_RATE * seconds)),
+                play_at_ms=req.play_at_ms,
+                final=req.final,
+            )
+        )
 
     async def _synthesize(self, req: SpeakRequestFrame, text: str) -> bytes | None:
         rt = self.rt

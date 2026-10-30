@@ -13,6 +13,7 @@ from pareeksha.api.auth import authenticate
 from pareeksha.api.main import app
 from pareeksha.speech import (
     SpeechConfigError,
+    SpeechNoAudioError,
     SpeechPermanentError,
     SpeechProviderName,
     SpeechRetryableError,
@@ -23,6 +24,7 @@ from pareeksha.speech import (
     provider_status,
 )
 from pareeksha.speech import http as speech_http
+from pareeksha.speech.text import has_speakable_text
 from pareeksha.speech.providers.deepgram import DeepgramSTT, DeepgramTTS
 from pareeksha.speech.providers.elevenlabs import ElevenLabsSTT
 from pareeksha.speech.providers.gnani import GnaniSTT, GnaniTTS
@@ -184,6 +186,37 @@ async def test_timeouts_are_retryable_and_4xx_is_not() -> None:
         respx.get(URL).mock(return_value=httpx.Response(401, text="bad key"))
         with pytest.raises(SpeechPermanentError, match="401"):
             await speech_http.send(client, "GET", URL, retry_delay=0)
+
+
+@respx.mock
+async def test_no_audio_generated_is_permanent_and_not_retried() -> None:
+    route = respx.post(URL).mock(
+        return_value=httpx.Response(500, text='{"detail": "No audio generated during synthesis"}')
+    )
+    async with httpx.AsyncClient() as client:
+        with pytest.raises(SpeechNoAudioError, match="No audio generated"):
+            await speech_http.send(client, "POST", URL, retry_delay=0)
+    assert route.call_count == 1
+    assert issubclass(SpeechNoAudioError, SpeechPermanentError)
+
+
+@respx.mock
+async def test_other_500s_still_retry() -> None:
+    route = respx.post(URL).mock(return_value=httpx.Response(500, text="internal error"))
+    async with httpx.AsyncClient() as client:
+        with pytest.raises(SpeechRetryableError):
+            await speech_http.send(client, "POST", URL, retry_delay=0)
+    assert route.call_count == 3
+
+
+@pytest.mark.parametrize("text", ["...", "…", "  - ? ! ", "।", "", "\u2026 \u2026"])
+def test_punctuation_only_text_is_not_speakable(text: str) -> None:
+    assert not has_speakable_text(text)
+
+
+@pytest.mark.parametrize("text", ["ok", "42", "ಹೌದು", "हाँ...", "ಕ್ಷಮಿಸಿ", "... yes"])
+def test_text_with_words_is_speakable(text: str) -> None:
+    assert has_speakable_text(text)
 
 
 def test_wav_info_streamed_header_placeholder_size() -> None:

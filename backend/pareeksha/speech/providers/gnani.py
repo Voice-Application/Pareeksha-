@@ -24,6 +24,7 @@ from pareeksha.gnani import GnaniSpeech, is_retryable, wav_duration_s
 from pareeksha.speech.base import (
     SpeechConfigError,
     SpeechError,
+    SpeechNoAudioError,
     SpeechPermanentError,
     SpeechProviderName,
     SpeechRetryableError,
@@ -41,6 +42,7 @@ from pareeksha.speech.base import (
 )
 from pareeksha.speech.config import SpeechSettings
 from pareeksha.speech.providers._common import elapsed_ms
+from pareeksha.speech.text import is_no_audio_message
 
 FRAME_BYTES = 1024  # 512 samples of 16-bit PCM, per the Gnani WebSocket spec
 GNANI_LANGUAGES = [
@@ -70,6 +72,8 @@ def _make_speech(
 def _map_error(exc: Exception) -> SpeechError:
     if isinstance(exc, SpeechError):
         return exc
+    if is_no_audio_message(str(exc)):
+        return SpeechNoAudioError(f"gnani: {type(exc).__name__}: {exc}")
     if is_retryable(exc) or isinstance(exc, OSError):
         return SpeechRetryableError(f"gnani: {type(exc).__name__}: {exc}")
     return SpeechPermanentError(f"gnani: {type(exc).__name__}: {exc}")

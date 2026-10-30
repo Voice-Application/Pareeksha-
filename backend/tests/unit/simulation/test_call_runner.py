@@ -417,6 +417,34 @@ async def test_a_long_line_is_voiced_in_two_parts_and_played_without_a_gap() -> 
     assert [e["characters"] for e in events(outcome, "caller_tts")] == [37, 46]
 
 
+async def test_a_line_with_nothing_to_speak_is_local_silence_not_a_tts_request() -> None:
+    agent = ReactiveAgent([0.5, 0.5], hangup=True)
+    tts = FakeTTS()
+    settings = replace(FAST, silent_turn_s=1.5, mid_silence_s=4.0)
+    async with agent_server(agent) as url:
+        outcome = await run_call(
+            make_spec(url), ScriptedCaller(["..."]), tts=tts, settings=settings
+        )
+    assert tts.said == []
+    r = outcome.result
+    assert r.end_reason != "infra_error"
+    turn = next(t for t in r.turns if t.speaker == "caller")
+    assert turn.text == "..."
+    assert (turn.end_ms - turn.start_ms) / 1000 == pytest.approx(1.5, abs=0.15)
+    assert [e["seconds"] for e in events(outcome, "caller_silence")] == [1.5]
+    assert events(outcome, "caller_tts") == []
+
+
+async def test_a_trailing_punctuation_only_part_is_dropped_not_sent_to_tts() -> None:
+    agent = ReactiveAgent([0.6, 0.6], hangup=True)
+    tts = FakeTTS(seconds_per_char=0.01)
+    line = "Hello, thank you for calling me back today. ..."
+    async with agent_server(agent) as url:
+        outcome = await run_call(make_spec(url), ScriptedCaller([line]), tts=tts)
+    assert tts.said == ["Hello, thank you for calling me back today."]
+    assert outcome.result.end_reason == "agent_hangup"
+
+
 async def test_the_microphone_waits_in_silence_for_a_late_second_part() -> None:
     # the agent tolerates 0.5 s of silence; the 0.38 s gap before part two must not end the turn
     agent = ReactiveAgent([0.6, 0.6], hangup=True, quiet_frames=25)

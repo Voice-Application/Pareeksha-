@@ -135,6 +135,8 @@ def is_retryable(exc: BaseException) -> bool:
     are retryable too.
     """
     if isinstance(exc, APIError | TTSAPIError):
+        if "no audio generated" in str(exc).lower():
+            return False  # the same text yields no audio every time
         return exc.status_code >= 500 or exc.status_code == 429
     return isinstance(
         exc,

@@ -7,7 +7,8 @@ from typing import Any
 
 import httpx
 
-from pareeksha.speech.base import SpeechPermanentError, SpeechRetryableError
+from pareeksha.speech.base import SpeechNoAudioError, SpeechPermanentError, SpeechRetryableError
+from pareeksha.speech.text import is_no_audio_message
 
 ATTEMPTS = 3
 
@@ -39,6 +40,8 @@ async def send(
             if response.status_code < 400:
                 return response
             detail = f"HTTP {response.status_code}: {response.text[:300]}"
+            if is_no_audio_message(response.text):
+                raise SpeechNoAudioError(detail)
             if response.status_code < 500 and response.status_code != 429:
                 raise SpeechPermanentError(detail)
             last, retry_after = detail, _retry_after(response)
