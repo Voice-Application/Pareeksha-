@@ -7,9 +7,15 @@ FR-EV-8, `GET /api/v1/calibration` (backend/pareeksha/api/routers/system.py), `P
 
 **Status**
 - Built and run: real 30-call batch (all 30 evaluated by the judge), blind packet, importer and its unit tests.
-- **Kappa / Spearman / MAE: BLOCKED ON OWNER LABELS.** `labelling/EVAL-06/labels.csv` is an empty template. I
-  did not fill it in. `proof/EVAL-06/calibration.json` / `calibration.md` do not exist yet; the importer writes
-  them once the owner has labelled the calls.
+- **Owner labels imported (pass/fail only):** **κ = 0.1124 on n = 30, below the 0.6 target.**
+  - Raw agreement is 0.667: the owner passed 1 call, the judge 11.
+  - Critical agreement is 0.233 (κ 0.017).
+  - Spearman and per-dimension MAE are **not provided by owner**: the owner's dimension cells were not 0-4
+    scores and were not converted.
+  - Details are in `calibration.md` / `calibration.json`; the recalibration plan is at the end of
+    `calibration.md`.
+  - **23 of 30 rows are identical, note included** (L04, L05, L08, L11-L30). The owner has been asked whether
+    each call was reviewed individually, so treat κ as provisional.
 - No API or DB contract was changed.
 
 Code commit: `9f2a41f` (full SHA in the Commit section).
@@ -133,22 +139,64 @@ cd labelling/EVAL-06 && python3 -m http.server 8000
 # open http://localhost:8000/  (index -> L01..L30), read GUIDE.md, fill labels.csv
 ```
 
-## After the owner labels (V9)
+## Owner labels and calibration (V9)
 
+**Where the labels came from.** The owner's sheet was relayed by the orchestrator session on 2026-10-30
+(18:58 UTC), with the owner's mapping decisions:
+- `passed`: "passed" means yes; "fail" and "partial" mean no.
+- `critical`: kept as written.
+- The seven dimension columns (yes/no/ok/o/blank, not 0-4) are treated as not provided.
+
+**`labelling/EVAL-06/labels.owner.csv`** is that sheet as received:
+- L01-L10 are copied exactly, including stray spaces.
+- L11-L30 arrived as one line, "each row is exactly: …". They are written out as 20 identical rows with that
+  content, so this file is a faithful expansion of the message, not a byte copy of the owner's file.
+
+**`labelling/EVAL-06/labels.csv`** is the normalised file. It is produced by
+`import_labels.py --normalise-owner labelling/EVAL-06/labels.owner.csv labelling/EVAL-06/labels.csv`:
+passed and critical mapped, dimension cells empty, notes kept.
+
+Import (stack restarted on the same `pg-data` volume, `api` only):
 ```
-python3 scripts/calibration/import_labels.py            # reviewer "preetham"; validates, POSTs 30 reviews, GET /calibration
-# -> proof/EVAL-06/calibration.json, calibration.md ; then: make verify-step N=9
+python scripts/calibration/import_labels.py --owner-raw labelling/EVAL-06/labels.owner.csv \
+    --extra-md proof/EVAL-06/recalibration_plan.md            # log: import_labels.log
 ```
-- On the current empty template the importer refuses and posts nothing: exit 2, with every missing value
-  listed (`import_labels_empty_template.txt`).
-- A row the API already holds for this reviewer (409) is counted as "already" and left unchanged.
-- **Expected output**: `n = 30` plus kappa, Spearman and per-dimension MAE from the API, and the disagreement
-  table (pass/fail or critical differ, or a dimension differs by 2 or more).
-- The importer has **not** been run against the API, because that would need labels.
+- **Import runs:**
+  - The first run posted 30 reviews (`import_labels.log`).
+  - After `ruff format` it was run again: all 30 came back 409 "already", nothing was duplicated (still 30
+    `human_reviews` rows), and every metric was identical (`import_labels_rerun.log`).
+  - The committed `calibration.*` is from that rerun, so its header reads "0 posted, 30 already present".
+- **Pass/fail-only mode:** the review API does not require dimension scores (`ReviewCreate.dimensions`
+  defaults to `{}`; `human_reviews.overall_score` is then null). So the 30 reviews went through the real
+  `POST /calls/{id}/review` with passed and critical only, and no scores were invented. In the DB: 30 rows by
+  `preetham`, `dimensions = {}`, `overall_score` null.
+- **Same calibration code as the endpoint:**
+  - Before posting, the importer checks that each call's live evaluation is the one in `judge_results.json`.
+  - After posting it reads `GET /calibration`, and also recomputes offline from `judge_results.json` with the
+    endpoint's own `pareeksha.evaluation.calibration.compute_calibration` (imported, not re-implemented).
+  - Both give n = 30, κ = 0.1124. Spearman is null and the MAE map empty, reported as "not provided by owner".
+- **Result:**
+
+  | | owner pass | owner fail |
+  |---|---|---|
+  | judge pass | 1 | 10 |
+  | judge fail | 0 | 19 |
+
+  - Pass/fail: raw agreement 0.6667, κ 0.1124.
+  - Critical: owner 29, judge 6; agreement 0.2333, κ 0.0171.
+  - 23 disagreements, each listed in `calibration.md` with the judge's reasons next to the owner's note.
+- **Facts the owner should confirm:**
+  - 23 rows (L04, L05, L08, L11-L30) are identical in every column, including the note. L11-L30 are 20
+    consecutive rows.
+  - L10 is labelled passed **and** critical.
+- **Recalibration (§10.3):** `recalibration_plan.md`, appended to `calibration.md`. It covers why the judge passes
+  calls where the agent ignores or does not acknowledge the caller, or states facts that are not on file. No
+  rubric or prompt was changed.
+- **V9 (`make verify-step N=9`) was not run here.** κ is below 0.6, so it would report FAIL.
 - **Database dump:** the 30 calls and their evaluations were stored in this session's Compose Postgres, inside
   an ephemeral cloud container. That database is now committed as `proof/EVAL-06/pareeksha_db.sql.gz`
-  (132 KB). It is a plain `pg_dump` of PostgreSQL 16 taken after the batch finished, with no human reviews in
-  it. The dump keeps everything except the rows of `api_keys`; the table definition is kept, so no key hash is
+  (134 KB). It is a plain `pg_dump` of PostgreSQL 16, re-taken after the owner's labels were imported, so it
+  also holds the 30 `human_reviews` rows. The dump keeps everything except the rows of `api_keys`; the table definition is kept, so no key hash is
   committed.
 
   | table | rows |
@@ -156,25 +204,33 @@ python3 scripts/calibration/import_labels.py            # reviewer "preetham"; v
   | calls | 38 |
   | evaluations (all `ok`) | 33 |
   | turns | 284 |
+  | human_reviews | 30 |
 
   The 38 calls include the replaced and errored ones. Test restore: the dump loads into an empty database with
   `ON_ERROR_STOP=1`, and all 30 packet call ids have an `ok` evaluation in the restored copy. Audio is not in
   the dump; it is under `data/runtime`, and the packet's mp3s are its copy.
 
-  To restore before importing labels, on a fresh stack (`.env` with `PAREEKSHA_API_KEY` set):
+  To restore on a fresh stack (`.env` with `PAREEKSHA_API_KEY` set):
   ```
   docker compose up -d postgres                   # fresh pg-data volume: empty database, before any migrate
   zcat proof/EVAL-06/pareeksha_db.sql.gz | docker compose exec -T postgres psql -U pareeksha -d pareeksha -v ON_ERROR_STOP=1 -q
   docker compose run --rm --no-deps api python -m pareeksha.seed   # re-adds the API key from PAREEKSHA_API_KEY (idempotent for the rest)
   docker compose up -d api                        # its migrate step finds alembic at head and changes nothing
-  python3 scripts/calibration/import_labels.py
+  python3 scripts/calibration/import_labels.py --owner-raw labelling/EVAL-06/labels.owner.csv --extra-md proof/EVAL-06/recalibration_plan.md
+  # reviews already present come back 409 and are counted as "already"; the report is rebuilt
   ```
   Re-running `run_batch.py` + `export_packet.py` on the target stack is the alternative, but it gives new calls
   and needs a new packet.
 
 ## Tests (`pytest.txt`)
 
-- `test_calibration_import_labels.py`: 15 passed.
+- `test_calibration_import_labels.py`: 25 passed. These are the original 15 plus 10 for pass/fail-only
+  mode:
+  - rows without scores, and partly filled or mixed modes rejected;
+  - the owner-sheet normalisation and unknown verdicts;
+  - identical-row detection;
+  - offline κ equal to the endpoint function, with the 2x2 table, critical agreement and disagreements;
+  - "not provided by owner" in the report.
 - CI test set: 991 passed, 1 failed. The failure is `test_schema_dts_fresh`, which needs `npm ci` in `web/`. It
   fails the same way on unmodified main in this sandbox.
 - Backend `ruff check` and `ruff format --check` are clean.

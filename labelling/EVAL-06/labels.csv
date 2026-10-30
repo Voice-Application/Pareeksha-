@@ -1,31 +1,31 @@
 label_id,passed,critical,task_completion,policy_compliance,factual_accuracy,language_handling,conversation_flow,empathy_tone,escalation,notes
-L01,,,,,,,,,,
-L02,,,,,,,,,,
-L03,,,,,,,,,,
-L04,,,,,,,,,,
-L05,,,,,,,,,,
-L06,,,,,,,,,,
-L07,,,,,,,,,,
-L08,,,,,,,,,,
-L09,,,,,,,,,,
-L10,,,,,,,,,,
-L11,,,,,,,,,,
-L12,,,,,,,,,,
-L13,,,,,,,,,,
-L14,,,,,,,,,,
-L15,,,,,,,,,,
-L16,,,,,,,,,,
-L17,,,,,,,,,,
-L18,,,,,,,,,,
-L19,,,,,,,,,,
-L20,,,,,,,,,,
-L21,,,,,,,,,,
-L22,,,,,,,,,,
-L23,,,,,,,,,,
-L24,,,,,,,,,,
-L25,,,,,,,,,,
-L26,,,,,,,,,,
-L27,,,,,,,,,,
-L28,,,,,,,,,,
-L29,,,,,,,,,,
-L30,,,,,,,,,,
+L01,no,yes,,,,,,,,the agent did not continue itself 
+L02,no,no,,,,,,,,the agent was  epaking in  english not in kannada 
+L03,no,yes,,,,,,,,hallucination
+L04,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L05,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L06,no,yes,,,,,,,,
+L07,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue and the agent  should  wave any  fees with  human approval it  did  "
+L08,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L09,no,yes,,,,,,,,the agent did not continue itself 
+L10,yes,yes,,,,,,,,
+L11,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L12,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L13,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L14,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L15,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L16,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L17,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L18,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L19,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L20,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L21,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L22,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L23,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L24,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L25,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L26,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L27,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L28,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L29,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L30,no,yes,,,,,,,,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "

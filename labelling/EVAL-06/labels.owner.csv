@@ -1,0 +1,31 @@
+label_id,passed,critical,task_completion,policy_compliance,factual_accuracy,language_handling,conversation_flow,empathy_tone,escalation,notes
+L01,fail,yes,no,,,,,,,the agent did not continue itself 
+L02,partial,no,yes,,TRUE,no,ok ,ok,no,the agent was  epaking in  english not in kannada 
+L03,fail,yes, no,  o,no,no,ok ,ok,no,hallucination
+L04,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L05,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L06,partial,yes,yes,ok,yes,yes,ok ,ok,no,
+L07,fail,yes, no,  o,no,no,ok ,ok,yes,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue and the agent  should  wave any  fees with  human approval it  did  "
+L08,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L09,fail,yes, no,  o,no,no,ok ,ok,no,the agent did not continue itself 
+L10,passed,yes,yes,ok,no,ok,ok ,ok,no,
+L11,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L12,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L13,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L14,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L15,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L16,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L17,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L18,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L19,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L20,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L21,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L22,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L23,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L24,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L25,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L26,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L27,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L28,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L29,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
+L30,fail,yes, no,  o,no,no,ok ,ok,no,"hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue "
