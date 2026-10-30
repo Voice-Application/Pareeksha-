@@ -1,0 +1,21 @@
+ Container vlive-postgres-1 Running 
+ Container vlive-kafka-1 Running 
+ Container vlive-postgres-1 Waiting 
+ Container vlive-kafka-1 Waiting 
+ Container vlive-postgres-1 Healthy 
+ Container vlive-migrate-1 Starting 
+ Container vlive-kafka-1 Healthy 
+ Container vlive-kafka-init-1 Starting 
+ Container vlive-migrate-1 Started 
+ Container vlive-kafka-init-1 Started 
+ Container vlive-migrate-1 Waiting 
+ Container vlive-kafka-init-1 Waiting 
+ Container vlive-migrate-1 Exited 
+ Container vlive-kafka-init-1 Exited 
+ Container vlive-api-run-c6e1a6153152 Creating 
+ Container vlive-api-run-c6e1a6153152 Created 
+INFO  gnani | [STT Batch] create start | request_id=req_88e41691ed7b | files=1
+INFO  gnani | [STT Batch] job created | job_id=a404a821-79b9-4328-9252-a20b09c86ad6
+WARNING gnani | [STT Batch] GET /stt/v3/batch/jobs/a404a821-79b9-4328-9252-a20b09c86ad6 -> 429; retrying in 1.0s (1/5)
+{"status": "OK", "segments": 3, "speakers": ["None"], "secs": 7.2}
+{"status": "OK", "segments": 3, "seg0": "{'start': 0.0, 'end': 5.952, 'text': '\u0928\u092e\u0938\u094d\u0924\u0947, \u092e\u0948\u0902 \u091f\u0947\u0938\u094d\u091f \u092c\u0948\u0902\u0915 \u0938\u0947 \u092c\u094b\u0932 \u0930\u0939\u0940 \u0939\u0942\u0901, \u0906\u092a\u0915\u0940 \u0908 \u090f\u092e \u0906\u0908 \u0915\u0940 \u0930\u0915\u092e \u20b94,000 \u0939\u0948\u0964', 'speaker': 1}", "secs": 6.8}

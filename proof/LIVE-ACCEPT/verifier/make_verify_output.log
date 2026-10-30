@@ -1,0 +1,31 @@
+== V1: Every section-7 task has proof and a signed verified.md
+FAIL V1: 6 task(s) without signed proof, 0 build-fail grep hit(s) (evidence: proof/verify/V1.md)
+== V2: compose up + make demo gives an evaluated call in < 20 min
+PASS V2: evaluated call in 294s (11 scored evaluations) (evidence: proof/verify/V2.md)
+== V4: >= 4 of 5 planted bugs caught with cited turn indices
+PASS V4: control (bugs off) pass rate 2/2; caught 5/5 (evidence: proof/verify/V4.md)
+== V5: Webhook-imported real recording audited, HubSpot note within 3 min
+PASS V5: HubSpot note created 15.1s after the signed POST (evidence: proof/verify/V5.md)
+== V6: Duplicate delivery and worker crash give one evaluation and one CRM note
+FAIL V6: Kafka suite failed (evidence: proof/verify/V6.md)
+== V7: Dialect report: >= 3 Kannada groups + Hindi + code-mixed, n + CIs
+PENDING V7: no dialect report exists; needs the owner's consented clips (H-02) (evidence: proof/verify/V7.md)
+== V8: GitHub Action fails a PR enabling a mock bug, passes after the fix
+PENDING V8: no recorded Actions run URLs (evidence: proof/verify/V8.md)
+== V9: Judge vs Preetham labels on 30 calls: Cohen's kappa >= 0.6
+PENDING V9: fewer than 30 human-labelled calls (EVAL-06 needs Preetham's labels) (evidence: proof/verify/V9.md)
+== V10: 8 adopter guides followed from a clean clone
+PASS V10: all 8 guide logs end with RESULT: PASS (evidence: proof/verify/V10.md)
+== V11: Repo public, tagged v1.0.0, demo video + launch post published
+FAIL V11: tag v1.0.0 does not exist (+0 more) (evidence: proof/verify/V11.md)
+
+| 1 | Every section-7 task has proof and a signed verified.md | **FAIL** | [proof/verify/V1.md](verify/V1.md) |
+| 2 | compose up + make demo gives an evaluated call in < 20 min | **PASS** | [proof/verify/V2.md](verify/V2.md) |
+| 4 | >= 4 of 5 planted bugs caught with cited turn indices | **PASS** | [proof/verify/V4.md](verify/V4.md) |
+| 5 | Webhook-imported real recording audited, HubSpot note within 3 min | **PASS** | [proof/verify/V5.md](verify/V5.md) |
+| 6 | Duplicate delivery and worker crash give one evaluation and one CRM note | **FAIL** | [proof/verify/V6.md](verify/V6.md) |
+| 7 | Dialect report: >= 3 Kannada groups + Hindi + code-mixed, n + CIs | **PENDING** | [proof/verify/V7.md](verify/V7.md) |
+| 8 | GitHub Action fails a PR enabling a mock bug, passes after the fix | **PENDING** | [proof/verify/V8.md](verify/V8.md) |
+| 9 | Judge vs Preetham labels on 30 calls: Cohen's kappa >= 0.6 | **PENDING** | [proof/verify/V9.md](verify/V9.md) |
+| 10 | 8 adopter guides followed from a clean clone | **PASS** | [proof/verify/V10.md](verify/V10.md) |
+| 11 | Repo public, tagged v1.0.0, demo video + launch post published | **FAIL** | [proof/verify/V11.md](verify/V11.md) |

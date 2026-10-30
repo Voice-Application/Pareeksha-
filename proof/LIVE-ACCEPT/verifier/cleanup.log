@@ -1,0 +1,8 @@
+note 413915927227 delete http=204
+note 413923017404 delete http=204
+contact 581744433873 delete http=204
+note 413913993954 delete http=204
+contact 581659657943 delete http=204
+remaining verifier contacts: 2
+GET 581744433873 http=404
+GET 581659657943 http=404

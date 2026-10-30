@@ -1,0 +1,17 @@
+### Guide 5 step 1: auth check
+HubSpot http=200
+### 5.1 contact
+contact id 581659657943
+### step 2: add integration
+integration 4358df5c-ff35-4c49-a9ff-789dfb0fdaa0
+### test
+{"ok":true,"detail":"HubSpot token accepted"}
+### 5.2 signed webhook (guide 4)
+POST at 15:26:05
+{"call_id":"ba6e310b-7fde-418b-93c8-30793aedf6d0","duplicate":false}
+### step 4: deliveries (poll 180 s)
+(verifier poll one-liner had a shell-quoting bug; polling output omitted, verified below via HubSpot directly)
+after 180 s:  at 15:29:07
+### 5 end-to-end: notes on contact
+1 [413913993954]
+2026-10-30T15:26:21.810Z [{'id': '581659657943', 'type': 'note_to_contact'}]

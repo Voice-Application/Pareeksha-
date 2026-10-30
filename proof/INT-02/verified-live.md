@@ -1,0 +1,2 @@
+# INT-02 live verification (HubSpot), independent QA 2026-10-30
+Real HubSpot private-app token, fresh stack. Integration `/test` -> `{"ok":true,"detail":"HubSpot token accepted"}`; phone-matched synthetic contact got exactly one note per call (413923017404 and 413913993954, fetched back from HubSpot with `note_to_contact` association); redelivery x2 + worker SIGKILL left one note (idempotency marker works). Evidence: `proof/LIVE-ACCEPT/verifier/`. Result: **PASS**. Synthetic data deleted afterwards.
