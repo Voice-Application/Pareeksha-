@@ -264,3 +264,84 @@ def test_render_md_marks_missing_metrics() -> None:
     assert md.count(il.NOT_PROVIDED) >= 4
     assert "bad \\| note" in md
     assert md.rstrip().endswith("text")
+
+
+# --- rows awaiting the owner (INTERIM) ----------------------------------------------------------
+
+
+def blank(lid: str) -> dict[str, str]:
+    return {"label_id": lid, **dict.fromkeys(il.COLUMNS[1:], "")}
+
+
+def test_blank_rows_are_pending_not_errors() -> None:
+    rows = [pf_row("L01", "yes"), blank("L02")]
+    labels = il.parse_labels(rows, KEY)
+    assert [lab.label_id for lab in labels] == ["L01"]
+    assert il.pending_ids(rows) == ["L02"]
+    # a row with only a note is not pending: it is an incomplete label
+    with pytest.raises(il.LabelError, match="passed must be yes or no"):
+        il.parse_labels([pf_row("L01", "yes"), {**blank("L02"), "notes": "x"}], KEY)
+
+
+def test_parse_id_range() -> None:
+    assert il.parse_id_range("L11-L13, L20") == {"L11", "L12", "L13", "L20"}
+    assert il.parse_id_range("") == set()
+    with pytest.raises(il.LabelError):
+        il.parse_id_range("L11-12x")
+
+
+def test_normalise_owner_blanks_unreviewed_rows() -> None:
+    raw = [
+        {"label_id": "L01", "passed": "fail", "critical": "yes", "notes": "a"},
+        {"label_id": "L02", "passed": "fail", "critical": "yes", "notes": "a"},
+    ]
+    out = il.normalise_owner_rows(raw, {"L02"})
+    assert out[0]["passed"] == "no"
+    assert out[1] == blank("L02")
+    assert il.pending_ids(out) == ["L02"]
+
+
+def test_wilson_interval() -> None:
+    assert il.wilson(10, 10) == (0.7225, 1.0)
+    lo, hi = il.wilson(5, 10)
+    assert lo < 0.5 < hi
+
+
+def test_kappa_bootstrap_counts_undefined_resamples() -> None:
+    jv = [True] + [False] * 9
+    boot = il.kappa_bootstrap(jv, list(jv), n_boot=2000)
+    assert boot["ci95"] == [1.0, 1.0]  # every defined resample agrees perfectly
+    assert 0.2 < boot["undefined_share"] < 0.5  # resamples without the one pass: (9/10)^10 ~ 0.35
+    assert il.kappa_bootstrap([False] * 4, [False] * 4, n_boot=50)["ci95"] is None
+
+
+def test_interim_report() -> None:
+    key = {"L01": "c1", "L02": "c2", "L03": "c3"}
+    rows = [pf_row("L01", "yes"), pf_row("L02", "no"), blank("L03")]
+    labels = il.parse_labels(rows, key)
+    judge = {"c1": judge_row(True, False), "c2": judge_row(False, True, 30)}
+    cal = {"n": 2, "kappa_pass_fail": 1.0, "spearman_overall": None, "dimension_mae": {}}
+    imported = {
+        "reviewer": "preetham",
+        "posted": 2,
+        "already": 0,
+        "labels": 2,
+        "labels_file": "x.csv",
+    }
+    report = il.build_report(labels, judge, cal, imported, None, il.pending_ids(rows), len(key))
+    assert (report["interim"], report["labelled"], report["total"], report["pending"]) == (
+        True,
+        2,
+        3,
+        ["L03"],
+    )
+    md = il.render_md(report)
+    assert md.startswith("# EVAL-06 calibration: judge vs owner labels (INTERIM)")
+    assert "**INTERIM: 2 of 3 calls labelled.**" in md
+    assert "not assessed (n = 2 < 30)" in md
+    assert "Wilson CI" in md and "bootstrap" in md
+
+
+def test_id_span() -> None:
+    assert il._id_span([f"L{i}" for i in range(11, 31)]) == "L11-L30"
+    assert il._id_span(["L01", "L03"]) == "L01, L03"

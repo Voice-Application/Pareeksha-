@@ -1,0 +1,222 @@
+[
+ {
+  "id": "b8672bb0-938e-4d99-bc30-f14fa0364ea9",
+  "evaluation_id": "75914f89-99a9-520f-a437-07509c71a4ef",
+  "reviewer": "preetham",
+  "dimensions": {},
+  "overall_score": null,
+  "passed": false,
+  "critical_failure": true,
+  "notes": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue",
+  "created_at": "2026-10-30T19:06:52.178776+00:00"
+ },
+ {
+  "id": "85e69fc2-bb49-42f2-9520-28deb36f9674",
+  "evaluation_id": "2b91b142-b535-5481-8fcb-9be921a19b1b",
+  "reviewer": "preetham",
+  "dimensions": {},
+  "overall_score": null,
+  "passed": false,
+  "critical_failure": true,
+  "notes": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue",
+  "created_at": "2026-10-30T19:06:52.212848+00:00"
+ },
+ {
+  "id": "a8ed8f64-5395-40fa-a1e9-d3d1558708f5",
+  "evaluation_id": "9e64bd3d-342a-54d0-a519-a9fd2e3de8fd",
+  "reviewer": "preetham",
+  "dimensions": {},
+  "overall_score": null,
+  "passed": false,
+  "critical_failure": true,
+  "notes": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue",
+  "created_at": "2026-10-30T19:06:52.241953+00:00"
+ },
+ {
+  "id": "64be4b10-747b-42c0-bd5d-bd3a7fa4c0eb",
+  "evaluation_id": "6844870b-7445-5074-b1b6-51afc78a39f9",
+  "reviewer": "preetham",
+  "dimensions": {},
+  "overall_score": null,
+  "passed": false,
+  "critical_failure": true,
+  "notes": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue",
+  "created_at": "2026-10-30T19:06:52.267957+00:00"
+ },
+ {
+  "id": "0cea0b30-d287-40a8-97e7-906d2f0e06ba",
+  "evaluation_id": "1e14f4a8-0f08-5565-b033-c2cdadfc481a",
+  "reviewer": "preetham",
+  "dimensions": {},
+  "overall_score": null,
+  "passed": false,
+  "critical_failure": true,
+  "notes": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue",
+  "created_at": "2026-10-30T19:06:52.298368+00:00"
+ },
+ {
+  "id": "8a55c9e6-307b-4928-a967-5a84c5b1ddc3",
+  "evaluation_id": "1b5c4dfb-b79c-5b54-830d-ef7d71484a75",
+  "reviewer": "preetham",
+  "dimensions": {},
+  "overall_score": null,
+  "passed": false,
+  "critical_failure": true,
+  "notes": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue",
+  "created_at": "2026-10-30T19:06:52.332529+00:00"
+ },
+ {
+  "id": "ebe15517-f38c-47d6-b24f-6b223443dc29",
+  "evaluation_id": "73e9467e-a2ef-5aa4-b322-a28e49531387",
+  "reviewer": "preetham",
+  "dimensions": {},
+  "overall_score": null,
+  "passed": false,
+  "critical_failure": true,
+  "notes": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue",
+  "created_at": "2026-10-30T19:06:52.361618+00:00"
+ },
+ {
+  "id": "d74ac2e7-246c-4caa-921d-6e1d3f9e5313",
+  "evaluation_id": "6942eafc-8790-58d0-8148-13904cf9d8a8",
+  "reviewer": "preetham",
+  "dimensions": {},
+  "overall_score": null,
+  "passed": false,
+  "critical_failure": true,
+  "notes": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue",
+  "created_at": "2026-10-30T19:06:52.390168+00:00"
+ },
+ {
+  "id": "9d622bd6-9c78-413d-aed4-424b776239a3",
+  "evaluation_id": "9f8f9a7a-b843-5ef2-9b16-2495be8ec51b",
+  "reviewer": "preetham",
+  "dimensions": {},
+  "overall_score": null,
+  "passed": false,
+  "critical_failure": true,
+  "notes": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue",
+  "created_at": "2026-10-30T19:06:52.418842+00:00"
+ },
+ {
+  "id": "5e1c93fa-ca59-4338-9fae-ee721ffa9362",
+  "evaluation_id": "8e61b9da-4a50-5f01-b383-a8717b31f49a",
+  "reviewer": "preetham",
+  "dimensions": {},
+  "overall_score": null,
+  "passed": false,
+  "critical_failure": true,
+  "notes": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue",
+  "created_at": "2026-10-30T19:06:52.451597+00:00"
+ },
+ {
+  "id": "b47e429d-6b51-48d5-82a5-a444cf368f22",
+  "evaluation_id": "24ddf266-faec-5666-be63-6d5224d49b8f",
+  "reviewer": "preetham",
+  "dimensions": {},
+  "overall_score": null,
+  "passed": false,
+  "critical_failure": true,
+  "notes": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue",
+  "created_at": "2026-10-30T19:06:52.481377+00:00"
+ },
+ {
+  "id": "4b3c2316-e6f3-4ea0-b411-8c129d3dd2b1",
+  "evaluation_id": "0e03975f-d65b-5e14-8892-acdecf605242",
+  "reviewer": "preetham",
+  "dimensions": {},
+  "overall_score": null,
+  "passed": false,
+  "critical_failure": true,
+  "notes": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue",
+  "created_at": "2026-10-30T19:06:52.50745+00:00"
+ },
+ {
+  "id": "6c9b9a81-cd2f-4915-98fd-fa9ac12e9e86",
+  "evaluation_id": "40fed006-2f4b-5825-b47c-6a587b480e55",
+  "reviewer": "preetham",
+  "dimensions": {},
+  "overall_score": null,
+  "passed": false,
+  "critical_failure": true,
+  "notes": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue",
+  "created_at": "2026-10-30T19:06:52.533771+00:00"
+ },
+ {
+  "id": "c61ee3f6-2e23-40bf-9093-7b79d5a02f62",
+  "evaluation_id": "6b85c087-94eb-5936-83ec-971d1fa99ecd",
+  "reviewer": "preetham",
+  "dimensions": {},
+  "overall_score": null,
+  "passed": false,
+  "critical_failure": true,
+  "notes": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue",
+  "created_at": "2026-10-30T19:06:52.560664+00:00"
+ },
+ {
+  "id": "2b6a997b-745b-4d25-9819-a75de046274c",
+  "evaluation_id": "3df45ebb-2f32-5a2f-b77b-abd524d50d61",
+  "reviewer": "preetham",
+  "dimensions": {},
+  "overall_score": null,
+  "passed": false,
+  "critical_failure": true,
+  "notes": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue",
+  "created_at": "2026-10-30T19:06:52.589071+00:00"
+ },
+ {
+  "id": "eda56bf1-d3a9-4ef8-813e-1282532f7507",
+  "evaluation_id": "6c674247-71ed-587d-8c05-0f7c09655de8",
+  "reviewer": "preetham",
+  "dimensions": {},
+  "overall_score": null,
+  "passed": false,
+  "critical_failure": true,
+  "notes": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue",
+  "created_at": "2026-10-30T19:06:52.616291+00:00"
+ },
+ {
+  "id": "ecd295d6-d7e3-499f-999d-630072f58278",
+  "evaluation_id": "8aeb4cb9-7d75-56b3-b798-103ce842e9ea",
+  "reviewer": "preetham",
+  "dimensions": {},
+  "overall_score": null,
+  "passed": false,
+  "critical_failure": true,
+  "notes": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue",
+  "created_at": "2026-10-30T19:06:52.646073+00:00"
+ },
+ {
+  "id": "8482a760-1eeb-47aa-8be8-8d9d5f3d1d62",
+  "evaluation_id": "a4da4639-7df5-57cd-8d79-2f9141bd8afe",
+  "reviewer": "preetham",
+  "dimensions": {},
+  "overall_score": null,
+  "passed": false,
+  "critical_failure": true,
+  "notes": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue",
+  "created_at": "2026-10-30T19:06:52.675145+00:00"
+ },
+ {
+  "id": "638312df-9099-4765-bd37-d0ace8d11675",
+  "evaluation_id": "d0eb4cd1-8472-59fb-8361-b6dc1204ce60",
+  "reviewer": "preetham",
+  "dimensions": {},
+  "overall_score": null,
+  "passed": false,
+  "critical_failure": true,
+  "notes": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue",
+  "created_at": "2026-10-30T19:06:52.704438+00:00"
+ },
+ {
+  "id": "3b472deb-bef3-46e0-9b16-70ddd133aac3",
+  "evaluation_id": "ef570185-fbe5-5f0c-b32b-b7fbe576425a",
+  "reviewer": "preetham",
+  "dimensions": {},
+  "overall_score": null,
+  "passed": false,
+  "critical_failure": true,
+  "notes": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue",
+  "created_at": "2026-10-30T19:06:52.730621+00:00"
+ }
+]

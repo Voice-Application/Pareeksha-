@@ -7,15 +7,15 @@ FR-EV-8, `GET /api/v1/calibration` (backend/pareeksha/api/routers/system.py), `P
 
 **Status**
 - Built and run: real 30-call batch (all 30 evaluated by the judge), blind packet, importer and its unit tests.
-- **Owner labels imported (pass/fail only):** **κ = 0.1124 on n = 30, below the 0.6 target.**
-  - Raw agreement is 0.667: the owner passed 1 call, the judge 11.
-  - Critical agreement is 0.233 (κ 0.017).
-  - Spearman and per-dimension MAE are **not provided by owner**: the owner's dimension cells were not 0-4
-    scores and were not converted.
-  - Details are in `calibration.md` / `calibration.json`; the recalibration plan is at the end of
-    `calibration.md`.
-  - **23 of 30 rows are identical, note included** (L04, L05, L08, L11-L30). The owner has been asked whether
-    each call was reviewed individually, so treat κ as provisional.
+- **Owner labels: INTERIM, 10 of 30.** The owner reviewed L01-L10. L11-L30 in the owner's sheet are a
+  fill-down; the owner confirmed they were not reviewed, so they are blank in `labels.csv` and awaiting the
+  owner. **V9 stays PENDING.**
+  - On n = 10, pass/fail: 10/10 agreement (95% Wilson CI [0.72, 1.0]), κ = 1.0 (the API and the offline
+    recompute agree). The bootstrap interval for κ is degenerate, because each rater has only 1 pass.
+  - Critical: owner 9/10, judge 4/10; agreement 0.5, κ 0.14 (bootstrap 95% CI [0.0, 0.55]).
+  - Spearman and per-dimension MAE are **not provided by owner**.
+  - L10 is labelled passed=yes **and** critical=yes (fact; for the owner to confirm).
+  - Details are in `calibration.md` / `calibration.json`.
 - No API or DB contract was changed.
 
 Code commit: `9f2a41f` (full SHA in the Commit section).
@@ -147,85 +147,110 @@ cd labelling/EVAL-06 && python3 -m http.server 8000
 - `critical`: kept as written.
 - The seven dimension columns (yes/no/ok/o/blank, not 0-4) are treated as not provided.
 
-**`labelling/EVAL-06/labels.owner.csv`** is that sheet as received:
-- L01-L10 are copied exactly, including stray spaces.
-- L11-L30 arrived as one line, "each row is exactly: …". They are written out as 20 identical rows with that
-  content, so this file is a faithful expansion of the message, not a byte copy of the owner's file.
+**`labelling/EVAL-06/labels.owner.csv`** is the owner's raw sheet as relayed. It is kept unchanged.
+- L01-L10 are the owner's reviews, copied exactly (stray spaces included).
+- **L11-L30 are unreviewed fill-down.** The owner confirmed on 2026-10-30 that they were not reviewed. They
+  arrived as one "each row is exactly: …" line and are written out as 20 identical rows. They are not
+  labels and must not be imported.
 
-**`labelling/EVAL-06/labels.csv`** is the normalised file. It is produced by
-`import_labels.py --normalise-owner labelling/EVAL-06/labels.owner.csv labelling/EVAL-06/labels.csv`:
-passed and critical mapped, dimension cells empty, notes kept.
+**`labelling/EVAL-06/labels.csv`** is the normalised file:
+```
+python scripts/calibration/import_labels.py --normalise-owner labelling/EVAL-06/labels.owner.csv \
+    labelling/EVAL-06/labels.csv --unreviewed L11-L30
+```
+- L01-L10 have passed and critical mapped, dimension cells empty and notes kept.
+- L11-L30 are blank. The importer treats a blank row as awaiting the owner: it skips the row, marks the
+  report INTERIM and keeps V9 pending.
 
-Import (stack restarted on the same `pg-data` volume, `api` only):
+### History: first import on 30 rows, then removal of the 20 fill-down reviews
+- **First import.** Before the owner's correction arrived, all 30 rows were imported.
+  - `import_labels.log`: 30 posted, κ 0.1124 on n = 30.
+  - `import_labels_rerun.log`: an idempotent rerun, 30 × 409.
+  - Those numbers are void, because 20 of the rows were never reviewed.
+- **Removal.** The API has no endpoint to delete a review, and API contracts are frozen, so the 20 rows for
+  L11-L30 were removed directly in Postgres, in one transaction.
+  - The SQL is in `remove_unreviewed.sql`. It scopes the delete to `reviewer = 'preetham'` and to the
+    evaluations of the 20 L11-L30 calls from `.key.json`. Result: `DELETE 20`, 10 rows left.
+  - The 20 deleted rows were saved first, as JSON, to `removed_human_reviews.json`.
+  - After the removal, `GET /calibration` returned `n = 10, kappa 1.0`.
+- **Guard against stale reviews.** The importer now refuses to write a report when `GET /calibration` counts
+  more reviewed evaluations than the file has labelled rows. Stale reviews in the DB would therefore stop the
+  import instead of silently skewing κ.
+
+### Current import (INTERIM)
 ```
 python scripts/calibration/import_labels.py --owner-raw labelling/EVAL-06/labels.owner.csv \
-    --extra-md proof/EVAL-06/recalibration_plan.md            # log: import_labels.log
+    --extra-md proof/EVAL-06/recalibration_plan.md        # log: import_labels_interim.log
 ```
-- **Import runs:**
-  - The first run posted 30 reviews (`import_labels.log`).
-  - After `ruff format` it was run again: all 30 came back 409 "already", nothing was duplicated (still 30
-    `human_reviews` rows), and every metric was identical (`import_labels_rerun.log`).
-  - The committed `calibration.*` is from that rerun, so its header reads "0 posted, 30 already present".
-- **Pass/fail-only mode:** the review API does not require dimension scores (`ReviewCreate.dimensions`
-  defaults to `{}`; `human_reviews.overall_score` is then null). So the 30 reviews went through the real
-  `POST /calls/{id}/review` with passed and critical only, and no scores were invented. In the DB: 30 rows by
-  `preetham`, `dimensions = {}`, `overall_score` null.
-- **Same calibration code as the endpoint:**
-  - Before posting, the importer checks that each call's live evaluation is the one in `judge_results.json`.
-  - After posting it reads `GET /calibration`, and also recomputes offline from `judge_results.json` with the
-    endpoint's own `pareeksha.evaluation.calibration.compute_calibration` (imported, not re-implemented).
-  - Both give n = 30, κ = 0.1124. Spearman is null and the MAE map empty, reported as "not provided by owner".
-- **Result:**
+- **What was posted.** The 10 reviews for L01-L10 were already present: 10 × 409, no new posts.
+  - The review API does not require dimension scores (`ReviewCreate.dimensions` defaults to `{}`;
+    `overall_score` stays null), so passed and critical went through the real `POST /calls/{id}/review` and
+    no scores were invented.
+- **Two independent checks, same result.**
+  - `GET /calibration` and an offline recompute both give n = 10, κ = 1.0. The offline recompute uses the
+    endpoint's own `compute_calibration`, imported, on `judge_results.json`.
+  - Before importing, the importer also checks that each call's live evaluation is the one in
+    `judge_results.json`.
 
-  | | owner pass | owner fail |
-  |---|---|---|
-  | judge pass | 1 | 10 |
-  | judge fail | 0 | 19 |
+| pass/fail | owner pass | owner fail |
+|---|---|---|
+| judge pass | 1 | 0 |
+| judge fail | 0 | 9 |
 
-  - Pass/fail: raw agreement 0.6667, κ 0.1124.
-  - Critical: owner 29, judge 6; agreement 0.2333, κ 0.0171.
-  - 23 disagreements, each listed in `calibration.md` with the judge's reasons next to the owner's note.
-- **Facts the owner should confirm:**
-  - 23 rows (L04, L05, L08, L11-L30) are identical in every column, including the note. L11-L30 are 20
-    consecutive rows.
-  - L10 is labelled passed **and** critical.
-- **Recalibration (§10.3):** `recalibration_plan.md`, appended to `calibration.md`. It covers why the judge passes
-  calls where the agent ignores or does not acknowledge the caller, or states facts that are not on file. No
-  rubric or prompt was changed.
-- **V9 (`make verify-step N=9`) was not run here.** κ is below 0.6, so it would report FAIL.
-- **Database dump:** the 30 calls and their evaluations were stored in this session's Compose Postgres, inside
-  an ephemeral cloud container. That database is now committed as `proof/EVAL-06/pareeksha_db.sql.gz`
-  (134 KB). It is a plain `pg_dump` of PostgreSQL 16, re-taken after the owner's labels were imported, so it
-  also holds the 30 `human_reviews` rows. The dump keeps everything except the rows of `api_keys`; the table definition is kept, so no key hash is
-  committed.
+| critical | owner critical | owner not critical |
+|---|---|---|
+| judge critical | 4 | 0 |
+| judge not critical | 5 | 1 |
+
+- **Pass/fail.** Raw agreement 1.0, 95% Wilson CI [0.7225, 1.0]; κ 1.0.
+  - The percentile bootstrap (10,000 resamples of calls, seed 20261030) gives a κ interval of [1.0, 1.0],
+    but 35.3% of resamples leave κ undefined.
+  - With one pass per rater this interval carries no information, and `calibration.md` says so. The Wilson
+    interval is the honest uncertainty at n = 10.
+- **Critical.** Raw agreement 0.5, Wilson CI [0.2366, 0.7634]; κ 0.1379, bootstrap CI [0.0, 0.5455].
+- **Disagreements: 5, all on critical only.** L04, L05, L06 and L07 are critical for the owner but not for the
+  judge. L10 is critical for the owner while both rate it a pass.
+- **Not a systematic disagreement.** No claim of systematic judge-owner disagreement is made, and no v2
+  rubric or prompt is proposed. `recalibration_plan.md` keeps the owner's failure definition (wrong values,
+  and non-responsive replies) and the rubric analysis only as **risks to check once 30 labels exist**.
+- **V9 is not run:** it stays PENDING until 30 calls are labelled.
+
+### Database dump
+- **What it holds.** `proof/EVAL-06/pareeksha_db.sql.gz` (133 KB) is a plain PostgreSQL 16 `pg_dump`,
+  re-taken after the removal.
+  - It holds the 10 owner reviews (L01-L10) and none for L11-L30; this was checked in the dump text.
+  - It keeps every table's rows except `api_keys` (only the table definition), so no key hash is committed.
 
   | table | rows |
   |---|---|
   | calls | 38 |
   | evaluations (all `ok`) | 33 |
   | turns | 284 |
-  | human_reviews | 30 |
+  | human_reviews | 10 |
 
-  The 38 calls include the replaced and errored ones. Test restore: the dump loads into an empty database with
-  `ON_ERROR_STOP=1`, and all 30 packet call ids have an `ok` evaluation in the restored copy. Audio is not in
-  the dump; it is under `data/runtime`, and the packet's mp3s are its copy.
+- **Test restore.** The dump loads into an empty database with `ON_ERROR_STOP=1` and gives the counts above.
+- **What is not in it.** The 38 calls include the replaced and errored ones. Audio is not in the dump; the
+  packet's mp3s are its copy.
 
-  To restore on a fresh stack (`.env` with `PAREEKSHA_API_KEY` set):
-  ```
-  docker compose up -d postgres                   # fresh pg-data volume: empty database, before any migrate
-  zcat proof/EVAL-06/pareeksha_db.sql.gz | docker compose exec -T postgres psql -U pareeksha -d pareeksha -v ON_ERROR_STOP=1 -q
-  docker compose run --rm --no-deps api python -m pareeksha.seed   # re-adds the API key from PAREEKSHA_API_KEY (idempotent for the rest)
-  docker compose up -d api                        # its migrate step finds alembic at head and changes nothing
-  python3 scripts/calibration/import_labels.py --owner-raw labelling/EVAL-06/labels.owner.csv --extra-md proof/EVAL-06/recalibration_plan.md
-  # reviews already present come back 409 and are counted as "already"; the report is rebuilt
-  ```
-  Re-running `run_batch.py` + `export_packet.py` on the target stack is the alternative, but it gives new calls
-  and needs a new packet.
+To restore on a fresh stack (`.env` with `PAREEKSHA_API_KEY` set):
+```
+docker compose up -d postgres                   # fresh pg-data volume: empty database, before any migrate
+zcat proof/EVAL-06/pareeksha_db.sql.gz | docker compose exec -T postgres psql -U pareeksha -d pareeksha -v ON_ERROR_STOP=1 -q
+docker compose run --rm --no-deps api python -m pareeksha.seed   # re-adds the API key from PAREEKSHA_API_KEY (idempotent for the rest)
+docker compose up -d api                        # its migrate step finds alembic at head and changes nothing
+python3 scripts/calibration/import_labels.py --owner-raw labelling/EVAL-06/labels.owner.csv --extra-md proof/EVAL-06/recalibration_plan.md
+# L01-L10 come back 409 "already"; once the owner fills L11-L30, those 20 are posted and INTERIM disappears
+```
 
 ## Tests (`pytest.txt`)
 
-- `test_calibration_import_labels.py`: 25 passed. These are the original 15 plus 10 for pass/fail-only
-  mode:
+- `test_calibration_import_labels.py`: 32 passed. These are the original 15, plus 10 for pass/fail-only mode,
+  plus 7 for pending rows and intervals:
+  - blank rows are pending, while a row with only a note is still an error;
+  - id ranges, and normalisation that blanks unreviewed rows;
+  - the Wilson interval, bootstrap undefined-share, the INTERIM report and id spans.
+
+  The 10 pass/fail-only tests cover:
   - rows without scores, and partly filled or mixed modes rejected;
   - the owner-sheet normalisation and unknown verdicts;
   - identical-row detection;

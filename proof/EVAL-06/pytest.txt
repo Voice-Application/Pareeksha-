@@ -31,3 +31,44 @@ All checks passed!
 
 $ ruff check --extend-ignore E501 ../scripts/calibration   (scripts are outside CI lint; remaining E501 are long HTML/CSS/SQL string literals)
 All checks passed!
+
+--- after owner labels (INTERIM, L01-L10), 2026-10-30T19:12:22Z ---
+$ python -m pytest tests/unit/test_calibration_import_labels.py -v
+tests/unit/test_calibration_import_labels.py::test_dimensions_match_rubric PASSED [  3%]
+tests/unit/test_calibration_import_labels.py::test_valid_rows_map_to_review_bodies PASSED [  6%]
+tests/unit/test_calibration_import_labels.py::test_invalid_rows_are_rejected[rows0-not labelled: L02] PASSED [  9%]
+tests/unit/test_calibration_import_labels.py::test_invalid_rows_are_rejected[rows1-appears more than once] PASSED [ 12%]
+tests/unit/test_calibration_import_labels.py::test_invalid_rows_are_rejected[rows2-not in the key] PASSED [ 15%]
+tests/unit/test_calibration_import_labels.py::test_invalid_rows_are_rejected[rows3-passed must be yes or no] PASSED [ 18%]
+tests/unit/test_calibration_import_labels.py::test_invalid_rows_are_rejected[rows4-critical must be yes or no] PASSED [ 21%]
+tests/unit/test_calibration_import_labels.py::test_invalid_rows_are_rejected[rows5-task_completion must be an integer 0-4] PASSED [ 25%]
+tests/unit/test_calibration_import_labels.py::test_invalid_rows_are_rejected[rows6-empathy_tone must be an integer 0-4] PASSED [ 28%]
+tests/unit/test_calibration_import_labels.py::test_invalid_rows_are_rejected[rows7-escalation must be an integer 0-4] PASSED [ 31%]
+tests/unit/test_calibration_import_labels.py::test_invalid_rows_are_rejected[rows8-label_id is empty] PASSED [ 34%]
+tests/unit/test_calibration_import_labels.py::test_all_problems_reported_together PASSED [ 37%]
+tests/unit/test_calibration_import_labels.py::test_csv_and_key_round_trip PASSED [ 40%]
+tests/unit/test_calibration_import_labels.py::test_csv_missing_column PASSED [ 43%]
+tests/unit/test_calibration_import_labels.py::test_disagreements PASSED  [ 46%]
+tests/unit/test_calibration_import_labels.py::test_pass_fail_only_rows_parse_without_scores PASSED [ 50%]
+tests/unit/test_calibration_import_labels.py::test_partly_filled_dimensions_still_rejected PASSED [ 53%]
+tests/unit/test_calibration_import_labels.py::test_mixed_modes_rejected PASSED [ 56%]
+tests/unit/test_calibration_import_labels.py::test_normalise_owner_rows PASSED [ 59%]
+tests/unit/test_calibration_import_labels.py::test_normalise_owner_rejects_unknown_verdicts[maybe] PASSED [ 62%]
+tests/unit/test_calibration_import_labels.py::test_normalise_owner_rejects_unknown_verdicts[] PASSED [ 65%]
+tests/unit/test_calibration_import_labels.py::test_normalise_owner_rejects_unknown_verdicts[yes] PASSED [ 68%]
+tests/unit/test_calibration_import_labels.py::test_identical_rows PASSED [ 71%]
+tests/unit/test_calibration_import_labels.py::test_offline_calibration_matches_endpoint_function_pass_fail_only PASSED [ 75%]
+tests/unit/test_calibration_import_labels.py::test_render_md_marks_missing_metrics PASSED [ 78%]
+tests/unit/test_calibration_import_labels.py::test_blank_rows_are_pending_not_errors PASSED [ 81%]
+tests/unit/test_calibration_import_labels.py::test_parse_id_range PASSED [ 84%]
+tests/unit/test_calibration_import_labels.py::test_normalise_owner_blanks_unreviewed_rows PASSED [ 87%]
+tests/unit/test_calibration_import_labels.py::test_wilson_interval PASSED [ 90%]
+tests/unit/test_calibration_import_labels.py::test_kappa_bootstrap_counts_undefined_resamples PASSED [ 93%]
+tests/unit/test_calibration_import_labels.py::test_interim_report PASSED [ 96%]
+tests/unit/test_calibration_import_labels.py::test_id_span PASSED        [100%]
+============================== 32 passed in 0.28s ==============================
+$ ruff check . && ruff format --check .
+All checks passed!
+340 files already formatted
+$ ruff check --extend-ignore E501 ../scripts/calibration
+All checks passed!

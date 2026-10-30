@@ -12,12 +12,15 @@ Two label modes, decided by the file (every row must use the same one):
 - pass/fail only: passed and critical, all seven dimension cells empty. Reviews are posted without
   dimensions (the API accepts that and stores no human overall score), so GET /calibration reports kappa
   and n, while Spearman and per-dimension MAE are "not provided by owner".
+A row with every cell but label_id empty is awaiting the owner: it is skipped, and the report is marked
+INTERIM (V9 stays pending) until every call in the key is labelled. GET /calibration must count exactly
+the labelled rows, or the import stops (the DB would hold reviews that are not in the file).
 Either way the numbers are also recomputed offline from proof/EVAL-06/judge_results.json with the
 endpoint's own function (pareeksha.evaluation.calibration.compute_calibration) as a cross-check.
 
     python3 scripts/calibration/import_labels.py [--labels PATH] [--key PATH] [--reviewer preetham]
         [--owner-raw PATH] [--extra-md PATH]
-    python3 scripts/calibration/import_labels.py --normalise-owner RAW OUT
+    python3 scripts/calibration/import_labels.py --normalise-owner RAW OUT [--unreviewed L11-L30]
 
 --normalise-owner maps the owner's raw sheet to the importer's format with the owner's stated rules:
 passed "passed" -> yes, "fail"/"partial" -> no; critical kept as yes/no; dimension cells dropped (they
@@ -32,6 +35,8 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
+import random
 import sys
 import urllib.error
 import urllib.request
@@ -104,7 +109,8 @@ def _yes_no(value: str, column: str, where: str, problems: list[str]) -> bool:
 def parse_labels(rows: list[dict[str, str]], key: dict[str, str]) -> list[Label]:
     """Validate the CSV rows against the key; raise LabelError listing every problem.
 
-    Every key id must be labelled exactly once; passed/critical are yes/no. A row gives either all
+    Every key id must appear exactly once. A row whose cells are all empty except label_id is awaiting
+    the owner (see ``pending_ids``) and is skipped. Otherwise passed/critical are yes/no. A row gives either all
     seven dimension scores as integers 0-4 (the API needs all seven to compute the human overall score
     that Spearman uses) or none of them (pass/fail only), and every row must use the same mode.
     """
@@ -124,6 +130,8 @@ def parse_labels(rows: list[dict[str, str]], key: dict[str, str]) -> list[Label]
             problems.append(f"{where}: label_id appears more than once")
             continue
         seen.add(lid)
+        if _is_pending(row):
+            continue
         passed = _yes_no(row.get("passed") or "", "passed", where, problems)
         critical = _yes_no(row.get("critical") or "", "critical", where, problems)
         scores: dict[str, int] = {}
@@ -151,17 +159,48 @@ def parse_labels(rows: list[dict[str, str]], key: dict[str, str]) -> list[Label]
     return labels
 
 
+def _is_pending(row: dict[str, str]) -> bool:
+    return not any((row.get(c) or "").strip() for c in COLUMNS[1:])
+
+
+def pending_ids(rows: list[dict[str, str]]) -> list[str]:
+    """Label ids still awaiting the owner: every cell but label_id empty."""
+    return [(r.get("label_id") or "").strip() for r in rows if _is_pending(r)]
+
+
+def parse_id_range(spec: str) -> set[str]:
+    """``"L11-L30"`` or ``"L11,L12"`` (or a mix) -> {"L11", ..., "L30"}."""
+    out: set[str] = set()
+    for part in filter(None, (p.strip() for p in spec.split(","))):
+        if "-" in part:
+            a, b = (x.strip() for x in part.split("-", 1))
+            if not (a[:1] == b[:1] == "L" and a[1:].isdigit() and b[1:].isdigit()):
+                raise LabelError(f"bad label id range {part!r}")
+            width = len(a) - 1
+            out |= {f"L{i:0{width}d}" for i in range(int(a[1:]), int(b[1:]) + 1)}
+        else:
+            out.add(part)
+    return out
+
+
 def label_mode(labels: list[Label]) -> str:
     return "full" if labels and all(lab.scores for lab in labels) else "pass_fail_only"
 
 
-def normalise_owner_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+def normalise_owner_rows(
+    rows: list[dict[str, str]], unreviewed: set[str] | frozenset[str] = frozenset()
+) -> list[dict[str, str]]:
     """The owner's raw sheet -> importer rows: passed via OWNER_PASSED, critical yes/no as written,
-    dimension cells emptied (not converted), notes unchanged. Raises LabelError on any other value."""
+    dimension cells emptied (not converted), notes unchanged. Rows in ``unreviewed`` (the owner says
+    they were not reviewed) come out blank, i.e. awaiting the owner. Raises LabelError on any other
+    value."""
     problems: list[str] = []
     out: list[dict[str, str]] = []
     for line, row in enumerate(rows, start=2):
         lid = (row.get("label_id") or "").strip()
+        if lid in unreviewed:
+            out.append({"label_id": lid, **dict.fromkeys(COLUMNS[1:], "")})
+            continue
         passed = (row.get("passed") or "").strip().lower()
         critical = (row.get("critical") or "").strip().lower()
         if passed not in OWNER_PASSED:
@@ -218,8 +257,47 @@ def label_pairs(labels: list[Label], judge: dict[str, dict[str, Any]]) -> list[L
     return pairs
 
 
+def wilson(k: int, n: int, z: float = 1.959964) -> tuple[float, float]:
+    """95% Wilson score interval for a proportion k/n."""
+    if n == 0:
+        return (0.0, 1.0)
+    p = k / n
+    centre = (p + z * z / (2 * n)) / (1 + z * z / n)
+    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / (1 + z * z / n)
+    return (round(max(0.0, centre - half), 4), round(min(1.0, centre + half), 4))
+
+
+def kappa_bootstrap(
+    jv: list[bool], hv: list[bool], n_boot: int = 10000, seed: int = 20261030
+) -> dict[str, Any]:
+    """Percentile 95% bootstrap interval of Cohen's kappa (resampling calls with replacement), using the
+    endpoint's ``cohen_kappa``. Resamples where kappa is undefined (one rater constant on both sides,
+    chance agreement 1) are counted and left out; the share left out is reported."""
+    rng = random.Random(seed)
+    n = len(jv)
+    values: list[float] = []
+    for _ in range(n_boot):
+        idx = [rng.randrange(n) for _ in range(n)]
+        k = cohen_kappa([jv[i] for i in idx], [hv[i] for i in idx])
+        if k is not None:
+            values.append(k)
+    values.sort()
+    ci = None
+    if values:
+        lo, hi = values[int(0.025 * (len(values) - 1))], values[int(0.975 * (len(values) - 1))]
+        ci = [round(lo, 4), round(hi, 4)]
+    return {
+        "method": "percentile bootstrap, calls resampled",
+        "resamples": n_boot,
+        "seed": seed,
+        "ci95": ci,
+        "undefined_share": round(1 - len(values) / n_boot, 4),
+    }
+
+
 def agreement(labels: list[Label], judge: dict[str, dict[str, Any]]) -> dict[str, Any]:
-    """2x2 tables (judge x human) and raw agreement for passed and for critical."""
+    """2x2 tables (judge x human), raw agreement with its Wilson interval, and kappa with a
+    bootstrap interval, for passed and for critical."""
 
     def table(jv: list[bool], hv: list[bool]) -> dict[str, Any]:
         n = len(jv)
@@ -231,10 +309,13 @@ def agreement(labels: list[Label], judge: dict[str, dict[str, Any]]) -> dict[str
             for h in (True, False)
         }
         kappa = cohen_kappa(jv, hv)
+        agree = sum(a == b for a, b in zip(jv, hv))
         return {
             "n": n,
             **cells,
-            "agreement": round(sum(a == b for a, b in zip(jv, hv)) / n, 4),
+            "agreement": round(agree / n, 4),
+            "agreement_ci95_wilson": list(wilson(agree, n)),
+            "kappa_bootstrap": kappa_bootstrap(jv, hv),
             "judge_yes": sum(jv),
             "human_yes": sum(hv),
             "kappa": None if kappa is None else round(kappa, 4),
@@ -359,16 +440,54 @@ def _cell(text: str) -> str:
     return " ".join(text.split()).replace("|", "\\|")
 
 
+def _id_span(ids: list[str]) -> str:
+    """["L11", "L12", ..., "L30"] -> "L11-L30" when consecutive, else a comma list."""
+    if not ids:
+        return "-"
+    nums = [int(i[1:]) for i in ids if i[1:].isdigit()]
+    if len(nums) == len(ids) and nums == list(range(nums[0], nums[0] + len(nums))) and len(ids) > 2:
+        return f"{ids[0]}-{ids[-1]}"
+    return ", ".join(ids)
+
+
+def _stats(t: dict[str, Any]) -> str:
+    lo, hi = t["agreement_ci95_wilson"]
+    boot = t["kappa_bootstrap"]
+    ci = boot["ci95"]
+    ci_txt = "undefined in every resample" if ci is None else f"[{ci[0]}, {ci[1]}]"
+    text = (
+        f"Raw agreement {t['agreement']} (95% Wilson CI [{lo}, {hi}]); kappa {t['kappa']} "
+        f"(95% {boot['method']} CI {ci_txt}, {boot['resamples']} resamples, "
+        f"{boot['undefined_share']:.1%} of resamples undefined and left out)."
+    )
+    rare = min(t["judge_yes"], t["human_yes"], t["n"] - t["judge_yes"], t["n"] - t["human_yes"])
+    if ci is None or ci[0] == ci[1] or boot["undefined_share"] >= 0.1:
+        text += (
+            f" With {rare} call(s) in a rater's rarer class the kappa interval is not informative "
+            "(the resamples either reproduce the same table or leave kappa undefined); read the "
+            "Wilson interval on raw agreement instead."
+        )
+    return text
+
+
 def render_md(report: dict[str, Any], extra: str = "") -> str:
     cal, off, agr = report["calibration_api"], report["calibration_offline"], report["agreement"]
     imp, mode = report["import"], report["mode"]
     na = mode == "pass_fail_only"
     rho = NOT_PROVIDED if na else cal.get("spearman_overall")
     p, c = agr["passed"], agr["critical"]
-    lines = [
-        "# EVAL-06 calibration: judge vs owner labels",
-        "",
-        f"Labels: `{imp['labels_file']}` ({imp['labels']} rows, mode **{mode}**), imported as reviewer "
+    interim, pending = report["interim"], report["pending"]
+    lines = ["# EVAL-06 calibration: judge vs owner labels" + (" (INTERIM)" if interim else ""), ""]
+    if interim:
+        lines += [
+            f"**INTERIM: {report['labelled']} of {report['total']} calls labelled.** Awaiting the owner: "
+            f"{_id_span(pending)}. Those rows are blank in the labels file and were not imported; V9 "
+            f"stays PENDING until all {report['total']} are labelled. Numbers below describe the "
+            f"{report['labelled']} labelled calls only.",
+            "",
+        ]
+    lines += [
+        f"Labels: `{imp['labels_file']}` ({imp['labels']} labelled rows, mode **{mode}**), imported as reviewer "
         f"`{imp['reviewer']}` through `POST /calls/{{id}}/review` ({imp['posted']} posted, "
         f"{imp['already']} already present), then read back from `GET /calibration`.",
     ]
@@ -390,7 +509,10 @@ def render_md(report: dict[str, Any], extra: str = "") -> str:
         f"{NOT_PROVIDED if na else off['dimension_mae']} |",
     ]
     kappa = cal.get("kappa_pass_fail")
-    verdict = "n/a" if kappa is None else ("meets" if kappa >= 0.6 else "below")
+    if interim:
+        verdict = f"not assessed (n = {report['labelled']} < 30)"
+    else:
+        verdict = "n/a" if kappa is None else ("meets" if kappa >= 0.6 else "below")
     lines += [
         "",
         f"Target (docs/08 section 10, V9): kappa >= 0.6 on >= 30 calls: **{verdict}**.",
@@ -402,8 +524,8 @@ def render_md(report: dict[str, Any], extra: str = "") -> str:
         f"| judge pass | {p['judge_pass_human_pass']} | {p['judge_pass_human_fail']} |",
         f"| judge fail | {p['judge_fail_human_pass']} | {p['judge_fail_human_fail']} |",
         "",
-        f"Owner passed {p['human_yes']}/{p['n']}, judge passed {p['judge_yes']}/{p['n']}; raw agreement "
-        f"{p['agreement']}, kappa {p['kappa']}.",
+        f"Owner passed {p['human_yes']}/{p['n']}, judge passed {p['judge_yes']}/{p['n']}. "
+        + _stats(p),
         "",
         "## Critical (judge rows x owner columns)",
         "",
@@ -412,15 +534,15 @@ def render_md(report: dict[str, Any], extra: str = "") -> str:
         f"| judge critical | {c['judge_yes_human_yes']} | {c['judge_yes_human_no']} |",
         f"| judge not critical | {c['judge_no_human_yes']} | {c['judge_no_human_no']} |",
         "",
-        f"Owner critical {c['human_yes']}/{c['n']}, judge critical {c['judge_yes']}/{c['n']}; raw "
-        f"agreement {c['agreement']}, kappa {c['kappa']}.",
+        f"Owner critical {c['human_yes']}/{c['n']}, judge critical {c['judge_yes']}/{c['n']}. "
+        + _stats(c),
     ]
     if report["identical_rows"]:
         lines += ["", "## Identical rows", ""]
         for ids in report["identical_rows"]:
             lines.append(
                 f"- {', '.join(ids)} ({len(ids)} rows) carry identical values in every column "
-                "of the owner's sheet, including the note."
+                "of the owner's sheet, including the note (labelled rows only)."
             )
     lines += [
         "",
@@ -450,7 +572,12 @@ def build_report(
     cal: dict[str, Any],
     imported: dict[str, Any],
     owner_rows: list[dict[str, str]] | None,
+    pending: list[str] | None = None,
+    total: int | None = None,
 ) -> dict[str, Any]:
+    pending = list(pending or [])
+    total = total if total is not None else len(labels) + len(pending)
+    labelled_ids = {lab.label_id for lab in labels}
     off = compute_calibration(label_pairs(labels, judge))
     mode = label_mode(labels)
     dis = []
@@ -470,6 +597,10 @@ def build_report(
             }
         )
     return {
+        "interim": len(labels) < total,
+        "labelled": len(labels),
+        "total": total,
+        "pending": pending,
         "mode": mode,
         "calibration_api": cal,
         "calibration_offline": {
@@ -482,7 +613,11 @@ def build_report(
         if mode == "pass_fail_only"
         else [],
         "agreement": agreement(labels, judge),
-        "identical_rows": identical_rows(owner_rows) if owner_rows else [],
+        "identical_rows": identical_rows(
+            [r for r in owner_rows if r.get("label_id") in labelled_ids]
+        )
+        if owner_rows
+        else [],
         "import": imported,
         "disagreements": dis,
     }
@@ -504,11 +639,16 @@ def main(argv: list[str] | None = None) -> int:
     )
     ap.add_argument("--extra-md", type=Path, help="markdown appended to calibration.md")
     ap.add_argument("--normalise-owner", nargs=2, type=Path, metavar=("RAW", "OUT"))
+    ap.add_argument(
+        "--unreviewed",
+        default="",
+        help='with --normalise-owner: ids the owner did not review, e.g. "L11-L30"; written blank',
+    )
     args = ap.parse_args(argv)
     if args.normalise_owner:
         raw, out = args.normalise_owner
         try:
-            rows = normalise_owner_rows(read_csv(raw))
+            rows = normalise_owner_rows(read_csv(raw), parse_id_range(args.unreviewed))
         except LabelError as exc:
             print(f"{raw} cannot be normalised:\n{exc}", file=sys.stderr)
             return 2
@@ -519,7 +659,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"{len(rows)} rows -> {out}")
         return 0
     try:
-        labels = parse_labels(read_csv(args.labels), read_key(args.key))
+        rows = read_csv(args.labels)
+        key = read_key(args.key)
+        labels = parse_labels(rows, key)
     except LabelError as exc:
         print(f"labels.csv is not valid, nothing was imported:\n{exc}", file=sys.stderr)
         return 2
@@ -555,6 +697,13 @@ def main(argv: list[str] | None = None) -> int:
     if status != 200:
         print(f"GET /calibration -> {status} {cal}", file=sys.stderr)
         return 1
+    if cal.get("n") != len(labels):
+        print(
+            f"GET /calibration counts {cal.get('n')} reviewed evaluations but {len(labels)} rows are "
+            "labelled: the DB holds reviews that are not in this labels file",
+            file=sys.stderr,
+        )
+        return 1
     imported = {
         "reviewer": args.reviewer,
         "posted": posted,
@@ -565,7 +714,7 @@ def main(argv: list[str] | None = None) -> int:
         ),
     }
     owner_rows = read_csv(args.owner_raw) if args.owner_raw else None
-    report = build_report(labels, judge, cal, imported, owner_rows)
+    report = build_report(labels, judge, cal, imported, owner_rows, pending_ids(rows), len(key))
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "calibration.json").write_text(
         json.dumps(report, indent=1, ensure_ascii=False) + "\n"
@@ -574,7 +723,17 @@ def main(argv: list[str] | None = None) -> int:
     (args.out / "calibration.md").write_text(render_md(report, extra))
     print(
         json.dumps(
-            {k: report[k] for k in ("mode", "calibration_api", "calibration_offline")}
+            {
+                k: report[k]
+                for k in (
+                    "interim",
+                    "labelled",
+                    "total",
+                    "mode",
+                    "calibration_api",
+                    "calibration_offline",
+                )
+            }
             | {"agreement": report["agreement"], "disagreements": len(report["disagreements"])},
             indent=1,
         )
