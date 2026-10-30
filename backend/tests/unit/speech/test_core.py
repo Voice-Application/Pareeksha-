@@ -187,7 +187,7 @@ async def test_timeouts_are_retryable_and_4xx_is_not() -> None:
 
 
 def test_wav_info_streamed_header_placeholder_size() -> None:
-    """A streamed WAV (Deepgram TTS) has 0xFFFFFFFF as its data size; duration comes from the bytes present."""
+    """Streamed WAV (Deepgram TTS) has data size 0xFFFFFFFF; duration uses the bytes present."""
     import struct
 
     from pareeksha.speech.wav import pcm_to_wav, wav_info
