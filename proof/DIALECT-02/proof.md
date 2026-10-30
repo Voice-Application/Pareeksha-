@@ -159,3 +159,7 @@ venv resolved (`mypy>=1.10` is unpinned); see `lint.txt`.
   separate task (it would change the frozen metric behaviour, so it needs a decision).
 - `hi-en-mix` (suggested in rubric section 9.1) was not requested and is not built.
 - No comparator engine (FR-DI-5) was run.
+
+## Commit
+Built, run and measured at commit `16d9e6e` (`git log task/DIALECT-02`); the following commit only
+adds this SHA line.
