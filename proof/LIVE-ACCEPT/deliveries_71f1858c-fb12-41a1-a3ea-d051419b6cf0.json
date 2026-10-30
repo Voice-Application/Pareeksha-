@@ -1,0 +1,16 @@
+{
+    "items": [
+        {
+            "id": "ad762b48-a85a-450a-a561-1dedcb5ceed6",
+            "event_id": "c0a60913-bba1-598f-9a82-36c88302096f",
+            "direction": "outbound",
+            "status": "succeeded",
+            "http_status": 201,
+            "external_id": "412826916601",
+            "attempts": 1,
+            "response_excerpt": "note 412826916601 on contact 579634530018",
+            "created_at": "2026-10-28T16:18:19.073289Z"
+        }
+    ],
+    "next_cursor": null
+}

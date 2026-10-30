@@ -184,3 +184,14 @@ async def test_timeouts_are_retryable_and_4xx_is_not() -> None:
         respx.get(URL).mock(return_value=httpx.Response(401, text="bad key"))
         with pytest.raises(SpeechPermanentError, match="401"):
             await speech_http.send(client, "GET", URL, retry_delay=0)
+
+
+def test_wav_info_streamed_header_placeholder_size() -> None:
+    """A streamed WAV (Deepgram TTS) has 0xFFFFFFFF as its data size; duration comes from the bytes present."""
+    import struct
+
+    from pareeksha.speech.wav import pcm_to_wav, wav_info
+
+    wav = bytearray(pcm_to_wav(b"\x00\x00" * 16000, 16000))
+    wav[40:44] = struct.pack("<I", 0xFFFFFFFF)
+    assert wav_info(bytes(wav)) == (16000, 1.0)

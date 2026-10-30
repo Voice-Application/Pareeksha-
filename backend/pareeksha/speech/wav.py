@@ -18,6 +18,11 @@ def pcm_to_wav(pcm: bytes, sample_rate: int) -> bytes:
 
 
 def wav_info(data: bytes) -> tuple[int, float]:
-    """Return ``(sample_rate, duration_s)`` of a well-formed WAV."""
+    """Return ``(sample_rate, duration_s)`` of a WAV.
+
+    Streamed WAVs (Deepgram TTS) carry a placeholder data size in the header, so the frame count is
+    capped by the bytes actually present.
+    """
     with wave.open(io.BytesIO(data)) as w:
-        return w.getframerate(), w.getnframes() / w.getframerate()
+        present = max(len(data) - 44, 0) // (w.getnchannels() * w.getsampwidth())
+        return w.getframerate(), min(w.getnframes(), present) / w.getframerate()

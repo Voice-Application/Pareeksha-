@@ -1,0 +1,115 @@
+{
+    "items": [
+        {
+            "id": "2b6d067a-8ae2-4373-a8e1-5ee6246e3b36",
+            "connector": "hubspot",
+            "name": "verify-hubspot-1793204290",
+            "direction": "sink",
+            "enabled": true,
+            "config": {
+                "match_by": "phone",
+                "only_failed": false
+            },
+            "secrets_set": true,
+            "event_filter": {
+                "events": [
+                    "evaluation.completed"
+                ],
+                "agent_ids": [],
+                "only_failed": false,
+                "min_score_below": null
+            },
+            "last_test_at": null,
+            "last_test_ok": null,
+            "created_at": "2026-10-28T16:18:10.703828Z",
+            "updated_at": "2026-10-28T16:18:10.703828Z",
+            "inbound_url": null,
+            "signing_secret": null
+        },
+        {
+            "id": "58d6522c-40a7-4b2d-a8b3-24d566b79e15",
+            "connector": "webhook",
+            "name": "verify-inbound-1793204290",
+            "direction": "both",
+            "enabled": true,
+            "config": {
+                "url": "https://example.com/sink",
+                "events": [
+                    "evaluation.completed"
+                ],
+                "default_agent_id": "805c764e-5cd0-4631-a09b-ee83d60804c3"
+            },
+            "secrets_set": true,
+            "event_filter": {
+                "events": [
+                    "evaluation.completed"
+                ],
+                "agent_ids": [],
+                "only_failed": false,
+                "min_score_below": null
+            },
+            "last_test_at": null,
+            "last_test_ok": null,
+            "created_at": "2026-10-28T16:18:10.690344Z",
+            "updated_at": "2026-10-28T16:18:10.690344Z",
+            "inbound_url": "http://localhost:18000/api/v1/webhooks/inbound/58d6522c-40a7-4b2d-a8b3-24d566b79e15",
+            "signing_secret": null
+        },
+        {
+            "id": "71f1858c-fb12-41a1-a3ea-d051419b6cf0",
+            "connector": "hubspot",
+            "name": "verify-hubspot-1793203781",
+            "direction": "sink",
+            "enabled": true,
+            "config": {
+                "match_by": "phone",
+                "only_failed": false
+            },
+            "secrets_set": true,
+            "event_filter": {
+                "events": [
+                    "evaluation.completed"
+                ],
+                "agent_ids": [],
+                "only_failed": false,
+                "min_score_below": null
+            },
+            "last_test_at": null,
+            "last_test_ok": null,
+            "created_at": "2026-10-28T16:09:41.596006Z",
+            "updated_at": "2026-10-28T16:09:41.596006Z",
+            "inbound_url": null,
+            "signing_secret": null
+        },
+        {
+            "id": "483ecb5b-6b0d-4e9c-9335-54095054275b",
+            "connector": "webhook",
+            "name": "verify-inbound-1793203781",
+            "direction": "both",
+            "enabled": true,
+            "config": {
+                "url": "https://example.com/sink",
+                "events": [
+                    "evaluation.completed"
+                ],
+                "default_agent_id": "805c764e-5cd0-4631-a09b-ee83d60804c3"
+            },
+            "secrets_set": true,
+            "event_filter": {
+                "events": [
+                    "evaluation.completed"
+                ],
+                "agent_ids": [],
+                "only_failed": false,
+                "min_score_below": null
+            },
+            "last_test_at": null,
+            "last_test_ok": null,
+            "created_at": "2026-10-28T16:09:41.583196Z",
+            "updated_at": "2026-10-28T16:09:41.583196Z",
+            "inbound_url": "http://localhost:18000/api/v1/webhooks/inbound/483ecb5b-6b0d-4e9c-9335-54095054275b",
+            "signing_secret": null
+        }
+    ],
+    "next_cursor": null
+}

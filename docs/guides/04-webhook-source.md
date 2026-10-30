@@ -68,18 +68,22 @@ Local receivers on `localhost` are blocked on purpose. For development only, swi
 # serve ./rec/call.wav over https with a self-signed cert on the host (port 8443)
 openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 1 -subj "/CN=host.docker.internal" \
   -addext "subjectAltName=DNS:host.docker.internal"
+# trust store for the worker: the system CAs (kept, so Gnani / ElevenLabs / HubSpot still verify) plus your cert
+cat "${CA_BUNDLE:-/etc/ssl/certs/ca-certificates.crt}" cert.pem > dev-trust.pem
 cat > docker-compose.dev-webhook.yml <<'YAML'
 services:
   api:                                  # checks the recording URL when the webhook arrives
+    extra_hosts: ["host.docker.internal:host-gateway"]    # needed on Linux
     environment: { PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS: "1" }
   auditor:                              # downloads the recording
-    environment: { PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS: "1", SSL_CERT_FILE: /dev-cert.pem }
-    volumes: ["./cert.pem:/dev-cert.pem:ro"]
+    extra_hosts: ["host.docker.internal:host-gateway"]    # needed on Linux
+    environment: { PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS: "1", SSL_CERT_FILE: /dev-trust.pem }
+    volumes: ["./dev-trust.pem:/dev-trust.pem:ro"]
 YAML
 docker compose -f docker-compose.yml -f docker-compose.dev-webhook.yml --profile workers up -d api auditor
 ```
 
-Then use `https://host.docker.internal:8443/call.wav` as `recording_url` (any WAV or MP3 served from `./rec`, for example `python3 -m http.server`-style over TLS; `backend/tests/fixtures/agent_greeting_5s.wav` works for a smoke test). `SSL_CERT_FILE` replaces the system trust store inside that container, which is fine for the auditor's local download. **Never set `PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS` in production**: it disables the private-address check (https, no-credentials and IP pinning still apply). The same switch relaxes the outbound webhook sink target check.
+Then use `https://host.docker.internal:8443/call.wav` as `recording_url` (any WAV or MP3 served from `./rec`, for example `python3 -m http.server`-style over TLS; `backend/tests/fixtures/agent_greeting_5s.wav` works for a smoke test). `SSL_CERT_FILE` replaces the system trust store inside that container, so the file must contain the system CAs as well as your certificate (the auditor also calls the speech provider). **Never set `PAREEKSHA_DEV_ALLOW_PRIVATE_TARGETS` in production**: it disables the private-address check (https, no-credentials and IP pinning still apply). The same switch relaxes the outbound webhook sink target check.
 
 ## 5. Receive the results (sink side)
 

@@ -1,20 +1,106 @@
-# Guide 5 (HubSpot): LIVE STEP PENDING OWNER KEY (no HubSpot private-app token available). Executed: create integration with a placeholder token, test endpoint (expects auth failure), mocked-API unit tests.
-$ POST /integrations (hubspot, placeholder token)
-{'id': '0f37763d-f2a4-4766-8121-f29467a8fe5a', 'connector': 'hubspot', 'direction': 'sink', 'secrets_set': True, 'config': {'match_by': 'phone', 'only_failed': False, 'public_base_url': 'http://localhost:3000'}}
-$ POST /integrations/<id>/test
-{"ok":false,"detail":"HubSpot HTTP 400: Invalid request"}
-$ GET /integrations/<id>/deliveries
-{"items":[],"next_cursor":null}
-$ docker compose run --rm --no-deps -v ./backend/tests:/app/tests:ro api sh -c "pip install -q pytest pytest-asyncio respx && python -m pytest tests/unit/integrations/test_hubspot_sink.py -q"
- Container doc02a-api-run-fabfb3386893 Creating 
- Container doc02a-api-run-fabfb3386893 Created 
-[notice] To update, run: pip install --upgrade pip
-.....................                                                    [100%]
-=============================== warnings summary ===============================
-pareeksha/audio/dsp.py:8
-  /app/pareeksha/audio/dsp.py:8: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13
-    import audioop  # stdlib <= 3.12; audioop-lts on >= 3.13 (see requirements.txt)
 
--- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-21 passed, 1 warning in 0.19s
-RESULT: PENDING OWNER KEY for the live HubSpot step (note on a real contact). Verified without a key: integration create (secret stored, secrets_set true), /test reaches HubSpot and reports failure for a placeholder token, 21 mocked-API sink tests pass.
+### Guide 1 step 1: fresh clone + configure
+a7ce5b3 VOICE-07 live: ElevenLabs and Deepgram TTS+STT round trips; fix WAV duration for streamed headers
+(.env written; secrets not printed)
+
+### Guide 1 step 2: start the stack (proxy overlay: sandbox only)
+(images retagged from the earlier build of this same commit lineage; Docker Hub 429 on rebuild)
+ Container liveguide-web-1 Starting 
+ Container liveguide-web-1 Started 
+{"db":"ok","kafka":"ok"}
+
+### Guide 1 step 3: seed
+  "existing": {}
+}
+
+### Guide 5 step 1: HubSpot private-app token provided by the owner (HUBSPOT_ACCESS_TOKEN); auth check
+HubSpot contacts API http=200
+
+### Guide 5 section 5.1: create a synthetic HubSpot contact (fake name, fake +91 number)
+contact id 579625333490 phone +919999900043
+
+### Guide 5 step 2: add the HubSpot integration
+{
+    "id": "8325d0d9-c092-4f14-88be-5ddbfa9f10ad",
+    "connector": "hubspot",
+    "name": "HubSpot collections portal",
+    "direction": "sink",
+    "enabled": true,
+    "config": {
+        "match_by": "phone",
+        "only_failed": false,
+        "public_base_url": "http://localhost:23000"
+    },
+    "secrets_set": true,
+    "event_filter": {
+        "events": [
+            "evaluation.completed"
+        ],
+        "agent_ids": [],
+        "only_failed": false,
+        "min_score_below": null
+    },
+    "last_test_at": null,
+    "last_test_ok": null,
+    "created_at": "2026-10-28T16:38:24.960009Z",
+    "updated_at": "2026-10-28T16:38:24.960009Z",
+    "inbound_url": null,
+    "signing_secret": null
+}
+
+### Guide 5: test the integration
+{"ok":true,"detail":"HubSpot token accepted"}
+
+### Guide 4 sections 1-2: webhook integration, recording over https, signed POST
+inbound_url=http://localhost:28000/api/v1/webhooks/inbound/57cfce8f-21d5-43d6-84d0-10401cd47ac5
+signed POST at 16:38:27 UTC:
+{"call_id":"ae5722c4-0517-435a-995b-2a9372ae2a24","duplicate":false}
+
+### Guide 5 step 4: deliveries (poll up to 180 s)
+note id: 412779237078 after 10 s
+{
+    "items": [
+        {
+            "id": "3e5c88ae-2c0e-4f0e-959b-eded1a5bd610",
+            "event_id": "45ca62e2-ec24-517e-9fca-b8f4d049559d",
+            "direction": "outbound",
+            "status": "succeeded",
+            "http_status": 201,
+            "external_id": "412779237078",
+            "attempts": 1,
+            "response_excerpt": "note 412779237078 on contact 579787952831",
+            "created_at": "2026-10-28T16:38:34.891660Z"
+        }
+    ],
+    "next_cursor": null
+}
+
+### Guide 5 section 5.3: note on the contact, fetched back from HubSpot
+{
+    "id": "412779237078",
+    "properties": {
+        "hs_createdate": "2026-10-28T16:38:35.701Z",
+        "hs_lastmodifieddate": "2026-10-28T16:38:36.277Z",
+        "hs_note_body": "Pareeksha call audit - FAIL (82.5/100)\nAgent: EMI Reminder Bot - hi-IN - 0m 13s\nIssues: missing_disclosure\nSummary: Bot successfully reminded EMI and captured promise-to-pay date in Hindi. However, mandatory recording disclosure was omitted, a compliance gap.\nDetails: http://localhost:3000/calls/ae5722c4-0517-435a-995b-2a9372ae2a24\n[pareeksha event 45ca62e2-ec24-517e-9fca-b8f4d049559d]",
+        "hs_object_id": "412779237078",
+        "hs_timestamp": "2026-10-28T16:38:34Z"
+    },
+    "createdAt": "2026-10-28T16:38:35.701Z",
+    "updatedAt": "2026-10-28T16:38:36.277Z",
+    "archived": false,
+    "url": "https://app-na2.hubspot.com/contacts/247816654/objects/0-46/views/all/list?filters=%5B%7B%22property%22%3A%22hs_object_id%22%2C%22operator%22%3A%22EQ%22%2C%22value%22%3A%22412779237078%22%7D%5D",
+    "associations": {
+        "contacts": {
+            "results": [
+                {
+                    "id": "579787952831",
+                    "type": "note_to_contact"
+                }
+            ]
+        }
+    }
+}
+contact 579625333490 notes: []
+NOTE: the note landed on contact 579787952831, not on the contact this run created (579625333490, since deleted): an earlier aborted attempt of this same run had created a contact with the same synthetic phone +919999900043 and HubSpot's phone search returns the older one. The check "contact notes: []" above refers to the new contact; the note is verified on 579787952831: exactly one note (412779237078), associated note_to_contact (see the note JSON above).
+Deviations: Docker Hub returned 429 for python:3.12-slim, so the images built earlier from the same Dockerfiles were retagged instead of `up --build`; the stack ran in the sandbox with the proxy overlay; clone was made from the local repository (a clone from the private GitHub URL hung without credentials); Gnani batch STT jobs failed server-side, STT_PROVIDER=elevenlabs; the guide-4 section-4 override was corrected in this commit (system CAs + extra_hosts) and used as corrected.
+RESULT: PASS live HubSpot note 412779237078 on contact 579787952831, 11 s after the signed POST (fresh clone of task/LIVE-ACCEPT a7ce5b3, guides 1, 4, 5)
