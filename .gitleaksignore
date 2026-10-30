@@ -127,3 +127,6 @@ a1727ef326f61e34a97285a823304b733e45a95c:proof/INFRA-02/demo.txt:generic-api-key
 00a47b15112fe00c7de161c8a9b37b33b0efb0b8:proof/VOICE-05/pytest_full.txt:generic-api-key:167
 60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/VOICE-05/pytest_full.txt:generic-api-key:167
 69f600e15b5aba4495b277f25e2d033b338af55b:proof/VOICE-05/pytest_full.txt:generic-api-key:167
+
+# generic-api-key .gitleaksignore (1): commit 3f063f4 of this file had a comment quoting the dummy test signing secret from tests/unit/integrations; the comment was reworded in 4fa1fc8
+3f063f429cabf9854b8fcda759ed69a5e0830921:.gitleaksignore:generic-api-key:28
