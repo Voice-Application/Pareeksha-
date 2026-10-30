@@ -2,6 +2,9 @@
 
 Contract changes after Day 1 need Tech Lead approval and an entry here.
 
+## Dialect dataset from Vaani (DIALECT-02) — 30 Oct 2026
+- Owner decision 2026-10-30: dialect dataset sourced from Vaani (CC-BY-4.0) instead of self-recorded clips. `scripts/data/fetch_vaani.py` selects transcribed Vaani clips per group (kn-mysuru, kn-north, kn-coastal, hi-standard, kn-en-mix) into `data/dialect/vaani/` (16 kHz mono WAV, `manifest.csv`, `SOURCES.md` with attribution and Vaani row ids, `REVIEW.md` for spot-checks). No contract change: the set goes through the existing Dialect API and worker.
+
 ## Verifier fixes (FIX-02) — 27 Oct 2026
 - No contract change. Dev dependencies declared (`python-multipart` in the SDK extras; `jsonschema`, `types-PyYAML`, `types-jsonschema` in `backend/requirements-dev.txt`); both workflows install the backend package so connector entry points resolve; the mock agent's clean policy was rewritten (see `mock_agent/README.md`); V6 starts its own HTTPS webhook sink (`scripts/verify/webhook_sink.py`). UI: Overview defaults to the agent with the newest run and scopes the review list to it, Run detail derives its title, failure tags and histogram from the scored calls, Dialect marks synthetic groups.
 
