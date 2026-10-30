@@ -56,3 +56,4 @@ Contract changes after Day 1 need Tech Lead approval and an entry here.
 - Audits with low-confidence or heuristic-vs-LLM-disagreeing role detection set `needs_human_review` (new `review_reasons` values, docs/contracts.md §4.2).
 - Per-agent STT/TTS provider override stored in `agents.adapter_config["speech"]` (docs/contracts.md §4.1); validated on create/patch, honoured by the auditor.
 - 2026-10-28 Owner approval (Preetham, written): CUT from v1 per AGENTS.md §10 — Vapi adapter and LiveKit adapter. Run compare view: owner chose BUILD (not cut).
+- 2026-10-28 Owner decision (Preetham): Gemini, Google Cloud speech and Azure speech keys will not be provided. Those providers stay implemented and unit-tested only (no live acceptance); DeepSeek remains the default LLM, Gnani the default speech provider. Owner authorised opening the CI test PRs (GOAL item 8).

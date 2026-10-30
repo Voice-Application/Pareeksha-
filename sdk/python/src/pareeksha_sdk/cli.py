@@ -94,8 +94,9 @@ def _finish(
     s = run.summary
     rate = "n/a" if s.pass_rate is None else f"{s.pass_rate * 100:.1f}%"
     typer.echo(f"run {run.id}: {run.status}, pass rate {rate}, critical {s.critical_failures}")
+    label = "ERROR" if verdict.errored else "FAIL"
     for reason in verdict.reasons:
-        typer.echo(f"FAIL: {reason}", err=True)
+        typer.echo(f"{label}: {reason}", err=True)
     if not verdict.ok:
         raise typer.Exit(EXIT_FAILED)
 

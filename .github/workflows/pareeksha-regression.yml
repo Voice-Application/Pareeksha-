@@ -12,6 +12,11 @@ on:
       - "action/**"
   workflow_dispatch:
 
+# One Gnani key allows a single active request: regression runs sharing it must not overlap.
+concurrency:
+  group: pareeksha-regression
+  cancel-in-progress: false
+
 jobs:
   suite:
     runs-on: ubuntu-24.04
