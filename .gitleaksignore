@@ -1,0 +1,132 @@
+# Reviewed false positives of `gitleaks detect` (8.30.0, full history) -- FIX-VERIFY.
+# Every entry is one exact fingerprint (commit:file:rule:line). No path-wide or rule-wide allowlist: a new finding, or the same
+# text on a new commit, is still reported. Each finding was checked against `git show <commit>:<file>` line by line.
+# Source of the list: proof/FIX-VERIFY/verifier/gitleaks_report.json (origin/qa/FIX-VERIFY). 111 fingerprints.
+
+# curl-auth-header proof/API-02/capture.sh (4): curl line that expands a shell variable holding the auth header; no literal token is stored in the file
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/API-02/capture.sh:curl-auth-header:41
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/API-02/capture.sh:curl-auth-header:41
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/API-02/capture.sh:curl-auth-header:41
+c36dce122b1a3130296de01ab49035773ba72587:proof/API-02/capture.sh:curl-auth-header:41
+
+# curl-auth-header proof/TL-01/live_server.txt (8): recorded session: one curl without an auth header and one with a literal placeholder token (not a real key) that shows a 401
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/TL-01/live_server.txt:curl-auth-header:1
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/TL-01/live_server.txt:curl-auth-header:23
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/TL-01/live_server.txt:curl-auth-header:1
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/TL-01/live_server.txt:curl-auth-header:23
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/TL-01/live_server.txt:curl-auth-header:1
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/TL-01/live_server.txt:curl-auth-header:23
+f38fcfd98a17c13af07f3278aeadedf6b43f85a2:proof/TL-01/live_server.txt:curl-auth-header:1
+f38fcfd98a17c13af07f3278aeadedf6b43f85a2:proof/TL-01/live_server.txt:curl-auth-header:23
+
+# curl-auth-user web/scripts/check-gate.sh (4): readiness-loop curl whose option flags match the rule; no credential on the line
+2f68426f00f970808ce2e7749f23c80b6b1284b7:web/scripts/check-gate.sh:curl-auth-user:8
+60d9abb2ba9d06d14515e0269166111c2c6f2203:web/scripts/check-gate.sh:curl-auth-user:8
+69f600e15b5aba4495b277f25e2d033b338af55b:web/scripts/check-gate.sh:curl-auth-user:8
+f0b54983135e71bb130372d123c757971c3b36c6:web/scripts/check-gate.sh:curl-auth-user:8
+
+# generic-api-key backend/tests/unit/integrations/test_webhook_sink.py (8): dummy test signing secrets (a 16-hex-prefixed string and a placeholder for the previous secret) in a unit test; fixtures, never valid anywhere
+2f68426f00f970808ce2e7749f23c80b6b1284b7:backend/tests/unit/integrations/test_webhook_sink.py:generic-api-key:328
+2f68426f00f970808ce2e7749f23c80b6b1284b7:backend/tests/unit/integrations/test_webhook_sink.py:generic-api-key:46
+33462a010e34ac1c45ce70430fc0fb0fd38e26d5:backend/tests/unit/integrations/test_webhook_sink.py:generic-api-key:320
+33462a010e34ac1c45ce70430fc0fb0fd38e26d5:backend/tests/unit/integrations/test_webhook_sink.py:generic-api-key:45
+60d9abb2ba9d06d14515e0269166111c2c6f2203:backend/tests/unit/integrations/test_webhook_sink.py:generic-api-key:328
+60d9abb2ba9d06d14515e0269166111c2c6f2203:backend/tests/unit/integrations/test_webhook_sink.py:generic-api-key:46
+69f600e15b5aba4495b277f25e2d033b338af55b:backend/tests/unit/integrations/test_webhook_sink.py:generic-api-key:328
+69f600e15b5aba4495b277f25e2d033b338af55b:backend/tests/unit/integrations/test_webhook_sink.py:generic-api-key:46
+
+# generic-api-key proof/API-03/e2e.txt (48): Kafka message keys and event/call UUIDs printed in a recorded e2e log; identifiers, not credentials
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/API-03/e2e.txt:generic-api-key:428
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/API-03/e2e.txt:generic-api-key:429
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/API-03/e2e.txt:generic-api-key:430
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/API-03/e2e.txt:generic-api-key:431
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/API-03/e2e.txt:generic-api-key:432
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/API-03/e2e.txt:generic-api-key:433
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/API-03/e2e.txt:generic-api-key:434
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/API-03/e2e.txt:generic-api-key:435
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/API-03/e2e.txt:generic-api-key:436
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/API-03/e2e.txt:generic-api-key:437
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/API-03/e2e.txt:generic-api-key:438
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/API-03/e2e.txt:generic-api-key:439
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/API-03/e2e.txt:generic-api-key:428
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/API-03/e2e.txt:generic-api-key:429
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/API-03/e2e.txt:generic-api-key:430
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/API-03/e2e.txt:generic-api-key:431
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/API-03/e2e.txt:generic-api-key:432
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/API-03/e2e.txt:generic-api-key:433
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/API-03/e2e.txt:generic-api-key:434
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/API-03/e2e.txt:generic-api-key:435
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/API-03/e2e.txt:generic-api-key:436
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/API-03/e2e.txt:generic-api-key:437
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/API-03/e2e.txt:generic-api-key:438
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/API-03/e2e.txt:generic-api-key:439
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/API-03/e2e.txt:generic-api-key:428
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/API-03/e2e.txt:generic-api-key:429
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/API-03/e2e.txt:generic-api-key:430
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/API-03/e2e.txt:generic-api-key:431
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/API-03/e2e.txt:generic-api-key:432
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/API-03/e2e.txt:generic-api-key:433
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/API-03/e2e.txt:generic-api-key:434
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/API-03/e2e.txt:generic-api-key:435
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/API-03/e2e.txt:generic-api-key:436
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/API-03/e2e.txt:generic-api-key:437
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/API-03/e2e.txt:generic-api-key:438
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/API-03/e2e.txt:generic-api-key:439
+c0ca61d72bacce803f90ff52e28df84880ee1812:proof/API-03/e2e.txt:generic-api-key:428
+c0ca61d72bacce803f90ff52e28df84880ee1812:proof/API-03/e2e.txt:generic-api-key:429
+c0ca61d72bacce803f90ff52e28df84880ee1812:proof/API-03/e2e.txt:generic-api-key:430
+c0ca61d72bacce803f90ff52e28df84880ee1812:proof/API-03/e2e.txt:generic-api-key:431
+c0ca61d72bacce803f90ff52e28df84880ee1812:proof/API-03/e2e.txt:generic-api-key:432
+c0ca61d72bacce803f90ff52e28df84880ee1812:proof/API-03/e2e.txt:generic-api-key:433
+c0ca61d72bacce803f90ff52e28df84880ee1812:proof/API-03/e2e.txt:generic-api-key:434
+c0ca61d72bacce803f90ff52e28df84880ee1812:proof/API-03/e2e.txt:generic-api-key:435
+c0ca61d72bacce803f90ff52e28df84880ee1812:proof/API-03/e2e.txt:generic-api-key:436
+c0ca61d72bacce803f90ff52e28df84880ee1812:proof/API-03/e2e.txt:generic-api-key:437
+c0ca61d72bacce803f90ff52e28df84880ee1812:proof/API-03/e2e.txt:generic-api-key:438
+c0ca61d72bacce803f90ff52e28df84880ee1812:proof/API-03/e2e.txt:generic-api-key:439
+
+# generic-api-key proof/INFRA-02/demo.txt (36): event id and Kafka message key (both UUIDs) in an outbox demo log; identifiers, not credentials
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/INFRA-02/demo.txt:generic-api-key:35
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/INFRA-02/demo.txt:generic-api-key:36
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/INFRA-02/demo.txt:generic-api-key:37
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/INFRA-02/demo.txt:generic-api-key:38
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/INFRA-02/demo.txt:generic-api-key:39
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/INFRA-02/demo.txt:generic-api-key:49
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/INFRA-02/demo.txt:generic-api-key:50
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/INFRA-02/demo.txt:generic-api-key:51
+2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/INFRA-02/demo.txt:generic-api-key:67
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/INFRA-02/demo.txt:generic-api-key:35
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/INFRA-02/demo.txt:generic-api-key:36
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/INFRA-02/demo.txt:generic-api-key:37
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/INFRA-02/demo.txt:generic-api-key:38
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/INFRA-02/demo.txt:generic-api-key:39
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/INFRA-02/demo.txt:generic-api-key:49
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/INFRA-02/demo.txt:generic-api-key:50
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/INFRA-02/demo.txt:generic-api-key:51
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/INFRA-02/demo.txt:generic-api-key:67
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/INFRA-02/demo.txt:generic-api-key:35
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/INFRA-02/demo.txt:generic-api-key:36
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/INFRA-02/demo.txt:generic-api-key:37
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/INFRA-02/demo.txt:generic-api-key:38
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/INFRA-02/demo.txt:generic-api-key:39
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/INFRA-02/demo.txt:generic-api-key:49
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/INFRA-02/demo.txt:generic-api-key:50
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/INFRA-02/demo.txt:generic-api-key:51
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/INFRA-02/demo.txt:generic-api-key:67
+a1727ef326f61e34a97285a823304b733e45a95c:proof/INFRA-02/demo.txt:generic-api-key:35
+a1727ef326f61e34a97285a823304b733e45a95c:proof/INFRA-02/demo.txt:generic-api-key:36
+a1727ef326f61e34a97285a823304b733e45a95c:proof/INFRA-02/demo.txt:generic-api-key:37
+a1727ef326f61e34a97285a823304b733e45a95c:proof/INFRA-02/demo.txt:generic-api-key:38
+a1727ef326f61e34a97285a823304b733e45a95c:proof/INFRA-02/demo.txt:generic-api-key:39
+a1727ef326f61e34a97285a823304b733e45a95c:proof/INFRA-02/demo.txt:generic-api-key:49
+a1727ef326f61e34a97285a823304b733e45a95c:proof/INFRA-02/demo.txt:generic-api-key:50
+a1727ef326f61e34a97285a823304b733e45a95c:proof/INFRA-02/demo.txt:generic-api-key:51
+a1727ef326f61e34a97285a823304b733e45a95c:proof/INFRA-02/demo.txt:generic-api-key:67
+
+# generic-api-key proof/VOICE-05/pytest_full.txt (3): pytest assertion diff that prints a Kafka message key made from a UUID in a DLQ test; test data, not a credential
+00a47b15112fe00c7de161c8a9b37b33b0efb0b8:proof/VOICE-05/pytest_full.txt:generic-api-key:167
+60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/VOICE-05/pytest_full.txt:generic-api-key:167
+69f600e15b5aba4495b277f25e2d033b338af55b:proof/VOICE-05/pytest_full.txt:generic-api-key:167
+
+# generic-api-key .gitleaksignore (1): commit 3f063f4 of this file had a comment quoting the dummy test signing secret from tests/unit/integrations; the comment was reworded in 4fa1fc8
+3f063f429cabf9854b8fcda759ed69a5e0830921:.gitleaksignore:generic-api-key:28

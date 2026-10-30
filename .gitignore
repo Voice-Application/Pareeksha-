@@ -23,3 +23,5 @@ data/runtime/
 .coverage
 .mypy_cache/
 htmlcov/
+.venv-verify/
+.tools/

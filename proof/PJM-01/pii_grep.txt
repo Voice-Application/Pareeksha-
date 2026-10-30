@@ -1,0 +1,100 @@
+# real-PII grep over tracked files (phones, Aadhaar-like, PAN-like, emails). Every hit is classified below.
+## phone numbers (10 digits starting 6-9)
+     24 9876543210
+      1 9999900077
+      1 9999900042
+## Aadhaar-like (12 digits)
+      1 STATUS.md: 412826916601
+      2 backend/tests/evaluation/test_pii.py: 2345 6789 0123
+      2 backend/tests/evaluation/test_pii.py: 234567890123
+      2 backend/tests/evaluation/test_pii.py: 4111 1111 1111
+      1 backend/tests/fixtures/synthetic_calls.py: 222222222222
+      1 backend/tests/unit/integrations/test_hubspot_sink.py: 919999900000
+      1 backend/tests/unit/test_event_schemas.py: 222222222222
+      1 backend/tests/unit/test_event_schemas.py: 333333333333
+      1 backend/tests/unit/test_event_schemas.py: 444444444444
+      1 backend/tests/unit/test_event_schemas.py: 555555555555
+      1 backend/tests/unit/test_event_schemas.py: 666666666666
+      1 backend/tests/unit/test_event_schemas.py: 777777777777
+      1 backend/tests/unit/test_event_schemas.py: 888888888888
+      1 backend/tests/unit/test_event_schemas.py: 999999999999
+      2 docs/guides/04-webhook-source.md: 919800000000
+      2 docs/guides/05-hubspot.md: 919800000001
+      7 proof/DOC-02/guides/5.log: 412779237078
+      3 proof/DOC-02/guides/5.log: 579625333490
+      5 proof/DOC-02/guides/5.log: 579787952831
+      2 proof/DOC-02/guides/5.log: 919999900043
+      1 proof/EVAL-02/pytest.log: 2345 6789 0123
+      1 proof/EVAL-02/pytest.log: 234567890123
+      1 proof/EVAL-02/pytest.log: 4111 1111 1111
+      1 proof/EVAL-03/judge_output_clean.json: 222222222222
+      5 proof/FIX-02/results/clean-scenarios-final.json: 682113987438
+      1 proof/INFRA-02/pytest.txt: 2345 6789 0123
+      1 proof/INFRA-02/pytest.txt: 234567890123
+      1 proof/INFRA-02/pytest.txt: 4111 1111 1111
+      1 proof/INT-02/verified-live.md: 413913993954
+      1 proof/INT-02/verified-live.md: 413923017404
+      2 proof/INT-03/e2e_result.json: 910000000000
+      1 proof/INT-03/run_e2e.py: 910000000000
+      1 proof/LIVE-ACCEPT/V5.md: 412826916601
+      3 proof/LIVE-ACCEPT/contact.json: 579634530018
+      1 proof/LIVE-ACCEPT/contact.json: 919999900042
+      4 proof/LIVE-ACCEPT/contact_created.json: 579634530018
+      3 proof/LIVE-ACCEPT/contact_created.json: 919999900042
+      2 proof/LIVE-ACCEPT/deliveries_2b6d067a-8ae2-4373-a8e1-5ee6246e3b36.json: 412826916601
+      1 proof/LIVE-ACCEPT/deliveries_2b6d067a-8ae2-4373-a8e1-5ee6246e3b36.json: 579634530018
+      2 proof/LIVE-ACCEPT/deliveries_71f1858c-fb12-41a1-a3ea-d051419b6cf0.json: 412826916601
+      1 proof/LIVE-ACCEPT/deliveries_71f1858c-fb12-41a1-a3ea-d051419b6cf0.json: 579634530018
+      4 proof/LIVE-ACCEPT/dup_crash.log: 412826916601
+      2 proof/LIVE-ACCEPT/note_fetched.json: 412826916601
+      1 proof/LIVE-ACCEPT/note_fetched.json: 579634530018
+      1 proof/LIVE-ACCEPT/proof.md: 412779237078
+      4 proof/LIVE-ACCEPT/proof.md: 412826916601
+      1 proof/LIVE-ACCEPT/proof.md: 579634530018
+      1 proof/LIVE-ACCEPT/proof.md: 579787952831
+      1 proof/LIVE-ACCEPT/proof.md: 919999900042
+      1 proof/LIVE-ACCEPT/proof.md: 919999900043
+      1 proof/LIVE-ACCEPT/verified.md: 413913993954
+      2 proof/LIVE-ACCEPT/verified.md: 413923017404
+      1 proof/LIVE-ACCEPT/verified.md: 581659657943
+      1 proof/LIVE-ACCEPT/verified.md: 581744433873
+      1 proof/LIVE-ACCEPT/verified.md: 919999900077
+      1 proof/LIVE-ACCEPT/verified.md: 919999900078
+      1 proof/LIVE-ACCEPT/verifier/cleanup.log: 413913993954
+      1 proof/LIVE-ACCEPT/verifier/cleanup.log: 413915927227
+      1 proof/LIVE-ACCEPT/verifier/cleanup.log: 413923017404
+      2 proof/LIVE-ACCEPT/verifier/cleanup.log: 581659657943
+      2 proof/LIVE-ACCEPT/verifier/cleanup.log: 581744433873
+      4 proof/LIVE-ACCEPT/verifier/contact_created.json: 581744433873
+      3 proof/LIVE-ACCEPT/verifier/contact_created.json: 919999900077
+      3 proof/LIVE-ACCEPT/verifier/dup_crash.log: 413923017404
+      1 proof/LIVE-ACCEPT/verifier/guide5.log: 413913993954
+      2 proof/LIVE-ACCEPT/verifier/guide5.log: 581659657943
+      2 proof/LIVE-ACCEPT/verifier/guide5_note.json: 413913993954
+      1 proof/LIVE-ACCEPT/verifier/guide5_note.json: 581659657943
+      2 proof/LIVE-ACCEPT/verifier/note_fetched.json: 413923017404
+      1 proof/LIVE-ACCEPT/verifier/note_fetched.json: 581744433873
+      1 proof/M3-integration/pytest_full.txt: 2345 6789 0123
+      1 proof/M3-integration/pytest_full.txt: 234567890123
+      1 proof/M3-integration/pytest_full.txt: 4111 1111 1111
+      1 proof/TL-01/pytest.log: 2345 6789 0123
+      1 proof/TL-01/pytest.log: 234567890123
+      1 proof/TL-01/pytest.log: 4111 1111 1111
+      1 proof/VOICE-04/calls/00_clean/mock_agent.log: 338698652486
+      1 proof/VOICE-04/calls/00_clean/transcript.json: 338698652486
+      1 proof/verify/V10.md: 412779237078
+      1 proof/verify/V10.md: 579787952831
+      1 proof/verify/V5.md: 413915927227
+## PAN-like
+      2 AAAAA9999A
+      6 ABCDE1234F
+## emails (distinct)
+      1 A@Example.com
+      5 a.b+c@example.co.in
+      1 a@b.com
+      1 a@example.com
+      1 git@github.com
+      2 noreply@anthropic.com
+      2 pw@example.com
+      1 svc@proj-from-key.iam.gserviceaccount.com
+      1 x@y.com
