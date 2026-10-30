@@ -130,6 +130,11 @@ python3 scripts/calibration/import_labels.py            # reviewer "preetham"; v
 - **Expected output**: `n = 30` plus kappa, Spearman and per-dimension MAE from the API, and the disagreement
   table (pass/fail or critical differ, or a dimension differs by 2 or more).
 - The importer has **not** been run against the API, because that would need labels.
+- **Caveat:** the 30 calls and their evaluations live in this session's Compose Postgres (`pg-data` volume)
+  in an ephemeral cloud container. The import needs a database that holds these call ids, so either keep or
+  dump that database (`docker compose exec postgres pg_dump -U pareeksha pareeksha`), or regenerate the batch
+  and packet (`run_batch.py` + `export_packet.py`) on the stack where the labels will be imported. The
+  committed `judge_results.json` keeps the judge's verdicts in either case.
 
 ## Tests (`pytest.txt`)
 
