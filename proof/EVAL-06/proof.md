@@ -145,11 +145,34 @@ python3 scripts/calibration/import_labels.py            # reviewer "preetham"; v
 - **Expected output**: `n = 30` plus kappa, Spearman and per-dimension MAE from the API, and the disagreement
   table (pass/fail or critical differ, or a dimension differs by 2 or more).
 - The importer has **not** been run against the API, because that would need labels.
-- **Caveat:** the 30 calls and their evaluations live in this session's Compose Postgres (`pg-data` volume)
-  in an ephemeral cloud container. The import needs a database that holds these call ids, so either keep or
-  dump that database (`docker compose exec postgres pg_dump -U pareeksha pareeksha`), or regenerate the batch
-  and packet (`run_batch.py` + `export_packet.py`) on the stack where the labels will be imported. The
-  committed `judge_results.json` keeps the judge's verdicts in either case.
+- **Database dump:** the 30 calls and their evaluations were stored in this session's Compose Postgres, inside
+  an ephemeral cloud container. That database is now committed as `proof/EVAL-06/pareeksha_db.sql.gz`
+  (132 KB). It is a plain `pg_dump` of PostgreSQL 16 taken after the batch finished, with no human reviews in
+  it. The dump keeps everything except the rows of `api_keys`; the table definition is kept, so no key hash is
+  committed.
+
+  | table | rows |
+  |---|---|
+  | calls | 38 |
+  | evaluations (all `ok`) | 33 |
+  | turns | 284 |
+
+  The 38 calls include the replaced and errored ones. Test restore: the dump loads into an empty database with
+  `ON_ERROR_STOP=1`, and all 30 packet call ids have an `ok` evaluation in the restored copy. Audio is not in
+  the dump; it is under `data/runtime`, and the packet's mp3s are its copy.
+
+  To restore before importing labels, on a fresh stack (`.env` with `PAREEKSHA_API_KEY` set):
+  ```
+  docker compose up -d postgres
+  docker compose run --rm migrate                 # creates the schema; the dump then needs an empty public schema:
+  docker compose exec -T postgres psql -U pareeksha -d pareeksha -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+  zcat proof/EVAL-06/pareeksha_db.sql.gz | docker compose exec -T postgres psql -U pareeksha -d pareeksha -v ON_ERROR_STOP=1 -q
+  docker compose run --rm --no-deps api python -m pareeksha.seed   # re-adds the API key from PAREEKSHA_API_KEY (idempotent for the rest)
+  docker compose up -d api
+  python3 scripts/calibration/import_labels.py
+  ```
+  Re-running `run_batch.py` + `export_packet.py` on the target stack is the alternative, but it gives new calls
+  and needs a new packet.
 
 ## Tests (`pytest.txt`)
 
