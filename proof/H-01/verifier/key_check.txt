@@ -1,0 +1,32 @@
+INFO  gnani | [TTS REST] synthesize start | request_id=req_c06b5769cb12 | model=timbre-v3.0 | voice=Shivani
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_c06b5769cb12
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_c00a4a4f702d | language=hi-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_c00a4a4f702d
+{
+  "gemini": "not tested: optional per owner decision (CHANGELOG 2026-10-28)",
+  "gnani": {
+    "tts_bytes": 87084,
+    "tts_model": "timbre-v3.0",
+    "stt_has_text": true
+  },
+  "deepseek": {
+    "http_status": 200,
+    "requested_model": "deepseek-flash",
+    "served_model": "deepseek-flash",
+    "has_choice": true
+  },
+  "gnani_http": [
+    {
+      "method": "POST",
+      "host": "api.vachana.ai",
+      "path": "api/v1/tts/inference",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "host": "api.vachana.ai",
+      "path": "stt/v3",
+      "status": 200
+    }
+  ]
+}

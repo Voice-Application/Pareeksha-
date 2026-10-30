@@ -10,7 +10,7 @@ State values: todo / doing / blocked / review / done. Verified = QA sign-off (`y
 
 | ID | Title | Role | Depends on | State | Owner | Verified |
 |---|---|---|---|---|---|---|
-| H-01 | Keys in `.env`, Timbre v3.0 access, Gemini model ID, SECRET_KEY | Preetham (human) | — | keys in cloud env (Gnani, DeepSeek, Gemini) — usable only in new cloud sessions; key-dependent tasks run as separate sessions | — | no |
+| H-01 | Keys in `.env`, Timbre v3.0 access, Gemini model ID, SECRET_KEY | Preetham (human) | — | done: Gnani + DeepSeek keys live-checked (Gemini optional per owner) | proof/H-01 | yes (qa/FIX-VERIFY 489faae) |
 | PM-01 | Scope v0.2 vs PRD §7; acceptance criteria per task | PM | — | done | — | proof/PM-01/verified.md |
 | TL-01 | Freeze §6 contracts as code; full OpenAPI stubs | TL | PM-01 | done | — | proof/TL-01/verified.md |
 | INFRA-01 | Compose from `docs/starter/` runs (Kafka KRaft, Postgres, topics) | BE-INFRA | — | done | — | proof/INFRA-01/verified.md |
@@ -39,7 +39,7 @@ State values: todo / doing / blocked / review / done. Verified = QA sign-off (`y
 | API-04 | SSE progress, run compare, DLQ endpoints, `/metrics/summary` | BE-API | API-03 | done | — | proof/API-04/verified.md |
 | FE-03 | Runs list, new-run wizard, live run detail (SSE), heatmap | FE | FE-02, API-04 | done | — | proof/FE-03/verified.md |
 | QA-03 | Planted-bug test: at least 4 of 5 caught | QA | VOICE-05, EVAL-03 | done | — | proof/QA-03/verified.md |
-| H-02 | ≥ 20 consented clips per dialect group | Preetham (human) | — | waiting on Preetham | — | no |
+| H-02 | ≥ 20 consented clips per dialect group | Preetham (human) | — | replaced by owner decision 2026-10-30: Vaani (CC-BY-4.0) via DIALECT-02; awaiting owner spot-check of REVIEW.md | proof/DIALECT-02 | no |
 | EVAL-05 | Dialect pipeline: WER/CER, entity accuracy, HTML report | EVAL | EVAL-03 | done (real dialect clips pending H-02) | — | proof/EVAL-05/verified.md |
 | VOICE-06 | Pipecat adapter + serializer + example (Must); LiveKit (Should) | VOICE | VOICE-04 | done (LiveKit/Vapi cut by owner 2026-10-28, see CHANGELOG) | — | proof/VOICE-06/verified.md |
 | INT-04 | `pareeksha-sdk` + CLI, `pareeksha.yaml`, GitHub Action | INT | TL-01 | done | — | proof/INT-04/verified.md |
@@ -48,11 +48,11 @@ State values: todo / doing / blocked / review / done. Verified = QA sign-off (`y
 | FE-05 | Audits, Dialect, Regression, Integrations, DLQ, Calibration, API keys | FE | FE-04 | done | — | proof/FE-05/verified.md |
 | QA-04 | Playwright smoke per page; OpenAPI + event contract tests | QA | FE-04 | done | — | proof/QA-04/verified.md |
 | QA-05 | 40-call demo run + full PRD §8 acceptance | QA | all | done | — | proof/QA-05/verified.md |
-| ALL-01 | Fix QA P0/P1 bugs only | engineers | QA-05 | todo | — | no |
-| EVAL-06 | Label 30 calls; publish κ and Spearman | EVAL + Preetham | QA-05 | todo | — | no |
+| ALL-01 | Fix QA P0/P1 bugs only | engineers | QA-05 | done (FIX-01, FIX-02, FIX-03) | proof/ALL-01 | yes (qa/FIX-VERIFY 489faae) |
+| EVAL-06 | Label 30 calls; publish κ and Spearman | EVAL + Preetham | QA-05 | INTERIM: owner labelled L01-L10, κ=1.0 (n=10); L11-L30 awaiting owner | proof/EVAL-06 (task/EVAL-06) | no |
 | DOC-02 | README, clean-clone quick start, 8 adopter guides, SDK reference | DOC | all | done | — | proof/DOC-02/verified.md |
-| DOC-03 | 60-second demo script; Preetham records | DOC + Preetham | QA-05 | todo | — | no |
-| PJM-01 | Release checklist, tag v1.0.0, repo public, launch post | PJM | all | todo | — | no |
+| DOC-03 | 60-second demo script; Preetham records | DOC + Preetham | QA-05 | script done (docs/demo-script.md); recording awaiting owner | proof/DOC-03 | script part (qa/FIX-VERIFY 489faae) |
+| PJM-01 | Release checklist, tag v1.0.0, repo public, launch post | PJM | all | checklist done, repo public, gitleaks full history clean; tag v1.0.0, demo video, launch post awaiting owner | proof/PJM-01 | partial (qa/FIX-VERIFY 489faae) |
 
 Notes: PM-01 issue: FR-RN-2 cost estimate is Should but required by FE-03; F19 per-run HTML export (Could) and Vapi have no board task.
 
@@ -121,3 +121,12 @@ Never cut: mock agent with planted bugs, judge with evidence, Kafka outbox + ide
 - PR voice-application/pareeksha-#2 (bug removed): `suite` PASSED, plus backend/web/sdk/kafka/build-fail-grep all green on ea08f12. Run: https://github.com/Voice-Application/Pareeksha-/actions/runs/40894620111
 - Fix that made CI reliable: task/FIX-CI (speech retry on retryable errors, regression workflow concurrency group, personas filter race fix) — merged here.
 - Live HubSpot acceptance (GOAL item 5/6/10) evidence on task/LIVE-ACCEPT (note 412826916601, 9.1 s) — pending independent verification in the final make verify.
+
+## 2026-10-30: verification fixes, dialect, calibration
+- FIX-03 (mypy/ruff pinned + clean; silent caller = local silence; no-audio TTS permanent) — verified qa/FIX-03 74c5c5c, merged.
+- FIX-VERIFY (V6 runs pytest from its own venv; V8/V11 REST fallbacks; .gitleaksignore with 112 exact fingerprints, full-history gitleaks 0) — verified qa/FIX-VERIFY 489faae, merged (verifier evidence copied without its flagged gitleaks_report.json).
+- GOAL 8: fail run 41097075186 (a8f8444, bug on) then pass run 41102511599 (b8b121e, descendant; manual dispatch because the PR paths filter skipped an empty net diff). Verifier: acceptable, not a literal PR check; owner to confirm.
+- DIALECT-02 (Vaani, 5 groups × 22 clips × 3 conditions, 330/330) — verified qa/DIALECT-02 b248279; not merged until the owner spot-checks data/dialect/vaani/REVIEW.md.
+- EVAL-06 interim: n=10 owner labels, κ=1.0 pass/fail, critical κ=0.14; rubric gap noted (no anchor for non-responsive replies) — task/EVAL-06 e21c46f.
+- Owner-pending: L11-L30 labels, dialect spot-check, tag v1.0.0, demo video, launch post, live demo approval.
+

@@ -1,0 +1,3 @@
+[90m9:12PM[0m [32mINF[0m [1m164 commits scanned.[0m
+[90m9:12PM[0m [32mINF[0m [1mscanned ~33373105 bytes (33.37 MB) in 4.45s[0m
+[90m9:12PM[0m [33mWRN[0m [1mleaks found: 9[0m
