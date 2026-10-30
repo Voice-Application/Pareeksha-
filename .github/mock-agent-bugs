@@ -1,3 +1,4 @@
 # Planted mock-agent bugs enabled for the regression workflow, comma separated (empty = clean agent).
 # Valid names: no_disclosure, no_amount_confirm, english_to_kannada, ignore_interrupt, false_waiver.
 # A PR that adds one makes `pareeksha-regression` fail; removing it makes the check pass again.
+no_disclosure
