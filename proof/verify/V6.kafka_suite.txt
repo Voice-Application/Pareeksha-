@@ -1,2 +1,8 @@
 .........                                                                [100%]
-9 passed in 63.65s (0:01:03)
+=============================== warnings summary ===============================
+pareeksha/audio/dsp.py:8
+  /home/user/Pareeksha-/backend/pareeksha/audio/dsp.py:8: DeprecationWarning: 'audioop' is deprecated and slated for removal in Python 3.13
+    import audioop  # stdlib <= 3.12; audioop-lts on >= 3.13 (see requirements.txt)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+9 passed, 1 warning in 62.70s (0:01:02)

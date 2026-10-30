@@ -31,9 +31,21 @@ note "local HTTPS webhook sink: https://host.docker.internal:$SINK_PORT (pid $SI
 WORKERS="outbox-relay planner simulator auditor evaluator finalizer integrations dialect generator retrier dlq-recorder reconciler"
 pgport=$(grep -E '^POSTGRES_HOST_PORT=' .env | cut -d= -f2 | cut -d' ' -f1); kport=$(grep -E '^KAFKA_HOST_PORT=' .env | cut -d= -f2 | cut -d' ' -f1)
 $COMPOSE --profile workers stop $WORKERS >/dev/null 2>&1
+# pytest comes from the backend dev environment, built the way CI does (kafka-suite.yml): requirements.txt +
+# backend/requirements-dev.txt + an editable install of backend (entry points). Reused when already present.
+VENV="$ROOT/.venv-verify"
+if ! "$VENV/bin/python" -c "import pytest, pareeksha, aiokafka" >/dev/null 2>&1; then
+  base=$(command -v python3.12 || command -v python3.11 || command -v python3)
+  note "creating $VENV with $base and installing backend dev dependencies"
+  { "$base" -m venv "$VENV" && "$VENV/bin/pip" install -q -r requirements.txt -r backend/requirements-dev.txt \
+      && "$VENV/bin/pip" install -q --no-deps -e backend; } > "$OUT/V6.venv_install.txt" 2>&1 \
+    || { tail -15 "$OUT/V6.venv_install.txt" | block; finish FAIL "cannot build the backend dev environment, so pytest tests/kafka could not run"; }
+fi
+SUITE_PY="$VENV/bin/python"
 (set -o pipefail; cd backend && DATABASE_URL="postgresql+psycopg://pareeksha:pareeksha@localhost:${pgport:-5432}/pareeksha" \
-  INFRA_TEST_KAFKA_BOOTSTRAP="localhost:${kport:-9094}" KAFKA_BOOTSTRAP_SERVERS="localhost:${kport:-9094}" $PY -m pytest tests/kafka -q -p no:cacheprovider 2>&1 | tail -15) > "$OUT/V6.kafka_suite.txt"
+  INFRA_TEST_KAFKA_BOOTSTRAP="localhost:${kport:-9094}" KAFKA_BOOTSTRAP_SERVERS="localhost:${kport:-9094}" "$SUITE_PY" -m pytest tests/kafka -q -p no:cacheprovider 2>&1 | tail -15) > "$OUT/V6.kafka_suite.txt"
 suite=$?
+note "pytest interpreter: $SUITE_PY ($($SUITE_PY --version 2>&1))"
 $COMPOSE --profile workers up -d $WORKERS >/dev/null 2>&1
 sleep 20
 block < "$OUT/V6.kafka_suite.txt"
