@@ -1,0 +1,89 @@
+2026-10-30 19:25:32.646 | INFO     | pipecat:<module>:54 - ᓚᘏᗢ Pipecat 1.15.0 (Python 3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]) ᓚᘏᗢ
+2026-10-30 19:25:33,479 websockets.server server listening on 0.0.0.0:8791
+2026-10-30 19:25:33,479 mock_agent mock agent on :8791 bugs=[]
+2026-10-30 19:25:33,853 websockets.server connection rejected (200 OK)
+2026-10-30 19:25:34,097 websockets.server connection open
+2026-10-30 19:25:34,098 mock_agent call 199ecedb-cbe8-4746-9f4b-943cb9a0b8e3 start lang=hi-IN bugs=[]
+INFO  gnani | [TTS REST] synthesize start | request_id=req_d1eebcd8f3b8 | model=timbre-v3.0 | voice=Avinash
+2026-10-30 19:25:34,100 gnani [TTS REST] synthesize start | request_id=req_d1eebcd8f3b8 | model=timbre-v3.0 | voice=Avinash
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_d1eebcd8f3b8
+2026-10-30 19:25:38,018 gnani [TTS REST] synthesize complete | request_id=req_d1eebcd8f3b8
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_60dbe9205666 | language=hi-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_60dbe9205666
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_3e5ec831c391 | language=hi-IN
+ERROR gnani | [STT REST] transcribe_bytes failed | request_id=req_3e5ec831c391 | status=504
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_600ed00fa966 | language=hi-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_600ed00fa966
+INFO  gnani | [TTS REST] synthesize start | request_id=req_6b32814c5c48 | model=timbre-v3.0 | voice=Chetana
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_6b32814c5c48
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_ce59e57f5d23 | language=hi-IN
+2026-10-30 19:26:12,411 gnani [STT REST] transcribe_bytes start | request_id=req_ce59e57f5d23 | language=hi-IN
+ERROR gnani | [STT REST] transcribe_bytes failed | request_id=req_ce59e57f5d23 | status=504
+2026-10-30 19:26:18,824 gnani [STT REST] transcribe_bytes failed | request_id=req_ce59e57f5d23 | status=504
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_8e1caf08bec9 | language=hi-IN
+2026-10-30 19:26:19,698 gnani [STT REST] transcribe_bytes start | request_id=req_8e1caf08bec9 | language=hi-IN
+INFO  gnani | [TTS REST] synthesize start | request_id=req_07711ae5711a | model=timbre-v3.0 | voice=Chetana
+ERROR gnani | [TTS REST] synthesize failed | request_id=req_07711ae5711a | status=429
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_8e1caf08bec9
+2026-10-30 19:26:21,161 gnani [STT REST] transcribe_bytes complete | request_id=req_8e1caf08bec9
+INFO  gnani | [TTS REST] synthesize start | request_id=req_d52d9dbd029d | model=timbre-v3.0 | voice=Avinash
+2026-10-30 19:26:21,164 gnani [TTS REST] synthesize start | request_id=req_d52d9dbd029d | model=timbre-v3.0 | voice=Avinash
+INFO  gnani | [TTS REST] synthesize start | request_id=req_3930cb742743 | model=timbre-v3.0 | voice=Chetana
+ERROR gnani | [TTS REST] synthesize failed | request_id=req_3930cb742743 | status=429
+INFO  gnani | [TTS REST] synthesize start | request_id=req_a9993bc5853f | model=timbre-v3.0 | voice=Chetana
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_d52d9dbd029d
+2026-10-30 19:26:23,913 gnani [TTS REST] synthesize complete | request_id=req_d52d9dbd029d
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_a9993bc5853f
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_9f6e29bc9247 | language=hi-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_9f6e29bc9247
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_72bdebc755ea | language=hi-IN
+2026-10-30 19:26:27,472 gnani [STT REST] transcribe_bytes start | request_id=req_72bdebc755ea | language=hi-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_72bdebc755ea
+2026-10-30 19:26:28,776 gnani [STT REST] transcribe_bytes complete | request_id=req_72bdebc755ea
+INFO  gnani | [TTS REST] synthesize start | request_id=req_bf09950970df | model=timbre-v3.0 | voice=Avinash
+2026-10-30 19:26:28,779 gnani [TTS REST] synthesize start | request_id=req_bf09950970df | model=timbre-v3.0 | voice=Avinash
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_bf09950970df
+2026-10-30 19:26:32,068 gnani [TTS REST] synthesize complete | request_id=req_bf09950970df
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_0a8094cd7780 | language=hi-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_0a8094cd7780
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_bc9e4199b106 | language=hi-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_bc9e4199b106
+INFO  gnani | [TTS REST] synthesize start | request_id=req_70776ab53126 | model=timbre-v3.0 | voice=Chetana
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_70776ab53126
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_3b442df2618e | language=hi-IN
+2026-10-30 19:27:03,932 gnani [STT REST] transcribe_bytes start | request_id=req_3b442df2618e | language=hi-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_3b442df2618e
+2026-10-30 19:27:04,970 gnani [STT REST] transcribe_bytes complete | request_id=req_3b442df2618e
+INFO  gnani | [TTS REST] synthesize start | request_id=req_5ed3e1ff9891 | model=timbre-v3.0 | voice=Avinash
+2026-10-30 19:27:04,974 gnani [TTS REST] synthesize start | request_id=req_5ed3e1ff9891 | model=timbre-v3.0 | voice=Avinash
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_5ed3e1ff9891
+2026-10-30 19:27:07,424 gnani [TTS REST] synthesize complete | request_id=req_5ed3e1ff9891
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_6b2b1da5e5b2 | language=hi-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_6b2b1da5e5b2
+INFO  gnani | [TTS REST] synthesize start | request_id=req_0807a9808c65 | model=timbre-v3.0 | voice=Chetana
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_0807a9808c65
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_567998f414b7 | language=hi-IN
+2026-10-30 19:27:31,291 gnani [STT REST] transcribe_bytes start | request_id=req_567998f414b7 | language=hi-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_567998f414b7
+2026-10-30 19:27:32,742 gnani [STT REST] transcribe_bytes complete | request_id=req_567998f414b7
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_9143d08497cd | language=hi-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_9143d08497cd
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_36428a9a006b | language=hi-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_36428a9a006b
+INFO  gnani | [TTS REST] synthesize start | request_id=req_bfef260195a7 | model=timbre-v3.0 | voice=Chetana
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_bfef260195a7
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_af47faf81e38 | language=hi-IN
+2026-10-30 19:28:03,672 gnani [STT REST] transcribe_bytes start | request_id=req_af47faf81e38 | language=hi-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_af47faf81e38
+2026-10-30 19:28:05,164 gnani [STT REST] transcribe_bytes complete | request_id=req_af47faf81e38
+INFO  gnani | [TTS REST] synthesize start | request_id=req_f613b87caee0 | model=timbre-v3.0 | voice=Avinash
+2026-10-30 19:28:05,167 gnani [TTS REST] synthesize start | request_id=req_f613b87caee0 | model=timbre-v3.0 | voice=Avinash
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_f613b87caee0
+2026-10-30 19:28:08,087 gnani [TTS REST] synthesize complete | request_id=req_f613b87caee0
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_3eaf287a21ab | language=hi-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_3eaf287a21ab
+INFO  gnani | [TTS REST] synthesize start | request_id=req_bf220b638db8 | model=timbre-v3.0 | voice=Chetana
+2026-10-30 19:28:34,101 mock_agent gnani usage (cumulative, uncached): {"tts": {"calls": 5, "audio_seconds": 39.6, "chars": 536}, "stt_rest": {"calls": 5, "audio_seconds": 11.2, "chars": 0}}
+call 199ecedb-cbe8-4746-9f4b-943cb9a0b8e3 end_reason=agent_hangup error=None
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_bf220b638db8
+wrote proof/FIX-03/verifier/live_call.json
