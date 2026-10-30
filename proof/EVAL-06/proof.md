@@ -89,6 +89,21 @@ when present):
 
 All 30 calls in the packet are `evaluation.status = ok`.
 
+**Gnani errors seen.** The Gnani key was shared with other sessions running at the same time (DIALECT-02 and a
+verifier). Counts are distinct `request_id`s that failed, from `docker compose logs` at the end of the run; the
+speech layer retried each one:
+
+| service | 429 (rate limit) | 500 | 504 |
+|---|---|---|---|
+| simulator (caller) | 123 | 48 | 4 |
+| mock-agent (clean agent) | 25 | 0 | 3 |
+| bug mock-agent containers | not counted (logs removed with the containers) | | |
+
+- The 500s are the "No audio generated" failures on the silent caller's `...` line (ISSUE-2).
+- 5 calls still failed after retries (`infra_error`); each was re-run and none is counted as a result
+  (`batch_replaced.json`).
+- No code was changed to hide these errors.
+
 ## The blind packet (`labelling/EVAL-06/`, 16 MB)
 
 - `index.html` and `L01.html` .. `L30.html`. Each call page has:
