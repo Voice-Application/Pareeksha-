@@ -1,0 +1,30 @@
+{
+  "provider": "elevenlabs",
+  "tts": {
+    "voice": "CwhRBWXzGAHq8TQ4Fs17",
+    "sample_rate": 16000,
+    "duration_s": 3.204375,
+    "usage": {
+      "provider": "elevenlabs",
+      "operation": "tts",
+      "audio_seconds": 3.204375,
+      "characters": 58,
+      "latency_ms": 657,
+      "est_cost": null
+    }
+  },
+  "stt": {
+    "text": "Hello, this is a short test call about your loan reminder.",
+    "model": "scribe_v1",
+    "usage": {
+      "provider": "elevenlabs",
+      "operation": "stt_batch",
+      "audio_seconds": 3.204375,
+      "characters": 0,
+      "latency_ms": 444,
+      "est_cost": null
+    }
+  },
+  "reference": "Hello, this is a short test call about your loan reminder.",
+  "reference_words_found": "11/11"
+}

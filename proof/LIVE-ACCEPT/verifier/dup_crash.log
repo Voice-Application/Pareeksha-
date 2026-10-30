@@ -1,0 +1,9 @@
+notes on contact before: 1 [413923017404]
+re-published the original evaluation.completed 2 time(s)
+integrations worker SIGKILLed at 15:24:01
+integrations worker restarted
+notes on contact after: 1 [413923017404]
+evaluations for call: 1
+deliveries (integration,event,status,external_id) for call's event:
+6e19feed-3b1d-4d9a-9e31-b1bbd43b9939|outbound|failed||1
+0db481e4-0533-4829-9252-1db3c90aa4db|outbound|succeeded|413923017404|1

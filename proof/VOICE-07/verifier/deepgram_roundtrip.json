@@ -1,0 +1,30 @@
+{
+  "provider": "deepgram",
+  "tts": {
+    "voice": "aura-2-amalthea-en",
+    "sample_rate": 16000,
+    "duration_s": 3.2799375,
+    "usage": {
+      "provider": "deepgram",
+      "operation": "tts",
+      "audio_seconds": 3.2799375,
+      "characters": 58,
+      "latency_ms": 1619,
+      "est_cost": null
+    }
+  },
+  "stt": {
+    "text": "Hello. This is a short test call about your loan reminder.",
+    "model": "nova-3",
+    "usage": {
+      "provider": "deepgram",
+      "operation": "stt_batch",
+      "audio_seconds": 3.2799375,
+      "characters": 0,
+      "latency_ms": 361,
+      "est_cost": null
+    }
+  },
+  "reference": "Hello, this is a short test call about your loan reminder.",
+  "reference_words_found": "11/11"
+}
