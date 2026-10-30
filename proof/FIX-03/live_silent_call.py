@@ -22,13 +22,18 @@ from pathlib import Path
 
 import httpx
 import yaml
-
 from pareeksha.adapters.base import AgentTarget
 from pareeksha.audio.profiles import get_profile
 from pareeksha.evaluation.evaluator import CallSnapshot, evaluate_call
+from pareeksha.evaluation.judge import AgentInfo
 from pareeksha.evaluation.pg_stores import expected_amounts_from_fixtures
 from pareeksha.evaluation.pii import mask_pii
-from pareeksha.evaluation.types import AgentInfo, Disclosure, ForbiddenPhrase, ToolCall, as_turn
+from pareeksha.evaluation.types import (
+    Disclosure,
+    ForbiddenPhrase,
+    ToolCall,
+    as_turn,
+)
 from pareeksha.llm.caller import CallerBrain
 from pareeksha.llm.factory import build_client
 from pareeksha.schemas.personas import PersonaCreate
@@ -38,7 +43,6 @@ from pareeksha.simulation.models import CallSpec
 from pareeksha.simulation.runner import CallRunner, quiet_pipecat_logs
 from pareeksha.simulation.runtime import BrainCallerSource
 from pareeksha.speech.registry import get_stt_provider, get_tts_provider
-
 
 PERSONA = "The Silent One"
 SCENARIO = "Caller goes silent"
@@ -50,18 +54,28 @@ def load(name: str) -> list[dict]:
 
 
 async def main(out: Path) -> None:
-    agent_yaml = yaml.safe_load((DATA_DIR / "agent_emi.yaml").read_text(encoding="utf-8"))
-    persona = PersonaCreate.model_validate(next(p for p in load("personas.yaml") if p["name"] == PERSONA))
+    agent_yaml = yaml.safe_load(
+        (DATA_DIR / "agent_emi.yaml").read_text(encoding="utf-8")
+    )
+    persona = PersonaCreate.model_validate(
+        next(p for p in load("personas.yaml") if p["name"] == PERSONA)
+    )
     agent_id = uuid.uuid4()
     scenario = ScenarioCreate.model_validate(
-        {**next(s for s in load("scenarios_emi.yaml") if s["title"] == SCENARIO), "agent_id": agent_id}
+        {
+            **next(s for s in load("scenarios_emi.yaml") if s["title"] == SCENARIO),
+            "agent_id": agent_id,
+        }
     )
     env = {**os.environ, "MOCK_AGENT_PORT": str(PORT), "PYTHONPATH": "."}
     agent_proc = subprocess.Popen([sys.executable, "-m", "mock_agent.server"], env=env)
     try:
         for _ in range(60):
             try:
-                if httpx.get(f"http://127.0.0.1:{PORT}/health", timeout=1).status_code == 200:
+                if (
+                    httpx.get(f"http://127.0.0.1:{PORT}/health", timeout=1).status_code
+                    == 200
+                ):
                     break
             except httpx.HTTPError:
                 time.sleep(0.5)
@@ -92,7 +106,9 @@ async def main(out: Path) -> None:
         )
         outcome = await runner.run(spec)
         result = outcome.result
-        print(f"call {spec.call_id} end_reason={result.end_reason} error={result.error}")
+        print(
+            f"call {spec.call_id} end_reason={result.end_reason} error={result.error}"
+        )
 
         turns = [
             as_turn(
@@ -119,18 +135,28 @@ async def main(out: Path) -> None:
                 agent=AgentInfo(
                     name=agent_yaml["name"],
                     description=agent_yaml["description"],
-                    mandatory_disclosures=[Disclosure.from_dict(d) for d in agent_yaml["mandatory_disclosures"]],
-                    forbidden_phrases=[ForbiddenPhrase.from_dict(d) for d in agent_yaml["forbidden_phrases"]],
+                    mandatory_disclosures=[
+                        Disclosure.from_dict(d)
+                        for d in agent_yaml["mandatory_disclosures"]
+                    ],
+                    forbidden_phrases=[
+                        ForbiddenPhrase.from_dict(d)
+                        for d in agent_yaml["forbidden_phrases"]
+                    ],
                 ),
                 turns=turns,
                 language=persona.language,
                 scenario=scenario,
                 persona=persona,
-                tool_calls=[ToolCall(name=c.name, args=c.arguments, turn_idx=c.turn_idx) for c in result.tool_calls],
+                tool_calls=[
+                    ToolCall(name=c.name, args=c.arguments, turn_idx=c.turn_idx)
+                    for c in result.tool_calls
+                ],
                 expected_language=persona.language,
                 allowed_languages=[persona.language],
                 expected_tool_calls=list(scenario.expected_tool_calls) or None,
-                expected_amounts=expected_amounts_from_fixtures(scenario.fixtures) or None,
+                expected_amounts=expected_amounts_from_fixtures(scenario.fixtures)
+                or None,
             )
             evaluation = await evaluate_call(snap, llm)
         doc = {
@@ -141,7 +167,11 @@ async def main(out: Path) -> None:
             "error": result.error,
             "duration_ms": result.duration_ms,
             "turns": [t.model_dump() for t in result.turns],
-            "silence_events": [e.model_dump() for e in result.events if e.type in ("caller_silence", "caller_tts", "caller_pause")],
+            "silence_events": [
+                e.model_dump()
+                for e in result.events
+                if e.type in ("caller_silence", "caller_tts", "caller_pause")
+            ],
             "evaluation": None
             if evaluation is None
             else {
@@ -157,7 +187,9 @@ async def main(out: Path) -> None:
                 "metrics": evaluation.metrics.__dict__,
             },
         }
-        out.write_text(json.dumps(doc, indent=2, ensure_ascii=False, default=str), encoding="utf-8")
+        out.write_text(
+            json.dumps(doc, indent=2, ensure_ascii=False, default=str), encoding="utf-8"
+        )
         print(f"wrote {out}")
     finally:
         agent_proc.terminate()

@@ -17,7 +17,7 @@ verify-step:
 	scripts/verify/run_all.sh $(N)
 
 lint:
-	cd backend && ruff check . && ruff format --check . && mypy pareeksha
+	cd backend && ruff check . && ruff format --check . && mypy
 	cd web && npm run lint && npx tsc --noEmit
 
 test:

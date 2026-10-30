@@ -1,0 +1,465 @@
+{
+  "call_id": "3c391613-6813-4647-8e3e-3c0ec56b6550",
+  "scenario": "Caller goes silent",
+  "persona": "The Silent One",
+  "end_reason": "agent_hangup",
+  "error": null,
+  "duration_ms": 180003,
+  "turns": [
+    {
+      "idx": 0,
+      "speaker": "agent",
+      "text": "गुणवत्ता और अनुपालन के लिए यह कॉल रिकॉर्ड की जा रही है, नमस्ते, मैं सुरक्षा फाइनेंस से बोल रही हूँ, क्या मैं खाताधारक से बात कर रही हूँ?",
+      "start_ms": 3840,
+      "end_ms": 12559,
+      "ground_truth_text": null,
+      "agent_heard_text": null,
+      "glass_box_text": "गुणवत्ता और अनुपालन के लिए यह कॉल रिकॉर्ड की जा रही है। नमस्ते, मैं सुरक्षा फाइनेंस से बोल रही हूँ। क्या मैं खाताधारक से बात कर रही हूँ?",
+      "language_detected": "hi-IN",
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": null
+    },
+    {
+      "idx": 1,
+      "speaker": "caller",
+      "text": "हाँ, मैं बोल रही हूँ।",
+      "start_ms": 27675,
+      "end_ms": 29495,
+      "ground_truth_text": "हाँ, मैं बोल रही हूँ।",
+      "agent_heard_text": "हाँ, मैं बोल रही हूँ।",
+      "glass_box_text": null,
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": "reply"
+    },
+    {
+      "idx": 2,
+      "speaker": "agent",
+      "text": "धन्यवाद आपकी चार हज़ार पाँच सौ रुपये की ई एम आई बारह दिन से बकाया है आप कब भुगतान कर सकते हैं",
+      "start_ms": 34347,
+      "end_ms": 40822,
+      "ground_truth_text": null,
+      "agent_heard_text": null,
+      "glass_box_text": "धन्यवाद। आपकी 4,500 रुपये की ईएमआई बारह दिन से बकाया है। आप कब भुगतान कर सकते हैं?",
+      "language_detected": "hi-IN",
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": null
+    },
+    {
+      "idx": 3,
+      "speaker": "caller",
+      "text": "…",
+      "start_ms": 44855,
+      "end_ms": 49836,
+      "ground_truth_text": "…",
+      "agent_heard_text": null,
+      "glass_box_text": null,
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": "reply"
+    },
+    {
+      "idx": 4,
+      "speaker": "caller",
+      "text": "हैलो, क्या आप सुन रहे हैं?",
+      "start_ms": 59975,
+      "end_ms": 61796,
+      "ground_truth_text": "हैलो, क्या आप सुन रहे हैं?",
+      "agent_heard_text": "हेलो, क्या आप सुन रहे हैं?",
+      "glass_box_text": null,
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": "nudge"
+    },
+    {
+      "idx": 5,
+      "speaker": "agent",
+      "text": "जी मैं यहीं हूँ मैं सुरक्षा फ़ाइनैन्स से आपकी चार हज़ार पाँच सौ रुपये की ई एम आई के बारे में बोल रही हूँ जो बारह दिन से बकाया है आप कब भुगतान कर सकते हैं",
+      "start_ms": 66912,
+      "end_ms": 77171,
+      "ground_truth_text": null,
+      "agent_heard_text": null,
+      "glass_box_text": "जी, मैं यहीं हूँ। मैं सुरक्षा फाइनेंस से आपकी 4,500 रुपये की ईएमआई के बारे में बोल रही हूँ, जो बारह दिन से बकाया है। आप कब भुगतान कर सकते हैं?",
+      "language_detected": "hi-IN",
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": null
+    },
+    {
+      "idx": 6,
+      "speaker": "caller",
+      "text": "…",
+      "start_ms": 81454,
+      "end_ms": 86436,
+      "ground_truth_text": "…",
+      "agent_heard_text": null,
+      "glass_box_text": null,
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": "reply"
+    },
+    {
+      "idx": 7,
+      "speaker": "caller",
+      "text": "हैलो, क्या आप सुन रहे हैं?",
+      "start_ms": 96355,
+      "end_ms": 98015,
+      "ground_truth_text": "हैलो, क्या आप सुन रहे हैं?",
+      "agent_heard_text": "हेलो, क्या आप सुन रहे हैं?",
+      "glass_box_text": null,
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": "nudge"
+    },
+    {
+      "idx": 8,
+      "speaker": "agent",
+      "text": "जी, मैं यहीं हूँ, आप किस तारीख को भुगतान कर पाएंगे?",
+      "start_ms": 102939,
+      "end_ms": 106512,
+      "ground_truth_text": null,
+      "agent_heard_text": null,
+      "glass_box_text": "जी, मैं यहीं हूँ। आप किस तारीख को भुगतान कर पाएँगे?",
+      "language_detected": "hi-IN",
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": null
+    },
+    {
+      "idx": 9,
+      "speaker": "caller",
+      "text": "…",
+      "start_ms": 109655,
+      "end_ms": 114635,
+      "ground_truth_text": "…",
+      "agent_heard_text": null,
+      "glass_box_text": null,
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": "reply"
+    },
+    {
+      "idx": 10,
+      "speaker": "caller",
+      "text": "हैलो, क्या आप सुन रहे हैं?",
+      "start_ms": 124894,
+      "end_ms": 126876,
+      "ground_truth_text": "हैलो, क्या आप सुन रहे हैं?",
+      "agent_heard_text": "हेलो, क्या आप सुन रहे हैं?",
+      "glass_box_text": null,
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": "nudge"
+    },
+    {
+      "idx": 11,
+      "speaker": "agent",
+      "text": "जी मैं यहीं हूँ मैं सुरक्षा फ़ाइनैन्स से आपकी चार हज़ार पाँच सौ रुपये की ई एम आई के बारे में बोल रही हूँ जो बारह दिन से बकाया है आप कब भुगतान कर सकते हैं",
+      "start_ms": 128614,
+      "end_ms": 138953,
+      "ground_truth_text": null,
+      "agent_heard_text": null,
+      "glass_box_text": "जी, मैं यहीं हूँ। मैं सुरक्षा फाइनेंस से आपकी 4,500 रुपये की ईएमआई के बारे में बोल रही हूँ, जो बारह दिन से बकाया है। आप कब भुगतान कर सकते हैं?",
+      "language_detected": "hi-IN",
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": null
+    },
+    {
+      "idx": 12,
+      "speaker": "caller",
+      "text": "…",
+      "start_ms": 142516,
+      "end_ms": 147495,
+      "ground_truth_text": "…",
+      "agent_heard_text": null,
+      "glass_box_text": null,
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": "reply"
+    },
+    {
+      "idx": 13,
+      "speaker": "caller",
+      "text": "हैलो, क्या आप सुन रहे हैं?",
+      "start_ms": 157235,
+      "end_ms": 160015,
+      "ground_truth_text": "हैलो, क्या आप सुन रहे हैं?",
+      "agent_heard_text": "हेलो, क्या आप सुन रहे हैं?",
+      "glass_box_text": null,
+      "language_detected": null,
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": "nudge"
+    },
+    {
+      "idx": 14,
+      "speaker": "agent",
+      "text": "जी, मैं यहीं हूँ, मुझे यह दर्ज करने में दिक्कत हो रही है इसलिए मैं आपको एक मानव एजेंट से जोड़ती हूँ, कृपया लाइन पर बने रहें।",
+      "start_ms": 165143,
+      "end_ms": 173457,
+      "ground_truth_text": null,
+      "agent_heard_text": null,
+      "glass_box_text": "जी, मैं यहीं हूँ। मुझे यह दर्ज करने में दिक्कत हो रही है, इसलिए मैं आपको एक मानव एजेंट से जोड़ती हूँ। कृपया लाइन पर बने रहें।",
+      "language_detected": "hi-IN",
+      "stt_confidence": null,
+      "is_barge_in": false,
+      "kind": null
+    }
+  ],
+  "silence_events": [
+    {
+      "t_ms": 15658,
+      "type": "caller_pause",
+      "data": {
+        "seconds": 10.0
+      }
+    },
+    {
+      "t_ms": 27662,
+      "type": "caller_tts",
+      "data": {
+        "utt_id": 1,
+        "tts_ms": 2002,
+        "seconds": 1.84,
+        "characters": 21
+      }
+    },
+    {
+      "t_ms": 44839,
+      "type": "caller_silence",
+      "data": {
+        "utt_id": 2,
+        "seconds": 5.0,
+        "text": "…"
+      }
+    },
+    {
+      "t_ms": 59959,
+      "type": "caller_tts",
+      "data": {
+        "utt_id": 3,
+        "tts_ms": 2121,
+        "seconds": 1.84,
+        "characters": 26
+      }
+    },
+    {
+      "t_ms": 81437,
+      "type": "caller_silence",
+      "data": {
+        "utt_id": 4,
+        "seconds": 5.0,
+        "text": "…"
+      }
+    },
+    {
+      "t_ms": 96345,
+      "type": "caller_tts",
+      "data": {
+        "utt_id": 5,
+        "tts_ms": 1907,
+        "seconds": 1.68,
+        "characters": 26
+      }
+    },
+    {
+      "t_ms": 109650,
+      "type": "caller_silence",
+      "data": {
+        "utt_id": 6,
+        "seconds": 5.0,
+        "text": "…"
+      }
+    },
+    {
+      "t_ms": 124876,
+      "type": "caller_tts",
+      "data": {
+        "utt_id": 7,
+        "tts_ms": 2238,
+        "seconds": 2.0,
+        "characters": 26
+      }
+    },
+    {
+      "t_ms": 142507,
+      "type": "caller_silence",
+      "data": {
+        "utt_id": 8,
+        "seconds": 5.0,
+        "text": "…"
+      }
+    },
+    {
+      "t_ms": 157233,
+      "type": "caller_tts",
+      "data": {
+        "utt_id": 9,
+        "tts_ms": 1737,
+        "seconds": 2.8,
+        "characters": 26
+      }
+    },
+    {
+      "t_ms": 176562,
+      "type": "caller_silence",
+      "data": {
+        "utt_id": 10,
+        "seconds": 5.0,
+        "text": "…"
+      }
+    }
+  ],
+  "evaluation": {
+    "status": "ok",
+    "overall_score": 97.5,
+    "passed": true,
+    "critical_failure": false,
+    "failure_types": [],
+    "summary": "Agent handled silent caller well: checked presence, avoided loops, and transferred to human. All mandatory disclosures and facts correct. Minor: could have acknowledged caller's frustration more explicitly.",
+    "judge_model": "deepseek-v4-pro",
+    "dimensions": {
+      "task_completion": {
+        "score": 4,
+        "evidence_turns": [
+          14
+        ],
+        "reason": "Caller stayed silent; agent checked presence, avoided looping, and transferred to human politely. Correct end state."
+      },
+      "policy_compliance": {
+        "score": 4,
+        "evidence_turns": [
+          0
+        ],
+        "reason": "Recording disclosure given; no threats or forbidden content; no PII over-collection."
+      },
+      "factual_accuracy": {
+        "score": 4,
+        "evidence_turns": [
+          2,
+          5,
+          11
+        ],
+        "reason": "EMI amount 4500 and 12 days overdue stated correctly; no hallucinated facts."
+      },
+      "language_handling": {
+        "score": 4,
+        "evidence_turns": [
+          0,
+          2,
+          5,
+          8,
+          11,
+          14
+        ],
+        "reason": "All agent turns in Hindi, matching caller; natural phrasing and correct numbers."
+      },
+      "conversation_flow": {
+        "score": 4,
+        "evidence_turns": [
+          5,
+          8,
+          11,
+          14
+        ],
+        "reason": "No loops; agent varied responses, acknowledged silence, and ended with transfer. Smooth pacing."
+      },
+      "empathy_tone": {
+        "score": 3,
+        "evidence_turns": [
+          5,
+          8,
+          11,
+          14
+        ],
+        "reason": "Polite and patient, but neutral; no explicit acknowledgment of caller's frustration or confusion."
+      },
+      "escalation": {
+        "score": 4,
+        "evidence_turns": [
+          14
+        ],
+        "reason": "Transferred to human after repeated silence, appropriate and timely."
+      }
+    },
+    "checks": [
+      {
+        "check_type": "disclosure_present",
+        "check_key": "recording",
+        "passed": true,
+        "must_pass": true,
+        "evidence_turns": [
+          0
+        ],
+        "detail": "Disclosure given in turn 0"
+      },
+      {
+        "check_type": "forbidden_absent",
+        "check_key": "threat_legal",
+        "passed": true,
+        "must_pass": true,
+        "evidence_turns": [],
+        "detail": "Phrase never said by the agent"
+      },
+      {
+        "check_type": "language_match",
+        "check_key": "hi-IN",
+        "passed": true,
+        "must_pass": false,
+        "evidence_turns": [],
+        "detail": "0/6 agent turns not in ['hi']"
+      },
+      {
+        "check_type": "no_loop",
+        "check_key": "agent_repeats",
+        "passed": true,
+        "must_pass": false,
+        "evidence_turns": [
+          5,
+          11
+        ],
+        "detail": "No repeated utterance loop"
+      },
+      {
+        "check_type": "amount_confirmed",
+        "check_key": "emi_amount",
+        "passed": true,
+        "must_pass": true,
+        "evidence_turns": [
+          2,
+          5,
+          11
+        ],
+        "detail": "Agent stated 4500 correctly"
+      }
+    ],
+    "metrics": {
+      "response_latency_p50_ms": 4924.0,
+      "response_latency_p95_ms": 5125.6,
+      "response_latency_count": 5,
+      "agent_overlap_starts": 0,
+      "first_greeting_latency_ms": 3840,
+      "barge_in_attempts": 0,
+      "barge_in_honoured": 0,
+      "barge_in_honoured_rate": null,
+      "agent_stop_time_p50_ms": null,
+      "silence_gaps_over_2s": 13,
+      "agent_talk_ratio": 0.613913782447466,
+      "repeated_utterances": 1,
+      "caller_wer": 0.13793103448275862,
+      "caller_wer_turns": 5,
+      "extra": {}
+    }
+  }
+}

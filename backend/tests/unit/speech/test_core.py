@@ -24,10 +24,10 @@ from pareeksha.speech import (
     provider_status,
 )
 from pareeksha.speech import http as speech_http
-from pareeksha.speech.text import has_speakable_text
 from pareeksha.speech.providers.deepgram import DeepgramSTT, DeepgramTTS
 from pareeksha.speech.providers.elevenlabs import ElevenLabsSTT
 from pareeksha.speech.providers.gnani import GnaniSTT, GnaniTTS
+from pareeksha.speech.text import has_speakable_text
 from pareeksha.speech.wav import pcm_to_wav, wav_info
 
 from .conftest import make_settings

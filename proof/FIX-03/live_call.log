@@ -1,0 +1,15 @@
+INFO  gnani | [TTS REST] synthesize start | request_id=req_fb5729f0225b | model=timbre-v3.0 | voice=Chetana
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_fb5729f0225b
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_891f0735597e | language=hi-IN
+2026-10-30 18:12:31,744 gnani [STT REST] transcribe_bytes start | request_id=req_891f0735597e | language=hi-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_891f0735597e
+2026-10-30 18:12:33,315 gnani [STT REST] transcribe_bytes complete | request_id=req_891f0735597e
+INFO  gnani | [TTS REST] synthesize start | request_id=req_c58d9ef30639 | model=timbre-v3.0 | voice=Avinash
+2026-10-30 18:12:33,319 gnani [TTS REST] synthesize start | request_id=req_c58d9ef30639 | model=timbre-v3.0 | voice=Avinash
+INFO  gnani | [TTS REST] synthesize complete | request_id=req_c58d9ef30639
+2026-10-30 18:12:37,196 gnani [TTS REST] synthesize complete | request_id=req_c58d9ef30639
+INFO  gnani | [STT REST] transcribe_bytes start | request_id=req_ea3850798e88 | language=hi-IN
+INFO  gnani | [STT REST] transcribe_bytes complete | request_id=req_ea3850798e88
+2026-10-30 18:12:52,149 mock_agent gnani usage (cumulative, uncached): {"tts": {"calls": 5, "audio_seconds": 38.0, "chars": 536}, "stt_rest": {"calls": 5, "audio_seconds": 11.72, "chars": 0}}
+call 3c391613-6813-4647-8e3e-3c0ec56b6550 end_reason=agent_hangup error=None
+wrote proof/FIX-03/live_call.json

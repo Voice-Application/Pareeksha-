@@ -418,7 +418,7 @@ class Dialog:
         """The caller did not answer the question: ask it again in other words, never advance, never loop."""
         self.reasks += 1
         if self.reasks > 3:
-            tool = (
+            tool: ToolCall = (
                 "transfer_to_human",
                 {"reason": "could_not_capture_date"},
                 {"status": "transferred"},
@@ -453,7 +453,7 @@ class Dialog:
                 return Reply(WAIVER_PROMISE[lang], lang, stage=self.stage)
             self.waivers += 1
             if self.waivers == 1:
-                tool = (
+                tool: ToolCall = (
                     "escalate_waiver_request",
                     {"reason": "caller_asked_late_fee_waiver"},
                     {"ok": True},

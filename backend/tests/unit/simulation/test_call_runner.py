@@ -23,6 +23,7 @@ from pareeksha.simulation.models import CallSpec, SimulationSettings
 from pareeksha.simulation.processors import split_for_tts
 from pareeksha.simulation.runner import CallOutcome, CallRunner
 from pareeksha.simulation.runtime import BrainCallerSource, CallerLine
+from pareeksha.speech.text import has_speakable_text
 from tests.integration.mock_agent_harness import TONE, FakeSpeech, running_agent
 from tests.unit.llm.test_client import make as make_llm
 from tests.unit.simulation.simfakes import (
@@ -425,23 +426,23 @@ async def test_a_line_with_nothing_to_speak_is_local_silence_not_a_tts_request()
         outcome = await run_call(
             make_spec(url), ScriptedCaller(["..."]), tts=tts, settings=settings
         )
-    assert tts.said == []
+    assert "..." not in tts.said and all(has_speakable_text(t) for t in tts.said)
     r = outcome.result
     assert r.end_reason != "infra_error"
     turn = next(t for t in r.turns if t.speaker == "caller")
     assert turn.text == "..."
     assert (turn.end_ms - turn.start_ms) / 1000 == pytest.approx(1.5, abs=0.15)
     assert [e["seconds"] for e in events(outcome, "caller_silence")] == [1.5]
-    assert events(outcome, "caller_tts") == []
+    assert 1 not in [e["utt_id"] for e in events(outcome, "caller_tts")]  # utt 1 is the "..." line
 
 
 async def test_a_trailing_punctuation_only_part_is_dropped_not_sent_to_tts() -> None:
     agent = ReactiveAgent([0.6, 0.6], hangup=True)
     tts = FakeTTS(seconds_per_char=0.01)
-    line = "Hello, thank you for calling me back today. ..."
+    line = "Hello, thank you for calling me back today about the EMI. ..."
     async with agent_server(agent) as url:
         outcome = await run_call(make_spec(url), ScriptedCaller([line]), tts=tts)
-    assert tts.said == ["Hello, thank you for calling me back today."]
+    assert tts.said == ["Hello, thank you for calling me back today about the EMI."]
     assert outcome.result.end_reason == "agent_hangup"
 
 

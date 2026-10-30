@@ -34,7 +34,7 @@ jobs:
         run: ruff check . && ruff format --check .
       - name: Types
         working-directory: backend
-        run: mypy pareeksha
+        run: mypy   # files = pareeksha, tests, ../mock_agent (pyproject.toml)
       - name: Unit, evaluation, judge and contract tests (no external services)
         working-directory: backend
         run: python -m pytest tests/unit tests/evaluation tests/judge tests/contract -q -p no:cacheprovider

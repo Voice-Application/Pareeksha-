@@ -226,7 +226,7 @@ async def test_streaming_against_local_websocket_server() -> None:
         await ws.close()
 
     async with serve(handler, "127.0.0.1", 0) as server:
-        port = server.sockets[0].getsockname()[1]
+        port = next(iter(server.sockets)).getsockname()[1]
         stt = DeepgramSTT(SETTINGS, ws_url=f"ws://127.0.0.1:{port}")
         events = [e async for e in stt.transcribe_stream(_chunks(), "hi-IN", sample_rate=16000)]
     assert [(e.text, e.is_final) for e in events] == [("hel", False), ("hello", True)]
@@ -251,7 +251,7 @@ async def test_streaming_rejected_handshake_is_permanent() -> None:
         await ws.close()
 
     async with serve(handler, "127.0.0.1", 0, process_request=reject) as server:  # type: ignore[arg-type]
-        port = server.sockets[0].getsockname()[1]
+        port = next(iter(server.sockets)).getsockname()[1]
         stt = DeepgramSTT(SETTINGS, ws_url=f"ws://127.0.0.1:{port}")
         with pytest.raises(SpeechPermanentError, match="401"):
             _ = [e async for e in stt.transcribe_stream(_chunks(), "hi-IN")]
