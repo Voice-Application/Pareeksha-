@@ -1,0 +1,8 @@
+gitleaks 8.30.0 detect (full history, 160 commits): 111 findings, values redacted
+ 48 generic-api-key proof/API-03
+ 36 generic-api-key proof/INFRA-02
+  8 generic-api-key backend/tests/unit/integrations
+  8 curl-auth-header proof/TL-01
+  4 curl-auth-header proof/API-02
+  4 curl-auth-user web/scripts
+  3 generic-api-key proof/VOICE-05

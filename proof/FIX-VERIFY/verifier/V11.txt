@@ -1,0 +1,6 @@
+scripts/verify/run_all.sh 11
+== V11: Repo public, tagged v1.0.0, demo video + launch post published
+FAIL V11: tag v1.0.0 does not exist on origin (+1 more) (evidence: proof/verify/V11.md)
+
+| 11 | Repo public, tagged v1.0.0, demo video + launch post published | **FAIL** | [proof/verify/V11.md](verify/V11.md) |
+make: *** [Makefile:17: verify-step] Error 1

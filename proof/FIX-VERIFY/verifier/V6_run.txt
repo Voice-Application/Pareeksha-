@@ -1,0 +1,5 @@
+scripts/verify/run_all.sh 6
+== V6: Duplicate delivery and worker crash give one evaluation and one CRM note
+PASS V6: one evaluation, no duplicate delivery after replay x2 and SIGKILL (evidence: proof/verify/V6.md)
+
+| 6 | Duplicate delivery and worker crash give one evaluation and one CRM note | **PASS** | [proof/verify/V6.md](verify/V6.md) |
