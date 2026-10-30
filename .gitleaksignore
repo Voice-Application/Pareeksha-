@@ -3,13 +3,13 @@
 # text on a new commit, is still reported. Each finding was checked against `git show <commit>:<file>` line by line.
 # Source of the list: proof/FIX-VERIFY/verifier/gitleaks_report.json (origin/qa/FIX-VERIFY). 111 fingerprints.
 
-# curl-auth-header proof/API-02/capture.sh (4): curl line uses the shell variable $A (A="Authorization: Bearer $PAREEKSHA_API_KEY"); no literal token is stored
+# curl-auth-header proof/API-02/capture.sh (4): curl line that expands a shell variable holding the auth header; no literal token is stored in the file
 2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/API-02/capture.sh:curl-auth-header:41
 60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/API-02/capture.sh:curl-auth-header:41
 69f600e15b5aba4495b277f25e2d033b338af55b:proof/API-02/capture.sh:curl-auth-header:41
 c36dce122b1a3130296de01ab49035773ba72587:proof/API-02/capture.sh:curl-auth-header:41
 
-# curl-auth-header proof/TL-01/live_server.txt (8): recorded session: a curl without a header (line 1) and one with the literal placeholder 'Bearer pk_live_x' to show a 401 (line 23); not a real key
+# curl-auth-header proof/TL-01/live_server.txt (8): recorded session: one curl without an auth header and one with a literal placeholder token (not a real key) that shows a 401
 2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/TL-01/live_server.txt:curl-auth-header:1
 2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/TL-01/live_server.txt:curl-auth-header:23
 60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/TL-01/live_server.txt:curl-auth-header:1
@@ -19,13 +19,13 @@ c36dce122b1a3130296de01ab49035773ba72587:proof/API-02/capture.sh:curl-auth-heade
 f38fcfd98a17c13af07f3278aeadedf6b43f85a2:proof/TL-01/live_server.txt:curl-auth-header:1
 f38fcfd98a17c13af07f3278aeadedf6b43f85a2:proof/TL-01/live_server.txt:curl-auth-header:23
 
-# curl-auth-user web/scripts/check-gate.sh (4): curl -s -o /dev/null http://127.0.0.1:3101/ readiness loop; matches the rule on '-s'/'-o' flags, no credential
+# curl-auth-user web/scripts/check-gate.sh (4): readiness-loop curl whose option flags match the rule; no credential on the line
 2f68426f00f970808ce2e7749f23c80b6b1284b7:web/scripts/check-gate.sh:curl-auth-user:8
 60d9abb2ba9d06d14515e0269166111c2c6f2203:web/scripts/check-gate.sh:curl-auth-user:8
 69f600e15b5aba4495b277f25e2d033b338af55b:web/scripts/check-gate.sh:curl-auth-user:8
 f0b54983135e71bb130372d123c757971c3b36c6:web/scripts/check-gate.sh:curl-auth-user:8
 
-# generic-api-key backend/tests/unit/integrations/test_webhook_sink.py (8): dummy signing secrets in a unit test (SECRET = '0123456789abcdef-signing', 'previous-secret-value'); fixtures, never valid anywhere
+# generic-api-key backend/tests/unit/integrations/test_webhook_sink.py (8): dummy test signing secrets (a 16-hex-prefixed string and a placeholder for the previous secret) in a unit test; fixtures, never valid anywhere
 2f68426f00f970808ce2e7749f23c80b6b1284b7:backend/tests/unit/integrations/test_webhook_sink.py:generic-api-key:328
 2f68426f00f970808ce2e7749f23c80b6b1284b7:backend/tests/unit/integrations/test_webhook_sink.py:generic-api-key:46
 33462a010e34ac1c45ce70430fc0fb0fd38e26d5:backend/tests/unit/integrations/test_webhook_sink.py:generic-api-key:320
@@ -35,7 +35,7 @@ f0b54983135e71bb130372d123c757971c3b36c6:web/scripts/check-gate.sh:curl-auth-use
 69f600e15b5aba4495b277f25e2d033b338af55b:backend/tests/unit/integrations/test_webhook_sink.py:generic-api-key:328
 69f600e15b5aba4495b277f25e2d033b338af55b:backend/tests/unit/integrations/test_webhook_sink.py:generic-api-key:46
 
-# generic-api-key proof/API-03/e2e.txt (48): Kafka partition keys, event_ids and call/run UUIDs printed in a recorded e2e log (key=<uuid>, event_id=<uuid>); identifiers, not credentials
+# generic-api-key proof/API-03/e2e.txt (48): Kafka message keys and event/call UUIDs printed in a recorded e2e log; identifiers, not credentials
 2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/API-03/e2e.txt:generic-api-key:428
 2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/API-03/e2e.txt:generic-api-key:429
 2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/API-03/e2e.txt:generic-api-key:430
@@ -85,7 +85,7 @@ c0ca61d72bacce803f90ff52e28df84880ee1812:proof/API-03/e2e.txt:generic-api-key:43
 c0ca61d72bacce803f90ff52e28df84880ee1812:proof/API-03/e2e.txt:generic-api-key:438
 c0ca61d72bacce803f90ff52e28df84880ee1812:proof/API-03/e2e.txt:generic-api-key:439
 
-# generic-api-key proof/INFRA-02/demo.txt (36): 'enqueued event_id=<uuid> key=<uuid>' lines of the outbox demo log; Kafka message key and event id, not credentials
+# generic-api-key proof/INFRA-02/demo.txt (36): event id and Kafka message key (both UUIDs) in an outbox demo log; identifiers, not credentials
 2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/INFRA-02/demo.txt:generic-api-key:35
 2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/INFRA-02/demo.txt:generic-api-key:36
 2f68426f00f970808ce2e7749f23c80b6b1284b7:proof/INFRA-02/demo.txt:generic-api-key:37
@@ -123,7 +123,7 @@ a1727ef326f61e34a97285a823304b733e45a95c:proof/INFRA-02/demo.txt:generic-api-key
 a1727ef326f61e34a97285a823304b733e45a95c:proof/INFRA-02/demo.txt:generic-api-key:51
 a1727ef326f61e34a97285a823304b733e45a95c:proof/INFRA-02/demo.txt:generic-api-key:67
 
-# generic-api-key proof/VOICE-05/pytest_full.txt (3): pytest assertion diff printing a Kafka message key 'misrouted-<uuid>' from a DLQ test; test data, not a credential
+# generic-api-key proof/VOICE-05/pytest_full.txt (3): pytest assertion diff that prints a Kafka message key made from a UUID in a DLQ test; test data, not a credential
 00a47b15112fe00c7de161c8a9b37b33b0efb0b8:proof/VOICE-05/pytest_full.txt:generic-api-key:167
 60d9abb2ba9d06d14515e0269166111c2c6f2203:proof/VOICE-05/pytest_full.txt:generic-api-key:167
 69f600e15b5aba4495b277f25e2d033b338af55b:proof/VOICE-05/pytest_full.txt:generic-api-key:167
