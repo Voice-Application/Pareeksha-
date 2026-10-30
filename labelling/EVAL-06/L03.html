@@ -1,0 +1,29 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Call L03</title><style>
+:root{--fg:#1a1d21;--muted:#5b6470;--bg:#fbfbfa;--card:#fff;--line:#e3e5e8;--agent:#0f5e66;--caller:#6b3fa0;--tool:#8a5a00}
+@media (prefers-color-scheme:dark){:root{--fg:#e7e9ec;--muted:#9aa3ad;--bg:#14171a;--card:#1c2024;--line:#2c3238;--agent:#5fc4cc;--caller:#c4a3f0;--tool:#e0b25c}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);
+font:16px/1.5 system-ui,-apple-system,"Segoe UI","Noto Sans","Noto Sans Kannada","Noto Sans Devanagari",sans-serif}
+main{max-width:860px;margin:0 auto;padding:16px}a{color:inherit}
+h1{font-size:1.4rem;margin:.5rem 0}h2{font-size:1.05rem;margin:1.2rem 0 .4rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:10px 0}
+.muted{color:var(--muted);font-size:.9rem}audio{width:100%;position:sticky;top:0;z-index:2;background:var(--bg)}
+.turn{display:grid;grid-template-columns:4.2rem 1fr;gap:4px 10px;padding:8px 0;border-top:1px solid var(--line)}
+.ts{font-variant-numeric:tabular-nums;color:var(--muted);background:none;border:0;padding:0;font:inherit;cursor:pointer;text-align:left}
+.ts:hover{text-decoration:underline}.who{font-weight:600}.agent .who{color:var(--agent)}.caller .who{color:var(--caller)}
+.tool .who{color:var(--tool)}.gloss{color:var(--muted);font-style:italic}.gloss b{font-style:normal;font-weight:600;font-size:.8rem}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:2px 12px;margin:0}dt{color:var(--muted)}dd{margin:0}
+nav{display:flex;justify-content:space-between;gap:8px;margin:8px 0}ul.calls{columns:3 10rem;padding-left:1.2rem}
+code{font-size:.9em}
+</style></head><body><main><nav><span><a href="L02.html">&larr; L02</a></span><a href="index.html">All calls</a><span><a href="L04.html">L04 &rarr;</a></span></nav><h1>Call L03</h1>
+<p class="muted">Caller language: English (India) · Length 1:06.9 ·
+Label this call in <code>labels.csv</code>, row <b>L03</b>. See <a href="GUIDE.md">GUIDE.md</a> for the scores.</p>
+<audio id="a" controls preload="metadata" src="audio/L03.mp3"></audio>
+<div class="card"><h2>What the simulated caller was asked to do</h2><p>Convince the agent you paid this month&#x27;s EMI via UPI 3 days ago and get it to note your UTR number instead of demanding payment.</p>
+<h2>Facts on file (synthetic)</h2><dl><dt>utr</dt><dd>UTR-555-0100</dd><dt>loan_id</dt><dd>SHK-000123</dd><dt>paid_on</dt><dd>3 days ago</dd><dt>emi_amount</dt><dd>4500</dd><dt>customer_name</dt><dd>Ravi Kumar</dd></dl>
+<h2>Success criteria for the agent</h2><p>Agent asks for or accepts the UTR, does not ask for payment again, confirms it will be verified, ends politely.</p></div>
+<h2>Transcript</h2>
+<p class="muted">Speech-to-text of the recording (Gnani), so it can contain recognition errors: the audio is the
+source of truth. Click a timestamp to play from there.</p>
+<div class="card"><div class="turn agent"><button class="ts" data-t="508">0:00.5</button><div><span class="who">Agent</span> <span class="muted">(0:00.5–0:07.8)</span><div lang="en-IN">this call is being recorded for quality and compliance purposes hello this is suraksha finance am i speaking with the account holder</div></div></div><div class="turn caller"><button class="ts" data-t="13863">0:13.9</button><div><span class="who">Caller</span> <span class="muted">(0:13.9–0:20.6)</span><div lang="en-IN">Haan, main Ravi Kumar bol rahi hoon... actually Ravi Kumar ka account hai. Kya baat hai?</div></div></div><div class="turn agent"><button class="ts" data-t="27940">0:27.9</button><div><span class="who">Agent</span> <span class="muted">(0:27.9–0:29.7)</span><div lang="en-IN">which date would you be able to pay on</div></div></div><div class="turn caller"><button class="ts" data-t="34163">0:34.2</button><div><span class="who">Caller</span> <span class="muted">(0:34.2–0:46.1)</span><div lang="en-IN">Arre, payment toh ho gaya hai! Maine is mahine ka EMI UPI se teen din pehle hi bhar diya tha, four thousand five hundred rupees.</div></div></div><div class="turn agent"><button class="ts" data-t="37680">0:37.7</button><div><span class="who">Agent</span> <span class="muted">(0:37.7–0:38.5)</span><div lang="en-IN">i am calling from</div></div></div><div class="turn caller"><button class="ts" data-t="57083">0:57.1</button><div><span class="who">Caller</span> <span class="muted">(0:57.1–0:58.9)</span><div lang="en-IN">Hello, are you still there?</div></div></div></div>
+<nav><span><a href="L02.html">&larr; L02</a></span><a href="index.html">All calls</a><span><a href="L04.html">L04 &rarr;</a></span></nav>
+<script>document.querySelectorAll('.ts').forEach(b=>b.addEventListener('click',()=>{const a=document.getElementById('a');a.currentTime=b.dataset.t/1000;a.play();}));</script></main></body></html>

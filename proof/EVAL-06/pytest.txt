@@ -1,0 +1,33 @@
+$ python -m pytest tests/unit/test_calibration_import_labels.py -v -p no:cacheprovider
+tests/unit/test_calibration_import_labels.py::test_dimensions_match_rubric PASSED [  6%]
+tests/unit/test_calibration_import_labels.py::test_valid_rows_map_to_review_bodies PASSED [ 13%]
+tests/unit/test_calibration_import_labels.py::test_invalid_rows_are_rejected[rows0-not labelled: L02] PASSED [ 20%]
+tests/unit/test_calibration_import_labels.py::test_invalid_rows_are_rejected[rows1-appears more than once] PASSED [ 26%]
+tests/unit/test_calibration_import_labels.py::test_invalid_rows_are_rejected[rows2-not in the key] PASSED [ 33%]
+tests/unit/test_calibration_import_labels.py::test_invalid_rows_are_rejected[rows3-passed must be yes or no] PASSED [ 40%]
+tests/unit/test_calibration_import_labels.py::test_invalid_rows_are_rejected[rows4-critical must be yes or no] PASSED [ 46%]
+tests/unit/test_calibration_import_labels.py::test_invalid_rows_are_rejected[rows5-task_completion must be an integer 0-4] PASSED [ 53%]
+tests/unit/test_calibration_import_labels.py::test_invalid_rows_are_rejected[rows6-empathy_tone must be an integer 0-4] PASSED [ 60%]
+tests/unit/test_calibration_import_labels.py::test_invalid_rows_are_rejected[rows7-escalation must be an integer 0-4] PASSED [ 66%]
+tests/unit/test_calibration_import_labels.py::test_invalid_rows_are_rejected[rows8-label_id is empty] PASSED [ 73%]
+tests/unit/test_calibration_import_labels.py::test_all_problems_reported_together PASSED [ 80%]
+tests/unit/test_calibration_import_labels.py::test_csv_and_key_round_trip PASSED [ 86%]
+tests/unit/test_calibration_import_labels.py::test_csv_missing_column PASSED [ 93%]
+tests/unit/test_calibration_import_labels.py::test_disagreements PASSED  [100%]
+============================== 15 passed in 0.05s ==============================
+
+$ python -m pytest tests/unit tests/evaluation tests/judge tests/contract -q -p no:cacheprovider   (CI set)
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/contract/test_schema_dts_fresh.py::test_committed_schema_dts_matches_the_backend_openapi
+1 failed, 991 passed, 1 warning in 193.28s (0:03:13)
+
+Note: test_schema_dts_fresh fails identically on unmodified main @5ccf328 in this sandbox: 'AssertionError: run `npm ci` in web/ first' (web/node_modules absent; Docker Hub rate limit also blocked the web image). Unrelated to EVAL-06.
+
+$ ruff check . && ruff format --check .   (backend, after fixing import order in the new test)
+All checks passed!
+340 files already formatted
+15 passed in 0.06s
+
+$ ruff check --extend-ignore E501 ../scripts/calibration   (scripts are outside CI lint; remaining E501 are long HTML/CSS/SQL string literals)
+All checks passed!
