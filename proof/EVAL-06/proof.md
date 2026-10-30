@@ -163,12 +163,10 @@ python3 scripts/calibration/import_labels.py            # reviewer "preetham"; v
 
   To restore before importing labels, on a fresh stack (`.env` with `PAREEKSHA_API_KEY` set):
   ```
-  docker compose up -d postgres
-  docker compose run --rm migrate                 # creates the schema; the dump then needs an empty public schema:
-  docker compose exec -T postgres psql -U pareeksha -d pareeksha -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+  docker compose up -d postgres                   # fresh pg-data volume: empty database, before any migrate
   zcat proof/EVAL-06/pareeksha_db.sql.gz | docker compose exec -T postgres psql -U pareeksha -d pareeksha -v ON_ERROR_STOP=1 -q
   docker compose run --rm --no-deps api python -m pareeksha.seed   # re-adds the API key from PAREEKSHA_API_KEY (idempotent for the rest)
-  docker compose up -d api
+  docker compose up -d api                        # its migrate step finds alembic at head and changes nothing
   python3 scripts/calibration/import_labels.py
   ```
   Re-running `run_batch.py` + `export_packet.py` on the target stack is the alternative, but it gives new calls
