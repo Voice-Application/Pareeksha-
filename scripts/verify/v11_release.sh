@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # V11 (PRD section 8 portfolio): repo PUBLIC, tag v1.0.0, demo video + launch post links in proof/PJM-01/release.md
-# return HTTP 200, gitleaks clean. Never makes anything public: it only reads state.
+# return HTTP 200, gitleaks clean (full history; reviewed false positives are listed per fingerprint in .gitleaksignore at the repo root). Never makes anything public: it only reads state.
 cd "$(dirname "$0")/../.." && source scripts/verify/lib.sh
 begin 11 "Repo public, tagged v1.0.0, demo video + launch post published"
 problems=(); pending=()
@@ -43,7 +43,7 @@ if [ -z "$GL" ] && [ "$(uname -s)-$(uname -m)" = Linux-x86_64 ]; then
   [ -x "$gdir/gitleaks" ] && GL="$gdir/gitleaks"
 fi
 if [ -n "$GL" ]; then
-  if "$GL" detect --no-banner --redact --report-format json --report-path "$OUT/V11.gitleaks.json" >"$OUT/V11.gitleaks.log" 2>&1; then
+  if "$GL" detect --source "$ROOT" --no-banner --redact --report-format json --report-path "$OUT/V11.gitleaks.json" >"$OUT/V11.gitleaks.log" 2>&1; then
     note "gitleaks $($GL version 2>/dev/null): clean over the full git history"
   else problems+=("gitleaks found secrets (see proof/verify/V11.gitleaks.json, values redacted)"); fi
 elif command -v docker >/dev/null && docker run --rm -v "$ROOT:/repo" "zricethezav/gitleaks:v$GITLEAKS_VERSION" detect --source /repo --no-banner --redact >"$OUT/V11.gitleaks.log" 2>&1; then
