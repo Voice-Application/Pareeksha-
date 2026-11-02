@@ -257,20 +257,20 @@ source of truth. Click a timestamp to play from there.{" Lines marked <b>MT glos
     return page(f"Call {lid}", body)
 
 
-def index_page(rows: list[tuple[str, dict[str, Any]]]) -> str:
+def index_page(rows: list[tuple[str, dict[str, Any]]], title: str) -> str:
     links = "".join(
         f'<li><a href="{lid}.html">{lid}</a> <span class="muted">{LANG_NAMES.get(c.get("language") or "", "")}, '
         f"{fmt_ms(c.get('duration_ms') or 0)}</span></li>"
         for lid, c in rows
     )
-    body = f"""<h1>EVAL-06 blind labelling packet</h1>
-<p>30 simulated calls to a synthetic EMI-reminder voice agent, in random order. Listen to each call, then fill
+    body = f"""<h1>{title} blind labelling packet</h1>
+<p>{len(rows)} simulated calls to a synthetic EMI-reminder voice agent, in random order. Listen to each call, then fill
 one row of <a href="labels.csv"><code>labels.csv</code></a> per call. Read <a href="GUIDE.md">GUIDE.md</a> first
 (one page: the 7 scores, what counts as critical, and when a call passes).</p>
 <p class="muted">Nothing here shows how the automatic judge scored a call; please do not look it up in the app
 until you have finished labelling. All people, loans and numbers are synthetic.</p>
 <ul class="calls">{links}</ul>"""
-    return page("EVAL-06 labelling", body)
+    return page(f"{title} labelling", body)
 
 
 def main() -> int:
@@ -281,23 +281,29 @@ def main() -> int:
         default=None,
         help="shuffle seed (default: random, recorded in .key.json)",
     )
+    ap.add_argument("--batch", type=Path, default=PROOF / "batch.json")
+    ap.add_argument("--packet", type=Path, default=PACKET, help="output folder")
+    ap.add_argument("--proof", type=Path, default=PROOF, help="gloss cache / usage folder")
+    ap.add_argument("--prefix", default="L", help="label id prefix (L01.. / H01..)")
+    ap.add_argument("--title", default="EVAL-06")
     args = ap.parse_args()
+    packet, proof, prefix = args.packet, args.proof, args.prefix
     batch = [
         r
-        for r in json.loads((PROOF / "batch.json").read_text())
+        for r in json.loads(args.batch.read_text())
         if r.get("evaluation_status") == "ok"
     ]
     if len(batch) != 30:
-        raise SystemExit(f"expected 30 evaluated calls in batch.json, found {len(batch)}")
+        raise SystemExit(f"expected 30 evaluated calls in {args.batch}, found {len(batch)}")
     seed = args.seed if args.seed is not None else random.SystemRandom().randrange(2**31)
     order = list(batch)
     random.Random(seed).shuffle(order)
     scenarios = {s["title"]: s for s in vapi.items("/scenarios")}
-    cache_file, usage_file = PROOF / "gloss_cache.json", PROOF / "gloss_usage.json"
+    cache_file, usage_file = proof / "gloss_cache.json", proof / "gloss_usage.json"
     cache = json.loads(cache_file.read_text()) if cache_file.exists() else {}
     usage = json.loads(usage_file.read_text()) if usage_file.exists() else []
-    PACKET.mkdir(parents=True, exist_ok=True)
-    ids = [f"L{i:02d}" for i in range(1, 31)]
+    packet.mkdir(parents=True, exist_ok=True)
+    ids = [f"{prefix}{i:02d}" for i in range(1, 31)]
     key, pages = {}, []
     for i, (lid, row) in enumerate(zip(ids, order)):
         call = vapi.call(row["call_id"])
@@ -308,9 +314,9 @@ def main() -> int:
             cache_file.write_text(json.dumps(cache, indent=1, ensure_ascii=False))
             usage_file.write_text(json.dumps(usage, indent=1))
         glosses = {int(k): v for k, v in cache[row["call_id"]].items()}
-        download_mp3(row["call_id"], PACKET / "audio" / f"{lid}.mp3")
+        download_mp3(row["call_id"], packet / "audio" / f"{lid}.mp3")
         prev, nxt = (ids[i - 1] if i else None), (ids[i + 1] if i + 1 < len(ids) else None)
-        (PACKET / f"{lid}.html").write_text(
+        (packet / f"{lid}.html").write_text(
             call_page(lid, prev, nxt, call, scenarios[row["scenario"]], glosses)
         )
         key[lid] = {"call_id": row["call_id"]}
@@ -319,17 +325,17 @@ def main() -> int:
             f"{lid} <- {row['call_id']} turns={len(call['turns'])} glossed={len(glosses)}",
             flush=True,
         )
-    (PACKET / "index.html").write_text(index_page(pages))
-    (PACKET / ".key.json").write_text(
+    (packet / "index.html").write_text(index_page(pages, args.title))
+    (packet / ".key.json").write_text(
         json.dumps({"shuffle_seed": seed, "labels": key}, indent=1) + "\n"
     )
-    with (PACKET / "labels.csv").open("w", newline="", encoding="utf-8") as fh:
+    with (packet / "labels.csv").open("w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
         w.writerow(COLUMNS)
         for lid in ids:
             w.writerow([lid] + [""] * (len(COLUMNS) - 1))
-    size = sum(p.stat().st_size for p in PACKET.rglob("*") if p.is_file())
-    print(f"packet: {PACKET} ({size / 1e6:.1f} MB), shuffle seed {seed}")
+    size = sum(p.stat().st_size for p in packet.rglob("*") if p.is_file())
+    print(f"packet: {packet} ({size / 1e6:.1f} MB), shuffle seed {seed}")
     return 0
 
 

@@ -1,5 +1,6 @@
-"""The LLM judge: renders ``judge_v1.j2``, calls the provider at temperature 0 with the pinned
-judge model, and validates evidence against the transcript (one repair retry on failure)."""
+"""The LLM judge: renders the active rubric's prompt (``judge_v2.j2``), calls the provider at
+temperature 0 with the pinned judge model, and validates evidence against the transcript (one repair
+retry on failure)."""
 
 from __future__ import annotations
 
@@ -10,7 +11,7 @@ from dataclasses import dataclass, field
 from pareeksha.evaluation.evidence import evidence_problems
 from pareeksha.evaluation.metrics import CallMetrics
 from pareeksha.evaluation.pii import mask_pii
-from pareeksha.evaluation.rubric import ANCHORS
+from pareeksha.evaluation.rubric import ACTIVE
 from pareeksha.evaluation.types import CheckResult, Disclosure, ForbiddenPhrase, ToolCall, Turn
 from pareeksha.llm.base import ChatMessage, LLMPurpose
 from pareeksha.llm.client import GenerationResult, LLMClient
@@ -19,7 +20,7 @@ from pareeksha.schemas.evaluation import JudgeOutput
 from pareeksha.schemas.personas import PersonaCreate
 from pareeksha.schemas.scenarios import ScenarioCreate
 
-JUDGE_PROMPT = "judge_v1"
+JUDGE_PROMPT = ACTIVE.prompt
 JUDGE_MAX_OUTPUT_TOKENS = 2500
 
 
@@ -70,7 +71,7 @@ def render_judge_prompt(data: JudgeInput) -> str:
         ],
         metrics=data.metrics,
         checks=list(data.checks),
-        rubric_anchors=ANCHORS,
+        rubric_anchors=ACTIVE.anchors,
     )
 
 

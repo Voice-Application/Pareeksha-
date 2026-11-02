@@ -41,12 +41,8 @@ def wav_to_pcm(wav: bytes) -> bytes:
 class GnaniAgentSpeech:
     """Real Gnani STT (REST) and TTS; TTS is disk-cached so repeated lines cost nothing."""
 
-    def __init__(
-        self, ledger: UsageLedger | None = None, cache_dir: Path | None = None
-    ) -> None:
-        cache = cache_dir or Path(
-            os.environ.get("MOCK_AGENT_TTS_CACHE", "/tmp/mock_agent_tts")
-        )
+    def __init__(self, ledger: UsageLedger | None = None, cache_dir: Path | None = None) -> None:
+        cache = cache_dir or Path(os.environ.get("MOCK_AGENT_TTS_CACHE", "/tmp/mock_agent_tts"))
         self.ledger = ledger if ledger is not None else UsageLedger()
         self._gnani = GnaniSpeech(
             os.environ.get("GNANI_API_KEY"), cache_dir=cache, ledger=self.ledger

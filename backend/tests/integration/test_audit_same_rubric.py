@@ -13,6 +13,7 @@ import pytest
 from httpx import AsyncClient
 
 from pareeksha.evaluation.evaluator import evaluate_call
+from pareeksha.evaluation.judge import JUDGE_PROMPT
 from pareeksha.evaluation.pg_stores import PgEvaluatorStore, RubricNotFoundError
 from pareeksha.evaluation.rubric import RUBRIC_VERSION
 from pareeksha.events.consumer import PermanentError
@@ -155,7 +156,7 @@ async def test_upload_and_simulation_use_the_same_rubric_and_judge_prompt(
     assert audit_eval["rubric_version_id"] == sim_eval["rubric_version_id"]
     assert audit_eval["version"] == sim_eval["version"] == RUBRIC_VERSION
     assert audit_eval["prompt_hash"] == sim_eval["prompt_hash"]
-    assert audit_eval["prompt_hash"].endswith(prompt_hash("judge_v1"))
+    assert audit_eval["prompt_hash"].endswith(prompt_hash(JUDGE_PROMPT))
     assert audit_eval["judge_model"] == sim_eval["judge_model"]
     assert audit_eval["temperature"] == sim_eval["temperature"] == 0
 

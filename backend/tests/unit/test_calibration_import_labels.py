@@ -336,7 +336,7 @@ def test_interim_report() -> None:
         ["L03"],
     )
     md = il.render_md(report)
-    assert md.startswith("# EVAL-06 calibration: judge vs owner labels (INTERIM)")
+    assert md.startswith("# Calibration: judge vs owner labels (INTERIM)")
     assert "**INTERIM: 2 of 3 calls labelled.**" in md
     assert "not assessed (n = 2 < 30)" in md
     assert "Wilson CI" in md and "bootstrap" in md
@@ -388,5 +388,5 @@ def test_final_report_heading() -> None:
         "labels_file": "x.csv",
     }
     md = il.render_md(il.build_report(labels, judge, cal, imported, None, [], 2))
-    assert md.startswith("# EVAL-06 calibration: judge vs owner labels (FINAL)")
+    assert md.startswith("# Calibration: judge vs owner labels (FINAL)")
     assert "INTERIM" not in md

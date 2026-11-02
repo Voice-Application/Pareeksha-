@@ -519,15 +519,17 @@ def render_md(report: dict[str, Any], extra: str = "") -> str:
     p, c = agr["passed"], agr["critical"]
     interim, pending = report["interim"], report["pending"]
     lines = [
-        "# EVAL-06 calibration: judge vs owner labels" + (" (INTERIM)" if interim else " (FINAL)"),
+        "# Calibration: judge vs owner labels" + (" (INTERIM)" if interim else " (FINAL)"),
         "",
     ]
+    rubrics = ", ".join(report.get("rubric_versions") or []) or "unknown rubric"
     if not interim:
         lines += [
-            f"**FINAL: all {report['total']} calls labelled by the owner.** This is the V9 measurement "
-            "for rubric-2026-10-v1.",
+            f"**FINAL: all {report['total']} calls labelled by the owner.** Judge: {rubrics}.",
             "",
         ]
+    if report.get("note"):
+        lines += [f"**{report['note']}**", ""]
     if interim:
         lines += [
             f"**INTERIM: {report['labelled']} of {report['total']} calls labelled.** Awaiting the owner: "
@@ -647,6 +649,9 @@ def build_report(
             }
         )
     return {
+        "rubric_versions": sorted(
+            {str(judge[lab.call_id].get("rubric_version")) for lab in labels}
+        ),
         "interim": len(labels) < total,
         "labelled": len(labels),
         "total": total,
@@ -695,6 +700,7 @@ def main(argv: list[str] | None = None) -> int:
         help='with --normalise-owner: ids the owner did not review, e.g. "L11-L30"; written blank',
     )
     ap.add_argument("--fill-json", type=Path, help="fill pending rows of --labels from this JSON")
+    ap.add_argument("--note", default="", help="a bold line under the heading (e.g. IN-SAMPLE)")
     ap.add_argument(
         "--expect-n",
         type=int,
@@ -791,6 +797,7 @@ def main(argv: list[str] | None = None) -> int:
     }
     owner_rows = read_csv(args.owner_raw) if args.owner_raw else None
     report = build_report(labels, judge, cal, imported, owner_rows, pending_ids(rows), len(key))
+    report["note"] = args.note
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "calibration.json").write_text(
         json.dumps(report, indent=1, ensure_ascii=False) + "\n"

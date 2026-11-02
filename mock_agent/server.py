@@ -3,6 +3,8 @@
 ``GET /health`` answers the compose healthcheck; every other path upgrades to a call session.
 Config: ``MOCK_BUGS`` (comma list of planted bugs), ``MOCK_AGENT_PORT`` (default 8765). A call's
 ``start.metadata["mock_bugs"]`` (list of names) overrides ``MOCK_BUGS`` for that call only.
+``MOCK_AGENT_DIALOG``: ``llm`` (default when ``DEEPSEEK_API_KEY`` is set; answers with the LLM, see
+``mock_agent.llm_dialog``) or ``scripted`` (the deterministic dialog in ``mock_agent.policy``).
 """
 
 from __future__ import annotations
@@ -31,6 +33,7 @@ from websockets.exceptions import ConnectionClosed
 from websockets.http11 import Request, Response
 
 from mock_agent.bugs import Bug, bugs_from_env, parse_bugs
+from mock_agent.llm_dialog import Completer, deepseek_completer, make_dialog
 from mock_agent.policy import Dialog, Reply
 from mock_agent.speech import GnaniAgentSpeech, Speech
 from mock_agent.vad import UtteranceDetector
@@ -45,12 +48,8 @@ BARGE_IN_FRAMES = 6
 
 def health_response(connection: ServerConnection, request: Request) -> Response | None:
     if request.path == "/health":
-        body = json.dumps(
-            {"status": "ok", "agent": "mock-emi", "protocol": "pareeksha-audio-v1"}
-        )
-        return Response(
-            200, "OK", Headers({"Content-Type": "application/json"}), body.encode()
-        )
+        body = json.dumps({"status": "ok", "agent": "mock-emi", "protocol": "pareeksha-audio-v1"})
+        return Response(200, "OK", Headers({"Content-Type": "application/json"}), body.encode())
     return None
 
 
@@ -58,9 +57,14 @@ class CallSession:
     """One call: VAD -> STT -> scripted dialog -> TTS paced at real time, with glass-box events."""
 
     def __init__(
-        self, ws: ServerConnection, speech: Speech, default_bugs: frozenset[Bug]
+        self,
+        ws: ServerConnection,
+        speech: Speech,
+        default_bugs: frozenset[Bug],
+        complete: Completer | None = None,
     ) -> None:
         self.ws = ws
+        self.complete = complete
         self.speech = speech
         self.bugs = default_bugs
         self.dialog = Dialog()
@@ -92,7 +96,7 @@ class CallSession:
         if override is not None:
             self.bugs = parse_bugs(override)
         self.t0 = time.monotonic()
-        self.dialog = Dialog(language=start.language_hint or "en-IN", bugs=self.bugs)
+        self.dialog = make_dialog(start.language_hint or "en-IN", self.bugs, self.complete)
         log.info(
             "call %s start lang=%s bugs=%s",
             start.call_id,
@@ -148,26 +152,19 @@ class CallSession:
                 # The agent already ended the call: never talk over its goodbye; if the caller cut it off,
                 # say the same goodbye again (its tool calls were already reported).
                 if self.playing is None or self.playing.done():
-                    await self._start_playback(
-                        dataclasses.replace(self.last_reply, tool_calls=())
-                    )
+                    await self._start_playback(dataclasses.replace(self.last_reply, tool_calls=()))
                 continue
             try:
                 heard = await self.speech.hear(utterance, self.dialog.language)
             except Exception:
-                log.exception(
-                    "speech-to-text failed; treating the utterance as not heard"
-                )
+                log.exception("speech-to-text failed; treating the utterance as not heard")
                 heard = ""
-            await self._send(
-                TranscriptMessage(role="user", text=heard, t_ms=self.now_ms())
-            )
+            await self._send(TranscriptMessage(role="user", text=heard, t_ms=self.now_ms()))
             replaying = not self.opening_finished
             if replaying:
-                self.dialog.opening_cut = (
-                    True  # the caller spoke over the disclosure: say it again
-                )
-            reply = self.dialog.respond(heard)
+                self.dialog.opening_cut = True  # the caller spoke over the disclosure: say it again
+            # the LLM dialog makes a network call: keep the event loop free for audio
+            reply = await asyncio.to_thread(self.dialog.respond, heard)
             await self._cancel_playback()
             await self._start_playback(reply, opening=replaying)
 
@@ -183,9 +180,7 @@ class CallSession:
 
     async def _speak(self, reply: Reply, opening: bool = False) -> None:
         self.last_reply = reply
-        await self._send(
-            TranscriptMessage(role="agent", text=reply.text, t_ms=self.now_ms())
-        )
+        await self._send(TranscriptMessage(role="agent", text=reply.text, t_ms=self.now_ms()))
         try:
             pcm = await self.speech.say(reply.text, reply.language)
             await self._stream_pcm(pcm)
@@ -222,14 +217,21 @@ async def serve_forever(
 ) -> None:
     engine = speech or GnaniAgentSpeech()
     default_bugs = bugs_from_env()
+    mode = os.environ.get("MOCK_AGENT_DIALOG", "").strip().lower()
+    complete = None if mode == "scripted" else deepseek_completer()
+    if mode == "llm" and complete is None:
+        raise SystemExit("MOCK_AGENT_DIALOG=llm needs DEEPSEEK_API_KEY")
 
     async def handler(ws: ServerConnection) -> None:
-        await CallSession(ws, engine, default_bugs).run()
+        await CallSession(ws, engine, default_bugs, complete).run()
 
-    async with serve(
-        handler, host, port, process_request=health_response, max_size=2**20
-    ):
-        log.info("mock agent on :%d bugs=%s", port, sorted(default_bugs))
+    async with serve(handler, host, port, process_request=health_response, max_size=2**20):
+        log.info(
+            "mock agent on :%d bugs=%s dialog=%s",
+            port,
+            sorted(default_bugs),
+            "llm" if complete else "scripted",
+        )
         await asyncio.Future()
 
 

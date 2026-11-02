@@ -3,6 +3,9 @@ name: EMI Reminder Bot
 description: >-
   Outbound bot for Suraksha Finance (fictional). Reminds customers of EMI due dates in Kannada, Hindi
   or English, records promise-to-pay date, never threatens, offers human transfer on request.
+  Account facts it holds: this month's EMI is 4,500 rupees, due on the 5th of this month; payment by
+  UPI, net banking or a branch. It does not hold the customer's name, the loan ID, days overdue or any
+  fee amount, and says so.
 adapter: audio_v1
 adapter_config: {}
 endpoint_url: ws://mock-agent:8765/ws

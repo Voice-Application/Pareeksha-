@@ -92,11 +92,28 @@ async def test_noise_profiles_are_the_eight_dsp_definitions(fresh_session_factor
     )
 
 
-async def test_rubric_v1_is_active_and_weights_sum_to_100(fresh_session_factory: Factory) -> None:
+async def test_rubrics_v1_and_v2_seeded_v2_active(fresh_session_factory: Factory) -> None:
     await seed_database(fresh_session_factory)
     async with fresh_session_factory() as session:
-        rubric = (await session.scalars(select(RubricVersions))).one()
-    assert rubric.version == "rubric-2026-10-v1" and rubric.is_active
+        rows = {r.version: r for r in await session.scalars(select(RubricVersions))}
+    assert set(rows) == {"rubric-2026-10-v1", "rubric-2026-10-v2"}
+    assert rows["rubric-2026-10-v2"].is_active and not rows["rubric-2026-10-v1"].is_active
+    # a database seeded before v2 (v1 active) is switched to the build's rubric on the next seed
+    async with fresh_session_factory() as session:
+        await session.execute(update(RubricVersions).values(is_active=False))
+        await session.execute(
+            update(RubricVersions)
+            .where(RubricVersions.version == "rubric-2026-10-v1")
+            .values(is_active=True)
+        )
+        await session.commit()
+    await seed_database(fresh_session_factory)
+    async with fresh_session_factory() as session:
+        active = (
+            await session.scalars(select(RubricVersions).where(RubricVersions.is_active))
+        ).one()
+    assert active.version == "rubric-2026-10-v2"
+    rubric = rows["rubric-2026-10-v1"]
     assert float(rubric.pass_threshold) == 80
     dims = rubric.dimensions
     assert isinstance(dims, list)

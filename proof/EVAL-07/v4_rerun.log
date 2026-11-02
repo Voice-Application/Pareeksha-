@@ -1,0 +1,2 @@
+scripts/verify/run_all.sh 4
+== V4: >= 4 of 5 planted bugs caught with cited turn indices

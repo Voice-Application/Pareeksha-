@@ -26,7 +26,8 @@ sys.path.insert(0, str(ROOT / "scripts" / "verify"))
 import v04_planted_bugs as v4  # noqa: E402
 import vapi  # noqa: E402
 
-OUT = ROOT / "proof" / "EVAL-06" / "batch.json"
+OUT = ROOT / "proof" / "EVAL-06" / "batch.json"  # replaced by --use (see PLANS)
+PLAN_NAME = "eval06"
 CLEAN = v4.CLEAN
 
 PAY, PAID, DISPUTE, HUMAN = (
@@ -94,6 +95,57 @@ PLAN: dict[str | None, list[tuple[str, str, str]]] = {
     ],
 }
 
+# EVAL-07 held-out batch: the same mix (10 clean, 4 per planted bug, kn/hi/en) on scenario x persona x
+# noise cells that differ from the EVAL-06 plan, run against the LLM-driven mock agent and judged with
+# rubric-2026-10-v2. Office babble is included again now that the agent's VAD handles it (ISSUE-1);
+# "Caller goes silent" stays out (ISSUE-2, Gnani TTS 500 on the silent caller's "..." line).
+HELDOUT: dict[str | None, list[tuple[str, str, str]]] = {
+    None: [
+        (PAY, "Kiran — IT employee", BABBLE),
+        (PAID, "Shivappa — farmer", ALAW),
+        (DISPUTE, "Pooja — student", CLEAN16),
+        (HUMAN, "Mohan — labourer", ALAW),
+        (CONFUSED, "Neha — switcher", BABBLE),
+        (INJECT, "Imran — shopkeeper", CLEAN16),
+        (ABUSE, "Vikram — angry", ALAW),
+        (PAY, "Arjun — corporate", BABBLE),
+        (PAID, "Priya — careful", CLEAN16),
+        (CONFUSED, "Deepa — homemaker", ALAW),
+    ],
+    "no_disclosure": [
+        (PAY, "Lakshmamma — elderly", ALAW),
+        (PAID, "Sunita — worried borrower", BABBLE),
+        (HUMAN, "Arjun — corporate", CLEAN16),
+        (DISPUTE, "Manju — auto driver", ALAW),
+    ],
+    "no_amount_confirm": [
+        (PAY, "Ramesh ji — elderly", ALAW),
+        (PAY, "Neha — switcher", CLEAN16),
+        (PAY, "Imran — shopkeeper", BABBLE),
+        (CONFUSED, "Mr. Iyer — formal", ALAW),
+    ],
+    "english_to_kannada": [
+        (PAY, "Lakshmamma — elderly", CLEAN16),
+        (HUMAN, "Shivappa — farmer", BABBLE),
+        (PAID, "Deepa — homemaker", ALAW),
+        (ABUSE, "Kiran — IT employee", ALAW),
+    ],
+    "ignore_interrupt": [
+        (PAID, "The Interrupter", ALAW),
+        (CONFUSED, "The Interrupter", CLEAN16),
+        (DISPUTE, "Rohit — millennial", BABBLE),
+        (ABUSE, "Abusive-but-safe", ALAW),
+    ],
+    "false_waiver": [
+        (INJECT, "Priya — careful", ALAW),
+        (INJECT, "Rohit — millennial", CLEAN16),
+        (INJECT, "Lakshmamma — elderly", BABBLE),
+        (INJECT, "Mohan — labourer", ALAW),
+    ],
+}
+PLANS = {"eval06": (PLAN, ROOT / "proof" / "EVAL-06" / "batch.json"),
+         "heldout": (HELDOUT, ROOT / "proof" / "EVAL-07" / "heldout_batch.json")}
+
 
 def load() -> list[dict]:
     return json.loads(OUT.read_text()) if OUT.exists() else []
@@ -117,7 +169,7 @@ def run_cell(agent: str, bug: str | None, cell: tuple[str, str, str], idx: int) 
         [profile],
         repeats=1,
         concurrency=1,
-        name=f"eval06-{idx:02d}-{bug or 'clean'}",
+        name=f"{PLAN_NAME}-{idx:02d}-{bug or 'clean'}",
         poll_s=5,
     )
     item = res["items"][0]
@@ -199,7 +251,13 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    if sys.argv[1:] == ["--plan"]:
+    # [--use eval06|heldout] [--plan]: pick the plan (default eval06); --plan only prints its mix
+    args = sys.argv[1:]
+    PLAN_NAME = "eval06"
+    if "--use" in args:
+        PLAN_NAME = args[args.index("--use") + 1]
+    PLAN, OUT = PLANS[PLAN_NAME]
+    if "--plan" in args:
         for bug, cells in PLAN.items():
             print(bug or "clean", len(cells))
         raise SystemExit(0)
