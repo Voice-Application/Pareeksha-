@@ -1,0 +1,341 @@
+{
+  "id": "0688d121-e5b6-4f99-b973-753033ee4eb8",
+  "dataset_id": "cb1ccb45-c6fd-43bc-8b4c-ec8ac101543b",
+  "progress": {
+    "done": 330,
+    "expected_results": 330
+  },
+  "aggregates": {
+    "kn-north": {
+      "clean_16k": {
+        "gnani-prisma": {
+          "n": 22,
+          "wer": 0.6094,
+          "wer_ci": [
+            0.5183,
+            0.6968
+          ],
+          "cer": 0.2228,
+          "entity_acc": 1.0,
+          "intent_preserved_rate": 0.9545
+        }
+      },
+      "pstn_8k_alaw": {
+        "gnani-prisma": {
+          "n": 22,
+          "wer": 0.618,
+          "wer_ci": [
+            0.5339,
+            0.6984
+          ],
+          "cer": 0.2326,
+          "entity_acc": 1.0,
+          "intent_preserved_rate": 0.9091
+        }
+      },
+      "pstn_street_10db": {
+        "gnani-prisma": {
+          "n": 22,
+          "wer": 0.6395,
+          "wer_ci": [
+            0.5459,
+            0.7246
+          ],
+          "cer": 0.29,
+          "entity_acc": 1.0,
+          "intent_preserved_rate": 0.7273
+        }
+      }
+    },
+    "kn-en-mix": {
+      "clean_16k": {
+        "gnani-prisma": {
+          "n": 22,
+          "wer": 0.283,
+          "wer_ci": [
+            0.2213,
+            0.348
+          ],
+          "cer": 0.0642,
+          "entity_acc": 0.75,
+          "intent_preserved_rate": 0.9545
+        }
+      },
+      "pstn_8k_alaw": {
+        "gnani-prisma": {
+          "n": 22,
+          "wer": 0.2604,
+          "wer_ci": [
+            0.1976,
+            0.3256
+          ],
+          "cer": 0.0642,
+          "entity_acc": 0.7778,
+          "intent_preserved_rate": 0.9091
+        }
+      },
+      "pstn_street_10db": {
+        "gnani-prisma": {
+          "n": 22,
+          "wer": 0.3057,
+          "wer_ci": [
+            0.2401,
+            0.3723
+          ],
+          "cer": 0.0912,
+          "entity_acc": 0.7361,
+          "intent_preserved_rate": 0.9091
+        }
+      }
+    },
+    "kn-mysuru": {
+      "clean_16k": {
+        "gnani-prisma": {
+          "n": 22,
+          "wer": 0.5058,
+          "wer_ci": [
+            0.4108,
+            0.5945
+          ],
+          "cer": 0.2281,
+          "entity_acc": 0.7692,
+          "intent_preserved_rate": 0.9091
+        }
+      },
+      "pstn_8k_alaw": {
+        "gnani-prisma": {
+          "n": 22,
+          "wer": 0.5233,
+          "wer_ci": [
+            0.4325,
+            0.6105
+          ],
+          "cer": 0.2407,
+          "entity_acc": 0.7692,
+          "intent_preserved_rate": 0.7727
+        }
+      },
+      "pstn_street_10db": {
+        "gnani-prisma": {
+          "n": 22,
+          "wer": 0.5872,
+          "wer_ci": [
+            0.4955,
+            0.6768
+          ],
+          "cer": 0.284,
+          "entity_acc": 0.7692,
+          "intent_preserved_rate": 0.4545
+        }
+      }
+    },
+    "kn-coastal": {
+      "clean_16k": {
+        "gnani-prisma": {
+          "n": 22,
+          "wer": 0.338,
+          "wer_ci": [
+            0.2818,
+            0.3866
+          ],
+          "cer": 0.0939,
+          "entity_acc": 0.8824,
+          "intent_preserved_rate": 1.0
+        }
+      },
+      "pstn_8k_alaw": {
+        "gnani-prisma": {
+          "n": 22,
+          "wer": 0.3427,
+          "wer_ci": [
+            0.2912,
+            0.3841
+          ],
+          "cer": 0.0998,
+          "entity_acc": 0.8235,
+          "intent_preserved_rate": 0.9545
+        }
+      },
+      "pstn_street_10db": {
+        "gnani-prisma": {
+          "n": 22,
+          "wer": 0.4178,
+          "wer_ci": [
+            0.3412,
+            0.4873
+          ],
+          "cer": 0.142,
+          "entity_acc": 0.7059,
+          "intent_preserved_rate": 0.8182
+        }
+      }
+    },
+    "hi-standard": {
+      "clean_16k": {
+        "gnani-prisma": {
+          "n": 22,
+          "wer": 0.0675,
+          "wer_ci": [
+            0.0391,
+            0.1029
+          ],
+          "cer": 0.0228,
+          "entity_acc": 0.9677,
+          "intent_preserved_rate": 1.0
+        }
+      },
+      "pstn_8k_alaw": {
+        "gnani-prisma": {
+          "n": 22,
+          "wer": 0.0675,
+          "wer_ci": [
+            0.0436,
+            0.1
+          ],
+          "cer": 0.0241,
+          "entity_acc": 0.9677,
+          "intent_preserved_rate": 1.0
+        }
+      },
+      "pstn_street_10db": {
+        "gnani-prisma": {
+          "n": 22,
+          "wer": 0.1043,
+          "wer_ci": [
+            0.0798,
+            0.1321
+          ],
+          "cer": 0.0475,
+          "entity_acc": 0.9677,
+          "intent_preserved_rate": 0.8636
+        }
+      }
+    }
+  },
+  "top_errors": [
+    {
+      "ref": "ತುಂಬಾ",
+      "hyp": "ತುಂಬ",
+      "count": 21
+    },
+    {
+      "ref": "ಅಂದ್ರೆ",
+      "hyp": "ಅಂದರೆ",
+      "count": 14
+    },
+    {
+      "ref": "1",
+      "hyp": "",
+      "count": 12
+    },
+    {
+      "ref": "ಎಲ್ಲಾ",
+      "hyp": "ಎಲ್ಲ",
+      "count": 12
+    },
+    {
+      "ref": "ಇದಾರೆ",
+      "hyp": "ಇದ್ದಾರೆ",
+      "count": 9
+    },
+    {
+      "ref": "ಮತ್ತೆ",
+      "hyp": "ಮತ್ತು",
+      "count": 9
+    },
+    {
+      "ref": "ಮಾಡಿದರೆ",
+      "hyp": "ಮಾಡಿದ್ದಾರೆ",
+      "count": 9
+    },
+    {
+      "ref": "ಆಹ್ಹ್",
+      "hyp": "",
+      "count": 7
+    },
+    {
+      "ref": "ಚಿಕ್",
+      "hyp": "ಚಿಕ್ಕ",
+      "count": 7
+    },
+    {
+      "ref": "अ",
+      "hyp": "",
+      "count": 6
+    },
+    {
+      "ref": "ಅವ್ರ್",
+      "hyp": "ಅವರು",
+      "count": 6
+    },
+    {
+      "ref": "ಆಗಿ",
+      "hyp": "",
+      "count": 6
+    },
+    {
+      "ref": "ಇದು",
+      "hyp": "",
+      "count": 6
+    },
+    {
+      "ref": "ಇನ್",
+      "hyp": "",
+      "count": 6
+    },
+    {
+      "ref": "ಇರಬಹುದು",
+      "hyp": "ಇರ್ಬೋದು",
+      "count": 6
+    },
+    {
+      "ref": "ಇಲ್ಲಿ",
+      "hyp": "",
+      "count": 6
+    },
+    {
+      "ref": "ಎಸ",
+      "hyp": "ಎಸ್",
+      "count": 6
+    },
+    {
+      "ref": "ಚನ್ನಾಗಿ",
+      "hyp": "ಚೆನ್ನಾಗಿ",
+      "count": 6
+    },
+    {
+      "ref": "ಜಿಮ್ನ",
+      "hyp": "ಜಿಮ್ಮಿನ",
+      "count": 6
+    },
+    {
+      "ref": "ನೋಡ್ರಿ",
+      "hyp": "ನೋಡಿರಿ",
+      "count": 6
+    }
+  ],
+  "bias_suggestions": [
+    "ಎಕ್ಸಿಟ್",
+    "ಗ್ಯಾರೇಜ್",
+    "ಇನಾಗ್ರೇಷನ್",
+    "ಎಕ್ಸರ್ಸೈಜ್",
+    "ಫ್ಲಾಗ್",
+    "ಡಿಸೈನ್",
+    "ಬೋರ್ಡ್",
+    "ರಿಕ್ಷಾ",
+    "ಲೋಡ್",
+    "ಫ್ರೋಕ್ಸ್",
+    "ಐಟೆಮ್ಸ",
+    "ಕ್ರೀಂ",
+    "ಎಜುಕೇಶನಲ್",
+    "ಸರ್",
+    "ಯಲ್ಲೋ",
+    "ಅಂಡ್",
+    "ಕಾರ್",
+    "ತುಂಬಾ",
+    "1",
+    "ಅಂದ್ರೆ"
+  ],
+  "html": "/api/v1/dialect-reports/0688d121-e5b6-4f99-b973-753033ee4eb8/html",
+  "created_at": "2026-10-30T16:01:05.210498Z"
+}

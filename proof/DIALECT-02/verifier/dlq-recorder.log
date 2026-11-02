@@ -1,0 +1,5 @@
+dlq-recorder-1  | {"ts": "2026-10-30T16:50:52.975162+00:00", "level": "error", "logger": "aiokafka.consumer.group_coordinator", "msg": "Group Coordinator Request failed: [Error 15] GroupCoordinatorNotAvailableError"}
+dlq-recorder-1  | {"ts": "2026-10-30T16:50:53.157371+00:00", "level": "warning", "logger": "aiokafka.consumer.group_coordinator", "msg": "Marking the coordinator dead (node 1)for group dlq-recorder."}
+dlq-recorder-1  | {"ts": "2026-10-30T16:50:53.283220+00:00", "level": "warning", "logger": "aiokafka.consumer.group_coordinator", "msg": "Marking the coordinator dead (node 1)for group dlq-recorder."}
+dlq-recorder-1  | {"ts": "2026-10-30T16:50:53.409770+00:00", "level": "warning", "logger": "aiokafka.consumer.group_coordinator", "msg": "Marking the coordinator dead (node 1)for group dlq-recorder."}
+dlq-recorder-1  | {"ts": "2026-10-30T16:50:53.554270+00:00", "level": "warning", "logger": "aiokafka.consumer.group_coordinator", "msg": "Marking the coordinator dead (node 1)for group dlq-recorder."}

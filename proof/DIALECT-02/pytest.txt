@@ -1,0 +1,37 @@
+........................................................................ [  7%]
+........................................................................ [ 14%]
+........................................................................ [ 21%]
+........................................................................ [ 29%]
+........................................................................ [ 36%]
+........................................................................ [ 43%]
+........................................................................ [ 50%]
+........................................................................ [ 58%]
+........................................................................ [ 65%]
+........................................................................ [ 72%]
+........................................................................ [ 79%]
+........................................................................ [ 87%]
+............................F........................................... [ 94%]
+........................................................                 [100%]
+=================================== FAILURES ===================================
+____________ test_committed_schema_dts_matches_the_backend_openapi _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/test_committed_schema_dts_matc0')
+
+    def test_committed_schema_dts_matches_the_backend_openapi(tmp_path: Path) -> None:
+        node = shutil.which("node")
+        assert node, "node is required to run web/scripts/gen-api.mjs (install Node 20+)"
+>       assert (WEB / "node_modules" / "openapi-typescript").exists(), "run `npm ci` in web/ first"
+E       AssertionError: run `npm ci` in web/ first
+E       assert False
+E        +  where False = exists()
+E        +    where exists = ((PosixPath('/home/user/Pareeksha-/web') / 'node_modules') / 'openapi-typescript').exists
+
+tests/contract/test_schema_dts_fresh.py:18: AssertionError
+=============================== warnings summary ===============================
+<frozen abc>:106
+  <frozen abc>:106: DeprecationWarning: `AudioContextTTSService` is deprecated since 0.0.105 and will be removed in 2.0.0. Use `WebsocketTTSService` instead.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1 failed, 991 passed, 1 warning in 217.14s (0:03:37)
+# rerun of the one environment failure after 'npm ci' in web/:
+1 passed in 2.20s

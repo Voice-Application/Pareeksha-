@@ -1,0 +1,9 @@
+All checks passed!
+340 files already formatted
+All checks passed!
+../mock_agent/policy.py:469: error: Dict entry 0 has incompatible type "str": "str"; expected "str": "bool"  [dict-item]
+../mock_agent/policy.py:499: error: Dict entry 0 has incompatible type "str": "str"; expected "str": "bool"  [dict-item]
+../mock_agent/policy.py:509: error: Dict entry 0 has incompatible type "str": "str"; expected "str": "bool"  [dict-item]
+tests/unit/speech/test_deepgram.py:229: error: Value of type "Iterable[socket]" is not indexable  [index]
+tests/unit/speech/test_deepgram.py:254: error: Value of type "Iterable[socket]" is not indexable  [index]
+Found 5 errors in 2 files (checked 344 source files)
