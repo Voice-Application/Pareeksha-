@@ -7,15 +7,19 @@ FR-EV-8, `GET /api/v1/calibration` (backend/pareeksha/api/routers/system.py), `P
 
 **Status**
 - Built and run: real 30-call batch (all 30 evaluated by the judge), blind packet, importer and its unit tests.
-- **Owner labels: INTERIM, 10 of 30.** The owner reviewed L01-L10. L11-L30 in the owner's sheet are a
-  fill-down; the owner confirmed they were not reviewed, so they are blank in `labels.csv` and awaiting the
-  owner. **V9 stays PENDING.**
-  - On n = 10, pass/fail: 10/10 agreement (95% Wilson CI [0.72, 1.0]), κ = 1.0 (the API and the offline
-    recompute agree). The bootstrap interval for κ is degenerate, because each rater has only 1 pass.
-  - Critical: owner 9/10, judge 4/10; agreement 0.5, κ 0.14 (bootstrap 95% CI [0.0, 0.55]).
+- **Owner labels: FINAL, 30 of 30.**
+  - L01-L10 come from the 2026-10-30 sheet. L11-L30 were labelled one by one on 2026-11-02; they replace the
+    earlier fill-down rows.
+  - **κ(pass/fail) = 0.1892 on n = 30**, 95% bootstrap CI [−0.14, 0.52]: **below the 0.6 target.** The API
+    and the offline recompute agree.
+  - Raw agreement is 0.667 (Wilson CI [0.49, 0.81]): the owner passed 5 calls, the judge 11.
+  - Critical: owner 18, judge 6; agreement 0.6, κ 0.286.
   - Spearman and per-dimension MAE are **not provided by owner**.
-  - L10 is labelled passed=yes **and** critical=yes (fact; for the owner to confirm).
-  - Details are in `calibration.md` / `calibration.json`.
+  - §10.3 applies: `recalibration_plan.md` (appended to `calibration.md`) proposes v2 grounded in the 10
+    pass/fail disagreements. It is **not applied**.
+  - L10 is labelled passed=yes and critical=yes (fact; for the owner to confirm).
+  - The 5 calls where the mock agent went mute (L01, L03, L09, L25, L27) all used office-babble noise. This
+    is a test-harness defect, not a provider failure (ISSUE-1, extended). Without them, κ = 0.138 on n = 25.
 - No API or DB contract was changed.
 
 Code commit: `9f2a41f` (full SHA in the Commit section).
@@ -177,10 +181,12 @@ python scripts/calibration/import_labels.py --normalise-owner labelling/EVAL-06/
   more reviewed evaluations than the file has labelled rows. Stale reviews in the DB would therefore stop the
   import instead of silently skewing κ.
 
-### Current import (INTERIM)
+### Interim import on L01-L10 (2026-10-30, superseded)
 ```
 python scripts/calibration/import_labels.py --extra-md proof/EVAL-06/failure_definition.md   # log: import_labels_interim.log
 ```
+This section records the interim state. Its `failure_definition.md` was later rewritten as
+`recalibration_plan.md` (see the final import below).
 - **What was posted.** The 10 reviews for L01-L10 were already present: 10 × 409, no new posts.
   - The review API does not require dimension scores (`ReviewCreate.dimensions` defaults to `{}`;
     `overall_score` stays null), so passed and critical went through the real `POST /calls/{id}/review` and
@@ -221,10 +227,58 @@ python scripts/calibration/import_labels.py --extra-md proof/EVAL-06/failure_def
   - All of it is framed as risks to check once 30 labels exist.
 - **V9 is not run:** it stays PENDING until 30 calls are labelled.
 
+### Final import, n = 30 (2026-11-02)
+- **Labels.** The owner's labelling-page export for L11-L30 is saved as given in
+  `labelling/EVAL-06/labels.owner.L11-L30.json`: yes/no values, empty scores, notes kept exactly.
+  - It fills the 20 pending rows of `labels.csv`.
+  - `--fill-json` only fills blank rows, never overwrites a labelled row, and rejects unknown or duplicate
+    ids and any value other than yes/no.
+- **Commands:**
+  ```
+  python scripts/calibration/import_labels.py --fill-json labelling/EVAL-06/labels.owner.L11-L30.json   # 0 rows still pending
+  python scripts/calibration/import_labels.py --expect-n 30 --extra-md proof/EVAL-06/recalibration_plan.md   # log: import_labels_final.log
+  ```
+- **What was posted.** The first final run posted the 20 new reviews through the real
+  `POST /calls/{id}/review`; the 10 for L01-L10 came back 409 "already". The run that wrote the committed
+  report saw all 30 as already present. Its own log was overwritten by that later run. Evidence of the 20 posts is the DB's
+  `created_at` per review, in `human_reviews_posted.txt`.
+  - `--expect-n 30` makes the importer refuse unless `GET /calibration` counts exactly 30 reviewed
+    evaluations, on top of the existing check that this count equals the labelled rows.
+- **Result:** `GET /calibration` returns n = 30, κ = 0.1892. The offline recompute with the endpoint's
+  `compute_calibration` gives the same.
+
+  | pass/fail | owner pass | owner fail |
+  |---|---|---|
+  | judge pass | 3 | 8 |
+  | judge fail | 2 | 17 |
+
+  | critical | owner critical | owner not critical |
+  |---|---|---|
+  | judge critical | 6 | 0 |
+  | judge not critical | 12 | 12 |
+
+  - Pass/fail: raw agreement 0.6667 (Wilson 95% [0.4878, 0.8077]); κ 0.1892, percentile bootstrap 95%
+    [−0.1351, 0.5161] (10,000 resamples, seed 20261030, none undefined).
+  - Critical: agreement 0.6 (Wilson [0.4232, 0.7541]); κ 0.2857, bootstrap [0.0909, 0.5455].
+  - 18 disagreements, listed in `calibration.md` with the judge's reasons next to the owner's notes.
+- **Recalibration plan.** `recalibration_plan.md` covers §10.3.
+  - **Judge pass, owner fail:** L12, L14, L17, L22, L23, L24, L29, L30. The plan cites the turns where the
+    agent did not respond to the caller, plus unwanted or late transfers.
+  - **Judge fail, owner pass:** L18 and L26. The judge failed them only on the `amount_confirmed` must-pass
+    check, which makes this a specification decision for the owner.
+  - **Why v1 misses non-responsiveness:** the judge mostly did not detect it (`judge_v1.j2` never asks for
+    it). Where it did, the 10-point weights absorbed it.
+  - **Concrete v2, not applied:** rubric-2026-10-v2 anchors, an `intent_miss`/`loop`/dimension ≤ 1 pass gate,
+    critical additions and `judge_v2.j2` prompt lines.
+  - **Overfitting:** the plan warns about tuning on these same 30 labels and proposes a held-out, owner-labelled
+    batch before adopting v2.
+- **V9:** the measurement is final and below target, so `make verify-step N=9` would report FAIL. It was not
+  run, because it writes to the shared `proof/verify/`.
+
 ### Database dump
-- **What it holds.** `proof/EVAL-06/pareeksha_db.sql.gz` (133 KB) is a plain PostgreSQL 16 `pg_dump`,
-  re-taken after the removal.
-  - It holds the 10 owner reviews (L01-L10) and none for L11-L30; this was checked in the dump text.
+- **What it holds.** `proof/EVAL-06/pareeksha_db.sql.gz` (135 KB) is a plain PostgreSQL 16 `pg_dump`,
+  re-taken after the final import.
+  - It holds all 30 owner reviews (5 passed); the restored copy was checked.
   - It keeps every table's rows except `api_keys` (only the table definition), so no key hash is committed.
 
   | table | rows |
@@ -232,7 +286,7 @@ python scripts/calibration/import_labels.py --extra-md proof/EVAL-06/failure_def
   | calls | 38 |
   | evaluations (all `ok`) | 33 |
   | turns | 284 |
-  | human_reviews | 10 |
+  | human_reviews | 30 |
 
 - **Test restore.** The dump loads into an empty database with `ON_ERROR_STOP=1` and gives the counts above.
 - **What is not in it.** The 38 calls include the replaced and errored ones. Audio is not in the dump; the
@@ -244,14 +298,18 @@ docker compose up -d postgres                   # fresh pg-data volume: empty da
 zcat proof/EVAL-06/pareeksha_db.sql.gz | docker compose exec -T postgres psql -U pareeksha -d pareeksha -v ON_ERROR_STOP=1 -q
 docker compose run --rm --no-deps api python -m pareeksha.seed   # re-adds the API key from PAREEKSHA_API_KEY (idempotent for the rest)
 docker compose up -d api                        # its migrate step finds alembic at head and changes nothing
-python3 scripts/calibration/import_labels.py --extra-md proof/EVAL-06/failure_definition.md
-# L01-L10 come back 409 "already"; once the owner fills L11-L30, those 20 are posted and INTERIM disappears
+python3 scripts/calibration/import_labels.py --expect-n 30 --extra-md proof/EVAL-06/recalibration_plan.md
+# all 30 come back 409 "already"; the FINAL report is rebuilt
 ```
 
 ## Tests (`pytest.txt`)
 
-- `test_calibration_import_labels.py`: 32 passed. These are the original 15, plus 10 for pass/fail-only mode,
-  plus 7 for pending rows and intervals:
+- `test_calibration_import_labels.py`: 38 passed. These are the earlier 32 plus 6 for the final step:
+  `--fill-json` fills only pending rows and rejects overwrites, unknown or duplicate ids and non yes/no
+  values; and the FINAL heading.
+
+  The earlier 32 are the original 15, plus 10 for pass/fail-only mode, plus 7 for pending rows and
+  intervals:
   - blank rows are pending, while a row with only a note is still an error;
   - id ranges, and normalisation that blanks unreviewed rows;
   - the Wilson interval, bootstrap undefined-share, the INTERIM report and id spans.
@@ -290,8 +348,12 @@ budget for everything that has a price.
 
 ## ISSUES (not fixed here; outside this task's scope)
 
-- **ISSUE-1 (mock agent):** street noise at 10 dB SNR mutes the mock agent (barge-in VAD fires on the noise
-  bed during opening synthesis; `mock_agent/server.py` `_on_audio`). Any run that uses `pstn_street_10db`
+- **ISSUE-1 (mock agent):** steady noise mutes the mock agent; `mock_agent/server.py` `_on_audio` is the
+  code involved.
+  - Street noise at 10 dB SNR: the barge-in VAD fires on the noise bed during opening synthesis.
+  - Office babble at 15 dB SNR: the VAD never closes the caller's utterance, so no STT request is made and
+    the agent never replies. This happened in 5 of the 8 babble calls in the batch (L01, L03, L09, L25, L27);
+    L25 was checked in the logs. Any run that uses `pstn_street_10db`
   against the mock agent measures this, not the dialog.
 - **ISSUE-2 (simulator):** a punctuation-only caller line (the silent persona/scenario) goes to Gnani TTS,
   which returns 500 "No audio generated during synthesis". The call ends `infra_error`, so "Caller goes

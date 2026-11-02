@@ -21,6 +21,11 @@ endpoint's own function (pareeksha.evaluation.calibration.compute_calibration) a
     python3 scripts/calibration/import_labels.py [--labels PATH] [--key PATH] [--reviewer preetham]
         [--owner-raw PATH] [--extra-md PATH]
     python3 scripts/calibration/import_labels.py --normalise-owner RAW OUT [--unreviewed L11-L30]
+    python3 scripts/calibration/import_labels.py --fill-json JSON [--labels PATH]
+
+--fill-json fills rows still awaiting the owner from the labelling page's JSON export
+([{"label_id", "passed", "critical", "notes"}], yes/no values); a row that is already labelled is never
+overwritten, and the JSON must not name an id that is not in the file.
 
 --normalise-owner maps the owner's raw sheet to the importer's format with the owner's stated rules:
 passed "passed" -> yes, "fail"/"partial" -> no; critical kept as yes/no; dimension cells dropped (they
@@ -180,6 +185,42 @@ def parse_id_range(spec: str) -> set[str]:
             out |= {f"L{i:0{width}d}" for i in range(int(a[1:]), int(b[1:]) + 1)}
         else:
             out.add(part)
+    return out
+
+
+def fill_from_json(rows: list[dict[str, str]], items: list[dict[str, Any]]) -> list[dict[str, str]]:
+    """Fill pending rows from the labelling page's export; raise LabelError on anything else."""
+    problems: list[str] = []
+    by_id = {(r.get("label_id") or "").strip(): r for r in rows}
+    out = [dict(r) for r in rows]
+    index = {(r.get("label_id") or "").strip(): i for i, r in enumerate(out)}
+    seen: set[str] = set()
+    for item in items:
+        lid = str(item.get("label_id", "")).strip()
+        if lid in seen:
+            problems.append(f"{lid}: appears more than once in the JSON")
+            continue
+        seen.add(lid)
+        if lid not in by_id:
+            problems.append(f"{lid}: not in the labels file")
+            continue
+        if not _is_pending(by_id[lid]):
+            problems.append(f"{lid}: already labelled in the file, not overwritten")
+            continue
+        passed = str(item.get("passed", "")).strip().lower()
+        critical = str(item.get("critical", "")).strip().lower()
+        if passed not in {"yes", "no"} or critical not in {"yes", "no"}:
+            problems.append(f"{lid}: passed/critical must be yes/no, got {passed!r}/{critical!r}")
+            continue
+        out[index[lid]] = {
+            "label_id": lid,
+            "passed": passed,
+            "critical": critical,
+            **dict.fromkeys(DIMENSIONS, ""),
+            "notes": str(item.get("notes") or ""),
+        }
+    if problems:
+        raise LabelError("\n".join(problems))
     return out
 
 
@@ -477,7 +518,16 @@ def render_md(report: dict[str, Any], extra: str = "") -> str:
     rho = NOT_PROVIDED if na else cal.get("spearman_overall")
     p, c = agr["passed"], agr["critical"]
     interim, pending = report["interim"], report["pending"]
-    lines = ["# EVAL-06 calibration: judge vs owner labels" + (" (INTERIM)" if interim else ""), ""]
+    lines = [
+        "# EVAL-06 calibration: judge vs owner labels" + (" (INTERIM)" if interim else " (FINAL)"),
+        "",
+    ]
+    if not interim:
+        lines += [
+            f"**FINAL: all {report['total']} calls labelled by the owner.** This is the V9 measurement "
+            "for rubric-2026-10-v1.",
+            "",
+        ]
     if interim:
         lines += [
             f"**INTERIM: {report['labelled']} of {report['total']} calls labelled.** Awaiting the owner: "
@@ -644,7 +694,27 @@ def main(argv: list[str] | None = None) -> int:
         default="",
         help='with --normalise-owner: ids the owner did not review, e.g. "L11-L30"; written blank',
     )
+    ap.add_argument("--fill-json", type=Path, help="fill pending rows of --labels from this JSON")
+    ap.add_argument(
+        "--expect-n",
+        type=int,
+        help="refuse unless GET /calibration counts exactly this many reviewed evaluations",
+    )
     args = ap.parse_args(argv)
+    if args.fill_json:
+        try:
+            filled = fill_from_json(
+                read_csv(args.labels), json.loads(args.fill_json.read_text(encoding="utf-8"))
+            )
+        except LabelError as exc:
+            print(f"{args.fill_json} not applied, {args.labels} unchanged:\n{exc}", file=sys.stderr)
+            return 2
+        with args.labels.open("w", newline="", encoding="utf-8") as fh:
+            w = csv.DictWriter(fh, fieldnames=COLUMNS)
+            w.writeheader()
+            w.writerows(filled)
+        print(f"{args.labels}: {len(pending_ids(filled))} rows still pending")
+        return 0
     if args.normalise_owner:
         raw, out = args.normalise_owner
         try:
@@ -696,6 +766,12 @@ def main(argv: list[str] | None = None) -> int:
     status, cal = api.call("GET", "/calibration")
     if status != 200:
         print(f"GET /calibration -> {status} {cal}", file=sys.stderr)
+        return 1
+    if args.expect_n is not None and cal.get("n") != args.expect_n:
+        print(
+            f"GET /calibration counts {cal.get('n')} reviewed evaluations, expected {args.expect_n}",
+            file=sys.stderr,
+        )
         return 1
     if cal.get("n") != len(labels):
         print(

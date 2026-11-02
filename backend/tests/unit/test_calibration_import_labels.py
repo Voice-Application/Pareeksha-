@@ -345,3 +345,48 @@ def test_interim_report() -> None:
 def test_id_span() -> None:
     assert il._id_span([f"L{i}" for i in range(11, 31)]) == "L11-L30"
     assert il._id_span(["L01", "L03"]) == "L01, L03"
+
+
+# --- filling pending rows from the labelling page's JSON ---------------------------------------
+
+
+def test_fill_from_json_fills_only_pending_rows() -> None:
+    rows = [pf_row("L01", "yes"), blank("L02")]
+    out = il.fill_from_json(
+        rows, [{"label_id": "L02", "passed": "no", "critical": "yes", "notes": 'said "x"'}]
+    )
+    assert out[0] == rows[0]
+    assert (out[1]["passed"], out[1]["critical"], out[1]["notes"]) == ("no", "yes", 'said "x"')
+    assert il.pending_ids(out) == []
+    assert [lab.label_id for lab in il.parse_labels(out, KEY)] == ["L01", "L02"]
+
+
+@pytest.mark.parametrize(
+    ("items", "message"),
+    [
+        ([{"label_id": "L01", "passed": "no", "critical": "no"}], "already labelled"),
+        ([{"label_id": "L09", "passed": "no", "critical": "no"}], "not in the labels file"),
+        ([{"label_id": "L02", "passed": "partial", "critical": "no"}], "must be yes/no"),
+        ([{"label_id": "L02", "passed": "no", "critical": "no"}] * 2, "more than once"),
+    ],
+)
+def test_fill_from_json_rejects(items: list[dict], message: str) -> None:
+    with pytest.raises(il.LabelError, match=message):
+        il.fill_from_json([pf_row("L01", "yes"), blank("L02")], items)
+
+
+def test_final_report_heading() -> None:
+    key = {"L01": "c1", "L02": "c2"}
+    labels = il.parse_labels([pf_row("L01", "yes"), pf_row("L02", "no")], key)
+    judge = {"c1": judge_row(True, False), "c2": judge_row(False, True, 30)}
+    cal = {"n": 2, "kappa_pass_fail": 1.0, "spearman_overall": None, "dimension_mae": {}}
+    imported = {
+        "reviewer": "preetham",
+        "posted": 2,
+        "already": 0,
+        "labels": 2,
+        "labels_file": "x.csv",
+    }
+    md = il.render_md(il.build_report(labels, judge, cal, imported, None, [], 2))
+    assert md.startswith("# EVAL-06 calibration: judge vs owner labels (FINAL)")
+    assert "INTERIM" not in md
