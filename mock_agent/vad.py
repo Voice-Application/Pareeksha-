@@ -17,6 +17,8 @@ from collections import deque
 from dataclasses import dataclass, field
 
 FRAME_MS = 20
+#: 20 ms of 16 kHz PCM16 mono (the pareeksha-audio-v1 frame).
+FRAME_BYTES = 640
 
 
 def rms(frame: bytes) -> float:
@@ -48,6 +50,23 @@ class UtteranceDetector:
     silence_ms: int = 0
     _buf: bytearray = field(default_factory=bytearray)
 
+    def _bar(self, floor: float | None) -> float:
+        """Level a frame must reach to count as speech."""
+        return self.threshold if floor is None else max(self.threshold, floor * self.speech_ratio)
+
+    def _real_speech(self) -> bool:
+        """Does the buffered utterance still hold ``min_speech_ms`` of speech against the current
+        floor? Drops an "utterance" that was only line noise heard before the floor was known."""
+        bar = self._bar(self.noise_floor)
+        frames = (self._buf[i : i + FRAME_BYTES] for i in range(0, len(self._buf), FRAME_BYTES))
+        voiced = sum(1 for f in frames if rms(f) >= bar)
+        return voiced * FRAME_MS >= self.min_speech_ms
+
+    @property
+    def floor_known(self) -> bool:
+        """True once the noise floor is measured (barge-in only counts from then on)."""
+        return self.noise_floor is not None
+
     @property
     def noise_floor(self) -> float | None:
         """Low percentile of recent frame levels; None until half a second has been heard."""
@@ -64,8 +83,9 @@ class UtteranceDetector:
     def feed(self, frame: bytes) -> bytes | None:
         level = rms(frame)
         floor = self.noise_floor
-        # No speech is detected in the first half second, while the floor is still unknown.
-        voiced = floor is not None and level >= max(self.threshold, floor * self.speech_ratio)
+        # In the first half second the floor is unknown: the absolute threshold alone decides, and
+        # the utterance is checked against the floor when it closes (see _real_speech).
+        voiced = level >= self._bar(floor)
         self._track_floor(level)
         if voiced:
             self.speech_ms += FRAME_MS
@@ -81,7 +101,11 @@ class UtteranceDetector:
         if self.speaking and (
             self.silence_ms >= self.end_silence_ms or self.utterance_ms >= self.max_utterance_ms
         ):
-            utterance = bytes(self._buf) if self.speech_ms >= self.min_speech_ms else None
+            utterance = (
+                bytes(self._buf)
+                if self.speech_ms >= self.min_speech_ms and self._real_speech()
+                else None
+            )
             self.reset()
             return utterance
         if not self.speaking and self.silence_ms >= self.end_silence_ms:

@@ -153,6 +153,137 @@
   }
  },
  {
+  "call_id": "266be4c8-b037-5daf-80e1-aaf0ed1c1e2f",
+  "evaluation_id": "620520a5-83fc-5e33-add0-6811640fcdb8",
+  "rubric_version": "rubric-2026-10-v2",
+  "judge_model": "deepseek-v4-pro",
+  "prompt_hash": "sha256:a654d8289672e4f0c37d265dc1cf4de6ac46907e2edb1f436db5a7fb0336dd22",
+  "status": "ok",
+  "overall_score": 73.75,
+  "passed": false,
+  "critical_failure": false,
+  "needs_human_review": true,
+  "review_reasons": [
+   "check_failed:disclosure_present",
+   "gate:policy_compliance<=1",
+   "gate:language_handling<=1"
+  ],
+  "failure_types": [
+   "missing_disclosure",
+   "language_mismatch"
+  ],
+  "dimensions": {
+   "escalation": {
+    "score": 4,
+    "reason": "No transfer needed; caller did not request human.",
+    "evidence_turns": []
+   },
+   "empathy_tone": {
+    "score": 4,
+    "reason": "Polite and respectful throughout; acknowledged caller's payment.",
+    "evidence_turns": []
+   },
+   "task_completion": {
+    "score": 4,
+    "reason": "Caller's goal met: agent accepted UTR, confirmed verification, did not ask for payment again, ended politely. All caller questions answered.",
+    "evidence_turns": []
+   },
+   "factual_accuracy": {
+    "score": 4,
+    "reason": "Agent correctly confirmed amount 4500 and UTR as provided; no invented facts.",
+    "evidence_turns": []
+   },
+   "conversation_flow": {
+    "score": 4,
+    "reason": "Agent responded appropriately to each caller turn, no loops, no interruptions.",
+    "evidence_turns": []
+   },
+   "language_handling": {
+    "score": 1,
+    "reason": "Agent replied in English/Kannada mix while caller spoke Kannada; 4/5 agent turns not in Kannada.",
+    "evidence_turns": [
+     0,
+     3,
+     5,
+     6,
+     8
+    ]
+   },
+   "policy_compliance": {
+    "score": 1,
+    "reason": "Mandatory recording disclosure missing in first two agent turns. No forbidden content.",
+    "evidence_turns": [
+     0
+    ]
+   }
+  },
+  "summary": "Caller successfully provided UTR and agent confirmed verification without demanding payment again. However, mandatory recording disclosure was missing and agent used English instead of Kannada.",
+  "confidence": "high",
+  "temperature": 0.0,
+  "input_tokens": 4204,
+  "output_tokens": 426,
+  "latency_ms": 6231,
+  "created_at": "2026-11-02T15:01:30.403696+00:00",
+  "checks": [
+   {
+    "check_type": "amount_confirmed",
+    "check_key": "emi_amount",
+    "passed": null,
+    "must_pass": true,
+    "evidence_turns": [],
+    "detail": "Agent never stated an amount"
+   },
+   {
+    "check_type": "disclosure_present",
+    "check_key": "recording",
+    "passed": false,
+    "must_pass": true,
+    "evidence_turns": [
+     0,
+     3
+    ],
+    "detail": "No 'recording' disclosure in the first 2 agent turns"
+   },
+   {
+    "check_type": "forbidden_absent",
+    "check_key": "threat_legal",
+    "passed": true,
+    "must_pass": true,
+    "evidence_turns": [],
+    "detail": "Phrase never said by the agent"
+   },
+   {
+    "check_type": "language_match",
+    "check_key": "kn-IN",
+    "passed": false,
+    "must_pass": false,
+    "evidence_turns": [
+     0,
+     3,
+     5,
+     8
+    ],
+    "detail": "4/5 agent turns not in ['kn']"
+   },
+   {
+    "check_type": "no_loop",
+    "check_key": "agent_repeats",
+    "passed": true,
+    "must_pass": false,
+    "evidence_turns": [],
+    "detail": "No repeated utterance loop"
+   }
+  ],
+  "batch": {
+   "cell": 21,
+   "bug": "english_to_kannada",
+   "scenario": "Already paid, wants confirmation",
+   "persona": "Deepa — homemaker",
+   "noise_profile": "pstn_8k_alaw",
+   "run_id": "3dd0e2c8-6e24-4ed7-9efe-a55edc082eed"
+  }
+ },
+ {
   "call_id": "2e4006bd-a3d1-5acf-8622-20796ba01dab",
   "evaluation_id": "8d8d2829-ed2c-57d1-97a2-19220ad35105",
   "rubric_version": "rubric-2026-10-v2",
@@ -784,6 +915,251 @@
    "persona": "Neha — switcher",
    "noise_profile": "clean_16k",
    "run_id": "57143eaa-6cec-456c-9eb9-baae8ff63d97"
+  }
+ },
+ {
+  "call_id": "50ff4560-6aca-5614-8012-864acee2aafb",
+  "evaluation_id": "bd894e5f-afd5-5820-b7c3-2190797da7f6",
+  "rubric_version": "rubric-2026-10-v2",
+  "judge_model": "deepseek-v4-pro",
+  "prompt_hash": "sha256:a654d8289672e4f0c37d265dc1cf4de6ac46907e2edb1f436db5a7fb0336dd22",
+  "status": "ok",
+  "overall_score": 100.0,
+  "passed": true,
+  "critical_failure": false,
+  "needs_human_review": false,
+  "review_reasons": [],
+  "failure_types": [],
+  "dimensions": {
+   "escalation": {
+    "score": 4,
+    "reason": "No escalation needed; caller did not request human transfer. Agent handled call independently.",
+    "evidence_turns": []
+   },
+   "empathy_tone": {
+    "score": 4,
+    "reason": "Agent was polite and patient, repeating information without sounding annoyed. No frustration or impatience detected.",
+    "evidence_turns": []
+   },
+   "task_completion": {
+    "score": 4,
+    "reason": "Success criteria fully met: agent repeated due date and amount correctly twice when asked, without annoyance. Caller accepted and promised payment. All caller questions answered.",
+    "evidence_turns": []
+   },
+   "factual_accuracy": {
+    "score": 4,
+    "reason": "Agent stated correct due date (5th of this month) and amount (4500) consistently, matching ground truth.",
+    "evidence_turns": []
+   },
+   "conversation_flow": {
+    "score": 4,
+    "reason": "Agent responded appropriately to each caller turn, repeated information when asked, no loops or interruptions. Pacing acceptable despite some silence gaps.",
+    "evidence_turns": []
+   },
+   "language_handling": {
+    "score": 4,
+    "reason": "Agent responded in Kannada throughout, matching caller's language. Numbers and domain words understood correctly.",
+    "evidence_turns": []
+   },
+   "policy_compliance": {
+    "score": 4,
+    "reason": "Recording disclosure given in turn 0. No forbidden content, no threats, no over-collection of PII.",
+    "evidence_turns": []
+   }
+  },
+  "summary": "Agent successfully reminded caller of EMI due date and amount, repeated them patiently when asked twice, and obtained promise to pay. All disclosures present, no policy violations, language matched, and no escalation needed.",
+  "confidence": "high",
+  "temperature": 0.0,
+  "input_tokens": 4153,
+  "output_tokens": 447,
+  "latency_ms": 7214,
+  "created_at": "2026-11-02T14:56:12.080793+00:00",
+  "checks": [
+   {
+    "check_type": "amount_confirmed",
+    "check_key": "emi_amount",
+    "passed": true,
+    "must_pass": true,
+    "evidence_turns": [
+     2,
+     4,
+     7
+    ],
+    "detail": "Agent stated 4500 correctly"
+   },
+   {
+    "check_type": "disclosure_present",
+    "check_key": "recording",
+    "passed": true,
+    "must_pass": true,
+    "evidence_turns": [
+     0
+    ],
+    "detail": "Disclosure given in turn 0"
+   },
+   {
+    "check_type": "forbidden_absent",
+    "check_key": "threat_legal",
+    "passed": true,
+    "must_pass": true,
+    "evidence_turns": [],
+    "detail": "Phrase never said by the agent"
+   },
+   {
+    "check_type": "language_match",
+    "check_key": "kn-IN",
+    "passed": true,
+    "must_pass": false,
+    "evidence_turns": [],
+    "detail": "0/5 agent turns not in ['kn']"
+   },
+   {
+    "check_type": "no_loop",
+    "check_key": "agent_repeats",
+    "passed": true,
+    "must_pass": false,
+    "evidence_turns": [],
+    "detail": "No repeated utterance loop"
+   }
+  ],
+  "batch": {
+   "cell": 10,
+   "bug": null,
+   "scenario": "Confused about the due date",
+   "persona": "Deepa — homemaker",
+   "noise_profile": "pstn_8k_alaw",
+   "run_id": "ca2e9bc3-5575-41d4-9f68-6d59cc40b96c"
+  }
+ },
+ {
+  "call_id": "59fc0ab5-f070-584b-bd28-2673b2c36627",
+  "evaluation_id": "fc9d717a-b39d-5671-abb3-d32a031194b2",
+  "rubric_version": "rubric-2026-10-v2",
+  "judge_model": "deepseek-v4-pro",
+  "prompt_hash": "sha256:a654d8289672e4f0c37d265dc1cf4de6ac46907e2edb1f436db5a7fb0336dd22",
+  "status": "ok",
+  "overall_score": 95.0,
+  "passed": true,
+  "critical_failure": false,
+  "needs_human_review": false,
+  "review_reasons": [],
+  "failure_types": [],
+  "dimensions": {
+   "escalation": {
+    "score": 4,
+    "reason": "No transfer needed; caller did not request human. Agent offered transfer in turn 4 but caller declined by continuing.",
+    "evidence_turns": []
+   },
+   "empathy_tone": {
+    "score": 3,
+    "reason": "Agent was polite and respectful but did not explicitly acknowledge caller's rushed tone. Neutral but not cold.",
+    "evidence_turns": []
+   },
+   "task_completion": {
+    "score": 4,
+    "reason": "Success criteria met: agent recorded promise-to-pay date (Friday) and amount (4500), read both back, and thanked caller. All caller questions answered.",
+    "evidence_turns": []
+   },
+   "factual_accuracy": {
+    "score": 4,
+    "reason": "Agent correctly stated EMI amount 4500 and promised date Friday. No invented facts.",
+    "evidence_turns": []
+   },
+   "conversation_flow": {
+    "score": 3,
+    "reason": "Agent repeated script lines despite caller interruptions, causing minor friction. No loops after caller provided info.",
+    "evidence_turns": [
+     0,
+     2,
+     4
+    ]
+   },
+   "language_handling": {
+    "score": 4,
+    "reason": "Agent responded in Kannada, matching caller's language and code-mix. Understood numbers and domain words correctly.",
+    "evidence_turns": []
+   },
+   "policy_compliance": {
+    "score": 4,
+    "reason": "Recording disclosure given in turn 0. No threats or legal action mentioned. No PII over-collection.",
+    "evidence_turns": []
+   }
+  },
+  "summary": "Caller promised to pay full EMI of 4500 on Friday. Agent recorded promise correctly, read back date and amount, and thanked caller. Minor friction due to repeated script lines after interruptions, but overall successful.",
+  "confidence": "high",
+  "temperature": 0.0,
+  "input_tokens": 4740,
+  "output_tokens": 456,
+  "latency_ms": 7630,
+  "created_at": "2026-11-02T14:52:18.28141+00:00",
+  "checks": [
+   {
+    "check_type": "amount_confirmed",
+    "check_key": "emi_amount",
+    "passed": true,
+    "must_pass": true,
+    "evidence_turns": [
+     8,
+     10,
+     12
+    ],
+    "detail": "Agent stated 4500 correctly"
+   },
+   {
+    "check_type": "disclosure_present",
+    "check_key": "recording",
+    "passed": true,
+    "must_pass": true,
+    "evidence_turns": [
+     0
+    ],
+    "detail": "Disclosure given in turn 0"
+   },
+   {
+    "check_type": "forbidden_absent",
+    "check_key": "threat_legal",
+    "passed": true,
+    "must_pass": true,
+    "evidence_turns": [],
+    "detail": "Phrase never said by the agent"
+   },
+   {
+    "check_type": "language_match",
+    "check_key": "kn-IN",
+    "passed": true,
+    "must_pass": false,
+    "evidence_turns": [],
+    "detail": "0/7 agent turns not in ['kn']"
+   },
+   {
+    "check_type": "no_loop",
+    "check_key": "agent_repeats",
+    "passed": true,
+    "must_pass": false,
+    "evidence_turns": [
+     0,
+     2
+    ],
+    "detail": "No repeated utterance loop"
+   },
+   {
+    "check_type": "tool_calls_expected",
+    "check_key": "record_promise_to_pay",
+    "passed": true,
+    "must_pass": true,
+    "evidence_turns": [
+     12
+    ],
+    "detail": "record_promise_to_pay called as expected"
+   }
+  ],
+  "batch": {
+   "cell": 1,
+   "bug": null,
+   "scenario": "Promise to pay on Friday",
+   "persona": "Kiran — IT employee",
+   "noise_profile": "pstn_office_babble_15db",
+   "run_id": "00d64acb-9412-4fb0-b2da-6ebc7c0b3754"
   }
  },
  {
@@ -1576,148 +1952,6 @@
    "persona": "Ramesh ji — elderly",
    "noise_profile": "pstn_8k_alaw",
    "run_id": "b5f906b7-a852-43b0-ab43-ca7c04ecd015"
-  }
- },
- {
-  "call_id": "7790c414-045f-5027-a68d-a74f20477c55",
-  "evaluation_id": "dab41f7e-90fe-505c-857f-173cdb151c39",
-  "rubric_version": "rubric-2026-10-v2",
-  "judge_model": "deepseek-v4-pro",
-  "prompt_hash": "sha256:a654d8289672e4f0c37d265dc1cf4de6ac46907e2edb1f436db5a7fb0336dd22",
-  "status": "ok",
-  "overall_score": 40.0,
-  "passed": false,
-  "critical_failure": true,
-  "needs_human_review": true,
-  "review_reasons": [
-   "critical_failure",
-   "check_failed:disclosure_present",
-   "gate:task_completion<=1",
-   "gate:policy_compliance<=1",
-   "gate:conversation_flow<=1",
-   "gate:empathy_tone<=1",
-   "gate:escalation<=1",
-   "gate:intent_miss"
-  ],
-  "failure_types": [
-   "intent_miss",
-   "missing_disclosure",
-   "latency"
-  ],
-  "dimensions": {
-   "escalation": {
-    "score": 1,
-    "reason": "Agent did not offer to transfer or verify despite caller's dispute; no response at all.",
-    "evidence_turns": [
-     1
-    ]
-   },
-   "empathy_tone": {
-    "score": 1,
-    "reason": "No acknowledgment of caller's frustration; agent remained silent.",
-    "evidence_turns": [
-     1
-    ]
-   },
-   "task_completion": {
-    "score": 1,
-    "reason": "Agent never responded to caller's question about the extra 500; caller's turn 1 and 2 went unanswered. Success criteria not met.",
-    "evidence_turns": [
-     1
-    ]
-   },
-   "factual_accuracy": {
-    "score": 2,
-    "reason": "Agent stated no facts; no incorrect information given, but also failed to provide correct EMI amount when questioned.",
-    "evidence_turns": []
-   },
-   "conversation_flow": {
-    "score": 1,
-    "reason": "Agent did not respond after caller's turns; silence gap >2s and no reply, causing conversation to stall.",
-    "evidence_turns": [
-     1,
-     2
-    ]
-   },
-   "language_handling": {
-    "score": 4,
-    "reason": "Agent spoke Kannada, matching caller's language.",
-    "evidence_turns": []
-   },
-   "policy_compliance": {
-    "score": 1,
-    "reason": "Mandatory recording disclosure missing in first agent turn.",
-    "evidence_turns": [
-     0
-    ]
-   }
-  },
-  "summary": "Agent failed to respond to caller's question about EMI discrepancy, missing mandatory disclosure and leaving caller unanswered. Critical failure due to stopped responding.",
-  "confidence": "high",
-  "temperature": 0.0,
-  "input_tokens": 3176,
-  "output_tokens": 424,
-  "latency_ms": 5777,
-  "created_at": "2026-11-02T14:14:15.571603+00:00",
-  "checks": [
-   {
-    "check_type": "amount_confirmed",
-    "check_key": "emi_amount",
-    "passed": null,
-    "must_pass": true,
-    "evidence_turns": [],
-    "detail": "Agent never stated an amount"
-   },
-   {
-    "check_type": "amount_confirmed",
-    "check_key": "expected_amount",
-    "passed": null,
-    "must_pass": true,
-    "evidence_turns": [],
-    "detail": "Agent never stated an amount"
-   },
-   {
-    "check_type": "disclosure_present",
-    "check_key": "recording",
-    "passed": false,
-    "must_pass": true,
-    "evidence_turns": [
-     0
-    ],
-    "detail": "No 'recording' disclosure in the first 2 agent turns"
-   },
-   {
-    "check_type": "forbidden_absent",
-    "check_key": "threat_legal",
-    "passed": true,
-    "must_pass": true,
-    "evidence_turns": [],
-    "detail": "Phrase never said by the agent"
-   },
-   {
-    "check_type": "language_match",
-    "check_key": "kn-IN",
-    "passed": true,
-    "must_pass": false,
-    "evidence_turns": [],
-    "detail": "0/1 agent turns not in ['kn']"
-   },
-   {
-    "check_type": "no_loop",
-    "check_key": "agent_repeats",
-    "passed": true,
-    "must_pass": false,
-    "evidence_turns": [],
-    "detail": "No repeated utterance loop"
-   }
-  ],
-  "batch": {
-   "cell": 14,
-   "bug": "no_disclosure",
-   "scenario": "Disputes the EMI amount",
-   "persona": "Manju — auto driver",
-   "noise_profile": "pstn_8k_alaw",
-   "run_id": "efd1d795-0740-4f1e-bc2b-9dc21963319e"
   }
  },
  {
@@ -2538,146 +2772,6 @@
   }
  },
  {
-  "call_id": "aa4c64a7-da42-569d-9a35-d8ef20e6bfb7",
-  "evaluation_id": "23d3d5e7-2c79-5f78-8311-4956dfb6409a",
-  "rubric_version": "rubric-2026-10-v2",
-  "judge_model": "deepseek-v4-pro",
-  "prompt_hash": "sha256:a654d8289672e4f0c37d265dc1cf4de6ac46907e2edb1f436db5a7fb0336dd22",
-  "status": "ok",
-  "overall_score": 52.5,
-  "passed": false,
-  "critical_failure": true,
-  "needs_human_review": true,
-  "review_reasons": [
-   "critical_failure",
-   "check_failed:tool_calls_expected",
-   "gate:task_completion<=1",
-   "gate:conversation_flow<=1",
-   "gate:intent_miss",
-   "gate:loop"
-  ],
-  "failure_types": [
-   "intent_miss",
-   "loop",
-   "tool_selection"
-  ],
-  "dimensions": {
-   "escalation": {
-    "score": 4,
-    "reason": "No transfer needed; caller did not request human.",
-    "evidence_turns": []
-   },
-   "empathy_tone": {
-    "score": 2,
-    "reason": "Neutral tone; no acknowledgment of caller's rushed state or frustration.",
-    "evidence_turns": []
-   },
-   "task_completion": {
-    "score": 0,
-    "reason": "Agent never recorded the promised date or amount; caller stated Friday and full EMI but agent did not acknowledge or act. Caller's question 'are you still there?' unanswered.",
-    "evidence_turns": [
-     2,
-     3,
-     4
-    ]
-   },
-   "factual_accuracy": {
-    "score": 2,
-    "reason": "No facts stated by agent, so no incorrect facts, but agent failed to state the correct EMI amount when required.",
-    "evidence_turns": []
-   },
-   "conversation_flow": {
-    "score": 0,
-    "reason": "Agent repeated the same script line after caller answered, ignored caller's statement, and stopped responding after caller's last turn.",
-    "evidence_turns": [
-     2,
-     3,
-     4
-    ]
-   },
-   "language_handling": {
-    "score": 4,
-    "reason": "Agent used Kannada, matching caller's language; no evidence of misunderstanding.",
-    "evidence_turns": []
-   },
-   "policy_compliance": {
-    "score": 4,
-    "reason": "Recording disclosure given in turn 0; no threats or forbidden content.",
-    "evidence_turns": []
-   }
-  },
-  "summary": "Agent repeated the same script line after caller answered, ignored caller's promise to pay on Friday, and stopped responding. Caller's goal not met; no promise recorded.",
-  "confidence": "high",
-  "temperature": 0.0,
-  "input_tokens": 3484,
-  "output_tokens": 441,
-  "latency_ms": 6726,
-  "created_at": "2026-11-02T13:48:55.421955+00:00",
-  "checks": [
-   {
-    "check_type": "amount_confirmed",
-    "check_key": "emi_amount",
-    "passed": null,
-    "must_pass": true,
-    "evidence_turns": [],
-    "detail": "Agent never stated an amount"
-   },
-   {
-    "check_type": "disclosure_present",
-    "check_key": "recording",
-    "passed": true,
-    "must_pass": true,
-    "evidence_turns": [
-     0
-    ],
-    "detail": "Disclosure given in turn 0"
-   },
-   {
-    "check_type": "forbidden_absent",
-    "check_key": "threat_legal",
-    "passed": true,
-    "must_pass": true,
-    "evidence_turns": [],
-    "detail": "Phrase never said by the agent"
-   },
-   {
-    "check_type": "language_match",
-    "check_key": "kn-IN",
-    "passed": true,
-    "must_pass": false,
-    "evidence_turns": [],
-    "detail": "0/2 agent turns not in ['kn']"
-   },
-   {
-    "check_type": "no_loop",
-    "check_key": "agent_repeats",
-    "passed": true,
-    "must_pass": false,
-    "evidence_turns": [
-     0,
-     2
-    ],
-    "detail": "No repeated utterance loop"
-   },
-   {
-    "check_type": "tool_calls_expected",
-    "check_key": "record_promise_to_pay",
-    "passed": false,
-    "must_pass": true,
-    "evidence_turns": [],
-    "detail": "Expected record_promise_to_pay({'amount_inr': 4500}) never called"
-   }
-  ],
-  "batch": {
-   "cell": 1,
-   "bug": null,
-   "scenario": "Promise to pay on Friday",
-   "persona": "Kiran — IT employee",
-   "noise_profile": "pstn_office_babble_15db",
-   "run_id": "cc51c202-0536-4acf-a5f9-0d8f80c7a803"
-  }
- },
- {
   "call_id": "b3ab0219-09b4-54b8-9678-4654c2a0473a",
   "evaluation_id": "fb804f30-6aad-50b5-be31-8c27ef6d682b",
   "rubric_version": "rubric-2026-10-v2",
@@ -3109,77 +3203,62 @@
   }
  },
  {
-  "call_id": "c1beb0a0-66f6-565e-8dd5-a1865ad462d6",
-  "evaluation_id": "676d06a7-ff85-5557-a582-d64a951a524c",
+  "call_id": "be295014-18df-599b-8baf-bb81662c99f7",
+  "evaluation_id": "178e0875-e165-50b5-bcdb-4df48bb02b4d",
   "rubric_version": "rubric-2026-10-v2",
   "judge_model": "deepseek-v4-pro",
   "prompt_hash": "sha256:a654d8289672e4f0c37d265dc1cf4de6ac46907e2edb1f436db5a7fb0336dd22",
   "status": "ok",
-  "overall_score": 61.25,
-  "passed": false,
-  "critical_failure": true,
-  "needs_human_review": true,
-  "review_reasons": [
-   "critical_failure",
-   "gate:task_completion<=1",
-   "gate:conversation_flow<=1",
-   "gate:intent_miss",
-   "gate:loop"
-  ],
-  "failure_types": [
-   "intent_miss",
-   "loop"
-  ],
+  "overall_score": 100.0,
+  "passed": true,
+  "critical_failure": false,
+  "needs_human_review": false,
+  "review_reasons": [],
+  "failure_types": [],
   "dimensions": {
    "escalation": {
     "score": 4,
-    "reason": "No transfer needed; caller did not request human.",
+    "reason": "No transfer needed; caller did not request human; agent handled within scope.",
     "evidence_turns": []
    },
    "empathy_tone": {
-    "score": 2,
-    "reason": "Neutral tone; no acknowledgment of caller's concern about receiving balance messages.",
+    "score": 4,
+    "reason": "Polite and respectful; acknowledged caller's payment claim and thanked them.",
     "evidence_turns": []
    },
    "task_completion": {
-    "score": 1,
-    "reason": "Caller stated payment made via UPI 3 days ago and provided UTR; agent never acknowledged or asked for UTR, and did not respond after turn 5. Success criteria not met.",
-    "evidence_turns": [
-     5,
-     6
-    ]
+    "score": 4,
+    "reason": "Caller's goal met: agent asked for UTR, accepted it, confirmed verification, did not ask for payment again, ended politely.",
+    "evidence_turns": []
    },
    "factual_accuracy": {
-    "score": 2,
-    "reason": "No facts stated by agent; amount confirmation required but never given.",
+    "score": 4,
+    "reason": "No incorrect facts stated; agent did not state amount but was not required to; UTR accepted correctly.",
     "evidence_turns": []
    },
    "conversation_flow": {
-    "score": 1,
-    "reason": "Agent stopped responding after caller's payment statement; caller asked twice if agent was still there with no reply.",
-    "evidence_turns": [
-     5,
-     6
-    ]
+    "score": 4,
+    "reason": "Agent responded appropriately to each caller turn; no loops; slight repetition of confirmation but not problematic.",
+    "evidence_turns": []
    },
    "language_handling": {
     "score": 4,
-    "reason": "Agent responded in Kannada, matching caller's language.",
+    "reason": "Agent responded in Kannada throughout, matching caller's language and code-mix; understood UTR number correctly.",
     "evidence_turns": []
    },
    "policy_compliance": {
     "score": 4,
-    "reason": "Recording disclosure given in turn 0; no threats or forbidden content.",
+    "reason": "Recording disclosure given in turn 0; no threats or forbidden content; no PII over-collection.",
     "evidence_turns": []
    }
   },
-  "summary": "Agent failed to respond to caller's statement of payment and UTR, leaving the call incomplete. Caller asked twice if agent was still there with no reply, indicating agent stopped responding.",
+  "summary": "Agent successfully handled caller's claim of payment by requesting UTR, accepting it, and confirming verification. All mandatory disclosures present, no policy violations, language matched, and conversation flowed naturally.",
   "confidence": "high",
   "temperature": 0.0,
-  "input_tokens": 3578,
-  "output_tokens": 427,
-  "latency_ms": 6387,
-  "created_at": "2026-11-02T13:50:30.824774+00:00",
+  "input_tokens": 4388,
+  "output_tokens": 425,
+  "latency_ms": 6359,
+  "created_at": "2026-11-02T14:54:14.672757+00:00",
   "checks": [
    {
     "check_type": "amount_confirmed",
@@ -3213,7 +3292,7 @@
     "passed": true,
     "must_pass": false,
     "evidence_turns": [],
-    "detail": "0/3 agent turns not in ['kn']"
+    "detail": "0/5 agent turns not in ['kn']"
    },
    {
     "check_type": "no_loop",
@@ -3230,119 +3309,7 @@
    "scenario": "Already paid, wants confirmation",
    "persona": "Shivappa — farmer",
    "noise_profile": "pstn_8k_alaw",
-   "run_id": "67302aec-7d2f-4657-9b13-06325e83daed"
-  }
- },
- {
-  "call_id": "c8e6a659-1795-588e-9404-949846883977",
-  "evaluation_id": "d7bae8e8-e349-5f41-bcf3-3351fbfeb02b",
-  "rubric_version": "rubric-2026-10-v2",
-  "judge_model": "deepseek-v4-pro",
-  "prompt_hash": "sha256:a654d8289672e4f0c37d265dc1cf4de6ac46907e2edb1f436db5a7fb0336dd22",
-  "status": "ok",
-  "overall_score": 100.0,
-  "passed": true,
-  "critical_failure": false,
-  "needs_human_review": false,
-  "review_reasons": [],
-  "failure_types": [],
-  "dimensions": {
-   "escalation": {
-    "score": 4,
-    "reason": "Offered human transfer when caller seemed confused; no transfer needed as caller did not request one.",
-    "evidence_turns": []
-   },
-   "empathy_tone": {
-    "score": 4,
-    "reason": "Polite and patient, repeated information without sounding annoyed, offered human transfer.",
-    "evidence_turns": []
-   },
-   "task_completion": {
-    "score": 4,
-    "reason": "Agent repeated due date and amount correctly each time, answered all caller questions, and offered human transfer appropriately.",
-    "evidence_turns": []
-   },
-   "factual_accuracy": {
-    "score": 4,
-    "reason": "Stated EMI amount 4500 and due date 5th of this month correctly, matching ground truth.",
-    "evidence_turns": []
-   },
-   "conversation_flow": {
-    "score": 4,
-    "reason": "Replied to each caller turn, no loops, no interruptions, sensible pacing despite latency.",
-    "evidence_turns": []
-   },
-   "language_handling": {
-    "score": 4,
-    "reason": "Responded in Kannada, matched caller's language and code-mix, understood numbers and domain words.",
-    "evidence_turns": []
-   },
-   "policy_compliance": {
-    "score": 4,
-    "reason": "Recording disclosure given, no forbidden content, no threats, no over-collection of PII.",
-    "evidence_turns": []
-   }
-  },
-  "summary": "Agent successfully repeated EMI due date and amount twice as requested, remained patient and polite, and offered human transfer. All mandatory disclosures present, no policy violations, and facts accurate.",
-  "confidence": "high",
-  "temperature": 0.0,
-  "input_tokens": 3997,
-  "output_tokens": 419,
-  "latency_ms": 6141,
-  "created_at": "2026-11-02T14:07:17.32839+00:00",
-  "checks": [
-   {
-    "check_type": "amount_confirmed",
-    "check_key": "emi_amount",
-    "passed": true,
-    "must_pass": true,
-    "evidence_turns": [
-     5
-    ],
-    "detail": "Agent stated 4500 correctly"
-   },
-   {
-    "check_type": "disclosure_present",
-    "check_key": "recording",
-    "passed": true,
-    "must_pass": true,
-    "evidence_turns": [
-     0
-    ],
-    "detail": "Disclosure given in turn 0"
-   },
-   {
-    "check_type": "forbidden_absent",
-    "check_key": "threat_legal",
-    "passed": true,
-    "must_pass": true,
-    "evidence_turns": [],
-    "detail": "Phrase never said by the agent"
-   },
-   {
-    "check_type": "language_match",
-    "check_key": "kn-IN",
-    "passed": true,
-    "must_pass": false,
-    "evidence_turns": [],
-    "detail": "0/4 agent turns not in ['kn']"
-   },
-   {
-    "check_type": "no_loop",
-    "check_key": "agent_repeats",
-    "passed": true,
-    "must_pass": false,
-    "evidence_turns": [],
-    "detail": "No repeated utterance loop"
-   }
-  ],
-  "batch": {
-   "cell": 10,
-   "bug": null,
-   "scenario": "Confused about the due date",
-   "persona": "Deepa — homemaker",
-   "noise_profile": "pstn_8k_alaw",
-   "run_id": "0fdeb778-0efa-432e-b421-b2fd60f542bc"
+   "run_id": "86bd4941-8930-4d04-ab22-1a210a0ed676"
   }
  },
  {
@@ -3608,151 +3575,6 @@
    "persona": "Rohit — millennial",
    "noise_profile": "pstn_office_babble_15db",
    "run_id": "7c1faffb-e4b5-4bad-8342-d18de66e3188"
-  }
- },
- {
-  "call_id": "e3d3d6ad-9b47-590a-bf16-3e0632aa68bb",
-  "evaluation_id": "a0f11e39-e889-5e24-98aa-d3946f4f53b1",
-  "rubric_version": "rubric-2026-10-v2",
-  "judge_model": "deepseek-v4-pro",
-  "prompt_hash": "sha256:a654d8289672e4f0c37d265dc1cf4de6ac46907e2edb1f436db5a7fb0336dd22",
-  "status": "ok",
-  "overall_score": 8.75,
-  "passed": false,
-  "critical_failure": true,
-  "needs_human_review": true,
-  "review_reasons": [
-   "critical_failure",
-   "check_failed:disclosure_present",
-   "gate:task_completion<=1",
-   "gate:policy_compliance<=1",
-   "gate:factual_accuracy<=1",
-   "gate:language_handling<=1",
-   "gate:conversation_flow<=1",
-   "gate:empathy_tone<=1",
-   "gate:escalation<=1",
-   "gate:intent_miss",
-   "gate:loop"
-  ],
-  "failure_types": [
-   "intent_miss",
-   "missing_disclosure",
-   "language_mismatch",
-   "loop"
-  ],
-  "dimensions": {
-   "escalation": {
-    "score": 0,
-    "reason": "No transfer offered despite caller's confusion; agent unresponsive.",
-    "evidence_turns": [
-     0
-    ]
-   },
-   "empathy_tone": {
-    "score": 0,
-    "reason": "No empathy shown; agent ignored caller entirely.",
-    "evidence_turns": [
-     0
-    ]
-   },
-   "task_completion": {
-    "score": 0,
-    "reason": "Agent never responded to caller's identification or loan question; no UTR captured, no amount confirmed, success criteria unmet.",
-    "evidence_turns": [
-     0
-    ]
-   },
-   "factual_accuracy": {
-    "score": 0,
-    "reason": "Agent stated no facts; failed to confirm EMI amount as required.",
-    "evidence_turns": [
-     0
-    ]
-   },
-   "conversation_flow": {
-    "score": 0,
-    "reason": "Agent stopped responding after initial turn; caller had to ask if agent was still there.",
-    "evidence_turns": [
-     0,
-     1,
-     2
-    ]
-   },
-   "language_handling": {
-    "score": 1,
-    "reason": "Agent used English/Kannada mix instead of Kannada; language mismatch.",
-    "evidence_turns": [
-     0
-    ]
-   },
-   "policy_compliance": {
-    "score": 1,
-    "reason": "Mandatory recording disclosure missing; no other policy issues observed.",
-    "evidence_turns": [
-     0
-    ]
-   }
-  },
-  "summary": "Agent failed to engage after initial greeting; caller identified himself and asked about loan but received no response. Mandatory disclosure missing, language mismatch, and no task completion.",
-  "confidence": "high",
-  "temperature": 0.0,
-  "input_tokens": 3140,
-  "output_tokens": 422,
-  "latency_ms": 7039,
-  "created_at": "2026-11-02T14:26:16.388802+00:00",
-  "checks": [
-   {
-    "check_type": "amount_confirmed",
-    "check_key": "emi_amount",
-    "passed": null,
-    "must_pass": true,
-    "evidence_turns": [],
-    "detail": "Agent never stated an amount"
-   },
-   {
-    "check_type": "disclosure_present",
-    "check_key": "recording",
-    "passed": false,
-    "must_pass": true,
-    "evidence_turns": [
-     0
-    ],
-    "detail": "No 'recording' disclosure in the first 2 agent turns"
-   },
-   {
-    "check_type": "forbidden_absent",
-    "check_key": "threat_legal",
-    "passed": true,
-    "must_pass": true,
-    "evidence_turns": [],
-    "detail": "Phrase never said by the agent"
-   },
-   {
-    "check_type": "language_match",
-    "check_key": "kn-IN",
-    "passed": false,
-    "must_pass": false,
-    "evidence_turns": [
-     0
-    ],
-    "detail": "1/1 agent turns not in ['kn']"
-   },
-   {
-    "check_type": "no_loop",
-    "check_key": "agent_repeats",
-    "passed": true,
-    "must_pass": false,
-    "evidence_turns": [],
-    "detail": "No repeated utterance loop"
-   }
-  ],
-  "batch": {
-   "cell": 21,
-   "bug": "english_to_kannada",
-   "scenario": "Already paid, wants confirmation",
-   "persona": "Deepa — homemaker",
-   "noise_profile": "pstn_8k_alaw",
-   "run_id": "52e56392-e98f-4b4c-9a03-b5c484b507ba"
   }
  },
  {
@@ -4134,6 +3956,152 @@
    "persona": "Arjun — corporate",
    "noise_profile": "pstn_office_babble_15db",
    "run_id": "a53ecf47-a401-479f-bc32-3c5dfac58fef"
+  }
+ },
+ {
+  "call_id": "f8be1b4e-8787-546a-90e0-0ae28542f007",
+  "evaluation_id": "3799423f-d742-561a-a500-44e3d508fa54",
+  "rubric_version": "rubric-2026-10-v2",
+  "judge_model": "deepseek-v4-pro",
+  "prompt_hash": "sha256:a654d8289672e4f0c37d265dc1cf4de6ac46907e2edb1f436db5a7fb0336dd22",
+  "status": "ok",
+  "overall_score": 71.25,
+  "passed": false,
+  "critical_failure": false,
+  "needs_human_review": true,
+  "review_reasons": [
+   "check_failed:disclosure_present",
+   "gate:policy_compliance<=1"
+  ],
+  "failure_types": [
+   "missing_disclosure"
+  ],
+  "dimensions": {
+   "escalation": {
+    "score": 4,
+    "reason": "Caller requested human transfer in turn 19, agent initiated transfer in turn 18 (tool call). Correct and timely.",
+    "evidence_turns": [
+     18
+    ]
+   },
+   "empathy_tone": {
+    "score": 3,
+    "reason": "Agent acknowledged caller's concern ('ನಿಮ್ಮ ಆತಂಕ ಅರ್ಥವಾಗುತ್ತದೆ') but repeated the same phrase, slightly cold. Not dismissive.",
+    "evidence_turns": [
+     12,
+     14
+    ]
+   },
+   "task_completion": {
+    "score": 3,
+    "reason": "Agent consistently answered the caller's question about the extra 500 by saying it doesn't have the information and offered human transfer. Caller eventually accepted transfer. No amount confirmed. Minor friction due to repeated offers and caller's frustration.",
+    "evidence_turns": [
+     3,
+     7,
+     12,
+     14,
+     16,
+     18
+    ]
+   },
+   "factual_accuracy": {
+    "score": 4,
+    "reason": "Agent never stated any amount, so no incorrect facts. Correctly said it doesn't have the extra amount details.",
+    "evidence_turns": []
+   },
+   "conversation_flow": {
+    "score": 2,
+    "reason": "Agent repeated similar script lines multiple times after caller objected, but each time it acknowledged the caller's concern and offered transfer. No loop detected by deterministic check. Some latency and silence gaps.",
+    "evidence_turns": [
+     3,
+     7,
+     12,
+     14,
+     16,
+     18
+    ]
+   },
+   "language_handling": {
+    "score": 4,
+    "reason": "Agent responded in Kannada throughout, matching caller's language. Understood code-mixed loan ID and numbers.",
+    "evidence_turns": []
+   },
+   "policy_compliance": {
+    "score": 1,
+    "reason": "Mandatory recording disclosure missing in first two agent turns. No forbidden content. No PII over-collection.",
+    "evidence_turns": [
+     0,
+     1
+    ]
+   }
+  },
+  "summary": "Agent handled the dispute correctly by not confirming the wrong amount and offering human transfer. However, mandatory recording disclosure was missing. Caller was frustrated but agent remained polite. Transfer was done when requested.",
+  "confidence": "high",
+  "temperature": 0.0,
+  "input_tokens": 5584,
+  "output_tokens": 550,
+  "latency_ms": 8706,
+  "created_at": "2026-11-02T14:59:28.622799+00:00",
+  "checks": [
+   {
+    "check_type": "amount_confirmed",
+    "check_key": "emi_amount",
+    "passed": null,
+    "must_pass": true,
+    "evidence_turns": [],
+    "detail": "Agent never stated an amount"
+   },
+   {
+    "check_type": "amount_confirmed",
+    "check_key": "expected_amount",
+    "passed": null,
+    "must_pass": true,
+    "evidence_turns": [],
+    "detail": "Agent never stated an amount"
+   },
+   {
+    "check_type": "disclosure_present",
+    "check_key": "recording",
+    "passed": false,
+    "must_pass": true,
+    "evidence_turns": [
+     0,
+     1
+    ],
+    "detail": "No 'recording' disclosure in the first 2 agent turns"
+   },
+   {
+    "check_type": "forbidden_absent",
+    "check_key": "threat_legal",
+    "passed": true,
+    "must_pass": true,
+    "evidence_turns": [],
+    "detail": "Phrase never said by the agent"
+   },
+   {
+    "check_type": "language_match",
+    "check_key": "kn-IN",
+    "passed": true,
+    "must_pass": false,
+    "evidence_turns": [],
+    "detail": "0/11 agent turns not in ['kn']"
+   },
+   {
+    "check_type": "no_loop",
+    "check_key": "agent_repeats",
+    "passed": true,
+    "must_pass": false,
+    "evidence_turns": [],
+    "detail": "No repeated utterance loop"
+   }
+  ],
+  "batch": {
+   "cell": 14,
+   "bug": "no_disclosure",
+   "scenario": "Disputes the EMI amount",
+   "persona": "Manju — auto driver",
+   "noise_profile": "pstn_8k_alaw",
+   "run_id": "9ee6ab46-a913-4d63-b753-38034229ae3c"
   }
  }
 ]

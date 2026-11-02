@@ -150,7 +150,10 @@ def test_bug_no_amount_confirm_never_states_the_amount() -> None:
 
 
 def test_caller_number_regrouped_is_allowed() -> None:
-    assert grounding_problems("Noted, 5550100, thank you.", "en-IN", ["UTR-555-0100"], frozenset()) == []
+    assert (
+        grounding_problems("Noted, 5550100, thank you.", "en-IN", ["UTR-555-0100"], frozenset())
+        == []
+    )
     assert grounding_problems("Noted 555 0100.", "en-IN", ["UTR-555-0100"], frozenset()) == []
     assert grounding_problems("Noted 555 0199.", "en-IN", ["UTR-555-0100"], frozenset())
 

@@ -16,15 +16,8 @@ def test_rms() -> None:
     assert rms(b"") == 0.0
 
 
-def _warmed() -> UtteranceDetector:
-    """A detector that has heard 0.5 s of quiet line first (it detects no speech before that)."""
-    vad = UtteranceDetector()
-    assert all(vad.feed(QUIET) is None for _ in range(25))
-    return vad
-
-
 def test_utterance_detected_after_silence() -> None:
-    vad = _warmed()
+    vad = UtteranceDetector()
     out = [vad.feed(LOUD) for _ in range(20)]
     assert all(o is None for o in out) and vad.speaking
     results = [vad.feed(QUIET) for _ in range(40)]
@@ -34,7 +27,7 @@ def test_utterance_detected_after_silence() -> None:
 
 
 def test_blip_is_ignored() -> None:
-    vad = _warmed()
+    vad = UtteranceDetector()
     vad.feed(LOUD)
     assert all(vad.feed(QUIET) is None for _ in range(60))
 
@@ -135,6 +128,15 @@ def test_babble_bed_does_not_keep_the_utterance_open(noise: float) -> None:
     assert len(utterance) >= 50 * 640  # most of the 2 s turn is in it
 
 
+def test_noise_from_the_first_frame_gives_no_utterance_and_no_floor_until_measured() -> None:
+    rng = random.Random(5)
+    vad = UtteranceDetector()
+    assert not vad.floor_known
+    got = _run(vad, [_noise_frame(rng, 2500.0) for _ in range(200)])
+    assert vad.floor_known
+    assert got == []  # the warm-up "utterance" was noise once the floor was known: dropped
+
+
 def test_steady_noise_alone_is_not_speech() -> None:
     rng = random.Random(3)
     vad = UtteranceDetector()
@@ -144,4 +146,4 @@ def test_steady_noise_alone_is_not_speech() -> None:
 def test_max_utterance_closes_a_turn_that_never_pauses() -> None:
     vad = UtteranceDetector(speech_ratio=0.0, max_utterance_ms=2000)
     got = _run(vad, [LOUD] * 200)
-    assert got and got[0][0] < 25 + 110  # closed ~2 s after the warm-up instead of never
+    assert got and got[0][0] < 110  # closed after ~2 s instead of never

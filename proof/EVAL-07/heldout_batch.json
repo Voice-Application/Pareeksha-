@@ -340,6 +340,23 @@
   "evaluation_status": "ok"
  },
  {
+  "cell": 21,
+  "bug": "english_to_kannada",
+  "scenario": "Already paid, wants confirmation",
+  "persona": "Deepa — homemaker",
+  "noise_profile": "pstn_8k_alaw",
+  "agent": "EMI Reminder Bot [bug:english_to_kannada]",
+  "run_id": "3dd0e2c8-6e24-4ed7-9efe-a55edc082eed",
+  "wall_s": 115.4,
+  "run_status": "completed",
+  "item_status": "evaluated",
+  "call_id": "266be4c8-b037-5daf-80e1-aaf0ed1c1e2f",
+  "judge_passed": false,
+  "judge_score": 73.75,
+  "judge_critical": false,
+  "evaluation_status": "ok"
+ },
+ {
   "cell": 22,
   "bug": "english_to_kannada",
   "scenario": "Abusive caller",

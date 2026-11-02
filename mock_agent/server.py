@@ -135,7 +135,11 @@ class CallSession:
             return  # bug 4: VAD is off while the agent talks; interruptions are never heard
         utterance = self.vad.feed(frame)
         if playing:
-            self.barge_frames = self.barge_frames + 1 if self.vad.speaking else 0
+            # barge-in counts only once the VAD knows the line's noise floor, so a noise bed heard
+            # in the first half second cannot cancel the opening (ISSUE-1)
+            self.barge_frames = (
+                self.barge_frames + 1 if self.vad.speaking and self.vad.floor_known else 0
+            )
             if self.barge_frames >= BARGE_IN_FRAMES and self.playing is not None:
                 self.playing.cancel()  # barge-in: stop talking immediately
         else:

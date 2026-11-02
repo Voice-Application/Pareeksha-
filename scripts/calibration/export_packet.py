@@ -60,7 +60,7 @@ def fmt_ms(ms: int) -> str:
     return f"{ms // 60000:d}:{ms % 60000 / 1000:04.1f}"
 
 
-def download_mp3(call_id: str, dest: Path) -> None:
+def download_mp3(call_id: str, dest: Path, bitrate: str = "48k") -> None:
     req = urllib.request.Request(
         f"{vapi.api_url()}/calls/{call_id}/audio/mixed",
         headers={"Authorization": f"Bearer {vapi.setting('PAREEKSHA_API_KEY')}"},
@@ -87,8 +87,7 @@ def download_mp3(call_id: str, dest: Path) -> None:
                 "16000",
                 "-c:a",
                 "libmp3lame",
-                "-b:a",
-                "48k",
+                "-b:a", bitrate,
                 str(dest),
             ],
             check=True,
@@ -286,6 +285,7 @@ def main() -> int:
     ap.add_argument("--proof", type=Path, default=PROOF, help="gloss cache / usage folder")
     ap.add_argument("--prefix", default="L", help="label id prefix (L01.. / H01..)")
     ap.add_argument("--title", default="EVAL-06")
+    ap.add_argument("--bitrate", default="48k", help="MP3 bitrate (e.g. 32k keeps 30 calls < 16 MB)")
     args = ap.parse_args()
     packet, proof, prefix = args.packet, args.proof, args.prefix
     batch = [
@@ -314,7 +314,7 @@ def main() -> int:
             cache_file.write_text(json.dumps(cache, indent=1, ensure_ascii=False))
             usage_file.write_text(json.dumps(usage, indent=1))
         glosses = {int(k): v for k, v in cache[row["call_id"]].items()}
-        download_mp3(row["call_id"], packet / "audio" / f"{lid}.mp3")
+        download_mp3(row["call_id"], packet / "audio" / f"{lid}.mp3", args.bitrate)
         prev, nxt = (ids[i - 1] if i else None), (ids[i + 1] if i + 1 < len(ids) else None)
         (packet / f"{lid}.html").write_text(
             call_page(lid, prev, nxt, call, scenarios[row["scenario"]], glosses)
