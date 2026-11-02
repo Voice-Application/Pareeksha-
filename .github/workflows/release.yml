@@ -1,0 +1,43 @@
+name: release
+
+# Manual release: creates the annotated tag and the GitHub release for a commit on main.
+# The release notes come from .github/release/<tag>.md.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to create, e.g. v1.0.0"
+        required: true
+      target:
+        description: "Commit SHA on main to tag"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Check the target is on main and the tag is new
+        env:
+          TAG: ${{ inputs.tag }}
+          TARGET: ${{ inputs.target }}
+        run: |
+          git merge-base --is-ancestor "$TARGET" origin/main || { echo "::error::$TARGET is not on main"; exit 1; }
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then echo "::error::tag $TAG already exists"; exit 1; fi
+          test -s ".github/release/$TAG.md" || { echo "::error::.github/release/$TAG.md is missing"; exit 1; }
+      - name: Create tag and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          TARGET: ${{ inputs.target }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" "$TARGET" -m "Pareeksha $TAG"
+          git push origin "refs/tags/$TAG"
+          gh release create "$TAG" --verify-tag --title "Pareeksha $TAG" --notes-file ".github/release/$TAG.md"
