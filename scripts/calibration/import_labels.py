@@ -560,7 +560,14 @@ def render_md(report: dict[str, Any], extra: str = "") -> str:
         f"| MAE per dimension | {NOT_PROVIDED if na else cal.get('dimension_mae')} | "
         f"{NOT_PROVIDED if na else off['dimension_mae']} |",
     ]
-    kappa = cal.get("kappa_pass_fail")
+    if report.get("api_pooled"):
+        lines += [
+            "",
+            f"`GET /calibration` pools every labelled evaluation of the active rubric (n = {cal.get('n')}, "
+            "this batch plus earlier labelled batches); it has no batch filter. **This batch's numbers are "
+            "the offline column** (same function, this batch's judge rows only).",
+        ]
+    kappa = off["kappa_pass_fail"] if report.get("api_pooled") else cal.get("kappa_pass_fail")
     if interim:
         verdict = f"not assessed (n = {report['labelled']} < 30)"
     else:
@@ -589,6 +596,14 @@ def render_md(report: dict[str, Any], extra: str = "") -> str:
         f"Owner critical {c['human_yes']}/{c['n']}, judge critical {c['judge_yes']}/{c['n']}. "
         + _stats(c),
     ]
+    if report.get("inconsistent_labels"):
+        lines += [
+            "",
+            "## Inconsistent labels",
+            "",
+            f"{', '.join(report['inconsistent_labels'])}: labelled passed = yes **and** critical = yes "
+            "(GUIDE.md: a critical call is normally a fail). Counted as written; the owner should confirm.",
+        ]
     if report["identical_rows"]:
         lines += ["", "## Identical rows", ""]
         for ids in report["identical_rows"]:
@@ -668,6 +683,7 @@ def build_report(
         if mode == "pass_fail_only"
         else [],
         "agreement": agreement(labels, judge),
+        "inconsistent_labels": [lab.label_id for lab in labels if lab.passed and lab.critical],
         "identical_rows": identical_rows(
             [r for r in owner_rows if r.get("label_id") in labelled_ids]
         )
@@ -701,6 +717,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     ap.add_argument("--fill-json", type=Path, help="fill pending rows of --labels from this JSON")
     ap.add_argument("--note", default="", help="a bold line under the heading (e.g. IN-SAMPLE)")
+    ap.add_argument(
+        "--api-pooled",
+        action="store_true",
+        help="the DB also holds other labelled evaluations of this rubric: GET /calibration must count "
+        "--expect-n (all of them); this batch's numbers are the offline column",
+    )
     ap.add_argument(
         "--expect-n",
         type=int,
@@ -779,7 +801,10 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 1
-    if cal.get("n") != len(labels):
+    if args.api_pooled and args.expect_n is None:
+        print("--api-pooled needs --expect-n (the pooled count)", file=sys.stderr)
+        return 2
+    if not args.api_pooled and cal.get("n") != len(labels):
         print(
             f"GET /calibration counts {cal.get('n')} reviewed evaluations but {len(labels)} rows are "
             "labelled: the DB holds reviews that are not in this labels file",
@@ -798,6 +823,7 @@ def main(argv: list[str] | None = None) -> int:
     owner_rows = read_csv(args.owner_raw) if args.owner_raw else None
     report = build_report(labels, judge, cal, imported, owner_rows, pending_ids(rows), len(key))
     report["note"] = args.note
+    report["api_pooled"] = args.api_pooled
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "calibration.json").write_text(
         json.dumps(report, indent=1, ensure_ascii=False) + "\n"

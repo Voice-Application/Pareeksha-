@@ -12,7 +12,7 @@ orchestrator) and confirmed scope A-D in this session. Branch `task/EVAL-07` = `
 | B. Mock agent | **LLM-driven** (DeepSeek) and grounded on its facts on file. The 5 planted bugs still work: V4 **PASS**, 4/5 caught, control 2/2. |
 | C. ISSUE-1 (agent muted by noise) | **Fixed** (VAD noise floor). A live babble call now gets answers. |
 | D1. In-sample κ (v2 on the 30 labelled EVAL-06 calls) | **0.6087**, versus 0.1892 with v1. **IN-SAMPLE:** v2 was written from these labels. |
-| D2. Held-out packet `labelling/EVAL-07/` H01-H30 | **Ready**, 14.9 MB. Held-out κ is **awaiting owner labels**. |
+| D2. Held-out H01-H30 | Labelled by the owner (2026-11-02). **Held-out κ = 0.00** (95% CI [−0.24, 0.22]), agreement 0.40: **v2 over-corrected.** Details: `heldout_calibration.md`. |
 
 ## A. Rubric v2 and judge v2
 
@@ -230,3 +230,40 @@ python  scripts/calibration/export_packet.py --batch proof/EVAL-07/heldout_batch
 - **ISSUE-3:** Gnani Kannada STT 504s silence the mock agent, and the platform cannot see it. The agent
   could report a failed STT through glass-box events.
 - **Docker Hub 429 in the sandbox:** the mock-agent image was refreshed `FROM` the existing image (NOTES).
+
+## Held-out result (owner labels, 2026-11-02)
+
+- **Labels.** `labelling/EVAL-07/labels.owner.json` is the owner's JSON as received. Its partial dimension
+  scores are kept there only and treated as not provided. It filled `labels.csv` via `--fill-json`.
+- **Import.** 30 reviews went through `POST /calls/{id}/review` (30 × 201; the rerun gives 30 × 409).
+- **Pooled API count.** `GET /calibration` pools all labelled v2 evaluations (n = 60 = 30 in-sample + 30
+  held-out; κ 0.2873) and has no batch filter (ISSUE-5). The importer's new `--api-pooled --expect-n 60`
+  guards that count, and the held-out numbers come from the endpoint's own function on the held-out judge rows.
+- **Pass/fail.** Agreement 12/30 = 0.40 (Wilson [0.25, 0.58]), **κ 0.00** (bootstrap [−0.24, 0.22]). The owner
+  passed 24, v2 10.
+- **Critical.** Agreement 0.80, κ 0.39 (owner 8, v2 4).
+- **Inconsistent labels.** H15, H21 and H27 are labelled passed = yes **and** critical = yes; they are flagged
+  in the report.
+- **Diagnosis (`heldout_analysis.md`, `heldout_ablation.txt`; no tuning, rubric unchanged).**
+  - No single gate or check explains the gap. The biggest single-rule effect is `gate:loop`, to κ 0.05; all
+    gates and checks removed only reaches 0.10.
+  - 12 of the 16 owner-pass / v2-fail calls already score below 80: v2's anchors score the now-responsive
+    agent too harshly.
+  - 4 of the 8 disclosure fails are false (ISSUE-4).
+- **Owner questions.**
+  - (a) Is a missing disclosure a fail? The owner passed all 4 `no_disclosure` calls.
+  - (b) Should the `intent_miss` / `loop` flags alone fail a call (H05, H21, H26)?
+  - (c) Is confirming a commitment the caller never made critical (H09)?
+
+## ISSUES (added)
+
+- **ISSUE-4:** the `disclosure_present` check misses an English disclosure that Kannada STT wrote in
+  Kannada script ("ರೆಕಾರ್ಡೆಡ್", "ರೆಕಾರ್ಡರ್"). The agent's regex `(record|ರೆಕಾರ್ಡ್|रिकॉर्ड)` needs e.g. `ರೆಕಾರ್ಡ`.
+  Calls affected: H12, H17, H27, H28.
+- **ISSUE-5:** `GET /calibration` cannot be restricted to one batch or run; it pools every labelled evaluation
+  of a rubric. A per-batch filter would be an API change.
+
+## Database dump
+
+`proof/EVAL-07/pareeksha_db.sql.gz` is a plain `pg_dump` taken after the held-out import, without the rows of
+`api_keys`. Restore it as in `proof/EVAL-06/proof.md`.

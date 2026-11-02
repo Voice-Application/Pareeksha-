@@ -390,3 +390,25 @@ def test_final_report_heading() -> None:
     md = il.render_md(il.build_report(labels, judge, cal, imported, None, [], 2))
     assert md.startswith("# Calibration: judge vs owner labels (FINAL)")
     assert "INTERIM" not in md
+
+
+def test_inconsistent_labels_flagged() -> None:
+    key = {"L01": "c1", "L02": "c2"}
+    labels = il.parse_labels([pf_row("L01", "yes", "yes"), pf_row("L02", "no", "yes")], key)
+    judge = {"c1": judge_row(True, False), "c2": judge_row(False, True, 30)}
+    cal = {"n": 60, "kappa_pass_fail": 0.5, "spearman_overall": None, "dimension_mae": {}}
+    imported = {
+        "reviewer": "preetham",
+        "posted": 2,
+        "already": 0,
+        "labels": 2,
+        "labels_file": "x.csv",
+    }
+    report = il.build_report(labels, judge, cal, imported, None, [], 2)
+    assert report["inconsistent_labels"] == ["L01"]
+    report["api_pooled"] = True
+    md = il.render_md(report)
+    assert (
+        "## Inconsistent labels" in md and "L01: labelled passed = yes **and** critical = yes" in md
+    )
+    assert "pools every labelled evaluation" in md and "n = 60" in md
