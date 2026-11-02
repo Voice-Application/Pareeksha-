@@ -52,7 +52,7 @@ State values: todo / doing / blocked / review / done. Verified = QA sign-off (`y
 | EVAL-06 | Label 30 calls; publish κ and Spearman | EVAL + Preetham | QA-05 | INTERIM: owner labelled L01-L10, κ=1.0 (n=10); L11-L30 awaiting owner | proof/EVAL-06 (task/EVAL-06) | no |
 | DOC-02 | README, clean-clone quick start, 8 adopter guides, SDK reference | DOC | all | done | — | proof/DOC-02/verified.md |
 | DOC-03 | 60-second demo script; Preetham records | DOC + Preetham | QA-05 | script done (docs/demo-script.md); recording awaiting owner | proof/DOC-03 | script part (qa/FIX-VERIFY 489faae) |
-| PJM-01 | Release checklist, tag v1.0.0, repo public, launch post | PJM | all | checklist done, repo public, gitleaks full history clean; tag v1.0.0, demo video, launch post awaiting owner | proof/PJM-01 | partial (qa/FIX-VERIFY 489faae) |
+| PJM-01 | Release checklist, tag v1.0.0, repo public, launch post | PJM | all | checklist done, repo public, gitleaks full history clean; tagged v1.0.0 on b1df0d1 (2026-11-02, release workflow run 41438833672); demo video, launch post awaiting owner | proof/PJM-01 | partial (qa/FIX-VERIFY 489faae) |
 
 Notes: PM-01 issue: FR-RN-2 cost estimate is Should but required by FE-03; F19 per-run HTML export (Could) and Vapi have no board task.
 
@@ -128,5 +128,7 @@ Never cut: mock agent with planted bugs, judge with evidence, Kafka outbox + ide
 - GOAL 8: fail run 41097075186 (a8f8444, bug on) then pass run 41102511599 (b8b121e, descendant; manual dispatch because the PR paths filter skipped an empty net diff). Verifier: acceptable, not a literal PR check; owner to confirm.
 - DIALECT-02 (Vaani, 5 groups × 22 clips × 3 conditions, 330/330) — verified qa/DIALECT-02 b248279; merged 2026-11-02 (owner: "merge dialect", spot-check waived).
 - EVAL-06 interim: n=10 owner labels, κ=1.0 pass/fail, critical κ=0.14; rubric gap noted (no anchor for non-responsive replies) — task/EVAL-06 e21c46f.
-- Owner-pending: L11-L30 labels, tag v1.0.0, demo video, launch post, live demo approval.
+- Released v1.0.0: https://github.com/Voice-Application/Pareeksha-/releases/tag/v1.0.0 (tag on b1df0d1).
+- EVAL-06 final (n=30): kappa 0.19, below 0.6; rubric v2 proposed, not applied (task/EVAL-06 7d347ba).
+- Owner-pending: demo video, launch post, live demo approval.
 
