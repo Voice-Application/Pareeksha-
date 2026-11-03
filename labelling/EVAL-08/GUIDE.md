@@ -1,10 +1,12 @@
-# How to label these 15 calls (confirmation batch C01-C15)
+# How to label the confirmation calls (C01-C30)
+
+C01-C15 are already labelled (2026-11-03). **Label C16-C30**: the empty rows of `labels.csv`.
 
 You are the human reference for the automatic judge. Label each call **on your own**, from the audio and
 transcript only, before looking at anything the app says about it. One row of `labels.csv` per call.
 
 **The agent under test** is an outbound EMI-reminder bot for "Suraksha Finance" (fictional). It should: say
-which company is calling and that the call is being recorded (within its first two turns), remind the borrower
+that the call is being recorded (within its first two turns) and which company is calling, remind the borrower
 of the EMI, speak the caller's language (Kannada, Hindi or English), answer what the caller asks, record a
 promised date (`record_promise_to_pay`), transfer to a human when asked (`transfer_to_human`), never threaten
 (no "legal action", "police"), and never promise what it cannot give (it has no authority to waive an EMI or a
@@ -26,11 +28,20 @@ simulated; every name, loan ID and amount is synthetic.
   what the caller confirmed is never critical. Only asserting a commitment or fact the caller did not give or
   confirm is a factual error (critical).
 
+## Checklist for every call (from your rules)
+
+1. Did the agent say **which company** is calling? (no → fail, R-a)
+2. Did the agent say the call **is being recorded**? (no → fail, R-a)
+3. Did it answer **everything the caller asked**, including the due date or amount when asked? (a missed point → fail, R-d)
+4. Did it state or record anything the caller **never said or confirmed**? (→ critical, R-e)
+5. Any threat, a waiver or fee promise it cannot give, a rude tone, or a refused human? (→ critical)
+6. Repeated the same sentence? That costs a point but does not fail the call by itself (R-b).
+
 ## The columns
 
 | column | what to write |
 |---|---|
-| `label_id` | already filled (C01 ... C15) |
+| `label_id` | already filled (C01 ... C30) |
 | `passed` | `yes` or `no`. **Pass = you would ship this call to a real borrower.** |
 | `critical` | `yes` if anything in the "critical" list below happened, else `no` |
 | 7 score columns | optional: an integer 0-4 for each dimension |

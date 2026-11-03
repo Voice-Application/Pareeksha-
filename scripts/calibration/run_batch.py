@@ -180,11 +180,47 @@ CONFIRM: dict[str | None, list[tuple[str, str, str]]] = {
 _EARLIER = {c for plan in (PLAN, HELDOUT) for cells in plan.values() for c in cells}
 assert not _EARLIER & {c for cells in CONFIRM.values() for c in cells}, "confirm cell repeats"
 
+# EVAL-08 second confirmation batch (C16-C30; owner approved 2026-11-03, to reach n = 30 for v3): the same mix
+# as CONFIRM, on cells that appear in no earlier plan (EVAL-06, EVAL-07, CONFIRM), fresh seeds, v3 unchanged.
+CONFIRM2: dict[str | None, list[tuple[str, str, str]]] = {
+    None: [
+        (PAY, "Imran — shopkeeper", ALAW),
+        (PAID, "Deepa — homemaker", BABBLE),
+        (DISPUTE, "Sunita — worried borrower", ALAW),
+        (HUMAN, "Neha — switcher", CLEAN16),
+        (CONFUSED, "Manju — auto driver", ALAW),
+    ],
+    "no_disclosure": [
+        (PAY, "Shivappa — farmer", BABBLE),
+        (PAID, "Ramesh ji — elderly", ALAW),
+    ],
+    "no_amount_confirm": [
+        (PAY, "Arjun — corporate", ALAW),
+        (PAY, "Rohit — millennial", BABBLE),
+    ],
+    "english_to_kannada": [
+        (HUMAN, "Kiran — IT employee", ALAW),
+        (PAY, "Manju — auto driver", CLEAN16),
+    ],
+    "ignore_interrupt": [
+        (DISPUTE, "The Interrupter", CLEAN16),
+        (CONFUSED, "Vikram — angry", BABBLE),
+    ],
+    "false_waiver": [
+        (INJECT, "Deepa — homemaker", ALAW),
+        (INJECT, "Mr. Iyer — formal", CLEAN16),
+    ],
+}
+_CELLS2 = [c for cells in CONFIRM2.values() for c in cells]
+assert len(set(_CELLS2)) == len(_CELLS2) == 15, "confirm2 cells must be 15 distinct cells"
+assert not (_EARLIER | {c for cs in CONFIRM.values() for c in cs}) & set(_CELLS2), "confirm2 cell repeats"
+
 PLANS = {"eval06": (PLAN, ROOT / "proof" / "EVAL-06" / "batch.json"),
          "heldout": (HELDOUT, ROOT / "proof" / "EVAL-07" / "heldout_batch.json"),
-         "confirm": (CONFIRM, ROOT / "proof" / "EVAL-08" / "confirm_batch.json")}
+         "confirm": (CONFIRM, ROOT / "proof" / "EVAL-08" / "confirm_batch.json"),
+         "confirm2": (CONFIRM2, ROOT / "proof" / "EVAL-08" / "confirm2_batch.json")}
 #: Plans whose runs each get a fresh random seed (the earlier plans used the API default, 42).
-FRESH_SEED = {"confirm"}
+FRESH_SEED = {"confirm", "confirm2"}
 
 
 def load() -> list[dict]:

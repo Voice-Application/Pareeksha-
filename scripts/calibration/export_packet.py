@@ -287,6 +287,13 @@ def main() -> int:
     ap.add_argument("--title", default="EVAL-06")
     ap.add_argument("--bitrate", default="48k", help="MP3 bitrate (e.g. 32k keeps 30 calls < 16 MB)")
     ap.add_argument("--count", type=int, default=30, help="evaluated calls expected in --batch")
+    ap.add_argument(
+        "--start",
+        type=int,
+        default=1,
+        help="first label number; > 1 appends to an existing packet (its .key.json, labels.csv rows "
+        "and pages are kept; the index lists every call)",
+    )
     args = ap.parse_args()
     packet, proof, prefix = args.packet, args.proof, args.prefix
     batch = [
@@ -304,7 +311,16 @@ def main() -> int:
     cache = json.loads(cache_file.read_text()) if cache_file.exists() else {}
     usage = json.loads(usage_file.read_text()) if usage_file.exists() else []
     packet.mkdir(parents=True, exist_ok=True)
-    ids = [f"{prefix}{i:02d}" for i in range(1, args.count + 1)]
+    ids = [f"{prefix}{i:02d}" for i in range(args.start, args.start + args.count)]
+    old_key: dict[str, Any] = {}
+    old_rows: list[list[str]] = []
+    if args.start > 1:
+        old_key = json.loads((packet / ".key.json").read_text())
+        with (packet / "labels.csv").open(newline="", encoding="utf-8") as fh:
+            old_rows = list(csv.reader(fh))[1:]
+        clash = set(ids) & set(old_key["labels"])
+        if clash:
+            raise SystemExit(f"label ids already in the packet: {sorted(clash)}")
     key, pages = {}, []
     for i, (lid, row) in enumerate(zip(ids, order)):
         call = vapi.call(row["call_id"])
@@ -316,7 +332,8 @@ def main() -> int:
             usage_file.write_text(json.dumps(usage, indent=1))
         glosses = {int(k): v for k, v in cache[row["call_id"]].items()}
         download_mp3(row["call_id"], packet / "audio" / f"{lid}.mp3", args.bitrate)
-        prev, nxt = (ids[i - 1] if i else None), (ids[i + 1] if i + 1 < len(ids) else None)
+        prev = ids[i - 1] if i else (f"{prefix}{args.start - 1:02d}" if args.start > 1 else None)
+        nxt = ids[i + 1] if i + 1 < len(ids) else None
         (packet / f"{lid}.html").write_text(
             call_page(lid, prev, nxt, call, scenarios[row["scenario"]], glosses)
         )
@@ -326,13 +343,26 @@ def main() -> int:
             f"{lid} <- {row['call_id']} turns={len(call['turns'])} glossed={len(glosses)}",
             flush=True,
         )
+    part = f"{ids[0]}-{ids[-1]}"
+    if old_key:
+        earlier = [(lid, vapi.call(v["call_id"])) for lid, v in old_key["labels"].items()]
+        pages = earlier + pages
+        seeds = old_key.get("shuffle_seeds") or {
+            f"{min(old_key['labels'])}-{max(old_key['labels'])}": old_key["shuffle_seed"]
+        }
+        key_out = {
+            "shuffle_seed": old_key["shuffle_seed"],
+            "shuffle_seeds": {**seeds, part: seed},
+            "labels": {**old_key["labels"], **key},
+        }
+    else:
+        key_out = {"shuffle_seed": seed, "labels": key}
     (packet / "index.html").write_text(index_page(pages, args.title))
-    (packet / ".key.json").write_text(
-        json.dumps({"shuffle_seed": seed, "labels": key}, indent=1) + "\n"
-    )
+    (packet / ".key.json").write_text(json.dumps(key_out, indent=1) + "\n")
     with (packet / "labels.csv").open("w", newline="", encoding="utf-8") as fh:
         w = csv.writer(fh)
         w.writerow(COLUMNS)
+        w.writerows(old_rows)  # rows already labelled are kept as they are
         for lid in ids:
             w.writerow([lid] + [""] * (len(COLUMNS) - 1))
     size = sum(p.stat().st_size for p in packet.rglob("*") if p.is_file())
