@@ -1,0 +1,38 @@
+[
+ {
+  "cell": 1,
+  "bug": null,
+  "scenario": "Promise to pay on Friday",
+  "persona": "Deepa — homemaker",
+  "noise_profile": "pstn_office_babble_15db",
+  "agent": "EMI Reminder Bot",
+  "run_id": "44b43194-f238-47fe-a1c6-45f9a2435772",
+  "run_seed": 1987547317,
+  "wall_s": 135.4,
+  "run_status": "completed",
+  "item_status": "evaluated",
+  "call_id": "f105a21b-8ca8-58f6-af40-244d3e11809a",
+  "judge_passed": true,
+  "judge_score": 100.0,
+  "judge_critical": false,
+  "evaluation_status": "ok"
+ },
+ {
+  "cell": 2,
+  "bug": null,
+  "scenario": "Already paid, wants confirmation",
+  "persona": "Vikram — angry",
+  "noise_profile": "clean_16k",
+  "agent": "EMI Reminder Bot",
+  "run_id": "e9a83ddf-d5b3-4c82-ab57-88935c9c9fd0",
+  "run_seed": 1525733091,
+  "wall_s": 230.7,
+  "run_status": "completed",
+  "item_status": "evaluated",
+  "call_id": "4421a780-b7ff-5d76-adf7-bec80850411d",
+  "judge_passed": true,
+  "judge_score": 95.0,
+  "judge_critical": false,
+  "evaluation_status": "ok"
+ }
+]

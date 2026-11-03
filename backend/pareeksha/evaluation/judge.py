@@ -1,4 +1,4 @@
-"""The LLM judge: renders the active rubric's prompt (``judge_v2.j2``), calls the provider at
+"""The LLM judge: renders the active rubric's prompt (``judge_v3.j2``), calls the provider at
 temperature 0 with the pinned judge model, and validates evidence against the transcript (one repair
 retry on failure)."""
 

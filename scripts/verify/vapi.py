@@ -101,6 +101,7 @@ def run_and_wait(
     name: str,
     poll_s: int = 10,
     timeout_s: int = 3600,
+    seed: int | None = None,
 ) -> dict[str, Any]:
     """Create a run through POST /runs, wait for it, return {run_id, wall_s, run, items}."""
     ag = next(a for a in items("/agents") if a["name"] == agent)
@@ -111,7 +112,8 @@ def run_and_wait(
         "persona_ids": pick(items("/personas"), "name", personas),
         "noise_profile_ids": pick(items("/noise-profiles"), "name", profiles),
         "repeats": repeats,
-        "config": {"max_concurrency": concurrency},
+        "config": {"max_concurrency": concurrency}
+        | ({} if seed is None else {"seed": seed}),
     }
     t0 = time.time()
     run_id = request("POST", "/runs", body)["id"]

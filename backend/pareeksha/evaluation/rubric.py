@@ -5,6 +5,9 @@ anything means a new version and recalibration.
 - ``rubric-2026-10-v2`` (EVAL-07): same dimensions and weights, responsiveness and escalation anchors,
   a pass gate and two more critical rules, judged with ``judge_v2.j2``. Its anchors come from
   ``seed/data/rubric-2026-10-v2.yaml``, the same file the seed stores in ``rubric_versions``.
+- ``rubric-2026-11-v3`` (EVAL-08): the owner's rules of 2026-11-03 (disclosure and company identity
+  fail a call, repetition costs one point, amount read-back only when asked, missed points fail,
+  confirmation is not fabrication), judged with ``judge_v3.j2`` from ``rubric-2026-11-v3.yaml``.
 
 This build evaluates with ``RUBRIC_VERSION`` (the active rubric). The ``call.completed`` event that
 triggers an evaluation carries no rubric version, so an older version cannot be re-run without a
@@ -20,8 +23,9 @@ import yaml
 
 RUBRIC_V1 = "rubric-2026-10-v1"
 RUBRIC_V2 = "rubric-2026-10-v2"
+RUBRIC_V3 = "rubric-2026-11-v3"
 #: The rubric this build evaluates with.
-RUBRIC_VERSION = RUBRIC_V2
+RUBRIC_VERSION = RUBRIC_V3
 PASS_THRESHOLD = 80.0
 
 WEIGHTS: dict[str, int] = {
@@ -96,26 +100,31 @@ class RubricSpec:
     gate_max_failing_score: int | None = None
     #: Pass gate (v2): any of these failure types (judge's or from checks) fails the call.
     gate_failure_types: frozenset[str] = frozenset()
+    #: Check types whose failure is reported but neither blocks a pass nor counts as must-pass (v3).
+    advisory_checks: frozenset[str] = frozenset()
 
 
-def _v2() -> RubricSpec:
-    spec = yaml.safe_load((_DATA / "rubric-2026-10-v2.yaml").read_text(encoding="utf-8"))
-    assert spec["version"] == RUBRIC_V2
+def _from_yaml(file: str, version: str, prompt: str) -> RubricSpec:
+    spec = yaml.safe_load((_DATA / file).read_text(encoding="utf-8"))
+    assert spec["version"] == version
     assert {d["key"]: d["weight"] for d in spec["dimensions"]} == WEIGHTS
     gate = spec["pass_gate"]
+    max_failing = gate.get("max_failing_score")
     return RubricSpec(
-        version=RUBRIC_V2,
-        prompt="judge_v2",
+        version=version,
+        prompt=prompt,
         anchors=_render_anchors(spec),
         pass_threshold=float(spec["pass_threshold"]),
-        gate_max_failing_score=int(gate["max_failing_score"]),
+        gate_max_failing_score=None if max_failing is None else int(max_failing),
         gate_failure_types=frozenset(gate["failure_types"]),
+        advisory_checks=frozenset(spec.get("advisory_checks", ())),
     )
 
 
 RUBRICS: dict[str, RubricSpec] = {
     RUBRIC_V1: RubricSpec(RUBRIC_V1, "judge_v1", ANCHORS_V1, PASS_THRESHOLD),
-    RUBRIC_V2: _v2(),
+    RUBRIC_V2: _from_yaml("rubric-2026-10-v2.yaml", RUBRIC_V2, "judge_v2"),
+    RUBRIC_V3: _from_yaml("rubric-2026-11-v3.yaml", RUBRIC_V3, "judge_v3"),
 }
 ACTIVE: RubricSpec = RUBRICS[RUBRIC_VERSION]
 #: The active rubric's anchors (rendered into the judge prompt).

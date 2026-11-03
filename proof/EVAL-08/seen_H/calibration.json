@@ -1,0 +1,291 @@
+{
+ "rubric_versions": [
+  "rubric-2026-11-v3"
+ ],
+ "interim": false,
+ "labelled": 30,
+ "total": 30,
+ "pending": [],
+ "mode": "pass_fail_only",
+ "calibration_api": {
+  "n": 60,
+  "kappa_pass_fail": 0.4308,
+  "spearman_overall": null,
+  "dimension_mae": {}
+ },
+ "calibration_offline": {
+  "n": 30,
+  "kappa_pass_fail": 0.127,
+  "spearman_overall": null,
+  "dimension_mae": {}
+ },
+ "not_provided_by_owner": [
+  "spearman_overall",
+  "dimension_mae"
+ ],
+ "agreement": {
+  "passed": {
+   "n": 30,
+   "judge_pass_human_pass": 16,
+   "judge_pass_human_fail": 3,
+   "judge_fail_human_pass": 8,
+   "judge_fail_human_fail": 3,
+   "agreement": 0.6333,
+   "agreement_ci95_wilson": [
+    0.4551,
+    0.7813
+   ],
+   "kappa_bootstrap": {
+    "method": "percentile bootstrap, calls resampled",
+    "resamples": 10000,
+    "seed": 20261030,
+    "ci95": [
+     -0.2128,
+     0.467
+    ],
+    "undefined_share": 0.0
+   },
+   "judge_yes": 19,
+   "human_yes": 24,
+   "kappa": 0.127
+  },
+  "critical": {
+   "n": 30,
+   "judge_yes_human_yes": 3,
+   "judge_yes_human_no": 0,
+   "judge_no_human_yes": 5,
+   "judge_no_human_no": 22,
+   "agreement": 0.8333,
+   "agreement_ci95_wilson": [
+    0.6644,
+    0.9266
+   ],
+   "kappa_bootstrap": {
+    "method": "percentile bootstrap, calls resampled",
+    "resamples": 10000,
+    "seed": 20261030,
+    "ci95": [
+     0.0,
+     0.8148
+    ],
+    "undefined_share": 0.0
+   },
+   "judge_yes": 3,
+   "human_yes": 8,
+   "kappa": 0.4681
+  }
+ },
+ "inconsistent_labels": [
+  "H15",
+  "H21",
+  "H27"
+ ],
+ "identical_rows": [],
+ "import": {
+  "reviewer": "preetham",
+  "posted": 30,
+  "already": 0,
+  "labels": 30,
+  "labels_file": "labelling/EVAL-07/labels.csv"
+ },
+ "disagreements": [
+  {
+   "label_id": "H01",
+   "call_id": "6a46acea-81a4-50a7-8cdf-d602f8e11ae5",
+   "judge_passed": false,
+   "human_passed": true,
+   "judge_critical": false,
+   "human_critical": false,
+   "dimension_gaps": {},
+   "judge_score": 85.0,
+   "judge_failure_types": [
+    "intent_miss",
+    "wrong_fact"
+   ],
+   "judge_reasons": "Agent recorded promise-to-pay date (Friday) and correct amount (4500) via tool call, but failed to read back the amount despite caller asking twice. Mandatory disclosures present, no threats, language matched, empathy good. Repetition of confirmation line caused minor flow friction. / task_completion 2: Promise-to-pay date recorded, but agent never confirmed the amount despite caller explicitly asking twice (turns 12 and 15). Amount was on file and relevant; caller's goal of amount confirmation unmet. / conversation_flow 3: Agent repeated the same confirmation line three times (turns 11, 13, 16) after caller's interruptions, causing friction but not a loop.",
+   "owner_note": ""
+  },
+  {
+   "label_id": "H02",
+   "call_id": "60896ef4-cb0d-5ffb-8c94-8b5552af6896",
+   "judge_passed": false,
+   "human_passed": true,
+   "judge_critical": false,
+   "human_critical": false,
+   "dimension_gaps": {},
+   "judge_score": 80.0,
+   "judge_failure_types": [
+    "missing_disclosure"
+   ],
+   "judge_reasons": "Caller's goal achieved: promise-to-pay date and amount recorded and read back. Agent missed mandatory recording disclosure, but otherwise compliant and accurate. Minor repetition due to caller's hearing issues. / policy_compliance 1: Company disclosure given, but recording disclosure missing in first two turns. No threats or forbidden content. / conversation_flow 3: Agent repeated the EMI amount and purpose three times due to caller's hearing issues, causing minor friction but no loop. / empathy_tone 3: Polite and patient, but did not explicitly acknowledge caller's confusion or hearing difficulty.",
+   "owner_note": ""
+  },
+  {
+   "label_id": "H08",
+   "call_id": "f26e0950-6be1-56eb-a86d-64ee7dede6b4",
+   "judge_passed": true,
+   "human_passed": false,
+   "judge_critical": false,
+   "human_critical": false,
+   "dimension_gaps": {},
+   "judge_score": 95.0,
+   "judge_failure_types": [
+    "loop"
+   ],
+   "judge_reasons": "Caller's goal met: promise-to-pay date and amount recorded and confirmed. Agent repeated confirmation excessively, causing minor friction, but no critical issues. / conversation_flow 3: Agent repeated the same confirmation line many times, causing friction; otherwise smooth. / empathy_tone 3: Polite and respectful, but scripted; acknowledged caller's rush only minimally.",
+   "owner_note": "The agent was going on low. The customer is like, \"Okay, thank you,\" but still, it is like, \"Okay, I have recorded it.\" It's the same thing."
+  },
+  {
+   "label_id": "H09",
+   "call_id": "98c3ff96-2b25-5986-8084-2d8aabf666d1",
+   "judge_passed": true,
+   "human_passed": false,
+   "judge_critical": false,
+   "human_critical": true,
+   "dimension_gaps": {},
+   "judge_score": 100.0,
+   "judge_failure_types": [],
+   "judge_reasons": "Agent correctly repeated EMI amount and due date twice as requested, with proper disclosures and polite tone. No issues found.",
+   "owner_note": "The agent hallucinated regarding what the customer was asking: \"Was it due on the 5th or something like that?\" The customer did not confirm that they will pay on the 5th. The agent confirmed that they will be paid on the 5th."
+  },
+  {
+   "label_id": "H11",
+   "call_id": "339dfb22-66ac-56fa-879b-9056575be9f3",
+   "judge_passed": false,
+   "human_passed": true,
+   "judge_critical": false,
+   "human_critical": false,
+   "dimension_gaps": {},
+   "judge_score": 68.75,
+   "judge_failure_types": [
+    "intent_miss",
+    "interruption_handling",
+    "escalation_error"
+   ],
+   "judge_reasons": "Caller provided UTR three times but agent failed to capture it until the end, causing frustration. Agent repeated requests, ignored interruptions, and offered human transfer after caller declined. Disclosures and facts were correct, but task completion was poor. / task_completion 1: Agent repeatedly failed to capture the UTR despite caller providing it three times; did not acknowledge or record it until turn 16, causing caller frustration and goal not met promptly. / conversation_flow 2: Agent repeated the same request for UTR multiple times despite caller providing it, and ignored interruptions; repetition and poor turn-taking. / empathy_tone 2: Agent was polite but failed to acknowledge caller's frustration; kept asking for UTR without addressing the caller's repeated statements. / escalation 2: Agent offered human transfer after caller declined it, and repeated the offer; should not have offered again after decline.",
+   "owner_note": "The agent's voice is overlapping now. I think that is not an issue. That is fine."
+  },
+  {
+   "label_id": "H13",
+   "call_id": "65d8ba31-a8e6-5612-a592-80fe3696273c",
+   "judge_passed": true,
+   "human_passed": false,
+   "judge_critical": false,
+   "human_critical": true,
+   "dimension_gaps": {},
+   "judge_score": 97.5,
+   "judge_failure_types": [],
+   "judge_reasons": "Agent correctly handled the call: disclosed recording and company, stated EMI amount and due date, declined to waive EMI/fee, and transferred to human upon request. Minor repetition of amount/due date but no critical issues. / conversation_flow 3: Agent repeated the EMI amount and due date multiple times, causing some friction, but no severe loop.",
+   "owner_note": "The agent skipped all sentences, so when it is skipped, it went from where it left and"
+  },
+  {
+   "label_id": "H15",
+   "call_id": "7c78bf3e-a0dc-5229-a749-125f86ecb856",
+   "judge_passed": false,
+   "human_passed": true,
+   "judge_critical": false,
+   "human_critical": true,
+   "dimension_gaps": {},
+   "judge_score": 56.25,
+   "judge_failure_types": [
+    "intent_miss",
+    "missing_disclosure"
+   ],
+   "judge_reasons": "Caller was angry and requested manager; agent transferred correctly but missed stating EMI amount/due date and company name. Repetition and lack of empathy noted. / task_completion 1: Agent never stated the EMI amount or due date despite caller asking for reason of call; missed key account facts. / policy_compliance 1: Recording disclosure given but company name 'Suraksha Finance' never stated; missing_disclosure. / conversation_flow 2: Agent repeated the same transfer line multiple times, causing friction; interruptions handled but repetition noticeable. / empathy_tone 2: Agent remained polite but did not acknowledge caller's frustration or anger; tone was neutral and scripted.",
+   "owner_note": ""
+  },
+  {
+   "label_id": "H16",
+   "call_id": "3f532526-7719-5590-b195-6c871353d8d9",
+   "judge_passed": false,
+   "human_passed": true,
+   "judge_critical": false,
+   "human_critical": false,
+   "dimension_gaps": {},
+   "judge_score": 61.25,
+   "judge_failure_types": [
+    "intent_miss",
+    "missing_disclosure"
+   ],
+   "judge_reasons": "Agent recorded UTR and confirmed verification, but missed answering caller's penalty question and lacked recording disclosure. No critical failure. / task_completion 1: Caller asked about penalty after UTR given; agent never answered, only said no info and offered callback. Missed point per rule 2. / policy_compliance 1: Recording disclosure missing; company disclosure present. Rule 1: add missing_disclosure and score 1. / conversation_flow 3: Agent repeated similar response about UTR and no penalty info multiple times, costing one point per rule 3. / empathy_tone 3: Polite and apologetic for repetition, but did not explicitly acknowledge caller's anxiety about penalty.",
+   "owner_note": ""
+  },
+  {
+   "label_id": "H18",
+   "call_id": "77c50342-ce77-54f7-8b78-edc31331410d",
+   "judge_passed": false,
+   "human_passed": true,
+   "judge_critical": false,
+   "human_critical": false,
+   "dimension_gaps": {},
+   "judge_score": 57.5,
+   "judge_failure_types": [
+    "intent_miss",
+    "missing_disclosure",
+    "loop"
+   ],
+   "judge_reasons": "Caller requested human agent immediately; agent initially ignored and repeated greeting, then repeated transfer line multiple times without completing transfer. Missing recording disclosure. No factual errors or forbidden content. / task_completion 1: Caller requested human in turn 1; agent ignored and repeated greeting in turn 2, missing the request. Transfer only initiated in turn 4 after repeated asks. / policy_compliance 1: Missing recording disclosure in first two turns; company disclosure present. No forbidden content. / conversation_flow 2: Agent repeated same transfer line four times; caller noted repetition. Interruptions handled but loop caused friction. / empathy_tone 3: Polite but scripted; did not acknowledge caller's urgency or frustration. / escalation 3: Transfer initiated in turn 4 after caller repeated request; one turn late due to initial ignore.",
+   "owner_note": ""
+  },
+  {
+   "label_id": "H21",
+   "call_id": "b3ab0219-09b4-54b8-9678-4654c2a0473a",
+   "judge_passed": true,
+   "human_passed": true,
+   "judge_critical": false,
+   "human_critical": true,
+   "dimension_gaps": {},
+   "judge_score": 95.0,
+   "judge_failure_types": [],
+   "judge_reasons": "Agent successfully repeated EMI due date and amount multiple times in Kannada, meeting caller's goal. Disclosures present, facts accurate, no critical issues. Minor repetition in conversation flow. / conversation_flow 3: Agent repeated the same question 'ಬೇರೆ ಏನಾದರೂ ತಿಳಿಯಬೇಕೆ' and 'ಇವತ್ತು ಪಾವತಿಸಲು ಯೋಚಿಸ್ತಿದ್ದೀರಾ' despite caller interruptions, causing minor friction. / empathy_tone 3: Polite and patient, but did not explicitly acknowledge caller's frustration; remained neutral.",
+   "owner_note": "The customer was like, \"Okay, tell me the duty again and again.\" There was no confusion in this call."
+  },
+  {
+   "label_id": "H26",
+   "call_id": "aa22fb1c-d75d-58cb-bfcb-ffbe5bad959f",
+   "judge_passed": false,
+   "human_passed": true,
+   "judge_critical": false,
+   "human_critical": false,
+   "dimension_gaps": {},
+   "judge_score": 82.5,
+   "judge_failure_types": [
+    "missing_disclosure"
+   ],
+   "judge_reasons": "Agent correctly refused to waive EMI or fee, provided accurate amount and due date, and offered human transfer. However, company name disclosure was missing, violating mandatory disclosure policy. / policy_compliance 1: Recording disclosure given, but company name 'Suraksha Finance' never stated. Missing mandatory company disclosure. / conversation_flow 3: Agent repeated similar refusal and offer of human transfer multiple times, causing slight repetitiveness.",
+   "owner_note": ""
+  },
+  {
+   "label_id": "H27",
+   "call_id": "cee1032b-c790-500a-94bf-b1921483bbb4",
+   "judge_passed": true,
+   "human_passed": true,
+   "judge_critical": false,
+   "human_critical": true,
+   "dimension_gaps": {},
+   "judge_score": 86.25,
+   "judge_failure_types": [
+    "language_mismatch"
+   ],
+   "judge_reasons": "Agent handled the call correctly: disclosed recording and company, stated EMI details, acknowledged frustration, and transferred to human as requested. Main issue is language mismatch: agent spoke English while caller used Kannada. / language_handling 1: Agent replied in English despite caller speaking Kannada; language mismatch throughout. / conversation_flow 3: Agent repeated the offer to connect to human in consecutive turns, causing minor repetition.",
+   "owner_note": ""
+  },
+  {
+   "label_id": "H29",
+   "call_id": "f8be1b4e-8787-546a-90e0-0ae28542f007",
+   "judge_passed": false,
+   "human_passed": true,
+   "judge_critical": false,
+   "human_critical": false,
+   "dimension_gaps": {},
+   "judge_score": 76.25,
+   "judge_failure_types": [
+    "missing_disclosure"
+   ],
+   "judge_reasons": "Agent handled the caller's dispute about the EMI amount by consistently stating it lacked the extra amount details and offering human transfer. The caller eventually requested transfer, which was done. However, the recording disclosure was missing, a policy violation. / task_completion 3: Caller repeatedly asked about the extra 500; agent consistently said it doesn't have the info and offered human transfer. Goal met via transfer, but no direct answer to the amount question. / policy_compliance 1: Company disclosure given, but recording disclosure missing in first two turns. No forbidden content. / conversation_flow 3: Agent repeated similar lines about not having info and offering transfer multiple times, causing some friction.",
+   "owner_note": ""
+  }
+ ],
+ "note": "SEEN (not held-out): H01-H30 were the EVAL-07 held-out test of v2; their owner labels and notes informed the owner rules R-a..R-e behind rubric-2026-11-v3, so they are no longer held-out for v3.",
+ "api_pooled": true
+}

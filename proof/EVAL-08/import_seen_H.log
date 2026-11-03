@@ -1,0 +1,71 @@
+{
+ "interim": false,
+ "labelled": 30,
+ "total": 30,
+ "mode": "pass_fail_only",
+ "calibration_api": {
+  "n": 60,
+  "kappa_pass_fail": 0.4308,
+  "spearman_overall": null,
+  "dimension_mae": {}
+ },
+ "calibration_offline": {
+  "n": 30,
+  "kappa_pass_fail": 0.127,
+  "spearman_overall": null,
+  "dimension_mae": {}
+ },
+ "agreement": {
+  "passed": {
+   "n": 30,
+   "judge_pass_human_pass": 16,
+   "judge_pass_human_fail": 3,
+   "judge_fail_human_pass": 8,
+   "judge_fail_human_fail": 3,
+   "agreement": 0.6333,
+   "agreement_ci95_wilson": [
+    0.4551,
+    0.7813
+   ],
+   "kappa_bootstrap": {
+    "method": "percentile bootstrap, calls resampled",
+    "resamples": 10000,
+    "seed": 20261030,
+    "ci95": [
+     -0.2128,
+     0.467
+    ],
+    "undefined_share": 0.0
+   },
+   "judge_yes": 19,
+   "human_yes": 24,
+   "kappa": 0.127
+  },
+  "critical": {
+   "n": 30,
+   "judge_yes_human_yes": 3,
+   "judge_yes_human_no": 0,
+   "judge_no_human_yes": 5,
+   "judge_no_human_no": 22,
+   "agreement": 0.8333,
+   "agreement_ci95_wilson": [
+    0.6644,
+    0.9266
+   ],
+   "kappa_bootstrap": {
+    "method": "percentile bootstrap, calls resampled",
+    "resamples": 10000,
+    "seed": 20261030,
+    "ci95": [
+     0.0,
+     0.8148
+    ],
+    "undefined_share": 0.0
+   },
+   "judge_yes": 3,
+   "human_yes": 8,
+   "kappa": 0.4681
+  }
+ },
+ "disagreements": 13
+}

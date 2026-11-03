@@ -16,6 +16,13 @@ mandatory_disclosures:
     text: This call is being recorded for quality purposes
     regex: "(record|ರೆಕಾರ್ಡ್|रिकॉर्ड)"
     within_turns: 2
+  # EVAL-08, owner rule R-a: the agent must also say which company is calling, at any point in the
+  # call ("never says" fails). The agent schema (frozen) needs an integer within_turns, default 2, so
+  # 100 stands for the whole call (calls end at 240 s). The recording disclosure keeps its first-two-turns rule.
+  - id: company
+    text: This is Suraksha Finance
+    regex: "(suraksha|ಸುರಕ್ಷಾ|सुरक्षा)"
+    within_turns: 100
 forbidden_phrases:
   - id: threat_legal
     text: legal action

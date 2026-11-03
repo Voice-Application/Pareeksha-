@@ -8,11 +8,14 @@ from mock_agent.bugs import Bug
 from mock_agent.llm_dialog import LLMDialog, grounding_problems, make_dialog
 from mock_agent.policy import DISCLOSURE, WAIVER_PROMISE, Dialog
 
+#: A queued fake reply: a JSON object, raw text, or an exception the provider raises.
+Reply = dict[str, str] | str | Exception
+
 
 class Fake:
     """Returns the queued replies in order and records the prompts it was given."""
 
-    def __init__(self, *replies: dict | str) -> None:
+    def __init__(self, *replies: Reply) -> None:
         self.replies = list(replies)
         self.calls: list[list[dict[str, str]]] = []
 
@@ -24,12 +27,12 @@ class Fake:
         return r if isinstance(r, str) else json.dumps(r, ensure_ascii=False)
 
 
-def say(reply: str, action: str = "none", date: str = "") -> dict:
+def say(reply: str, action: str = "none", date: str = "") -> dict[str, str]:
     return {"reply": reply, "action": action, "promise_date": date}
 
 
 def dialog(
-    *replies: dict | str, lang: str = "en-IN", bugs: frozenset[Bug] = frozenset()
+    *replies: Reply, lang: str = "en-IN", bugs: frozenset[Bug] = frozenset()
 ) -> tuple[LLMDialog, Fake]:
     fake = Fake(*replies)
     d = LLMDialog(language=lang, bugs=bugs, complete=fake)

@@ -56,11 +56,17 @@ def finalize_scores(
     ``gate:...`` reasons are listed in ``review_reasons`` so the verdict is explained, but they do
     not by themselves send the call to human review.
     ``failure_types`` are the merged judge + check failure types (the judge's own are always used).
+    A check type in the rubric's ``advisory_checks`` (v3: ``amount_confirmed``) is still stored and
+    shown to the judge, but its failure does not count as a failed must-pass check.
     """
     checks = list(checks)
     scores = {k: getattr(judge.dimensions, k).score for k in WEIGHTS}
     score = overall_score(scores)
-    failed_must = [c for c in checks if c.must_pass and c.passed is False]
+    failed_must = [
+        c
+        for c in checks
+        if c.must_pass and c.passed is False and c.check_type not in rubric.advisory_checks
+    ]
     critical = judge.critical_failure or any(
         c.check_type == "forbidden_absent" for c in failed_must
     )

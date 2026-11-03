@@ -152,7 +152,7 @@ def deepseek_completer() -> Completer | None:
     )
 
     def complete(messages: list[dict[str, str]]) -> str:
-        body = {
+        body: dict[str, Any] = {
             "model": model,
             "messages": messages,
             "temperature": 0.3,

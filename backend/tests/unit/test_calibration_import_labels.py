@@ -7,6 +7,7 @@ import importlib.util
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -126,7 +127,7 @@ def pf_row(lid: str, passed: str = "no", critical: str = "no", notes: str = "") 
     }
 
 
-def judge_row(passed: bool, critical: bool, score: float = 90.0) -> dict:
+def judge_row(passed: bool, critical: bool, score: float = 90.0) -> dict[str, Any]:
     return {
         "passed": passed,
         "critical_failure": critical,
@@ -229,9 +230,9 @@ def test_offline_calibration_matches_endpoint_function_pass_fail_only() -> None:
     assert all(p.human_score is None and p.human_dimensions == {} for p in pairs)
     report = il.build_report(labels, judge, {"n": 4}, {"posted": 4}, None)
     off = report["calibration_offline"]
-    assert off["kappa_pass_fail"] == round(
-        cohen_kappa([True, True, False, True], [True, False, False, True]), 4
-    )
+    expected = cohen_kappa([True, True, False, True], [True, False, False, True])
+    assert expected is not None
+    assert off["kappa_pass_fail"] == round(expected, 4)
     assert off["spearman_overall"] is None and off["dimension_mae"] == {}
     assert report["not_provided_by_owner"] == ["spearman_overall", "dimension_mae"]
     p = report["agreement"]["passed"]
@@ -252,7 +253,12 @@ def test_render_md_marks_missing_metrics() -> None:
     key = {"L01": "c1", "L02": "c2"}
     labels = il.parse_labels([pf_row("L01", "yes"), pf_row("L02", "no", notes="bad | note")], key)
     judge = {"c1": judge_row(True, False), "c2": judge_row(True, False)}
-    cal = {"n": 2, "kappa_pass_fail": None, "spearman_overall": None, "dimension_mae": {}}
+    cal: dict[str, Any] = {
+        "n": 2,
+        "kappa_pass_fail": None,
+        "spearman_overall": None,
+        "dimension_mae": {},
+    }
     imported = {
         "reviewer": "preetham",
         "posted": 2,
@@ -320,7 +326,12 @@ def test_interim_report() -> None:
     rows = [pf_row("L01", "yes"), pf_row("L02", "no"), blank("L03")]
     labels = il.parse_labels(rows, key)
     judge = {"c1": judge_row(True, False), "c2": judge_row(False, True, 30)}
-    cal = {"n": 2, "kappa_pass_fail": 1.0, "spearman_overall": None, "dimension_mae": {}}
+    cal: dict[str, Any] = {
+        "n": 2,
+        "kappa_pass_fail": 1.0,
+        "spearman_overall": None,
+        "dimension_mae": {},
+    }
     imported = {
         "reviewer": "preetham",
         "posted": 2,
@@ -370,7 +381,7 @@ def test_fill_from_json_fills_only_pending_rows() -> None:
         ([{"label_id": "L02", "passed": "no", "critical": "no"}] * 2, "more than once"),
     ],
 )
-def test_fill_from_json_rejects(items: list[dict], message: str) -> None:
+def test_fill_from_json_rejects(items: list[dict[str, str]], message: str) -> None:
     with pytest.raises(il.LabelError, match=message):
         il.fill_from_json([pf_row("L01", "yes"), blank("L02")], items)
 
@@ -379,7 +390,12 @@ def test_final_report_heading() -> None:
     key = {"L01": "c1", "L02": "c2"}
     labels = il.parse_labels([pf_row("L01", "yes"), pf_row("L02", "no")], key)
     judge = {"c1": judge_row(True, False), "c2": judge_row(False, True, 30)}
-    cal = {"n": 2, "kappa_pass_fail": 1.0, "spearman_overall": None, "dimension_mae": {}}
+    cal: dict[str, Any] = {
+        "n": 2,
+        "kappa_pass_fail": 1.0,
+        "spearman_overall": None,
+        "dimension_mae": {},
+    }
     imported = {
         "reviewer": "preetham",
         "posted": 2,
@@ -396,7 +412,12 @@ def test_inconsistent_labels_flagged() -> None:
     key = {"L01": "c1", "L02": "c2"}
     labels = il.parse_labels([pf_row("L01", "yes", "yes"), pf_row("L02", "no", "yes")], key)
     judge = {"c1": judge_row(True, False), "c2": judge_row(False, True, 30)}
-    cal = {"n": 60, "kappa_pass_fail": 0.5, "spearman_overall": None, "dimension_mae": {}}
+    cal: dict[str, Any] = {
+        "n": 60,
+        "kappa_pass_fail": 0.5,
+        "spearman_overall": None,
+        "dimension_mae": {},
+    }
     imported = {
         "reviewer": "preetham",
         "posted": 2,

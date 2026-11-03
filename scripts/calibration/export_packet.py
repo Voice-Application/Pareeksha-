@@ -286,6 +286,7 @@ def main() -> int:
     ap.add_argument("--prefix", default="L", help="label id prefix (L01.. / H01..)")
     ap.add_argument("--title", default="EVAL-06")
     ap.add_argument("--bitrate", default="48k", help="MP3 bitrate (e.g. 32k keeps 30 calls < 16 MB)")
+    ap.add_argument("--count", type=int, default=30, help="evaluated calls expected in --batch")
     args = ap.parse_args()
     packet, proof, prefix = args.packet, args.proof, args.prefix
     batch = [
@@ -293,8 +294,8 @@ def main() -> int:
         for r in json.loads(args.batch.read_text())
         if r.get("evaluation_status") == "ok"
     ]
-    if len(batch) != 30:
-        raise SystemExit(f"expected 30 evaluated calls in {args.batch}, found {len(batch)}")
+    if len(batch) != args.count:
+        raise SystemExit(f"expected {args.count} evaluated calls in {args.batch}, found {len(batch)}")
     seed = args.seed if args.seed is not None else random.SystemRandom().randrange(2**31)
     order = list(batch)
     random.Random(seed).shuffle(order)
@@ -303,7 +304,7 @@ def main() -> int:
     cache = json.loads(cache_file.read_text()) if cache_file.exists() else {}
     usage = json.loads(usage_file.read_text()) if usage_file.exists() else []
     packet.mkdir(parents=True, exist_ok=True)
-    ids = [f"{prefix}{i:02d}" for i in range(1, 31)]
+    ids = [f"{prefix}{i:02d}" for i in range(1, args.count + 1)]
     key, pages = {}, []
     for i, (lid, row) in enumerate(zip(ids, order)):
         call = vapi.call(row["call_id"])

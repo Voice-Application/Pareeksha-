@@ -1,0 +1,5 @@
+03:32:25 cell 01 bug=clean ('Promise to pay on Friday', 'Deepa — homemaker', 'pstn_office_babble_15db')
+03:34:40   -> evaluated call=f105a21b-8ca8-58f6-af40-244d3e11809a judge passed=True score=100.0 critical=False wall=135.4s
+03:34:40 cell 02 bug=clean ('Already paid, wants confirmation', 'Vikram — angry', 'clean_16k')
+03:38:31   -> evaluated call=4421a780-b7ff-5d76-adf7-bec80850411d judge passed=True score=95.0 critical=False wall=230.7s
+03:38:31 cell 03 bug=clean ('Disputes the EMI amount', 'Kiran — IT employee', 'pstn_8k_alaw')

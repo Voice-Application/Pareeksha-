@@ -5,8 +5,8 @@ running it twice (or after a user edited a seeded row) changes nothing.
   ``PersonaCreate``;
 * noise profiles: the 8 definitions in ``pareeksha.audio.profiles.BUILTIN_PROFILES``, so the
   profiles the DSP runs and the ones the API lists can never differ;
-* rubrics: ``data/rubric-2026-10-v1.yaml`` and ``-v2.yaml``; the build's ``RUBRIC_VERSION`` is
-  made active;
+* rubrics: ``data/rubric-2026-10-v1.yaml``, ``-v2.yaml`` and ``rubric-2026-11-v3.yaml``; the
+  build's ``RUBRIC_VERSION`` is made active;
 * the mock EMI agent and its scenarios;
 * the demo API key (admin scope). ``PAREEKSHA_API_KEY`` in the environment pins the key (only its
   hash is stored); otherwise a key is generated and returned once, on the run that creates it.
@@ -43,7 +43,7 @@ from pareeksha.schemas.scenarios import ScenarioCreate
 
 DATA_DIR = Path(__file__).parent / "data"
 #: Shipped rubric versions, oldest first (docs/08 section 2).
-RUBRIC_FILES = ("rubric-2026-10-v1.yaml", "rubric-2026-10-v2.yaml")
+RUBRIC_FILES = ("rubric-2026-10-v1.yaml", "rubric-2026-10-v2.yaml", "rubric-2026-11-v3.yaml")
 PROJECT_NAME = "Pareeksha"
 DEMO_KEY_NAME = "demo"
 DEMO_KEY_SCOPES = ["admin"]

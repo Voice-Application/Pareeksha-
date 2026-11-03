@@ -16,6 +16,7 @@ finished ones; a re-run skips cells already present) and logs to stdout.
 from __future__ import annotations
 
 import json
+import secrets
 import subprocess
 import sys
 import time
@@ -143,8 +144,47 @@ HELDOUT: dict[str | None, list[tuple[str, str, str]]] = {
         (INJECT, "Mohan — labourer", ALAW),
     ],
 }
+# EVAL-08 confirmation batch: 15 NEW calls in the same mix (5 clean, 2 per planted bug; 8 kn / 4 hi /
+# 3 en; noise 7 alaw / 4 babble / 4 clean), on cells that appear in neither earlier plan, each run with a
+# fresh random seed (POST /runs config.seed, stored per row), against the mock agent with the final VAD,
+# judged with rubric-2026-11-v3.
+CONFIRM: dict[str | None, list[tuple[str, str, str]]] = {
+    None: [
+        (PAY, "Deepa — homemaker", BABBLE),
+        (PAID, "Vikram — angry", CLEAN16),
+        (DISPUTE, "Kiran — IT employee", ALAW),
+        (HUMAN, "Priya — careful", ALAW),
+        (CONFUSED, "Pooja — student", ALAW),
+    ],
+    "no_disclosure": [
+        (PAY, "Mohan — labourer", BABBLE),
+        (HUMAN, "Manju — auto driver", CLEAN16),
+    ],
+    "no_amount_confirm": [
+        (PAY, "Mr. Iyer — formal", ALAW),
+        (PAY, "Kiran — IT employee", ALAW),
+    ],
+    "english_to_kannada": [
+        (PAID, "Imran — shopkeeper", BABBLE),
+        (DISPUTE, "Deepa — homemaker", CLEAN16),
+    ],
+    "ignore_interrupt": [
+        (HUMAN, "The Interrupter", ALAW),
+        (PAY, "Sunita — worried borrower", BABBLE),
+    ],
+    "false_waiver": [
+        (INJECT, "Arjun — corporate", ALAW),
+        (INJECT, "Shivappa — farmer", CLEAN16),
+    ],
+}
+_EARLIER = {c for plan in (PLAN, HELDOUT) for cells in plan.values() for c in cells}
+assert not _EARLIER & {c for cells in CONFIRM.values() for c in cells}, "confirm cell repeats"
+
 PLANS = {"eval06": (PLAN, ROOT / "proof" / "EVAL-06" / "batch.json"),
-         "heldout": (HELDOUT, ROOT / "proof" / "EVAL-07" / "heldout_batch.json")}
+         "heldout": (HELDOUT, ROOT / "proof" / "EVAL-07" / "heldout_batch.json"),
+         "confirm": (CONFIRM, ROOT / "proof" / "EVAL-08" / "confirm_batch.json")}
+#: Plans whose runs each get a fresh random seed (the earlier plans used the API default, 42).
+FRESH_SEED = {"confirm"}
 
 
 def load() -> list[dict]:
@@ -162,6 +202,7 @@ def log(msg: str) -> None:
 
 def run_cell(agent: str, bug: str | None, cell: tuple[str, str, str], idx: int) -> dict:
     scenario, persona, profile = cell
+    seed = secrets.randbits(31) if PLAN_NAME in FRESH_SEED else None
     res = vapi.run_and_wait(
         agent,
         [scenario],
@@ -171,6 +212,7 @@ def run_cell(agent: str, bug: str | None, cell: tuple[str, str, str], idx: int) 
         concurrency=1,
         name=f"{PLAN_NAME}-{idx:02d}-{bug or 'clean'}",
         poll_s=5,
+        seed=seed,
     )
     item = res["items"][0]
     row = {
@@ -181,6 +223,7 @@ def run_cell(agent: str, bug: str | None, cell: tuple[str, str, str], idx: int) 
         "noise_profile": profile,
         "agent": agent,
         "run_id": res["run_id"],
+        "run_seed": seed if seed is not None else 42,
         "wall_s": res["wall_s"],
         "run_status": res["run"]["status"],
         "item_status": item["status"],

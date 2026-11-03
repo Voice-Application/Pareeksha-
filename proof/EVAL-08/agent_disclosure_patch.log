@@ -1,0 +1,19 @@
+EMI Reminder Bot [bug:false_waiver]: ['recording'] -> ['recording', 'company']
+EMI Reminder Bot [bug:ignore_interrupt]: ['recording'] -> ['recording', 'company']
+EMI Reminder Bot [bug:english_to_kannada]: ['recording'] -> ['recording', 'company']
+EMI Reminder Bot [bug:no_amount_confirm]: ['recording'] -> ['recording', 'company']
+EMI Reminder Bot [bug:no_disclosure]: ['recording'] -> ['recording', 'company']
+EMI Reminder Bot: ['recording'] -> ['recording', 'company']
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/home/user/Pareeksha-/scripts/calibration/patch_agent_disclosures.py", line 35, in main
+    assert after == want
+           ^^^^^^^^^^^^^
+AssertionError
+PATCH /agents/dfef20df-8f51-4b44-bad3-abac42e73aa1 -> 400: {"error":{"code":"validation_error","message":"Request validation failed","details":{"errors":[{"type":"int_type","loc":["body","mandatory_disclosures",1,"within_turns"],"msg":"Input should be a valid integer","input":null}]}}}
+EMI Reminder Bot [bug:false_waiver]: ['recording', 'company'] -> ['recording', 'company']
+EMI Reminder Bot [bug:ignore_interrupt]: ['recording', 'company'] -> ['recording', 'company']
+EMI Reminder Bot [bug:english_to_kannada]: ['recording', 'company'] -> ['recording', 'company']
+EMI Reminder Bot [bug:no_amount_confirm]: ['recording', 'company'] -> ['recording', 'company']
+EMI Reminder Bot [bug:no_disclosure]: ['recording', 'company'] -> ['recording', 'company']
+EMI Reminder Bot: ['recording', 'company'] -> ['recording', 'company']

@@ -58,8 +58,9 @@ class UtteranceDetector:
         """Does the buffered utterance still hold ``min_speech_ms`` of speech against the current
         floor? Drops an "utterance" that was only line noise heard before the floor was known."""
         bar = self._bar(self.noise_floor)
-        frames = (self._buf[i : i + FRAME_BYTES] for i in range(0, len(self._buf), FRAME_BYTES))
-        voiced = sum(1 for f in frames if rms(f) >= bar)
+        buf = bytes(self._buf)
+        frames = (buf[i : i + FRAME_BYTES] for i in range(0, len(buf), FRAME_BYTES))
+        voiced = sum(rms(f) >= bar for f in frames)
         return voiced * FRAME_MS >= self.min_speech_ms
 
     @property

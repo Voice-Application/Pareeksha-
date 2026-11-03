@@ -79,7 +79,9 @@ async def test_evaluate_call_scores_in_code_and_records_provenance() -> None:
     assert rec.status == "ok" and rec.overall_score == 40.0
     assert rec.critical_failure and rec.passed is False and rec.needs_human_review
     assert rec.review_reasons[0] == "critical_failure"
-    assert "check_failed:amount_confirmed" in rec.review_reasons
+    # v3 (R-c): a failed amount_confirmed check is stored but advisory, not a must-pass failure.
+    assert "check_failed:amount_confirmed" not in rec.review_reasons
+    assert any(c.check_type == "amount_confirmed" and c.passed is False for c in rec.checks)
     assert "check_failed:disclosure_present" in rec.review_reasons
     assert rec.failure_types[0] == "wrong_fact" and "missing_disclosure" in rec.failure_types
     assert rec.id == evaluation_id(snap.call_id) and rec.rubric_version == RUBRIC_VERSION

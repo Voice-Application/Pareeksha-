@@ -6,13 +6,10 @@ import pytest
 import yaml
 
 from pareeksha.evaluation import rubric
-from pareeksha.evaluation.judge import JUDGE_PROMPT, JudgeInput, render_judge_prompt
-from pareeksha.evaluation.metrics import compute_metrics
 from pareeksha.evaluation.scoring import finalize_scores, gate_reasons
 from pareeksha.evaluation.types import CheckResult
-from pareeksha.llm.prompts import prompt_hash
+from pareeksha.llm.prompts import PROMPTS_DIR, prompt_hash
 from pareeksha.schemas.evaluation import JudgeOutput
-from tests.fixtures import synthetic_calls as sc
 from tests.unit.evaluation.fakes import judge_json
 
 V1, V2 = rubric.RUBRICS[rubric.RUBRIC_V1], rubric.RUBRICS[rubric.RUBRIC_V2]
@@ -23,9 +20,8 @@ def judged(scores: tuple[int, ...] = (4,) * 7, **kw: object) -> JudgeOutput:
     return JudgeOutput.model_validate_json(judge_json(scores, **kw))  # type: ignore[arg-type]
 
 
-def test_v2_is_active_and_v1_is_kept() -> None:
-    assert rubric.RUBRIC_VERSION == rubric.RUBRIC_V2 == rubric.ACTIVE.version
-    assert JUDGE_PROMPT == "judge_v2"
+def test_v2_and_v1_are_kept() -> None:
+    assert rubric.RUBRICS[rubric.RUBRIC_V2].prompt == "judge_v2"
     assert (
         V1.prompt == "judge_v1" and V1.gate_max_failing_score is None and not V1.gate_failure_types
     )
@@ -97,19 +93,8 @@ def test_gate_reasons_deduplicate_failure_types() -> None:
 
 
 def test_judge_v2_prompt_has_responsiveness_and_critical_rules() -> None:
-    snap = sc.clean_call()
-    turns = list(snap.turns)
-    text = render_judge_prompt(
-        JudgeInput(
-            agent=snap.agent,
-            turns=turns,
-            metrics=compute_metrics(turns, 0),
-            checks=[],
-            scenario=snap.scenario,
-            persona=snap.persona,
-        )
-    )
+    text = (PROMPTS_DIR / "judge_v2.j2").read_text(encoding="utf-8")
     assert "## Responsiveness" in text
     assert "Facts on file" in text
     assert "stopped responding" in text and "three or more times" in text
-    assert "every caller question or request answered" in text  # v2 anchors rendered
+    assert "every caller question or request answered" in V2.anchors
