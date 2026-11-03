@@ -7,3 +7,5 @@ aa22fb1c-d75d-58cb-bfcb-ffbe5bad959f company passed=False (No 'company' disclosu
 7c78bf3e-a0dc-5229-a749-125f86ecb856 company passed=False (No 'company' disclosure in the first 100 agent turns) -> rubric-2026-11-v3 passed=False score=56.25
 1aa3f8c6-223c-5ed1-84e3-0d7f3f282780 company passed=True (Disclosure given in turn 3) -> rubric-2026-11-v3 passed=False score=36.25
 re-judged 7/7
+0 of 15 calls have the old company check
+re-judged 0/0

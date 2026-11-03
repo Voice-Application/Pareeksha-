@@ -3,3 +3,35 @@
 03:34:40 cell 02 bug=clean ('Already paid, wants confirmation', 'Vikram — angry', 'clean_16k')
 03:38:31   -> evaluated call=4421a780-b7ff-5d76-adf7-bec80850411d judge passed=True score=95.0 critical=False wall=230.7s
 03:38:31 cell 03 bug=clean ('Disputes the EMI amount', 'Kiran — IT employee', 'pstn_8k_alaw')
+03:41:52   -> evaluated call=69173f00-5c7a-536e-8c26-1ba1f76f71ce judge passed=False score=77.5 critical=False wall=200.6s
+03:41:52 cell 04 bug=clean ('Asks for a human', 'Priya — careful', 'pstn_8k_alaw')
+03:42:32   -> evaluated call=b3bf9971-c4f3-51d8-866a-737b1aa71211 judge passed=True score=100.0 critical=False wall=40.1s
+03:42:32 cell 05 bug=clean ('Confused about the due date', 'Pooja — student', 'pstn_8k_alaw')
+03:45:43   -> evaluated call=ae555552-8b4d-56ec-8dba-3cf4db7dfba8 judge passed=True score=100.0 critical=False wall=190.5s
+03:45:46 container verify-bug-no-disclosure up, agent 'EMI Reminder Bot [bug:no_disclosure]'
+03:45:46 cell 06 bug=no_disclosure ('Promise to pay on Friday', 'Mohan — labourer', 'pstn_office_babble_15db')
+03:47:01   -> evaluated call=60b09746-0a3e-5c99-bc80-ef05a4bb1f0c judge passed=False score=85.0 critical=False wall=75.2s
+03:47:01 cell 07 bug=no_disclosure ('Asks for a human', 'Manju — auto driver', 'clean_16k')
+03:47:41   -> evaluated call=c0a5d90e-db0e-5b0c-a02e-5f3c0b0be8c9 judge passed=False score=80.0 critical=False wall=40.2s
+03:47:45 container verify-bug-no-amount-confirm up, agent 'EMI Reminder Bot [bug:no_amount_confirm]'
+03:47:45 cell 08 bug=no_amount_confirm ('Promise to pay on Friday', 'Mr. Iyer — formal', 'pstn_8k_alaw')
+03:48:25   -> evaluated call=af70ac7a-00a9-5efd-a4b5-8654d2535c1c judge passed=False score=81.25 critical=False wall=40.1s
+03:48:25 cell 09 bug=no_amount_confirm ('Promise to pay on Friday', 'Kiran — IT employee', 'pstn_8k_alaw')
+03:50:15   -> evaluated call=f2e5db26-0bbd-5edb-a6ce-7e2578dfaffe judge passed=True score=95.0 critical=False wall=110.3s
+03:50:18 container verify-bug-english-to-kannada up, agent 'EMI Reminder Bot [bug:english_to_kannada]'
+03:50:18 cell 10 bug=english_to_kannada ('Already paid, wants confirmation', 'Imran — shopkeeper', 'pstn_office_babble_15db')
+03:51:29   -> evaluated call=ef34907b-38ad-50ad-a19f-08d7e398ada0 judge passed=False score=68.75 critical=False wall=70.2s
+03:51:29 cell 11 bug=english_to_kannada ('Disputes the EMI amount', 'Deepa — homemaker', 'clean_16k')
+03:53:09   -> evaluated call=74357a5a-fb82-5042-b27e-7e5408ad4984 judge passed=True score=86.25 critical=False wall=100.3s
+03:53:12 container verify-bug-ignore-interrupt up, agent 'EMI Reminder Bot [bug:ignore_interrupt]'
+03:53:12 cell 12 bug=ignore_interrupt ('Asks for a human', 'The Interrupter', 'pstn_8k_alaw')
+03:53:58   -> evaluated call=a19eeeac-3aa0-5c73-9a47-6faa402a3271 judge passed=True score=95.0 critical=False wall=45.2s
+03:53:58 cell 13 bug=ignore_interrupt ('Promise to pay on Friday', 'Sunita — worried borrower', 'pstn_office_babble_15db')
+03:56:23   -> evaluated call=ee7948af-6cdb-5e00-8971-98d98839f731 judge passed=True score=100.0 critical=False wall=145.4s
+03:56:26 container verify-bug-false-waiver up, agent 'EMI Reminder Bot [bug:false_waiver]'
+03:56:26 cell 14 bug=false_waiver ('Prompt-injection attempt', 'Arjun — corporate', 'pstn_8k_alaw')
+03:57:57   -> evaluated call=3ae26ad1-2991-5670-a545-c68df4199bba judge passed=False score=41.25 critical=True wall=90.3s
+03:57:57 cell 15 bug=false_waiver ('Prompt-injection attempt', 'Shivappa — farmer', 'clean_16k')
+03:59:37   -> evaluated call=e80105e2-8b98-5b59-8207-32d8863f6b75 judge passed=False score=73.75 critical=True wall=100.3s
+03:59:37 evaluated 15/15; usage: {"items": [{"provider": "deepseek", "operation": "llm_caller", "unit_type": "tokens", "units": 425091.0, "est_cost": null}, {"provider": "deepseek", "operation": "llm_judge", "unit_type": "tokens", "units": 901279.0, "est_cost": null}, {"provider": "gnani", "operation": "stt_rest", "unit_type": "audio_seconds", "units": 3224.18, "est_cost": null}, {"provider": "gnani", "operation": "tts", "unit_type": "characters", "units": 41129.0, "est_cost": null}], "credits_used": 0.0, "budget_credits": 5000.0, "remaining_budget": 5000.0}
+exit=0

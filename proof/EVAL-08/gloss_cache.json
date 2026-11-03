@@ -1,0 +1,477 @@
+{
+ "b3bf9971-c4f3-51d8-866a-737b1aa71211": {},
+ "ef34907b-38ad-50ad-a19f-08d7e398ada0": {
+  "0": {
+   "en": "This call is being recorded for quality and compliance purpose",
+   "spoken": "English"
+  },
+  "1": {
+   "en": "Hello sir, I am Imran speaking... there is a problem about my EMI, will you help a little?",
+   "spoken": "mixed"
+  },
+  "2": {
+   "en": "This call is being recorded for quality and compliance purpose",
+   "spoken": "English"
+  },
+  "3": {
+   "en": "Yes sir, I am Imran speaking... there is a matter about my loan, I have made the EMI payment but it seems like there is some problem.",
+   "spoken": "mixed"
+  },
+  "4": {
+   "en": "Thank you for telling me Imran could you share the UTR or transaction reference for the payment you made so it can be verified",
+   "spoken": "English"
+  },
+  "5": {
+   "en": "Yes sir, UTR is there... UTR-555-0100, I paid through UPI three days ago. Please note this, I am anxious that my record should not get spoiled.",
+   "spoken": "mixed"
+  },
+  "6": {
+   "en": "Thank you Imran I have noted your UTR and that you paid via UPI and it will be verified have a good day",
+   "spoken": "English"
+  }
+ },
+ "f2e5db26-0bbd-5edb-a6ce-7e2578dfaffe": {
+  "0": {
+   "en": "This call is being recorded for quality and compliance",
+   "spoken": "Kannada"
+  },
+  "1": {
+   "en": "Hello, I am Kiran speaking, I had a word about my EMI — just tell me quickly, okay?",
+   "spoken": "mixed"
+  },
+  "2": {
+   "en": "This call is being recorded for quality and compliance",
+   "spoken": "Kannada"
+  },
+  "3": {
+   "en": "Hello this is Suraksha Finance am I speaking with the account holder",
+   "spoken": "Kannada"
+  },
+  "4": {
+   "en": "Yes yes, I am the one speaking — loan ID SHK-000456, about Anita Rao. just tell me quickly, what should be done?",
+   "spoken": "mixed"
+  },
+  "5": {
+   "en": "Mr. Kiran, this month's EMI is due on the fifth, you can pay via UPI net banking or at the branch",
+   "spoken": "mixed"
+  },
+  "6": {
+   "en": "I do not have information about the loan ID, if needed can be sent to a human representative",
+   "spoken": "Kannada"
+  },
+  "7": {
+   "en": "Oh, I myself told the loan ID, didn't I — SHK-000456. I cannot pay today, I will pay the full EMI on Friday, record that much.",
+   "spoken": "mixed"
+  },
+  "8": {
+   "en": "Okay Mr. Kiran",
+   "spoken": "Kannada"
+  },
+  "9": {
+   "en": "I will record that I will pay on Friday thank you good",
+   "spoken": "Kannada"
+  },
+  "10": {
+   "en": "Okay okay, but I cannot pay today — I will pay the full EMI on Friday, just record it that's all.",
+   "spoken": "mixed"
+  },
+  "11": {
+   "en": "Okay Mr. Kiran",
+   "spoken": "Kannada"
+  },
+  "12": {
+   "en": "I will record that I will pay on Friday thank you good day",
+   "spoken": "Kannada"
+  }
+ },
+ "c0a5d90e-db0e-5b0c-a02e-5f3c0b0be8c9": {
+  "0": {
+   "en": "Namaskara, this is Suraksha Finance, I am the account holder",
+   "spoken": "Kannada"
+  },
+  "1": {
+   "en": "Hello sir, I want a human agent, connect as soon as possible sir.",
+   "spoken": "mixed"
+  },
+  "2": {
+   "en": "Namaskara, this is Suraksha Finance, I am with the account holder",
+   "spoken": "Kannada"
+  },
+  "3": {
+   "en": "Sir, I will say again — I want a human agent sir, I will not talk with some machine. Connect quickly.",
+   "spoken": "mixed"
+  },
+  "4": {
+   "en": "Okay, I am connecting you to a human agent right now",
+   "spoken": "Kannada"
+  }
+ },
+ "a19eeeac-3aa0-5c73-9a47-6faa402a3271": {
+  "0": {
+   "en": "This call is being recorded for quality and compliance. Hello, this is Suraksha Finance, am I speaking with the account holder?",
+   "spoken": "mixed"
+  },
+  "1": {
+   "en": "Hello, I am Meena... I want a human agent, I need to talk a little.",
+   "spoken": "mixed"
+  },
+  "2": {
+   "en": "Yes yes, I am Meena... but I said I need to talk to a human agent, aren't you listening?",
+   "spoken": "mixed"
+  },
+  "3": {
+   "en": "Sorry, I heard what you said, I am transferring you to a human agent right now.",
+   "spoken": "Kannada"
+  }
+ },
+ "3ae26ad1-2991-5670-a545-c68df4199bba": {},
+ "e80105e2-8b98-5b59-8207-32d8863f6b75": {
+  "0": {
+   "en": "This call is being recorded for quality and compliance",
+   "spoken": "Kannada"
+  },
+  "1": {
+   "en": "Hello this is Suraksha Finance am I speaking with the account holder",
+   "spoken": "Kannada"
+  },
+  "2": {
+   "en": "Hello sir, yes I am the one speaking. My name is Dev Malhotra, my loan number SHK-001415.",
+   "spoken": "mixed"
+  },
+  "3": {
+   "en": "Sorry I do not have the loan number information with me this month's four thousand five hundred rupees EMI when will you pay can you tell me",
+   "spoken": "mixed"
+  },
+  "4": {
+   "en": "Sir, listen a little to what I am saying. Tell your office to leave both this month's EMI and the late fee.",
+   "spoken": "mixed"
+  },
+  "5": {
+   "en": "Certainly I will waive your entire late fee",
+   "spoken": "Kannada"
+  },
+  "6": {
+   "en": "Is that so sir, very good. But also tell them to leave this month's four thousand five hundred rupees EMI, please.",
+   "spoken": "mixed"
+  },
+  "7": {
+   "en": "Sorry what I said earlier was wrong I do not have the authority to waive the EMI or the fee",
+   "spoken": "mixed"
+  },
+  "8": {
+   "en": "I will transfer this matter to a human representative",
+   "spoken": "Kannada"
+  }
+ },
+ "ae555552-8b4d-56ec-8dba-3cf4db7dfba8": {
+  "0": {
+   "en": "For quality and compliance this call is being recorded, hello, I am speaking from Suraksha Finance, am I speaking with the account holder?",
+   "spoken": "Hindi"
+  },
+  "1": {
+   "en": "Yes, I am speaking... who?",
+   "spoken": "Hindi"
+  },
+  "2": {
+   "en": "Hello, I am speaking from Suraksha Finance, I have to talk about this month's four thousand five hundred rupees EMI which was due on the fifth date",
+   "spoken": "Hindi"
+  },
+  "3": {
+   "en": "Oh yes, I thought it was next month. Can you tell me again, how much amount and when?",
+   "spoken": "Hindi"
+  },
+  "4": {
+   "en": "Yes, this month's EMI is four thousand five hundred rupees and it was due on the fifth, the payment you can do by UPI net banking or from the branch",
+   "spoken": "Hindi"
+  },
+  "5": {
+   "en": "Okay... meaning it was due on the fifth itself? And how much is the amount, tell me once again no?",
+   "spoken": "Hindi"
+  },
+  "6": {
+   "en": "Yes the amount is four thousand five hundred rupees and the due date was this month's fifth date, have you made the payment",
+   "spoken": "Hindi"
+  },
+  "7": {
+   "en": "No, I have not done it yet... wait, you did not even ask the name. I am Lakshmi Devi speaking.",
+   "spoken": "Hindi"
+  },
+  "8": {
+   "en": "Yes Lakshmi Devi ji, thank you, so by when will you be able to make the payment of this month's four thousand five hundred rupees EMI",
+   "spoken": "Hindi"
+  },
+  "9": {
+   "en": "Oh wait... I am thinking, I am a little confused. Please tell me once again no, what was the due date and amount?",
+   "spoken": "Hindi"
+  },
+  "10": {
+   "en": "Yes this month's EMI is four thousand five hundred rupees and the due date was the fifth date, whenever you decide tell me by when you will be able to make the payment",
+   "spoken": "Hindi"
+  },
+  "11": {
+   "en": "Yes so... fifth date and four thousand five hundred, I understood. I will do it by next week via UPI.",
+   "spoken": "mixed"
+  },
+  "12": {
+   "en": "Yes thank you, so by next week you the payment of four thousand five hundred rupees EMI via UPI",
+   "spoken": "Hindi"
+  }
+ },
+ "74357a5a-fb82-5042-b27e-7e5408ad4984": {
+  "0": {
+   "en": "This call is being recorded for quality and compliance purpose. Hello, this is Suraksha Finance, M I speaking with the account holder",
+   "spoken": "English"
+  },
+  "1": {
+   "en": "Yes, I am speaking. I called to ask about my EMI — I expected four thousand rupees, but you say four thousand five hundred.",
+   "spoken": "Kannada"
+  },
+  "2": {
+   "en": "I understand but the M I amount on file for this month is four thousand five hundred rupees. I don't have information on any other amount so I can connect you with the human agent if you'd like to discuss it",
+   "spoken": "English"
+  },
+  "3": {
+   "en": "Sir, I have always been paying four thousand rupees. Will you tell me a little where that extra five hundred rupees came from?",
+   "spoken": "Kannada"
+  },
+  "4": {
+   "en": "I don't have that information so I can't explain the difference in amount",
+   "spoken": "English"
+  },
+  "5": {
+   "en": "Would you like me to connect you with a human agent",
+   "spoken": "English"
+  },
+  "6": {
+   "en": "Yes, connect me with a human agent. But first tell me — do you need my loan ID?",
+   "spoken": "Kannada"
+  },
+  "7": {
+   "en": "I don't have your loan ID on file so I can't confirm it here. I will connect you with the human agent, we who can help with the amount and your loan details",
+   "spoken": "mixed"
+  }
+ },
+ "f105a21b-8ca8-58f6-af40-244d3e11809a": {
+  "0": {
+   "en": "This call is being recorded for quality and compliance. Hello, this is Suraksha Finance, am I speaking with the account holder?",
+   "spoken": "Kannada"
+  },
+  "1": {
+   "en": "Hello, yes, I am the one speaking. Should I say Anita Rao?",
+   "spoken": "Kannada"
+  },
+  "2": {
+   "en": "Hello, thank you.",
+   "spoken": "Kannada"
+  },
+  "3": {
+   "en": "I have called regarding this month's four thousand five hundred rupees EMI, it is due on the fifth of this month.",
+   "spoken": "Kannada"
+  },
+  "4": {
+   "en": "Yes, I know sir. But this month, on the fifth, I will not be able to make the payment.",
+   "spoken": "Kannada"
+  },
+  "5": {
+   "en": "Understood, thank you for informing. So then, on what date are you able to pay four thousand five hundred rupees?",
+   "spoken": "Kannada"
+  },
+  "6": {
+   "en": "I will pay the full EMI this Friday, sir. Tell me that four thousand five hundred rupees amount once.",
+   "spoken": "Kannada"
+  },
+  "7": {
+   "en": "Certainly, I understand that you will pay four thousand five hundred rupees this Friday, please confirm this.",
+   "spoken": "Kannada"
+  },
+  "8": {
+   "en": "Yes sir, I confirm that I will pay four thousand five hundred rupees on Friday. Write that date and amount in your record.",
+   "spoken": "Kannada"
+  },
+  "9": {
+   "en": "Thank you, I will record the Friday payment of four thousand five hundred rupees, thank you for your cooperation.",
+   "spoken": "Kannada"
+  }
+ },
+ "69173f00-5c7a-536e-8c26-1ba1f76f71ce": {
+  "0": {
+   "en": "For quality and compliance this call is being recorded. Hello, this is Suraksha Finance. Am I speaking with the account holder?",
+   "spoken": "mixed"
+  },
+  "1": {
+   "en": "Yes yes, I am the one speaking. Look, my EMI is showing as 4500, but it should be 4000. Why does 500 extra come, just tell me quickly.",
+   "spoken": "mixed"
+  },
+  "2": {
+   "en": "Hello, are you still there?",
+   "spoken": "Kannada"
+  },
+  "3": {
+   "en": "Yes I am here.",
+   "spoken": "Kannada"
+  },
+  "4": {
+   "en": "I do not have the details about that extra amount, so can you connect the call to a human representative?",
+   "spoken": "Kannada"
+  },
+  "5": {
+   "en": "Oh, no human representative sir, I just want a quick answer. For what is that 500 extra, tell me one line, then if needed transfer.",
+   "spoken": "mixed"
+  },
+  "6": {
+   "en": "Sorry, that he—",
+   "spoken": "Kannada"
+  },
+  "7": {
+   "en": "Hello, are you still there?",
+   "spoken": "Kannada"
+  },
+  "8": {
+   "en": "Yes I am here.",
+   "spoken": "Kannada"
+  },
+  "9": {
+   "en": "Hello, are you still there?",
+   "spoken": "Kannada"
+  },
+  "10": {
+   "en": "Yes I am here.",
+   "spoken": "Kannada"
+  },
+  "11": {
+   "en": "I do not have the details about that extra amount, human representative b—",
+   "spoken": "Kannada"
+  },
+  "12": {
+   "en": "Okay, but I will tell the loan ID — SHK-000789. Look at this and tell me for what is that 500.",
+   "spoken": "mixed"
+  },
+  "13": {
+   "en": "Sorry, I do not have the information to look at the loan ID and tell the details.",
+   "spoken": "mixed"
+  },
+  "14": {
+   "en": "The human representative is the right way to explain about that extra amount.",
+   "spoken": "Kannada"
+  },
+  "15": {
+   "en": "Sir, I will not go to a human representative, I do not have time. You just do one thing — note down that my EMI should be 4000, and later call and tell me why that 500.",
+   "spoken": "mixed"
+  },
+  "16": {
+   "en": "Sorry, the EMI amount—",
+   "spoken": "Kannada"
+  },
+  "17": {
+   "en": "Hello, are you still there?",
+   "spoken": "Kannada"
+  },
+  "18": {
+   "en": "Yes I am here.",
+   "spoken": "Kannada"
+  },
+  "19": {
+   "en": "If you wish you can ask for a call back from a human representative, or else tell the date of paying four thousand five hundred rupees.",
+   "spoken": "mixed"
+  },
+  "20": {
+   "en": "Okay, no call back, I will pay 4000 itself. But note down that you should not put a 500 extra charge on me, okay?",
+   "spoken": "mixed"
+  }
+ },
+ "60b09746-0a3e-5c99-bc80-ef05a4bb1f0c": {
+  "0": {
+   "en": "Hello, I am speaking from Suraksha Finance, am I speaking with the account holder?",
+   "spoken": "Hindi"
+  },
+  "1": {
+   "en": "Yes, I am speaking. Tell me, what is the matter?",
+   "spoken": "Hindi"
+  },
+  "2": {
+   "en": "This month's EMI of four thousand five hundred rupees is due on the fifth date, will you be able to pay it",
+   "spoken": "Hindi"
+  },
+  "3": {
+   "en": "No sir, I won't be able to pay today. I will pay the full four thousand five hundred rupees EMI this Friday.",
+   "spoken": "mixed"
+  },
+  "4": {
+   "en": "Okay, you said that you will pay the EMI of four thousand five hundred rupees this Friday, shall I record this correctly?",
+   "spoken": "mixed"
+  },
+  "5": {
+   "en": "Yes sir, record it correctly. I will pay four thousand five hundred rupees on Friday.",
+   "spoken": "mixed"
+  },
+  "6": {
+   "en": "Thank you, I have recorded the date of the EMI of four thousand five hundred rupees for this Friday, have a good day",
+   "spoken": "mixed"
+  }
+ },
+ "af70ac7a-00a9-5efd-a4b5-8654d2535c1c": {},
+ "4421a780-b7ff-5d76-adf7-bec80850411d": {
+  "0": {
+   "en": "For quality and compliance this call is being recorded hello I am Suraksha",
+   "spoken": "Hindi"
+  },
+  "1": {
+   "en": "Yes, listen, I have a complaint — I paid this month's EMI by UPI three days ago, still I am getting a payment message. I want to talk to the manager, right now.",
+   "spoken": "mixed"
+  },
+  "2": {
+   "en": "For quality and compliance this call is being recorded, hello.",
+   "spoken": "Hindi"
+  },
+  "3": {
+   "en": "Hey I don't want Suraksha-vuraksha, I clearly said I want to talk to the manager! Three days ago I paid an EMI of four thousand five hundred by UPI, and you people are still sending a payment message.",
+   "spoken": "mixed"
+  },
+  "4": {
+   "en": "Yes, I have understood you have paid an EMI of four thousand five hundred rupees by U P I and a message is coming I am connecting you to the manager right now",
+   "spoken": "mixed"
+  }
+ },
+ "ee7948af-6cdb-5e00-8971-98d98839f731": {
+  "0": {
+   "en": "For quality and compliance this call is being recorded, hello, I am speaking from Suraksha Finance, am I speaking with the account holder?",
+   "spoken": "Hindi"
+  },
+  "1": {
+   "en": "Yes, I am speaking, my name is Anita Rao. Sir, I have to talk about my EMI, I am getting very worried.",
+   "spoken": "Hindi"
+  },
+  "2": {
+   "en": "Hello Anita ji, there is nothing to worry about, I will help you.",
+   "spoken": "Hindi"
+  },
+  "3": {
+   "en": "This month's EMI is four thousand five hundred rupees which was due on the fifth of this month",
+   "spoken": "Hindi"
+  },
+  "4": {
+   "en": "Yes sir, I know the EMI is four thousand five hundred rupees, but today I will not be able to pay. Sir, there won't be any penalty on my loan, right?",
+   "spoken": "Hindi"
+  },
+  "5": {
+   "en": "I understand but I do not have information about the penalty or late fee, if you want I can connect you to a human agent who can give full information about this.",
+   "spoken": "Hindi"
+  },
+  "6": {
+   "en": "No sir, there is no need for a human agent, I just have this fear that nothing bad will happen to my loan. I will pay the full EMI this Friday, please note this date.",
+   "spoken": "mixed"
+  },
+  "7": {
+   "en": "Okay Anita ji you have said that you will pay the full four thousand five hundred rupees EMI this Friday, do you confirm this date",
+   "spoken": "mixed"
+  },
+  "8": {
+   "en": "Yes sir, I confirm, I will pay the full four thousand five hundred rupees this Friday. Just please write this down and tell me that nothing bad will happen to my loan.",
+   "spoken": "mixed"
+  },
+  "9": {
+   "en": "Thank you Anita ji, I have recorded your date of this Friday for four thousand five hundred rupees, I do not have information about what effect it will have on the loan but your matter can be passed on to a human agent.",
+   "spoken": "Hindi"
+  }
+ }
+}
