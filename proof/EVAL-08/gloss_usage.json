@@ -178,5 +178,185 @@
    "prompt_cache_miss_tokens": 954
   },
   "at": "2026-11-03T04:00:36Z"
+ },
+ {
+  "call_id": "55a0a9fc-273e-57f8-bdde-ec23737c3c47",
+  "model": "deepseek-flash",
+  "usage": {
+   "prompt_tokens": 1063,
+   "completion_tokens": 379,
+   "total_tokens": 1442,
+   "prompt_tokens_details": {
+    "cached_tokens": 256
+   },
+   "prompt_cache_hit_tokens": 256,
+   "prompt_cache_miss_tokens": 807
+  },
+  "at": "2026-11-03T11:25:03Z"
+ },
+ {
+  "call_id": "6e8d2fb4-e539-5de2-be0d-b2f6d8a79fa0",
+  "model": "deepseek-flash",
+  "usage": {
+   "prompt_tokens": 1388,
+   "completion_tokens": 621,
+   "total_tokens": 2009,
+   "prompt_tokens_details": {
+    "cached_tokens": 256
+   },
+   "prompt_cache_hit_tokens": 256,
+   "prompt_cache_miss_tokens": 1132
+  },
+  "at": "2026-11-03T11:25:07Z"
+ },
+ {
+  "call_id": "83acb03a-33aa-5e28-bd50-abaad5753cf5",
+  "model": "deepseek-flash",
+  "usage": {
+   "prompt_tokens": 1988,
+   "completion_tokens": 943,
+   "total_tokens": 2931,
+   "prompt_tokens_details": {
+    "cached_tokens": 256
+   },
+   "prompt_cache_hit_tokens": 256,
+   "prompt_cache_miss_tokens": 1732
+  },
+  "at": "2026-11-03T11:25:12Z"
+ },
+ {
+  "call_id": "70fcd85c-1787-522b-8597-c79cc9cf74db",
+  "model": "deepseek-flash",
+  "usage": {
+   "prompt_tokens": 557,
+   "completion_tokens": 123,
+   "total_tokens": 680,
+   "prompt_tokens_details": {
+    "cached_tokens": 256
+   },
+   "prompt_cache_hit_tokens": 256,
+   "prompt_cache_miss_tokens": 301
+  },
+  "at": "2026-11-03T11:25:15Z"
+ },
+ {
+  "call_id": "d7309e29-f87f-5566-b086-02ee8815f89d",
+  "model": "deepseek-flash",
+  "usage": {
+   "prompt_tokens": 1465,
+   "completion_tokens": 625,
+   "total_tokens": 2090,
+   "prompt_tokens_details": {
+    "cached_tokens": 256
+   },
+   "prompt_cache_hit_tokens": 256,
+   "prompt_cache_miss_tokens": 1209
+  },
+  "at": "2026-11-03T11:25:19Z"
+ },
+ {
+  "call_id": "8c22d77a-da0f-5120-951b-df0928725a15",
+  "model": "deepseek-flash",
+  "usage": {
+   "prompt_tokens": 1618,
+   "completion_tokens": 631,
+   "total_tokens": 2249,
+   "prompt_tokens_details": {
+    "cached_tokens": 256
+   },
+   "prompt_cache_hit_tokens": 256,
+   "prompt_cache_miss_tokens": 1362
+  },
+  "at": "2026-11-03T11:25:23Z"
+ },
+ {
+  "call_id": "1136ac26-2bfe-58de-ae4c-0e05330805ea",
+  "model": "deepseek-flash",
+  "usage": {
+   "prompt_tokens": 653,
+   "completion_tokens": 187,
+   "total_tokens": 840,
+   "prompt_tokens_details": {
+    "cached_tokens": 256
+   },
+   "prompt_cache_hit_tokens": 256,
+   "prompt_cache_miss_tokens": 397
+  },
+  "at": "2026-11-03T11:25:26Z"
+ },
+ {
+  "call_id": "bc44014f-86b0-553f-8f0e-1c96c7dd8633",
+  "model": "deepseek-flash",
+  "usage": {
+   "prompt_tokens": 843,
+   "completion_tokens": 306,
+   "total_tokens": 1149,
+   "prompt_tokens_details": {
+    "cached_tokens": 128
+   },
+   "prompt_cache_hit_tokens": 128,
+   "prompt_cache_miss_tokens": 715
+  },
+  "at": "2026-11-03T11:25:29Z"
+ },
+ {
+  "call_id": "215e32be-64f8-53fd-b23f-2ffa84bc0fc4",
+  "model": "deepseek-flash",
+  "usage": {
+   "prompt_tokens": 1140,
+   "completion_tokens": 489,
+   "total_tokens": 1629,
+   "prompt_tokens_details": {
+    "cached_tokens": 128
+   },
+   "prompt_cache_hit_tokens": 128,
+   "prompt_cache_miss_tokens": 1012
+  },
+  "at": "2026-11-03T11:25:32Z"
+ },
+ {
+  "call_id": "b49a5eda-b1e7-5469-9314-28edf137886a",
+  "model": "deepseek-flash",
+  "usage": {
+   "prompt_tokens": 1698,
+   "completion_tokens": 667,
+   "total_tokens": 2365,
+   "prompt_tokens_details": {
+    "cached_tokens": 128
+   },
+   "prompt_cache_hit_tokens": 128,
+   "prompt_cache_miss_tokens": 1570
+  },
+  "at": "2026-11-03T11:25:37Z"
+ },
+ {
+  "call_id": "e5e6035f-ff25-5ee2-be31-0aec93fd5644",
+  "model": "deepseek-flash",
+  "usage": {
+   "prompt_tokens": 1237,
+   "completion_tokens": 375,
+   "total_tokens": 1612,
+   "prompt_tokens_details": {
+    "cached_tokens": 128
+   },
+   "prompt_cache_hit_tokens": 128,
+   "prompt_cache_miss_tokens": 1109
+  },
+  "at": "2026-11-03T11:25:40Z"
+ },
+ {
+  "call_id": "651ec4df-ec40-5a34-ac86-61059f27d463",
+  "model": "deepseek-flash",
+  "usage": {
+   "prompt_tokens": 974,
+   "completion_tokens": 335,
+   "total_tokens": 1309,
+   "prompt_tokens_details": {
+    "cached_tokens": 256
+   },
+   "prompt_cache_hit_tokens": 256,
+   "prompt_cache_miss_tokens": 718
+  },
+  "at": "2026-11-03T11:25:43Z"
  }
 ]

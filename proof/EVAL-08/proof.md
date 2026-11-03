@@ -13,6 +13,7 @@ file.
 | 3. `rubric-2026-11-v3` + `judge_v3.j2` | **Active.** v1 and v2 are unchanged. No contract change. One test group per rule (`test_rubric_v3.py`, 22 tests). |
 | 4. v3 κ on L01-L30 / H01-H30 / pooled | **0.379 / 0.127 / 0.431** (pass/fail). **Both sets are SEEN**, not held-out (see below). Below the 0.6 target. |
 | 5. Confirmation batch C01-C15 | 15 new real calls, 15/15 evaluated. Owner labels 2026-11-03, with the owner's correction (C02/C04/C12 fail under R-a): **final confirmation κ 0.595** (12/15, CI [0.12, 1.0]). Just below 0.6, and n = 15 < 30. As first labelled it was 0.167. Pooled H+C (n = 45) 0.314. See `confirm_calibration.md`. |
+| 5b. Second confirmation batch C16-C30 | The owner approved it on 2026-11-03 to reach n = 30. 15 new real calls, 15/15 evaluated, 0 re-runs, v3 **unchanged**. Packet extended in `labelling/EVAL-08/`. **Awaiting owner labels**; the final V9 number will be v3 κ on C01-C30 (C02/C04/C12 as corrected). |
 
 ## 1. mypy
 
@@ -220,6 +221,57 @@ python scripts/calibration/import_labels.py ... (same, without --fill-json)    #
   - **Just below 0.6, on n = 15 < 30.**
   - The remaining misses are C11, C13 and C14.
   - Pooled H01-H30 (SEEN) + C01-C15: κ 0.314 (n = 45).
+
+## 5b. Second confirmation batch C16-C30 (owner approved 2026-11-03: "yes prepare 15 calls")
+
+```
+python3 -u scripts/calibration/run_batch.py --use confirm2      # confirm2_run.log, confirm2_batch.json ("evaluated 15/15", exit 0)
+python3 scripts/calibration/export_judge_results.py --batch proof/EVAL-08/confirm2_batch.json --rubric-version rubric-2026-11-v3 --out proof/EVAL-08/confirm2_judge_results.json
+SSL_CERT_FILE=/root/.ccr/ca-bundle.crt python scripts/calibration/export_packet.py --batch proof/EVAL-08/confirm2_batch.json \
+        --packet labelling/EVAL-08 --proof proof/EVAL-08 --prefix C --title "EVAL-08 confirmation" --bitrate 32k --count 15 --start 16
+```
+
+**Plan (`CONFIRM2` in `run_batch.py`).**
+- Same mix as C01-C15: 5 clean + 2 per planted bug; 8 kn / 4 hi / 3 en; noise 7 alaw / 4 babble / 4 clean.
+- An assert in `run_batch.py` checks that none of the 15 cells repeats an EVAL-06, EVAL-07 or C01-C15 cell, and
+  that all 15 are distinct.
+- 15 distinct fresh random run seeds (`run_seed`). Same mock-agent image (final VAD).
+- **v3 is unchanged:** no rubric, prompt or check change since aaa23af, and nothing was tuned on C01-C15.
+
+**Judge v3** (`confirm2_judge_results.json`, kept **outside** the packet).
+- Overall: 9/15 pass, 1 critical.
+- By group:
+
+  | group | pass |
+  |---|---|
+  | clean | 4/5 |
+  | `no_disclosure` | 0/2 |
+  | `no_amount_confirm` | 1/2 |
+  | `english_to_kannada` | 2/2 |
+  | `ignore_interrupt` | 1/2 |
+  | `false_waiver` | 1/2 (1 critical) |
+
+**Packet** (`export_packet.py --start 16` appends to the existing packet).
+- Added `C16.html`-`C30.html` and `audio/C16.mp3`-`C30.mp3`.
+- `.key.json` is extended to 30 ids, with the shuffle seed of each part in `shuffle_seeds`
+  (C01-C15 508266647, C16-C30 1054013942).
+- `labels.csv`: the 15 rows C01-C15 are kept byte-identical (checked), with 15 blank rows C16-C30.
+- `index.html` lists all 30 calls. The packet is 11.5 MB.
+- `GUIDE.md` now covers C01-C30 and opens with a 6-point checklist from the owner's rules. The owner said the page
+  had given no checklist.
+- **Blindness check:** 0 hits on every page, over the same terms as before (bug, scenario, persona, noise profile,
+  call or run id, agent name, rubric, `gate:`).
+- The three English calls (C18, C24, C30) have no gloss, as English lines need none.
+
+**Spend** (`api_usage_confirm2.txt`).
+- DeepSeek: judge 78k tokens, caller 77k tokens. That is about $0.20, under the $5 budget.
+- Gnani: STT 89 requests / 570 s, TTS 124 requests.
+
+**When the owner has labelled C16-C30** (the final V9 number, n = 30, C02/C04/C12 as corrected):
+```
+python scripts/calibration/import_labels.py --labels labelling/EVAL-08/labels.csv --key labelling/EVAL-08/.key.json \
+    --judge <confirm_judge_results.json + confirm2_judge_results.json merged> --out proof/EVAL-08/confirm30 --api-pooled --expect-n 90
+```
 
 ## Tests (`pytest.txt`)
 
