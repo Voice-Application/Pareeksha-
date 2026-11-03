@@ -1,0 +1,2 @@
+# EVAL-07 verified (verifier, 2026-11-03, via SHA 36d8f3f)
+The only rejection reason (13 mypy errors, qa/EVAL-07 rejected.md) is fixed in this branch: `cd backend && mypy` gives "no issues found in 350 source files"; ruff check/format clean; no ignores added (diff scan in proof/EVAL-08/verified.md). All other EVAL-07 items were passed by the earlier verifier (kappa 0.1892 on EVAL-06, v2 in-sample 0.6087, held-out batch/packet, tests). Re-run here: pytest 1106 passed, 0 skipped.
