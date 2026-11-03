@@ -12,7 +12,7 @@ file.
 | 2. ISSUE-4 (Kannada STT disclosure) | **Fixed**, with grounded spellings only. All 10 calls whose transcript has ರೆಕಾರ್ಡೆಡ್ / ರೆಕಾರ್ಡರ್ now pass. The only recording fails left are the `no_disclosure` calls (`issue4_check.txt`). |
 | 3. `rubric-2026-11-v3` + `judge_v3.j2` | **Active.** v1 and v2 are unchanged. No contract change. One test group per rule (`test_rubric_v3.py`, 22 tests). |
 | 4. v3 κ on L01-L30 / H01-H30 / pooled | **0.379 / 0.127 / 0.431** (pass/fail). **Both sets are SEEN**, not held-out (see below). Below the 0.6 target. |
-| 5. Confirmation batch C01-C15 | 15 new real calls, 15/15 evaluated, 0 re-runs. Labelled by the owner on 2026-11-03: **confirmation κ 0.167** (agreement 9/15; critical κ 0.762). It would be 0.595 if C02/C04/C12 followed R-a (a label/rule conflict pending the owner). See `confirm_calibration.md`. |
+| 5. Confirmation batch C01-C15 | 15 new real calls, 15/15 evaluated. Owner labels 2026-11-03, with the owner's correction (C02/C04/C12 fail under R-a): **final confirmation κ 0.595** (12/15, CI [0.12, 1.0]). Just below 0.6, and n = 15 < 30. As first labelled it was 0.167. Pooled H+C (n = 45) 0.314. See `confirm_calibration.md`. |
 
 ## 1. mypy
 
@@ -214,6 +214,12 @@ python scripts/calibration/import_labels.py ... (same, without --fill-json)    #
   - C14: passed although the agent transferred without asking for the UTR; the owner failed it and marked it
     critical.
 - v3 was not tuned on this set. n = 15 is below V9's minimum of 30.
+- **Owner correction (2026-11-03):** "Fail them now because the rule is okay." C02, C04 and C12 → `passed = no`.
+  - Posted through the API as reviewer `preetham-correction-2026-11-03`; the newest review wins and n stays 75.
+  - **Final confirmation κ 0.595** (bootstrap CI [0.12, 1.0]), agreement 12/15, critical κ 0.762.
+  - **Just below 0.6, on n = 15 < 30.**
+  - The remaining misses are C11, C13 and C14.
+  - Pooled H01-H30 (SEEN) + C01-C15: κ 0.314 (n = 45).
 
 ## Tests (`pytest.txt`)
 
@@ -241,7 +247,7 @@ python scripts/calibration/import_labels.py ... (same, without --fill-json)    #
 
 ## Database dump
 
-`pareeksha_db.sql.gz` is a `pg_dump` after the confirmation labels were imported (75 v3 reviews). It holds every table except the rows of
+`pareeksha_db.sql.gz` is a `pg_dump` after the confirmation labels and the owner's 3 corrections were imported (75 v3 evaluations reviewed; 78 v3 reviews). It holds every table except the rows of
 `api_keys`: the 87 earlier calls plus the 15 C calls, and v1/v2/v3 evaluations. Restore it as in
 `proof/EVAL-06/proof.md`.
 
