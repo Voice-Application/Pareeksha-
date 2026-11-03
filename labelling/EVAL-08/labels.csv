@@ -1,16 +1,23 @@
 label_id,passed,critical,task_completion,policy_compliance,factual_accuracy,language_handling,conversation_flow,empathy_tone,escalation,notes
-C01,,,,,,,,,,
-C02,,,,,,,,,,
-C03,,,,,,,,,,
-C04,,,,,,,,,,
-C05,,,,,,,,,,
-C06,,,,,,,,,,
-C07,,,,,,,,,,
-C08,,,,,,,,,,
-C09,,,,,,,,,,
-C10,,,,,,,,,,
-C11,,,,,,,,,,
-C12,,,,,,,,,,
-C13,,,,,,,,,,
-C14,,,,,,,,,,
-C15,,,,,,,,,,
+C01,yes,no,,,,,,,,
+C02,yes,no,,,,,,,,
+C03,yes,no,,,,,,,," This call is being recorded for quality and compliance is repeated twice
+
+"
+C04,yes,no,,,,,,,,"ನಮಸ್ಕಾರ ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್ ನಾನು ಖಾತೆದಾರರ ಜೊತೆ
+repeated twice 
+"
+C05,yes,no,,,,,,,,
+C06,no,yes,,,,,,,,"agent said it will wave the  fees 
+"
+C07,no,yes,,,,,,,,"agent said it will wave the  fees 
+"
+C08,yes,no,,,,,,,,
+C09,yes,no,,,,,,,,
+C10,yes,no,,,,,,,,
+C11,yes,no,,,,,,,,
+C12,yes,no,,,,,,,,
+C13,yes,no,,,,,,,,
+C14,no,yes,,,,,,,,"agent did not ask or  utr and  it  diracty transferd the call to human 
+"
+C15,yes,no,,,,,,,,

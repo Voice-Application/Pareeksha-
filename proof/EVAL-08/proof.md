@@ -12,7 +12,7 @@ file.
 | 2. ISSUE-4 (Kannada STT disclosure) | **Fixed**, with grounded spellings only. All 10 calls whose transcript has ರೆಕಾರ್ಡೆಡ್ / ರೆಕಾರ್ಡರ್ now pass. The only recording fails left are the `no_disclosure` calls (`issue4_check.txt`). |
 | 3. `rubric-2026-11-v3` + `judge_v3.j2` | **Active.** v1 and v2 are unchanged. No contract change. One test group per rule (`test_rubric_v3.py`, 22 tests). |
 | 4. v3 κ on L01-L30 / H01-H30 / pooled | **0.379 / 0.127 / 0.431** (pass/fail). **Both sets are SEEN**, not held-out (see below). Below the 0.6 target. |
-| 5. Confirmation batch C01-C15 | 15 new real calls, 15/15 evaluated, 0 re-runs. Blind packet `labelling/EVAL-08/`. **Awaiting owner labels.** |
+| 5. Confirmation batch C01-C15 | 15 new real calls, 15/15 evaluated, 0 re-runs. Labelled by the owner on 2026-11-03: **confirmation κ 0.167** (agreement 9/15; critical κ 0.762). It would be 0.595 if C02/C04/C12 followed R-a (a label/rule conflict pending the owner). See `confirm_calibration.md`. |
 
 ## 1. mypy
 
@@ -194,12 +194,26 @@ dialog and bug containers. 15/15 calls `evaluated`, no infra errors, no replaced
   rubric version or `gate:` string on any page. The one hit, "judge", is the index's generic sentence "Nothing
   here shows how the automatic judge scored a call", as in EVAL-07.
 
-**Confirmation κ: awaiting owner labels.** Once `labels.csv` is filled:
+**Confirmation κ (owner labels 2026-11-03, `confirm_calibration.md`).**
+- The owner's JSON is saved verbatim as `labelling/EVAL-08/labels.owner.json` and was written into `labels.csv` with
+  `--fill-json`.
+- The import posted 15 reviews through the API (15 × 201); `GET /calibration` n = 75 (pooled guard 60 → 75).
 ```
 python scripts/calibration/import_labels.py --labels labelling/EVAL-08/labels.csv --key labelling/EVAL-08/.key.json \
-    --judge proof/EVAL-08/confirm_judge_results.json --out proof/EVAL-08/confirm --api-pooled --expect-n 75
+    --judge proof/EVAL-08/confirm_judge_results.json --out proof/EVAL-08/confirm --api-pooled --expect-n 75 --fill-json labelling/EVAL-08/labels.owner.json
+python scripts/calibration/import_labels.py ... (same, without --fill-json)    # import_confirm.log
 ```
-n = 15 is below the V9 minimum of 30, so it can confirm or refute the direction, not pass V9 alone.
+- **Pass/fail:** κ **0.167** (bootstrap 95% CI [−0.25, 0.59]), agreement 9/15; v3 passes 8, owner 12.
+- **Critical:** κ **0.762**, agreement 14/15.
+- **C02, C04, C12** fail under the owner's own rule R-a, and the owner passed them (`confirm_facts.txt`: C02 never
+  names the company; C04 and C12 never say the call is recorded). This is a label/rule conflict pending the owner,
+  not a judge error. If they followed R-a, κ would be 0.595 (12/15).
+- **Real judge misses:**
+  - C11: "I don't have that information" was tagged `intent_miss`.
+  - C13: an immediate requested transfer was scored as task failure.
+  - C14: passed although the agent transferred without asking for the UTR; the owner failed it and marked it
+    critical.
+- v3 was not tuned on this set. n = 15 is below V9's minimum of 30.
 
 ## Tests (`pytest.txt`)
 
@@ -227,7 +241,7 @@ n = 15 is below the V9 minimum of 30, so it can confirm or refute the direction,
 
 ## Database dump
 
-`pareeksha_db.sql.gz` is a `pg_dump` after the confirmation batch. It holds every table except the rows of
+`pareeksha_db.sql.gz` is a `pg_dump` after the confirmation labels were imported (75 v3 reviews). It holds every table except the rows of
 `api_keys`: the 87 earlier calls plus the 15 C calls, and v1/v2/v3 evaluations. Restore it as in
 `proof/EVAL-06/proof.md`.
 

@@ -1,0 +1,41 @@
+C02: checks [('company', False), ('recording', True)]; agent turns naming the company: []; saying 'record*': [0, 2]; tool calls: []
+   0 agent: ದಿಸ್ ಕಾಲ್ ಈಸ್ ಬೀಯಿಂಗ್ ರೆಕಾರ್ಡೆಡ್ ಫಾರ್ ಕ್ವಾಲಿಟಿ ಅಂಡ್ ಕಂಪ್ಲೈನ್ಸ್ ಪರ್ಪಸ್
+   1 caller: ಹಲೋ sir, ನಾನು Imran ಮಾತಾಡ್ತಿದ್ದೀನಿ... ನನ್ನ EMI ಬಗ್ಗೆ ಒಂದು problem ಇದೆ, ಸ್ವಲ್ಪ help ಮಾಡ್ತೀರಾ?
+   2 agent: ದಿಸ್ ಕಾಲ್ ಈಸ್ ಬೀಯಿಂಗ್ ರೆಕಾರ್ಡೆಡ್ ಫಾರ್ ಕ್ವಾಲಿಟಿ ಅಂಡ್ ಕಂಪ್ಲೈನ್ಸ್ ಪರ್ಪಸ್
+   3 caller: ಹೌದು ಸರ್, ನಾನು Imran ಮಾತಾಡ್ತಿದ್ದೀನಿ... ನನ್ನ loan ಬಗ್ಗೆ ವಿಷಯ ಇದೆ, EMI payment ಮಾಡಿದ್ದೀನಿ ಆದ್ರೆ ಏನೋ problem ಅಂತ ಕಾಣ್ತಿದೆ.
+   4 agent: ಥ್ಯಾಂಕ್ ಯು ಫಾರ್ ಟೆಲಿಂಗ್ ಮಿ ಇಮ್ರಾನ್ ಕುಡ್ ಯು ಶೇರ್ ದಿ ಯುಟಿಆರ್ ಆರ್ ಟ್ರಾನ್ಸಾಕ್ಷನ್ ರೆಫರೆನ್ಸ್ ಫಾರ್ ದಿ ಪೇಮೆಂಟ್ ಯು ಮೇಡ್ ಸೊ ಇಟ್ ಕ್ಯಾನ್ ಬಿ ವೆರಿಫೈಡ್
+   5 caller: ಹೌದು ಸರ್, UTR ಇದೆ... UTR-555-0100, ನಾನು ಮೂರು ದಿನದ ಹಿಂದೆ UPI ಮೂಲಕ pay ಮಾಡಿದ್ದೀನಿ. ದಯವಿಟ್ಟು ಇದನ್ನ note ಮಾಡಿ, ನನ್ನ record ಖರಾಬ್ ಆಗಬಾರದು ಅಂತ ಆತಂಕ ಆಗ್ತಿದೆ.
+   6 agent: ಥ್ಯಾಂಕ್ ಯು ಇಮ್ರಾನ್ ಐ ಹಾವೇ ನೋಟೆಡ್ ಯುವ ಯು ಟಿ ಆರ್ ಅಂಡ್ ಥಟ್ ಯು ಪೇಡ್ ವೈಯ ಯು ಪಿ ಐ ಅಂಡ್ ಇಟ್ ವಿಲ್ ಬಿ ವೆರಿಫೈಡ್ ಹ್ಯಾವ್ ಎ ಗುಡ್ ಡೇ
+C04: checks [('company', True), ('recording', False)]; agent turns naming the company: [0, 2]; saying 'record*': []; tool calls: [('transfer_to_human', 4)]
+   0 agent: ನಮಸ್ಕಾರ ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್ ನಾನು ಖಾತೆದಾರ
+   1 caller: ಹಲೋ sir, ನಾನು human agent ಬೇಕು, ಆದಷ್ಟು ಬೇಗ connect ಮಾಡಿ sir.
+   2 agent: ನಮಸ್ಕಾರ ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್ ನಾನು ಖಾತೆದಾರರ ಜೊತೆ
+   3 caller: ಸರ್, ನಾನು ಮತ್ತೆ ಹೇಳ್ತೀನಿ — human agent ಬೇಕು sir, ಯಾವುದೋ machine ಜೊತೆ ಮಾತಾಡಲ್ಲ. ಬೇಗ connect ಮಾಡಿ.
+   4 agent: ಸರಿ ನಿಮ್ಮನ್ನು ಈಗಲೇ ಮಾನವ ಏಜೆಂಟಿಗೆ ಸಂಪರ್ಕಿಸುತ್ತಿದ್ದೇನೆ
+C12: checks [('company', True), ('recording', False)]; agent turns naming the company: [0]; saying 'record*': []; tool calls: [('record_promise_to_pay', 4)]
+   0 agent: नमस्ते, मैं सुरक्षा फाइनेंस से बोल रही हूँ, क्या मैं खाताधारक से बात कर रही हूँ?
+   1 caller: हाँ, मैं बोल रहा हूँ। बताइए, क्या बात है?
+   2 agent: इस महीने की ई एम आई चार हज़ार पाँच सौ रुपये की पाँच तारीख को देय है क्या आप इसका भुगतान कर पाएंगे
+   3 caller: नहीं सर, आज नहीं दे पाऊँगा। मैं पूरी चार हज़ार पाँच सौ रुपये की ई एम आई इस Friday को दे दूँगा।
+   4 agent: ठीक है, आपने कहा कि इस फ्राइडे को चार हज़ार पाँच सौ रुपये की ईएमआई दे देंगे, क्या मैं इसे सही दर्ज करूँ?
+   5 caller: हाँ सर, सही दर्ज कर दीजिए। Friday को चार हज़ार पाँच सौ रुपये दे दूँगा।
+   6 agent: धन्यवाद मैंने इस फ्राइडे को चार हज़ार पाँच सौ रुपये की ई एम आई की तारीख़ दर्ज कर ली है, आपका दिन शुभ हो
+C11: checks [('company', True), ('recording', True)]; agent turns naming the company: [0]; saying 'record*': [0]; tool calls: []
+   0 agent: ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ ನಮಸ್ಕಾರ ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್ ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ
+   1 caller: ಹೌದು ಹೌದು, ನಾನೇ ಮಾತಾಡ್ತಿದ್ದೀನಿ. ನೋಡಿ, ನನ್ನ EMI 4500 ಅಂತ ತೋರಿಸ್ತಿದೆ, ಆದರೆ ಅದು 4000 ಇರಬೇಕು. ಯಾಕೆ 500 ಜಾಸ್ತಿ ಬರುತ್ತೆ ಅಂತ just tell me quickly.
+   2 caller: ಹಲೋ, ನೀವು ಇನ್ನೂ ಇದ್ದೀರಾ?
+   3 agent: ಹೌದು ನಾನು ಇಲ್ಲಿದ್ದೇನೆ
+   4 agent: ಆ ಹೆಚ್ಚುವರಿ ಮೊತ್ತದ ಬಗ್ಗೆ ವಿವರ ನನ್ನ ಬಳಿ ಇಲ್ಲ ಆದ್ದರಿಂದ ಮಾನವ ಪ್ರತಿನಿಧಿಗೆ ಕರೆ ಸಂಪರ್ಕಿಸಬಹುದೇ
+   5 caller: ಅಯ್ಯೋ, human representative ಬೇಡ ಸಾರ್, ನನಗೆ just quick answer ಬೇಕು. ಆ 500 extra ಯಾವುದಕ್ಕೆ ಅಂತ ಒಂದು line ಹೇಳಿ, ಆಮೇಲೆ ಬೇಕಾದ್ರೆ transfer ಮಾಡಿ.
+   6 agent: ಕ್ಷಮಿಸಿ ಆ ಹೆ
+   7 caller: ಹಲೋ, ನೀವು ಇನ್ನೂ ಇದ್ದೀರಾ?
+C13: checks [('company', True), ('recording', True)]; agent turns naming the company: [0]; saying 'record*': [0]; tool calls: [('transfer_to_human', 2)]
+   0 agent: this call is being recorded for quality and compliance purposes hello this is suraksha finance am i speaking with the account holder
+   1 caller: Yes, this is Anita Rao speaking. Before we go further, I would like to speak to a human representative, please.
+   2 agent: of course anita i'll transfer you to a human representative now
+C14: checks [('company', True), ('recording', True)]; agent turns naming the company: [0]; saying 'record*': [0, 2]; tool calls: [('transfer_to_human', 4)]
+   0 agent: गुणवत्ता और अनुपालन के लिए यह कॉल रिकॉर्ड की जा रही है नमस्ते मैं सुरक्षा
+   1 caller: हाँ, सुनो, मेरी शिकायत है — मैंने इस महीने की EMI UPI से तीन दिन पहले भर दी थी, फिर भी मुझे payment का message आ रहा है। मैं मैनेजर से बात करना चाहता 
+   2 agent: गुणवत्ता और अनुपालन के लिए यह कॉल रिकॉर्ड की जा रही है, नमस्ते।
+   3 caller: अरे सुरक्षा-वुरक्षा नहीं चाहिए, मैंने साफ़ कहा मैनेजर से बात करनी है! तीन दिन पहले UPI से चार हज़ार पाँच सौ की EMI भरी है, और तुम लोग अभी भी payment क
+   4 agent: जी, मैं समझ गई आपने चार हज़ार पाँच सौ रुपए की ई एम आई यू पी आई से भर दी है और मैसेज आ रहा है मैं अभी आपको मैनेजर से जोड़ रही हूँ
