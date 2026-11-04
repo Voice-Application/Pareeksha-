@@ -29,6 +29,7 @@ steps=("$@"); [ ${#steps[@]} -gt 0 ] || [ $report_only = 1 ] || steps=(1 2 3 4 5
 fail=0
 for n in "${steps[@]}"; do
   echo "== V$n: ${TITLE[$n]}"
+  rm -f "proof/verify/V$n.md"  # a step that dies before begin() must not leave its old result standing
   scripts/verify/${SCRIPT[$n]} | tail -3
   [ "${PIPESTATUS[0]}" -eq 0 ] || fail=1
 done
@@ -42,7 +43,9 @@ head=$(git rev-parse --short HEAD)
 last_run() {
   [ -f "proof/verify/V$1.md" ] || { echo "no evidence file"; return; }
   local at sha; read -r at sha < <(evidence "$1" | sed -n 's/^Run at \(.*\) on commit \(.*\)$/\1 \2/p' | head -1)
-  if [ "$sha" = "$head" ]; then echo "$at, re-run on this commit"; else echo "not re-run; last run $at on $sha"; fi
+  if [ "$sha" != "$head" ]; then echo "not re-run; last run $at on $sha"
+  elif evidence "$1" | grep -q '^REASON:.*not re-run here'; then echo "$at on this commit: recorded evidence re-checked, not re-run"
+  else echo "$at, re-run on this commit"; fi
 }
 
 {

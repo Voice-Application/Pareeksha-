@@ -40,7 +40,7 @@ State values: todo / doing / blocked / review / done. Verified = QA sign-off (`y
 | FE-03 | Runs list, new-run wizard, live run detail (SSE), heatmap | FE | FE-02, API-04 | done | — | proof/FE-03/verified.md |
 | QA-03 | Planted-bug test: at least 4 of 5 caught | QA | VOICE-05, EVAL-03 | done | — | proof/QA-03/verified.md |
 | H-02 | ≥ 20 consented clips per dialect group | Preetham (human) | — | replaced by owner decision 2026-10-30: Vaani (CC-BY-4.0) via DIALECT-02; merged 2026-11-02 on verifier PASS (owner waived spot-check) | proof/DIALECT-02 | no |
-| EVAL-05 | Dialect pipeline: WER/CER, entity accuracy, HTML report | EVAL | EVAL-03 | done (real dialect clips pending H-02) | — | proof/EVAL-05/verified.md |
+| EVAL-05 | Dialect pipeline: WER/CER, entity accuracy, HTML report | EVAL | EVAL-03 | done (real dialect run: DIALECT-02, Vaani) | — | proof/EVAL-05/verified.md |
 | VOICE-06 | Pipecat adapter + serializer + example (Must); LiveKit (Should) | VOICE | VOICE-04 | done (LiveKit/Vapi cut by owner 2026-10-28, see CHANGELOG) | — | proof/VOICE-06/verified.md |
 | INT-04 | `pareeksha-sdk` + CLI, `pareeksha.yaml`, GitHub Action | INT | TL-01 | done | — | proof/INT-04/verified.md |
 | API-05 | Regression promote/suite, calibration, scenario generation | BE-API | EVAL-03 | done | — | proof/API-05/verified.md |
