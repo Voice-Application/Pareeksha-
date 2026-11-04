@@ -1,0 +1,1 @@
+`calibration.json` and `calibration.md` are copied unchanged from `task/EVAL-06` at 7d347ba so the results cited in the README and FINAL_REPORT are in this tree. The full proof, labels and database dump are on that branch, which is not merged.

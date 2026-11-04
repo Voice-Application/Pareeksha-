@@ -6,7 +6,7 @@
 cd "$(dirname "$0")/../.." && source scripts/verify/lib.sh
 begin 9 "Judge vs Preetham labels on 30 calls: Cohen's kappa >= 0.6"
 $PY - <<'PYEOF' | tee "$OUT/V9.json" | block
-import json, os, sys
+import hashlib, json, os, sys
 sys.path.insert(0, "scripts/verify")
 import vapi
 def kappa(p):
@@ -25,7 +25,9 @@ except (Exception, SystemExit) as exc:
     source = f"database not reachable ({type(exc).__name__})"
 if len(pairs) < 30:
     path = "proof/EVAL-06/calibration.json"
-    rec = json.load(open(path, encoding="utf-8")) if os.path.exists(path) else None
+    # the recorded result counts only while it is the file task/EVAL-06 7d347ba produced
+    raw = open(path, encoding="utf-8").read().encode() if os.path.exists(path) else b""  # text mode: same hash on CRLF checkouts
+    rec = json.loads(raw) if hashlib.sha256(raw).hexdigest() == "21d3cca3844cd14a71c084357158f5d9b7176cd4843ea240e2b72c9e8d76464c" else None
     if not rec or rec["interim"] or rec["labelled"] < 30:
         print(json.dumps({"source": source, "labelled_pairs_in_db": len(pairs), "recorded_run": path if rec else None}, indent=1))
         sys.exit(2)
@@ -40,9 +42,9 @@ if mine is None or api_kappa is None or abs(mine - api_kappa) >= 0.02: sys.exit(
 sys.exit(0 if cal.get("n", 0) >= 30 and api_kappa >= 0.6 else 4)
 PYEOF
 rc=${PIPESTATUS[0]}
-[ "$rc" -eq 2 ] && finish PENDING "fewer than 30 human-labelled calls in this database and no final recorded run"
+[ "$rc" -eq 2 ] && finish PENDING "fewer than 30 human-labelled calls in this database and no unchanged final recorded run"
 if [ "$rc" -eq 0 ] || [ "$rc" -eq 3 ] || [ "$rc" -eq 4 ]; then
-  m=$($PY -c "import json; d = json.load(open('proof/verify/V9.json')); print(d['api']['kappa_pass_fail'], 'on n =', d['api']['n'], '(recorded EVAL-06 run, not re-run here)' if d['source'].startswith('recorded') else '')")
+  m=$($PY -c "import json; d = json.load(open('proof/verify/V9.json')); print(d['api']['kappa_pass_fail'], 'on n =', d['api']['n'], '(recorded EVAL-06 run, not re-run here)' if d['source'].startswith('recorded') else '')"); m=${m% }
 fi
 [ "$rc" -eq 0 ] && finish PASS "kappa $m meets the target, recomputed independently"
 [ "$rc" -eq 3 ] && finish FAIL "API and recomputed kappa disagree or are undefined: $m"

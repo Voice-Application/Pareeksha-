@@ -14,7 +14,7 @@ if reports=$(psql_q "SELECT count(*) FROM dialect_reports" 2>/dev/null); then db
 if [ "${reports:-0}" -gt 0 ]; then
   source=db; note "Source: newest report in the database ($db)."
 elif head -1 proof/DIALECT-02/verified.md 2>/dev/null | grep -q 'verified: PASS' && [ -f "$art/report.json" ] \
-     && git diff --quiet "$verified_sha" -- "$art/report.json" "$art/report.html" "$art/usage.json" 2>/dev/null; then
+     && git diff --quiet "$verified_sha" -- proof/DIALECT-02/verified.md "$art/report.json" "$art/report.html" "$art/usage.json" 2>/dev/null; then
   source=artefact; note "Source: the verifier's run in $art, unchanged since $verified_sha (proof/DIALECT-02/verified.md). Not re-run here ($db); the live run needs the dialect worker plus Gnani and DeepSeek keys."
 else
   note "No dialect report in the database ($db) and no unchanged verified run in $art."
