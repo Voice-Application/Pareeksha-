@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # V9 (FR-EV-7, FR-EV-8, NFR-6, NFR-7): judge vs Preetham's labels on 30 calls: n = 30, Cohen's kappa >= 0.6, and kappa
-# recomputed independently from the exported labels. The labels are the owner's; PENDING until 30 exist.
+# recomputed independently from the exported labels. The labels are the owner's; PENDING while this database has fewer
+# than 30. The final EVAL-06 labels are in proof/EVAL-06/pareeksha_db.sql.gz on task/EVAL-06 (restore steps in its proof.md).
 cd "$(dirname "$0")/../.." && source scripts/verify/lib.sh
 begin 9 "Judge vs Preetham labels on 30 calls: Cohen's kappa >= 0.6"
 $PY - <<'PYEOF' | tee "$OUT/V9.json" | block
@@ -27,5 +28,5 @@ sys.exit(0 if ok else 1)
 PYEOF
 rc=${PIPESTATUS[0]}
 [ "$rc" -eq 0 ] && finish PASS "kappa >= 0.6 on >= 30 labelled calls, recomputed independently"
-[ "$rc" -eq 2 ] && finish PENDING "fewer than 30 human-labelled calls (EVAL-06 needs Preetham's labels)"
+[ "$rc" -eq 2 ] && finish PENDING "fewer than 30 human-labelled calls in this database; restore the EVAL-06 dump to measure"
 finish FAIL "kappa below 0.6 or API/recomputed values disagree"

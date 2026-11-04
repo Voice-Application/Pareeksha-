@@ -24,8 +24,9 @@ if [ -f "$rel" ]; then
     code=$(curl -s -o /dev/null -w '%{http_code}' -L "$u"); note "$u -> $code"
     [ "$code" = 200 ] || problems+=("$u returned $code")
   done
-  grep -Eqi 'youtu|loom|vimeo|video' "$rel" || problems+=("release.md has no demo video link")
-  grep -Eqi 'launch|post|linkedin|blog' "$rel" || problems+=("release.md has no launch post link")
+  # the line must carry a URL: the template's "Demo video link: (not published yet)" is not a link
+  grep -Ei 'youtu|loom|vimeo|video' "$rel" | grep -Eq 'https?://' || problems+=("release.md has no demo video link")
+  grep -Ei 'launch|post|linkedin|blog' "$rel" | grep -Eq 'https?://' || problems+=("release.md has no launch post link")
 else
   pending+=("$rel missing: demo video and launch post not recorded")
 fi
