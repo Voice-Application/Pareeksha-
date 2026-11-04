@@ -34,7 +34,7 @@ class Shot:
     """One browser context with video; `t()` is seconds since the clip started."""
     def __init__(self, pw, name, url):
         self.name = name
-        self.browser = pw.chromium.launch(executable_path="/opt/pw-browsers/chromium", args=["--no-sandbox"])
+        self.browser = pw.chromium.launch(executable_path="/opt/pw-browsers/chromium", args=["--no-sandbox"], proxy=({"server": os.environ["HTTPS_PROXY"], "bypass": "localhost,127.0.0.1"} if os.environ.get("HTTPS_PROXY") else None))
         self.ctx = self.browser.new_context(viewport={"width": 1920, "height": 1080}, device_scale_factor=1,
                                             record_video_dir=str(OUT / "_tmp"), record_video_size={"width": 1920, "height": 1080})
         self.page = self.ctx.new_page(); self.t0 = time.time(); self.ev = {}
@@ -130,22 +130,24 @@ def shot_audit(pw):
     s.pause(3); s.scroll(500); s.pause(3); s.end()
 
 
-def hubspot_setup():
-    """Real HubSpot integration + one signed webhook delivery of the same recording with the synthetic phone."""
-    agent = next(a for a in api("GET", "/agents?limit=100")["items"] if a["name"] == "EMI Reminder Bot")
-    secret = uuid.uuid4().hex
-    inb = api("POST", "/integrations", {"connector": "webhook", "name": "demo-inbound",
-        "config": {"url": "https://example.com/sink", "events": ["evaluation.completed"], "default_agent_id": agent["id"]},
-        "secrets": {"signing_secret": secret}})
-    hub = api("POST", "/integrations", {"connector": "hubspot", "name": "HubSpot (demo)",
-        "config": {"match_by": "phone", "only_failed": False}, "secrets": {"private_app_token": os.environ["HUBSPOT_ACCESS_TOKEN"]}})
-    # recording served over the local web host is private; use a public-less local https? -> see recording.md
-    return agent, inb, hub
+def shot_hubspot(pw):
+    """HubSpot app login is not available in the sandbox: show the live integration's delivery log instead."""
+    h = json.loads((ROOT / "proof/DOC-03/hubspot.json").read_text())
+    s = Shot(pw, "07_hubspot", WEB + "/")
+    s.click(s.page.get_by_role("link", name="Integrations", exact=True)); s.pause(1.5)
+    s.click(s.page.get_by_role("link", name="HubSpot (demo)")); s.pause(2.5)
+    s.click(s.page.get_by_role("button", name="Deliveries").or_(s.page.get_by_text("Deliveries").first)); s.pause(4.0); s.end()
+
+
+def shot_github(pw):
+    s = Shot(pw, "08_github", "https://github.com/Voice-Application/Pareeksha-/actions/runs/41097075186")
+    s.pause(3.0); s.mark("red"); s.scroll(300); s.pause(2.5)
+    s.page.goto("https://github.com/Voice-Application/Pareeksha-/actions/runs/41102511599"); s.pause(3.5); s.mark("green"); s.scroll(300); s.pause(2.5); s.end()
 
 
 if __name__ == "__main__":
     shots = {"runs": shot_runs, "call": shot_call, "promote": shot_promote, "compare": shot_compare,
-             "dialect": shot_dialect, "audit": shot_audit}
+             "dialect": shot_dialect, "audit": shot_audit, "hubspot": shot_hubspot, "github": shot_github}
     want = sys.argv[1:] or list(shots)
     with sync_playwright() as pw:
         for n in want: shots[n](pw); print("recorded", n, flush=True)
