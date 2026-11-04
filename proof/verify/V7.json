@@ -12,10 +12,11 @@
  "cells_without_ci": 0,
  "min_n": 22,
  "clips_without_consent": 0,
- "html_path": "proof/DIALECT-02/report.html",
+ "html_path": "proof/DIALECT-02/verifier/report.html",
  "db_samples_total_and_consented_recorded_by_run": [
   110,
   110
  ],
+ "html_ok": true,
  "ok": true
 }
