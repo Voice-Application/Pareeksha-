@@ -98,6 +98,7 @@ The mock agent now skips the recording disclosure, so the run reports a failed c
 | Symptom | Fix |
 |---|---|
 | `kafka` unhealthy | Give Docker at least 4 GB RAM; `docker compose logs kafka` |
+| `kafka-init` fails with `set: pipefail: invalid option name`, or `migrate` with `Can't locate revision identified by 'head'` | The scripts have CRLF line endings (a Windows clone from before `.gitattributes` forced LF). Check them out again and rebuild: `rm infra/kafka/create-topics.sh backend/alembic_migrate.sh && git checkout -- infra/kafka/create-topics.sh backend/alembic_migrate.sh && docker compose --profile workers up -d --build` |
 | `pareeksha doctor` 401 | the key in `.env` is not the one that was seeded; run the seed again after fixing `PAREEKSHA_API_KEY` |
 | Calls end in `error` with 429 | Gnani allows one active request per key; set `SIMULATOR_REPLICAS=1` and run one call at a time |
 | `docker pull` 429 from Docker Hub | log in (`docker login`) or pull through a mirror |

@@ -1,2 +1,7 @@
 NOTES.md merge=union
 CHANGELOG.md merge=union
+
+# Keep LF on Windows (core.autocrlf=true): these run or are hashed inside Linux containers.
+*.sh text eol=lf
+# prompt_hash() is the sha256 of the raw template bytes.
+*.j2 text eol=lf
