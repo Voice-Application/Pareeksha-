@@ -25,3 +25,6 @@ data/runtime/
 htmlcov/
 .venv-verify/
 .tools/
+
+# Launch video output
+brag-output/
