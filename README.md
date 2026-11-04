@@ -18,7 +18,7 @@ pareeksha run --agent "EMI Reminder Bot" --tags promise_to_pay --persona "Manju 
 ```
 Then open <http://localhost:3000> for the call: transcript, waveform, judge scores with evidence.
 
-Providers: LLM is DeepSeek by default (`LLM_PROVIDER=gemini` for Gemini); speech is Gnani by default (`STT_PROVIDER` / `TTS_PROVIDER` may be `google`, `azure`, `elevenlabs` or `deepgram`; those four are implemented but not yet verified against the live services).
+Providers: LLM is DeepSeek by default (`LLM_PROVIDER=gemini` for Gemini); speech is Gnani by default (`STT_PROVIDER` / `TTS_PROVIDER` may be `google`, `azure`, `elevenlabs` or `deepgram`; ElevenLabs and Deepgram have passed a live smoke test; Google and Azure have not been run against the live services).
 
 ## Architecture
 ```mermaid
@@ -52,10 +52,10 @@ Details: [docs/04-system-design.md](docs/04-system-design.md).
 
 ## Limitations
 - Gnani allows one active request per key, so simulated calls are real time and effectively serial per key; a 12-call run takes tens of minutes.
-- Only Gnani is verified live among speech providers; Google, Azure, ElevenLabs and Deepgram adapters await keys. LiveKit and Vapi adapters are not built; Salesforce, Zoho, LeadSquared, Freshdesk, Exotel and Slack connectors are designed for, not built (Guide 7 shows how).
-- The HubSpot sink is tested against mocked HubSpot APIs; a live portal test needs an owner-provided token.
-- Dialect results need consented clips (H-02); the dialect heatmap in `proof/EVAL-05/report.html` comes from a small synthetic set and says nothing about real dialect error rates.
-- The judge is an LLM: scores are calibrated against labelled calls, not ground truth. Treat a single score as a signal and read the evidence.
+- Gnani is the only speech provider used in full evaluated runs. ElevenLabs and Deepgram passed a live smoke test only, one TTS and one STT call each (`proof/VOICE-07/verified-live.md`). Google and Azure have not been run against the live services (no keys). LiveKit and Vapi adapters are not built; Salesforce, Zoho, LeadSquared, Freshdesk, Exotel and Slack connectors are designed for, not built (Guide 7 shows how).
+- The HubSpot sink's test suite uses mocked HubSpot APIs. Live acceptance ran against a real portal with synthetic contacts: a note 15.1 s after the signed POST (`proof/verify/V5.md`) and 20.1 s in the independent run (`proof/LIVE-ACCEPT/verified.md`). Repeating it needs an owner-provided token.
+- Dialect results come from 110 Vaani clips (CC-BY-4.0): 5 groups, 22 clips each, 3 audio conditions, through Gnani Prisma only (`proof/DIALECT-02/report.html`). The sample is small. Kannada WER is inflated by Vaani's colloquial spellings, so compare groups with each other and prefer CER and intent. Groups are the speaker's district of residence, and nobody has listened to the clips to confirm accents (owner spot-check waived). The older heatmap in `proof/EVAL-05/report.html` comes from a small synthetic set and says nothing about real dialect error rates.
+- The judge is an LLM and misses its calibration target: Cohen's kappa against the owner's pass/fail labels on 30 calls is 0.19 (95% CI -0.14 to 0.52), below the 0.6 target, with `rubric-2026-10-v1` (`proof/EVAL-06/calibration.md`). Treat a single score as a signal and read the evidence.
 - Single-node Kafka and Postgres in Compose: fine for a team, not an HA deployment. Behind a TLS-intercepting proxy use `docker-compose.proxy.yml`.
 
 ## Contributing and agents

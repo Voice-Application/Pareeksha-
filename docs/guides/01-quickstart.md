@@ -30,7 +30,7 @@ Later lines in `.env` win, so you can also append both lines instead of editing.
 
 **Choosing providers (all in `.env`):**
 - LLM: `LLM_PROVIDER=deepseek` (default; needs `DEEPSEEK_API_KEY`) or `LLM_PROVIDER=gemini` (needs `GEMINI_API_KEY`, `GEMINI_JUDGE_MODEL`, `GEMINI_CALLER_MODEL`).
-- Speech: `STT_PROVIDER` / `TTS_PROVIDER` = `gnani` (default) | `google` | `azure` | `elevenlabs` | `deepgram`. Only Gnani is verified live today; the other four are implemented and unit-tested but their keys are pending, so treat them as untested against the real services. Each provider's variables are in `.env.example`.
+- Speech: `STT_PROVIDER` / `TTS_PROVIDER` = `gnani` (default) | `google` | `azure` | `elevenlabs` | `deepgram`. Gnani is the only one used in full evaluated runs. ElevenLabs and Deepgram passed a live smoke test only (`proof/VOICE-07/verified-live.md`); Google and Azure are implemented and unit-tested but have not been run against the real services. Each provider's variables are in `.env.example`.
 
 **Port clashes:** if 3000, 5432, 8000, 8765 or 9094 are taken, set `WEB_HOST_PORT`, `POSTGRES_HOST_PORT`, `API_HOST_PORT`, `MOCK_AGENT_HOST_PORT` or `KAFKA_HOST_PORT` in `.env`. Use `COMPOSE_PROJECT_NAME=<name>` to keep a second copy apart.
 
