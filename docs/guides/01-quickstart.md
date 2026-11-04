@@ -93,6 +93,8 @@ pareeksha run --agent "EMI Reminder Bot" --tags promise_to_pay --persona "Manju 
 
 The mock agent now skips the recording disclosure, so the run reports a failed call. Other bugs: `no_amount_confirm`, `english_to_kannada`, `ignore_interrupt`, `false_waiver` (comma-separate to combine). Remove the line and `docker compose up -d mock-agent` to restore.
 
+The mock agent's voice detection goes by loudness, so on `auto_rickshaw_0db` it can stop answering and the call ends `agent_silent`. That is a limit of the mock, not a finding about a real bot: see [its README](../../mock_agent/README.md#noisy-lines).
+
 ## Troubleshooting
 
 | Symptom | Fix |
