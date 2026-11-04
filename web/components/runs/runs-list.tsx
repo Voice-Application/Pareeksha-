@@ -60,7 +60,7 @@ export function PassRateCell({ run }: { run: Run }) {
   const pct = Math.round(pr * 100);
   return (
     <span className="inline-flex items-center gap-2">
-      <span className="mono w-9 text-right">{pct}%</span>
+      <span className="num w-10 text-right">{pct}%</span>
       <Meter value={pct} passLine={null} label={`Pass rate ${pct}%`} />
     </span>
   );

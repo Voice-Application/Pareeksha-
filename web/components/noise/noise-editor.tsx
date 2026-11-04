@@ -255,7 +255,7 @@ export function NoiseEditor({
             {profile ? "Save changes" : "Create profile"}
           </Button>
           {mode === "page" ? (
-            <Link href="/noise-profiles" className="inline-flex h-8 items-center px-3 text-sm text-muted hover:text-fg">
+            <Link href="/noise-profiles" className="inline-flex h-9 items-center px-3 text-sm text-muted hover:text-fg">
               Cancel
             </Link>
           ) : (

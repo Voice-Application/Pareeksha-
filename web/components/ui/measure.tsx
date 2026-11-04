@@ -31,7 +31,7 @@ export function ScoreChip({ score, kind = "overall", className }: { score: numbe
   const none = score === null || score === undefined;
   const step = none ? null : kind === "overall" ? overallStep(score) : dimensionStep(score);
   return (
-    <span style={stepStyle(step)} className={cn("mono inline-flex h-5 min-w-8 items-center justify-center rounded-xs px-1.5 text-xs font-medium", className)} title={none ? "Not scored" : undefined}>
+    <span style={stepStyle(step)} className={cn("num inline-flex h-6 min-w-11 items-center justify-center rounded-xs px-2 text-xs font-semibold", className)} title={none ? "Not scored" : undefined}>
       {none ? "-" : kind === "dimension" ? `${score}/4` : fmtScore(score)}
     </span>
   );
@@ -47,7 +47,7 @@ export function verdictOf(e: { passed?: boolean | null; critical_failure?: boole
 export function VerdictBadge({ verdict, size = "sm" }: { verdict: Verdict | null; size?: "sm" | "md" }) {
   if (!verdict) return <span className="text-subtle" title="Not scored">-</span>;
   const big = size === "md";
-  const base = cn("inline-flex items-center gap-1 rounded-xs font-medium", big ? "h-7 px-2.5 text-sm" : "h-5 px-1.5 text-xs");
+  const base = cn("inline-flex items-center gap-1 rounded-pill font-medium whitespace-nowrap", big ? "h-8 px-3 text-sm" : "h-6 px-2 text-xs");
   const sz = big ? 16 : 14;
   if (verdict === "critical")
     return (
@@ -76,12 +76,12 @@ export function FlagChip({ reasons, iconOnly = false, label = "Needs human revie
   const title = reasons?.length ? reasons.join(", ") : label;
   if (iconOnly)
     return (
-      <span title={title} aria-label={`${label}${reasons?.length ? `: ${reasons.join(", ")}` : ""}`} className="inline-flex h-5 w-5 items-center justify-center rounded-xs border border-border-strong text-warn-fg" role="img">
+      <span title={title} aria-label={`${label}${reasons?.length ? `: ${reasons.join(", ")}` : ""}`} className="inline-flex h-6 w-6 items-center justify-center rounded-pill bg-warn-tint text-warn-fg" role="img">
         <Flag size={12} strokeWidth={1.6} aria-hidden />
       </span>
     );
   return (
-    <span className="inline-flex h-7 items-center gap-1.5 rounded-xs border border-border-strong px-2.5 text-sm">
+    <span className="inline-flex h-8 items-center gap-1.5 rounded-pill bg-warn-tint px-3 text-sm text-warn-fg">
       <Flag size={14} strokeWidth={1.6} className="text-warn-fg" aria-hidden />
       {label}
     </span>
@@ -152,7 +152,7 @@ export function Meter({ value, max = 100, passLine = 80, width = 56, label }: { 
   const pct = value === null || value === undefined ? 0 : Math.max(0, Math.min(100, (value / max) * 100));
   const step = value === null || value === undefined ? null : overallStep((value / max) * 100);
   return (
-    <span role="img" aria-label={label} className="relative inline-block h-2 rounded-full bg-sunken align-middle ring-1 ring-inset ring-border-strong" style={{ width }}>
+    <span role="img" aria-label={label} className="relative inline-block h-2 rounded-full border border-border-strong bg-sunken align-middle" style={{ width }}>
       <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${pct}%`, background: step ? `var(--score-${step})` : "transparent" }} />
       {passLine !== null && <span className="absolute -inset-y-0.5 w-0.5 bg-fg" style={{ left: `${(passLine / max) * 100}%` }} aria-hidden />}
     </span>
@@ -178,7 +178,7 @@ export function ProgressBar({ done, total, label }: { done: number; total: numbe
       <span role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={total} aria-valuenow={done} className="h-1 w-full min-w-12 overflow-hidden rounded-xs bg-sunken">
         <span className="block h-full bg-accent" style={{ width: `${pct}%` }} />
       </span>
-      <span className="mono whitespace-nowrap text-xs text-muted">
+      <span className="num whitespace-nowrap text-xs text-muted">
         {done}/{total}
       </span>
     </span>
@@ -186,15 +186,16 @@ export function ProgressBar({ done, total, label }: { done: number; total: numbe
 }
 
 export type Threshold = "ok" | "warn" | "fail" | null;
+/** One figure in a ruled tally: the label above in the body face, the figure in the display face, a muted caption. */
 export function StatTile({ label, value, caption, threshold = null, hero = false, href }: { label: string; value: ReactNode; caption?: ReactNode; threshold?: Threshold; hero?: boolean; href?: string }) {
   const Icon = threshold === "ok" ? CircleCheck : threshold === "warn" ? TriangleAlert : threshold === "fail" ? CircleX : null;
   const tone = threshold === "ok" ? "text-pass-fg" : threshold === "warn" ? "text-warn-fg" : threshold === "fail" ? "text-fail-fg" : "";
   return (
-    <div className={cn("relative flex min-w-0 flex-col gap-0.5 px-4 py-3", href && "hover:bg-hover")}>
-      <dt className="eyebrow">{href ? <Link href={href} className="after:absolute after:inset-0">{label}</Link> : label}</dt>
-      <dd className="flex flex-col gap-0.5">
-        <span className={cn("mono flex items-center gap-1.5 font-medium", hero ? "text-2xl" : "text-lg", tone)}>
-          {Icon && <Icon size={16} strokeWidth={1.6} aria-label={threshold === "ok" ? "meets target" : threshold === "warn" ? "near target" : "misses target"} role="img" />}
+    <div className={cn("group relative flex min-w-0 flex-col gap-1 px-5 py-4", href && "hover:bg-hover")}>
+      <dt className="label truncate">{href ? <Link href={href} className="after:absolute after:inset-0 group-hover:text-fg">{label}</Link> : label}</dt>
+      <dd className="flex min-w-0 flex-col gap-1">
+        <span className={cn("display num flex min-w-0 items-center gap-2 truncate", hero ? "text-2xl" : "text-xl", tone)}>
+          {Icon && <Icon size={hero ? 24 : 20} strokeWidth={1.6} className="shrink-0" aria-label={threshold === "ok" ? "meets target" : threshold === "warn" ? "near target" : "misses target"} role="img" />}
           {value}
         </span>
         {caption && <span className="text-xs text-subtle">{caption}</span>}
@@ -203,10 +204,12 @@ export function StatTile({ label, value, caption, threshold = null, hero = false
   );
 }
 
-/** A row of StatTiles separated by hairlines (MetaStrip-style dl). */
+/** A ruled tally: figures parted by hairlines between a rule above and below, no box. The first column sits flush with the page. */
 export function TileRow({ children, cols }: { children: ReactNode; cols?: string }) {
   return (
-    <dl className={cn("mb-6 grid divide-x divide-border overflow-hidden rounded-md border border-border bg-surface max-[860px]:grid-cols-2 max-[860px]:divide-x-0", cols ?? "grid-cols-2 min-[860px]:grid-cols-3 min-[1180px]:grid-cols-6")}>{children}</dl>
+    <div className="mb-8 overflow-clip border-y border-border">
+      <dl className={cn("-mt-px -ml-[21px] grid w-[calc(100%+21px)] [&>*]:border-t [&>*]:border-l [&>*]:border-border", cols ?? "grid-cols-2 min-[1180px]:grid-cols-6")}>{children}</dl>
+    </div>
   );
 }
 
@@ -231,7 +234,7 @@ export const failureTypeCopy: Record<string, string> = {
 export function TagChip({ tag, level = "fail", count, turn, onTurn }: { tag: string; level?: "fail" | "warn"; count?: number; turn?: number; onTurn?: (n: number) => void }) {
   const Icon = level === "fail" ? CircleX : TriangleAlert;
   return (
-    <span title={failureTypeCopy[tag] ?? tag} className={cn("mono inline-flex h-6 items-center gap-1 rounded-xs border px-1.5 text-xs", level === "fail" ? "border-fail bg-fail-tint text-fail-fg" : "border-warn bg-warn-tint text-warn-fg")}>
+    <span title={failureTypeCopy[tag] ?? tag} className={cn("mono inline-flex h-6 items-center gap-1 rounded-xs px-2 text-2xs", level === "fail" ? "bg-fail-tint text-fail-fg" : "bg-warn-tint text-warn-fg")}>
       <Icon size={12} strokeWidth={1.6} aria-hidden />
       {tag}
       {count !== undefined && count > 1 && <span className="text-muted">x{count}</span>}
@@ -242,7 +245,7 @@ export function TagChip({ tag, level = "fail", count, turn, onTurn }: { tag: str
 
 /** Mono #n button: seeks audio and scrolls the transcript on the call page. */
 export function EvidenceRef({ turn, onSeek, href }: { turn: number; onSeek?: (n: number) => void; href?: string }) {
-  const cls = "mono inline-flex h-5 min-w-6 items-center justify-center rounded-xs border border-border-strong bg-surface px-1 text-xs text-accent-fg hover:bg-hover";
+  const cls = "mono inline-flex h-6 min-w-7 items-center justify-center rounded-xs border border-border-strong bg-surface px-1 text-2xs text-accent-fg hover:bg-hover active:translate-y-px";
   if (href)
     return (
       <a href={href} className={cls} aria-label={`Evidence turn ${turn}`}>

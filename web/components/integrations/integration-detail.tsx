@@ -62,8 +62,8 @@ function Deliveries({ id }: { id: string }) {
       <Sheet open={!!open} onClose={() => setOpen(null)} title="Delivery">
         {open && (
           <div className="flex flex-col gap-3 text-sm">
-            <dl className="grid grid-cols-2 gap-3"><div><dt className="eyebrow">Event id</dt><dd className="mono break-all">{open.event_id}</dd></div><div><dt className="eyebrow">Status</dt><dd><DeliveryStatus s={open.status} /></dd></div><div><dt className="eyebrow">HTTP</dt><dd className="mono">{open.http_status ?? "-"}</dd></div><div><dt className="eyebrow">Attempts</dt><dd className="mono">{open.attempts}</dd></div></dl>
-            <div><p className="eyebrow mb-1">Response excerpt</p><CodeBlock label="response excerpt" text={open.response_excerpt || "(empty)"} max={500} /></div>
+            <dl className="grid grid-cols-2 gap-3"><div><dt className="label">Event id</dt><dd className="mono break-all">{open.event_id}</dd></div><div><dt className="label">Status</dt><dd><DeliveryStatus s={open.status} /></dd></div><div><dt className="label">HTTP</dt><dd className="mono">{open.http_status ?? "-"}</dd></div><div><dt className="label">Attempts</dt><dd className="mono">{open.attempts}</dd></div></dl>
+            <div><p className="label mb-1">Response excerpt</p><CodeBlock label="response excerpt" text={open.response_excerpt || "(empty)"} max={500} /></div>
           </div>
         )}
       </Sheet>

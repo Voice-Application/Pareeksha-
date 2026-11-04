@@ -78,7 +78,7 @@ export function Heatmap({ items, line, sortBy, flashIds, runKey }: { items: RunI
 }
 
 function HeatCell({ cell, r, c, ri, ci, onKey, flash, runKey }: { cell?: Cell; r: string; c: string; ri: number; ci: number; onKey: (e: React.KeyboardEvent, r: number, c: number) => void; flash: boolean; runKey: string }) {
-  const base = cn("relative flex h-10 min-w-14 items-center justify-center rounded-xs mono text-sm font-medium outline-offset-2", flash && "flash-in");
+  const base = cn("relative flex h-10 min-w-14 items-center justify-center rounded-xs num text-sm font-semibold outline-offset-2", flash && "flash-in");
   const dn = { "data-cell": `${ri}-${ci}`, role: "gridcell" as const, onKeyDown: (e: React.KeyboardEvent) => onKey(e, ri, ci), tabIndex: ri === 0 && ci === 0 ? 0 : -1 };
   const it = cell?.shown;
   if (!it) return <div {...dn} className={base} style={stepStyle(null)} aria-label={`Scenario ${r}, persona ${c}, no call planned`}><Minus size={14} aria-hidden /></div>;
@@ -130,7 +130,7 @@ export function HeatmapLegend() {
       {items.map(([n, label]) => (
         <span key={n} className="inline-flex items-center gap-1.5">
           <span className="h-3 w-5 rounded-xs" style={stepStyle(n as 1 | 2 | 3 | 4 | 5)} aria-hidden />
-          <span className="mono">{label}</span>
+          <span className="num">{label}</span>
           {n === 3 && <span className="ml-1 inline-block h-3.5 w-0.5 bg-fg" title="Pass line at 80" aria-hidden />}
         </span>
       ))}

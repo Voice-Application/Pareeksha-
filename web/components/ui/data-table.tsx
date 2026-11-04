@@ -60,7 +60,7 @@ export function DataTable<T>({
   actions?: (row: T) => ReactNode;
 }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="relative overflow-x-auto">
       <table className="rt">
         <caption className="sr-only">{caption}</caption>
         <thead>
@@ -72,7 +72,7 @@ export function DataTable<T>({
                   {c.sortable ? (
                     <button
                       type="button"
-                      className="inline-flex items-center gap-1 rounded-xs hover:text-fg"
+                      className="-mx-1 inline-flex h-8 items-center gap-1 rounded-xs px-1 hover:text-fg active:translate-y-px"
                       onClick={() => onSort(!active ? `${c.key}:asc` : sort.dir === "asc" ? `${c.key}:desc` : null)}
                     >
                       {c.header}
@@ -95,7 +95,7 @@ export function DataTable<T>({
           {rows.map((row) => (
             <tr key={rowKey(row)}>
               {columns.map((c, i) => (
-                <td key={c.key} data-label={i === 0 ? "" : c.header} className={cn(c.mono && "mono", c.className, c.hidePhone && "rt-hide-phone")}>
+                <td key={c.key} data-label={i === 0 ? "" : c.header} className={cn(c.mono && "num", c.className, c.hidePhone && "rt-hide-phone")}>
                   {c.cell(row)}
                 </td>
               ))}
@@ -129,17 +129,17 @@ export function FilterBar({
   onClear: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-2 border-b border-border p-3">
+    <div className="flex flex-col gap-2 border-b border-border px-5 py-3">
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-[200px] flex-1 sm:max-w-[320px]">
-          <Search size={14} strokeWidth={1.6} className="pointer-events-none absolute left-2 top-2.5 text-subtle" aria-hidden />
+          <Search size={14} strokeWidth={1.6} className="pointer-events-none absolute left-3 top-[11px] text-subtle" aria-hidden />
           <input
             type="search"
             aria-label={placeholder}
             placeholder={placeholder}
             value={search}
             onChange={(e) => onSearch(e.target.value)}
-            className={cn(controlClass, "pl-7")}
+            className={cn(controlClass, "rounded-pill pl-9")}
           />
         </div>
         {children}
@@ -147,14 +147,14 @@ export function FilterBar({
       {chips.length > 0 && (
         <div className="flex flex-wrap items-center gap-2" aria-label="Active filters">
           {chips.map((c) => (
-            <span key={c.label} className="inline-flex h-6 items-center gap-1 rounded-xs border border-border bg-sunken pl-2 pr-0.5 text-xs">
+            <span key={c.label} className="inline-flex h-7 items-center gap-1 rounded-pill bg-selected pl-3 pr-1 text-xs">
               {c.label}
-              <button type="button" aria-label={`Remove filter ${c.label}`} onClick={c.remove} className="flex h-5 w-5 items-center justify-center rounded-xs hover:bg-hover">
+              <button type="button" aria-label={`Remove filter ${c.label}`} onClick={c.remove} className="flex h-5 w-5 items-center justify-center rounded-pill hover:bg-hover">
                 <X size={12} strokeWidth={1.6} aria-hidden />
               </button>
             </span>
           ))}
-          <Button variant="ghost" className="h-6 px-2" onClick={onClear}>
+          <Button variant="ghost" className="h-7 px-3" onClick={onClear}>
             Clear
           </Button>
         </div>
@@ -165,9 +165,9 @@ export function FilterBar({
 
 export function LoadMore({ hasMore, loading, onClick, shown }: { hasMore: boolean; loading: boolean; onClick: () => void; shown: number }) {
   return (
-    <div className="flex items-center justify-between gap-2 border-t border-border px-3 py-2 text-xs text-subtle">
+    <div className="flex items-center justify-between gap-2 border-t border-border px-5 py-3 text-xs text-subtle">
       <span>
-        <span className="mono">{shown}</span> loaded
+        <span className="num">{shown}</span> loaded
       </span>
       {hasMore && (
         <Button loading={loading} onClick={onClick}>

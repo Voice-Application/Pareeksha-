@@ -42,7 +42,7 @@ export function CopyField({ value, label }: { value: string; label: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <div className="flex items-center gap-2">
-      <input readOnly aria-label={label} value={value} onFocus={(e) => e.currentTarget.select()} className="mono h-8 min-w-0 flex-1 rounded-sm border border-border-strong bg-surface px-2 text-sm" />
+      <input readOnly aria-label={label} value={value} onFocus={(e) => e.currentTarget.select()} className="mono h-9 min-w-0 flex-1 rounded-sm border border-border-strong bg-surface px-2 text-sm" />
       <Button
         onClick={() => {
           void navigator.clipboard?.writeText(value);

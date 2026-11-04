@@ -65,7 +65,7 @@ export function RegressionPage() {
         ) : agents.isPending || tests.isPending ? (
           <TableSkeleton rows={5} />
         ) : items.length === 0 ? (
-          <EmptyState icon={FlaskConical} title="No regression tests yet" body="Promote a failed call and it becomes a test that future runs must not fail." action={<Link className="inline-flex h-8 items-center rounded-sm bg-accent px-3 text-sm text-accent-on" href="/runs">Open failed calls</Link>} />
+          <EmptyState icon={FlaskConical} title="No regression tests yet" body="Promote a failed call and it becomes a test that future runs must not fail." action={<Link className="inline-flex h-9 items-center rounded-pill bg-accent px-4 text-sm font-medium text-accent-on hover:bg-accent-hi" href="/runs">Open failed calls</Link>} />
         ) : (
           <DataTable caption="Regression tests" columns={columns} rows={items} rowKey={(t) => t.id} sort={null} onSort={() => undefined} />
         )}

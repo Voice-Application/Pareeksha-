@@ -175,7 +175,7 @@ export function PersonaEditor({
       {serverError && <Strip tone="error">Could not save. {serverError}</Strip>}
 
       <fieldset className="grid gap-4">
-        <legend className="eyebrow mb-2 flex items-center gap-2">
+        <legend className="label mb-2 flex items-center gap-2">
           Who {persona?.is_seed && <Chip>seed</Chip>}
         </legend>
         <TextField id="pe-name" label="Name" required value={form.name} onChange={(e) => patch({ name: e.target.value })} error={submitted ? errors["pe-name"] : undefined} />
@@ -191,7 +191,7 @@ export function PersonaEditor({
       </fieldset>
 
       <fieldset className="grid gap-4">
-        <legend className="eyebrow mb-2">Voice</legend>
+        <legend className="label mb-2">Voice</legend>
         <SelectField label="TTS model" value={form.tts_model} onChange={(e) => patch({ tts_model: e.target.value })}>
           {TTS_MODELS.map((m) => (
             <option key={m} value={m}>
@@ -223,7 +223,7 @@ export function PersonaEditor({
       </fieldset>
 
       <fieldset className="grid gap-4">
-        <legend className="eyebrow mb-2">Behaviour</legend>
+        <legend className="label mb-2">Behaviour</legend>
         <NumberField id="pe-patience" label="Patience (turns)" min={1} max={30} value={form.patience_turns} onChange={(e) => patch({ patience_turns: e.target.value })} error={submitted ? errors["pe-patience"] : undefined} fieldClassName="max-w-[160px]" help="Turns before the caller gives up." />
         <Segmented
           label="Interruption level"
@@ -256,7 +256,7 @@ export function PersonaEditor({
             {persona ? "Save changes" : "Create persona"}
           </Button>
           {mode === "page" ? (
-            <Link href="/personas" className="inline-flex h-8 items-center px-3 text-sm text-muted hover:text-fg">
+            <Link href="/personas" className="inline-flex h-9 items-center px-3 text-sm text-muted hover:text-fg">
               Cancel
             </Link>
           ) : (

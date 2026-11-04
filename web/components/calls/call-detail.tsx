@@ -10,7 +10,7 @@ import { api } from "@/lib/api/client";
 import { call as callApi } from "@/lib/api/call";
 import { listRunItems } from "@/lib/api/runs";
 import { CHECK_TAG, getCall, mmss, TAG_DIMENSION } from "@/lib/api/calls";
-import { PageHeader } from "@/components/ui/layout";
+import { Chip, PageHeader } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
 import { PageError, Skeleton } from "@/components/ui/states";
 import { StatusPill } from "@/components/ui/measure";
@@ -149,13 +149,12 @@ export function CallDetail({ callId }: { callId: string }) {
     <>
       <PageHeader
         eyebrow={
-          <span className="inline-flex flex-wrap items-center gap-x-2">
-            <span>Call {call.id.slice(0, 8)}</span>
-            <span aria-hidden>·</span>
+          <>
+            <span>Call <span className="mono text-xs text-fg">{call.id.slice(0, 8)}</span></span>
             <span>{sim ? "Synthetic caller" : call.source === "upload" ? "Uploaded recording" : "Imported call"}</span>
-            {call.language && <><span aria-hidden>·</span><span>{call.language}</span></>}
+            {call.language && <Chip>{call.language}</Chip>}
             {call.status !== "completed" && <StatusPill status={call.status} />}
-          </span>
+          </>
         }
         title={title}
         description={desc}
@@ -175,7 +174,8 @@ export function CallDetail({ callId }: { callId: string }) {
         }
       />
 
-      <dl className="mb-6 grid divide-x divide-border overflow-hidden rounded-md border border-border bg-surface max-[860px]:grid-cols-2 max-[860px]:divide-x-0 grid-cols-2 min-[860px]:grid-cols-3 min-[1180px]:grid-cols-6">
+      <div className="mb-8 overflow-clip border-y border-border">
+      <dl className="-mt-px -ml-[21px] grid w-[calc(100%+21px)] grid-cols-2 min-[860px]:grid-cols-3 min-[1180px]:grid-cols-6 [&>*]:border-t [&>*]:border-l [&>*]:border-border">
         <Meta label="Agent" value={agent.data?.name ?? "-"} sub={agent.data?.glass_box ? "glass-box" : undefined} />
         <Meta label="Scenario" value={item?.scenario ?? (sim ? "-" : "Agent goals")} sub={call.run_id ? <Link className="underline-offset-2 hover:underline" href={`/runs/${call.run_id}`}>open run</Link> : undefined} />
         <Meta label="Persona" value={item?.persona ?? "-"} />
@@ -183,6 +183,7 @@ export function CallDetail({ callId }: { callId: string }) {
         <Meta label="Duration" value={call.duration_ms ? mmss(call.duration_ms) : "-"} mono sub={`${turns.length} turns`} />
         <Meta label="Judge" value={ev ? `Confidence ${ev.confidence ?? "-"}` : "-"} sub={ev?.judge_model} />
       </dl>
+      </div>
 
       <div className="grid items-start gap-6 min-[1180px]:grid-cols-[minmax(0,1fr)_408px]">
         <div className="flex min-w-0 flex-col gap-6">
@@ -208,10 +209,10 @@ export function CallDetail({ callId }: { callId: string }) {
 
 function Meta({ label, value, sub, mono }: { label: string; value: string; sub?: React.ReactNode; mono?: boolean }) {
   return (
-    <div className="min-w-0 px-4 py-3">
-      <dt className="eyebrow">{label}</dt>
+    <div className="min-w-0 px-5 py-4">
+      <dt className="label">{label}</dt>
       <dd className="min-w-0">
-        <span className={`mt-0.5 block truncate text-sm font-medium ${mono ? "mono" : ""}`} title={value}>{value}</span>
+        <span className={`mt-1 block truncate text-base ${mono ? "num" : ""}`} title={value}>{value}</span>
         {sub && <span className="block truncate text-xs text-subtle">{sub}</span>}
       </dd>
     </div>

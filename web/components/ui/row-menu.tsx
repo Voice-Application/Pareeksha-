@@ -62,7 +62,7 @@ export function RowMenu({ label, items }: { label: string; items: MenuItem[] }) 
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? id : undefined}
-        className="h-8 w-8"
+        className="h-9 w-9"
         onClick={(e) => {
           const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
           setPos({ top: r.bottom + 4, right: window.innerWidth - r.right });
@@ -97,7 +97,7 @@ export function RowMenu({ label, items }: { label: string; items: MenuItem[] }) 
                 close(false);
                 it.onSelect();
               }}
-              className={cn("flex h-8 w-full items-center rounded-sm px-2 text-left text-sm hover:bg-hover focus:bg-hover disabled:opacity-50", it.destructive && "text-fail-fg")}
+              className={cn("flex h-9 w-full items-center rounded-sm px-2 text-left text-sm hover:bg-hover focus:bg-hover disabled:opacity-50", it.destructive && "text-fail-fg")}
             >
               {it.label}
             </button>

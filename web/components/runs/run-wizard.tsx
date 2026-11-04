@@ -72,7 +72,7 @@ function PickTable<T extends { id: string }>({
                 />
               </td>
               {cols.map((c, i) => (
-                <td key={c.header} data-label={i === 0 ? "" : c.header} className={c.mono ? "mono" : undefined}>
+                <td key={c.header} data-label={i === 0 ? "" : c.header} className={c.mono ? "num" : undefined}>
                   {c.cell(r)}
                 </td>
               ))}
@@ -196,9 +196,10 @@ export function RunWizard() {
                   <input type="radio" name="agent" className="mt-1 accent-[var(--accent)]" checked={agentId === a.id} onChange={() => { setSel((c) => ({ ...c, s: [] })); url.set({ agent: a.id, s: null }); }} />
                   <span className="min-w-0">
                     <span className="block font-medium">{a.name}</span>
-                    <span className="mono block text-xs text-muted">
-                      {a.adapter} · {(a.languages ?? []).map((l) => l.split("-")[0]).join(" ") || "no languages"}
-                      {a.glass_box ? " · glass-box" : ""}
+                    <span className="flex flex-wrap gap-x-3 text-xs text-muted">
+                      <span className="mono">{a.adapter}</span>
+                      <span>{(a.languages ?? []).map((l) => l.split("-")[0]).join(", ") || "no languages"}</span>
+                      {a.glass_box && <span>glass-box</span>}
                     </span>
                   </span>
                 </label>
@@ -356,7 +357,7 @@ export function RunWizard() {
 
         <aside aria-label="Run summary" className="sticky top-4 rounded-md border border-border bg-surface min-[860px]:max-[1180px]:col-span-2 max-[1180px]:static">
           <div className="border-b border-border p-4">
-            <p className="eyebrow mb-1">Matrix</p>
+            <p className="label mb-1">Matrix</p>
             <p className="mono text-sm text-muted">
               {scenarioIds.length} × {personaIds.length} × {lineIds.length} × {repeats}
             </p>
@@ -371,7 +372,7 @@ export function RunWizard() {
             )}
           </div>
           <div className="border-b border-border p-4">
-            <p className="eyebrow mb-2">Estimated cost</p>
+            <p className="label mb-2">Estimated cost</p>
             {!valid ? (
               <p className="text-sm text-subtle">Pick at least one of each to see the cost.</p>
             ) : estimate.isPending ? (

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Bot, Play } from "lucide-react";
+import { Bot, CircleCheck, CircleHelp, CircleX, Play } from "lucide-react";
 import { api } from "@/lib/api/client";
 import { call } from "@/lib/api/call";
 import { listRunItems, listRuns } from "@/lib/api/runs";
@@ -19,16 +19,17 @@ import { Chip } from "@/components/ui/layout";
 
 const STORE = "pareeksha.agent";
 const inr = (n: number | null | undefined) => (n == null ? "-" : `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`);
+const linkCls = "text-accent-fg underline-offset-2 hover:underline";
 
 function PanelBody({ q, rows, empty, children }: { q: { isPending: boolean; isError: boolean; error: unknown; refetch: () => unknown }; rows: number; empty: string; children: React.ReactNode }) {
   if (q.isPending)
     return (
-      <div role="status" aria-label="Loading" aria-busy="true" className="flex flex-col gap-2">
-        {Array.from({ length: 5 }, (_, i) => <Skeleton key={i} className="h-5" />)}
+      <div role="status" aria-label="Loading" aria-busy="true" className="flex flex-col gap-3">
+        {Array.from({ length: 5 }, (_, i) => <Skeleton key={i} className="h-6" />)}
       </div>
     );
   if (q.isError) return <ErrorPanel error={q.error} onRetry={() => void q.refetch()} />;
-  if (!rows) return <p className="text-sm text-subtle">{empty}</p>;
+  if (!rows) return <p className="py-2 text-sm text-subtle">{empty}</p>;
   return <>{children}</>;
 }
 
@@ -36,7 +37,7 @@ export function OverviewSkeleton() {
   return (
     <>
       <PageHeader eyebrow="Overview" title="" description={<Skeleton className="h-4 w-72" />} />
-      <TileRow cols="grid-cols-2 min-[860px]:grid-cols-4">{Array.from({ length: 4 }, (_, i) => <div key={i} className="px-4 py-3"><Skeleton className="h-3 w-20" /><Skeleton className="mt-2 h-6 w-16" /></div>)}</TileRow>
+      <TileRow cols="grid-cols-2 min-[860px]:grid-cols-4">{Array.from({ length: 4 }, (_, i) => <div key={i} className="px-5 py-4"><Skeleton className="h-3 w-20" /><Skeleton className="mt-3 h-8 w-16" /></div>)}</TileRow>
     </>
   );
 }
@@ -83,7 +84,7 @@ export function Overview() {
   const failed = latest && s?.pass_rate != null && latest.progress.evaluated ? Math.round(latest.progress.evaluated * (1 - s.pass_rate)) : 0;
   const crit = s?.critical_failures ?? 0;
   const title = !latest ? "No runs yet for this agent" : running ? `Run is ${latest.progress.evaluated + latest.progress.error} of ${latest.progress.total} done` : latest.progress.evaluated === 0 ? "Latest run has no scored calls" : failed === 0 ? `Latest run passed all ${latest.progress.evaluated} calls` : `Latest run passed ${latest.progress.evaluated - failed} of ${latest.progress.evaluated} calls${crit ? `, ${crit} critical` : ""}`;
-  const desc = latest ? `Run "${latest.name || latest.id.slice(0, 8)}" ${latest.finished_at ? `finished ${relativeTime(latest.finished_at)}` : `was created ${relativeTime(latest.created_at)}`}.${s?.needs_review ? ` ${s.needs_review} call${s.needs_review === 1 ? "" : "s"} need human review.` : ""}` : "A run sends synthetic callers to your agent and scores every call.";
+  const desc = latest ? `Run "${latest.name || latest.id.slice(0, 8)}" ${latest.finished_at ? `finished ${relativeTime(latest.finished_at)}` : `was created ${relativeTime(latest.created_at)}`}.${s?.needs_review ? ` ${s.needs_review} call${s.needs_review === 1 ? " needs" : "s need"} human review.` : ""}` : "A run sends synthetic callers to your agent and scores every call.";
 
   const worst = [...(items.data?.items ?? [])].filter((i) => i.overall_score != null).sort((a, b) => a.overall_score! - b.overall_score!).slice(0, 5);
   const lag = metrics.data ? Math.max(0, ...Object.values(metrics.data.consumer_lag)) : 0;
@@ -98,10 +99,13 @@ export function Overview() {
     <>
       <PageHeader
         eyebrow={
-          <span className="inline-flex items-center gap-3">
-            <span>{agent.name}</span>
+          <>
+            <span className="inline-flex items-center gap-2">
+              <Bot size={16} strokeWidth={1.6} className="text-subtle" aria-hidden />
+              {agent.name}
+            </span>
             {active.length > 1 && <FilterSelect label="Agent" value={agent.id} onChange={choose} options={active.map((a) => ({ value: a.id, label: a.name }))} />}
-          </span>
+          </>
         }
         title={title}
         description={desc}
@@ -114,97 +118,117 @@ export function Overview() {
         <StatTile label="Credits used" value={inr(usage.data?.credits_used)} caption={budget != null ? <span className="inline-flex items-center gap-2">of {inr(budget)} <Meter value={Math.min(100, ((usage.data?.credits_used ?? 0) / budget) * 100)} passLine={null} label="Budget used" /></span> : "no budget set"} />
       </TileRow>
 
-      <div className="mb-6 grid items-stretch gap-6 min-[1180px]:grid-cols-[minmax(0,1fr)_408px]">
-        <Panel title="Worst calls, latest run" aux={latest && <Link className="text-accent-fg underline-offset-2 hover:underline" href={`/runs/${latest.id}`}>Open run</Link>}>
-          {!latest ? (
-            <EmptyState icon={Play} title="No runs yet" body="A run sends synthetic callers to your agent." action={<LinkButton variant="primary" href={`/runs/new?agent=${agent.id}`}>Create run</LinkButton>} />
-          ) : (
-            <PanelBody q={items} rows={worst.length} empty="No scored calls in the latest run yet.">
-              <ol className="flex flex-col divide-y divide-border">
-                {worst.map((i) => (
-                  <li key={i.id} className="flex items-center gap-3 py-2">
-                    <ScoreChip score={i.overall_score} />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm">{i.call_id ? <Link className="font-medium underline-offset-2 hover:underline" href={`/calls/${i.call_id}`}>{i.scenario}</Link> : i.scenario}</p>
-                      <p className="truncate text-xs text-muted">{i.persona} · {i.noise_profile}</p>
-                    </div>
-                    <VerdictBadge verdict={verdictOf(i)} />
-                  </li>
-                ))}
-              </ol>
-            </PanelBody>
-          )}
-        </Panel>
-        <Panel title="Platform health" aux={stale ? <span className="text-warn-fg">Last updated {relativeTime(new Date(metrics.dataUpdatedAt).toISOString())}</span> : undefined}>
-          <PanelBody q={metrics} rows={1} empty="">
-            <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-2 text-sm">
-              <dt className="text-muted">API</dt>
-              <dd><Status ok={health.data?.db === "ok"} label={health.data ? "ok" : "unknown"} /></dd>
-              <dt className="text-muted">Database</dt>
-              <dd><Status ok={health.data?.db === "ok"} label={health.data?.db ?? "unknown"} /></dd>
-              <dt className="text-muted">Kafka</dt>
-              <dd><Status ok={health.data?.kafka === "ok"} fail={health.data?.kafka !== "ok" && !!health.data} label={health.data?.kafka ?? "unknown"} /></dd>
-              <dt className="text-muted">Outbox backlog</dt>
-              <dd className="mono">{metrics.data?.outbox_backlog ?? "-"}</dd>
-              {lagRows.map(([k, v]) => (
-                <div key={k} className="contents">
-                  <dt className="text-muted">Lag: <span className="mono">{k}</span></dt>
-                  <dd className={v > 20 ? "mono text-warn-fg" : "mono"}>{v}</dd>
-                </div>
-              ))}
-              {lagHidden > 0 && <p className="col-span-2 text-xs text-subtle">and {lagHidden} more consumer group{lagHidden === 1 ? "" : "s"}</p>}
-              {lag > 20 && <p className="col-span-2 text-xs text-warn-fg">A consumer is more than 20 events behind.</p>}
-            </dl>
-          </PanelBody>
-        </Panel>
-      </div>
+      <div className="grid items-start gap-6 min-[1180px]:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="flex min-w-0 flex-col gap-6">
+          <Panel title="Worst calls, latest run" aux={latest && <Link className={linkCls} href={`/runs/${latest.id}`}>Open run</Link>}>
+            {!latest ? (
+              <EmptyState icon={Play} title="No runs yet" body="A run sends synthetic callers to your agent." action={<LinkButton variant="primary" href={`/runs/new?agent=${agent.id}`}>Create run</LinkButton>} />
+            ) : (
+              <PanelBody q={items} rows={worst.length} empty="No scored calls in the latest run yet.">
+                <ol className="flex flex-col divide-y divide-border">
+                  {worst.map((i) => (
+                    <li key={i.id} className="flex items-center gap-4 py-3 first:pt-1 last:pb-0">
+                      <ScoreChip score={i.overall_score} />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-base">{i.call_id ? <Link className="underline-offset-2 hover:underline" href={`/calls/${i.call_id}`}>{i.scenario}</Link> : i.scenario}</p>
+                        <p className="flex min-w-0 flex-wrap gap-x-4 text-sm text-muted">
+                          <span className="truncate">{i.persona}</span>
+                          <span className="mono truncate text-xs leading-5 text-subtle">{i.noise_profile}</span>
+                        </p>
+                      </div>
+                      <VerdictBadge verdict={verdictOf(i)} />
+                    </li>
+                  ))}
+                </ol>
+              </PanelBody>
+            )}
+          </Panel>
 
-      <div className="grid items-start gap-6 min-[1180px]:grid-cols-2">
-        <Panel title="Recent runs" bodyClassName="p-0" aux={<Link className="text-accent-fg underline-offset-2 hover:underline" href="/runs">All runs</Link>}>
-          <div className="p-4">
-            <PanelBody q={runs} rows={runs.data?.items?.length ?? 0} empty="No runs yet.">
+          <Panel title="Recent runs" bodyClassName="p-0 pb-2" aux={<Link className={linkCls} href="/runs">All runs</Link>}>
+            {runs.isPending || runs.isError || !runs.data?.items?.length ? (
+              <div className="px-5 pb-5">
+                <PanelBody q={runs} rows={runs.data?.items?.length ?? 0} empty="No runs yet.">{null}</PanelBody>
+              </div>
+            ) : (
               <table className="rt">
                 <caption className="sr-only">Recent runs</caption>
                 <thead><tr><th scope="col">Name</th><th scope="col">Status</th><th scope="col">Pass rate</th><th scope="col">When</th></tr></thead>
                 <tbody>
-                  {runs.data?.items?.slice(0, 5).map((r) => (
+                  {runs.data.items.slice(0, 5).map((r) => (
                     <tr key={r.id}>
                       <td><Link className="font-medium underline-offset-2 hover:underline" href={`/runs/${r.id}`}>{r.name || r.id.slice(0, 8)}</Link></td>
                       <td data-label="Status"><StatusPill status={r.status} /></td>
-                      <td data-label="Pass rate" className="mono">{r.summary?.pass_rate != null ? `${Math.round(r.summary.pass_rate * 100)}%` : "-"}</td>
+                      <td data-label="Pass rate">{r.summary?.pass_rate != null ? `${Math.round(r.summary.pass_rate * 100)}%` : "-"}</td>
                       <td data-label="When" className="text-muted"><time dateTime={r.created_at}>{relativeTime(r.created_at)}</time></td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            )}
+          </Panel>
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-6">
+          <Panel title="Needs human review" aux={<Link className={linkCls} href="/calibration">Calibration</Link>}>
+            <PanelBody q={review} rows={review.data?.items?.length ?? 0} empty="No calls are waiting for review.">
+              <ul className="flex flex-col divide-y divide-border">
+                {review.data?.items?.map((c) => (
+                  <li key={c.id} className="flex flex-col gap-2 py-3 first:pt-1 last:pb-0">
+                    <div className="flex items-center gap-3">
+                      <ScoreChip score={c.overall_score} />
+                      <Link className="mono text-sm underline-offset-2 hover:underline" href={`/calls/${c.id}`}>{c.id.slice(0, 8)}</Link>
+                      <span className="ml-auto"><FlagChip iconOnly reasons={c.review_reasons} /></span>
+                    </div>
+                    {(c.review_reasons ?? []).length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {(c.review_reasons ?? []).slice(0, 2).map((x) => <Chip key={x} mono className="max-w-full truncate">{x}</Chip>)}
+                        {(c.review_reasons ?? []).length > 2 && <span className="num text-xs text-muted" title={(c.review_reasons ?? []).slice(2).join(", ")}>+{(c.review_reasons ?? []).length - 2}</span>}
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </PanelBody>
-          </div>
-        </Panel>
-        <Panel title={`Needs human review: ${agent.name}`} aux={<Link className="text-accent-fg underline-offset-2 hover:underline" href="/calibration">Calibration</Link>}>
-          <PanelBody q={review} rows={review.data?.items?.length ?? 0} empty="No calls are waiting for review.">
-            <ul className="flex flex-col divide-y divide-border">
-              {review.data?.items?.map((c) => (
-                <li key={c.id} className="flex flex-wrap items-center gap-2 py-2">
-                  <ScoreChip score={c.overall_score} />
-                  <Link className="mono text-sm underline-offset-2 hover:underline" href={`/calls/${c.id}`}>{c.id.slice(0, 8)}</Link>
-                  <FlagChip iconOnly reasons={c.review_reasons} />
-                  {(c.review_reasons ?? []).slice(0, 2).map((x) => <Chip key={x} mono>{x}</Chip>)}
-                  {(c.review_reasons ?? []).length > 2 && <span className="mono text-xs text-muted" title={(c.review_reasons ?? []).slice(2).join(", ")}>+{(c.review_reasons ?? []).length - 2}</span>}
-                </li>
-              ))}
-            </ul>
-          </PanelBody>
-        </Panel>
+          </Panel>
+
+          <Panel title="Platform health" aux={stale ? <span className="text-warn-fg">Last updated {relativeTime(new Date(metrics.dataUpdatedAt).toISOString())}</span> : undefined}>
+            <PanelBody q={metrics} rows={1} empty="">
+              <dl className="grid grid-cols-[1fr_auto] gap-x-4 text-sm [&>dd]:py-1.5 [&>dt]:py-1.5">
+                <dt className="text-muted">API</dt>
+                <dd><Status ok={health.data?.db === "ok"} label={health.data ? "ok" : "unknown"} /></dd>
+                <dt className="text-muted">Database</dt>
+                <dd><Status ok={health.data?.db === "ok"} label={health.data?.db ?? "unknown"} /></dd>
+                <dt className="text-muted">Kafka</dt>
+                <dd><Status ok={health.data?.kafka === "ok"} fail={health.data?.kafka !== "ok" && !!health.data} label={health.data?.kafka ?? "unknown"} /></dd>
+                <dt className="text-muted">Outbox backlog</dt>
+                <dd className="num text-right">{metrics.data?.outbox_backlog ?? "-"}</dd>
+              </dl>
+              {lagRows.length > 0 && (
+                <dl className="mt-3 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto] gap-x-3 border-t border-border pt-3 text-sm [&>div>dd]:py-1 [&>div>dt]:truncate [&>div>dt]:py-1 max-[420px]:grid-cols-[minmax(0,1fr)_auto]">
+                  {lagRows.map(([k, v]) => (
+                    <div key={k} className="contents">
+                      <dt className="text-muted">Lag: <span className="mono text-xs">{k}</span></dt>
+                      <dd className={v > 20 ? "num text-right text-warn-fg" : "num text-right"}>{v}</dd>
+                    </div>
+                  ))}
+                  {lagHidden > 0 && <p className="col-span-full pt-1 text-xs text-subtle">and {lagHidden} more consumer group{lagHidden === 1 ? "" : "s"}</p>}
+                  {lag > 20 && <p className="col-span-full pt-1 text-xs text-warn-fg">A consumer is more than 20 events behind.</p>}
+                </dl>
+              )}
+            </PanelBody>
+          </Panel>
+        </div>
       </div>
     </>
   );
 }
 
 function Status({ ok, label, fail }: { ok: boolean; label: string; fail?: boolean }) {
+  const Icon = ok ? CircleCheck : fail ? CircleX : CircleHelp;
   return (
-    <span className={fail ? "inline-flex items-center gap-1.5 text-fail-fg" : "inline-flex items-center gap-1.5"}>
-      <span className={`h-2 w-2 rounded-full ${ok ? "bg-pass" : fail ? "bg-fail" : "bg-border-strong"}`} aria-hidden />
-      <span className="mono">{label}</span>
+    <span className={fail ? "inline-flex items-center gap-1.5 text-fail-fg" : ok ? "inline-flex items-center gap-1.5 text-pass-fg" : "inline-flex items-center gap-1.5 text-muted"}>
+      <Icon size={14} strokeWidth={1.6} aria-hidden />
+      {label}
     </span>
   );
 }

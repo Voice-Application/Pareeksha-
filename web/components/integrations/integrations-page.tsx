@@ -108,7 +108,7 @@ function AddSheet({ open, onClose, connectors }: { open: boolean; onClose: () =>
               <JsonSchemaForm schema={info.config_schema} values={config} onChange={setConfig} />
               <JsonSchemaForm schema={info.secrets_schema} values={secrets} onChange={setSecrets} secret />
               <fieldset className="flex flex-col gap-3 border-t border-border pt-4">
-                <legend className="eyebrow mb-1">Event filter</legend>
+                <legend className="label mb-1">Event filter</legend>
                 <TextField label="Events" help="Comma separated, for example evaluation.completed" value={events} onChange={(e) => setEvents(e.target.value)} />
                 <Switch label="Only failed calls" checked={onlyFailed} onChange={setOnlyFailed} />
                 <NumberField label="Only scores below" help="Optional" min={0} max={100} value={below} onChange={(e) => setBelow(e.target.value)} />

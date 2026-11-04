@@ -56,7 +56,7 @@ export function DialectIndex() {
                 {rs.map((r) => (
                   <li key={r.id} className="flex flex-col gap-1 px-4 py-3">
                     <Link className="font-medium underline-offset-2 hover:underline" href={`/dialect/${r.id}`}>Report {r.id.slice(0, 8)}</Link>
-                    <p className="text-xs text-muted">{r.engines.join(", ")} · {r.conditions.length} conditions · <time dateTime={r.created_at}>{relativeTime(r.created_at)}</time></p>
+                    <p className="flex flex-wrap gap-x-3 text-xs text-muted"><span>{r.engines.join(", ")}</span><span>{r.conditions.length} conditions</span><time dateTime={r.created_at}>{relativeTime(r.created_at)}</time></p>
                     <ProgressBar done={r.progress.done} total={r.progress.expected_results} label="Report progress" />
                   </li>
                 ))}
@@ -154,12 +154,12 @@ export function DialectReport({ id }: { id: string }) {
               <div className="flex flex-col gap-3 text-sm">
                 <p className="font-medium">{pick.dialect} on {pick.condition}</p>
                 <dl className="grid grid-cols-2 gap-2">
-                  <div><dt className="eyebrow">WER</dt><dd className="mono">{(sel.wer * 100).toFixed(1)}%</dd></div>
-                  <div><dt className="eyebrow">95% CI</dt><dd className="mono">{(sel.wer_ci[0] * 100).toFixed(0)}-{(sel.wer_ci[1] * 100).toFixed(0)}%</dd></div>
-                  <div><dt className="eyebrow">CER</dt><dd className="mono">{(sel.cer * 100).toFixed(1)}%</dd></div>
-                  <div><dt className="eyebrow">Entity accuracy</dt><dd className="mono">{sel.entity_acc == null ? "-" : `${(sel.entity_acc * 100).toFixed(0)}%`}</dd></div>
+                  <div><dt className="label">WER</dt><dd className="mono">{(sel.wer * 100).toFixed(1)}%</dd></div>
+                  <div><dt className="label">95% CI</dt><dd className="mono">{(sel.wer_ci[0] * 100).toFixed(0)}-{(sel.wer_ci[1] * 100).toFixed(0)}%</dd></div>
+                  <div><dt className="label">CER</dt><dd className="mono">{(sel.cer * 100).toFixed(1)}%</dd></div>
+                  <div><dt className="label">Entity accuracy</dt><dd className="mono">{sel.entity_acc == null ? "-" : `${(sel.entity_acc * 100).toFixed(0)}%`}</dd></div>
                 </dl>
-                <p className="eyebrow">Worst clips</p>
+                <p className="label">Worst clips</p>
                 {clips.isPending ? <p className="text-subtle">Loading clips…</p> : (clips.data ?? []).slice(0, 10).map((c) => (
                   <div key={c.sample_id + c.engine} className="rounded-sm border border-border p-2">
                     <p lang="kn" className="text-sm">{c.reference_text}</p><p lang="kn" className="text-sm text-muted">{c.hypothesis_text}</p>

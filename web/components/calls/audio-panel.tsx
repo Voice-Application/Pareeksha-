@@ -234,7 +234,7 @@ export function AudioPanel({
             <span className="mono text-md" aria-label="Playback position">
               {mmss(playhead)} <span className="text-subtle">/ {mmss(duration)}</span>
             </span>
-            <div className="ml-auto flex items-center gap-3 text-xs text-muted">
+            <div className="ml-auto flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
               <Legend color="var(--speaker-agent)" label="Agent" />
               <Legend color="var(--speaker-caller)" label="Caller" />
               <span className="inline-flex items-center gap-1"><span className="h-3 w-4 border border-fail bg-fail-tint" aria-hidden />Evidence</span>
@@ -277,7 +277,7 @@ export function AudioPanel({
                 ))}
                 {!twoLanes && (
                   <g>
-                    <text x={0} y={laneTop.agent + laneH + 3} className="eyebrow" fontSize="10" fill="var(--fg-subtle)">MIXED</text>
+                    <text x={0} y={laneTop.agent + laneH + 3} className="label" fontSize="12" fill="var(--fg-subtle)">Mixed</text>
                     {sorted.map((t) => (
                       <rect key={t.idx} x={x(t.start_ms)} y={laneTop.agent} width={Math.max(1, x(t.end_ms) - x(t.start_ms))} height={laneH * 2 + 4} fill={t.speaker === "agent" ? "var(--speaker-agent)" : "var(--speaker-caller)"} opacity="0.16">
                         <title>{t.speaker === "agent" ? "Agent" : "Caller"}, turn {t.idx}</title>
@@ -296,12 +296,12 @@ export function AudioPanel({
                 )}
                 {twoLanes && (["agent", "caller"] as const).map((l) => (
                   <g key={l}>
-                    <text x={0} y={laneTop[l] + laneH / 2 + 3} className="eyebrow" fontSize="10" fill="var(--fg-subtle)">{l.toUpperCase()}</text>
+                    <text x={0} y={laneTop[l] + laneH / 2 + 3} className="label" fontSize="12" fill="var(--fg-subtle)">{l === "agent" ? "Agent" : "Caller"}</text>
                     <line x1={GUTTER} x2={GUTTER + W} y1={laneTop[l] + laneH / 2} y2={laneTop[l] + laneH / 2} stroke={l === "agent" ? "var(--speaker-agent)" : "var(--speaker-caller)"} strokeWidth="1" opacity="0.5" />
                     {peaks?.[l] && strokes(peaks[l], laneTop[l], l === "agent" ? "var(--speaker-agent)" : "var(--speaker-caller)")}
                   </g>
                 ))}
-                <text x={0} y={laneTop.events + 20} className="eyebrow" fontSize="10" fill="var(--fg-subtle)">EVENTS</text>
+                <text x={0} y={laneTop.events + 20} className="label" fontSize="12" fill="var(--fg-subtle)">Events</text>
                 <line x1={GUTTER} x2={GUTTER + W} y1={laneTop.events + 16} y2={laneTop.events + 16} stroke="var(--grid)" />
                 {gaps.map((g, i) => (
                   <rect key={i} x={x(g.a)} y={laneTop.events + 12} width={Math.max(2, x(g.b) - x(g.a))} height="8" fill="var(--bg-sunken)" stroke="var(--border-strong)">
@@ -316,16 +316,16 @@ export function AudioPanel({
                 ))}
                 {showLatency && (
                   <g>
-                <text x={0} y={laneTop.latency + 12} className="eyebrow" fontSize="10" fill="var(--fg-subtle)">LATENCY</text>
+                <text x={0} y={laneTop.latency + 12} className="label" fontSize="12" fill="var(--fg-subtle)">Latency</text>
                 <line x1={GUTTER} x2={GUTTER + W} y1={laneTop.latency + 56 - (2000 / maxLat) * 50} y2={laneTop.latency + 56 - (2000 / maxLat) * 50} stroke="var(--fg-muted)" strokeDasharray="4 3" />
-                <text x={0} y={laneTop.latency + 56 - (2000 / maxLat) * 50 + 3} className="mono" fontSize="9" fill="var(--fg-muted)">2.0 s target</text>
+                <text x={0} y={laneTop.latency + 56 - (2000 / maxLat) * 50 + 3} className="num" fontSize="11" fill="var(--fg-muted)">2.0 s target</text>
                 {lat.map((l) => {
                   const h = (l.ms / maxLat) * 50;
                   const col = l.ms > 2000 ? "var(--fail)" : l.ms > 1000 ? "var(--warn)" : "var(--series-3)";
                   return (
                     <g key={l.idx}>
                       <rect x={x(l.x) - 5} y={laneTop.latency + 56 - h} width="10" height={h} rx="2" fill={col}><title>{(l.ms / 1000).toFixed(1)} s to respond (turn {l.idx})</title></rect>
-                      <text x={x(l.x)} y={laneTop.latency + 53 - h} textAnchor="middle" className="mono" fontSize="9" fill="var(--fg-muted)">{(l.ms / 1000).toFixed(1)}</text>
+                      <text x={x(l.x)} y={laneTop.latency + 53 - h} textAnchor="middle" className="num" fontSize="11" fill="var(--fg-muted)">{(l.ms / 1000).toFixed(1)}</text>
                     </g>
                   );
                 })}
