@@ -24,7 +24,8 @@ declare -A TITLE=(
   [11]="Repo public, tagged v1.0.0, demo video + launch post published"
 )
 report_only=0; if [ "${1:-}" = --report-only ]; then report_only=1; shift; fi
-steps=("$@"); [ ${#steps[@]} -gt 0 ] || [ $report_only = 1 ] || steps=(1 2 3 4 5 6 7 8 9 10 11)
+steps=("$@")
+if [ $report_only = 1 ]; then steps=(); elif [ ${#steps[@]} -eq 0 ]; then steps=(1 2 3 4 5 6 7 8 9 10 11); fi
 
 fail=0
 for n in "${steps[@]}"; do

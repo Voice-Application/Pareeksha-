@@ -34,5 +34,7 @@ be=$(field "$b" event); ge=$(field "$g" event)
 for sha in "$bs" "$gs"; do git cat-file -e "$sha^{commit}" 2>/dev/null || git fetch -q origin "$sha" >/dev/null 2>&1 || true; done
 desc=no; git cat-file -e "$bs^{commit}" 2>/dev/null && git cat-file -e "$gs^{commit}" 2>/dev/null && git merge-base --is-ancestor "$bs" "$gs" && desc=yes
 note "first: $bc ($bw @ $bs, event $be); second: $gc ($gw @ $gs, event $ge); second descends from first: $desc"
-[ "$bc" = failure ] && [ "$gc" = success ] && [ "$bw" = "$gw" ] && [ "$desc" = yes ] && finish PASS "first run failed, second passed, same workflow, second commit descends"
-finish FAIL "expected failure then success of the same workflow on descending commits"
+[ "$bc" = failure ] && [ "$gc" = success ] && [ "$bw" = "$gw" ] && [ "$desc" = yes ] || finish FAIL "expected failure then success of the same workflow on descending commits"
+# GOAL.md and FR-DX-6 ask for PR checks: a manual run on the fixed commit shows the fix works, not that the PR check passed
+[ "$be" = pull_request ] && [ "$ge" = pull_request ] && finish PASS "first PR check failed, second passed, same workflow, second commit descends"
+finish PENDING "runs were $be then $ge, so this is not two PR checks; needs a pull_request run on the fixed commit or the owner's acceptance"

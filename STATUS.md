@@ -125,11 +125,11 @@ Never cut: mock agent with planted bugs, judge with evidence, Kafka outbox + ide
 ## 2026-10-30: verification fixes, dialect, calibration
 - FIX-03 (mypy/ruff pinned + clean; silent caller = local silence; no-audio TTS permanent) — verified qa/FIX-03 74c5c5c, merged.
 - FIX-VERIFY (V6 runs pytest from its own venv; V8/V11 REST fallbacks; .gitleaksignore with 112 exact fingerprints, full-history gitleaks 0) — verified qa/FIX-VERIFY 489faae, merged (verifier evidence copied without its flagged gitleaks_report.json).
-- GOAL 8: fail run 41097075186 (a8f8444, bug on) then pass run 41102511599 (b8b121e, descendant; manual dispatch because the PR paths filter skipped an empty net diff). Verifier: acceptable, not a literal PR check; owner to confirm.
+- GOAL 8: fail run 41097075186 (a8f8444, bug on) then pass run 41102511599 (b8b121e, descendant; manual dispatch because the PR paths filter skipped an empty net diff). Verifier: acceptable, not a literal PR check; owner to confirm. V8 now reports PENDING until a PR check passes or the owner accepts this (2026-11-04).
 - DIALECT-02 (Vaani, 5 groups × 22 clips × 3 conditions, 330/330) — verified qa/DIALECT-02 b248279; merged 2026-11-02 (owner: "merge dialect", spot-check waived).
 - EVAL-06 interim: n=10 owner labels, κ=1.0 pass/fail, critical κ=0.14; rubric gap noted (no anchor for non-responsive replies) — task/EVAL-06 e21c46f.
 - Released v1.0.0: https://github.com/Voice-Application/Pareeksha-/releases/tag/v1.0.0 (tag on b1df0d1).
 - EVAL-06 final (n=30): kappa 0.19, below 0.6; rubric v2 proposed, not applied (task/EVAL-06 7d347ba).
 - Records reconciled 2026-11-04: `proof/FINAL_REPORT.md` regenerated from the evidence files; what was and was not re-run is in `proof/verify/REPORT_NOTES.md`.
-- Owner-pending: demo video, launch post, live demo approval, GOAL 8 confirmation (run 2 was a manual dispatch).
+- Owner-pending: demo video, launch post, live demo approval, a consented real recording for GOAL 5 (V5 PENDING; live runs used TTS), a passing PR check for GOAL 8 (V8 PENDING; run 2 was a manual dispatch).
 
