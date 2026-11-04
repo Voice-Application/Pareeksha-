@@ -23,10 +23,12 @@ mine = kappa(pairs)
 res = {"api": cal, "labelled_pairs_in_db": n, "kappa_recomputed": mine}
 print(json.dumps(res, indent=1))
 if n < 30: sys.exit(2)
-ok = cal.get("n", 0) >= 30 and (cal.get("kappa_pass_fail") or 0) >= 0.6 and mine is not None and abs(mine - cal["kappa_pass_fail"]) < 0.02
-sys.exit(0 if ok else 1)
+api_kappa = cal.get("kappa_pass_fail")
+if mine is None or api_kappa is None or abs(mine - api_kappa) >= 0.02: sys.exit(3)
+sys.exit(0 if cal.get("n", 0) >= 30 and api_kappa >= 0.6 else 1)
 PYEOF
 rc=${PIPESTATUS[0]}
 [ "$rc" -eq 0 ] && finish PASS "kappa >= 0.6 on >= 30 labelled calls, recomputed independently"
 [ "$rc" -eq 2 ] && finish PENDING "fewer than 30 human-labelled calls in this database; restore the EVAL-06 dump to measure"
-finish FAIL "kappa below 0.6 or API/recomputed values disagree"
+[ "$rc" -eq 3 ] && finish FAIL "API and recomputed kappa disagree or are undefined (see JSON)"
+finish FAIL "kappa $($PY -c "import json; a = json.load(open('proof/verify/V9.json'))['api']; print(a['kappa_pass_fail'], 'on n =', a['n'])") is below the 0.6 target"
