@@ -34,13 +34,13 @@ State values: todo / doing / blocked / review / done. Verified = QA sign-off (`y
 | VOICE-05 | `simulator` consumer; 12-call run end to end | VOICE | VOICE-04, API-03 | done | — | proof/VOICE-05/verified.md |
 | EVAL-03 | `judge_v1.j2`, evidence validation, `evaluator`, `finalizer` | EVAL | EVAL-02 | done | — | proof/EVAL-03/verified.md |
 | EVAL-04 | `auditor` consumer: upload → batch STT → role detection | EVAL | EVAL-03 | done | — | proof/EVAL-04/verified.md |
-| INT-02 | HubSpot sink: contact match → note, idempotent | INT | INT-01 | done (live HubSpot note pending owner token) | — | proof/INT-02/verified.md |
-| INT-03 | Generic Webhook source: verify → dedupe → audit | INT | INT-01, EVAL-04 | done (live HubSpot step pending owner token) | — | proof/INT-03/verified.md |
+| INT-02 | HubSpot sink: contact match → note, idempotent | INT | INT-01 | done (live HubSpot note verified, proof/LIVE-ACCEPT) | — | proof/INT-02/verified.md |
+| INT-03 | Generic Webhook source: verify → dedupe → audit | INT | INT-01, EVAL-04 | done (live HubSpot step verified, proof/LIVE-ACCEPT) | — | proof/INT-03/verified.md |
 | API-04 | SSE progress, run compare, DLQ endpoints, `/metrics/summary` | BE-API | API-03 | done | — | proof/API-04/verified.md |
 | FE-03 | Runs list, new-run wizard, live run detail (SSE), heatmap | FE | FE-02, API-04 | done | — | proof/FE-03/verified.md |
 | QA-03 | Planted-bug test: at least 4 of 5 caught | QA | VOICE-05, EVAL-03 | done | — | proof/QA-03/verified.md |
 | H-02 | ≥ 20 consented clips per dialect group | Preetham (human) | — | replaced by owner decision 2026-10-30: Vaani (CC-BY-4.0) via DIALECT-02; merged 2026-11-02 on verifier PASS (owner waived spot-check) | proof/DIALECT-02 | no |
-| EVAL-05 | Dialect pipeline: WER/CER, entity accuracy, HTML report | EVAL | EVAL-03 | done (real dialect clips pending H-02) | — | proof/EVAL-05/verified.md |
+| EVAL-05 | Dialect pipeline: WER/CER, entity accuracy, HTML report | EVAL | EVAL-03 | done (real dialect run: DIALECT-02, Vaani) | — | proof/EVAL-05/verified.md |
 | VOICE-06 | Pipecat adapter + serializer + example (Must); LiveKit (Should) | VOICE | VOICE-04 | done (LiveKit/Vapi cut by owner 2026-10-28, see CHANGELOG) | — | proof/VOICE-06/verified.md |
 | INT-04 | `pareeksha-sdk` + CLI, `pareeksha.yaml`, GitHub Action | INT | TL-01 | done | — | proof/INT-04/verified.md |
 | API-05 | Regression promote/suite, calibration, scenario generation | BE-API | EVAL-03 | done | — | proof/API-05/verified.md |
@@ -49,7 +49,7 @@ State values: todo / doing / blocked / review / done. Verified = QA sign-off (`y
 | QA-04 | Playwright smoke per page; OpenAPI + event contract tests | QA | FE-04 | done | — | proof/QA-04/verified.md |
 | QA-05 | 40-call demo run + full PRD §8 acceptance | QA | all | done | — | proof/QA-05/verified.md |
 | ALL-01 | Fix QA P0/P1 bugs only | engineers | QA-05 | done (FIX-01, FIX-02, FIX-03) | proof/ALL-01 | yes (qa/FIX-VERIFY 489faae) |
-| EVAL-06 | Label 30 calls; publish κ and Spearman | EVAL + Preetham | QA-05 | INTERIM: owner labelled L01-L10, κ=1.0 (n=10); L11-L30 awaiting owner | proof/EVAL-06 (task/EVAL-06) | no |
+| EVAL-06 | Label 30 calls; publish κ and Spearman | EVAL + Preetham | QA-05 | FINAL: owner labelled 30 calls, κ=0.19 (target 0.6, missed); branch unmerged, verifier rejected it on mypy only and recomputed κ=0.1892 (qa/EVAL-07) | proof/EVAL-06/calibration.md (full proof on task/EVAL-06) | no |
 | DOC-02 | README, clean-clone quick start, 8 adopter guides, SDK reference | DOC | all | done | — | proof/DOC-02/verified.md |
 | DOC-03 | 60-second demo script; Preetham records | DOC + Preetham | QA-05 | script done (docs/demo-script.md); recording awaiting owner | proof/DOC-03 | script part (qa/FIX-VERIFY 489faae) |
 | PJM-01 | Release checklist, tag v1.0.0, repo public, launch post | PJM | all | checklist done, repo public, gitleaks full history clean; tagged v1.0.0 on b1df0d1 (2026-11-02, release workflow run 41438833672); demo video, launch post awaiting owner | proof/PJM-01 | partial (qa/FIX-VERIFY 489faae) |
@@ -125,10 +125,11 @@ Never cut: mock agent with planted bugs, judge with evidence, Kafka outbox + ide
 ## 2026-10-30: verification fixes, dialect, calibration
 - FIX-03 (mypy/ruff pinned + clean; silent caller = local silence; no-audio TTS permanent) — verified qa/FIX-03 74c5c5c, merged.
 - FIX-VERIFY (V6 runs pytest from its own venv; V8/V11 REST fallbacks; .gitleaksignore with 112 exact fingerprints, full-history gitleaks 0) — verified qa/FIX-VERIFY 489faae, merged (verifier evidence copied without its flagged gitleaks_report.json).
-- GOAL 8: fail run 41097075186 (a8f8444, bug on) then pass run 41102511599 (b8b121e, descendant; manual dispatch because the PR paths filter skipped an empty net diff). Verifier: acceptable, not a literal PR check; owner to confirm.
+- GOAL 8: fail run 41097075186 (a8f8444, bug on) then pass run 41102511599 (b8b121e, descendant; manual dispatch because the PR paths filter skipped an empty net diff). Verifier: acceptable, not a literal PR check; owner to confirm. V8 now reports PENDING until a PR check passes or the owner accepts this (2026-11-04).
 - DIALECT-02 (Vaani, 5 groups × 22 clips × 3 conditions, 330/330) — verified qa/DIALECT-02 b248279; merged 2026-11-02 (owner: "merge dialect", spot-check waived).
 - EVAL-06 interim: n=10 owner labels, κ=1.0 pass/fail, critical κ=0.14; rubric gap noted (no anchor for non-responsive replies) — task/EVAL-06 e21c46f.
 - Released v1.0.0: https://github.com/Voice-Application/Pareeksha-/releases/tag/v1.0.0 (tag on b1df0d1).
 - EVAL-06 final (n=30): kappa 0.19, below 0.6; rubric v2 proposed, not applied (task/EVAL-06 7d347ba).
-- Owner-pending: demo video, launch post, live demo approval.
+- Records reconciled 2026-11-04: `proof/FINAL_REPORT.md` regenerated from the evidence files; what was and was not re-run is in `proof/verify/REPORT_NOTES.md`.
+- Owner-pending: demo video, launch post, live demo approval, a consented real recording for GOAL 5 (V5 PENDING; live runs used TTS), a passing PR check for GOAL 8 (V8 PENDING; run 2 was a manual dispatch).
 

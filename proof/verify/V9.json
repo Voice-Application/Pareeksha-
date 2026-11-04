@@ -1,10 +1,11 @@
 {
+ "source": "database",
  "api": {
-  "n": 0,
-  "kappa_pass_fail": null,
+  "n": 30,
+  "kappa_pass_fail": 0.1892,
   "spearman_overall": null,
   "dimension_mae": {}
  },
- "labelled_pairs_in_db": 0,
- "kappa_recomputed": null
+ "labelled_pairs_in_db": 30,
+ "kappa_recomputed": 0.18918918918918906
 }

@@ -130,3 +130,11 @@ a1727ef326f61e34a97285a823304b733e45a95c:proof/INFRA-02/demo.txt:generic-api-key
 
 # generic-api-key .gitleaksignore (1): commit 3f063f4 of this file had a comment quoting the dummy test signing secret from tests/unit/integrations; the comment was reworded in 4fa1fc8
 3f063f429cabf9854b8fcda759ed69a5e0830921:.gitleaksignore:generic-api-key:28
+
+# qa/FIX-VERIFY, unmerged branch, reviewed 2026-11-04 with git show on each line: rejected.md quotes the test secret from a
+# gitleaksignore comment; gitleaks_report.json holds gitleaks' own description of the curl-auth-user rule. No real credential.
+777fa756fe646369a2d15e63bbb4d65add730750:proof/FIX-VERIFY/rejected.md:generic-api-key:5
+dc6a121c326247bfcf048c59b0b5727c84c2ea34:proof/FIX-VERIFY/verifier/gitleaks_report.json:curl-auth-user:1159
+dc6a121c326247bfcf048c59b0b5727c84c2ea34:proof/FIX-VERIFY/verifier/gitleaks_report.json:curl-auth-user:1726
+dc6a121c326247bfcf048c59b0b5727c84c2ea34:proof/FIX-VERIFY/verifier/gitleaks_report.json:curl-auth-user:2314
+dc6a121c326247bfcf048c59b0b5727c84c2ea34:proof/FIX-VERIFY/verifier/gitleaks_report.json:curl-auth-user:571

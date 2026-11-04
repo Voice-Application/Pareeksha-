@@ -60,8 +60,8 @@ Nothing else is typed; every other step is a click (names above are the labels i
 
 - The 72% pass rate in the PRD storyline is a design target, not a number to quote. Show the real pass rate of the
   real run and say it.
-- Dialect numbers come from real consented clips (H-02). Until those exist, do not record the Dialect shot as a finding
-  (synthetic groups are labelled as such in the report).
+- Dialect numbers come from the Vaani run in `proof/DIALECT-02` (110 clips). Say the Kannada WER is inflated by colloquial
+  spellings, and do not use the synthetic heatmap in `proof/EVAL-05` as a finding.
 - Show the HubSpot note only if it was produced by the live integration (not pasted).
 - No keys on screen: `.env` is never opened; the API key field in the UI is masked.
 

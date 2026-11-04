@@ -20,4 +20,4 @@ note "Guides: ${#guides[@]}; failing: ${#bad[@]}; pending: ${#pending[@]}"
 [ ${#pending[@]} -gt 0 ] && printf '%s\n' "${pending[@]}" | block
 [ ${#bad[@]} -gt 0 ] && finish FAIL "${#bad[@]} of ${#guides[@]} guide logs missing or not passing"
 [ ${#pending[@]} -gt 0 ] && finish PENDING "${#pending[@]} guide(s) need an owner key"
-finish PASS "all 8 guide logs end with RESULT: PASS"
+finish PASS "all 8 guide logs end with RESULT: PASS; recorded logs, guides not re-run here"
