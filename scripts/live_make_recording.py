@@ -25,17 +25,32 @@ TURNS = [
 
 
 async def main(out: Path) -> None:
+    """Stereo output (agent on the left channel, caller on the right) when argv[2] == "stereo"."""
+    stereo = len(sys.argv) > 2 and sys.argv[2] == "stereo"
     tts = get_tts_provider()
-    pcm = b""
     rate = 16000
+    chunks: list[tuple[int, bytes]] = []
     for voice, text in TURNS:
         res = await tts.synthesize(text, voice, LANGUAGE, sample_rate=rate)
         with wave.open(io.BytesIO(res.audio)) as w:
-            pcm += w.readframes(w.getnframes()) + b"\x00\x00" * int(rate * 0.6)
+            chunks.append((0 if voice == TURNS[0][0] else 1, w.readframes(w.getnframes())))
+    gap = b"\x00\x00" * int(rate * 0.6)
+    if not stereo:
+        pcm = b"".join(c + gap for _, c in chunks)
+    else:
+        import array
+        left, right = array.array("h"), array.array("h")
+        for side, c in chunks:
+            a = array.array("h", c + gap)
+            z = array.array("h", [0]) * len(a)
+            (left.extend(a), right.extend(z)) if side == 0 else (left.extend(z), right.extend(a))
+        inter = array.array("h", [0]) * (2 * len(left))
+        inter[0::2], inter[1::2] = left, right
+        pcm = inter.tobytes()
     with wave.open(str(out), "wb") as w:
-        w.setnchannels(1), w.setsampwidth(2), w.setframerate(rate)
+        w.setnchannels(2 if stereo else 1), w.setsampwidth(2), w.setframerate(rate)
         w.writeframes(pcm)
-    print(f"wrote {out} ({len(pcm) / 2 / rate:.1f}s)")
+    print(f"wrote {out} ({len(pcm) / 2 / rate / (2 if stereo else 1):.1f}s)")
 
 
 asyncio.run(main(Path(sys.argv[1])))
