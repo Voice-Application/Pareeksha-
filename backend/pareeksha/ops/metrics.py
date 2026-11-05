@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import uuid
 from datetime import datetime
 from typing import Any, cast
 
@@ -87,33 +88,48 @@ async def consumer_lag(bootstrap_servers: str) -> dict[str, int]:
         ) from exc
 
 
-async def _credits_used(session: AsyncSession) -> float:
-    return float(await session.scalar(select(func.coalesce(func.sum(ApiUsage.est_cost), 0))) or 0)
+async def _credits_used(session: AsyncSession, project_id: uuid.UUID) -> float:
+    return float(
+        await session.scalar(
+            select(func.coalesce(func.sum(ApiUsage.est_cost), 0)).where(
+                ApiUsage.project_id == project_id
+            )
+        )
+        or 0
+    )
 
 
-async def metrics_summary(session: AsyncSession, bootstrap_servers: str) -> MetricsSummary:
+async def metrics_summary(
+    session: AsyncSession, bootstrap_servers: str, project_id: uuid.UUID
+) -> MetricsSummary:
     lag = await consumer_lag(bootstrap_servers)
     backlog = await session.scalar(
         select(func.count()).select_from(OutboxEvents).where(OutboxEvents.published_at.is_(None))
     )
     dlq_open = await session.scalar(
-        select(func.count()).select_from(DeadLetters).where(DeadLetters.status == "open")
+        select(func.count())
+        .select_from(DeadLetters)
+        .where(DeadLetters.status == "open", DeadLetters.project_id == project_id)
     )
     return MetricsSummary(
         consumer_lag=lag,
         outbox_backlog=int(backlog or 0),
         dlq_open=int(dlq_open or 0),
-        credits_used=round(await _credits_used(session), 4),
+        credits_used=round(await _credits_used(session, project_id), 4),
     )
 
 
-async def usage(session: AsyncSession, from_: datetime | None, to: datetime | None) -> UsageOut:
-    """``api_usage`` aggregated per provider / operation / unit type inside ``[from, to]``.
+async def usage(
+    session: AsyncSession, project_id: uuid.UUID, from_: datetime | None, to: datetime | None
+) -> UsageOut:
+    """``api_usage`` for the caller's project, aggregated per provider / operation / unit type
+    inside ``[from, to]``.
 
-    ``credits_used`` is the cost inside the window; ``remaining_budget`` is the all-time budget
-    left (the same figure the run estimate checks), null when ``BUDGET_CREDITS`` is unset.
+    ``credits_used`` is the project's cost inside the window; ``remaining_budget`` is the project's
+    all-time budget left (the same figure the run estimate checks), null when ``BUDGET_CREDITS`` is
+    unset.
     """
-    conditions: list[Any] = []
+    conditions: list[Any] = [ApiUsage.project_id == project_id]
     if from_ is not None:
         conditions.append(ApiUsage.created_at >= from_)
     if to is not None:
@@ -146,5 +162,5 @@ async def usage(session: AsyncSession, from_: datetime | None, to: datetime | No
         items=items,
         credits_used=round(sum(i.est_cost or 0.0 for i in items), 4),
         budget_credits=budget_credits(),
-        remaining_budget=remaining_budget(await _credits_used(session)),
+        remaining_budget=remaining_budget(await _credits_used(session, project_id)),
     )

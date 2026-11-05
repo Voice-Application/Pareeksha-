@@ -17,11 +17,13 @@ import {
   Plug,
   Scale,
   ShieldCheck,
+  UserCog,
   Users,
   type LucideIcon,
 } from "lucide-react";
 import { NAV_ITEMS, type NavItem } from "@/lib/nav";
 import { cn } from "@/lib/utils";
+import { useRole } from "./theme-toggle";
 
 const GROUPS: NavItem["group"][] = [null, "Build", "Evaluate", "Operate"];
 
@@ -42,10 +44,12 @@ const ICONS: Record<string, LucideIcon> = {
   "/dlq": Inbox,
   "/calibration": Scale,
   "/settings/api-keys": KeyRound,
+  "/settings/users": UserCog,
 };
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const raw = usePathname();
+  const role = useRole();
   // A call is reached from a run, so Runs stays lit on /calls/[id].
   const pathname = raw.startsWith("/calls/") ? "/runs" : raw;
   // The most specific matching item is active, so /runs/new does not also light up Runs.
@@ -62,7 +66,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         <div key={group ?? "top"} className="flex flex-col gap-1">
           {group && <p className="px-3 pb-1 text-xs text-subtle">{group}</p>}
           <ul className="flex flex-col gap-px">
-            {NAV_ITEMS.filter((i) => i.group === group).map((item) => {
+            {NAV_ITEMS.filter((i) => i.group === group && (!i.adminOnly || role !== "member")).map((item) => {
               const active = match?.href === item.href;
               const Icon = ICONS[item.href];
               return (

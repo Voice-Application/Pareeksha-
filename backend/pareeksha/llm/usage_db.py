@@ -31,15 +31,24 @@ class UsageScope:
 
     run_id: uuid.UUID | None = None
     call_id: uuid.UUID | None = None
+    project_id: uuid.UUID | None = None
 
 
 _SCOPE: contextvars.ContextVar[UsageScope | None] = contextvars.ContextVar(
     "pareeksha_usage_scope", default=None
 )
 
+# project_id is resolved at write time: the explicit scope value if given, else the owning project
+# of the run or call. A row with none of the three leaves project_id NULL (operator-only in /usage).
 _INSERT = """
-INSERT INTO api_usage (provider, operation, units, unit_type, est_cost, cached, run_id, call_id)
-VALUES (%s, %s, %s, 'tokens', %s, %s, %s, %s)
+INSERT INTO api_usage (provider, operation, units, unit_type, est_cost, cached, run_id, call_id,
+                       project_id)
+VALUES (%s, %s, %s, 'tokens', %s, %s, %s, %s,
+        COALESCE(
+            %s,
+            (SELECT project_id FROM test_runs WHERE id = %s),
+            (SELECT project_id FROM calls WHERE id = %s)
+        ))
 """
 
 
@@ -51,9 +60,13 @@ class ApiUsageSink:
 
     @contextlib.contextmanager
     def scope(
-        self, *, run_id: uuid.UUID | None = None, call_id: uuid.UUID | None = None
+        self,
+        *,
+        run_id: uuid.UUID | None = None,
+        call_id: uuid.UUID | None = None,
+        project_id: uuid.UUID | None = None,
     ) -> Iterator[None]:
-        token = _SCOPE.set(UsageScope(run_id=run_id, call_id=call_id))
+        token = _SCOPE.set(UsageScope(run_id=run_id, call_id=call_id, project_id=project_id))
         try:
             yield
         finally:
@@ -67,6 +80,9 @@ class ApiUsageSink:
             record.input_tokens + record.output_tokens,
             record.est_cost,
             record.cache_hit,
+            scope.run_id,
+            scope.call_id,
+            scope.project_id,
             scope.run_id,
             scope.call_id,
         )

@@ -42,31 +42,58 @@ log = logging.getLogger(__name__)
 #: Largest WebSocket message accepted from an agent (a few seconds of audio at most).
 MAX_MESSAGE_BYTES = 1 << 20
 
+#: Backpressure: the reader blocks once this many undrained events are queued, so a peer that
+#: floods frames faster than the pipeline consumes them cannot grow the queue without bound.
+MAX_QUEUED_EVENTS = 256
+
+#: Per-call hard budget on volume (not just time): an untrusted peer may stream frames far faster
+#: than real time, so cap the total frames and bytes accepted. Generous for a legitimate call
+#: (hours of 20 ms audio / well above a real transcript) but bounds a flooding peer. Exceeding
+#: either ends the call with a protocol error.
+MAX_TOTAL_FRAMES = 1_000_000
+MAX_TOTAL_BYTES = 512 * 1024 * 1024
+
 
 class AudioV1Session(AudioSession):
     """One live ``pareeksha-audio-v1`` call. A background task turns frames into events."""
 
     def __init__(self, ws: ClientConnection) -> None:
         self._ws = ws
-        self._events: asyncio.Queue[AgentEvent | None] = asyncio.Queue()
+        self._events: asyncio.Queue[AgentEvent | None] = asyncio.Queue(maxsize=MAX_QUEUED_EVENTS)
         self._closed = False
         self._ended = False
         #: Unknown or malformed agent text frames that were skipped (forward compatibility).
         self.ignored_messages = 0
+        #: Per-call volume accounting for the hard budget (independent of the time watchdog).
+        self._frames_seen = 0
+        self._bytes_seen = 0
         self._reader = asyncio.create_task(self._read_loop(), name="audio_v1-reader")
+
+    def _over_budget(self, message: bytes | str) -> bool:
+        """Account one inbound frame; True once the per-call frame/byte budget is exceeded."""
+        self._frames_seen += 1
+        self._bytes_seen += (
+            len(message)
+            if isinstance(message, (bytes, bytearray))
+            else len(message.encode("utf-8", "ignore"))
+        )
+        return self._frames_seen > MAX_TOTAL_FRAMES or self._bytes_seen > MAX_TOTAL_BYTES
 
     async def _read_loop(self) -> None:
         reason = "transport_closed"
         try:
             async for message in self._ws:
+                if self._over_budget(message):
+                    raise AgentProtocolError("agent exceeded the per-call frame/byte budget")
                 if isinstance(message, bytes):
                     for audio in self._on_binary(message):
-                        self._events.put_nowait(audio)
+                        # await (not put_nowait) so a flood is backpressured, not buffered unbounded
+                        await self._events.put(audio)
                     continue
                 event = self._parse_text(message)
                 if event is None:
                     continue
-                self._events.put_nowait(event)
+                await self._events.put(event)
                 if isinstance(event, AgentCallEnd):
                     self._ended = True
                     return
@@ -78,8 +105,8 @@ class AudioV1Session(AudioSession):
         finally:
             if not self._ended and not self._closed:
                 self._ended = True
-                self._events.put_nowait(AgentCallEnd(reason))
-            self._events.put_nowait(None)
+                await self._events.put(AgentCallEnd(reason))
+            await self._events.put(None)
 
     def _on_binary(self, data: bytes) -> list[AgentEvent]:
         """Turn one binary frame into events; subclasses may re-frame the audio."""
@@ -128,7 +155,9 @@ class AudioV1Session(AudioSession):
         self._reader.cancel()
         with contextlib.suppress(asyncio.CancelledError):
             await self._reader
-        self._events.put_nowait(None)
+        # Wake a waiting receive() with the sentinel; make room first since the queue is bounded.
+        with contextlib.suppress(asyncio.QueueFull):
+            self._events.put_nowait(None)
 
 
 class AudioV1Adapter(Adapter):

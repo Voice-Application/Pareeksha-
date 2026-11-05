@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import uuid
 from typing import Any
@@ -165,6 +166,31 @@ async def test_a_json_array_is_a_protocol_error_too() -> None:
         events = await collect(session)
         await session.close()
     assert isinstance(events[0], AgentCallEnd) and "JSON objects" in events[0].reason
+
+
+async def test_a_flood_of_frames_ends_the_call_at_the_per_call_budget(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """An untrusted peer that floods frames is cut off by the per-call frame budget (SEC-01)."""
+    monkeypatch.setattr("pareeksha.adapters.audio_v1.MAX_TOTAL_FRAMES", 20)
+
+    async def agent(ws: ServerConnection) -> None:
+        await read_start(ws)
+        with contextlib.suppress(Exception):
+            for _ in range(500):
+                await ws.send(LOUD_FRAME)
+                await asyncio.sleep(0)
+        await asyncio.sleep(0.5)
+
+    async with agent_server(agent) as url:
+        session = await AudioV1Adapter().connect(target(url), ctx())
+        events = await collect(session)
+        await session.close()
+    # the session stops at the budget: far fewer than the 500 frames sent, ends in a protocol error
+    assert isinstance(events[-1], AgentCallEnd)
+    assert events[-1].reason.startswith("protocol_error")
+    audio = [e for e in events if isinstance(e, AgentAudio)]
+    assert len(audio) <= 20
 
 
 async def test_connect_failure_is_an_agent_connect_error() -> None:

@@ -184,7 +184,7 @@ async def on_call_requested(env: Envelope[CallRequested], ctx: Ctx) -> Sequence[
     await store.mark_in_progress(conn, req.run_item_id)
 
     sink = _usage if _usage is not None else _usage_sink()
-    with sink.scope(run_id=req.run_id, call_id=spec.call_id):
+    with sink.scope(run_id=req.run_id, call_id=spec.call_id, project_id=project_id):
         result, audio = await _run_call(spec)
 
     keys: dict[str, str] | None = None

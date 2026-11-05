@@ -332,24 +332,28 @@ class Auditor:
         )
         for t in transcripts:
             await tx.execute(
-                "INSERT INTO api_usage (provider, operation, units, unit_type, est_cost, call_id) "
-                "VALUES (%s, %s, %s, 'audio_seconds', %s, %s)",
+                "INSERT INTO api_usage (provider, operation, units, unit_type, est_cost, call_id, "
+                "project_id) VALUES (%s, %s, %s, 'audio_seconds', %s, %s, "
+                "(SELECT project_id FROM calls WHERE id = %s))",
                 (
                     t.provider.value,
                     t.usage.operation,
                     t.usage.audio_seconds,
                     t.usage.est_cost,
                     p.call_id,
+                    p.call_id,
                 ),
             )
         if decision.llm_model is not None and self.deps.llm is not None:
             await tx.execute(
-                "INSERT INTO api_usage (provider, operation, units, unit_type, est_cost, call_id) "
-                "VALUES (%s, 'llm_role_detect', %s, 'tokens', %s, %s)",
+                "INSERT INTO api_usage (provider, operation, units, unit_type, est_cost, call_id, "
+                "project_id) VALUES (%s, 'llm_role_detect', %s, 'tokens', %s, %s, "
+                "(SELECT project_id FROM calls WHERE id = %s))",
                 (
                     self.deps.llm.provider.name.value,
                     decision.input_tokens + decision.output_tokens,
                     decision.est_cost,
+                    p.call_id,
                     p.call_id,
                 ),
             )

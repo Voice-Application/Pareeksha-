@@ -76,7 +76,7 @@ async def create_regression_run(
             {"statuses": statuses},
         )
     estimate = estimate_run([max_turns for _, max_turns in rows])
-    remaining = await remaining_budget(session)
+    remaining = await remaining_budget(session, key.project_id)
     if remaining is not None and estimate.est_cost > remaining and not body.confirm_over_budget:
         raise ApiError(
             402,

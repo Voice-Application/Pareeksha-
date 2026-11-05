@@ -165,7 +165,9 @@ services:
     environment:
       PAREEKSHA_API_URL: http://api:8000/api/v1
       PAREEKSHA_API_KEY: ${PAREEKSHA_API_KEY:-}
-      WEB_PASSWORD: ${WEB_PASSWORD:-}
+      # Sign-in is on. SESSION_SECRET signs the session cookie: set your own (16+ characters) in .env.
+      SESSION_SECRET: ${SESSION_SECRET:-pareeksha-dev-session-secret-change-me}
+      AUTH_DISABLED: ${AUTH_DISABLED:-}
     ports: ["${WEB_HOST_PORT:-3000}:3000"]
     depends_on: { api: { condition: service_healthy } }
     restart: unless-stopped

@@ -430,6 +430,8 @@ Implementation notes (API-04): list is newest first by `failed_at`, `status` def
 | `GET /api-keys` | list with prefix, scopes, last_used_at |
 | `DELETE /api-keys/{id}` | revoke |
 
+Web sign-in accounts (called only by the Next.js server with an `admin` key, which then sets its own session cookie): `GET /auth/status` returns `{ has_users }`; `POST /auth/bootstrap` creates the first admin (`409 already_bootstrapped` afterwards); `POST /auth/login` verifies email and password (`401 invalid_credentials`, `403 account_disabled`); `GET /users`, `POST /users` and `PATCH /users/{id}` manage users (`409 email_taken`, `409 last_admin`). Passwords are 10 to 200 characters (else `422 invalid_password`), stored as scrypt hashes and never returned.
+
 ## 11. Event contract (for consumers outside the API)
 
 Kafka topics, keys and the envelope are specified in `03-TRD.md §10`. The Pydantic models in `backend/pareeksha/events/schemas.py` are the source of truth; `GET /events/schemas` returns their JSON Schemas so external consumers (e.g. a data team reading `evaluation.completed`) can validate messages.

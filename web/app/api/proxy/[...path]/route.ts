@@ -1,4 +1,5 @@
 import type { NextRequest } from "next/server";
+import { SESSION_COOKIE, sessionSecret, verifySessionToken } from "@/lib/session";
 
 /**
  * BFF proxy (TRD 11, FR-DB-5): the browser calls /api/proxy/<path>; this handler forwards to the origin of
@@ -19,6 +20,15 @@ async function handle(req: NextRequest, ctx: { params: Promise<{ path: string[] 
   const { path } = await ctx.params;
   if (path.some((seg) => seg === ".." || seg === "." || seg.includes("\\"))) {
     return Response.json({ error: "invalid path" }, { status: 400 });
+  }
+
+  // Account endpoints are for the web server only; user management is for admins.
+  const seg = path[0] === "api" && path[1] === "v1" ? path[2] : path[0];
+  if (seg === "auth") return Response.json({ error: "not found" }, { status: 404 });
+  if (seg === "users" && process.env.AUTH_DISABLED !== "1") {
+    const secret = sessionSecret();
+    const user = secret ? await verifySessionToken(secret, req.cookies.get(SESSION_COOKIE)?.value) : null;
+    if (user?.role !== "admin") return Response.json({ error: "admins only" }, { status: 403 });
   }
 
   const target = new URL(`${new URL(base).origin}/${path.map(encodeURIComponent).join("/")}`);

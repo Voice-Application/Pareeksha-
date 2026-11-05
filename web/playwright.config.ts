@@ -18,7 +18,7 @@ export default defineConfig({
     env: {
       PAREEKSHA_API_URL: "http://127.0.0.1:3199/api/v1",
       PAREEKSHA_API_KEY: "pk_test_fe01_secret",
-      WEB_PASSWORD: "",
+      AUTH_DISABLED: "1",
     },
   },
 });

@@ -101,16 +101,21 @@ async def _one(conn: psycopg.AsyncConnection[Any], sql: str, params: tuple[Any, 
     return await cur.fetchone()
 
 
-async def _record_llm_usage(conn: psycopg.AsyncConnection[Any], record: UsageRecord) -> None:
+async def _record_llm_usage(
+    conn: psycopg.AsyncConnection[Any], record: UsageRecord, sample_id: uuid.UUID
+) -> None:
     await conn.execute(
-        "INSERT INTO api_usage (provider, operation, units, unit_type, cached, est_cost) "
-        "VALUES (%s, %s, %s, 'tokens', %s, %s)",
+        "INSERT INTO api_usage (provider, operation, units, unit_type, cached, est_cost, "
+        "project_id) VALUES (%s, %s, %s, 'tokens', %s, %s, "
+        "(SELECT d.project_id FROM dialect_samples s "
+        "JOIN dialect_datasets d ON d.id = s.dataset_id WHERE s.id = %s))",
         (
             record.provider.value,
             f"llm_{record.purpose.value}",
             record.input_tokens + record.output_tokens,
             record.cache_hit,
             record.est_cost,
+            sample_id,
         ),
     )
 
@@ -165,19 +170,22 @@ async def handle_clip_requested(
             raise PermanentError(str(exc)) from exc
         latency_ms = round((time.monotonic() - t0) * 1000)
         await conn.execute(
-            "INSERT INTO api_usage (provider, operation, units, unit_type, est_cost) "
-            "VALUES (%s, %s, %s, 'audio_seconds', %s)",
+            "INSERT INTO api_usage (provider, operation, units, unit_type, est_cost, project_id) "
+            "VALUES (%s, %s, %s, 'audio_seconds', %s, "
+            "(SELECT d.project_id FROM dialect_samples s "
+            "JOIN dialect_datasets d ON d.id = s.dataset_id WHERE s.id = %s))",
             (
                 provider.value,
                 transcript.usage.operation,
                 transcript.usage.audio_seconds or wav_seconds(degraded),
                 transcript.usage.est_cost,
+                p.sample_id,
             ),
         )
         scores = score_clip(reference, transcript.text, domain_terms)
 
-        async def sink(record: UsageRecord) -> None:
-            await _record_llm_usage(conn, record)
+        async def sink(record: UsageRecord, sample_id: uuid.UUID = p.sample_id) -> None:
+            await _record_llm_usage(conn, record, sample_id)
 
         verdict = await intent_preserved(
             deps.llm_for(sink),

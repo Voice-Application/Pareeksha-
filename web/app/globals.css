@@ -83,8 +83,9 @@ body {
 }
 ::selection { background: color-mix(in oklab, var(--accent) 24%, transparent); color: var(--fg); }
 
-h1, h2, h3 { font-family: var(--font-display); font-weight: var(--weight-medium); letter-spacing: var(--tracking-display); overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: var(--weight-display); letter-spacing: var(--tracking-display); overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
 p { text-wrap: pretty; }
+.dark h1, .dark h2, .dark h3, .dark .display { font-variation-settings: "SHRP" 100; }
 
 :focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -95,7 +96,7 @@ p { text-wrap: pretty; }
 .num { font-variant-numeric: tabular-nums; }
 /* A quiet label: the body face a step smaller, sentence case, untracked. */
 .label { font-size: var(--text-sm); line-height: var(--lh-sm); font-weight: var(--weight-regular); color: var(--fg-muted); }
-.display { font-family: var(--font-display); font-weight: var(--weight-medium); letter-spacing: var(--tracking-display); }
+.display { font-family: var(--font-display); font-weight: var(--weight-display); letter-spacing: var(--tracking-display); }
 
 /* Loading: 1.2 s opacity pulse, static under reduced motion. */
 @keyframes pulse-op { 0%, 100% { opacity: 1; } 50% { opacity: .6; } }

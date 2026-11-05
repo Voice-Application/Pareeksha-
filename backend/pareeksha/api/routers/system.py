@@ -110,7 +110,7 @@ async def get_usage(
     from_: Annotated[datetime | None, Query(alias="from")] = None,
     to: datetime | None = None,
 ) -> UsageOut:
-    return await metrics.usage(session, from_, to)
+    return await metrics.usage(session, key.project_id, from_, to)
 
 
 @authed.get(
@@ -121,7 +121,7 @@ async def get_usage(
 async def get_metrics_summary(
     key: ReadKey, session: Db, bootstrap: Annotated[str, Depends(kafka_bootstrap)]
 ) -> MetricsSummary:
-    return await metrics.metrics_summary(session, bootstrap)
+    return await metrics.metrics_summary(session, bootstrap, key.project_id)
 
 
 @authed.get(

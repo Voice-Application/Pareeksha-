@@ -28,6 +28,7 @@ from pareeksha.api.routers import (
     runs,
     scenarios,
     system,
+    users,
     webhooks,
 )
 from pareeksha.schemas.runs import SSE_EVENT_MODELS
@@ -56,6 +57,7 @@ ROUTERS = (
     webhooks.router,
     dlq.router,
     api_keys.router,
+    users.router,
     system.router,
     system.authed,
 )

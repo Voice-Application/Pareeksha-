@@ -53,17 +53,28 @@ CREATE TABLE IF NOT EXISTS it_side_effects (
 )
 """
 
+#: The dead-letter recorder resolves a dead letter's project from these tables. The plumbing DB
+#: holds only Kafka tables, so it gets empty stand-ins with the columns the recorder reads.
+_OWNER_STUBS = """
+CREATE TABLE IF NOT EXISTS calls (id uuid PRIMARY KEY, project_id uuid);
+CREATE TABLE IF NOT EXISTS test_runs (id uuid PRIMARY KEY, project_id uuid);
+CREATE TABLE IF NOT EXISTS agents (id uuid PRIMARY KEY, project_id uuid);
+CREATE TABLE IF NOT EXISTS integrations (id uuid PRIMARY KEY, project_id uuid);
+CREATE TABLE IF NOT EXISTS dialect_datasets (id uuid PRIMARY KEY, project_id uuid);
+CREATE TABLE IF NOT EXISTS dialect_samples (id uuid PRIMARY KEY, dataset_id uuid);
+"""
+
 
 def plumbing_ddl() -> list[str]:
     text = SCHEMA_SQL.read_text(encoding="utf-8")
     out: list[str] = []
     for m in re.finditer(r"CREATE (TABLE|INDEX) (\w+)\b.*?;", text, flags=re.DOTALL):
         if m.group(2) in _PLUMBING:
-            out.append(
-                m.group(0).replace(
-                    f"CREATE {m.group(1)} ", f"CREATE {m.group(1)} IF NOT EXISTS ", 1
-                )
+            stmt = m.group(0).replace(
+                f"CREATE {m.group(1)} ", f"CREATE {m.group(1)} IF NOT EXISTS ", 1
             )
+            # The plumbing database has no projects table, so drop the tenant foreign keys.
+            out.append(stmt.replace(" REFERENCES projects(id) ON DELETE CASCADE", ""))
     assert len(out) == len(_PLUMBING), f"expected {len(_PLUMBING)} statements, found {len(out)}"
     return out
 
@@ -83,6 +94,7 @@ def prepare_database() -> None:
         for stmt in plumbing_ddl():
             conn.execute(stmt)
         conn.execute(SIDE_EFFECTS_DDL)
+        conn.execute(_OWNER_STUBS)
 
 
 def unique_group(prefix: str) -> str:

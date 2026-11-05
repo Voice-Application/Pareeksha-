@@ -21,6 +21,13 @@ from pareeksha.speech.wav import pcm_to_wav
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 TARGET_RATE = 16000
 MIN_DURATION_S = 0.3
+#: Longest recording accepted. A small but long or highly compressible file can decode to a PCM
+#: buffer far larger than its compressed size, so the duration is capped BEFORE the full decode
+#: (libsndfile reports it from the header) to bound memory and CPU per upload. 1800 s matches the
+#: maximum ``agents.max_call_seconds``.
+MAX_DURATION_S = 1800.0
+#: Only mono or stereo recordings are evaluated.
+MAX_CHANNELS = 2
 
 AudioFormat = Literal["wav", "mp3"]
 
@@ -61,6 +68,26 @@ def check_size(data: bytes) -> None:
         raise AudioError("recording is empty")
 
 
+def _check_decoded_bounds(data: bytes) -> None:
+    """Reject over-long or over-channel recordings from the libsndfile header, before decoding.
+
+    ``sf.read`` allocates the whole PCM buffer (frames x channels x 4 bytes) up front, so a small
+    but long or highly compressible file could expand far beyond the 10 MB input cap. ``sf.info``
+    reads only the header, so the duration and channel count are bounded without that allocation.
+    """
+    try:
+        info = sf.info(io.BytesIO(data))
+    except (sf.LibsndfileError, RuntimeError, ValueError):
+        return  # a header we cannot read fails later in sf.read with a clear AudioError
+    if info.channels > MAX_CHANNELS:
+        raise AudioError(f"unsupported audio: {info.channels} channels (mono or stereo only)")
+    if info.frames and info.samplerate and info.frames / info.samplerate > MAX_DURATION_S:
+        raise AudioTooLargeError(
+            f"recording is longer than {int(MAX_DURATION_S)} s "
+            f"({info.frames / info.samplerate:.0f} s)"
+        )
+
+
 def _to_target_rate(x: np.ndarray, rate: int) -> np.ndarray:
     if rate == TARGET_RATE:
         return x
@@ -78,6 +105,7 @@ def decode_audio(data: bytes) -> DecodedAudio:
     """Validate and convert a recording; raises :class:`AudioError` on anything unusable."""
     check_size(data)
     fmt = sniff_format(data)
+    _check_decoded_bounds(data)  # bound the decoded size before sf.read allocates it
     try:
         samples, rate = sf.read(io.BytesIO(data), dtype="float32", always_2d=True)
     except (sf.LibsndfileError, RuntimeError, ValueError) as exc:

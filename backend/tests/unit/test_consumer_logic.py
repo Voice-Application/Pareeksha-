@@ -152,6 +152,27 @@ def test_dead_letter_from_garbage_is_still_recorded_with_a_stable_id() -> None:
     assert to_dead_letter(b"[1, 2]", None, {}, "t").envelope == {"raw": [1, 2]}
 
 
+def test_dead_letter_extracts_owner_hints_from_the_payload() -> None:
+    """The recorder pulls owning-entity ids from the envelope so the DB can resolve project_id."""
+    call_id = uuid.uuid4()
+    value = json.dumps(
+        {
+            "event_id": str(uuid.uuid4()),
+            "type": "audit.requested",
+            "payload": {"call_id": str(call_id), "agent_id": str(uuid.uuid4())},
+        }
+    ).encode()
+    dl = to_dead_letter(value, b"k", {}, Topics.DLQ.value)
+    assert dl.project_hints["call_id"] == call_id
+    assert dl.project_hints["agent_id"] is not None
+    assert dl.project_hints["run_id"] is None  # not in this payload
+    # a message with no usable payload leaves every hint None (project stays NULL: operator-only)
+    bare = to_dead_letter(b"\xff not json", None, {}, Topics.DLQ.value)
+    assert set(bare.project_hints) == {"call_id", "run_id", "agent_id", "integration_id",
+                                       "sample_id"}  # fmt: skip
+    assert all(v is None for v in bare.project_hints.values())
+
+
 def test_header_round_trip_and_timestamps() -> None:
     headers = {"x-a": "ä", "x-b": "2"}
     assert decode_headers(encode_headers(headers)) == headers

@@ -255,7 +255,13 @@ async def test_remaining_budget_subtracts_api_usage(
     monkeypatch.setenv("BUDGET_CREDITS", "100")
     async with session_factory() as session:
         session.add(
-            models.ApiUsage(provider="gnani", operation="tts", units=1, unit_type="characters")
+            models.ApiUsage(
+                provider="gnani",
+                operation="tts",
+                units=1,
+                unit_type="characters",
+                project_id=tenant.project_id,
+            )
         )
         session.add(
             models.ApiUsage(
@@ -263,7 +269,11 @@ async def test_remaining_budget_subtracts_api_usage(
             )
         )
         await session.commit()
-        before = await session.scalar(select(func.coalesce(func.sum(models.ApiUsage.est_cost), 0)))
+        before = await session.scalar(
+            select(func.coalesce(func.sum(models.ApiUsage.est_cost), 0)).where(
+                models.ApiUsage.project_id == tenant.project_id
+            )
+        )
     fx = await make_fixture(api, tenant, 1, 1, 1)
     estimate = (await api.post(f"{API}/runs:estimate", json=fx.body(), headers=tenant.read)).json()
     assert estimate["remaining_budget"] == pytest.approx(100 - float(before or 0), abs=0.01)
