@@ -325,7 +325,7 @@ export function ScenarioForm({ scenarioId }: { scenarioId?: string }) {
                 <div key={i} className="flex items-center gap-2">
                   <span className="mono w-5 text-xs text-subtle">{form.ordered ? i + 1 : "-"}</span>
                   {agentTools.length > 0 ? (
-                    <select aria-label={`Tool ${i + 1}`} value={t.name} onChange={(e) => patch({ tools: form.tools.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)) })} className="mono h-8 flex-1 rounded-sm border border-border-strong bg-surface px-2 text-sm">
+                    <select aria-label={`Tool ${i + 1}`} value={t.name} onChange={(e) => patch({ tools: form.tools.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)) })} className="mono h-9 flex-1 rounded-sm border border-border-strong bg-surface px-2 text-sm">
                       <option value="">Choose a tool</option>
                       {[...new Set([...agentTools, t.name].filter(Boolean))].map((n) => (
                         <option key={n} value={n}>
@@ -334,7 +334,7 @@ export function ScenarioForm({ scenarioId }: { scenarioId?: string }) {
                       ))}
                     </select>
                   ) : (
-                    <input aria-label={`Tool ${i + 1}`} placeholder="tool_name" value={t.name} onChange={(e) => patch({ tools: form.tools.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)) })} className="mono h-8 flex-1 rounded-sm border border-border-strong bg-surface px-2 text-sm" />
+                    <input aria-label={`Tool ${i + 1}`} placeholder="tool_name" value={t.name} onChange={(e) => patch({ tools: form.tools.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)) })} className="mono h-9 flex-1 rounded-sm border border-border-strong bg-surface px-2 text-sm" />
                   )}
                   <Button variant="ghost" icon aria-label={`Move tool ${i + 1} up`} disabled={i === 0} onClick={() => patch({ tools: swap(form.tools, i, i - 1) })}>
                     <ArrowUp size={14} strokeWidth={1.6} aria-hidden />
@@ -367,7 +367,7 @@ export function ScenarioForm({ scenarioId }: { scenarioId?: string }) {
             <Button type="submit" variant="primary" loading={save.isPending}>
               {isNew ? "Create scenario" : "Save changes"}
             </Button>
-            <Link href="/scenarios" className="inline-flex h-8 items-center px-3 text-sm text-muted hover:text-fg">
+            <Link href="/scenarios" className="inline-flex h-9 items-center px-3 text-sm text-muted hover:text-fg">
               Cancel
             </Link>
             {dirty && <span className="text-xs text-subtle">Unsaved changes</span>}
@@ -377,7 +377,7 @@ export function ScenarioForm({ scenarioId }: { scenarioId?: string }) {
         <aside className="min-w-0 min-[1180px]:sticky min-[1180px]:top-16 min-[1180px]:self-start">
           <Panel title="How the judge will read this" bodyClassName="grid gap-4">
             <section aria-label="Success criteria checklist">
-              <h3 className="eyebrow mb-1">Success criteria</h3>
+              <h3 className="label mb-1">Success criteria</h3>
               {splitCriteria(form.success_criteria).length === 0 ? (
                 <p className="text-sm text-subtle">Nothing yet.</p>
               ) : (
@@ -392,7 +392,7 @@ export function ScenarioForm({ scenarioId }: { scenarioId?: string }) {
               )}
             </section>
             <section aria-label="Facts">
-              <h3 className="eyebrow mb-1">Facts the caller knows</h3>
+              <h3 className="label mb-1">Facts the caller knows</h3>
               {form.fixtures.filter((r) => r.key).length === 0 ? (
                 <p className="text-sm text-subtle">None.</p>
               ) : (
@@ -412,7 +412,7 @@ export function ScenarioForm({ scenarioId }: { scenarioId?: string }) {
             </section>
             {warn.length > 0 && (
               <section aria-label="Authoring warnings">
-                <h3 className="eyebrow mb-1">Warnings</h3>
+                <h3 className="label mb-1">Warnings</h3>
                 <ul className="grid gap-2">
                   {warn.map((w) => (
                     <li key={w} className="flex gap-2 border-l-2 border-warn bg-warn-tint px-3 py-2 text-sm">

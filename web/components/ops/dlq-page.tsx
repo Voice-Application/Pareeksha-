@@ -133,13 +133,13 @@ export function DlqPage() {
         {open && (
           <div className="flex flex-col gap-4">
             <dl className="grid grid-cols-2 gap-3 text-sm">
-              <div><dt className="eyebrow">Topic</dt><dd className="mono break-all">{open.original_topic}</dd></div>
-              <div><dt className="eyebrow">Consumer</dt><dd className="mono">{open.consumer_group}</dd></div>
-              <div><dt className="eyebrow">Attempts</dt><dd className="mono">{open.attempts}</dd></div>
-              <div><dt className="eyebrow">Status</dt><dd><DlStatus s={open.status} /></dd></div>
+              <div><dt className="label">Topic</dt><dd className="mono break-all">{open.original_topic}</dd></div>
+              <div><dt className="label">Consumer</dt><dd className="mono">{open.consumer_group}</dd></div>
+              <div><dt className="label">Attempts</dt><dd className="mono">{open.attempts}</dd></div>
+              <div><dt className="label">Status</dt><dd><DlStatus s={open.status} /></dd></div>
             </dl>
-            <div><p className="eyebrow mb-1">Error</p><CodeBlock label="error" text={open.error} /></div>
-            <div><p className="eyebrow mb-1">Envelope (as received, PII masked)</p><CodeBlock label="envelope JSON" text={JSON.stringify(open.envelope, null, 2)} /></div>
+            <div><p className="label mb-1">Error</p><CodeBlock label="error" text={open.error} /></div>
+            <div><p className="label mb-1">Envelope (as received, PII masked)</p><CodeBlock label="envelope JSON" text={JSON.stringify(open.envelope, null, 2)} /></div>
           </div>
         )}
       </Sheet>

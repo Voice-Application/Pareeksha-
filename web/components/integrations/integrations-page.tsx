@@ -108,7 +108,7 @@ function AddSheet({ open, onClose, connectors }: { open: boolean; onClose: () =>
               <JsonSchemaForm schema={info.config_schema} values={config} onChange={setConfig} />
               <JsonSchemaForm schema={info.secrets_schema} values={secrets} onChange={setSecrets} secret />
               <fieldset className="flex flex-col gap-3 border-t border-border pt-4">
-                <legend className="eyebrow mb-1">Event filter</legend>
+                <legend className="label mb-1">Event filter</legend>
                 <TextField label="Events" help="Comma separated, for example evaluation.completed" value={events} onChange={(e) => setEvents(e.target.value)} />
                 <Switch label="Only failed calls" checked={onlyFailed} onChange={setOnlyFailed} />
                 <NumberField label="Only scores below" help="Optional" min={0} max={100} value={below} onChange={(e) => setBelow(e.target.value)} />
@@ -159,13 +159,24 @@ export function IntegrationsPage() {
           ) : connectors.isError ? (
             <ErrorPanel error={connectors.error} what="connectors" onRetry={() => void connectors.refetch()} />
           ) : (
-            <ul className="flex flex-col gap-2 text-sm">
-              {cs.length === 0 && <li className="text-muted">The API reports no registered connectors.</li>}
-              {cs.map((c) => (
-                <li key={c.name} className="flex items-center gap-2"><span className="mono font-medium">{c.name}</span><Chip mono>{c.direction}</Chip><span className="text-muted">subscribes to {(c.subscribes_to ?? []).join(", ") || "nothing"}</span></li>
-              ))}
-              <li className="flex flex-wrap items-center gap-2 border-t border-border pt-2 text-muted">{PLANNED.map((p) => <span key={p} className="inline-flex items-center gap-1">{p}<Chip>Planned</Chip></span>)}</li>
-            </ul>
+            <div className="grid gap-x-10 gap-y-6 min-[1180px]:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
+              <ul className="divide-y divide-border text-sm">
+                {cs.length === 0 && <li className="py-3 text-muted">The API reports no registered connectors.</li>}
+                {cs.map((c) => (
+                  <li key={c.name} className="grid grid-cols-[8rem_5rem_minmax(0,1fr)] items-center gap-3 py-3 first:pt-0 max-[560px]:grid-cols-[1fr_auto]">
+                    <span className="mono text-base">{c.name}</span>
+                    <Chip mono className="w-fit">{c.direction}</Chip>
+                    <span className="text-muted max-[560px]:col-span-2">subscribes to <span className="mono text-xs text-fg">{(c.subscribes_to ?? []).join(", ") || "nothing"}</span></span>
+                  </li>
+                ))}
+              </ul>
+              <div className="text-sm">
+                <p className="mb-2 text-muted">Planned, not built yet</p>
+                <ul className="flex flex-wrap gap-1.5" aria-label="Planned connectors">
+                  {PLANNED.map((p) => <li key={p}><Chip>{p}</Chip></li>)}
+                </ul>
+              </div>
+            </div>
           )}
         </Panel>
       </div>

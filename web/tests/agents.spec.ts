@@ -106,6 +106,22 @@ test.describe("Agents list", () => {
     await expect(page.getByRole("status").filter({ hasText: "connected, first audio in 820 ms" })).toBeVisible();
   });
 
+  test("row menu flips above a trigger near the viewport edge", async ({ page }) => {
+    await open(page, "/agents");
+    const trigger = page.getByRole("button", { name: "Actions for EMI Reminder Bot" });
+    await trigger.evaluate((el: HTMLElement) => { el.style.position = "fixed"; el.style.bottom = "4px"; el.style.right = "4px"; });
+    await trigger.click();
+    const menu = page.getByRole("menu", { name: "Actions for EMI Reminder Bot" });
+    await expect(menu.getByRole("menuitem", { name: "Edit" })).toBeFocused();
+    const bounds = await menu.boundingBox();
+    const anchor = await trigger.boundingBox();
+    expect(bounds).not.toBeNull();
+    expect(anchor).not.toBeNull();
+    expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(anchor!.y - 4);
+    expect(bounds!.x).toBeGreaterThanOrEqual(0);
+    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+  });
+
   test("a failed connection test shows the error word in the row", async ({ page }) => {
     await open(page, "/agents", (s) => (s.testConnection = { ok: false, error: "refused", detail: "connection refused" }));
     await page.getByRole("button", { name: "Actions for EMI Reminder Bot" }).click();

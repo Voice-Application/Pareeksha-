@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { Ellipsis } from "lucide-react";
 import { Button } from "./button";
 import { cn } from "@/lib/utils";
@@ -10,7 +10,7 @@ export type MenuItem = { label: string; onSelect: () => void; destructive?: bool
 /** Trailing "..." menu. Enter/Space/ArrowDown open it, arrows move, Esc closes and returns focus to the trigger. */
 export function RowMenu({ label, items }: { label: string; items: MenuItem[] }) {
   const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
+  const [pos, setPos] = useState<{ top: number; right: number; above: number } | null>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const menu = useRef<HTMLDivElement>(null);
   const id = useId();
@@ -30,6 +30,14 @@ export function RowMenu({ label, items }: { label: string; items: MenuItem[] }) 
       window.removeEventListener("scroll", onScroll, true);
     };
   }, [open]);
+
+  // Flip above the trigger when the measured menu would run past the bottom of the viewport.
+  useLayoutEffect(() => {
+    const m = menu.current;
+    if (!open || !m || !pos) return;
+    const h = m.getBoundingClientRect().height;
+    if (pos.top + h > window.innerHeight - 8) m.style.top = `${Math.max(8, pos.above - h - 4)}px`;
+  }, [open, pos]);
 
   function close(refocus = true) {
     setOpen(false);
@@ -62,10 +70,10 @@ export function RowMenu({ label, items }: { label: string; items: MenuItem[] }) 
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? id : undefined}
-        className="h-8 w-8"
+        className="h-9 w-9"
         onClick={(e) => {
           const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
-          setPos({ top: r.bottom + 4, right: window.innerWidth - r.right });
+          setPos({ top: r.bottom + 4, right: window.innerWidth - r.right, above: r.top });
           setOpen((o) => !o);
         }}
         onKeyDown={(e) => {
@@ -97,7 +105,7 @@ export function RowMenu({ label, items }: { label: string; items: MenuItem[] }) 
                 close(false);
                 it.onSelect();
               }}
-              className={cn("flex h-8 w-full items-center rounded-sm px-2 text-left text-sm hover:bg-hover focus:bg-hover disabled:opacity-50", it.destructive && "text-fail-fg")}
+              className={cn("flex h-9 w-full items-center rounded-sm px-2 text-left text-sm hover:bg-hover focus:bg-hover disabled:opacity-50", it.destructive && "text-fail-fg")}
             >
               {it.label}
             </button>

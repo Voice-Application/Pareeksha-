@@ -159,7 +159,7 @@ function RegexField({ idBase, value, onChange, error, label }: { idBase: string;
             placeholder="try a phrase"
             value={sample}
             onChange={(e) => setSample(e.target.value)}
-            className="mono h-8 min-w-[160px] flex-1 rounded-sm border border-border-strong bg-surface px-2 text-sm"
+            className="mono h-9 min-w-[160px] flex-1 rounded-sm border border-border-strong bg-surface px-2 text-sm"
           />
           <span role="status" className="inline-flex min-w-[90px] items-center gap-1 text-sm">
             {matched === null ? (
@@ -351,7 +351,7 @@ export function AgentForm({ agentId }: { agentId?: string }) {
               <legend className="mb-1 text-sm font-medium">Languages</legend>
               <div className="flex flex-wrap gap-4">
                 {LANGUAGES.map((l) => (
-                  <label key={l} className="inline-flex min-h-8 items-center gap-2 text-sm">
+                  <label key={l} className="inline-flex min-h-9 items-center gap-2 text-sm">
                     <input
                       type="checkbox"
                       checked={form.languages.includes(l)}
@@ -445,7 +445,7 @@ export function AgentForm({ agentId }: { agentId?: string }) {
               <Button disabled={save.isPending} onClick={() => void submit("test")}>
                 Save and test
               </Button>
-              <Link href="/agents" className="inline-flex h-8 items-center px-3 text-sm text-muted hover:text-fg">
+              <Link href="/agents" className="inline-flex h-9 items-center px-3 text-sm text-muted hover:text-fg">
                 Cancel
               </Link>
               {dirty && <span className="text-xs text-subtle">Unsaved changes</span>}

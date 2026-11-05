@@ -12,9 +12,9 @@ export function Skeleton({ className, style }: { className?: string; style?: Rea
 export function TableSkeleton({ rows = 5, label = "Loading" }: { rows?: number; label?: string }) {
   return (
     <div role="status" aria-label={label} aria-busy="true">
-      <div className="h-9 border-b border-border bg-sunken" />
+      <div className="h-10 border-b border-border" />
       {Array.from({ length: rows }, (_, i) => (
-        <div key={i} className="flex h-9 items-center gap-4 border-b border-border px-3 last:border-0">
+        <div key={i} className="flex h-10 items-center gap-4 border-b border-border px-5 last:border-0">
           <Skeleton className="w-1/4" />
           <Skeleton className="w-1/6" />
           <Skeleton className="hidden w-1/6 min-[561px]:block" />
@@ -31,8 +31,8 @@ export function FormSkeleton({ sections = 3 }: { sections?: number }) {
       {Array.from({ length: sections }, (_, i) => (
         <div key={i} className="rounded-md border border-border bg-surface p-4">
           <Skeleton className="mb-4 h-5 w-40" />
-          <Skeleton className="mb-3 h-8 w-full" />
-          <Skeleton className="h-8 w-2/3" />
+          <Skeleton className="mb-3 h-9 w-full" />
+          <Skeleton className="h-9 w-2/3" />
         </div>
       ))}
     </div>
@@ -55,7 +55,7 @@ export function EmptyState({
   return (
     <div className="mx-auto flex max-w-[420px] flex-col items-center gap-2 px-4 py-12 text-center">
       <Icon size={24} strokeWidth={1.6} className="text-subtle" aria-hidden />
-      <h3 className="text-md font-medium">{title}</h3>
+      <h3 className="display text-md">{title}</h3>
       <p className="text-sm text-muted">{body}</p>
       {action && <div className="mt-2">{action}</div>}
       {secondary && <p className="text-xs text-subtle">{secondary}</p>}
@@ -72,7 +72,7 @@ function describe(error: unknown): { cause: string; requestId?: string } {
 export function ErrorPanel({ error, onRetry, what }: { error: unknown; onRetry?: () => void; what?: string }) {
   const { cause, requestId } = describe(error);
   return (
-    <div role="alert" className="flex flex-wrap items-center gap-3 border-l-2 border-fail bg-fail-tint px-4 py-3 text-sm">
+    <div role="alert" className="flex flex-wrap items-center gap-3 rounded-sm bg-fail-tint px-4 py-3 text-sm">
       <CircleAlert size={16} strokeWidth={1.6} className="shrink-0 text-fail-fg" aria-hidden />
       <p className="min-w-0 flex-1">
         <span className="font-medium text-fail-fg">{what ? `Could not load ${what}. ` : ""}</span>
@@ -95,14 +95,14 @@ export function Strip({ tone, children, onRetry }: { tone: "error" | "warn"; chi
     <div
       role={tone === "error" ? "alert" : "status"}
       className={cn(
-        "flex items-start gap-3 border-l-2 px-3 py-2 text-sm",
-        tone === "error" ? "border-fail bg-fail-tint" : "border-warn bg-warn-tint",
+        "flex items-start gap-3 rounded-sm px-4 py-3 text-sm",
+        tone === "error" ? "bg-fail-tint" : "bg-warn-tint",
       )}
     >
       <Icon size={16} strokeWidth={1.6} className={cn("mt-0.5 shrink-0", tone === "error" ? "text-fail-fg" : "text-warn-fg")} aria-hidden />
       <div className="min-w-0 flex-1">{children}</div>
       {onRetry && (
-        <Button onClick={onRetry} className="h-6 px-2">
+        <Button onClick={onRetry} className="h-7 px-3">
           Retry
         </Button>
       )}
@@ -118,14 +118,14 @@ export function PageError({ error, onRetry, backHref, backLabel }: { error: unkn
   return (
     <div role="alert" className="mx-auto flex max-w-[460px] flex-col items-center gap-2 py-16 text-center">
       <CircleAlert size={24} strokeWidth={1.6} className="text-fail-fg" aria-hidden />
-      <h2 className="text-md font-medium">
+      <h2 className="display text-lg">
         {notFound ? "This item does not exist or was deleted" : forbidden ? "This API key cannot read this" : "The API did not respond"}
       </h2>
       <p className="text-sm text-muted">{describe(error).cause}</p>
       {requestId && <p className="mono text-xs text-subtle">{requestId}</p>}
       <div className="mt-2 flex gap-2">
         {!notFound && onRetry && <Button onClick={onRetry}>Retry</Button>}
-        <a className="inline-flex h-8 items-center rounded-sm px-3 text-sm text-accent-fg underline" href={backHref}>
+        <a className="inline-flex h-9 items-center rounded-pill px-4 text-sm text-accent-fg underline underline-offset-2" href={backHref}>
           {backLabel}
         </a>
       </div>

@@ -125,10 +125,10 @@ export function ScenariosList() {
       sortable: true,
       cell: (s) =>
         s.source === "promoted" && s.source_call_id ? (
-          <span className="inline-flex items-center gap-2">
+          <span className="inline-flex items-center gap-2 whitespace-nowrap">
             <Chip>promoted</Chip>
-            <Link href={`/calls/${s.source_call_id}`} className="mono text-xs text-accent-fg underline-offset-2 hover:underline">
-              call {s.source_call_id.slice(0, 8)}
+            <Link href={`/calls/${s.source_call_id}`} aria-label={`call ${s.source_call_id.slice(0, 8)}`} className="mono text-xs text-accent-fg underline-offset-2 hover:underline">
+              {s.source_call_id.slice(0, 8)}
             </Link>
           </span>
         ) : (
@@ -147,7 +147,7 @@ export function ScenariosList() {
                 {t}
               </Chip>
             ))}
-            {s.tags.length > 3 && <span className="text-xs text-subtle">+{s.tags.length - 3}</span>}
+            {s.tags.length > 3 && <span className="num text-xs text-subtle" title={s.tags.slice(3).join(", ")}>+{s.tags.length - 3}</span>}
           </span>
         ) : (
           <span className="text-subtle">-</span>

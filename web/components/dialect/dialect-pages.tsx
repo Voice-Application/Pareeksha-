@@ -33,31 +33,33 @@ export function DialectIndex() {
       {off ? (
         <Panel><NotEnabled icon={Languages} what="Dialect evaluation" error={datasets.error ?? reports.error} /></Panel>
       ) : (
-        <div className="grid items-start gap-6 min-[1180px]:grid-cols-[minmax(0,1fr)_408px]">
-          <Panel title="Datasets" bodyClassName="p-0">
-            {datasets.isPending ? <TableSkeleton rows={3} /> : datasets.isError ? <div className="p-4"><ErrorPanel error={datasets.error} what="datasets" onRetry={() => void datasets.refetch()} /></div> : ds.length === 0 ? (
-              <EmptyState icon={Languages} title="No datasets yet" body="A dataset is a set of consented, labelled clips of one language, grouped by dialect." />
+        <div className="flex flex-col gap-6">
+          <Panel title="Reports" bodyClassName="p-0" aux={reports.isSuccess && rs.length > 0 ? <span className="num">{rs.length}</span> : undefined}>
+            {reports.isPending ? <TableSkeleton rows={3} /> : reports.isError ? <div className="px-5 pb-5"><ErrorPanel error={reports.error} what="reports" onRetry={() => void reports.refetch()} /></div> : rs.length === 0 ? (
+              <p className="px-5 pb-5 text-sm text-subtle">No reports yet. Evaluate a dataset to create one.</p>
             ) : (
-              <ul className="divide-y divide-border">
-                {ds.map((d) => (
-                  <li key={d.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                    <div><p className="font-medium">{d.name}</p><p className="text-xs text-muted">{d.description}</p></div>
-                    <Chip mono>{d.sample_count} clips</Chip>
+              <ul className="divide-y divide-border border-t border-border">
+                {rs.map((r) => (
+                  <li key={r.id} className="grid items-center gap-x-6 gap-y-2 px-5 py-4 min-[860px]:grid-cols-[minmax(0,1fr)_16rem]">
+                    <div className="min-w-0">
+                      <Link className="text-base font-medium underline-offset-2 hover:underline" href={`/dialect/${r.id}`}>Report {r.id.slice(0, 8)}</Link>
+                      <p className="mt-0.5 flex flex-wrap gap-x-4 text-sm text-muted"><span className="mono text-xs leading-5">{r.engines.join(", ")}</span><span>{r.conditions.length} conditions</span><time dateTime={r.created_at}>{relativeTime(r.created_at)}</time></p>
+                    </div>
+                    <ProgressBar done={r.progress.done} total={r.progress.expected_results} label="Report progress" />
                   </li>
                 ))}
               </ul>
             )}
           </Panel>
-          <Panel title="Reports" bodyClassName="p-0">
-            {reports.isPending ? <TableSkeleton rows={3} /> : reports.isError ? <div className="p-4"><ErrorPanel error={reports.error} what="reports" onRetry={() => void reports.refetch()} /></div> : rs.length === 0 ? (
-              <p className="p-4 text-sm text-subtle">No reports yet. Evaluate a dataset to create one.</p>
+          <Panel title="Datasets" bodyClassName="p-0" aux={datasets.isSuccess && ds.length > 0 ? <span className="num">{ds.length}</span> : undefined}>
+            {datasets.isPending ? <TableSkeleton rows={3} /> : datasets.isError ? <div className="px-5 pb-5"><ErrorPanel error={datasets.error} what="datasets" onRetry={() => void datasets.refetch()} /></div> : ds.length === 0 ? (
+              <EmptyState icon={Languages} title="No datasets yet" body="A dataset is a set of consented, labelled clips of one language, grouped by dialect." />
             ) : (
-              <ul className="divide-y divide-border">
-                {rs.map((r) => (
-                  <li key={r.id} className="flex flex-col gap-1 px-4 py-3">
-                    <Link className="font-medium underline-offset-2 hover:underline" href={`/dialect/${r.id}`}>Report {r.id.slice(0, 8)}</Link>
-                    <p className="text-xs text-muted">{r.engines.join(", ")} · {r.conditions.length} conditions · <time dateTime={r.created_at}>{relativeTime(r.created_at)}</time></p>
-                    <ProgressBar done={r.progress.done} total={r.progress.expected_results} label="Report progress" />
+              <ul className="divide-y divide-border border-t border-border">
+                {ds.map((d) => (
+                  <li key={d.id} className="flex items-center justify-between gap-4 px-5 py-4">
+                    <div className="min-w-0"><p className="text-base font-medium">{d.name}</p>{d.description && <p className="text-sm text-muted">{d.description}</p>}</div>
+                    <span className="num shrink-0 text-sm text-muted">{d.sample_count} clips</span>
                   </li>
                 ))}
               </ul>
@@ -154,12 +156,12 @@ export function DialectReport({ id }: { id: string }) {
               <div className="flex flex-col gap-3 text-sm">
                 <p className="font-medium">{pick.dialect} on {pick.condition}</p>
                 <dl className="grid grid-cols-2 gap-2">
-                  <div><dt className="eyebrow">WER</dt><dd className="mono">{(sel.wer * 100).toFixed(1)}%</dd></div>
-                  <div><dt className="eyebrow">95% CI</dt><dd className="mono">{(sel.wer_ci[0] * 100).toFixed(0)}-{(sel.wer_ci[1] * 100).toFixed(0)}%</dd></div>
-                  <div><dt className="eyebrow">CER</dt><dd className="mono">{(sel.cer * 100).toFixed(1)}%</dd></div>
-                  <div><dt className="eyebrow">Entity accuracy</dt><dd className="mono">{sel.entity_acc == null ? "-" : `${(sel.entity_acc * 100).toFixed(0)}%`}</dd></div>
+                  <div><dt className="label">WER</dt><dd className="mono">{(sel.wer * 100).toFixed(1)}%</dd></div>
+                  <div><dt className="label">95% CI</dt><dd className="mono">{(sel.wer_ci[0] * 100).toFixed(0)}-{(sel.wer_ci[1] * 100).toFixed(0)}%</dd></div>
+                  <div><dt className="label">CER</dt><dd className="mono">{(sel.cer * 100).toFixed(1)}%</dd></div>
+                  <div><dt className="label">Entity accuracy</dt><dd className="mono">{sel.entity_acc == null ? "-" : `${(sel.entity_acc * 100).toFixed(0)}%`}</dd></div>
                 </dl>
-                <p className="eyebrow">Worst clips</p>
+                <p className="label">Worst clips</p>
                 {clips.isPending ? <p className="text-subtle">Loading clips…</p> : (clips.data ?? []).slice(0, 10).map((c) => (
                   <div key={c.sample_id + c.engine} className="rounded-sm border border-border p-2">
                     <p lang="kn" className="text-sm">{c.reference_text}</p><p lang="kn" className="text-sm text-muted">{c.hypothesis_text}</p>

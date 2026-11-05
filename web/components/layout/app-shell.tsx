@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { Menu, Moon, Sun, X } from "lucide-react";
+import { LogOut, Menu, Moon, Sun, X } from "lucide-react";
 import { Sidebar } from "./sidebar";
 import { Button } from "@/components/ui/button";
 import { ToastProvider } from "@/components/ui/toast";
 import { NAV_ITEMS } from "@/lib/nav";
+import { SIGNED_IN_COOKIE } from "@/lib/session";
 
 type Theme = "light" | "dark";
 
@@ -42,6 +43,24 @@ function ThemeToggle() {
   );
 }
 
+/** Shown only after a password sign-in. The form posts, so signing out works without script too. */
+function SignOut() {
+  const signedIn = useSyncExternalStore(
+    () => () => {},
+    () => document.cookie.split("; ").some((c) => c === `${SIGNED_IN_COOKIE}=1`),
+    () => false,
+  );
+  if (!signedIn) return null;
+  return (
+    <form method="post" action="/api/auth/logout">
+      <Button type="submit" variant="ghost" className="px-3">
+        <LogOut size={16} strokeWidth={1.6} aria-hidden />
+        Sign out
+      </Button>
+    </form>
+  );
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -62,19 +81,22 @@ export function AppShell({ children }: { children: ReactNode }) {
     (a, b) => b.href.length - a.href.length,
   )[0];
 
+  // The product and sign-in pages stand outside the working shell: no sidebar, their own chrome.
+  if (pathname === "/welcome" || pathname === "/login") return <ToastProvider>{children}</ToastProvider>;
+
   return (
     <ToastProvider>
-      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-surface focus:p-2">
+      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:rounded-sm focus:bg-surface focus:p-2">
         Skip to content
       </a>
-      <div className="flex min-h-screen">
-        <aside className="sticky top-0 hidden h-screen shrink-0 border-r border-border bg-surface min-[861px]:block" style={{ width: "var(--sidebar-w)" }}>
+      <div className="min-h-dvh">
+        <aside className="fixed inset-y-0 left-0 z-20 hidden border-r border-border bg-sunken min-[861px]:block" style={{ width: "var(--sidebar-w)" }}>
           <Sidebar />
         </aside>
         <dialog
           ref={dlg}
           className="sheet"
-          style={{ marginLeft: 0, marginRight: "auto", width: "min(280px, 100vw)", borderLeft: 0, borderRight: "1px solid var(--border)" }}
+          style={{ marginLeft: 0, marginRight: "auto", width: "min(288px, 100%)", background: "var(--bg-sunken)" }}
           aria-label="Navigation"
           onClose={() => setOpen(false)}
           onClick={(e) => e.target === dlg.current && setOpen(false)}
@@ -86,17 +108,18 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
           <Sidebar onNavigate={() => setOpen(false)} />
         </dialog>
-        <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-10 flex h-12 items-center gap-2 border-b border-border bg-canvas px-4 min-[861px]:px-8">
+        <div className="flex min-h-dvh min-w-0 flex-col min-[861px]:pl-[var(--sidebar-w)]">
+          <header className="sticky top-0 z-10 flex h-14 items-center gap-2 border-b border-border bg-canvas px-4 min-[861px]:px-10">
             <Button variant="ghost" icon aria-label="Open navigation" className="min-[861px]:hidden" onClick={() => setOpen(true)}>
               <Menu size={16} strokeWidth={1.6} aria-hidden />
             </Button>
-            <p className="text-sm text-muted">{current?.label ?? ""}</p>
-            <div className="ml-auto">
+            <p className="truncate text-sm text-muted">{current?.label ?? (pathname === "/" ? "Overview" : "")}</p>
+            <div className="ml-auto flex items-center gap-1">
+              <SignOut />
               <ThemeToggle />
             </div>
           </header>
-          <main id="main" className="mx-auto w-full max-w-[1360px] flex-1 px-4 py-6 min-[561px]:px-8">
+          <main id="main" className="mx-auto w-full max-w-[1360px] flex-1 px-4 pt-8 pb-16 min-[561px]:px-10">
             {children}
           </main>
         </div>

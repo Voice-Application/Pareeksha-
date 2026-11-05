@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "./button";
 
 export const controlClass =
-  "h-8 w-full rounded-sm border border-border-strong bg-surface px-2 text-sm text-fg placeholder:text-subtle disabled:cursor-not-allowed disabled:bg-sunken disabled:text-subtle aria-[invalid=true]:border-fail";
+  "h-9 w-full rounded-sm border border-border-strong bg-surface px-3 text-sm text-fg placeholder:text-subtle transition-[border-color] duration-150 hover:border-fg disabled:cursor-not-allowed disabled:bg-sunken disabled:text-subtle disabled:opacity-55 disabled:hover:border-border-strong aria-[invalid=true]:border-fail";
 
 /** Label above, help text below, error text with icon below (00-shared 4). `id` ties label, help and error to the control. */
 export function Field({
@@ -172,7 +172,7 @@ export function Segmented<T extends string | number>({
       <span id={id} className={hideLabel ? "sr-only" : "text-sm font-medium"}>
         {label}
       </span>
-      <div role="radiogroup" aria-labelledby={id} className="inline-flex w-fit max-w-full flex-wrap rounded-sm border border-border-strong bg-surface p-0.5">
+      <div role="radiogroup" aria-labelledby={id} className="inline-flex w-fit max-w-full flex-wrap gap-0.5 rounded-pill bg-sunken p-0.5">
         {options.map((o, i) => {
           const selected = o.value === value;
           return (
@@ -190,8 +190,8 @@ export function Segmented<T extends string | number>({
               onKeyDown={(e) => onKey(e, i)}
               onClick={() => onChange(o.value)}
               className={cn(
-                "h-7 rounded-xs px-3 text-sm transition-colors disabled:cursor-not-allowed disabled:text-subtle disabled:opacity-60",
-                selected ? "bg-selected font-medium text-fg" : "text-muted hover:bg-hover",
+                "h-8 rounded-pill px-3.5 text-sm transition-colors active:translate-y-px disabled:cursor-not-allowed disabled:text-subtle disabled:opacity-55",
+                selected ? "bg-surface font-medium text-fg outline outline-1 -outline-offset-1 outline-border" : "text-muted hover:text-fg",
               )}
             >
               {o.label}
@@ -218,21 +218,21 @@ export function Switch({ label, checked, onChange, help, disabled }: { label: st
           disabled={disabled}
           onClick={() => onChange(!checked)}
           className={cn(
-            "relative h-5 w-9 shrink-0 border transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+            "relative h-5 w-9 shrink-0 border transition-colors disabled:cursor-not-allowed disabled:opacity-55",
             checked ? "border-accent bg-accent" : "border-border-strong bg-sunken",
           )}
           style={{ borderRadius: "var(--radius-pill)" }}
         >
           <span
             aria-hidden
-            className={cn("absolute top-0.5 h-3.5 w-3.5 transition-[left]", checked ? "left-[18px]" : "left-0.5")}
+            className={cn("absolute top-0.5 left-0.5 h-3.5 w-3.5 transition-transform duration-150 ease-out", checked ? "translate-x-4" : "translate-x-0")}
             style={{ borderRadius: "var(--radius-pill)", background: checked ? "var(--accent-on)" : "var(--fg-muted)" }}
           />
         </button>
         <label htmlFor={id} className="text-sm font-medium">
           {label}
         </label>
-        <span className="mono text-xs text-subtle">{checked ? "on" : "off"}</span>
+        <span className="text-xs text-subtle">{checked ? "on" : "off"}</span>
       </div>
       {help && (
         <p id={`${id}-help`} className="text-xs text-subtle">
@@ -327,7 +327,7 @@ export function TagInput({
   const remaining = suggestions.filter((s) => !value.includes(s));
   return (
     <Field label={label} id={id} help={help} error={error}>
-      <div className="flex min-h-8 flex-wrap items-center gap-1 rounded-sm border border-border-strong bg-surface px-1.5 py-1 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[color:var(--focus-ring)]">
+      <div className="flex min-h-9 flex-wrap items-center gap-1 rounded-sm border border-border-strong bg-surface px-1.5 py-1 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[color:var(--focus-ring)]">
         {value.map((t) => (
           <span key={t} className={cn("inline-flex h-6 items-center gap-1 rounded-xs border border-border bg-sunken pl-2 pr-0.5 text-xs", mono && "mono")}>
             {t}
@@ -392,7 +392,7 @@ export function Repeater<T>({
       <legend className="mb-1 text-sm font-medium">{label}</legend>
       {rows.length === 0 && <p className="text-sm text-subtle">{emptyText}</p>}
       {rows.map((row, i) => (
-        <div key={i} className="flex items-start gap-2 rounded-sm border border-border bg-canvas p-3">
+        <div key={i} className="flex items-start gap-2 rounded-sm bg-canvas p-3">
           <div className="grid min-w-0 flex-1 gap-3">{render(row, (patch) => onChange(rows.map((r, j) => (j === i ? { ...r, ...patch } : r))), i)}</div>
           <Button variant="ghost" icon aria-label={`Remove ${label.toLowerCase()} row ${i + 1}`} onClick={() => onChange(rows.filter((_, j) => j !== i))}>
             <Trash2 size={14} strokeWidth={1.6} aria-hidden />

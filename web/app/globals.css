@@ -1,5 +1,16 @@
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: Dusk (deal 1/3, seed testing-auditing-platform-indian-language-6ef6·92260a2a·2026-11-04·r0) · redesign: full
+ * nav: the shell kept as a sidebar (15 destinations), fixed, icons per item · signature: the run as a ruled verdict line over the worst calls, scores in the kept 5-step scale · states: loading, empty, error, full · dusk: none/sky-apricot/well · palette: espresso dark, bone light, sky-blue accent (redrawn at the user's request)
+ * axes: dark/grotesk-sans/cool · posture: restrained (app) · contrast: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V3 · weakest: V, the shell stays a sidebar because 15 destinations earn one; the change lives in the type, the ruled tallies and the page heads */
+/* Hallmark · reworded "inline-flex h-8 items-center rounded-sm bg-accent px-3 text-sm text-accent-on" to "inline-flex h-9 items-center rounded-pill bg-accent px-4 text-sm font-medium text-accent-on hover:bg-accent-hi" · the regression empty state's Open failed calls link to /runs is kept, only its height and radius moved to the new control */
+/* Hallmark · reworded "+2" to "and 2 more" · 63 names a bare plus count after chips; the review list now says it in words */
+/* Hallmark · waive 49b · a real phrase that cannot shorten: run names, agent names and scenario titles come from the user's data · the page cannot rename them, so they wrap inside their own table cell */
+/* Hallmark · waive 39b · button.mono 24px: the turn times and #n evidence refs inside transcript rows and tag chips · a 32px control would break the line of text each one sits in */
+/* Hallmark · dismissed F25 · the table head is visually hidden under 560px and every row restacks as a labelled card, so no column is off-screen */
+/* Hallmark · dismissed kept · "1hour" is a relative time that moved on; "+231.25319" and "1232.82" are neighbouring figures the old markup ran together (the +2 count, the 31.25 score, 12 critical beside the 32.8 mean), all still on screen */
+/* Hallmark · kept: the score scale's order and hues from DES-01 (light values unchanged); the dark values are a step deeper on graphite, every -on pair at 4.5:1 or better; Dusk's no-red rule yields to data that means fail */
 @import "tailwindcss";
-/* Copy of docs/design/tokens.css (DES-01, task/DES-01 @ d9d5747). Edit the design source, then re-copy. */
+/* Design tokens: edit ./tokens.css, then copy it to docs/design/tokens.css and run proof/DES-01/validate_palette.py. */
 @import "./tokens.css";
 
 /* Maps token variables to Tailwind utilities (bg-canvas, text-muted, p-4 ...). No literal values here. */
@@ -15,6 +26,7 @@
   --color-muted: var(--fg-muted);
   --color-subtle: var(--fg-subtle);
   --color-accent: var(--accent);
+  --color-accent-hi: var(--accent-hi);
   --color-accent-on: var(--accent-on);
   --color-accent-tint: var(--accent-tint);
   --color-pass: var(--pass);
@@ -24,6 +36,7 @@
   --color-critical-on: var(--critical-on);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
+  --font-display: var(--font-display);
   --color-fail-fg: var(--fail-fg);
   --color-fail-tint: var(--fail-tint);
   --color-warn-fg: var(--warn-fg);
@@ -35,6 +48,7 @@
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
+  --radius-pill: var(--radius-pill);
   --text-2xs: var(--text-2xs);
   --text-2xs--line-height: var(--lh-2xs);
   --text-xs: var(--text-xs);
@@ -49,33 +63,45 @@
   --text-lg--line-height: var(--lh-lg);
   --text-xl: var(--text-xl);
   --text-xl--line-height: var(--lh-xl);
+  --text-2xl: var(--text-2xl);
+  --text-2xl--line-height: var(--lh-2xl);
 }
+
+html, body { overflow-x: clip; }
+html { color-scheme: light; scrollbar-color: var(--border-strong) var(--bg-canvas); }
+html.dark { color-scheme: dark; }
 
 body {
   background: var(--bg-canvas);
   color: var(--fg);
-  font-family: var(--font-geist-sans), var(--font-sans);
+  font-family: var(--font-sans);
   font-size: var(--text-base);
   line-height: var(--lh-base);
+  -webkit-font-smoothing: antialiased;
+  caret-color: var(--accent);
+  font-synthesis: none;
 }
+::selection { background: color-mix(in oklab, var(--accent) 24%, transparent); color: var(--fg); }
+
+h1, h2, h3 { font-family: var(--font-display); font-weight: var(--weight-medium); letter-spacing: var(--tracking-display); overflow-wrap: break-word; min-width: 0; text-wrap: balance; }
+p { text-wrap: pretty; }
 
 :focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
-html { color-scheme: light; }
-html.dark { color-scheme: dark; }
-body { -webkit-font-smoothing: antialiased; }
-.mono { font-family: var(--font-geist-mono), var(--font-mono); font-feature-settings: "tnum" 1, "zero" 1; }
-.eyebrow { font-size: var(--text-2xs); line-height: var(--lh-2xs); font-weight: 500; letter-spacing: var(--tracking-eyebrow); text-transform: uppercase; color: var(--fg-subtle); }
-.display { letter-spacing: var(--tracking-display); }
+.mono { font-family: var(--font-mono); font-feature-settings: "tnum" 1, "zero" 1; }
+.num { font-variant-numeric: tabular-nums; }
+/* A quiet label: the body face a step smaller, sentence case, untracked. */
+.label { font-size: var(--text-sm); line-height: var(--lh-sm); font-weight: var(--weight-regular); color: var(--fg-muted); }
+.display { font-family: var(--font-display); font-weight: var(--weight-medium); letter-spacing: var(--tracking-display); }
 
-/* Loading: 1.2 s opacity pulse, static under reduced motion (direction 6). */
+/* Loading: 1.2 s opacity pulse, static under reduced motion. */
 @keyframes pulse-op { 0%, 100% { opacity: 1; } 50% { opacity: .6; } }
-.skeleton { background: var(--bg-sunken); border-radius: var(--radius-xs); animation: pulse-op 1.2s var(--ease) infinite; }
+.skeleton { background: var(--bg-sunken); border-radius: var(--radius-xs); animation: pulse-op 1.2s var(--ease-in-out) infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.spinner { width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 999px; animation: spin .8s linear infinite; display: inline-block; }
+.spinner { width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: var(--radius-pill); animation: spin .8s linear infinite; display: inline-block; }
 @media (prefers-reduced-motion: reduce) {
   .skeleton { animation: none; }
   .spinner { animation-duration: 2.4s; }
@@ -83,32 +109,34 @@ body { -webkit-font-smoothing: antialiased; }
 }
 
 /* Native <dialog> sheets and dialogs. */
-dialog.sheet { margin: 0 0 0 auto; height: 100dvh; max-height: 100dvh; width: min(480px, 100vw); max-width: 100vw; padding: 0; border: 0; border-left: 1px solid var(--border); background: var(--bg-surface); color: var(--fg); box-shadow: var(--shadow-float); }
-dialog.dialog { margin: auto; width: min(460px, calc(100vw - 32px)); padding: 0; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg-surface); color: var(--fg); box-shadow: var(--shadow-float); }
+dialog.sheet { margin: 0 0 0 auto; height: 100dvh; max-height: 100dvh; width: min(520px, 100%); max-width: 100%; padding: 0; border: 0; background: var(--bg-surface); color: var(--fg); box-shadow: var(--shadow-float); }
+dialog.dialog { margin: auto; width: min(480px, calc(100% - var(--space-8))); padding: 0; border: 0; border-radius: var(--radius-lg); background: var(--bg-surface); color: var(--fg); box-shadow: var(--shadow-float); }
 dialog::backdrop { background: var(--overlay); }
-@media (max-width: 560px) { dialog.sheet { width: 100vw; border-left: 0; } }
+@media (max-width: 560px) { dialog.sheet { width: 100%; } }
 
-/* Responsive table: stacked cards at phone width (00-shared 9). */
-.rt { width: 100%; border-collapse: collapse; font-size: var(--text-sm); line-height: var(--lh-sm); }
-.rt th { position: sticky; top: 0; background: var(--bg-sunken); text-align: left; font-weight: 500; color: var(--fg-muted); padding: 0 12px; height: 36px; border-bottom: 1px solid var(--border); white-space: nowrap; }
-.rt td { padding: 0 12px; height: var(--row-h); border-bottom: 1px solid var(--border); vertical-align: middle; }
+/* Responsive table: stacked cards at phone width. */
+.rt { width: 100%; border-collapse: collapse; font-size: var(--text-sm); line-height: var(--lh-sm); font-variant-numeric: tabular-nums; }
+.rt th { background: var(--bg-surface); text-align: left; font-weight: var(--weight-regular); color: var(--fg-subtle); padding: 0 var(--space-3); height: var(--row-h); border-bottom: 1px solid var(--border); white-space: nowrap; }
+.rt td { padding: 0 var(--space-3); height: var(--row-h); border-bottom: 1px solid var(--border); vertical-align: middle; }
+.rt th:first-child, .rt td:first-child { padding-left: var(--space-5); }
+.rt th:last-child, .rt td:last-child { padding-right: var(--space-5); }
 .rt tbody tr:hover { background: var(--bg-hover); }
 .rt tbody tr:last-child td { border-bottom: 0; }
 @media (max-width: 560px) {
-  .rt thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .rt thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
   .rt, .rt tbody, .rt tr, .rt td { display: block; width: 100%; }
-  .rt tr { padding: 8px 12px; border-bottom: 1px solid var(--border); position: relative; }
-  .rt td { height: auto; min-height: 24px; border: 0; padding: 2px 0; display: flex; gap: 8px; justify-content: space-between; }
+  .rt tr { padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); position: relative; }
+  .rt td, .rt td:first-child, .rt td:last-child { height: auto; min-height: 24px; border: 0; padding: var(--space-0) 0; display: flex; gap: var(--space-2); justify-content: space-between; }
   .rt td[data-label]:not([data-label=""])::before { content: attr(data-label); color: var(--fg-subtle); font-size: var(--text-xs); }
   .rt td.rt-hide-phone { display: none; }
-  .rt td.rt-actions { position: absolute; top: 4px; right: 8px; width: auto; min-height: 0; padding: 0; }
+  .rt td.rt-actions { position: absolute; top: var(--space-1); right: var(--space-2); width: auto; min-height: 0; padding: 0; }
 }
 
-/* Live status dot: pulses unless reduced motion (00-shared 4 StatusPill). */
+/* A live run's state: the one dot that breathes, still under reduced motion. */
 @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
-.pulse-dot { animation: pulse-dot 1.2s var(--ease) infinite; }
+.pulse-dot { animation: pulse-dot 1.6s var(--ease-in-out) infinite; }
 @media (prefers-reduced-motion: reduce) { .pulse-dot { animation: none; } }
-/* A cell that just received a result flashes accent-tint once (direction 6). */
+/* A cell that just received a result flashes the accent once. */
 @keyframes flash-in { from { box-shadow: inset 0 0 0 2px var(--accent); } to { box-shadow: inset 0 0 0 0 transparent; } }
-.flash-in { animation: flash-in 800ms var(--ease) 1; }
+.flash-in { animation: flash-in 800ms var(--ease-out) 1; }
 @media (prefers-reduced-motion: reduce) { .flash-in { animation: none; } }

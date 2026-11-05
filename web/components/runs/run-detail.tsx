@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CircleAlert } from "lucide-react";
 import { api } from "@/lib/api/client";
 import { call, ApiError } from "@/lib/api/call";
-import { PageHeader, Panel } from "@/components/ui/layout";
+import { Chip, PageHeader, Panel } from "@/components/ui/layout";
 import { Button, LinkButton } from "@/components/ui/button";
 import { DataTable, parseSort, sortRows, type Column, type Sorters } from "@/components/ui/data-table";
 import { FilterSelect, Segmented } from "@/components/ui/field";
@@ -42,18 +42,18 @@ function Histogram({ bins }: { bins: number[] }) {
             <g key={i}>
               {n > 0 && <rect x={i * bw + 2} y={H - h} width={bw - 4} height={h} rx="2" fill={`var(--score-${step})`} />}
               {n > 0 && (
-                <text x={i * bw + bw / 2} y={H - h - 3} textAnchor="middle" className="mono" fontSize="9" fill="var(--fg-muted)">
+                <text x={i * bw + bw / 2} y={H - h - 3} textAnchor="middle" className="num" fontSize="11" fill="var(--fg-muted)">
                   {n}
                 </text>
               )}
-              <text x={i * bw + bw / 2} y={H + 12} textAnchor="middle" className="mono" fontSize="8" fill="var(--fg-subtle)">
+              <text x={i * bw + bw / 2} y={H + 12} textAnchor="middle" className="num" fontSize="10" fill="var(--fg-subtle)">
                 {i * 10}
               </text>
             </g>
           );
         })}
         <line x1={8 * bw} x2={8 * bw} y1="0" y2={H} stroke="var(--fg)" strokeWidth="1" strokeDasharray="3 3" />
-        <text x={8 * bw - 3} y="9" textAnchor="end" fontSize="9" fill="var(--fg-muted)" className="mono">
+        <text x={8 * bw - 3} y="9" textAnchor="end" fontSize="11" fill="var(--fg-muted)" className="num">
           pass 80
         </text>
       </svg>
@@ -195,7 +195,7 @@ export function RunDetail({ runId }: { runId: string }) {
       hidePhone: true,
       cell: (i) => {
         const c = i.call_id ? callInfo.get(i.call_id) : undefined;
-        return c?.needs_human_review ? <FlagChip reasons={c.review_reasons} label="Review" /> : <span className="text-subtle">-</span>;
+        return c?.needs_human_review ? <FlagChip iconOnly reasons={c.review_reasons} label="Needs human review" /> : <span className="text-subtle">-</span>;
       },
     },
     {
@@ -205,7 +205,7 @@ export function RunDetail({ runId }: { runId: string }) {
       cell: (i) => {
         const c = i.call_id ? callInfo.get(i.call_id) : undefined;
         const t = c?.failure_types ?? [];
-        return t.length ? <span className="flex flex-wrap gap-1"><TagChip key={t[0]} tag={t[0]} />{t.length > 1 && <span className="mono text-xs text-muted" title={t.slice(1).join(", ")}>+{t.length - 1}</span>}</span> : <span className="text-subtle">-</span>;
+        return t.length ? <span className="flex max-w-[15rem] items-center gap-1.5 whitespace-nowrap"><span className="min-w-0 truncate"><TagChip key={t[0]} tag={t[0]} /></span>{t.length > 1 && <span className="num shrink-0 text-xs text-muted" title={t.slice(1).join(", ")}>+{t.length - 1}</span>}</span> : <span className="text-subtle">-</span>;
       },
     },
     { key: "dur", header: "Duration", mono: true, hidePhone: true, cell: (i) => { const d = i.call_id ? callInfo.get(i.call_id)?.duration_ms : null; return d ? `${Math.floor(d / 60000)}:${String(Math.floor((d % 60000) / 1000)).padStart(2, "0")}` : <span className="text-subtle">-</span>; } },
@@ -215,15 +215,12 @@ export function RunDetail({ runId }: { runId: string }) {
     <>
       <PageHeader
         eyebrow={
-          <span className="inline-flex flex-wrap items-center gap-x-2">
-            <span>Run</span>
-            <span className="normal-case">{r.name || r.id.slice(0, 8)}</span>
-            <span aria-hidden>|</span>
-            <span className="normal-case">{agent.data?.name ?? "agent"}</span>
-            <span aria-hidden>|</span>
-            <span className="normal-case">{r.kind}</span>
+          <>
+            <span>Run <span className="mono text-xs text-fg">{r.name || r.id.slice(0, 8)}</span></span>
+            <span>Agent <span className="text-fg">{agent.data?.name ?? "agent"}</span></span>
+            <Chip>{r.kind}</Chip>
             <LiveIndicator state={live} />
-          </span>
+          </>
         }
         title={title}
         description={desc}
@@ -236,7 +233,7 @@ export function RunDetail({ runId }: { runId: string }) {
         }
       />
       {running && (
-        <div className="mb-6 flex items-center gap-3 rounded-md border border-border bg-surface px-4 py-2">
+        <div className="mb-8 flex items-center gap-4 rounded-md border border-border bg-surface px-5 py-3">
           <span className="text-sm text-muted">{r.status === "queued" && done === 0 ? "Waiting for the planner" : "Progress"}</span>
           <div className="flex-1"><ProgressBar done={done} total={total} label="Run progress" /></div>
           {stale && <span className="text-xs text-warn-fg">Updated {relativeTime(new Date(updatedAt).toISOString())}</span>}
@@ -244,7 +241,7 @@ export function RunDetail({ runId }: { runId: string }) {
       )}
       {r.status === "failed" && <div className="mb-6"><Strip tone="error">The run did not finish. The planner or every call errored. Re-run it, or open the DLQ page if events are stuck.</Strip></div>}
       {!running && r.status !== "failed" && p.evaluated > 0 && failed === 0 && crit === 0 && (
-        <p className="mb-6 rounded-md border border-border bg-pass-tint px-4 py-2 text-sm text-pass-fg">No failures. {p.evaluated} of {p.evaluated} passed.</p>
+        <p className="mb-8 rounded-sm bg-pass-tint px-4 py-3 text-sm text-pass-fg">No failures. {p.evaluated} of {p.evaluated} passed.</p>
       )}
       <TileRow>
         <StatTile hero label={`Pass rate${running ? " so far" : ""}`} value={s?.pass_rate != null ? `${Math.round(s.pass_rate * 100)}%` : "-"} caption={p.evaluated ? `${p.evaluated} scored` : undefined} />
@@ -261,7 +258,7 @@ export function RunDetail({ runId }: { runId: string }) {
         </p>
       )}
 
-      <div className="mb-6 grid items-start gap-6 min-[1180px]:grid-cols-[minmax(0,1fr)_408px]">
+      <div className="mb-6 grid items-start gap-6 min-[1180px]:grid-cols-[minmax(0,1fr)_380px]">
         <Panel
           title="Matrix"
           aux={
@@ -284,18 +281,15 @@ export function RunDetail({ runId }: { runId: string }) {
             </>
           )}
         </Panel>
-        <div className="flex flex-col gap-6">
-          <Panel title="Score distribution" aux={<span className="mono text-xs">{p.evaluated} calls</span>}>
-            {p.evaluated ? <Histogram bins={bins} /> : <p className="text-sm text-subtle">No scores yet.</p>}
-          </Panel>
+          <div className="min-[1180px]:order-last min-[1180px]:col-span-2">
           <Panel title="Top failure types">
             {tops.length ? (
-              <ul className="flex flex-col gap-2">
+              <ul className="grid gap-x-10 gap-y-2 min-[860px]:grid-cols-2 min-[1180px]:grid-cols-3">
                 {tops.slice(0, 6).map(([tag, n]) => (
-                  <li key={tag} className="flex items-center gap-3">
-                    <span className="w-48 shrink-0"><TagChip tag={tag} /></span>
-                    <span className="h-1.5 flex-1 rounded-xs bg-sunken"><span className="block h-full rounded-xs bg-series-1" style={{ width: `${(n / tops[0][1]) * 100}%`, background: "var(--series-1)" }} /></span>
-                    <span className="mono w-6 text-right text-sm">{n}</span>
+                  <li key={tag} className="flex min-w-0 items-center gap-3">
+                    <span className="w-52 min-w-0 shrink truncate"><TagChip tag={tag} /></span>
+                    <span className="h-1.5 min-w-8 flex-1 rounded-xs bg-sunken"><span className="block h-full rounded-xs" style={{ width: `${(n / tops[0][1]) * 100}%`, background: "var(--series-1)" }} /></span>
+                    <span className="num w-6 text-right text-sm">{n}</span>
                   </li>
                 ))}
               </ul>
@@ -304,10 +298,15 @@ export function RunDetail({ runId }: { runId: string }) {
             )}
           </Panel>
         </div>
+        <div className="flex flex-col gap-6">
+          <Panel title="Score distribution" aux={<span className="num">{p.evaluated} calls</span>}>
+            {p.evaluated ? <Histogram bins={bins} /> : <p className="text-sm text-subtle">No scores yet.</p>}
+          </Panel>
+        </div>
       </div>
 
-      <Panel title="Calls" bodyClassName="p-0" aux={<span className="mono text-xs">{visible.length} of {all.length}</span>}>
-        <div className="flex flex-wrap items-center gap-2 border-b border-border p-3">
+      <Panel title="Calls" bodyClassName="p-0" aux={<span className="num">{visible.length} of {all.length}</span>}>
+        <div className="flex flex-wrap items-center gap-2 border-b border-border px-5 pt-1 pb-3">
           <FilterSelect label="Verdict" value={fv} onChange={(v) => url.set({ verdict: v })} options={[{ value: "", label: "All verdicts" }, { value: "pass", label: "Pass" }, { value: "fail", label: "Fail" }, { value: "critical", label: "Critical" }]} />
           <FilterSelect label="Flag" value={ff} onChange={(v) => url.set({ flag: v })} options={[{ value: "", label: "Any flag" }, { value: "review", label: "Needs human review" }]} />
           <FilterSelect label="Status" value={fs} onChange={(v) => url.set({ status: v })} options={[{ value: "", label: "All statuses" }, ...["queued", "in_progress", "evaluated", "judge_error", "error", "cancelled"].map((x) => ({ value: x, label: x.replace("_", " ") }))]} />

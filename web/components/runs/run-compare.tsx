@@ -33,7 +33,7 @@ const dateOf = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day:
 export function RunCompareSkeleton() {
   return (
     <>
-      <PageHeader eyebrow="Run compare" title="" description={<Skeleton className="h-4 w-72" />} />
+      <PageHeader title="" description={<Skeleton className="h-4 w-72" />} />
       <TileRow cols="grid-cols-2 min-[860px]:grid-cols-4">{Array.from({ length: 4 }, (_, i) => <div key={i} className="px-4 py-3"><Skeleton className="h-3 w-16" /><Skeleton className="mt-2 h-6 w-16" /></div>)}</TileRow>
       <Panel title="Changed cells" bodyClassName="p-0"><TableSkeleton rows={5} label="Loading comparison" /></Panel>
     </>
@@ -136,7 +136,7 @@ export function RunCompare() {
   if (!ready) {
     return (
       <>
-        <PageHeader eyebrow="Run compare" title="Choose two runs to compare" description="Pick a base run and a head run. Regressions are listed first." />
+        <PageHeader title="Choose two runs to compare" description="Pick a base run and a head run. Regressions are listed first." />
         {list.isError && <div className="mb-6"><ErrorPanel error={list.error} what="runs" onRetry={() => void list.refetch()} /></div>}
         {pickers}
         {list.isSuccess && runs.length < 2 && <EmptyState icon={GitCompare} title="Not enough runs to compare" body="Comparing needs two runs of the same agent. Create another run first." action={<LinkButton variant="primary" href="/runs/new">New run</LinkButton>} />}
@@ -225,7 +225,7 @@ export function RunCompare() {
       {!same && cmp.isError && <div className="mb-6"><ErrorPanel error={cmp.error} what="the comparison" onRetry={() => void cmp.refetch()} /></div>}
       {!same && !cmp.isError && (
         <>
-          <Panel title="Changed cells" className="mb-6" bodyClassName="p-0" aux={<span className="mono text-xs">{changed.length} changed</span>}>
+          <Panel title="Changed cells" className="mb-6" bodyClassName="p-0" aux={<span className="num">{changed.length} changed</span>}>
             {cmp.isPending ? <TableSkeleton rows={5} label="Loading comparison" />
               : overlap === 0 ? <EmptyState icon={GitCompare} title="These runs share no scenario, persona and line combination" body="Re-run with the same matrix to compare them cell by cell." action={<LinkButton href={`/runs/new?agent=${h.agent_id}`}>New run</LinkButton>} />
               : changed.length === 0 ? <p className="p-6 text-center text-sm text-muted">No cell changed score between these runs.</p>
@@ -249,7 +249,7 @@ export function RunCompare() {
               {cmp.isPending ? <Skeleton className="h-32" /> : overlap === 0 ? <p className="text-sm text-muted">Nothing to draw: no shared cells.</p> : <DiffHeatmap cells={sorted} headCall={headCall} />}
             </Panel>
             <div className="flex flex-col gap-6">
-              <Panel title="Dimensions" aux={<span className="mono text-xs">mean 0-4</span>}>
+              <Panel title="Dimensions" aux={<span>mean 0 to 4</span>}>
                 <DimensionDeltas base={dims.base} head={dims.head} loading={dimsLoading || itemQ.some((q) => q.isPending)} failed={dimQ.some((q) => q.isError)} />
               </Panel>
               <Panel title="What changed in the agent">
@@ -285,7 +285,7 @@ function DeltaBar({ delta }: { delta: number | null | undefined }) {
         <span className="absolute inset-y-0 left-1/2 w-px bg-border-strong" />
         {delta !== 0 && <span className="absolute inset-y-0 rounded-xs" style={{ width: w, [delta < 0 ? "right" : "left"]: "50%", background: delta < 0 ? "var(--score-2)" : "var(--score-5)" }} />}
       </span>
-      <span className="mono text-sm">{signed(delta, 1)}</span>
+      <span className="num text-sm">{signed(delta, 1)}</span>
     </span>
   );
 }
@@ -398,7 +398,7 @@ function AgentDiff({ same, base, head, loading }: { same: boolean; base?: AgentD
       {!any && <p className="text-muted">The two agents have the same description, disclosures, forbidden phrases and tools.</p>}
       {groups.filter(([, l]) => l.length).map(([name, lines]) => (
         <div key={name}>
-          <h3 className="eyebrow mb-1">{name}</h3>
+          <h3 className="label mb-1">{name}</h3>
           <ul className="flex flex-col gap-1">
             {lines.map((l, i) => (
               <li key={i} className="flex items-start gap-2">

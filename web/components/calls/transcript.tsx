@@ -147,13 +147,15 @@ function TurnRow({ t, playing, selected, evidence, onSelect, tags, latency, tool
     <li
       id={`turn-${t.idx}`}
       aria-current={playing ? "true" : undefined}
-      className={cn("border-b border-border last:border-0", evidence && "border-l-[3px] border-l-fail bg-fail-tint", playing && !evidence && "bg-selected", selected && "outline outline-2 -outline-offset-2 outline-accent")}
+      className={cn("border-b border-border last:border-0", evidence && "border-l-2 border-l-fail bg-fail-tint/40", playing && !evidence && "bg-selected", selected && "outline outline-2 -outline-offset-2 outline-accent")}
     >
       <div className="grid grid-cols-[64px_72px_1fr_16px] gap-x-2 px-4 py-3 max-[560px]:grid-cols-[52px_1fr_16px]">
-        <button type="button" onClick={() => onSelect(t.idx)} className="mono self-start text-left text-xs text-muted hover:text-accent-fg" aria-label={`Seek to turn ${t.idx} at ${mmss(t.start_ms)}`}>
-          {mmss(t.start_ms)}
-          <br />#{t.idx}
-        </button>
+        <span className="flex flex-col items-start self-start">
+          <button type="button" onClick={() => onSelect(t.idx)} className="mono whitespace-nowrap text-left text-xs text-muted hover:text-accent-fg active:translate-y-px" aria-label={`Seek to turn ${t.idx} at ${mmss(t.start_ms)}`}>
+            {mmss(t.start_ms)}
+          </button>
+          <span className="mono text-xs text-subtle" aria-hidden>#{t.idx}</span>
+        </span>
         <span className="flex items-start gap-1.5 text-sm font-medium max-[560px]:hidden" style={{ color: t.speaker === "agent" ? "var(--speaker-agent)" : "var(--fg-muted)" }}>
           <span className="mt-1.5 h-2 w-2 shrink-0" style={{ background: t.speaker === "agent" ? "var(--speaker-agent)" : "var(--speaker-caller)" }} aria-hidden />
           {t.speaker === "agent" ? "Agent" : "Caller"}
@@ -165,14 +167,14 @@ function TurnRow({ t, playing, selected, evidence, onSelect, tags, latency, tool
           </p>
           {heard ? (
             <p className="mono mt-1.5 rounded-xs bg-sunken px-2 py-1 text-xs" lang={lang}>
-              <span className="text-subtle">AGENT STT HEARD </span>
+              <span className="text-subtle">Agent STT heard </span>
               {heardWords(t.ground_truth_text!, t.agent_heard_text!)}
               <span className="ml-1 block text-subtle" lang={lang}>caller said: {t.ground_truth_text}</span>
             </p>
           ) : null}
           {tools.map((tc) => (
             <p key={tc.seq} className="mono mt-1.5 rounded-xs bg-sunken px-2 py-1 text-xs">
-              <span className="text-subtle">TOOL CALL </span>
+              <span className="text-subtle">Tool call </span>
               {tc.name}({Object.entries(tc.arguments ?? {}).map(([k, v]) => `${k}=${JSON.stringify(v)}`).join(", ")}) at {mmss(tc.at_ms)}
             </p>
           ))}

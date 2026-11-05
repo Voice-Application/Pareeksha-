@@ -56,13 +56,13 @@ export function AuditsList() {
   const columns: Column<Row>[] = [
     { key: "id", header: "Recording", mono: true, cell: (r) => <Link className="font-medium underline-offset-2 hover:underline" href={`/calls/${r.id}`}>{r.id.slice(0, 8)}</Link> },
     { key: "agent", header: "Agent", hidePhone: true, cell: (r) => <span className="text-muted">{agentName(r.agent_id)}</span> },
-    { key: "source", header: "Source", mono: true, hidePhone: true, cell: (r) => (r.source === "import" ? "webhook" : r.source) },
+    { key: "source", header: "Source", hidePhone: true, cell: (r) => (r.source === "import" ? "webhook" : r.source) },
     { key: "lang", header: "Lang", mono: true, sortable: true, cell: (r) => r.language ?? "-" },
     { key: "status", header: "Status", cell: (r) => <StatusPill status={auditStatus(r)} /> },
     { key: "score", header: "Score", sortable: true, cell: (r) => <ScoreChip score={r.overall_score} /> },
     { key: "verdict", header: "Verdict", cell: (r) => <VerdictBadge verdict={verdictOf(r)} /> },
     { key: "flag", header: "Flag", hidePhone: true, cell: (r) => (r.needs_human_review ? <FlagChip iconOnly reasons={r.review_reasons} /> : <span className="text-subtle">-</span>) },
-    { key: "tags", header: "Tags", hidePhone: true, cell: (r) => (r.failure_types?.length ? <span className="flex items-center gap-1"><TagChip tag={r.failure_types[0]} />{r.failure_types.length > 1 && <span className="mono text-xs text-muted" title={r.failure_types.slice(1).join(", ")}>+{r.failure_types.length - 1}</span>}</span> : <span className="text-subtle">-</span>) },
+    { key: "tags", header: "Tags", hidePhone: true, cell: (r) => (r.failure_types?.length ? <span className="flex items-center gap-1"><TagChip tag={r.failure_types[0]} />{r.failure_types.length > 1 && <span className="num text-xs text-muted" title={r.failure_types.slice(1).join(", ")}>+{r.failure_types.length - 1}</span>}</span> : <span className="text-subtle">-</span>) },
     { key: "started", header: "Uploaded", sortable: true, cell: (r) => (r.started_at ? <time dateTime={r.started_at} title={r.started_at} className="text-muted">{relativeTime(r.started_at)}</time> : "-") },
   ];
   const chips = [

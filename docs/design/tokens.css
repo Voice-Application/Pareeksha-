@@ -1,148 +1,166 @@
 /*
- * Pareeksha design tokens  -  DES-01  -  direction: "Field Instrument"
- * See docs/design/direction.md for the reasoning behind every value.
+ * Pareeksha design tokens (Hallmark redesign, 2026-11-04), replacing DES-01 "Field Instrument".
+ * Light: warm bone. Dark: espresso black. One sky-blue accent in both.
  *
- * Light = :root.  Dark = .dark / [data-theme="dark"] (next-themes sets the class).
- * Only the colour tokens change between themes; type, spacing, radius are shared.
- * Colour is reserved for meaning: neutrals carry structure, the score scale and the
- * single cobalt accent are the only chroma in the product.
- * Validated with proof/DES-01/validate_palette.py (WCAG + colour-vision-deficiency).
+ * Light = :root (bone wells).  Dark = .dark / [data-theme="dark"] (slate).
+ * Only the colour tokens change between themes; type, spacing and radius are shared.
+ * Colour is reserved for meaning: neutrals carry structure, one sky-blue accent marks interaction,
+ * and the score scale and verdict colours are kept exactly as DES-01 validated them
+ * (proof/DES-01/validate_palette.py: WCAG and colour-vision deficiency).
  */
 
+@font-face { font-family: "Wix Madefor Display"; font-style: normal; font-weight: 400 600; font-display: swap; src: url("./fonts/wix-madefor-display-latin.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Wix Madefor Display"; font-style: normal; font-weight: 400 600; font-display: swap; src: url("./fonts/wix-madefor-display-latin-ext.woff2") format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Wix Madefor Text"; font-style: normal; font-weight: 400 600; font-display: swap; src: url("./fonts/wix-madefor-text-latin.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Wix Madefor Text"; font-style: normal; font-weight: 400 600; font-display: swap; src: url("./fonts/wix-madefor-text-latin-ext.woff2") format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
 :root {
-  /* ---------- surfaces (warm paper) ---------- */
-  --bg-canvas:   #F5F3ED;   /* app background behind panels */
-  --bg-surface:  #FCFBF8;   /* panels, tables, inputs */
-  --bg-sunken:   #EEEBE3;   /* wells: code, waveform track, table header */
-  --bg-hover:    #F0EDE5;
-  --bg-selected: #E7E3D8;
+  /* ---------- surfaces: bone ---------- */
+  --bg-canvas:   oklch(95.5% 0.008 75);   /* app background behind panels */
+  --bg-surface:  oklch(99.3% 0.003 75);   /* panels, tables, inputs */
+  --bg-sunken:   oklch(92.2% 0.010 75);   /* wells: sidebar, code, waveform track, table head */
+  --bg-hover:    oklch(93.6% 0.010 75);
+  --bg-selected: oklch(91.5% 0.030 238);
 
   /* ---------- lines ---------- */
-  --border:        #E1DCCF;  /* hairline between and around panels */
-  --border-strong: #8C8676;  /* inputs, buttons: >= 3:1 on surface */
+  --border:        oklch(87.5% 0.009 75);  /* hairline between and around panels */
+  --border-strong: oklch(56% 0.016 265);   /* inputs, buttons: >= 3:1 on surface */
 
   /* ---------- text ---------- */
-  --fg:        #1A1915;
-  --fg-muted:  #55524A;
-  --fg-subtle: #69655A;     /* captions, timestamps, still >= 4.5:1 */
+  --fg:        oklch(21% 0.016 268);
+  --fg-muted:  oklch(41% 0.018 266);
+  --fg-subtle: oklch(46% 0.016 265);       /* captions, timestamps: >= 4.5:1 on canvas */
 
   /* ---------- accent: interaction only (links, focus, playhead, primary button) ---------- */
-  --accent:      #2748B5;
-  --accent-fg:   #2748B5;   /* accent as text/icon on surfaces */
-  --accent-on:   #FFFFFF;   /* text on solid accent */
-  --accent-tint: #E3E8F8;
-  --focus-ring:  #2748B5;
+  --accent:      oklch(46% 0.13 242);
+  --accent-hi:   oklch(40% 0.13 242);
+  --accent-fg:   oklch(45% 0.13 242);      /* accent as text or icon on surfaces */
+  --accent-on:   oklch(98.5% 0.006 240);   /* text on solid accent */
+  --accent-tint: oklch(93% 0.032 238);
+  --focus-ring:  oklch(50% 0.15 242);
 
-  /* ---------- verdict (3-state + critical). Never colour alone: always icon + word. ---------- */
+  /* ---------- verdict (3-state + critical). Kept from DES-01. Never colour alone: always icon + word. ---------- */
   --pass:        #0F7A63;   --pass-fg: #0A6551;   --pass-tint: #DAEEE6;
   --warn:        #D99A0B;   --warn-fg: #755000;   --warn-tint: #F8E9C4;
   --fail:        #CF4A1C;   --fail-fg: #A63810;   --fail-tint: #F8DDD1;
   --critical:    #8E1D08;   --critical-on: #FFFFFF;
 
-  /* ---------- score scale: 5 ordinal steps, worst -> best ----------
+  /* ---------- score scale: 5 ordinal steps, worst -> best. Kept from DES-01. ----------
    * Dimension score 0..4  -> step 1..5
-   * Overall 0..100        -> <40: 1 | 40-59: 2 | 60-79: 3 | 80-89: 4 | >=90: 5   (pass line = 80)
-   * -on = readable text colour on that fill.  Number is always printed in the fill. */
+   * Overall 0..100        -> <40: 1 | 40-59: 2 | 60-79: 3 | 80-89: 4 | >=90: 5   (pass line = 80) */
   --score-1: #9E2A0A;  --score-1-on: #FFFFFF;
   --score-2: #D9622B;  --score-2-on: #1F0C03;
   --score-3: #E9B03A;  --score-3-on: #2B1D00;
   --score-4: #5FB4A6;  --score-4-on: #062620;
   --score-5: #0B6F66;  --score-5-on: #FFFFFF;
-  --score-na: #D4CFC1; --score-na-on: #3D3A32;   /* not run / not applicable */
+  --score-na: #D4CFC1; --score-na-on: #3D3A32;
 
-  /* ---------- speakers & chart series (never reuse score hues) ---------- */
-  --speaker-agent:  #2748B5;   /* the agent under test */
-  --speaker-caller: #7A6A4C;   /* the synthetic / real caller */
-  --series-1: #2748B5;
-  --series-2: #7A6A4C;
-  --series-3: #4F8FB8;
-  --series-4: #8C8878;
-  --grid: #E1DCCF;
+  /* ---------- speakers and chart series (never reuse score hues) ---------- */
+  --speaker-agent:  oklch(46% 0.13 242);
+  --speaker-caller: oklch(50% 0.05 70);
+  --series-1: oklch(46% 0.13 242);
+  --series-2: oklch(50% 0.05 70);
+  --series-3: oklch(52% 0.10 300);
+  --series-4: oklch(60% 0.015 265);
+  --grid: oklch(87.5% 0.009 75);
 
   /* ---------- elevation: borders first, shadow only for things that float ---------- */
-  --shadow-float: 0 1px 0 rgba(26, 25, 21, .04), 0 10px 28px -6px rgba(26, 25, 21, .16);
-  --overlay: rgba(26, 25, 21, .40);
+  --shadow-float: 0 1px 2px oklch(21% 0.016 268 / 0.06), 0 16px 40px -12px oklch(21% 0.016 268 / 0.22);
+  --overlay: oklch(21% 0.016 268 / 0.42);
 
   /* ---------- type ---------- */
-  --font-sans: "Geist", "Noto Sans Kannada", "Noto Sans Devanagari", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-display: "Wix Madefor Display", "Noto Sans Kannada", "Noto Sans Devanagari", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Wix Madefor Text", "Noto Sans Kannada", "Noto Sans Devanagari", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  --text-2xs: 11px;  --lh-2xs: 14px;   /* eyebrow labels, uppercase + tracking */
-  --text-xs:  12px;  --lh-xs:  16px;   /* captions, timestamps, badges */
-  --text-sm:  13px;  --lh-sm:  20px;   /* tables, dense UI */
-  --text-base:14px;  --lh-base:22px;   /* default body, transcript */
-  --text-md:  16px;  --lh-md:  24px;   /* panel titles */
-  --text-lg:  20px;  --lh-lg:  28px;   /* page section titles */
-  --text-xl:  26px;  --lh-xl:  32px;   /* page titles */
-  --text-2xl: 40px;  --lh-2xl: 44px;   /* hero numbers (pass rate) */
+  --text-2xs: 12px;  --lh-2xs: 16px;   /* dense meta inside chips */
+  --text-xs:  13px;  --lh-xs:  18px;   /* captions, timestamps, badges */
+  --text-sm:  14px;  --lh-sm:  20px;   /* tables, dense UI */
+  --text-base:16px;  --lh-base:24px;   /* default body, transcript */
+  --text-md:  17px;  --lh-md:  24px;   /* panel titles */
+  --text-lg:  20px;  --lh-lg:  28px;   /* section titles, secondary figures */
+  --text-xl:  30px;  --lh-xl:  34px;   /* page titles */
+  --text-2xl: 46px;  --lh-2xl: 48px;   /* the one figure a page leads with */
   --tracking-display: -0.022em;
-  --tracking-eyebrow: 0.06em;
   --weight-regular: 400;
   --weight-medium:  500;
   --weight-semibold:600;
 
-  /* ---------- space: 4px base ---------- */
+  /* ---------- space: 4px base (DES-01 names) and the Hallmark scale ---------- */
   --space-0: 2px;  --space-1: 4px;  --space-2: 8px;  --space-3: 12px;  --space-4: 16px;
   --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px; --space-16: 64px;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
   --gutter: 16px;            /* phone-width page gutter */
-  --sidebar-w: 232px;
-  --row-h: 36px;             /* table / list row */
-  --control-h: 32px;         /* buttons, inputs */
+  --sidebar-w: 248px;
+  --row-h: 40px;             /* table / list row */
+  --control-h: 36px;         /* buttons, inputs */
 
-  /* ---------- radius ---------- */
-  --radius-xs: 3px;          /* badges, chips, heatmap cells */
-  --radius-sm: 5px;          /* buttons, inputs */
-  --radius-md: 8px;          /* panels */
-  --radius-lg: 12px;         /* dialogs */
-  --radius-pill: 999px;
+  /* ---------- radius: one per nesting level ---------- */
+  --radius-xs: 5px;          /* badges, chips, heatmap cells */
+  --radius-sm: 9px;          /* inputs, menus */
+  --radius-md: 14px;         /* panels */
+  --radius-lg: 18px;         /* dialogs */
+  --radius-pill: 999px;      /* buttons */
 
   /* ---------- motion ---------- */
-  --ease: cubic-bezier(.2, .7, .2, 1);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --dur-fast: 120ms;
-  --dur-base: 200ms;
+  --dur-base: 220ms;
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-long: 420ms;
+
+  --z-raised: 10; --z-sticky: 200; --z-sticky-nav: 300; --z-modal: 400; --z-toast: 500;
 }
 
 .dark,
 [data-theme="dark"] {
-  --bg-canvas:   #0D0D0B;
-  --bg-surface:  #151512;
-  --bg-sunken:   #0A0A08;
-  --bg-hover:    #1C1C18;
-  --bg-selected: #26251F;
+  /* ---------- surfaces: warm espresso black. Lightness carries the depth. ---------- */
+  --bg-canvas:   oklch(14.5% 0.009 60);
+  --bg-surface:  oklch(18.5% 0.010 60);
+  --bg-sunken:   oklch(12.5% 0.008 60);
+  --bg-hover:    oklch(22.5% 0.011 60);
+  --bg-selected: oklch(26% 0.035 232);
 
-  --border:        #2B2A24;
-  --border-strong: #6C695E;
+  --border:        oklch(26.5% 0.012 62);
+  --border-strong: oklch(52% 0.014 65);
 
-  --fg:        #ECE9E0;
-  --fg-muted:  #ABA79B;
-  --fg-subtle: #928E82;
+  --fg:        oklch(94.5% 0.014 85);
+  --fg-muted:  oklch(79% 0.016 75);
+  --fg-subtle: oklch(70% 0.016 70);
 
-  --accent:      #6F88F0;
-  --accent-fg:   #9FB1FF;
-  --accent-on:   #0A0E24;
-  --accent-tint: #1A2142;
-  --focus-ring:  #9FB1FF;
+  --accent:      oklch(77% 0.12 232);
+  --accent-hi:   oklch(83% 0.10 232);
+  --accent-fg:   oklch(80% 0.11 232);
+  --accent-on:   oklch(17% 0.04 235);
+  --accent-tint: oklch(25% 0.045 232);
+  --focus-ring:  oklch(82% 0.11 232);
 
-  --pass:        #3BB89D;   --pass-fg: #62D4BA;   --pass-tint: #0E2B25;
-  --warn:        #E5A91C;   --warn-fg: #F0C461;   --warn-tint: #30240A;
-  --fail:        #EC6C40;   --fail-fg: #FF9670;   --fail-tint: #351A0F;
-  --critical:    #FF6F47;   --critical-on: #260A02;
+  /* ---------- verdict: same three states, tints that sit on graphite instead of glowing on it ---------- */
+  --pass:        oklch(72% 0.11 170);   --pass-fg: oklch(82% 0.10 170);   --pass-tint: oklch(25% 0.035 170);
+  --warn:        oklch(80% 0.13 80);    --warn-fg: oklch(85% 0.11 85);    --warn-tint: oklch(27% 0.045 85);
+  --fail:        oklch(70% 0.15 38);    --fail-fg: oklch(80% 0.11 40);    --fail-tint: oklch(26% 0.05 35);
+  --critical:    oklch(48% 0.16 27);    --critical-on: oklch(97% 0.01 25);
 
-  --score-1: #E5583A;  --score-1-on: #1F0602;
-  --score-2: #F0954F;  --score-2-on: #231003;
-  --score-3: #EFC95A;  --score-3-on: #261B00;
-  --score-4: #66C2B2;  --score-4-on: #04211C;
-  --score-5: #1F9A8E;  --score-5-on: #03211D;
-  --score-na: #3B392F; --score-na-on: #D9D5C8;
+  /* ---------- score scale: the DES-01 order and hues, set a step deeper so a full matrix reads as data, not neon.
+   * Every -on pair checked at 4.5:1 or better (WCAG 2 contrast on the OKLCH values). ---------- */
+  --score-1: oklch(52% 0.150 30);   --score-1-on: oklch(97% 0.01 30);
+  --score-2: oklch(68% 0.130 52);   --score-2-on: oklch(17% 0.03 50);
+  --score-3: oklch(80% 0.120 88);   --score-3-on: oklch(17% 0.03 85);
+  --score-4: oklch(74% 0.080 180);  --score-4-on: oklch(16% 0.03 180);
+  --score-5: oklch(62% 0.090 185);  --score-5-on: oklch(14% 0.03 185);
+  --score-na: oklch(30% 0.012 65); --score-na-on: oklch(82% 0.012 70);
 
-  --speaker-agent:  #8CA0F7;
-  --speaker-caller: #C2AE86;
-  --series-1: #8CA0F7;
-  --series-2: #C2AE86;
-  --series-3: #6FB3DB;
-  --series-4: #9A9686;
-  --grid: #2B2A24;
+  --speaker-agent:  oklch(77% 0.12 232);
+  --speaker-caller: oklch(78% 0.06 70);
+  --series-1: oklch(77% 0.12 232);
+  --series-2: oklch(78% 0.06 70);
+  --series-3: oklch(72% 0.09 300);
+  --series-4: oklch(62% 0.014 65);
+  --grid: oklch(26.5% 0.012 62);
 
-  --shadow-float: 0 1px 0 rgba(255, 255, 255, .04) inset, 0 12px 32px -6px rgba(0, 0, 0, .65);
-  --overlay: rgba(0, 0, 0, .60);
+  --shadow-float: 0 1px 0 oklch(100% 0 0 / 0.05) inset, 0 24px 48px -16px oklch(6% 0.01 60 / 0.75);
+  --overlay: oklch(6% 0.01 60 / 0.66);
 }

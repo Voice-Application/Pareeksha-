@@ -40,7 +40,7 @@ function SecretField({ label, help, alreadySet, value, onChange, error }: { labe
       <div className="flex flex-col gap-1">
         <span className="text-sm font-medium">{label}</span>
         <div className="flex items-center gap-2">
-          <span className="mono inline-flex h-8 items-center rounded-sm border border-border bg-sunken px-3 text-sm text-muted">Set</span>
+          <span className="mono inline-flex h-9 items-center rounded-sm border border-border bg-sunken px-3 text-sm text-muted">Set</span>
           <Button onClick={() => setReplacing(true)}>Replace</Button>
         </div>
       </div>

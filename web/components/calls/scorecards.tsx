@@ -34,7 +34,7 @@ export function VerdictPanel({ ev, status, onOverride, onReevaluate, review }: {
         {ev.needs_human_review && <FlagChip />}
         {ev.confidence === "low" && <Chip>Judge confidence low</Chip>}
       </div>
-      <p className="eyebrow mt-4">Overall score</p>
+      <p className="label mt-4">Overall score</p>
       <p className="mono display text-2xl font-semibold" style={{ color: step && step <= 2 ? "var(--fail-fg)" : undefined }}>
         {fmtScore(score)} <span className="text-md font-normal text-muted">/ 100</span>
       </p>
