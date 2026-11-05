@@ -30,6 +30,7 @@ from tests.integration.support import BOOTSTRAP, audit_envelope, read_topic, wai
 async def _dead_letter(
     factory: Factory,
     *,
+    project_id: uuid.UUID | None = None,
     envelope: dict[str, Any] | None = None,
     status: str = "open",
     group: str = "auditor",
@@ -48,6 +49,7 @@ async def _dead_letter(
             error="PermanentError: bad audio",
             attempts=attempts,
             status=status,
+            project_id=project_id,
             failed_at=datetime.now(UTC) - age,
         )
         session.add(row)
@@ -59,11 +61,13 @@ async def test_list_filters_by_status_newest_first_and_pages(
     private_api: tuple[AsyncClient, Tenant, Factory],
 ) -> None:
     api, tenant, session_factory = private_api
-    await _dead_letter(session_factory, status="replayed")
-    await _dead_letter(session_factory, status="discarded")
-    old = await _dead_letter(session_factory, age=timedelta(hours=2))
-    mid = await _dead_letter(session_factory, age=timedelta(hours=1), group="evaluator")
-    new = await _dead_letter(session_factory)
+    await _dead_letter(session_factory, project_id=tenant.project_id, status="replayed")
+    await _dead_letter(session_factory, project_id=tenant.project_id, status="discarded")
+    old = await _dead_letter(session_factory, project_id=tenant.project_id, age=timedelta(hours=2))
+    mid = await _dead_letter(
+        session_factory, project_id=tenant.project_id, age=timedelta(hours=1), group="evaluator"
+    )
+    new = await _dead_letter(session_factory, project_id=tenant.project_id)
 
     page = (await api.get(f"{API}/dlq?limit=2", headers=tenant.read)).json()
     ours = [new.id, mid.id]
@@ -93,7 +97,7 @@ async def test_list_filters_by_status_newest_first_and_pages(
 async def test_discard_marks_the_row_and_is_not_repeatable(
     api: AsyncClient, tenant: Tenant, session_factory: Factory
 ) -> None:
-    row = await _dead_letter(session_factory)
+    row = await _dead_letter(session_factory, project_id=tenant.project_id)
     response = await api.post(f"{API}/dlq/{row.id}/discard", headers=tenant.admin)
     assert response.status_code == 200 and response.json()["status"] == "discarded"
     async with session_factory() as session:
@@ -111,7 +115,7 @@ async def test_discard_marks_the_row_and_is_not_repeatable(
 async def test_replay_republishes_the_envelope_with_attempt_1_through_the_outbox(
     api: AsyncClient, tenant: Tenant, session_factory: Factory, database_url: str
 ) -> None:
-    row = await _dead_letter(session_factory, attempts=3)
+    row = await _dead_letter(session_factory, project_id=tenant.project_id, attempts=3)
     response = await api.post(f"{API}/dlq/{row.id}/replay", headers=tenant.admin)
     assert response.status_code == 202, response.text
     assert response.json()["status"] == "replayed" and response.json()["id"] == str(row.id)
@@ -158,7 +162,9 @@ async def test_replay_republishes_the_envelope_with_attempt_1_through_the_outbox
 async def test_replay_refuses_a_message_that_is_not_an_envelope(
     api: AsyncClient, tenant: Tenant, session_factory: Factory
 ) -> None:
-    row = await _dead_letter(session_factory, envelope={"raw": "not json {"}, attempts=1)
+    row = await _dead_letter(
+        session_factory, project_id=tenant.project_id, envelope={"raw": "not json {"}, attempts=1
+    )
     response = await api.post(f"{API}/dlq/{row.id}/replay", headers=tenant.admin)
     assert response.status_code == 409
     assert "not a valid event envelope" in response.json()["error"]["message"]
@@ -173,7 +179,7 @@ async def test_replay_refuses_a_message_that_is_not_an_envelope(
 async def test_replay_and_discard_need_admin_and_a_known_row(
     api: AsyncClient, tenant: Tenant, session_factory: Factory
 ) -> None:
-    row = await _dead_letter(session_factory)
+    row = await _dead_letter(session_factory, project_id=tenant.project_id)
     for action in ("replay", "discard"):
         denied = await api.post(f"{API}/dlq/{row.id}/{action}", headers=tenant.read)
         assert denied.status_code == 403
@@ -181,3 +187,32 @@ async def test_replay_and_discard_need_admin_and_a_known_row(
         assert missing.status_code == 404 and missing.json()["error"]["code"] == "not_found"
     async with session_factory() as session:
         assert (await session.get(models.DeadLetters, row.id)).status == "open"  # type: ignore[union-attr]
+
+
+async def test_dlq_is_scoped_to_the_callers_project(
+    api: AsyncClient,
+    tenant: Tenant,
+    other_tenant: Tenant,
+    session_factory: Factory,
+) -> None:
+    """A key never sees, replays or discards another project's dead letters (SEC-01)."""
+    mine = await _dead_letter(session_factory, project_id=tenant.project_id)
+    theirs = await _dead_letter(session_factory, project_id=other_tenant.project_id)
+    orphan = await _dead_letter(session_factory, project_id=None)  # unresolved owner: operator-only
+
+    listed = (await api.get(f"{API}/dlq?limit=200", headers=tenant.read)).json()
+    ids = {i["id"] for i in listed["items"]}
+    assert str(mine.id) in ids
+    assert str(theirs.id) not in ids and str(orphan.id) not in ids
+
+    # replay/discard of another project's (or an orphan) row is a 404, and must not mutate it
+    for row in (theirs, orphan):
+        for action in ("replay", "discard"):
+            resp = await api.post(f"{API}/dlq/{row.id}/{action}", headers=tenant.admin)
+            assert resp.status_code == 404, (action, resp.text)
+    async with session_factory() as session:
+        assert (await session.get(models.DeadLetters, theirs.id)).status == "open"  # type: ignore[union-attr]
+        assert (await session.get(models.DeadLetters, orphan.id)).status == "open"  # type: ignore[union-attr]
+        # the owner can still act on its own row
+    ok = await api.post(f"{API}/dlq/{mine.id}/discard", headers=tenant.admin)
+    assert ok.status_code == 200 and ok.json()["status"] == "discarded"

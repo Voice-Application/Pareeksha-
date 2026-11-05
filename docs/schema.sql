@@ -412,6 +412,9 @@ CREATE TABLE processed_events (
 );
 
 -- Copy of every message that reached pareeksha.dlq.v1, for the DLQ viewer and replay.
+-- project_id is best-effort: the dlq recorder resolves it from the stored envelope's ids when it
+-- can, and it is NULL for a raw/unparseable message or an event with no resolvable project. The
+-- DLQ API scopes list/replay/discard to the caller's project (a NULL-project row is operator-only).
 CREATE TABLE dead_letters (
     id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     event_id       uuid NOT NULL,
@@ -422,11 +425,13 @@ CREATE TABLE dead_letters (
     error          text NOT NULL,
     attempts       smallint NOT NULL,
     status         text NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'replayed', 'discarded')),
+    project_id     uuid REFERENCES projects(id) ON DELETE CASCADE,
     failed_at      timestamptz NOT NULL DEFAULT now(),
     replayed_at    timestamptz,
     UNIQUE (event_id, consumer_group)
 );
 CREATE INDEX dead_letters_open ON dead_letters (failed_at DESC) WHERE status = 'open';
+CREATE INDEX dead_letters_project ON dead_letters (project_id);
 
 -- ---------------------------------------------------------------------------
 -- Integrations (CRM / webhook connectors) and API keys
@@ -497,9 +502,11 @@ CREATE TABLE api_usage (
     unit_type   text NOT NULL CHECK (unit_type IN ('audio_seconds', 'characters', 'tokens')),
     est_cost    numeric(12,4),
     cached      boolean NOT NULL DEFAULT false,
+    project_id  uuid REFERENCES projects(id) ON DELETE CASCADE,   -- owner of the usage; scopes /usage and the budget check
     run_id      uuid REFERENCES test_runs(id) ON DELETE SET NULL,
     call_id     uuid REFERENCES calls(id) ON DELETE SET NULL,
     created_at  timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX api_usage_created ON api_usage (created_at);
 CREATE INDEX api_usage_run ON api_usage (run_id);
+CREATE INDEX api_usage_project ON api_usage (project_id);

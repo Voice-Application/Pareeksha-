@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import math
 import os
+import uuid
 from collections.abc import Sequence
 from typing import Any
 
@@ -65,10 +66,15 @@ def estimate_run(
     )
 
 
-async def remaining_budget(session: AsyncSession) -> float | None:
-    """``BUDGET_CREDITS`` minus recorded ``api_usage.est_cost``; ``None`` when no budget is set."""
+async def remaining_budget(session: AsyncSession, project_id: uuid.UUID) -> float | None:
+    """``BUDGET_CREDITS`` minus the project's recorded ``api_usage.est_cost``; ``None`` when no
+    budget is set."""
     raw: Any = os.environ.get("BUDGET_CREDITS")
     if not raw:
         return None
-    used = await session.scalar(select(func.coalesce(func.sum(ApiUsage.est_cost), 0)))
+    used = await session.scalar(
+        select(func.coalesce(func.sum(ApiUsage.est_cost), 0)).where(
+            ApiUsage.project_id == project_id
+        )
+    )
     return float(raw) - float(used or 0)

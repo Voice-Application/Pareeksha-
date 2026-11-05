@@ -93,13 +93,15 @@ async def handle_generate_requested(
 
     async def sink(record: UsageRecord) -> None:
         await conn.execute(
-            "INSERT INTO api_usage (provider, operation, units, unit_type, cached, est_cost) "
-            "VALUES (%s, 'llm_scenario_gen', %s, 'tokens', %s, %s)",
+            "INSERT INTO api_usage (provider, operation, units, unit_type, cached, est_cost, "
+            "project_id) VALUES (%s, 'llm_scenario_gen', %s, 'tokens', %s, %s, "
+            "(SELECT project_id FROM agents WHERE id = %s))",
             (
                 record.provider.value,
                 record.input_tokens + record.output_tokens,
                 record.cache_hit,
                 record.est_cost,
+                p.agent_id,
             ),
         )
 

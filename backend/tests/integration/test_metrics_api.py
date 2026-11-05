@@ -16,7 +16,7 @@ from pareeksha.db import models
 from pareeksha.events.producer import EventProducer
 from pareeksha.events.settings import kafka_bootstrap
 from pareeksha.events.topics import Topics
-from tests.conftest import Tenant
+from tests.conftest import Tenant, new_tenant
 from tests.integration.api04_support import Factory
 from tests.integration.runs_support import API
 from tests.integration.support import (
@@ -113,6 +113,7 @@ async def test_outbox_backlog_dlq_open_and_credits_used_come_from_postgres(
                     error="x",
                     attempts=3,
                     status=status,
+                    project_id=tenant.project_id,
                 )
             )
         session.add_all(
@@ -123,6 +124,7 @@ async def test_outbox_backlog_dlq_open_and_credits_used_come_from_postgres(
                     units=100,
                     unit_type="characters",
                     est_cost=1.25,
+                    project_id=tenant.project_id,
                 ),
                 models.ApiUsage(
                     provider="deepseek",
@@ -130,12 +132,14 @@ async def test_outbox_backlog_dlq_open_and_credits_used_come_from_postgres(
                     units=900,
                     unit_type="tokens",
                     est_cost=0.5,
+                    project_id=tenant.project_id,
                 ),
                 models.ApiUsage(
                     provider="gnani",
                     operation="stt_batch",
                     units=30,
                     unit_type="audio_seconds",
+                    project_id=tenant.project_id,
                 ),  # no cost recorded
             ]
         )
@@ -171,6 +175,7 @@ async def test_usage_aggregates_a_time_window_and_reports_the_budget(
                 unit_type=unit_type,
                 est_cost=cost,
                 created_at=when,
+                project_id=tenant.project_id,
             )
             for provider, operation, units, unit_type, cost, when in (
                 ("gnani", "tts", 100, "characters", 1.0, inside),
@@ -225,3 +230,31 @@ async def test_usage_aggregates_a_time_window_and_reports_the_budget(
     assert no_budget["budget_credits"] is None and no_budget["remaining_budget"] is None
     assert (await api.get(f"{API}/usage")).status_code == 401
     assert (await api.get(f"{API}/usage?from=yesterday", headers=tenant.read)).status_code == 400
+
+
+async def test_usage_and_credits_are_scoped_to_the_callers_project(
+    private_api: tuple[AsyncClient, Tenant, Factory],
+) -> None:
+    """One project's spend never shows up in another project's /usage, /metrics or budget (SEC-01)."""
+    api, tenant, session_factory = private_api
+    other = await new_tenant(session_factory)
+    async with session_factory() as session:
+        session.add(
+            models.ApiUsage(
+                provider="deepseek",
+                operation="llm_judge",
+                units=1000,
+                unit_type="tokens",
+                est_cost=42.0,
+                project_id=other.project_id,
+            )
+        )
+        await session.commit()
+
+    # the other project's 42.0 credits are invisible to this caller
+    usage = (await api.get(f"{API}/usage", headers=tenant.read)).json()
+    assert usage["items"] == [] and usage["credits_used"] == 0.0
+    assert (await _summary(api, tenant))["credits_used"] == 0.0
+    # and the other tenant sees exactly its own spend
+    other_usage = (await api.get(f"{API}/usage", headers=other.read)).json()
+    assert other_usage["credits_used"] == 42.0

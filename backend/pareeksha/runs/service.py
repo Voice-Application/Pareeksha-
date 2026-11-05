@@ -113,8 +113,12 @@ class Prepared:
         return self.body.kind == "dry_run" or self.body.config.dry_run
 
 
-async def _spent(session: AsyncSession) -> float:
-    total = await session.scalar(select(func.coalesce(func.sum(ApiUsage.est_cost), 0)))
+async def _spent(session: AsyncSession, project_id: uuid.UUID) -> float:
+    total = await session.scalar(
+        select(func.coalesce(func.sum(ApiUsage.est_cost), 0)).where(
+            ApiUsage.project_id == project_id
+        )
+    )
     return float(total or 0)
 
 
@@ -152,7 +156,7 @@ async def prepare(session: AsyncSession, project_id: uuid.UUID, body: RunCreate)
         max_call_seconds=agent.max_call_seconds,
         text_only=dry_run,
     )
-    remaining = remaining_budget(await _spent(session))
+    remaining = remaining_budget(await _spent(session, project_id))
     return Prepared(body, agent, scenario_ids, persona_ids, noise_ids, estimate, remaining)
 
 

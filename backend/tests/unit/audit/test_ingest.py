@@ -85,3 +85,17 @@ def test_corrupt_and_unusable_audio_is_rejected() -> None:
         decode_audio(encode(tone(0.1, 300, 16000), 16000, "WAV"))
     with pytest.raises(AudioError, match="channels"):
         decode_audio(encode(np.zeros((16000, 3), dtype="float32") + 0.1, 16000, "WAV"))
+
+
+def test_overlong_recording_is_rejected_before_full_decode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A long recording is refused from the header, so sf.read never allocates the full PCM (SEC-01)."""
+    # Keep the test cheap: a 2 s file against a 1 s cap exercises the header preflight.
+    monkeypatch.setattr("pareeksha.audit.ingest.MAX_DURATION_S", 1.0)
+    data = encode(tone(2.0, 440, 16000), 16000, "WAV")
+    with pytest.raises(AudioTooLargeError, match="longer than"):
+        decode_audio(data)
+    # a recording within the cap still decodes
+    monkeypatch.setattr("pareeksha.audit.ingest.MAX_DURATION_S", 5.0)
+    assert decode_audio(data).duration_s == pytest.approx(2.0, abs=0.01)

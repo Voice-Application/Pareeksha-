@@ -19,7 +19,7 @@ router = APIRouter(tags=["dlq"], responses=AUTH_ERRORS)
 async def list_dead_letters(
     key: ReadKey, session: Db, page: Pagination, status: DeadLetterStatus = "open"
 ) -> Page[DeadLetterOut]:
-    return await dlq.list_dead_letters(session, page, status)
+    return await dlq.list_dead_letters(session, key.project_id, page, status)
 
 
 @router.post(
@@ -29,7 +29,7 @@ async def list_dead_letters(
     summary="Re-publish the envelope (attempt=1) to its original topic via the outbox",
 )
 async def replay_dead_letter(dead_letter_id: UUID, key: AdminKey, session: Db) -> DeadLetterOut:
-    return await dlq.replay(session, dead_letter_id)
+    return await dlq.replay(session, key.project_id, dead_letter_id)
 
 
 @router.post(
@@ -38,4 +38,4 @@ async def replay_dead_letter(dead_letter_id: UUID, key: AdminKey, session: Db) -
     summary="Mark a dead letter discarded",
 )
 async def discard_dead_letter(dead_letter_id: UUID, key: AdminKey, session: Db) -> DeadLetterOut:
-    return await dlq.discard(session, dead_letter_id)
+    return await dlq.discard(session, key.project_id, dead_letter_id)

@@ -118,11 +118,15 @@ class DeadLetters(Base):
             "status = ANY (ARRAY['open'::text, 'replayed'::text, 'discarded'::text])",
             name="dead_letters_status_check",
         ),
+        ForeignKeyConstraint(
+            ["project_id"], ["projects.id"], ondelete="CASCADE", name="dead_letters_project_id_fkey"
+        ),
         PrimaryKeyConstraint("id", name="dead_letters_pkey"),
         UniqueConstraint(
             "event_id", "consumer_group", name="dead_letters_event_id_consumer_group_key"
         ),
         Index("dead_letters_open", "failed_at", postgresql_where="(status = 'open'::text)"),
+        Index("dead_letters_project", "project_id"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -136,6 +140,8 @@ class DeadLetters(Base):
     error: Mapped[str] = mapped_column(Text, nullable=False)
     attempts: Mapped[int] = mapped_column(SmallInteger, nullable=False)
     status: Mapped[str] = mapped_column(Text, nullable=False, server_default=text("'open'::text"))
+    #: Best-effort owning project (resolved from the stored envelope's ids); NULL when unknown.
+    project_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)
     failed_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(True), nullable=False, server_default=text("now()")
     )
@@ -1261,11 +1267,15 @@ class ApiUsage(Base):
             ["call_id"], ["calls.id"], ondelete="SET NULL", name="api_usage_call_id_fkey"
         ),
         ForeignKeyConstraint(
+            ["project_id"], ["projects.id"], ondelete="CASCADE", name="api_usage_project_id_fkey"
+        ),
+        ForeignKeyConstraint(
             ["run_id"], ["test_runs.id"], ondelete="SET NULL", name="api_usage_run_id_fkey"
         ),
         PrimaryKeyConstraint("id", name="api_usage_pkey"),
         Index("api_usage_created", "created_at"),
         Index("api_usage_run", "run_id"),
+        Index("api_usage_project", "project_id"),
     )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
@@ -1278,6 +1288,8 @@ class ApiUsage(Base):
         DateTime(True), nullable=False, server_default=text("now()")
     )
     est_cost: Mapped[decimal.Decimal | None] = mapped_column(Numeric(12, 4))
+    #: Owning project; scopes /usage and the run/regression budget check. NULL only for legacy rows.
+    project_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)
     run_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)
     call_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)
 
@@ -1334,3 +1346,27 @@ class AsrResults(Base):
         "NoiseProfiles", back_populates="asr_results"
     )
     sample: Mapped["DialectSamples"] = relationship("DialectSamples", back_populates="asr_results")
+
+
+class Users(Base):
+    """Web sign-in accounts (Alembic revision 0002; not part of docs/schema.sql v0.2)."""
+
+    __tablename__ = "users"
+    __table_args__ = (
+        CheckConstraint("role IN ('admin', 'member')", name="users_role_check"),
+        PrimaryKeyConstraint("id", name="users_pkey"),
+        Index("users_email_key", "email", unique=True),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    email: Mapped[str] = mapped_column(Text, nullable=False)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    password_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    role: Mapped[str] = mapped_column(Text, nullable=False)
+    disabled_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(True))
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime(True), nullable=False, server_default=text("now()")
+    )
+    last_login_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(True))

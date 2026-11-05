@@ -40,9 +40,11 @@ def _out(row: DeadLetters) -> DeadLetterOut:
 
 
 async def list_dead_letters(
-    session: AsyncSession, page: PageParams, status: str
+    session: AsyncSession, project_id: uuid.UUID, page: PageParams, status: str
 ) -> Page[DeadLetterOut]:
-    stmt = select(DeadLetters).where(DeadLetters.status == status)
+    stmt = select(DeadLetters).where(
+        DeadLetters.status == status, DeadLetters.project_id == project_id
+    )
     rows, next_cursor = await paginate_rows(
         session,
         stmt,
@@ -54,10 +56,14 @@ async def list_dead_letters(
     return Page(items=[_out(r[0]) for r in rows], next_cursor=next_cursor)
 
 
-async def _open_row(session: AsyncSession, dead_letter_id: uuid.UUID) -> DeadLetters:
+async def _open_row(
+    session: AsyncSession, project_id: uuid.UUID, dead_letter_id: uuid.UUID
+) -> DeadLetters:
     row = (
         await session.scalars(
-            select(DeadLetters).where(DeadLetters.id == dead_letter_id).with_for_update()
+            select(DeadLetters)
+            .where(DeadLetters.id == dead_letter_id, DeadLetters.project_id == project_id)
+            .with_for_update()
         )
     ).one_or_none()
     if row is None:
@@ -69,8 +75,10 @@ async def _open_row(session: AsyncSession, dead_letter_id: uuid.UUID) -> DeadLet
     return row
 
 
-async def replay(session: AsyncSession, dead_letter_id: uuid.UUID) -> DeadLetterOut:
-    row = await _open_row(session, dead_letter_id)
+async def replay(
+    session: AsyncSession, project_id: uuid.UUID, dead_letter_id: uuid.UUID
+) -> DeadLetterOut:
+    row = await _open_row(session, project_id, dead_letter_id)
     envelope = {**cast("dict[str, Any]", row.envelope), "attempt": 1}
     try:
         parse_envelope(envelope)  # raw / unparseable messages cannot be put back on a topic
@@ -96,8 +104,10 @@ async def replay(session: AsyncSession, dead_letter_id: uuid.UUID) -> DeadLetter
     return _out(row)
 
 
-async def discard(session: AsyncSession, dead_letter_id: uuid.UUID) -> DeadLetterOut:
-    row = await _open_row(session, dead_letter_id)
+async def discard(
+    session: AsyncSession, project_id: uuid.UUID, dead_letter_id: uuid.UUID
+) -> DeadLetterOut:
+    row = await _open_row(session, project_id, dead_letter_id)
     row.status = "discarded"
     await session.flush()
     return _out(row)

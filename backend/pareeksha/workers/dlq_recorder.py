@@ -36,14 +36,41 @@ from pareeksha.events.topics import HEADER_ERROR, HEADER_TARGET_TOPIC, ConsumerG
 log = logging.getLogger(__name__)
 
 _UPSERT = """
-INSERT INTO dead_letters (event_id, original_topic, key, consumer_group, envelope, error, attempts)
+INSERT INTO dead_letters (event_id, original_topic, key, consumer_group, envelope, error, attempts,
+                          project_id)
 VALUES (%(event_id)s, %(original_topic)s, %(key)s, %(consumer_group)s, %(envelope)s, %(error)s,
-        %(attempts)s)
+        %(attempts)s,
+        COALESCE(
+            (SELECT project_id FROM calls WHERE id = %(call_id)s),
+            (SELECT project_id FROM test_runs WHERE id = %(run_id)s),
+            (SELECT project_id FROM agents WHERE id = %(agent_id)s),
+            (SELECT project_id FROM integrations WHERE id = %(integration_id)s),
+            (SELECT d.project_id FROM dialect_samples s
+                 JOIN dialect_datasets d ON d.id = s.dataset_id WHERE s.id = %(sample_id)s)
+        ))
 ON CONFLICT (event_id, consumer_group) DO UPDATE
 SET status = 'open', error = EXCLUDED.error, attempts = EXCLUDED.attempts,
-    envelope = EXCLUDED.envelope, failed_at = now(), replayed_at = NULL
+    envelope = EXCLUDED.envelope, project_id = EXCLUDED.project_id, failed_at = now(),
+    replayed_at = NULL
 WHERE dead_letters.status = 'replayed'
 """
+
+#: Payload fields the dead-letter owner is resolved from, newest-trust first (see _UPSERT).
+_PROJECT_HINT_FIELDS = ("call_id", "run_id", "agent_id", "integration_id", "sample_id")
+
+
+def _project_hints(envelope: dict[str, Any]) -> dict[str, uuid.UUID | None]:
+    """Candidate owning-entity ids pulled from the stored envelope's payload (best-effort)."""
+    payload = envelope.get("payload")
+    payload = payload if isinstance(payload, dict) else {}
+    hints: dict[str, uuid.UUID | None] = {}
+    for field in _PROJECT_HINT_FIELDS:
+        raw = payload.get(field)
+        try:
+            hints[field] = uuid.UUID(str(raw)) if raw is not None else None
+        except (ValueError, TypeError):
+            hints[field] = None
+    return hints
 
 
 @dataclass(frozen=True, slots=True)
@@ -55,6 +82,8 @@ class DeadLetter:
     envelope: dict[str, Any]
     error: str
     attempts: int
+    #: Best-effort owning-entity ids from the envelope; the DB resolves project_id from them.
+    project_hints: dict[str, uuid.UUID | None]
 
 
 def to_dead_letter(
@@ -81,6 +110,7 @@ def to_dead_letter(
         envelope=envelope,
         error=headers.get(HEADER_ERROR, "unknown error"),
         attempts=attempt if isinstance(attempt, int) and attempt >= 1 else 1,
+        project_hints=_project_hints(envelope),
     )
 
 
@@ -95,6 +125,7 @@ async def record(conn: psycopg.AsyncConnection[Any], dl: DeadLetter) -> None:
             "envelope": Jsonb(dl.envelope),
             "error": dl.error,
             "attempts": dl.attempts,
+            **dl.project_hints,
         },
     )
 
