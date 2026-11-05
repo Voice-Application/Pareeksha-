@@ -1,27 +1,29 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ArrowRight } from "lucide-react";
 
 /** The workers one call passes through, with the topic each one emits (backend/pareeksha/events/topics.py). */
 const STAGES = [
-  { name: "Planner", line: "Turns the matrix into calls.", emits: "call.requested.v1" },
-  { name: "Simulator", line: "Speaks as the caller.", emits: "call.completed.v1" },
-  { name: "Evaluator", line: "The judge scores the call.", emits: "evaluation.completed.v1" },
-  { name: "Finalizer", line: "Totals the run into a verdict.", emits: "run.completed.v1" },
-  { name: "Integrations", line: "Sends the scores on.", emits: "HubSpot, webhooks" },
+  { name: "Planner", line: "Turns the matrix into one event per call.", emits: "call.requested.v1" },
+  { name: "Simulator", line: "Dials the bot and speaks as the caller.", emits: "call.completed.v1" },
+  { name: "Evaluator", line: "The judge scores; fixed checks run beside it.", emits: "evaluation.completed.v1" },
+  { name: "Finalizer", line: "Totals the calls into the run's verdict.", emits: "run.completed.v1" },
+  { name: "Integrations", line: "Sends the scores to HubSpot and webhooks.", emits: "HubSpot note, webhook" },
 ];
+const RETRY = ["retry.30s.v1", "retry.5m.v1", "dlq.v1"];
 const STEP_MS = 1600;
 
 /**
- * One event moving through the pipeline. Still until it is on screen, stopped off screen,
- * paused on hover and focus, never moving under reduced motion, with a visible pause control.
+ * One event moving through the pipeline. Still until it is on screen, stopped off screen, paused on hover
+ * and on focus (tracked separately), never moving under reduced motion, with a visible pause control.
  */
 export function PipelineLive() {
   const [at, setAt] = useState(0);
   const [held, setHeld] = useState(false);
   const [seen, setSeen] = useState(false);
-  const [over, setOver] = useState(false);
-  const [focused, setFocused] = useState(false);
+  const [hover, setHover] = useState(false);
+  const [focus, setFocus] = useState(false);
   const [still, setStill] = useState(true);
   const root = useRef<HTMLDivElement>(null);
 
@@ -35,7 +37,7 @@ export function PipelineLive() {
     return () => { reduce.removeEventListener("change", sync); io.disconnect(); };
   }, []);
 
-  const running = seen && !held && !over && !focused && !still;
+  const running = seen && !held && !hover && !focus && !still;
   useEffect(() => {
     if (!running) return;
     const id = window.setInterval(() => setAt((n) => (n + 1) % STAGES.length), STEP_MS);
@@ -47,28 +49,43 @@ export function PipelineLive() {
       ref={root}
       className="lp-pipe"
       data-running={running ? "" : undefined}
-      onPointerEnter={() => setOver(true)}
-      onPointerLeave={() => setOver(false)}
-      onFocus={() => setFocused(true)}
-      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setFocused(false); }}
-      style={{ "--at": at } as React.CSSProperties}
+      onPointerEnter={() => setHover(true)}
+      onPointerLeave={() => setHover(false)}
+      onFocus={() => setFocus(true)}
+      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocus(false); }}
     >
-      <ol className="lp-flow" aria-label="Diagram of the call pipeline">
+      <ol className="lp-stages" aria-label="Diagram of the call pipeline">
         {STAGES.map((s, i) => (
-          <li key={s.name} data-active={i === at ? "" : undefined}>
-            <button type="button" className="lp-flow__node" aria-pressed={i === at} onClick={() => { setAt(i); setHeld(true); }}>
-              <span className="sr-only">Show step {i + 1}, </span>{s.name}
+          <li key={s.name} className="lp-stages__item" data-active={i === at ? "" : undefined} data-done={i < at ? "" : undefined}>
+            <button type="button" className="lp-stage" aria-pressed={i === at} onClick={() => { setAt(i); setHeld(true); }}>
+              <span className="lp-stage__n num" aria-hidden>{i + 1}</span>
+              <span className="lp-stage__name">{s.name}</span>
+              <span className="lp-stage__line">{s.line}</span>
             </button>
-            <p>{s.line}</p>
-            <p className="lp-flow__emit"><code>{s.emits}</code></p>
+            <p className="lp-stage__out">
+              <span className="lp-stage__wire" aria-hidden><span /></span>
+              <code>{s.emits}</code>
+            </p>
           </li>
         ))}
       </ol>
-      {!still && (
-        <button type="button" className="btn btn--quiet lp-pipe__toggle" onClick={() => setHeld((h) => !h)}>
-          {held ? "Play" : "Pause"}
-        </button>
-      )}
+      <div className="lp-pipe__foot">
+        <p className="lp-pipe__retry">
+          <span>A handler that throws</span>
+          {RETRY.map((r, i) => (
+            <span key={r} className="lp-pipe__hop">
+              <ArrowRight size={14} strokeWidth={1.8} aria-hidden />
+              <code data-last={i === RETRY.length - 1 ? "" : undefined}>{r}</code>
+            </span>
+          ))}
+          <span className="sr-only">: retried after 30 seconds, then 5 minutes, then parked in the dead-letter queue.</span>
+        </p>
+        {!still && (
+          <button type="button" className="btn btn--quiet lp-pipe__toggle" onClick={() => setHeld((h) => !h)}>
+            {held ? "Play" : "Pause"}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

@@ -43,8 +43,8 @@ const CODEC_LABEL = { none: "none", mulaw: "mu-law", alaw: "A-law" } as const;
 function SnrCell({ snr }: { snr?: number | null }) {
   if (snr === null || snr === undefined) return <span className="text-subtle" title="No background noise">-</span>;
   return (
-    <span className="inline-flex items-center gap-2">
-      <span className="mono w-10">{snr} dB</span>
+    <span className="inline-flex items-center gap-2 whitespace-nowrap">
+      <span className="num w-12">{snr}&nbsp;dB</span>
       <span aria-hidden className="inline-block h-1.5 w-12 overflow-hidden rounded-xs bg-sunken">
         <span className="block h-full" style={{ width: `${Math.min(100, (snr / 30) * 100)}%`, background: "var(--fg-muted)" }} />
       </span>

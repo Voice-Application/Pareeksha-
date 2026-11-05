@@ -1,12 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import "./landing.css";
-import audioShot from "./shots/call-audio.png";
 import verdictShot from "./shots/call-verdict.png";
 import transcriptShot from "./shots/call-transcript-light.png";
 import { RunReplay } from "./run-replay";
 import { PipelineLive } from "./pipeline-live";
 import { CopySteps } from "./copy-steps";
+import { CallPlayer } from "./call-player";
 
 const REPO = "https://github.com/voice-application/pareeksha-";
 
@@ -22,11 +22,6 @@ const PEOPLE = [
   { name: "The Interrupter", lang: "Kannada" },
 ];
 
-const TAGS = [
-  { tag: "missing_disclosure", line: "The required disclosure never came." },
-  { tag: "language_mismatch", line: "Answered in a language the caller did not use." },
-  { tag: "wrong_fact", line: "Confirmed a fact that is wrong." },
-];
 
 const QUICK_START = [
   "docker compose --profile workers up -d --build",
@@ -65,38 +60,25 @@ export function Landing() {
             </div>
             <figure className="lp-fig">
               <RunReplay />
-              <figcaption className="lp-caption">A recorded run against the bundled mock bot, which has planted bugs, replayed in the order it finished.</figcaption>
+              <figcaption className="lp-caption">A recorded run against the bundled mock bot, which has planted bugs.</figcaption>
             </figure>
           </div>
         </section>
 
         <section id="questions" className="lp-q" aria-labelledby="q-why">
-          <div className="container lp-split lp-split--flip">
-            <div className="lp-split__text">
+          <div className="container">
+            <div className="lp-q__head">
               <h2 id="q-why">Why did this call fail?</h2>
-              <p className="lead">The judge cites the turn, and the audio jumps there.</p>
-              <dl className="lp-tags">
-                {TAGS.map((t) => (
-                  <div key={t.tag}><dt>{t.tag}</dt><dd>{t.line}</dd></div>
-                ))}
-              </dl>
+              <p className="lead">A real call from that run. Pick a code to hear the turns it cites.</p>
             </div>
-            <figure className="lp-fig">
-              <div className="lp-scroll" tabIndex={0} role="region" aria-label="Call audio timeline, scrolls sideways on small screens">
-                <div className="lp-panel lp-panel--audio" data-slot="call-audio" data-kind="product" data-alt="The audio timeline of one failed call: agent and caller lanes, silences, a tool call and response latency">
-                  <Image src={audioShot} alt="Audio timeline of a 36 second call: agent and caller waveforms, two long silences, a tool call, and response latencies of 1.0 and 1.3 seconds." sizes="(min-width: 60rem) 680px, 600px" />
-                </div>
-              </div>
-              <figcaption className="lp-caption">One failed call from the same run.</figcaption>
-            </figure>
+            <CallPlayer />
           </div>
         </section>
-
         <section className="lp-q" aria-labelledby="q-flow">
           <div className="container">
             <div className="lp-q__head">
               <h2 id="q-flow">What happens on one call?</h2>
-              <p className="lead">Each step is a Kafka worker. Click one to stop on it.</p>
+              <p className="lead">Each step is a Kafka worker. An event that fails three times lands in the DLQ.</p>
             </div>
             <PipelineLive />
           </div>
@@ -139,7 +121,7 @@ export function Landing() {
           <div className="container lp-split">
             <div className="lp-split__text">
               <h2 id="q-ci">Can it fail a pull request?</h2>
-              <p className="lead">Yes. The GitHub Action runs a suite and fails the check on any of these.</p>
+              <p className="lead">Yes. The GitHub Action runs a suite and fails the check on any of these. The regression check runs when <code>regression</code> is on.</p>
               <ul className="lp-exits">
                 <li><span className="num">1</span><span>Pass rate under the threshold</span></li>
                 <li><span className="num">2</span><span>A critical failure on any call</span></li>
@@ -155,7 +137,7 @@ export function Landing() {
             <div className="lp-statement-row">
               <h2 id="q-judge" className="lp-statement">Treat a score as a signal, then read the evidence.</h2>
               <div className="lp-statement-row__aside">
-                <p>The judge is an LLM, calibrated against labelled calls, not ground truth. Check it against your own labels.</p>
+                <p>The judge is an LLM, not ground truth. Check it against your own labels.</p>
                 <p><Link className="link" href="/calibration">Open calibration</Link></p>
               </div>
             </div>

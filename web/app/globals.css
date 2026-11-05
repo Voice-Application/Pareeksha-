@@ -10,7 +10,7 @@
 /* Hallmark · dismissed kept · "1hour" is a relative time that moved on; "+231.25319" and "1232.82" are neighbouring figures the old markup ran together (the +2 count, the 31.25 score, 12 critical beside the 32.8 mean), all still on screen */
 /* Hallmark · kept: the score scale's order and hues from DES-01 (light values unchanged); the dark values are a step deeper on graphite, every -on pair at 4.5:1 or better; Dusk's no-red rule yields to data that means fail */
 @import "tailwindcss";
-/* Design tokens live in ./tokens.css (Dusk). docs/design/tokens.css still holds the DES-01 values its palette proof reads. */
+/* Design tokens: edit ./tokens.css, then copy it to docs/design/tokens.css and run proof/DES-01/validate_palette.py. */
 @import "./tokens.css";
 
 /* Maps token variables to Tailwind utilities (bg-canvas, text-muted, p-4 ...). No literal values here. */

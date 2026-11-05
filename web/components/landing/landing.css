@@ -3,7 +3,7 @@
  * axes: dark/grotesk-sans/warm · posture: committed · contrast: pass · fold: pass · v2.0.0 */
 /* Hallmark · pre-emit critique: P4 H4 E4 S5 R4 V4 · weakest: H, five questions in a row risk one rhythm; each answer takes a different composition (live replay, split, live diagram, bone index, code, statement) */
 /* Hallmark · swapped pricing for the code sample and the lines list · no price was given and the product is self-hosted */
-/* Hallmark · dismissed 58 · the dense window spans failure codes and worker names, which are identifiers; each line under them is six words or fewer */
+/* Hallmark · dismissed 58 · the dense window under the hero is the replay's own data (scenario names, callers, tally labels) and the six failure codes of the call below; the prose there is two short lines */
 /* Hallmark · dropped the Dusk hour photograph · no photo in the library shows an Indian street or a phone line, and a landscape fails the deletion test */
 /* Hallmark · waive 47c · the run planted-bugs rebuilt from its 18 recorded calls · a screenshot cannot replay the run, show only calls with one failure, or open a call's score */
 /* Hallmark · waive 39b · Phone line, Office babble and Replay sit inside the rebuilt run at 32 to 36px with a 44px hit area · they are the run's own app controls, sized like the dashboard they come from */
@@ -21,6 +21,7 @@
   --color-s3: oklch(80% 0.120 88);  --color-s3-on: oklch(17% 0.03 85);
   --color-s4: oklch(74% 0.080 180); --color-s4-on: oklch(16% 0.03 180);
   --color-s5: oklch(62% 0.090 185); --color-s5-on: oklch(14% 0.03 185);
+  --color-caller: oklch(78% 0.06 70);
   --color-crit-mark: oklch(94.5% 0.014 85); --color-s1-text: oklch(72% 0.15 32);
   --color-well: oklch(95.5% 0.008 75); --color-well-ink: oklch(21% 0.016 60); --color-well-muted: oklch(45% 0.016 60); --color-well-rule: oklch(87.5% 0.009 75);
   --shadow-card: 0 1px 2px oklch(21% 0.016 60 / 0.08), 0 30px 60px -30px oklch(21% 0.016 60 / 0.35);
@@ -157,7 +158,6 @@
 /* Product panels: one panel of the app each, captured at 2x, shown no larger than it was drawn. */
 .lp-panel { position: relative; min-width: 0; border-radius: var(--radius-card); overflow: hidden; background: var(--color-paper); color: var(--color-ink); }
 .lp-panel img { display: block; width: 100%; height: auto; }
-.lp-panel--audio { max-width: 680px; margin-inline-start: auto; box-shadow: var(--shadow-lift); }
 .lp-panel--verdict { max-width: 408px; margin-inline: auto; box-shadow: var(--shadow-lift); }
 .lp-panel--transcript { max-width: 680px; margin-inline-start: auto; }
 .lp-scroll { min-width: 0; }
@@ -167,30 +167,79 @@
 .lp-split--flip { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); }
 .lp-split--flip > .lp-split__text { order: 2; }
 .lp-split__text { display: flex; flex-direction: column; gap: var(--space-lg); }
-.lp-tags { display: flex; flex-direction: column; margin: var(--space-xs) 0 0; }
-.lp-tags > div { display: grid; gap: var(--space-3xs); padding-block: var(--space-md); border-top: 1px solid var(--color-rule); }
-.lp-tags dt { font-family: var(--font-code-lp); font-size: 0.875rem; color: var(--color-fail); }
-.lp-tags dd { margin: 0; color: var(--color-ink-2); }
 
-/* One call through the workers, live: each stage lights in turn and the line ahead of it fills. */
-.lp-pipe { display: flex; flex-direction: column; gap: var(--space-lg); }
-.lp-flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--gap-columns); margin: 0; padding: 0; list-style: none; counter-reset: stage; }
-.lp-flow li { position: relative; counter-increment: stage; display: flex; flex-direction: column; gap: var(--space-sm); }
-.lp-flow li:not(:last-child)::before { content: ""; position: absolute; top: 10px; left: 30px; right: calc(-1 * var(--gap-columns) + 8px); height: 1px; background: var(--color-rule-2); }
-.lp-flow li:not(:last-child)::after { content: ""; position: absolute; top: 10px; left: 30px; right: calc(-1 * var(--gap-columns) + 8px); height: 1px; background: var(--color-accent); transform: scaleX(0); transform-origin: left; }
-.lp-flow li[data-active]:not(:last-child)::after { animation: lp-run 1600ms linear forwards paused; }
-.lp-pipe[data-running] .lp-flow li[data-active]:not(:last-child)::after { animation-play-state: running; }
+/* The real call: failure codes as toggles over one product panel holding the waveform and the transcript. */
+.lp-call { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-lg); }
+.lp-call__codes { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+.lp-chip--fail code { color: var(--color-fail); }
+.lp-chip--fail[aria-pressed="true"] { border-color: var(--color-fail); background: color-mix(in oklab, var(--color-fail) 14%, transparent); }
+.lp-chip--fail[aria-pressed="true"] code { color: var(--color-ink); }
+.lp-call__panel { padding: var(--space-lg); border-radius: var(--radius-card); background: var(--color-paper-2); color: var(--color-ink); outline: 1px solid var(--color-rule); outline-offset: -1px; box-shadow: var(--shadow-lift); }
+.lp-call__head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-sm) var(--space-md); margin-bottom: var(--space-md); }
+.lp-call__play { display: grid; place-items: center; width: 48px; height: 48px; flex-shrink: 0; border: 0; border-radius: var(--radius-pill); background: var(--color-accent); color: var(--color-accent-ink); cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.lp-call__play:hover { background: var(--color-accent-hi); }
+.lp-call__play:active { transform: scale(0.96); }
+.lp-call__clock { font-family: var(--font-display-lp); font-size: 1.375rem; color: var(--color-muted); }
+.lp-call__clock span { color: var(--color-ink); }
+.lp-call__meta { font-size: var(--text-sm); color: var(--color-muted); }
+.lp-call__meta code { font-size: 0.8125rem; color: var(--color-ink-2); }
+.lp .lp-call__score { margin-left: auto; font-family: var(--font-display-lp); font-size: 2rem; line-height: 1; letter-spacing: var(--tracking-display); }
+.lp-call__score[data-critical] { color: var(--color-s1-text); }
+.lp-call__score span { margin-left: var(--space-3xs); font-size: 0.9375rem; color: var(--color-muted); }
+.lp-call__err { margin-bottom: var(--space-sm); font-size: var(--text-sm); color: var(--color-fail); }
+.lp-call__track { display: grid; grid-template-columns: 3.5rem minmax(0, 1fr); gap: var(--space-sm); align-items: stretch; }
+.lp-call__lanes { display: grid; grid-template-rows: 1fr 1fr; align-items: center; font-size: 0.8125rem; color: var(--color-muted); }
+.lp-call__wave { display: block; width: 100%; height: 120px; cursor: pointer; }
+.lp-call__agent rect { fill: var(--color-accent); }
+.lp-call__caller rect { fill: var(--color-caller); }
+.lp-call__band { fill: color-mix(in oklab, var(--color-fail) 18%, transparent); stroke: color-mix(in oklab, var(--color-fail) 60%, transparent); stroke-width: 1; }
+.lp-call__head-line { stroke: var(--color-ink); stroke-width: 2; }
+.lp-call__turns { margin: var(--space-md) 0 0; padding: 0; list-style: none; border-top: 1px solid var(--color-rule); }
+.lp-call__turns li { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: var(--space-md); padding: var(--space-sm) var(--space-sm); border-bottom: 1px solid var(--color-rule); border-left: 2px solid transparent; transition: background-color var(--dur-short) var(--ease-out); }
+.lp-call__turns li[data-cited] { border-left-color: var(--color-fail); background: color-mix(in oklab, var(--color-fail) 7%, transparent); }
+.lp-call__turns li[data-now] { background: var(--color-paper-3); }
+.lp-call__turn { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3xs); padding: 0; border: 0; background: none; cursor: pointer; text-align: left; }
+.lp-call__turn .num { font-size: var(--text-sm); color: var(--color-muted); }
+.lp-call__turn:hover .num { color: var(--color-accent); }
+.lp-call__who { font-size: var(--text-sm); }
+.lp-call__who[data-speaker="agent"] { color: var(--color-accent); }
+.lp-call__who[data-speaker="caller"] { color: var(--color-caller); }
+.lp-call__text p[lang="kn"] { line-height: 1.75; }
+.lp-call__heard { margin-top: var(--space-2xs); font-size: var(--text-sm); color: var(--color-muted); }
+.lp-call__heard span:first-child { color: var(--color-ink-2); }
+.lp-call__cite { margin-top: var(--space-2xs); font-size: var(--text-sm); color: var(--color-fail); }
+.lp-call__cite code { font-size: 0.8125rem; }
+
+/* One call through the workers: connected stage cards, the active one lit, the wire after it filling while the pipeline runs. */
+.lp-pipe { display: flex; flex-direction: column; gap: var(--space-xl); }
+.lp-stages { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-sm); margin: 0; padding: 0; list-style: none; }
+.lp-stages__item { display: flex; flex-direction: column; gap: var(--space-sm); min-width: 0; }
+.lp-stage { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-xs); min-height: 11.5rem; padding: var(--space-lg); border: 1px solid var(--color-rule); border-radius: var(--radius-card); background: var(--color-paper-2); color: var(--color-ink); text-align: left; cursor: pointer; transition: border-color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out); }
+.lp-stage:hover { border-color: var(--color-rule-2); background: var(--color-paper-3); }
+.lp-stage:active { transform: translateY(1px); }
+.lp-stage__n { display: grid; place-items: center; width: 28px; height: 28px; border: 1px solid var(--color-rule-2); border-radius: var(--radius-pill); font-size: 0.8125rem; color: var(--color-muted); transition: background-color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out); }
+.lp-stage__name { margin-top: var(--space-xs); font-family: var(--font-display-lp); font-size: var(--text-title); letter-spacing: var(--tracking-display); }
+.lp-stage__line { font-size: 0.9375rem; line-height: 1.45; color: var(--color-ink-2); }
+.lp-stages__item[data-done] .lp-stage__n { border-color: var(--color-accent); color: var(--color-accent); }
+.lp-stages__item[data-active] .lp-stage { border-color: var(--color-accent); background: var(--color-accent-tint); }
+.lp-stages__item[data-active] .lp-stage__n { border-color: var(--color-accent); background: var(--color-accent); color: var(--color-accent-ink); }
+.lp-stage__out { display: flex; flex-direction: column; gap: var(--space-xs); padding-inline: var(--space-lg); }
+.lp-stage__out code { font-size: 0.8125rem; color: var(--color-muted); overflow-wrap: anywhere; transition: color var(--dur-short) var(--ease-out); }
+.lp-stages__item[data-active] .lp-stage__out code { color: var(--color-accent); }
+.lp-stage__wire { display: block; height: 2px; border-radius: 2px; background: var(--color-rule-2); overflow: hidden; }
+.lp-stage__wire span { display: block; height: 100%; background: var(--color-accent); transform: scaleX(0); transform-origin: left; }
+.lp-stages__item[data-done] .lp-stage__wire span { transform: scaleX(1); }
+/* The wire follows the pipeline: it fills while running and holds where it is when paused, hovered or focused. */
+.lp-stage__wire span { animation-play-state: paused; }
+.lp-pipe[data-running] .lp-stage__wire span { animation-play-state: running; }
+.lp-stages__item[data-active] .lp-stage__wire span { animation-name: lp-run; animation-duration: 1600ms; animation-timing-function: linear; animation-fill-mode: forwards; }
 @keyframes lp-run { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-.lp-flow__node { display: inline-flex; align-items: center; gap: var(--space-sm); width: fit-content; padding: 0; border: 0; background: none; cursor: pointer; font-family: var(--font-display-lp); font-size: var(--text-title); letter-spacing: var(--tracking-display); text-align: left; }
-.lp-flow__node::before { content: counter(stage); display: grid; place-items: center; width: 22px; height: 22px; flex-shrink: 0; border: 1px solid var(--color-rule-2); border-radius: var(--radius-pill); background: var(--color-paper); color: var(--color-muted); font: 500 0.75rem/1 var(--font-body-lp); font-variant-numeric: tabular-nums; transition: background-color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out); }
-.lp-flow__node:hover::before { border-color: var(--color-accent); }
-.lp-flow li[data-active] .lp-flow__node::before { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-accent-ink); }
-.lp-flow p { color: var(--color-ink-2); }
-.lp-flow__emit { font-size: var(--text-sm); color: var(--color-muted); transition: opacity var(--dur-short) var(--ease-out); }
-.lp-flow__emit code { font-size: 0.8125rem; color: var(--color-ink-2); }
-.lp-flow li[data-active] .lp-flow__emit code { color: var(--color-accent); }
-.lp-pipe .lp-pipe__toggle { align-self: flex-start; min-height: 36px; padding-inline: var(--space-md); font-size: var(--text-sm); }
-
+.lp-pipe__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-md); padding-top: var(--space-lg); border-top: 1px solid var(--color-rule); }
+.lp-pipe__retry { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-xs) var(--space-sm); font-size: var(--text-sm); color: var(--color-muted); }
+.lp-pipe__hop { display: inline-flex; align-items: center; gap: var(--space-sm); }
+.lp-pipe__hop code { padding: 2px var(--space-xs); border-radius: 6px; background: var(--color-paper-2); color: var(--color-ink-2); font-size: 0.8125rem; }
+.lp-pipe__hop code[data-last] { color: var(--color-fail); }
+.lp-pipe .lp-pipe__toggle { min-height: 36px; padding-inline: var(--space-md); font-size: var(--text-sm); }
 /* A bone band: the one light surface on the page, holding the light theme's transcript. */
 .lp-bone { background: var(--color-well); color: var(--color-well-ink); border-top: 0; }
 .lp-bone .lead, .lp-bone .lp-people__title, .lp-bone .lp-caption, .lp-bone .lp-people span + span { color: var(--color-well-muted); }
@@ -246,15 +295,15 @@
   .lp-hero .container, .lp-split, .lp-split--flip, .lp-q__head, .lp-judge { grid-template-columns: minmax(0, 1fr); gap: var(--space-xl); }
   .lp-hero .container { min-height: 0; }
   .lp-split--flip > .lp-split__text { order: 0; }
-  .lp-flow { grid-template-columns: minmax(0, 1fr); gap: var(--space-lg); }
-  .lp-flow li:not(:last-child)::before, .lp-flow li:not(:last-child)::after { top: 30px; bottom: calc(-1 * var(--space-lg) + 4px); left: 10px; right: auto; width: 1px; height: auto; transform-origin: top; }
-  .lp-flow li[data-active]:not(:last-child)::after { animation-name: lp-run-y; }
-  .lp-flow li { padding-left: 0; }
-  .lp-flow li > p { padding-left: var(--space-xl); }
-  .lp-panel--audio, .lp-panel--transcript { margin-inline-start: 0; }
+  .lp-stages { grid-template-columns: minmax(0, 1fr); gap: var(--space-xs); }
+  .lp-stage { min-height: 0; }
+  .lp-stage__out { flex-direction: row; align-items: center; }
+  .lp-stage__wire { width: 2rem; flex-shrink: 0; }
+  .lp-call__turns li { grid-template-columns: minmax(0, 1fr); gap: var(--space-2xs); }
+  .lp-call__turn { flex-direction: row; gap: var(--space-sm); }
+  .lp-panel--transcript { margin-inline-start: 0; }
   .lp-nav__links a.lp-nav__repo { display: none; }
 }
-@keyframes lp-run-y { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 @media (max-width: 40rem) {
   [data-theme="dusk"] { --gutter: 16px; --section-gap-s: 56px; --section-gap: 72px; --gap-columns: 16px; }
   .lp-nav__links a[href="#questions"] { display: none; }
@@ -266,7 +315,6 @@
   .lp-rp__tally > div:nth-child(3) { padding-left: 0; border-left: 0; }
   .lp-rp__tally > div:nth-child(n+3) { margin-top: var(--space-md); border-top: 1px solid var(--color-rule); }
   .lp-scroll { overflow-x: auto; overscroll-behavior-x: contain; border-radius: var(--radius-card); }
-  .lp-scroll > .lp-panel--audio { width: 600px; max-width: none; }
   .lp-steps li { grid-template-columns: 1.5rem minmax(0, 1fr); }
   .lp-copy { grid-column: 2; justify-self: start; }
 }
@@ -274,5 +322,7 @@
   .lp .btn, .lp-chip, .lp-copy, .lp-seg__opt, .lp-rp__cell { transition: none; }
   .lp .btn:active, .lp-chip:active, .lp-copy:active, .lp-seg__opt:active, .lp-rp__cell[data-step]:hover { transform: none; }
   .lp-rp__cell[data-step] { animation: none; }
-  .lp-flow li[data-active]:not(:last-child)::after { animation: none; transform: none; }
+  .lp-stages__item[data-active] .lp-stage__wire span { animation: none; transform: scaleX(1); }
+  .lp-stage, .lp-call__play, .lp-call__turns li { transition: none; }
+  .lp-stage:active, .lp-call__play:active { transform: none; }
 }

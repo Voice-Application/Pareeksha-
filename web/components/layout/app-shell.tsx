@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { Menu, Moon, Sun, X } from "lucide-react";
+import { LogOut, Menu, Moon, Sun, X } from "lucide-react";
 import { Sidebar } from "./sidebar";
 import { Button } from "@/components/ui/button";
 import { ToastProvider } from "@/components/ui/toast";
 import { NAV_ITEMS } from "@/lib/nav";
+import { SIGNED_IN_COOKIE } from "@/lib/session";
 
 type Theme = "light" | "dark";
 
@@ -42,6 +43,24 @@ function ThemeToggle() {
   );
 }
 
+/** Shown only after a password sign-in. The form posts, so signing out works without script too. */
+function SignOut() {
+  const signedIn = useSyncExternalStore(
+    () => () => {},
+    () => document.cookie.split("; ").some((c) => c === `${SIGNED_IN_COOKIE}=1`),
+    () => false,
+  );
+  if (!signedIn) return null;
+  return (
+    <form method="post" action="/api/auth/logout">
+      <Button type="submit" variant="ghost" className="px-3">
+        <LogOut size={16} strokeWidth={1.6} aria-hidden />
+        Sign out
+      </Button>
+    </form>
+  );
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -62,8 +81,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     (a, b) => b.href.length - a.href.length,
   )[0];
 
-  // The product page stands outside the working shell: no sidebar, its own chrome.
-  if (pathname === "/welcome") return <ToastProvider>{children}</ToastProvider>;
+  // The product and sign-in pages stand outside the working shell: no sidebar, their own chrome.
+  if (pathname === "/welcome" || pathname === "/login") return <ToastProvider>{children}</ToastProvider>;
 
   return (
     <ToastProvider>
@@ -95,7 +114,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Menu size={16} strokeWidth={1.6} aria-hidden />
             </Button>
             <p className="truncate text-sm text-muted">{current?.label ?? (pathname === "/" ? "Overview" : "")}</p>
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-1">
+              <SignOut />
               <ThemeToggle />
             </div>
           </header>

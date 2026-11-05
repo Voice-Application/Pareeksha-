@@ -26,7 +26,6 @@ export function RunReplay() {
   const [tag, setTag] = useState<string | null>(null);
   const [active, setActive] = useState<RunCall | null>(null);
   const root = useRef<HTMLDivElement>(null);
-  const lineButtons = useRef<(HTMLButtonElement | null)[]>([]);
   const started = useRef(false);
 
   useEffect(() => {
@@ -66,22 +65,9 @@ export function RunReplay() {
     [scored],
   );
   const done = shown >= RUN_CALLS.length;
-  const detail = active ?? null;
-
-  function selectLine(next: RunCall["line"]) {
-    if (next !== line) setActive(null);
-    setLine(next);
-  }
-
-  function onLineKey(e: React.KeyboardEvent, index: number) {
-    let next: number;
-    if (e.key === "ArrowRight" || e.key === "ArrowDown") next = (index + 1) % LINES.length;
-    else if (e.key === "ArrowLeft" || e.key === "ArrowUp") next = (index - 1 + LINES.length) % LINES.length;
-    else return;
-    e.preventDefault();
-    selectLine(LINES[next].id);
-    lineButtons.current[next]?.focus();
-  }
+  const pickLine = (id: RunCall["line"]) => { setLine(id); setActive(null); };
+  // Only show a call that is on the current line and already scored in the replay.
+  const detail = active && active.line === line && RUN_CALLS.indexOf(active) < shown ? active : null;
 
   return (
     <div ref={root} className="lp-rp" data-kind="product">
@@ -93,7 +79,24 @@ export function RunReplay() {
         <div className="lp-rp__controls">
           <div className="lp-seg" role="radiogroup" aria-label="Line">
             {LINES.map((l, i) => (
-              <button key={l.id} ref={(el) => { lineButtons.current[i] = el; }} type="button" role="radio" aria-checked={line === l.id} tabIndex={line === l.id ? 0 : -1} onKeyDown={(e) => onLineKey(e, i)} onClick={() => selectLine(l.id)} className="lp-seg__opt">
+              <button
+                key={l.id}
+                type="button"
+                role="radio"
+                aria-checked={line === l.id}
+                tabIndex={line === l.id ? 0 : -1}
+                onClick={() => pickLine(l.id)}
+                onKeyDown={(e) => {
+                  const step = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
+                  if (!step) return;
+                  e.preventDefault();
+                  const next = LINES[(i + step + LINES.length) % LINES.length];
+                  pickLine(next.id);
+                  (e.currentTarget.parentElement?.querySelector(`[data-line="${next.id}"]`) as HTMLButtonElement | null)?.focus();
+                }}
+                data-line={l.id}
+                className="lp-seg__opt"
+              >
                 {l.label}
               </button>
             ))}
@@ -132,7 +135,7 @@ export function RunReplay() {
                     data-step={on ? overallStep(call.score) : undefined}
                     data-critical={on && call.critical ? "" : undefined}
                     data-dim={dim ? "" : undefined}
-                    aria-label={on ? `${sc}, ${who}: ${fmt(call.score)}${call.critical ? ", critical" : ""}${tag ? (call.tags.includes(tag) ? `, matches ${tag}` : `, does not match ${tag}`) : ""}` : `${sc}, ${who}: not scored yet`}
+                    aria-label={on ? `${sc}, ${who}: ${fmt(call.score)}${call.critical ? ", critical" : ""}${tag ? (dim ? `, does not match ${tag}` : `, matches ${tag}`) : ""}` : `${sc}, ${who}: not scored yet`}
                     onMouseEnter={() => on && setActive(call)}
                     onFocus={() => on && setActive(call)}
                     onClick={() => on && setActive(call)}

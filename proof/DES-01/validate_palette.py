@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Validate docs/design/tokens.css: WCAG contrast + colour-vision-deficiency separation.
+Colours may be hex or oklch(L% C H) (the redesign tokens use OKLCH).
 
 Run: python3 -I proof/DES-01/validate_palette.py
 Reads tokens.css (light = :root, dark = [data-theme="dark"]), prints a report, exits 1 on failure.
@@ -36,7 +37,25 @@ def parse_blocks(css: str):
     return lv, dv
 
 
+def oklch_rgb(s):
+    """oklch(L% C H) to gamma-encoded sRGB in 0..1 (Ottosson's OKLab matrices), clipped to gamut."""
+    m = re.match(r"oklch\(\s*([\d.]+)%\s+([\d.]+)\s+([\d.]+)", s.strip())
+    L, C, h = float(m.group(1)) / 100, float(m.group(2)), np.radians(float(m.group(3)))
+    a, b = C * np.cos(h), C * np.sin(h)
+    l_ = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3
+    m_ = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3
+    s_ = (L - 0.0894841775 * a - 1.2914855480 * b) ** 3
+    lin_rgb = np.array([
+        4.0767416621 * l_ - 3.3077115913 * m_ + 0.2309699292 * s_,
+        -1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_,
+        -0.0041960863 * l_ - 0.7034186147 * m_ + 1.7076147010 * s_,
+    ])
+    return delin(lin_rgb)
+
+
 def hex_rgb(h):
+    if h.strip().startswith("oklch("):
+        return oklch_rgb(h)
     h = h.strip().lstrip("#")
     return np.array([int(h[i:i + 2], 16) for i in (0, 2, 4)]) / 255.0
 

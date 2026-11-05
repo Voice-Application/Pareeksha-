@@ -22,7 +22,8 @@ test("pipeline pauses for focus and hover, and reduced motion retains selection"
   await page.goto("/welcome");
   const pipe = page.locator(".lp-pipe");
   const first = pipe.locator("li").first();
-  const playState = () => first.evaluate((el) => getComputedStyle(el, "::after").animationPlayState);
+  // The first stage's wire carries the progress animation; it must pause whenever the pipeline does.
+  const playState = () => first.locator(".lp-stage__wire span").evaluate((el) => getComputedStyle(el).animationPlayState);
   await expect.poll(playState).toBe("paused");
   await pipe.scrollIntoViewIfNeeded();
   await page.mouse.move(0, 0);

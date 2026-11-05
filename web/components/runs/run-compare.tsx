@@ -33,7 +33,7 @@ const dateOf = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day:
 export function RunCompareSkeleton() {
   return (
     <>
-      <PageHeader eyebrow="Run compare" title="" description={<Skeleton className="h-4 w-72" />} />
+      <PageHeader title="" description={<Skeleton className="h-4 w-72" />} />
       <TileRow cols="grid-cols-2 min-[860px]:grid-cols-4">{Array.from({ length: 4 }, (_, i) => <div key={i} className="px-4 py-3"><Skeleton className="h-3 w-16" /><Skeleton className="mt-2 h-6 w-16" /></div>)}</TileRow>
       <Panel title="Changed cells" bodyClassName="p-0"><TableSkeleton rows={5} label="Loading comparison" /></Panel>
     </>
@@ -136,7 +136,7 @@ export function RunCompare() {
   if (!ready) {
     return (
       <>
-        <PageHeader eyebrow="Run compare" title="Choose two runs to compare" description="Pick a base run and a head run. Regressions are listed first." />
+        <PageHeader title="Choose two runs to compare" description="Pick a base run and a head run. Regressions are listed first." />
         {list.isError && <div className="mb-6"><ErrorPanel error={list.error} what="runs" onRetry={() => void list.refetch()} /></div>}
         {pickers}
         {list.isSuccess && runs.length < 2 && <EmptyState icon={GitCompare} title="Not enough runs to compare" body="Comparing needs two runs of the same agent. Create another run first." action={<LinkButton variant="primary" href="/runs/new">New run</LinkButton>} />}

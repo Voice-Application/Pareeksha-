@@ -313,7 +313,7 @@ export function RunWizard() {
 
   return (
     <>
-      <PageHeader eyebrow="Evaluate" title="New run" description="Choose the matrix of scenarios, callers and phone lines. The summary shows its size and cost before anything starts." />
+      <PageHeader title="New run" description="Choose the matrix of scenarios, callers and phone lines. The summary shows its size and cost before anything starts." />
       <div className="grid items-start gap-6 min-[1180px]:grid-cols-[200px_minmax(0,1fr)_380px] min-[860px]:grid-cols-[200px_minmax(0,1fr)] max-[860px]:grid-cols-1">
         <nav aria-label="Run steps" className="rounded-md border border-border bg-surface p-1 max-[860px]:flex max-[860px]:overflow-x-auto">
           <ol className="contents">
