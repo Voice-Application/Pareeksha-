@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import asyncio
 from datetime import UTC, datetime
-from typing import Literal
+from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 from sqlalchemy import func, select, text
 from sqlalchemy.exc import IntegrityError
 
@@ -49,7 +49,7 @@ class AuthStatus(BaseModel):
 
 
 class BootstrapIn(_Body):
-    email: str = Field(max_length=254, pattern=_EMAIL)
+    email: Annotated[str, StringConstraints(strip_whitespace=True, max_length=254, pattern=_EMAIL)]
     name: str = Field(min_length=1, max_length=200)
     password: str
 
