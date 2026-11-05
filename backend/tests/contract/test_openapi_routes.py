@@ -93,6 +93,13 @@ EXPECTED: set[tuple[str, str]] = {
     ("POST", "/api-keys"),
     ("GET", "/api-keys"),
     ("DELETE", "/api-keys/{id}"),
+    # 10b web sign-in accounts (called by the web server with an admin key)
+    ("GET", "/auth/status"),
+    ("POST", "/auth/bootstrap"),
+    ("POST", "/auth/login"),
+    ("GET", "/users"),
+    ("POST", "/users"),
+    ("PATCH", "/users/{id}"),
     # 11 event contract
     ("GET", "/events/schemas"),
 }
