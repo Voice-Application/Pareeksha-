@@ -1,56 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { LogOut, Menu, Moon, Sun, X } from "lucide-react";
+import { LogOut, Menu, X } from "lucide-react";
+import { ThemeToggle, useRole } from "./theme-toggle";
 import { Sidebar } from "./sidebar";
 import { Button } from "@/components/ui/button";
 import { ToastProvider } from "@/components/ui/toast";
 import { NAV_ITEMS } from "@/lib/nav";
-import { SIGNED_IN_COOKIE } from "@/lib/session";
-
-type Theme = "light" | "dark";
-
-function subscribeTheme(cb: () => void) {
-  const o = new MutationObserver(cb);
-  o.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
-  return () => o.disconnect();
-}
-
-function ThemeToggle() {
-  const theme = useSyncExternalStore<Theme>(
-    subscribeTheme,
-    () => (document.documentElement.classList.contains("dark") ? "dark" : "light"),
-    () => "light",
-  );
-  const next: Theme = theme === "dark" ? "light" : "dark";
-  return (
-    <Button
-      variant="ghost"
-      icon
-      aria-label={`Switch to ${next} theme`}
-      onClick={() => {
-        document.documentElement.classList.toggle("dark", next === "dark");
-        try {
-          localStorage.setItem("theme", next);
-        } catch {
-          /* storage may be blocked; the choice then lasts for this page view */
-        }
-      }}
-    >
-      {theme === "dark" ? <Sun size={16} strokeWidth={1.6} aria-hidden /> : <Moon size={16} strokeWidth={1.6} aria-hidden />}
-    </Button>
-  );
-}
 
 /** Shown only after a password sign-in. The form posts, so signing out works without script too. */
 function SignOut() {
-  const signedIn = useSyncExternalStore(
-    () => () => {},
-    () => document.cookie.split("; ").some((c) => c === `${SIGNED_IN_COOKIE}=1`),
-    () => false,
-  );
-  if (!signedIn) return null;
+  if (!useRole()) return null;
   return (
     <form method="post" action="/api/auth/logout">
       <Button type="submit" variant="ghost" className="px-3">

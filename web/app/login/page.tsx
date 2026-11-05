@@ -1,75 +1,99 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { CircleAlert, LockKeyhole } from "lucide-react";
+import { CircleAlert } from "lucide-react";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { safeNext } from "@/lib/session";
+import { backend } from "@/lib/auth-server";
 import verdictShot from "@/components/landing/shots/call-verdict.png";
 
 export const metadata: Metadata = { title: "Sign in to Pareeksha", description: "Sign in to the Pareeksha dashboard." };
 export const dynamic = "force-dynamic";
 
 const ERRORS: Record<string, string> = {
-  wrong: "That password is not right. Check it against WEB_PASSWORD in the server's .env.",
-  empty: "Enter the password to continue.",
+  wrong: "That email and password do not match.",
+  empty: "Fill in every field to continue.",
+  locked: "Too many failed attempts. Try again in ten minutes.",
+  disabled: "This account is disabled. Ask an admin to turn it back on.",
+  down: "The API did not answer. Check that it is running, then try again.",
+  config: "SESSION_SECRET is not set on the server (16 characters or more).",
+  mismatch: "The two passwords are not the same.",
+  short: "Use at least 10 characters for the password.",
+  invalid: "Check the email address and password length (10 to 200 characters).",
+  closed: "An admin already exists. Sign in instead.",
 };
+
+const input = "h-12 w-full rounded-sm border border-border-strong bg-surface px-3 text-base text-fg transition-[border-color] duration-150 hover:border-fg aria-[invalid=true]:border-fail";
+const submit = "inline-flex h-12 items-center justify-center rounded-pill bg-accent px-6 text-base font-medium text-accent-on transition-[background-color,transform] duration-150 hover:bg-accent-hi active:translate-y-px motion-reduce:transition-none";
+
+function Field({ id, label, type = "text", autoComplete, autoFocus, invalid, hint }: { id: string; label: string; type?: string; autoComplete?: string; autoFocus?: boolean; invalid?: boolean; hint?: string }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={id} className="text-sm font-medium">{label}</label>
+      <input id={id} name={id} type={type} autoComplete={autoComplete} autoFocus={autoFocus} required aria-invalid={invalid ? true : undefined} className={input} />
+      {hint && <p className="text-sm text-subtle">{hint}</p>}
+    </div>
+  );
+}
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
   const one = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : undefined);
   const next = safeNext(one("next"));
   const error = ERRORS[one("error") ?? ""];
-  const gated = !!process.env.WEB_PASSWORD;
+  const open = process.env.AUTH_DISABLED === "1";
+  const status = open ? null : await backend("/auth/status");
+  const hasUsers = (status?.data as { has_users?: boolean } | null)?.has_users;
+  const setup = !open && status?.status === 200 && hasUsers === false;
+  const unavailable = !open && status?.status !== 200;
 
   return (
     <div className="min-h-dvh bg-canvas text-fg">
       <div className="mx-auto grid min-h-dvh w-full max-w-[1360px] items-center gap-12 px-6 py-10 min-[961px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] min-[961px]:px-16">
         <main id="main" className="flex w-full max-w-[26rem] flex-col gap-8">
-          <Link href="/welcome" className="display w-fit text-lg">Pareeksha</Link>
+          <div className="flex items-center justify-between"><Link href="/welcome" className="display w-fit text-lg">Pareeksha</Link><ThemeToggle /></div>
           <div className="flex flex-col gap-3">
-            <h1 className="display text-xl">Sign in to the dashboard</h1>
+            <h1 className="display text-xl">{setup ? "Create the admin account" : "Sign in to the dashboard"}</h1>
             <p className="text-muted">
-              {gated ? "This instance is protected by the password set as WEB_PASSWORD on the server." : "This instance has no password set, so the dashboard is open."}
+              {open
+                ? "Sign-in is turned off on this instance (AUTH_DISABLED), so the dashboard is open."
+                : setup
+                  ? "No one has an account yet. The first account is the admin, who adds everyone else from Users."
+                  : "Use the email and password an admin created for you."}
             </p>
           </div>
 
           {one("signed_out") && !error && <p role="status" className="rounded-sm bg-pass-tint px-4 py-3 text-sm text-pass-fg">You are signed out.</p>}
+          {error && (
+            <p role="alert" className="flex items-start gap-1.5 text-sm text-fail-fg">
+              <CircleAlert size={16} strokeWidth={1.6} className="mt-0.5 shrink-0" aria-hidden />
+              {error}
+            </p>
+          )}
 
-          {gated ? (
-            <form method="post" action="/api/auth/login" className="flex flex-col gap-5">
-              <input type="hidden" name="next" value={next} />
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor="password" className="text-sm font-medium">Password</label>
-                <div className="relative">
-                  <LockKeyhole size={16} strokeWidth={1.6} className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-subtle" aria-hidden />
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    autoFocus
-                    aria-invalid={error ? true : undefined}
-                    aria-describedby={error ? "password-error" : "password-help"}
-                    className="h-12 w-full rounded-sm border border-border-strong bg-surface pr-3 pl-10 text-base text-fg transition-[border-color] duration-150 hover:border-fg aria-[invalid=true]:border-fail"
-                  />
-                </div>
-                {error ? (
-                  <p id="password-error" role="alert" className="flex items-start gap-1.5 text-sm text-fail-fg">
-                    <CircleAlert size={16} strokeWidth={1.6} className="mt-0.5 shrink-0" aria-hidden />
-                    {error}
-                  </p>
-                ) : (
-                  <p id="password-help" className="min-h-5 text-sm text-subtle">Any username works for scripts that use HTTP Basic auth.</p>
-                )}
-              </div>
-              <button type="submit" className="inline-flex h-12 items-center justify-center rounded-pill bg-accent px-6 text-base font-medium text-accent-on transition-[background-color,transform] duration-150 hover:bg-accent-hi active:translate-y-px motion-reduce:transition-none">
-                Sign in
-              </button>
+          {open ? (
+            <Link href={next} className={`${submit} w-fit`}>Open the dashboard</Link>
+          ) : unavailable ? (
+            <p role="alert" className="flex items-start gap-1.5 text-sm text-fail-fg">
+              <CircleAlert size={16} strokeWidth={1.6} className="mt-0.5 shrink-0" aria-hidden />
+              {ERRORS.down}
+            </p>
+          ) : setup ? (
+            <form method="post" action="/api/auth/setup" className="flex flex-col gap-5">
+              <Field id="name" label="Name" autoComplete="name" autoFocus />
+              <Field id="email" label="Email" type="email" autoComplete="email" />
+              <Field id="password" label="Password" type="password" autoComplete="new-password" hint="10 characters or more." />
+              <Field id="confirm" label="Repeat the password" type="password" autoComplete="new-password" />
+              <button type="submit" className={submit}>Create admin account</button>
             </form>
           ) : (
-            <Link href={next} className="inline-flex h-12 w-fit items-center rounded-pill bg-accent px-6 text-base font-medium text-accent-on hover:bg-accent-hi">
-              Open the dashboard
-            </Link>
+            <form method="post" action="/api/auth/login" className="flex flex-col gap-5">
+              <input type="hidden" name="next" value={next} />
+              <Field id="email" label="Email" type="email" autoComplete="username" autoFocus invalid={!!error} />
+              <Field id="password" label="Password" type="password" autoComplete="current-password" invalid={!!error} />
+              <button type="submit" className={submit}>Sign in</button>
+              <p className="text-sm text-subtle">There is no public sign-up. An admin adds accounts from Users.</p>
+            </form>
           )}
 
           <p className="text-sm text-subtle">

@@ -1,43 +1,35 @@
 /*
- * Pareeksha design tokens (Hallmark redesign, 2026-11-04), replacing DES-01 "Field Instrument".
- * Light: warm bone. Dark: espresso black. One sky-blue accent in both.
- *
- * Light = :root (bone wells).  Dark = .dark / [data-theme="dark"] (slate).
- * Only the colour tokens change between themes; type, spacing and radius are shared.
- * Colour is reserved for meaning: neutrals carry structure, one sky-blue accent marks interaction,
- * and the score scale and verdict colours are kept exactly as DES-01 validated them
- * (proof/DES-01/validate_palette.py: WCAG and colour-vision deficiency).
+ * Pareeksha design tokens: Cobalt (light) and Vantage (dark) from Hallmark, by request.
+ * Cobalt: cool near-white paper, blue-grey ink, one electric blue, 6-8px corners, Familjen Grotesk over IBM Plex Sans.
+ * Vantage: blue-black ground, pale steel ink, one lime signal, 4px corners, Geologica.
+ * Verdict and score colours are kept as DES-01 validated them (proof/DES-01/validate_palette.py).
  */
 
-@font-face { font-family: "Wix Madefor Display"; font-style: normal; font-weight: 400 600; font-display: swap; src: url("./fonts/wix-madefor-display-latin.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-@font-face { font-family: "Wix Madefor Display"; font-style: normal; font-weight: 400 600; font-display: swap; src: url("./fonts/wix-madefor-display-latin-ext.woff2") format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
-@font-face { font-family: "Wix Madefor Text"; font-style: normal; font-weight: 400 600; font-display: swap; src: url("./fonts/wix-madefor-text-latin.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
-@font-face { font-family: "Wix Madefor Text"; font-style: normal; font-weight: 400 600; font-display: swap; src: url("./fonts/wix-madefor-text-latin-ext.woff2") format("woff2"); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 
 :root {
   /* ---------- surfaces: bone ---------- */
-  --bg-canvas:   oklch(95.5% 0.008 75);   /* app background behind panels */
-  --bg-surface:  oklch(99.3% 0.003 75);   /* panels, tables, inputs */
-  --bg-sunken:   oklch(92.2% 0.010 75);   /* wells: sidebar, code, waveform track, table head */
-  --bg-hover:    oklch(93.6% 0.010 75);
-  --bg-selected: oklch(91.5% 0.030 238);
+  --bg-canvas:   oklch(98.6% 0.005 250);   /* app background behind panels */
+  --bg-surface:  oklch(99.4% 0.003 250);   /* panels, tables, inputs */
+  --bg-sunken:   oklch(96.2% 0.008 252);   /* wells: sidebar, code, waveform track, table head */
+  --bg-hover:    oklch(94.5% 0.010 252);
+  --bg-selected: oklch(93% 0.035 256);
 
   /* ---------- lines ---------- */
-  --border:        oklch(87.5% 0.009 75);  /* hairline between and around panels */
-  --border-strong: oklch(56% 0.016 265);   /* inputs, buttons: >= 3:1 on surface */
+  --border:        oklch(90% 0.009 252);  /* hairline between and around panels */
+  --border-strong: oklch(56% 0.016 260);   /* inputs, buttons: >= 3:1 on surface */
 
   /* ---------- text ---------- */
-  --fg:        oklch(21% 0.016 268);
-  --fg-muted:  oklch(41% 0.018 266);
-  --fg-subtle: oklch(46% 0.016 265);       /* captions, timestamps: >= 4.5:1 on canvas */
+  --fg:        oklch(21% 0.028 262);
+  --fg-muted:  oklch(40% 0.022 260);
+  --fg-subtle: oklch(46% 0.018 258);       /* captions, timestamps: >= 4.5:1 on canvas */
 
   /* ---------- accent: interaction only (links, focus, playhead, primary button) ---------- */
-  --accent:      oklch(46% 0.13 242);
-  --accent-hi:   oklch(40% 0.13 242);
-  --accent-fg:   oklch(45% 0.13 242);      /* accent as text or icon on surfaces */
-  --accent-on:   oklch(98.5% 0.006 240);   /* text on solid accent */
-  --accent-tint: oklch(93% 0.032 238);
-  --focus-ring:  oklch(50% 0.15 242);
+  --accent:      oklch(52% 0.19 258);
+  --accent-hi:   oklch(43% 0.2 262);
+  --accent-fg:   oklch(48% 0.19 258);      /* accent as text or icon on surfaces */
+  --accent-on:   oklch(98.6% 0.005 250);   /* text on solid accent */
+  --accent-tint: oklch(95% 0.028 256);
+  --focus-ring:  oklch(52% 0.19 258);
 
   /* ---------- verdict (3-state + critical). Kept from DES-01. Never colour alone: always icon + word. ---------- */
   --pass:        #0F7A63;   --pass-fg: #0A6551;   --pass-tint: #DAEEE6;
@@ -56,21 +48,21 @@
   --score-na: #D4CFC1; --score-na-on: #3D3A32;
 
   /* ---------- speakers and chart series (never reuse score hues) ---------- */
-  --speaker-agent:  oklch(46% 0.13 242);
+  --speaker-agent:  oklch(52% 0.19 258);
   --speaker-caller: oklch(50% 0.05 70);
-  --series-1: oklch(46% 0.13 242);
+  --series-1: oklch(52% 0.19 258);
   --series-2: oklch(50% 0.05 70);
   --series-3: oklch(52% 0.10 300);
   --series-4: oklch(60% 0.015 265);
-  --grid: oklch(87.5% 0.009 75);
+  --grid: oklch(90% 0.009 252);
 
   /* ---------- elevation: borders first, shadow only for things that float ---------- */
   --shadow-float: 0 1px 2px oklch(21% 0.016 268 / 0.06), 0 16px 40px -12px oklch(21% 0.016 268 / 0.22);
   --overlay: oklch(21% 0.016 268 / 0.42);
 
   /* ---------- type ---------- */
-  --font-display: "Wix Madefor Display", "Noto Sans Kannada", "Noto Sans Devanagari", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Wix Madefor Text", "Noto Sans Kannada", "Noto Sans Devanagari", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-familjen), "Noto Sans Kannada", "Noto Sans Devanagari", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-plex), "Noto Sans Kannada", "Noto Sans Devanagari", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   --text-2xs: 12px;  --lh-2xs: 16px;   /* dense meta inside chips */
@@ -81,8 +73,9 @@
   --text-lg:  20px;  --lh-lg:  28px;   /* section titles, secondary figures */
   --text-xl:  30px;  --lh-xl:  34px;   /* page titles */
   --text-2xl: 46px;  --lh-2xl: 48px;   /* the one figure a page leads with */
-  --tracking-display: -0.022em;
+  --tracking-display: -0.028em;
   --weight-regular: 400;
+  --weight-display: 600;
   --weight-medium:  500;
   --weight-semibold:600;
 
@@ -96,11 +89,11 @@
   --control-h: 36px;         /* buttons, inputs */
 
   /* ---------- radius: one per nesting level ---------- */
-  --radius-xs: 5px;          /* badges, chips, heatmap cells */
-  --radius-sm: 9px;          /* inputs, menus */
-  --radius-md: 14px;         /* panels */
-  --radius-lg: 18px;         /* dialogs */
-  --radius-pill: 999px;      /* buttons */
+  --radius-xs: 4px;          /* badges, chips, heatmap cells */
+  --radius-sm: 6px;          /* inputs, menus */
+  --radius-md: 8px;         /* panels */
+  --radius-lg: 10px;         /* dialogs */
+  --radius-pill: 6px;      /* buttons */
 
   /* ---------- motion ---------- */
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -118,25 +111,25 @@
 .dark,
 [data-theme="dark"] {
   /* ---------- surfaces: warm espresso black. Lightness carries the depth. ---------- */
-  --bg-canvas:   oklch(14.5% 0.009 60);
-  --bg-surface:  oklch(18.5% 0.010 60);
-  --bg-sunken:   oklch(12.5% 0.008 60);
-  --bg-hover:    oklch(22.5% 0.011 60);
-  --bg-selected: oklch(26% 0.035 232);
+  --bg-canvas:   oklch(13.5% 0.012 235);
+  --bg-surface:  oklch(17% 0.014 235);
+  --bg-sunken:   oklch(11.5% 0.012 235);
+  --bg-hover:    oklch(21% 0.016 235);
+  --bg-selected: oklch(26% 0.05 126);
 
-  --border:        oklch(26.5% 0.012 62);
-  --border-strong: oklch(52% 0.014 65);
+  --border:        oklch(27% 0.014 235);
+  --border-strong: oklch(52% 0.016 235);
 
-  --fg:        oklch(94.5% 0.014 85);
-  --fg-muted:  oklch(79% 0.016 75);
-  --fg-subtle: oklch(70% 0.016 70);
+  --fg:        oklch(95% 0.006 230);
+  --fg-muted:  oklch(82% 0.012 230);
+  --fg-subtle: oklch(70% 0.016 230);
 
-  --accent:      oklch(77% 0.12 232);
-  --accent-hi:   oklch(83% 0.10 232);
-  --accent-fg:   oklch(80% 0.11 232);
-  --accent-on:   oklch(17% 0.04 235);
-  --accent-tint: oklch(25% 0.045 232);
-  --focus-ring:  oklch(82% 0.11 232);
+  --accent:      oklch(89% 0.19 126);
+  --accent-hi:   oklch(93% 0.17 126);
+  --accent-fg:   oklch(89% 0.19 126);
+  --accent-on:   oklch(19% 0.04 126);
+  --accent-tint: oklch(25% 0.06 126);
+  --focus-ring:  oklch(89% 0.19 126);
 
   /* ---------- verdict: same three states, tints that sit on graphite instead of glowing on it ---------- */
   --pass:        oklch(72% 0.11 170);   --pass-fg: oklch(82% 0.10 170);   --pass-tint: oklch(25% 0.035 170);
@@ -153,14 +146,19 @@
   --score-5: oklch(62% 0.090 185);  --score-5-on: oklch(14% 0.03 185);
   --score-na: oklch(30% 0.012 65); --score-na-on: oklch(82% 0.012 70);
 
-  --speaker-agent:  oklch(77% 0.12 232);
+  --speaker-agent:  oklch(89% 0.19 126);
   --speaker-caller: oklch(78% 0.06 70);
-  --series-1: oklch(77% 0.12 232);
+  --series-1: oklch(89% 0.19 126);
   --series-2: oklch(78% 0.06 70);
   --series-3: oklch(72% 0.09 300);
   --series-4: oklch(62% 0.014 65);
-  --grid: oklch(26.5% 0.012 62);
+  --grid: oklch(27% 0.014 235);
 
   --shadow-float: 0 1px 0 oklch(100% 0 0 / 0.05) inset, 0 24px 48px -16px oklch(6% 0.01 60 / 0.75);
   --overlay: oklch(6% 0.01 60 / 0.66);
+
+  --radius-xs: 2px; --radius-sm: 4px; --radius-md: 4px; --radius-lg: 6px; --radius-pill: 999px;
+  --font-display: var(--font-geologica), "Noto Sans Kannada", "Noto Sans Devanagari", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-geologica), "Noto Sans Kannada", "Noto Sans Devanagari", ui-sans-serif, system-ui, sans-serif;
+  --weight-display: 300; --tracking-display: -0.035em;
 }

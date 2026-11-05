@@ -1,11 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import "./landing.css";
 import verdictShot from "./shots/call-verdict.png";
 import transcriptShot from "./shots/call-transcript-light.png";
 import { RunReplay } from "./run-replay";
-import { PipelineLive } from "./pipeline-live";
-import { CopySteps } from "./copy-steps";
 import { CallPlayer } from "./call-player";
 
 const REPO = "https://github.com/voice-application/pareeksha-";
@@ -22,19 +21,9 @@ const PEOPLE = [
   { name: "The Interrupter", lang: "Kannada" },
 ];
 
-
-const QUICK_START = [
-  "docker compose --profile workers up -d --build",
-  "docker compose run --rm api python -m pareeksha.seed",
-  "pip install ./sdk/python",
-  "set -a; . ./.env; set +a",
-  'pareeksha login --url http://localhost:8000 --key "$PAREEKSHA_API_KEY"',
-  'pareeksha run --agent "EMI Reminder Bot" --tags promise_to_pay --persona "Manju — auto driver" --noise clean_16k --wait',
-];
-
 export function Landing() {
   return (
-    <div className="lp" data-theme="dusk">
+    <div data-theme="cobalt" className="lp">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[400] focus:rounded-sm focus:p-2">Skip to content</a>
       <header className="lp-nav">
         <div className="container">
@@ -42,6 +31,7 @@ export function Landing() {
           <nav aria-label="Product" className="lp-nav__links">
             <a href="#questions">How it works</a>
             <a className="lp-nav__repo" href={REPO}>Repository</a>
+            <ThemeToggle />
             <Link className="btn" href="/">Open the dashboard</Link>
           </nav>
         </div>
@@ -55,7 +45,7 @@ export function Landing() {
               <p className="lead">Synthetic Indian callers on noisy phone lines, every call scored with evidence.</p>
               <div className="lp-hero__actions">
                 <Link className="btn" href="/runs/new">Start a run</Link>
-                <a className="btn btn--quiet" href="#quick-start">Run it locally</a>
+                <a className="btn btn--quiet" href="#questions">Hear a failed call</a>
               </div>
             </div>
             <figure className="lp-fig">
@@ -74,23 +64,13 @@ export function Landing() {
             <CallPlayer />
           </div>
         </section>
-        <section className="lp-q" aria-labelledby="q-flow">
-          <div className="container">
-            <div className="lp-q__head">
-              <h2 id="q-flow">What happens on one call?</h2>
-              <p className="lead">Each step is a Kafka worker. An event that fails three times lands in the DLQ.</p>
-            </div>
-            <PipelineLive />
-          </div>
-        </section>
-
-        <section className="lp-q lp-bone" aria-labelledby="q-who">
+        <section className="lp-q" aria-labelledby="q-who">
           <div className="container">
             <div className="lp-q__head">
               <h2 id="q-who">Which callers, on which lines?</h2>
               <p className="lead">Kannada, Hindi and English callers, mixing languages the way people do.</p>
             </div>
-            <div className="lp-split lp-split--bone">
+            <div className="lp-split lp-split--top">
               <div className="lp-index">
                 <div>
                   <p className="lp-people__title">Some of the callers</p>
@@ -117,21 +97,6 @@ export function Landing() {
           </div>
         </section>
 
-        <section className="lp-q" aria-labelledby="q-ci">
-          <div className="container lp-split">
-            <div className="lp-split__text">
-              <h2 id="q-ci">Can it fail a pull request?</h2>
-              <p className="lead">Yes. The GitHub Action runs a suite and fails the check on any of these. The regression check runs when <code>regression</code> is on.</p>
-              <ul className="lp-exits">
-                <li><span className="num">1</span><span>Pass rate under the threshold</span></li>
-                <li><span className="num">2</span><span>A critical failure on any call</span></li>
-                <li><span className="num">3</span><span>A regression on a promoted call</span></li>
-              </ul>
-            </div>
-            <div className="lp-code"><span className="lp-code__name">.github/workflows/voice.yml</span><pre aria-label="GitHub workflow step"><code><span className="k">- uses:</span> voice-application/pareeksha-/action@main{"\n"}  <span className="k">with:</span>{"\n"}    <span className="k">api-url:</span> ${"{{"} secrets.PAREEKSHA_URL {"}}"}{"\n"}    <span className="k">api-key:</span> ${"{{"} secrets.PAREEKSHA_KEY {"}}"}{"\n"}    <span className="k">suite:</span> pr_check{"\n"}    <span className="c"># fail-under: &quot;80&quot;</span>{"\n"}    <span className="k">regression:</span> &quot;true&quot;</code></pre></div>
-          </div>
-        </section>
-
         <section className="lp-q lp-q--gap" aria-labelledby="q-judge">
           <div className="container lp-judge">
             <div className="lp-statement-row">
@@ -150,17 +115,15 @@ export function Landing() {
           </div>
         </section>
 
-        <section id="quick-start" className="lp-q lp-close" aria-labelledby="q-start">
-          <div className="container lp-split">
+        <section className="lp-q lp-final" aria-labelledby="q-final">
+          <div className="container">
             <div className="lp-split__text">
-              <h2 id="q-start">Can I run it on my own machine?</h2>
-              <p className="lead">Yes, in Docker. You need Python 3.11, a Gnani key and a DeepSeek key.</p>
-              <div className="lp-hero__actions">
-                <a className="btn btn--quiet" href={`${REPO}/blob/main/docs/guides/01-quickstart.md`}>Read the quick start</a>
-              </div>
+              <h2 id="q-final">Hear your bot fail before a customer does.</h2>
+              <p className="lead">Pick an agent, a caller and a phone line. The run scores every call with the turns it cites.</p>
             </div>
-            <div className="lp-code lp-code--steps">
-              <CopySteps steps={QUICK_START} />
+            <div className="lp-hero__actions">
+              <Link className="btn" href="/runs/new">Start a run</Link>
+              <Link className="btn btn--quiet" href="/agents">Choose an agent</Link>
             </div>
           </div>
         </section>

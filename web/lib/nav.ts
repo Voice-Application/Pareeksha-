@@ -1,5 +1,5 @@
 /** Sidebar information architecture (docs/design/pages/00-shared.md section 2). Routes = FR-DB-1. */
-export type NavItem = { href: string; label: string; group: "Build" | "Evaluate" | "Operate" | null };
+export type NavItem = { href: string; label: string; group: "Build" | "Evaluate" | "Operate" | null; adminOnly?: true };
 
 export const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Overview", group: null },
@@ -17,4 +17,5 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/dlq", label: "DLQ", group: "Operate" },
   { href: "/calibration", label: "Calibration", group: "Operate" },
   { href: "/settings/api-keys", label: "API keys", group: "Operate" },
+  { href: "/settings/users", label: "Users", group: "Operate", adminOnly: true },
 ];
