@@ -26,3 +26,15 @@ caller's own date), answers loan-ID / amount / due-date / "are you a bot" questi
 promising), stays calm with abuse, redirects off-topic talk, checks the caller is still there on silence, says the
 recording disclosure again when the caller talked over it, and varies its wording so it never loops. Each repeated
 intent gets a different answer and ends in a handoff or goodbye instead of a loop. A Gnani 429 on STT is retried.
+
+## Noisy lines
+
+Line noise on the shipped 5 and 10 dB profiles is above the VAD's fixed 500 RMS, so `vad.py` also requires a frame to be
+twice the line's noise floor (20th percentile of the last 10 s; trusted after 1.2 s). Barge-in needs 6 such frames in a
+row, and is off for the first 1.2 s. On `clean_16k` and `pstn_8k_alaw` the fixed threshold stays the cut, unless the
+caller starts talking within about 240 ms of connecting and keeps going past 1.2 s, which can lose the start of what they
+say.
+
+**Limit:** this is an energy VAD. On `auto_rickshaw_0db` speech is no louder than the noise, so the agent can stay deaf:
+in a live call it spoke its opening, never answered the caller, and the call ended `agent_silent`. A low score on that
+line says nothing about the dialog; read the transcript before blaming the bot's behaviour.

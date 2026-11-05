@@ -128,10 +128,14 @@ class CallSession:
     def _on_audio(self, frame: bytes) -> None:
         playing = self.playing is not None and not self.playing.done()
         if playing and Bug.IGNORE_INTERRUPT in self.bugs:
-            return  # bug 4: VAD is off while the agent talks; interruptions are never heard
+            # bug 4: VAD is off while the agent talks; interruptions are never heard. Only the
+            # noise meter runs, so the line is known when the VAD comes back on.
+            self.vad.measure(frame)
+            return
         utterance = self.vad.feed(frame)
         if playing:
-            self.barge_frames = self.barge_frames + 1 if self.vad.speaking else 0
+            speech = self.vad.voiced and self.vad.noise_known
+            self.barge_frames = self.barge_frames + 1 if speech else 0
             if self.barge_frames >= BARGE_IN_FRAMES and self.playing is not None:
                 self.playing.cancel()  # barge-in: stop talking immediately
         else:
