@@ -1,9 +1,8 @@
-"""Web sign-in accounts. Called only by the Next.js server with an admin key; it owns the session."""
+"""Web sign-in accounts, called only by the Next.js server with an admin key."""
 
 from __future__ import annotations
 
 import asyncio
-import re
 from datetime import UTC, datetime
 from typing import Literal
 from uuid import UUID

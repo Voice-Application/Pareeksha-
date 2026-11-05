@@ -66,7 +66,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         <div key={group ?? "top"} className="flex flex-col gap-1">
           {group && <p className="px-3 pb-1 text-xs text-subtle">{group}</p>}
           <ul className="flex flex-col gap-px">
-            {NAV_ITEMS.filter((i) => i.group === group && (!i.adminOnly || role === "admin")).map((item) => {
+            {NAV_ITEMS.filter((i) => i.group === group && (!i.adminOnly || role !== "member")).map((item) => {
               const active = match?.href === item.href;
               const Icon = ICONS[item.href];
               return (

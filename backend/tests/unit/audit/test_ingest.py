@@ -90,7 +90,7 @@ def test_corrupt_and_unusable_audio_is_rejected() -> None:
 def test_overlong_recording_is_rejected_before_full_decode(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """A long recording is refused from the header, so sf.read never allocates the full PCM (SEC-01)."""
+    """A long recording is refused from its header, so sf.read never allocates the PCM."""
     # Keep the test cheap: a 2 s file against a 1 s cap exercises the header preflight.
     monkeypatch.setattr("pareeksha.audit.ingest.MAX_DURATION_S", 1.0)
     data = encode(tone(2.0, 440, 16000), 16000, "WAV")

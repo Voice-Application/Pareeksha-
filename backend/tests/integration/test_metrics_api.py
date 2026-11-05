@@ -235,7 +235,7 @@ async def test_usage_aggregates_a_time_window_and_reports_the_budget(
 async def test_usage_and_credits_are_scoped_to_the_callers_project(
     private_api: tuple[AsyncClient, Tenant, Factory],
 ) -> None:
-    """One project's spend never shows up in another project's /usage, /metrics or budget (SEC-01)."""
+    """One project's spend never shows in another project's /usage, /metrics or budget."""
     api, tenant, session_factory = private_api
     other = await new_tenant(session_factory)
     async with session_factory() as session:

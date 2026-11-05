@@ -51,22 +51,29 @@ async def test_bootstrap_once_then_409(
     assert set(user) == {"id", "email", "name", "role", "disabled", "created_at", "last_login_at"}
     second = await api.post("/api/v1/auth/bootstrap", json=body, headers=tenant.admin)
     assert second.status_code == 409 and second.json()["error"]["code"] == "already_bootstrapped"
-    assert (await api.get("/api/v1/auth/status", headers=tenant.admin)).json() == {"has_users": True}
+    assert (await api.get("/api/v1/auth/status", headers=tenant.admin)).json() == {
+        "has_users": True
+    }
     assert (await api.get("/api/v1/auth/status", headers=tenant.read)).status_code == 403
 
 
 async def test_login_ok_wrong_unknown_disabled(api: AsyncClient, tenant: Tenant) -> None:
     user = await _admin(api, tenant, "login@example.com")
     ok = await api.post(
-        "/api/v1/auth/login", json={"email": "LOGIN@example.com", "password": PW}, headers=tenant.admin
+        "/api/v1/auth/login",
+        json={"email": "LOGIN@example.com", "password": PW},
+        headers=tenant.admin,
     )
     assert ok.status_code == 200 and ok.json()["last_login_at"] is not None
     wrong = await api.post(
-        "/api/v1/auth/login", json={"email": "login@example.com", "password": "nope nope nope"},
+        "/api/v1/auth/login",
+        json={"email": "login@example.com", "password": "nope nope nope"},
         headers=tenant.admin,
     )
     unknown = await api.post(
-        "/api/v1/auth/login", json={"email": "who@example.com", "password": PW}, headers=tenant.admin
+        "/api/v1/auth/login",
+        json={"email": "who@example.com", "password": PW},
+        headers=tenant.admin,
     )
     assert wrong.status_code == unknown.status_code == 401
     assert wrong.json() == unknown.json()
@@ -78,11 +85,14 @@ async def test_login_ok_wrong_unknown_disabled(api: AsyncClient, tenant: Tenant)
     )
     assert patched.status_code == 200 and patched.json()["disabled"] is True
     disabled = await api.post(
-        "/api/v1/auth/login", json={"email": "login@example.com", "password": PW}, headers=tenant.admin
+        "/api/v1/auth/login",
+        json={"email": "login@example.com", "password": PW},
+        headers=tenant.admin,
     )
     assert disabled.status_code == 403 and disabled.json()["error"]["code"] == "account_disabled"
     bad_pw = await api.post(
-        "/api/v1/auth/login", json={"email": "login@example.com", "password": "nope nope nope"},
+        "/api/v1/auth/login",
+        json={"email": "login@example.com", "password": "nope nope nope"},
         headers=tenant.admin,
     )
     assert bad_pw.status_code == 401  # disabled is only revealed after a correct password
@@ -120,19 +130,29 @@ async def test_last_admin_protected_and_hash_never_returned(
     for change in ({"disabled": True}, {"role": "member"}):
         r = await api.patch(url, json=change, headers=tenant.admin)
         assert r.status_code == 409 and r.json()["error"]["code"] == "last_admin"
-    ok = await api.patch(url, json={"name": "Renamed", "password": "another long password"}, headers=tenant.admin)
+    ok = await api.patch(
+        url, json={"name": "Renamed", "password": "another long password"}, headers=tenant.admin
+    )
     assert ok.status_code == 200 and ok.json()["name"] == "Renamed"
     second = await _admin(api, tenant, "second@example.com")
     demote = await api.patch(url, json={"role": "member"}, headers=tenant.admin)
     assert demote.status_code == 200 and demote.json()["role"] == "member"
-    assert (await api.patch(f"/api/v1/users/{second['id']}", json={"disabled": True},
-                            headers=tenant.admin)).status_code == 409
+    assert (
+        await api.patch(
+            f"/api/v1/users/{second['id']}", json={"disabled": True}, headers=tenant.admin
+        )
+    ).status_code == 409
     missing = await api.patch(
-        "/api/v1/users/00000000-0000-0000-0000-000000000000", json={"name": "x"}, headers=tenant.admin
+        "/api/v1/users/00000000-0000-0000-0000-000000000000",
+        json={"name": "x"},
+        headers=tenant.admin,
     )
     assert missing.status_code == 404
 
     listing = await api.get("/api/v1/users", headers=tenant.admin)
-    assert [u["email"] for u in listing.json()["items"]] == ["only@example.com", "second@example.com"]
+    assert [u["email"] for u in listing.json()["items"]] == [
+        "only@example.com",
+        "second@example.com",
+    ]
     for text in (listing.text, ok.text, demote.text):
         assert "scrypt" not in text and "password" not in text

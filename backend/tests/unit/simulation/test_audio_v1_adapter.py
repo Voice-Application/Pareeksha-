@@ -186,7 +186,7 @@ async def test_a_flood_of_frames_ends_the_call_at_the_per_call_budget(
         session = await AudioV1Adapter().connect(target(url), ctx())
         events = await collect(session)
         await session.close()
-    # the session stops at the budget: far fewer than the 500 frames sent, ending in a protocol error
+    # the session stops at the budget: far fewer than the 500 frames sent, ends in a protocol error
     assert isinstance(events[-1], AgentCallEnd)
     assert events[-1].reason.startswith("protocol_error")
     audio = [e for e in events if isinstance(e, AgentAudio)]

@@ -72,8 +72,10 @@ class AudioV1Session(AudioSession):
     def _over_budget(self, message: bytes | str) -> bool:
         """Account one inbound frame; True once the per-call frame/byte budget is exceeded."""
         self._frames_seen += 1
-        self._bytes_seen += len(message) if isinstance(message, (bytes, bytearray)) else len(
-            message.encode("utf-8", "ignore")
+        self._bytes_seen += (
+            len(message)
+            if isinstance(message, (bytes, bytearray))
+            else len(message.encode("utf-8", "ignore"))
         )
         return self._frames_seen > MAX_TOTAL_FRAMES or self._bytes_seen > MAX_TOTAL_BYTES
 
@@ -82,9 +84,7 @@ class AudioV1Session(AudioSession):
         try:
             async for message in self._ws:
                 if self._over_budget(message):
-                    raise AgentProtocolError(
-                        "agent exceeded the per-call frame/byte budget"
-                    )
+                    raise AgentProtocolError("agent exceeded the per-call frame/byte budget")
                 if isinstance(message, bytes):
                     for audio in self._on_binary(message):
                         # await (not put_nowait) so a flood is backpressured, not buffered unbounded
