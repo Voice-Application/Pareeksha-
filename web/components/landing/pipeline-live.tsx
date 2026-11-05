@@ -21,6 +21,7 @@ export function PipelineLive() {
   const [held, setHeld] = useState(false);
   const [seen, setSeen] = useState(false);
   const [over, setOver] = useState(false);
+  const [focused, setFocused] = useState(false);
   const [still, setStill] = useState(true);
   const root = useRef<HTMLDivElement>(null);
 
@@ -34,7 +35,7 @@ export function PipelineLive() {
     return () => { reduce.removeEventListener("change", sync); io.disconnect(); };
   }, []);
 
-  const running = seen && !held && !over && !still;
+  const running = seen && !held && !over && !focused && !still;
   useEffect(() => {
     if (!running) return;
     const id = window.setInterval(() => setAt((n) => (n + 1) % STAGES.length), STEP_MS);
@@ -45,16 +46,17 @@ export function PipelineLive() {
     <div
       ref={root}
       className="lp-pipe"
+      data-running={running ? "" : undefined}
       onPointerEnter={() => setOver(true)}
       onPointerLeave={() => setOver(false)}
-      onFocus={() => setOver(true)}
-      onBlur={() => setOver(false)}
+      onFocus={() => setFocused(true)}
+      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setFocused(false); }}
       style={{ "--at": at } as React.CSSProperties}
     >
       <ol className="lp-flow" aria-label="Diagram of the call pipeline">
         {STAGES.map((s, i) => (
-          <li key={s.name} data-active={!still && i === at ? "" : undefined}>
-            <button type="button" className="lp-flow__node" aria-pressed={!still && i === at} onClick={() => { setAt(i); setHeld(true); }}>
+          <li key={s.name} data-active={i === at ? "" : undefined}>
+            <button type="button" className="lp-flow__node" aria-pressed={i === at} onClick={() => { setAt(i); setHeld(true); }}>
               <span className="sr-only">Show step {i + 1}, </span>{s.name}
             </button>
             <p>{s.line}</p>

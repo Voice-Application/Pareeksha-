@@ -32,6 +32,7 @@ const QUICK_START = [
   "docker compose --profile workers up -d --build",
   "docker compose run --rm api python -m pareeksha.seed",
   "pip install ./sdk/python",
+  "set -a; . ./.env; set +a",
   'pareeksha login --url http://localhost:8000 --key "$PAREEKSHA_API_KEY"',
   'pareeksha run --agent "EMI Reminder Bot" --tags promise_to_pay --persona "Manju — auto driver" --noise clean_16k --wait',
 ];
@@ -145,7 +146,7 @@ export function Landing() {
                 <li><span className="num">3</span><span>A regression on a promoted call</span></li>
               </ul>
             </div>
-            <div className="lp-code"><span className="lp-code__name">.github/workflows/voice.yml</span><pre aria-label="GitHub workflow step"><code><span className="k">- uses:</span> voice-application/pareeksha-/action@main{"\n"}  <span className="k">with:</span>{"\n"}    <span className="k">api-url:</span> ${"{{"} secrets.PAREEKSHA_URL {"}}"}{"\n"}    <span className="k">api-key:</span> ${"{{"} secrets.PAREEKSHA_KEY {"}}"}{"\n"}    <span className="k">suite:</span> pr_check{"\n"}    <span className="c"># fail-under: &quot;80&quot;</span>{"\n"}    <span className="c"># regression: &quot;true&quot;</span></code></pre></div>
+            <div className="lp-code"><span className="lp-code__name">.github/workflows/voice.yml</span><pre aria-label="GitHub workflow step"><code><span className="k">- uses:</span> voice-application/pareeksha-/action@main{"\n"}  <span className="k">with:</span>{"\n"}    <span className="k">api-url:</span> ${"{{"} secrets.PAREEKSHA_URL {"}}"}{"\n"}    <span className="k">api-key:</span> ${"{{"} secrets.PAREEKSHA_KEY {"}}"}{"\n"}    <span className="k">suite:</span> pr_check{"\n"}    <span className="c"># fail-under: &quot;80&quot;</span>{"\n"}    <span className="k">regression:</span> &quot;true&quot;</code></pre></div>
           </div>
         </section>
 

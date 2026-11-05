@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { mockFe, opsState, RUN_ID, CALL_ID } from "./support/fe03-mock";
+import { mockFe, opsState, run, RUN_ID, CALL_ID } from "./support/fe03-mock";
 
 async function axeClean(page: import("@playwright/test").Page) {
   const r = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze();
@@ -95,6 +95,24 @@ test.describe("run detail", () => {
     await axeClean(page);
   });
 
+  test("failure type rows retain a visible bar with a long label", async ({ page }) => {
+    await page.setViewportSize({ width: 900, height: 800 });
+    const st = opsState();
+    const tag = "failure_".repeat(30);
+    const base = run();
+    st.extra[`GET /runs/${RUN_ID}`] = run({ summary: { ...base.summary, top_failure_types: [[tag, 2]] } });
+    await mockFe(page, st);
+    await page.goto(`/runs/${RUN_ID}`);
+    const row = page.getByText(tag, { exact: true }).locator("../..");
+    const label = row.locator(":scope > span").nth(0);
+    const bar = row.locator(":scope > span").nth(1);
+    await expect(label).toBeVisible();
+    const sizes = await row.evaluate((el) => ({ row: el.clientWidth, label: el.children[0].getBoundingClientRect().width, bar: el.children[1].getBoundingClientRect().width }));
+    expect(sizes.bar).toBeGreaterThanOrEqual(32);
+    expect(sizes.label + sizes.bar).toBeLessThan(sizes.row);
+    await expect(bar.locator("span")).toHaveCSS("width", `${sizes.bar}px`);
+  });
+
   test("live: snapshot and call.evaluated events fill a cell without reload", async ({ page }) => {
     const st = opsState();
     const base = { id: RUN_ID, agent_id: "x", name: "Live", kind: "matrix", status: "running", progress: { total: 2, queued: 1, in_progress: 0, evaluated: 0, error: 0 }, summary: {}, created_at: "2026-10-24T10:00:00Z" };
@@ -117,6 +135,20 @@ test.describe("run detail", () => {
 });
 
 test.describe("overview", () => {
+  test("recent runs wrap long unbroken names within the table", async ({ page }) => {
+    await page.setViewportSize({ width: 1000, height: 800 });
+    const st = opsState();
+    const name = "long_run_name".repeat(30);
+    st.extra["GET /runs"] = { items: [run({ name })], next_cursor: null };
+    await mockFe(page, st);
+    await page.goto("/");
+    const table = page.getByRole("table", { name: "Recent runs" });
+    const link = table.getByRole("link", { name });
+    await expect(link).toHaveAttribute("href", `/runs/${RUN_ID}`);
+    const size = await table.evaluate((el) => ({ table: el.getBoundingClientRect().width, container: el.parentElement!.getBoundingClientRect().width }));
+    expect(size.table).toBeLessThanOrEqual(size.container + 1);
+  });
+
   test("title from the latest run, tiles link, health and review panels", async ({ page }) => {
     await mockFe(page, opsState());
     await page.goto("/");

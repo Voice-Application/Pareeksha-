@@ -287,8 +287,8 @@ export function RunDetail({ runId }: { runId: string }) {
               <ul className="grid gap-x-10 gap-y-2 min-[860px]:grid-cols-2 min-[1180px]:grid-cols-3">
                 {tops.slice(0, 6).map(([tag, n]) => (
                   <li key={tag} className="flex min-w-0 items-center gap-3">
-                    <span className="w-52 min-w-0 shrink-0 truncate"><TagChip tag={tag} /></span>
-                    <span className="h-1.5 flex-1 rounded-xs bg-sunken"><span className="block h-full rounded-xs" style={{ width: `${(n / tops[0][1]) * 100}%`, background: "var(--series-1)" }} /></span>
+                    <span className="w-52 min-w-0 shrink truncate"><TagChip tag={tag} /></span>
+                    <span className="h-1.5 min-w-8 flex-1 rounded-xs bg-sunken"><span className="block h-full rounded-xs" style={{ width: `${(n / tops[0][1]) * 100}%`, background: "var(--series-1)" }} /></span>
                     <span className="num w-6 text-right text-sm">{n}</span>
                   </li>
                 ))}

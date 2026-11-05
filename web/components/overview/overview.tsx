@@ -156,7 +156,7 @@ export function Overview() {
                 <tbody>
                   {runs.data.items.slice(0, 5).map((r) => (
                     <tr key={r.id}>
-                      <td><Link className="font-medium underline-offset-2 hover:underline" href={`/runs/${r.id}`}>{r.name || r.id.slice(0, 8)}</Link></td>
+                      <td><Link className="min-w-0 font-medium [overflow-wrap:anywhere] underline-offset-2 hover:underline" href={`/runs/${r.id}`}>{r.name || r.id.slice(0, 8)}</Link></td>
                       <td data-label="Status"><StatusPill status={r.status} /></td>
                       <td data-label="Pass rate">{r.summary?.pass_rate != null ? `${Math.round(r.summary.pass_rate * 100)}%` : "-"}</td>
                       <td data-label="When" className="text-muted"><time dateTime={r.created_at}>{relativeTime(r.created_at)}</time></td>

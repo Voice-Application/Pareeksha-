@@ -178,7 +178,8 @@
 .lp-flow li { position: relative; counter-increment: stage; display: flex; flex-direction: column; gap: var(--space-sm); }
 .lp-flow li:not(:last-child)::before { content: ""; position: absolute; top: 10px; left: 30px; right: calc(-1 * var(--gap-columns) + 8px); height: 1px; background: var(--color-rule-2); }
 .lp-flow li:not(:last-child)::after { content: ""; position: absolute; top: 10px; left: 30px; right: calc(-1 * var(--gap-columns) + 8px); height: 1px; background: var(--color-accent); transform: scaleX(0); transform-origin: left; }
-.lp-flow li[data-active]:not(:last-child)::after { animation: lp-run 1600ms linear forwards; }
+.lp-flow li[data-active]:not(:last-child)::after { animation: lp-run 1600ms linear forwards paused; }
+.lp-pipe[data-running] .lp-flow li[data-active]:not(:last-child)::after { animation-play-state: running; }
 @keyframes lp-run { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .lp-flow__node { display: inline-flex; align-items: center; gap: var(--space-sm); width: fit-content; padding: 0; border: 0; background: none; cursor: pointer; font-family: var(--font-display-lp); font-size: var(--text-title); letter-spacing: var(--tracking-display); text-align: left; }
 .lp-flow__node::before { content: counter(stage); display: grid; place-items: center; width: 22px; height: 22px; flex-shrink: 0; border: 1px solid var(--color-rule-2); border-radius: var(--radius-pill); background: var(--color-paper); color: var(--color-muted); font: 500 0.75rem/1 var(--font-body-lp); font-variant-numeric: tabular-nums; transition: background-color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out); }
