@@ -60,6 +60,34 @@ Opens the socket, sends 1 s of silence, waits ≤ 10 s for agent audio.
 ```
 or `{ "ok": false, "error": "timeout", "detail": "no audio within 10000 ms" }`.
 
+### Prompt agents and versions
+A prompt agent has `"adapter": "prompt"`; `endpoint_url` is optional for it. `adapter_secrets` (`{"api_key": "…"}`) is accepted on `POST`/`PATCH /agents`, stored encrypted and **never returned**; responses carry `has_adapter_secrets: true|false` instead. A version is immutable; the active one is `adapter_config.active_version_id`, and a run pins it in `agent_snapshot`. These routes return `409 not_a_prompt_agent` for other adapters.
+
+### `POST /agents/{id}/prompt-versions`
+```json
+{
+  "system_prompt": "You answer EMI questions for Shakti Finance (fictional).",
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "base_url": null,
+  "temperature": 0.2,
+  "max_tool_rounds": 5,
+  "note": "first draft",
+  "tools": [
+    { "name": "lookup_emi", "description": "Look up the EMI",
+      "parameters": { "type": "object", "properties": { "customer_id": { "type": "string" } } },
+      "mock": { "mode": "static", "result": { "emi": 4200 } } }
+  ]
+}
+```
+`provider` ∈ `openai, openai_compatible, deepseek, groq, mistral, ollama, anthropic, gemini`. `mock.mode` ∈ `static` (returns `result`), `by_args` (first `cases[].when` that matches, else `result`), `simulated` (a model invents the result). → `201` with the version (adds `id`, `agent_id`, `version`, `content_hash`, `created_at`) and makes it the active one; the agent's `expected_tools` is refreshed from its tools. Identical content to the active version (the `note` is ignored) → `200` with that version, nothing created. `422 base_url_not_allowed` for private or loopback URLs unless `AGENT_LLM_ALLOW_PRIVATE_URLS=true`.
+
+### `GET /agents/{id}/prompt-versions` · `GET /agents/{id}/prompt-versions/{version}`
+List (newest first) or fetch one version by its number.
+
+### `POST /agents/{id}/prompt-versions/{version}/activate`
+Makes an existing version the active one; returns it. Runs created afterwards use it.
+
 ---
 
 ## 2. Scenarios, personas, noise profiles
@@ -193,12 +221,15 @@ Rows for the matrix view: `scenario`, `persona`, `noise_profile`, `status`, `cal
 {
   "cells": [
     { "scenario": "Already paid…", "persona": "Manju…", "profile": "pstn_market_5db",
-      "base_score": 86, "head_score": 52, "delta": -34, "newly_failing": true }
+      "base_score": 86, "head_score": 52, "delta": -34, "newly_failing": true,
+      "base_call_ids": ["…"], "head_call_ids": ["…"] }
   ],
-  "summary": { "regressed": 2, "improved": 3, "unchanged": 3 }
+  "summary": { "regressed": 2, "improved": 3, "unchanged": 3 },
+  "base_prompt_version": 1,
+  "head_prompt_version": 2
 }
 ```
-A cell is (scenario title, persona name, noise profile name); repeats are averaged and a cell counts as passed only if all repeats passed. `delta = head - base` (null if either side has no evaluated call); `newly_failing` = passed in `base`, not passed in `head`. `summary` counts cells scored in both runs. Cells come worst delta first, cells without a delta last. (API-04)
+`base_prompt_version` / `head_prompt_version` are the prompt-agent versions the runs pinned (null for voice agents). A cell is (scenario title, persona name, noise profile name); repeats are averaged and a cell counts as passed only if all repeats passed. `delta = head - base` (null if either side has no evaluated call); `newly_failing` = passed in `base`, not passed in `head`. `summary` counts cells scored in both runs. Cells come worst delta first, cells without a delta last. (API-04)
 
 ### `GET /runs/{id}/report` → `text/html` exportable report.
 One self-contained page (inline CSS, no scripts): summary figures, top failure types, score distribution and the matrix. Names are HTML-escaped. (API-04)
