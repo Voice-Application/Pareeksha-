@@ -28,6 +28,8 @@ from collections.abc import Sequence
 from functools import cache
 from typing import Any
 
+from pareeksha.agent_llm import build_chat_provider
+from pareeksha.agent_llm.url_guard import allow_private_urls, check_base_url
 from pareeksha.events.consumer import Ctx, Outgoing, PermanentError, Throttled, consumer, run_worker
 from pareeksha.events.runtime import Database
 from pareeksha.events.schemas import CallCompleted, CallRequested, Envelope
@@ -37,10 +39,12 @@ from pareeksha.llm.caller import CallerBrain
 from pareeksha.llm.factory import build_client
 from pareeksha.llm.usage_db import ApiUsageSink
 from pareeksha.runs.slots import StartResult, start_item
+from pareeksha.schemas.prompts import PromptVersionOut
 from pareeksha.simulation import store
 from pareeksha.simulation.models import CallResult, CallSpec
 from pareeksha.simulation.runner import CallRunner, quiet_pipecat_logs
-from pareeksha.simulation.runtime import BrainCallerSource
+from pareeksha.simulation.runtime import BrainCallerSource, CallerSource
+from pareeksha.simulation.text_runner import run_text_call
 from pareeksha.speech.registry import get_stt_provider, get_tts_provider
 from pareeksha.storage.blob import BlobStore, blob_store_from_env
 
@@ -52,6 +56,7 @@ PRODUCER = "simulator"
 _db: Database | None = None
 _usage: ApiUsageSink | None = None
 _runner: CallRunner | None = None
+_caller: CallerSource | None = None
 _providers: list[Any] = []
 _blobs: BlobStore | None = None
 
@@ -87,15 +92,24 @@ def _usage_sink() -> ApiUsageSink:
     return ApiUsageSink(EventSettings.from_env())
 
 
+def _caller_source() -> CallerSource:
+    """The caller brain, built on first use (a text-only worker never needs STT/TTS)."""
+    global _caller
+    if _caller is None:
+        sink = _usage if _usage is not None else _usage_sink()
+        brain = CallerBrain(build_client(usage_sink=sink))
+        _providers.append(brain)
+        _caller = BrainCallerSource(brain)
+    return _caller
+
+
 def _call_runner() -> CallRunner:
     global _runner
     if _runner is None:
         quiet_pipecat_logs()
-        sink = _usage if _usage is not None else _usage_sink()
-        brain = CallerBrain(build_client(usage_sink=sink))
         stt, tts = get_stt_provider(), get_tts_provider()
-        _providers.extend([stt, tts, brain])
-        _runner = CallRunner(stt=stt, tts=tts, caller=BrainCallerSource(brain))
+        _providers.extend([stt, tts])
+        _runner = CallRunner(stt=stt, tts=tts, caller=_caller_source())
     return _runner
 
 
@@ -137,9 +151,37 @@ async def _reproduce(env: Envelope[CallRequested], ctx: Ctx) -> Sequence[Outgoin
     ]
 
 
+async def _run_prompt_call(spec: CallSpec) -> CallResult:
+    """A prompt agent's scenario as a typed conversation (no audio)."""
+    raw = spec.agent.adapter_config.get("prompt_version")
+    if raw is None:
+        return CallResult(
+            call_id=spec.call_id,
+            end_reason="connect_failed",
+            duration_ms=0,
+            error="prompt agent has no version",
+        )
+    version = PromptVersionOut.model_validate(raw)
+    try:
+        if version.base_url:
+            check_base_url(version.base_url, allow_private=allow_private_urls())
+        chat = build_chat_provider(
+            version.provider,
+            api_key=spec.agent.adapter_secrets.get("api_key"),
+            base_url=version.base_url,
+        )
+    except ValueError as exc:
+        return CallResult(
+            call_id=spec.call_id, end_reason="connect_failed", duration_ms=0, error=str(exc)
+        )
+    return await run_text_call(spec, caller=_caller_source(), chat=chat)
+
+
 async def _run_call(spec: CallSpec) -> tuple[CallResult, dict[str, bytes]]:
     """Run the call; an unexpected crash of the pipeline becomes an ``infra_error`` result."""
     try:
+        if spec.agent.adapter == "prompt":
+            return await _run_prompt_call(spec), {}
         outcome = await _call_runner().run(spec)
     except Exception as exc:
         log.exception("call %s crashed", spec.call_id)
