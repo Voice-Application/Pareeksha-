@@ -72,9 +72,20 @@ class OpenAICompatProvider:
                 for t in tools
             ]
         headers = {"Authorization": f"Bearer {self._key}"} if self._key else {}
-        data, latency = await post_json(
-            self._http, self._url, headers, body, timeout_s=timeout_s, api_key=self._key
-        )
+
+        async def send() -> tuple[dict[str, Any], int]:
+            return await post_json(
+                self._http, self._url, headers, body, timeout_s=timeout_s, api_key=self._key
+            )
+
+        try:
+            data, latency = await send()
+        except AgentLLMError as exc:
+            # Reasoning models (o-series, gpt-5) accept only the default temperature: retry without.
+            if exc.status != 400 or "temperature" not in str(exc).lower():
+                raise
+            del body["temperature"]
+            data, latency = await send()
         try:
             msg = data["choices"][0]["message"]
             calls = tuple(

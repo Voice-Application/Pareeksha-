@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from pareeksha.agent_llm import allow_private_urls, check_base_url
 from pareeksha.api.auth import ReadKey, WriteKey
-from pareeksha.api.crud import flush, get_or_404
+from pareeksha.api.crud import ACTIVE_VERSION_KEY, active_version, flush, get_or_404
 from pareeksha.api.deps import AUTH_ERRORS, Db, errors
 from pareeksha.api.errors import ApiError
 from pareeksha.db.models import Agents, PromptVersions
@@ -36,13 +36,6 @@ async def _prompt_agent(session: AsyncSession, agent_id: UUID, project_id: UUID)
     return agent
 
 
-async def active_version(session: AsyncSession, agent: Agents) -> PromptVersions | None:
-    active_id = cast(dict[str, Any], agent.adapter_config).get("active_version_id")
-    if not active_id:
-        return None
-    return await session.get(PromptVersions, UUID(str(active_id)))
-
-
 async def _check_url(base_url: str | None) -> None:
     if not base_url:
         return
@@ -56,7 +49,7 @@ def _activate(agent: Agents, version: PromptVersions) -> None:
     """Point the agent at ``version`` and mirror its tools into ``expected_tools``."""
     agent.adapter_config = {
         **cast(dict[str, Any], agent.adapter_config),
-        "active_version_id": str(version.id),
+        ACTIVE_VERSION_KEY: str(version.id),
     }
     agent.expected_tools = [
         {"name": t["name"], "description": t.get("description", ""), "args_schema": t["parameters"]}

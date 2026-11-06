@@ -110,7 +110,9 @@ async def handle_generate_requested(
     if adapter == "prompt":  # the ACTIVE version: scenarios are written for what runs next
         version_id = (adapter_config or {}).get("active_version_id")
         row = await _one(
-            conn, "SELECT system_prompt FROM prompt_versions WHERE id = %s", (version_id,)
+            conn,
+            "SELECT system_prompt FROM prompt_versions WHERE id = %s AND agent_id = %s",
+            (version_id, p.agent_id),
         )
         description = prompt_context(
             description or "", {"system_prompt": row[0]} if row is not None else None

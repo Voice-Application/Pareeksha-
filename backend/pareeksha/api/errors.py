@@ -68,9 +68,17 @@ async def _api_error_handler(_: Request, exc: Exception) -> JSONResponse:
 
 async def _validation_handler(_: Request, exc: Exception) -> JSONResponse:
     assert isinstance(exc, RequestValidationError)
-    return error_response(
-        400, "validation_error", "Request validation failed", {"errors": exc.errors()}
-    )
+    # `input` is the offending value as sent: it can be a secret (agent `adapter_secrets`), so it
+    # is never echoed back; `ctx` goes too for secret fields.
+    errors = [
+        {
+            k: v
+            for k, v in e.items()
+            if k != "input" and not (k == "ctx" and "adapter_secrets" in e["loc"])
+        }
+        for e in exc.errors()
+    ]
+    return error_response(400, "validation_error", "Request validation failed", {"errors": errors})
 
 
 async def _http_exception_handler(_: Request, exc: Exception) -> JSONResponse:

@@ -143,7 +143,16 @@ async def compare_runs(
 
 async def _prompt_version(session: AsyncSession, run_id: uuid.UUID) -> int | None:
     """Version number of the prompt version a run used (None for voice runs / unknown)."""
-    snapshot = await session.scalar(select(TestRuns.agent_snapshot).where(TestRuns.id == run_id))
+    run = (
+        await session.execute(
+            select(TestRuns.agent_snapshot, TestRuns.agent_id, TestRuns.project_id).where(
+                TestRuns.id == run_id
+            )
+        )
+    ).one_or_none()
+    if run is None:
+        return None
+    snapshot, agent_id, project_id = run
     config = snapshot.get("adapter_config") if isinstance(snapshot, dict) else None
     version_id = config.get("active_version_id") if isinstance(config, dict) else None
     if not isinstance(version_id, str):
@@ -152,4 +161,10 @@ async def _prompt_version(session: AsyncSession, run_id: uuid.UUID) -> int | Non
         key = uuid.UUID(version_id)
     except ValueError:
         return None
-    return await session.scalar(select(PromptVersions.version).where(PromptVersions.id == key))
+    return await session.scalar(
+        select(PromptVersions.version).where(
+            PromptVersions.id == key,
+            PromptVersions.agent_id == agent_id,
+            PromptVersions.project_id == project_id,
+        )
+    )

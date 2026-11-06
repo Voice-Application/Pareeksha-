@@ -83,5 +83,9 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    # The old CHECKs reject these values. Deleting prompt agents would have to cascade through
+    # calls / test_runs (no ON DELETE CASCADE), so keep them as archived, inert audio_v1 agents.
+    op.execute("DELETE FROM deterministic_checks WHERE check_type = 'no_unexpected_tool'")
+    op.execute("UPDATE agents SET adapter = 'audio_v1', archived = true WHERE adapter = 'prompt'")
     op.drop_table("prompt_versions")
     _swap_checks(_ADAPTERS, _CHECKS)

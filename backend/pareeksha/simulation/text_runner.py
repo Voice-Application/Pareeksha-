@@ -8,6 +8,7 @@ mocks (``agent_llm.mocks.mock_result``).
 from __future__ import annotations
 
 import json
+import re
 import time
 from collections.abc import Callable
 from typing import Any
@@ -24,6 +25,17 @@ _SIMULATE_SYSTEM = (
     "You simulate the backend of a tool for testing. Reply with only one JSON object: "
     "the tool's result for the given arguments."
 )
+
+#: Tool calls processed per model reply; the rest get an error result.
+MAX_TOOL_CALLS_PER_REPLY = 16
+
+_FENCE = re.compile(r"^```[A-Za-z0-9_-]*\s*\n(.*?)\n?```$", re.DOTALL)
+
+
+def _unfence(text: str) -> str:
+    """The body of a single surrounding ```json fence (models often wrap JSON in one)."""
+    m = _FENCE.match(text.strip())
+    return m.group(1) if m else text
 
 
 async def run_text_call(
@@ -84,7 +96,7 @@ async def run_text_call(
         reply = await ask(
             [AgentMessage("system", _SIMULATE_SYSTEM), AgentMessage("user", prompt)], []
         )
-        result = json.loads(reply.text)
+        result = json.loads(_unfence(reply.text))
         if not isinstance(result, dict):
             raise ValueError("simulated result is not an object")
         return result
@@ -156,7 +168,25 @@ async def run_text_call(
                 break
             # pass the provider's own ToolCallReq objects back unchanged
             messages.append(AgentMessage("assistant", reply.text, reply.tool_calls))
-            for tc in reply.tool_calls:
+            if len(reply.tool_calls) > MAX_TOOL_CALLS_PER_REPLY:
+                log(
+                    "tool_call_limit",
+                    limit=MAX_TOOL_CALLS_PER_REPLY,
+                    requested=len(reply.tool_calls),
+                )
+            for i, tc in enumerate(reply.tool_calls):
+                if (
+                    i >= MAX_TOOL_CALLS_PER_REPLY
+                ):  # still answer it: providers need one result per call
+                    messages.append(
+                        AgentMessage(
+                            "tool",
+                            json.dumps({"error": "too_many_tool_calls"}),
+                            tool_call_id=tc.id,
+                            name=tc.name,
+                        )
+                    )
+                    continue
                 tool = tools_by_name.get(tc.name)
                 if tool is None:
                     result: dict[str, Any] = {"error": "unknown_tool"}

@@ -17,11 +17,12 @@ def allow_private_urls() -> bool:
 
 
 def check_base_url(url: str, *, allow_private: bool) -> None:
-    """Raise ``ValueError`` for non-http(s) URLs and, unless ``allow_private``, for hosts that
-    resolve to loopback/private/link-local/metadata addresses."""
+    """Raise ``ValueError`` for non-https URLs (http too when ``allow_private``) and, unless
+    ``allow_private``, for hosts that resolve to loopback/private/link-local/metadata addresses.
+    Mirrors what ``safe_request`` enforces at request time."""
     parts = urlsplit(url)
-    if parts.scheme not in ("http", "https"):
-        raise ValueError("base_url must use http or https")
+    if parts.scheme not in (("http", "https") if allow_private else ("https",)):
+        raise ValueError("base_url must use https (set AGENT_LLM_ALLOW_PRIVATE_URLS for http)")
     host = parts.hostname
     if not host:
         raise ValueError("base_url has no host")

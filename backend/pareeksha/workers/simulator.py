@@ -98,7 +98,6 @@ def _caller_source() -> CallerSource:
     if _caller is None:
         sink = _usage if _usage is not None else _usage_sink()
         brain = CallerBrain(build_client(usage_sink=sink))
-        _providers.append(brain)
         _caller = BrainCallerSource(brain)
     return _caller
 

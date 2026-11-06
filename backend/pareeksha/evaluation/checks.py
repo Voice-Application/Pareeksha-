@@ -384,10 +384,9 @@ def check_no_unexpected_tool(
     expected: Iterable[Mapping] | None, actual: Iterable[Mapping | ToolCall] | None
 ) -> list[CheckResult]:
     """Fail once per actual call whose name is not an expected tool (not_called names excluded)."""
-    expected = list(expected or [])
-    if not expected or actual is None:
+    allowed = {e["name"] for e in expected or [] if e.get("expect") != "not_called"}
+    if not allowed or actual is None:  # only "must not call X" expectations: just X is forbidden
         return []
-    allowed = {e["name"] for e in expected if e.get("expect") != "not_called"}
     calls = [c if isinstance(c, ToolCall) else ToolCall.from_dict(c) for c in actual]
     bad = [(i, c) for i, c in enumerate(calls, 1) if c.name not in allowed]
     if not bad:

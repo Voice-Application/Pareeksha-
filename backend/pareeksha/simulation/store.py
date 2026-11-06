@@ -20,7 +20,7 @@ from pareeksha.adapters.base import AgentTarget
 from pareeksha.audio.profiles import LineProfile
 from pareeksha.evaluation.pii import mask_pii
 from pareeksha.events.schemas import CallRequested
-from pareeksha.integrations.crypto import SecretBox
+from pareeksha.integrations.crypto import SecretBox, SecretDecryptError
 from pareeksha.runs.slots import release_slot
 from pareeksha.schemas.personas import PersonaCreate
 from pareeksha.schemas.prompts import PromptVersionOut
@@ -38,7 +38,8 @@ def call_id_for(run_item_id: uuid.UUID) -> uuid.UUID:
 
 
 class SpecNotFoundError(LookupError):
-    """The request names an agent, scenario, persona or noise profile that does not exist."""
+    """The request names an agent, scenario, persona or noise profile that does not exist
+    (or the agent's stored secrets cannot be read)."""
 
 
 async def read_spec(conn: Conn, req: CallRequested) -> tuple[CallSpec, uuid.UUID]:
@@ -91,7 +92,11 @@ async def read_spec(conn: Conn, req: CallRequested) -> tuple[CallSpec, uuid.UUID
         if version is not None:  # absent -> the simulator ends the call connect_failed
             config["prompt_version"] = version.model_dump(mode="json")
         if agent["adapter_secrets_encrypted"]:
-            secrets = _secret_box().decrypt(bytes(agent["adapter_secrets_encrypted"]).decode())
+            try:
+                secrets = _secret_box().decrypt(bytes(agent["adapter_secrets_encrypted"]).decode())
+            except (SecretDecryptError, RuntimeError, ValueError) as exc:
+                # permanent (wrong/missing SECRET_KEY): fail the item rather than retry forever
+                raise SpecNotFoundError("the agent's provider secrets cannot be decrypted") from exc
     spec = CallSpec(
         call_id=call_id_for(req.run_item_id),
         agent=AgentTarget(

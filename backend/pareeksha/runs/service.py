@@ -16,7 +16,7 @@ from typing import Any, cast
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from pareeksha.api.crud import decode_cursor, encode_cursor, paginate
+from pareeksha.api.crud import active_version, decode_cursor, encode_cursor, paginate
 from pareeksha.api.deps import PageParams
 from pareeksha.api.errors import ApiError
 from pareeksha.db.models import (
@@ -131,9 +131,7 @@ async def prepare(session: AsyncSession, project_id: uuid.UUID, body: RunCreate)
     ).one_or_none()
     if agent is None:
         raise ApiError(404, "not_found", "Agent not found", {"id": str(body.agent_id)})
-    if agent.adapter == "prompt" and not cast(dict[str, Any], agent.adapter_config).get(
-        "active_version_id"
-    ):
+    if agent.adapter == "prompt" and await active_version(session, agent) is None:
         raise ApiError(
             422, "prompt_agent_has_no_version", "Create a prompt version before running this agent"
         )

@@ -149,7 +149,9 @@ function toPayload(f: Form): AgentCreate {
     glass_box: prompt ? true : f.glass_box,
     mandatory_disclosures: f.disclosures.map((d) => ({ id: d.id.trim(), text: d.text.trim(), regex: d.regex.trim() || null, within_turns: Number(d.within_turns) })),
     forbidden_phrases: f.forbidden.map((d) => ({ id: d.id.trim(), text: d.text.trim(), regex: d.regex.trim() || null })),
-    expected_tools: f.tools.map((t) => ({ name: t.name.trim(), description: t.description.trim() })),
+    // Prompt agents' expected_tools mirror the active version's tools (with args_schema); the form
+    // only edits name/description, so sending them back would wipe the schemas.
+    ...(prompt ? {} : { expected_tools: f.tools.map((t) => ({ name: t.name.trim(), description: t.description.trim() })) }),
     bias_list: f.bias,
     max_call_seconds: Number(f.max_call_seconds),
   };
@@ -456,20 +458,22 @@ export function AgentForm({ agentId }: { agentId?: string }) {
                 </>
               )}
             />
-            <Repeater<Tool>
-              label="Expected tools"
-              rows={form.tools}
-              onChange={(tools) => patch({ tools })}
-              blank={() => ({ name: "", description: "" })}
-              addLabel="Add tool"
-              emptyText="No expected tools."
-              render={(t, up, i) => (
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <TextField id={`tool-${i}-name`} label="Name" className="mono" value={t.name} onChange={(e) => up({ name: e.target.value })} error={errors[`tool-${i}-name`]} />
-                  <TextField id={`tool-${i}-desc`} label="Description" value={t.description} onChange={(e) => up({ description: e.target.value })} />
-                </div>
-              )}
-            />
+            {!isPrompt && (
+              <Repeater<Tool>
+                label="Expected tools"
+                rows={form.tools}
+                onChange={(tools) => patch({ tools })}
+                blank={() => ({ name: "", description: "" })}
+                addLabel="Add tool"
+                emptyText="No expected tools."
+                render={(t, up, i) => (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <TextField id={`tool-${i}-name`} label="Name" className="mono" value={t.name} onChange={(e) => up({ name: e.target.value })} error={errors[`tool-${i}-name`]} />
+                    <TextField id={`tool-${i}-desc`} label="Description" value={t.description} onChange={(e) => up({ description: e.target.value })} />
+                  </div>
+                )}
+              />
+            )}
             <TagInput label="Bias list" value={form.bias} onChange={(bias) => patch({ bias })} placeholder="Add a word and press Enter" help="Words the speech recogniser should expect, such as product names." />
           </Panel>
 

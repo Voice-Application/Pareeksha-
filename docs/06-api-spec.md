@@ -61,7 +61,7 @@ Opens the socket, sends 1 s of silence, waits ≤ 10 s for agent audio.
 or `{ "ok": false, "error": "timeout", "detail": "no audio within 10000 ms" }`.
 
 ### Prompt agents and versions
-A prompt agent has `"adapter": "prompt"`; `endpoint_url` is optional for it. `adapter_secrets` (`{"api_key": "…"}`) is accepted on `POST`/`PATCH /agents`, stored encrypted and **never returned**; responses carry `has_adapter_secrets: true|false` instead. A version is immutable; the active one is `adapter_config.active_version_id`, and a run pins it in `agent_snapshot`. These routes return `409 not_a_prompt_agent` for other adapters.
+A prompt agent has `"adapter": "prompt"`; `endpoint_url` is optional for it. `adapter_secrets` (`{"api_key": "…"}`) is accepted on `POST /agents` and `PATCH /agents/{id}`, stored encrypted and **never returned**; responses carry `has_adapter_secrets: true|false` instead. A version is immutable; the active one is `adapter_config.active_version_id` (server-owned: ignored if a client sends it), and a run pins it in `agent_snapshot`. These routes return `409 not_a_prompt_agent` for other adapters.
 
 ### `POST /agents/{id}/prompt-versions`
 ```json

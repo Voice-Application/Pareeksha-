@@ -10,6 +10,12 @@ from typing import Any, Literal, Protocol
 
 import httpx
 
+from pareeksha.agent_llm.url_guard import allow_private_urls
+from pareeksha.integrations.ssrf import SSRFError, safe_request
+
+#: Largest provider response body accepted (enforced while streaming).
+MAX_RESPONSE_BYTES = 10 * 1024 * 1024
+
 
 @dataclass(frozen=True, slots=True)
 class ToolSpec:
@@ -88,6 +94,43 @@ def _error_text(resp: httpx.Response, api_key: str | None) -> str:
     return text.replace(api_key, "***") if api_key else text
 
 
+async def _send(
+    url: str, headers: dict[str, str], body: dict[str, Any], timeout_s: float
+) -> httpx.Response:
+    """The one production path to a provider: ``safe_request`` (https only, public addresses,
+    connection pinned to the validated IP, no redirects, size cap). ``AGENT_LLM_ALLOW_PRIVATE_URLS``
+    is the operator's opt-in for local/self-hosted servers: plain httpx, still no redirects and
+    the same size cap."""
+    content = json.dumps(body).encode()
+    headers = {**headers, "Content-Type": "application/json"}
+    if not allow_private_urls():
+        return await safe_request(
+            "POST",
+            url,
+            headers=headers,
+            content=content,
+            timeout_s=timeout_s,
+            max_bytes=MAX_RESPONSE_BYTES,
+        )
+    async with (
+        httpx.AsyncClient(follow_redirects=False, timeout=timeout_s) as client,
+        client.stream("POST", url, headers=headers, content=content) as response,
+    ):
+        chunks: list[bytes] = []
+        total = 0
+        async for chunk in response.aiter_bytes():
+            total += len(chunk)
+            if total > MAX_RESPONSE_BYTES:
+                raise SSRFError(f"response larger than {MAX_RESPONSE_BYTES} bytes")
+            chunks.append(chunk)
+        return httpx.Response(
+            response.status_code,
+            headers=response.headers,
+            content=b"".join(chunks),
+            request=response.request,
+        )
+
+
 async def post_json(
     http: httpx.AsyncClient | None,
     url: str,
@@ -101,10 +144,11 @@ async def post_json(
     start = time.monotonic()
     try:
         if http is None:
-            async with httpx.AsyncClient(follow_redirects=False) as client:
-                resp = await client.post(url, headers=headers, json=body, timeout=timeout_s)
+            resp = await _send(url, headers, body, timeout_s)
         else:
             resp = await http.post(url, headers=headers, json=body, timeout=timeout_s)
+    except SSRFError as exc:
+        raise AgentLLMError(f"provider URL not allowed: {exc}", retryable=False) from exc
     except httpx.TimeoutException as exc:
         raise AgentLLMError("provider request timed out", retryable=True) from exc
     except httpx.HTTPError as exc:
@@ -112,6 +156,11 @@ async def post_json(
             f"provider request failed: {type(exc).__name__}", retryable=True
         ) from exc
     latency_ms = int((time.monotonic() - start) * 1000)
+    if resp.is_redirect:
+        raise AgentLLMError(
+            f"provider redirected (HTTP {resp.status_code}); redirects are not followed",
+            status=resp.status_code,
+        )
     if resp.status_code >= 400:
         raise AgentLLMError(
             f"provider returned HTTP {resp.status_code}: {_error_text(resp, api_key)}",

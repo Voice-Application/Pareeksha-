@@ -172,8 +172,8 @@ class PgEvaluatorStore:
             # the version the run was pinned to; audits (no run) use the agent's current one
             config = (call["agent_snapshot"] or {}).get("adapter_config") or call["adapter_config"]
             rows = await self._rows(
-                "SELECT system_prompt FROM prompt_versions WHERE id = %s",
-                ((config or {}).get("active_version_id"),),
+                "SELECT system_prompt FROM prompt_versions WHERE id = %s AND agent_id = %s",
+                ((config or {}).get("active_version_id"), call["agent_id"]),
             )
             description = prompt_context(description, rows[0] if rows else None)
         agent = AgentInfo(
