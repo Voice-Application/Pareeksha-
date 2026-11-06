@@ -1,6 +1,6 @@
 # Prompt testing and RAG testing: design
 
-Date: 2026-11-06. Status: draft for owner approval.
+Date: 2026-11-06. Status: approved by owner 2026-11-06 (with the local-only switch).
 
 ## Why
 
@@ -217,6 +217,16 @@ pieces at a **prompt** instead of a deployed voice bot, and adds a **RAG lab** o
   shown as "n/a: KB does not fit the model's context window (N tokens vs limit M)" when it does
   not fit; never truncated. Monthly conversation volume is an input on the matrix report (per
   view, not stored), defaulting to 10,000.
+- **Local-only knowledge bases (owner decision).** Each knowledge base has a `local_only`
+  switch (default off). When on, no text from its documents or chunks leaves the Pareeksha
+  deployment: embeddings and reranking must use local models; scenario generation, the judge's
+  faithfulness/correctness checks and the caller brain only get KB text if the project's
+  Pareeksha LLM is a local provider (Ollama or a self-hosted OpenAI-compatible endpoint the
+  owner has marked local), otherwise those steps are refused with a clear error naming the
+  switch. The prompt-under-test model is also checked: a run that would send retrieved chunks to
+  a hosted model is refused. Enforced server-side in one place (a guard every provider call for
+  that KB goes through), not in the UI, and covered by tests. Switching it on for an existing KB
+  does not delete anything already sent; the UI says so.
 - **Migration.** `agents.endpoint_url` stays NOT NULL; prompt agents store
   `prompt://<agent_id>`. The adapter CHECK gains `prompt`. Price table seeded from providers'
   public pricing at build time with the date recorded; editable per project.
@@ -246,6 +256,8 @@ Each phase ships with tests and leaves the existing voice flow green.
 - Embeddings local by default, Gemini optional, all major providers supported via API key.
 - Both text ("prompt method") and call modes.
 - With/without-RAG comparison, retrieval latency, cost and savings are required.
+- Each knowledge base has a "local only" switch that keeps its documents away from outside
+  services.
 
 ## Calls made by the designer (owner to check)
 
