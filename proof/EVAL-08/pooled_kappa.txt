@@ -1,0 +1,3 @@
+pooled n=60 (L01-L30 + H01-H30, both SEEN)
+pass/fail: kappa=0.4308 agreement=43/60 judge_pass=26 owner_pass=29
+critical:  kappa=0.2946 agreement=41/60 judge_crit=7 owner_crit=26

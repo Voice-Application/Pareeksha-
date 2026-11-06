@@ -1,0 +1,40 @@
+{
+ "mode": "pass_fail_only",
+ "calibration_api": {
+  "n": 30,
+  "kappa_pass_fail": 0.1124,
+  "spearman_overall": null,
+  "dimension_mae": {}
+ },
+ "calibration_offline": {
+  "n": 30,
+  "kappa_pass_fail": 0.1124,
+  "spearman_overall": null,
+  "dimension_mae": {}
+ },
+ "agreement": {
+  "passed": {
+   "n": 30,
+   "judge_pass_human_pass": 1,
+   "judge_pass_human_fail": 10,
+   "judge_fail_human_pass": 0,
+   "judge_fail_human_fail": 19,
+   "agreement": 0.6667,
+   "judge_yes": 11,
+   "human_yes": 1,
+   "kappa": 0.1124
+  },
+  "critical": {
+   "n": 30,
+   "judge_yes_human_yes": 6,
+   "judge_yes_human_no": 0,
+   "judge_no_human_yes": 23,
+   "judge_no_human_no": 1,
+   "agreement": 0.2333,
+   "judge_yes": 6,
+   "human_yes": 29,
+   "kappa": 0.0171
+  }
+ },
+ "disagreements": 23
+}

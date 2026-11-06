@@ -24,6 +24,7 @@ from typing import Any
 import psycopg
 from aiokafka import AIOKafkaConsumer
 
+from pareeksha.evaluation.rubric import RUBRIC_VERSION
 from pareeksha.events.consumer import ConsumerRunner, ConsumerSpec, Ctx, Outgoing, RetryPolicy
 from pareeksha.events.producer import EventProducer
 from pareeksha.events.schemas import AnyEnvelope, CallCompleted, EvaluationCompleted, make_envelope
@@ -37,7 +38,7 @@ __all__ = ["BOOTSTRAP", "prime_group", "read_topic", "wait_for"]
 
 BOOTSTRAP = os.environ.get("INFRA_TEST_KAFKA_BOOTSTRAP", "localhost:9094")
 FAST = RetryPolicy(delay_seconds={2: 0.5, 3: 1.0}, throttle_delay_seconds=0.5)
-RUBRIC = "rubric-2026-10-v1"
+RUBRIC = RUBRIC_VERSION  # the version this build evaluates with
 
 
 def settings_for(database_url: str) -> EventSettings:

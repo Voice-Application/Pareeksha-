@@ -1,0 +1,7 @@
+  <frozen abc>:106: DeprecationWarning: `AudioContextTTSService` is deprecated since 0.0.105 and will be removed in 2.0.0. Use `WebsocketTTSService` instead.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/contract/test_schema_dts_fresh.py::test_committed_schema_dts_matches_the_backend_openapi
+1 failed, 1105 passed, 1 warning in 177.56s (0:02:57)
+1 passed in 1.47s

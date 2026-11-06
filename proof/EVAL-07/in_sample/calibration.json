@@ -1,0 +1,287 @@
+{
+ "rubric_versions": [
+  "rubric-2026-10-v2"
+ ],
+ "interim": false,
+ "labelled": 30,
+ "total": 30,
+ "pending": [],
+ "mode": "pass_fail_only",
+ "calibration_api": {
+  "n": 30,
+  "kappa_pass_fail": 0.6087,
+  "spearman_overall": null,
+  "dimension_mae": {}
+ },
+ "calibration_offline": {
+  "n": 30,
+  "kappa_pass_fail": 0.6087,
+  "spearman_overall": null,
+  "dimension_mae": {}
+ },
+ "not_provided_by_owner": [
+  "spearman_overall",
+  "dimension_mae"
+ ],
+ "agreement": {
+  "passed": {
+   "n": 30,
+   "judge_pass_human_pass": 3,
+   "judge_pass_human_fail": 1,
+   "judge_fail_human_pass": 2,
+   "judge_fail_human_fail": 24,
+   "agreement": 0.9,
+   "agreement_ci95_wilson": [
+    0.7438,
+    0.9654
+   ],
+   "kappa_bootstrap": {
+    "method": "percentile bootstrap, calls resampled",
+    "resamples": 10000,
+    "seed": 20261030,
+    "ci95": [
+     -0.0345,
+     1.0
+    ],
+    "undefined_share": 0.0011
+   },
+   "judge_yes": 4,
+   "human_yes": 5,
+   "kappa": 0.6087
+  },
+  "critical": {
+   "n": 30,
+   "judge_yes_human_yes": 9,
+   "judge_yes_human_no": 0,
+   "judge_no_human_yes": 9,
+   "judge_no_human_no": 12,
+   "agreement": 0.7,
+   "agreement_ci95_wilson": [
+    0.5212,
+    0.8334
+   ],
+   "kappa_bootstrap": {
+    "method": "percentile bootstrap, calls resampled",
+    "resamples": 10000,
+    "seed": 20261030,
+    "ci95": [
+     0.2075,
+     0.7273
+    ],
+    "undefined_share": 0.0
+   },
+   "judge_yes": 9,
+   "human_yes": 18,
+   "kappa": 0.4444
+  }
+ },
+ "identical_rows": [],
+ "import": {
+  "reviewer": "preetham",
+  "posted": 0,
+  "already": 30,
+  "labels": 30,
+  "labels_file": "labelling/EVAL-06/labels.csv"
+ },
+ "disagreements": [
+  {
+   "label_id": "L03",
+   "call_id": "341f17dc-f9f3-58d5-95c2-17d8090e4465",
+   "judge_passed": false,
+   "human_passed": false,
+   "judge_critical": false,
+   "human_critical": true,
+   "dimension_gaps": {},
+   "judge_score": 50.0,
+   "judge_failure_types": [
+    "intent_miss",
+    "loop",
+    "wrong_fact",
+    "language_mismatch"
+   ],
+   "judge_reasons": "Agent failed to recognize caller's payment claim, repeated payment request, and stated incorrect overdue days. Caller's goal of providing UTR was not achieved. / task_completion 1: Caller stated payment was made via UPI 3 days ago with amount 4500, but agent ignored this and asked for payment date again. UTR not requested or accepted; success criteria not met. / factual_accuracy 1: Agent falsely stated EMI is overdue by twelve days, which is not on file and contradicts caller's payment claim. / language_handling 2: Agent replied in English despite caller using Hindi/Hinglish; did not adapt to code-mixing. / conversation_flow 1: Agent repeated scripted payment request after caller already said paid; ignored caller's statement and asked again. / empathy_tone 2: Neutral tone, but no acknowledgment of caller's confusion or frustration.",
+   "owner_note": "hallucination"
+  },
+  {
+   "label_id": "L06",
+   "call_id": "6aaa3a76-90a1-5bdd-afb1-46aae18f2f94",
+   "judge_passed": false,
+   "human_passed": false,
+   "judge_critical": false,
+   "human_critical": true,
+   "dimension_gaps": {},
+   "judge_score": 72.5,
+   "judge_failure_types": [
+    "missing_disclosure",
+    "wrong_fact"
+   ],
+   "judge_reasons": "Agent successfully recorded promise-to-pay date and amount, but missed mandatory recording disclosure and stated an unverified overdue days fact. / policy_compliance 1: Mandatory recording disclosure missing in first two agent turns. No forbidden content. / factual_accuracy 2: Agent stated EMI is overdue by twelve days, but days overdue is not on file. Amount 4500 correct. / empathy_tone 2: Neutral and cold; no acknowledgment of caller's inability to pay today.",
+   "owner_note": ""
+  },
+  {
+   "label_id": "L07",
+   "call_id": "2ec77fa9-7c67-5edb-9944-d297af129791",
+   "judge_passed": false,
+   "human_passed": false,
+   "judge_critical": false,
+   "human_critical": true,
+   "dimension_gaps": {},
+   "judge_score": 41.25,
+   "judge_failure_types": [
+    "intent_miss",
+    "missing_disclosure",
+    "language_mismatch",
+    "loop"
+   ],
+   "judge_reasons": "Agent failed to answer caller's question about extra 500, repeated payment date request, missed recording disclosure, and used wrong language. Transfer to human was appropriate. / task_completion 2: Caller asked where extra 500 comes from; agent ignored question and asked for payment date twice. Dispute not resolved, but transfer offered. / policy_compliance 1: Mandatory recording disclosure missing in first agent turn. / factual_accuracy 2: Agent stated EMI overdue by twelve days, but days overdue is not on file; amount 4500 is correct but not stated in Kannada. / language_handling 1: Agent replied in English/Kannada mix instead of caller's Kannada; all agent turns not in Kannada. / conversation_flow 1: Agent repeated script line asking for payment date after caller objected; ignored caller's question twice. / empathy_tone 2: Neutral tone; did not acknowledge caller's confusion or frustration.",
+   "owner_note": "hallucination, and see the agent  should  first listen what the user is  aysiong  acknowlgedge and then continue and the agent  should  wave any  fees with  human approval it  did"
+  },
+  {
+   "label_id": "L10",
+   "call_id": "c208451e-3650-575f-ae89-846d2a62baab",
+   "judge_passed": true,
+   "human_passed": true,
+   "judge_critical": false,
+   "human_critical": true,
+   "dimension_gaps": {},
+   "judge_score": 92.5,
+   "judge_failure_types": [],
+   "judge_reasons": "Agent successfully recorded promise-to-pay for Friday with correct amount 4500, read back, and thanked caller. Disclosures and language handling were correct. Minor friction in conversation flow due to repetition, and empathy could be improved. / conversation_flow 3: Agent repeated confirmation after caller asked if still there; minor friction but no loop. Handled interruption well. / empathy_tone 2: Neutral tone; did not acknowledge caller's frustration or inability to pay today. Could have been warmer.",
+   "owner_note": ""
+  },
+  {
+   "label_id": "L14",
+   "call_id": "af40946d-384d-5d69-92c0-c9ea278dc715",
+   "judge_passed": true,
+   "human_passed": false,
+   "judge_critical": false,
+   "human_critical": false,
+   "dimension_gaps": {},
+   "judge_score": 95.0,
+   "judge_failure_types": [],
+   "judge_reasons": "Caller requested human in first turn; agent initially ignored and repeated EMI script, but then transferred within two turns. All mandatory disclosures present, no forbidden content, language matched, facts correct. Minor friction in conversation flow. / conversation_flow 3: Agent ignored initial human request in turn 2 and repeated EMI script, causing caller to repeat request; no loop beyond that. / empathy_tone 3: Agent acknowledged confusion in turn 4 by offering human; tone neutral but not dismissive.",
+   "owner_note": "The customer requested from the first itself to transfer to the human agent. Then the agent was unable to understand, and he transferred to the call handler."
+  },
+  {
+   "label_id": "L16",
+   "call_id": "86fb8831-45f9-52ac-8666-5c7a9c7fc32a",
+   "judge_passed": false,
+   "human_passed": false,
+   "judge_critical": false,
+   "human_critical": true,
+   "dimension_gaps": {},
+   "judge_score": 37.5,
+   "judge_failure_types": [
+    "intent_miss",
+    "missing_disclosure",
+    "wrong_fact",
+    "loop"
+   ],
+   "judge_reasons": "Agent failed to acknowledge caller's payment and UTR, repeatedly demanded payment date, and stated incorrect overdue days. Missing recording disclosure. Transferred to human unnecessarily. / task_completion 1: Caller repeatedly said already paid via UPI and offered UTR; agent ignored and kept asking for payment date. UTR never accepted or noted; success criteria not met. / policy_compliance 1: Mandatory recording disclosure missing in first two agent turns. / factual_accuracy 1: Agent repeatedly stated EMI is 12 days overdue, which is not on file; only due date is 5th. This is a material error the caller had to fight. / conversation_flow 1: Agent repeated same script line after caller answered and objected, ignoring interruptions and causing loop. / empathy_tone 1: Agent was dismissive and impatient, repeating script to a frustrated caller without acknowledging emotion. / escalation 2: Agent transferred to human without caller request; transfer was not needed and caller did not decline, but it was not a correct transfer.",
+   "owner_note": "Said that he had already made the payment three days ago. The agent was not capturing this part. The agent should have listened to the call, to what he was saying, and then answered."
+  },
+  {
+   "label_id": "L17",
+   "call_id": "29a52575-5926-5938-b4ba-d85ab3dc36b0",
+   "judge_passed": false,
+   "human_passed": false,
+   "judge_critical": false,
+   "human_critical": true,
+   "dimension_gaps": {},
+   "judge_score": 70.0,
+   "judge_failure_types": [
+    "intent_miss",
+    "loop",
+    "interruption_handling",
+    "escalation_error"
+   ],
+   "judge_reasons": "Agent ignored caller's request for manager and repeated EMI script, causing frustration. Transfer was late. No threats or factual errors. Needs human review for poor handling of angry caller. / task_completion 2: Caller asked for manager in turn 4; agent ignored and repeated EMI script in turns 5-6. Transfer only after second request in turn 7. Caller's frustration not acknowledged. / conversation_flow 1: Agent ignored caller's interruptions and repeated script lines twice after caller objected. Did not respond to what caller said. / empathy_tone 1: No acknowledgment of caller's anger or frustration. Repeated script coldly despite caller's insults and refusal to pay. / escalation 2: Caller requested manager in turn 4; agent did not transfer until turn 8 after second request. Transfer was late.",
+   "owner_note": "The customer was frustrated, and the agent was repeating the same script again and again and was not listening to what he was saying."
+  },
+  {
+   "label_id": "L18",
+   "call_id": "0e7e2540-6324-5c33-a876-0d763948c374",
+   "judge_passed": false,
+   "human_passed": true,
+   "judge_critical": false,
+   "human_critical": false,
+   "dimension_gaps": {},
+   "judge_score": 82.5,
+   "judge_failure_types": [
+    "wrong_fact"
+   ],
+   "judge_reasons": "Agent recorded promise-to-pay date (Friday) and amount (4500) via tool call, but did not read back the amount to the caller, missing a required confirmation. All other aspects were correct. / task_completion 2: PTP date captured but amount not read back to caller; success criteria partially met. / conversation_flow 3: Agent ended call without confirming amount; minor flow issue. / empathy_tone 3: Polite and respectful, but no explicit acknowledgment of caller's inability to pay today.",
+   "owner_note": ""
+  },
+  {
+   "label_id": "L22",
+   "call_id": "ffb19243-f4b7-522b-b324-52b9f4cf1303",
+   "judge_passed": false,
+   "human_passed": false,
+   "judge_critical": false,
+   "human_critical": true,
+   "dimension_gaps": {},
+   "judge_score": 57.5,
+   "judge_failure_types": [
+    "intent_miss",
+    "loop",
+    "hallucination",
+    "language_mismatch",
+    "interruption_handling"
+   ],
+   "judge_reasons": "Agent repeatedly failed to provide due date when asked, often omitting it and instead stating an unverified overdue status. It looped script lines, ignored interruptions, and did not match caller's language. Caller eventually got the correct date and amount after multiple attempts. / task_completion 2: Caller asked for due date and amount repeatedly; agent often omitted due date or gave it late. Turn 3 omitted due date, turn 6 included it, but later turns 8, 11, 13 omitted it again. Caller had to ask multiple times. / factual_accuracy 2: Agent repeatedly stated EMI is overdue by twelve days, which is not on file. Ground truth only has due date and amount. This is an invented fact. / language_handling 2: Caller spoke Hindi/English mix; agent replied only in English. Agent did not match caller's language or code-mixing. / conversation_flow 1: Agent repeated script lines ignoring caller's requests for due date and amount. Turn 8 and 13 are identical. Agent also ignored interruptions (barge-in attempts 4, honoured 1). / empathy_tone 1: Caller was rushed and frustrated; agent did not acknowledge emotion, kept repeating script, and sounded impatient by not addressing caller's repeated requests.",
+   "owner_note": "Most of the issues are like this: it is not responding to what the user is asking."
+  },
+  {
+   "label_id": "L23",
+   "call_id": "7637b5de-8473-526c-affc-f56ea08654bc",
+   "judge_passed": false,
+   "human_passed": false,
+   "judge_critical": false,
+   "human_critical": true,
+   "dimension_gaps": {},
+   "judge_score": 70.0,
+   "judge_failure_types": [
+    "intent_miss",
+    "loop"
+   ],
+   "judge_reasons": "Agent failed to answer the caller's question about the extra 500 rupees, repeated script lines, and transferred without resolving the dispute. The transfer was appropriate but the caller's core concern was never addressed. / task_completion 2: Caller's question about the extra 500 was never answered; agent repeated script lines and transferred without addressing the dispute. / factual_accuracy 2: Agent stated EMI overdue by twelve days, which is not on file; amount 4500 is correct but no explanation given. / conversation_flow 2: Agent repeated script lines ignoring caller's repeated question; did not acknowledge frustration. / empathy_tone 2: Neutral and cold; caller was rushed and frustrated but agent did not acknowledge.",
+   "owner_note": "The agent is repeating itself, and I'm unable to hear some voices."
+  },
+  {
+   "label_id": "L26",
+   "call_id": "54b4a35a-be54-5380-81de-6ffadaddef03",
+   "judge_passed": false,
+   "human_passed": true,
+   "judge_critical": false,
+   "human_critical": false,
+   "dimension_gaps": {},
+   "judge_score": 61.25,
+   "judge_failure_types": [
+    "intent_miss",
+    "loop",
+    "wrong_fact"
+   ],
+   "judge_reasons": "Agent recorded promise-to-pay but failed to read back date and amount despite caller asking twice. Repeated same script line three times, ignoring caller's questions. No threats or disclosure issues. / task_completion 1: Agent recorded PTP but never read back date or amount despite caller asking twice; caller's questions in turns 5 and 7 unanswered. / factual_accuracy 2: Stated EMI 4500 and 12 days overdue; overdue days not on file, but amount correct. / conversation_flow 1: Repeated same script line three times ignoring caller's interruptions and questions. / empathy_tone 2: Neutral and polite but did not acknowledge caller's need for confirmation.",
+   "owner_note": ""
+  },
+  {
+   "label_id": "L29",
+   "call_id": "4d9f91f6-c814-5e3e-a06e-9fa7d3b926fd",
+   "judge_passed": false,
+   "human_passed": false,
+   "judge_critical": false,
+   "human_critical": true,
+   "dimension_gaps": {},
+   "judge_score": 63.75,
+   "judge_failure_types": [
+    "intent_miss",
+    "loop",
+    "escalation_error"
+   ],
+   "judge_reasons": "Agent failed to acknowledge caller's frustration, repeatedly asked for payment date despite refusal, and transferred to human even though caller declined. No threats or factual errors, but conversation was robotic and unresponsive to caller's intent. / task_completion 1: Agent repeatedly asked for payment date despite caller refusing to pay; never acknowledged frustration or answered caller's questions; transfer done despite caller declining human. / conversation_flow 1: Agent repeated same script line multiple times after caller objected; ignored caller's refusal and frustration; transferred despite caller declining human. / empathy_tone 1: No acknowledgment of caller's anger or frustration; cold and repetitive; ignored emotional cues. / escalation 2: Agent transferred to human despite caller explicitly declining human agent in turn 11; transfer was not correct.",
+   "owner_note": ""
+  }
+ ],
+ "note": "IN-SAMPLE: rubric-2026-10-v2 was written from these same 30 labels (proof/EVAL-06/recalibration_plan.md), so this kappa overstates how v2 generalises; the held-out batch H01-H30 is the real test."
+}

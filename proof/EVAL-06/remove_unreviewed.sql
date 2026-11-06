@@ -1,0 +1,5 @@
+-- EVAL-06: remove the reviews posted for L11-L30 (owner: filled down, not reviewed)
+BEGIN;
+DELETE FROM human_reviews h WHERE h.reviewer='preetham' AND h.evaluation_id IN (SELECT id FROM evaluations WHERE call_id IN ('89c5a48c-d9ac-5099-a722-d3843d46db1f','2a89e553-95e6-519d-a9d8-9179da3b3a2f','b321d865-498a-5f54-9926-9b9bb5941846','af40946d-384d-5d69-92c0-c9ea278dc715','86ef0cb0-febb-5dfc-ada5-68ed16d943ef','86fb8831-45f9-52ac-8666-5c7a9c7fc32a','29a52575-5926-5938-b4ba-d85ab3dc36b0','0e7e2540-6324-5c33-a876-0d763948c374','8462c887-359f-526d-bb04-60f5a020425b','5662fd3b-d1db-5be7-be0d-19a062428a3f','4bbdfff4-1f13-5ebe-adb1-d6afa3dbe6a8','ffb19243-f4b7-522b-b324-52b9f4cf1303','7637b5de-8473-526c-affc-f56ea08654bc','002deebb-ecff-5da5-a9a0-394d0e7bfbb1','df9fc4e6-076f-558a-bb77-e949492827a4','54b4a35a-be54-5380-81de-6ffadaddef03','86a01f8b-cf10-5bdd-9df1-57ae222af1b9','1aa3f8c6-223c-5ed1-84e3-0d7f3f282780','4d9f91f6-c814-5e3e-a06e-9fa7d3b926fd','5d9ae3e6-384e-571c-a9f8-5098e707952e'));
+SELECT count(*) FROM human_reviews;
+COMMIT;

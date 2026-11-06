@@ -1,0 +1,8 @@
+ provider | operation  |  n  |   units   
+----------+------------+-----+-----------
+ deepseek | llm_caller |  66 | 76629.000
+ deepseek | llm_judge  |  15 | 78004.000
+ gnani    | stt_rest   |  89 |   570.100
+ gnani    | tts        | 124 |  6728.000
+(4 rows)
+

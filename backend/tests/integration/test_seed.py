@@ -92,11 +92,28 @@ async def test_noise_profiles_are_the_eight_dsp_definitions(fresh_session_factor
     )
 
 
-async def test_rubric_v1_is_active_and_weights_sum_to_100(fresh_session_factory: Factory) -> None:
+async def test_rubrics_v1_v2_v3_seeded_v3_active(fresh_session_factory: Factory) -> None:
     await seed_database(fresh_session_factory)
     async with fresh_session_factory() as session:
-        rubric = (await session.scalars(select(RubricVersions))).one()
-    assert rubric.version == "rubric-2026-10-v1" and rubric.is_active
+        rows = {r.version: r for r in await session.scalars(select(RubricVersions))}
+    assert set(rows) == {"rubric-2026-10-v1", "rubric-2026-10-v2", "rubric-2026-11-v3"}
+    assert [v for v, r in rows.items() if r.is_active] == ["rubric-2026-11-v3"]
+    # a database seeded before v3 (v1 active) is switched to the build's rubric on the next seed
+    async with fresh_session_factory() as session:
+        await session.execute(update(RubricVersions).values(is_active=False))
+        await session.execute(
+            update(RubricVersions)
+            .where(RubricVersions.version == "rubric-2026-10-v1")
+            .values(is_active=True)
+        )
+        await session.commit()
+    await seed_database(fresh_session_factory)
+    async with fresh_session_factory() as session:
+        active = (
+            await session.scalars(select(RubricVersions).where(RubricVersions.is_active))
+        ).one()
+    assert active.version == "rubric-2026-11-v3"
+    rubric = rows["rubric-2026-10-v1"]
     assert float(rubric.pass_threshold) == 80
     dims = rubric.dimensions
     assert isinstance(dims, list)
@@ -115,7 +132,9 @@ async def test_rubric_v1_is_active_and_weights_sum_to_100(fresh_session_factory:
     assert rubric.prompt_hash != rubric_prompt_hash(rubric.version, 70, dims)
 
 
-async def test_an_existing_active_rubric_is_not_replaced(fresh_session_factory: Factory) -> None:
+async def test_custom_active_rubric_is_kept_but_the_builds_becomes_active(
+    fresh_session_factory: Factory,
+) -> None:
     async with fresh_session_factory() as session, session.begin():
         session.add(
             RubricVersions(version="custom", dimensions=[], prompt_hash="x", is_active=True)
@@ -125,8 +144,9 @@ async def test_an_existing_active_rubric_is_not_replaced(fresh_session_factory: 
         active = list(
             await session.scalars(select(RubricVersions.version).where(RubricVersions.is_active))
         )
-    assert active == ["custom"]
-    assert await _count(fresh_session_factory, RubricVersions) == 2
+    # seeding makes the rubric this build evaluates with active; the custom row stays, inactive
+    assert active == ["rubric-2026-11-v3"]
+    assert await _count(fresh_session_factory, RubricVersions) == 4
 
 
 async def test_mock_agent_and_scenarios(fresh_session_factory: Factory) -> None:

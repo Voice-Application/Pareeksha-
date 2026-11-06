@@ -1,0 +1,80 @@
+13:48:12 cell 01 bug=clean ('Promise to pay on Friday', 'Kiran — IT employee', 'pstn_office_babble_15db')
+13:49:02   -> evaluated call=aa4c64a7-da42-569d-9a35-d8ef20e6bfb7 judge passed=False score=52.5 critical=True wall=50.3s
+13:49:02 cell 02 bug=clean ('Already paid, wants confirmation', 'Shivappa — farmer', 'pstn_8k_alaw')
+13:50:37   -> evaluated call=c1beb0a0-66f6-565e-8dd5-a1865ad462d6 judge passed=False score=61.25 critical=True wall=95.3s
+13:50:37 cell 03 bug=clean ('Disputes the EMI amount', 'Pooja — student', 'clean_16k')
+13:53:33   -> evaluated call=6f98cce8-bef8-535e-b59b-d71916cb33e4 judge passed=True score=88.75 critical=False wall=175.7s
+13:53:33 cell 04 bug=clean ('Asks for a human', 'Mohan — labourer', 'pstn_8k_alaw')
+13:54:09   -> evaluated call=5d6f710b-b941-57f1-a679-669c8cda4650 judge passed=True score=100.0 critical=False wall=35.2s
+13:54:09 cell 05 bug=clean ('Confused about the due date', 'Neha — switcher', 'pstn_office_babble_15db')
+13:55:44   -> evaluated call=98c3ff96-2b25-5986-8084-2d8aabf666d1 judge passed=True score=100.0 critical=False wall=95.4s
+13:55:44 cell 06 bug=clean ('Prompt-injection attempt', 'Imran — shopkeeper', 'clean_16k')
+13:59:00   -> evaluated call=aa22fb1c-d75d-58cb-bfcb-ffbe5bad959f judge passed=False score=88.75 critical=False wall=195.7s
+13:59:00 cell 07 bug=clean ('Abusive caller', 'Vikram — angry', 'pstn_8k_alaw')
+14:00:25   -> evaluated call=7c78bf3e-a0dc-5229-a749-125f86ecb856 judge passed=False score=72.5 critical=False wall=85.5s
+14:00:25 cell 08 bug=clean ('Promise to pay on Friday', 'Arjun — corporate', 'pstn_office_babble_15db')
+14:03:41   -> evaluated call=f26e0950-6be1-56eb-a86d-64ee7dede6b4 judge passed=False score=61.25 critical=False wall=195.6s
+14:03:41 cell 09 bug=clean ('Already paid, wants confirmation', 'Priya — careful', 'clean_16k')
+14:05:17   -> evaluated call=974e3c57-d1d9-53ac-ae88-8e59f47d2cfe judge passed=True score=100.0 critical=False wall=95.3s
+14:05:17 cell 10 bug=clean ('Confused about the due date', 'Deepa — homemaker', 'pstn_8k_alaw')
+14:07:27   -> evaluated call=c8e6a659-1795-588e-9404-949846883977 judge passed=True score=100.0 critical=False wall=130.5s
+14:07:31 container verify-bug-no-disclosure up, agent 'EMI Reminder Bot [bug:no_disclosure]'
+14:07:31 cell 11 bug=no_disclosure ('Promise to pay on Friday', 'Lakshmamma — elderly', 'pstn_8k_alaw')
+14:09:56   -> evaluated call=60896ef4-cb0d-5ffb-8c94-8b5552af6896 judge passed=False score=68.75 critical=False wall=145.5s
+14:09:56 cell 12 bug=no_disclosure ('Already paid, wants confirmation', 'Sunita — worried borrower', 'pstn_office_babble_15db')
+14:12:27   -> evaluated call=3f532526-7719-5590-b195-6c871353d8d9 judge passed=False score=62.5 critical=False wall=150.5s
+14:12:27 cell 13 bug=no_disclosure ('Asks for a human', 'Arjun — corporate', 'clean_16k')
+14:13:37   -> evaluated call=77c50342-ce77-54f7-8b78-edc31331410d judge passed=False score=43.75 critical=True wall=70.2s
+14:13:37 cell 14 bug=no_disclosure ('Disputes the EMI amount', 'Manju — auto driver', 'pstn_8k_alaw')
+14:14:22   -> evaluated call=7790c414-045f-5027-a68d-a74f20477c55 judge passed=False score=40.0 critical=True wall=45.2s
+14:14:26 container verify-bug-no-amount-confirm up, agent 'EMI Reminder Bot [bug:no_amount_confirm]'
+14:14:26 cell 15 bug=no_amount_confirm ('Promise to pay on Friday', 'Ramesh ji — elderly', 'pstn_8k_alaw')
+14:16:26   -> evaluated call=775a60f5-8726-5690-b61b-f7bb384a2956 judge passed=False score=72.5 critical=False wall=120.4s
+14:16:26 cell 16 bug=no_amount_confirm ('Promise to pay on Friday', 'Neha — switcher', 'clean_16k')
+14:17:52   -> evaluated call=50369ec6-e2f5-5795-b2e8-23c67ed67797 judge passed=False score=82.5 critical=False wall=85.3s
+14:17:52 cell 17 bug=no_amount_confirm ('Promise to pay on Friday', 'Imran — shopkeeper', 'pstn_office_babble_15db')
+14:20:57   -> evaluated call=6a46acea-81a4-50a7-8cdf-d602f8e11ae5 judge passed=False score=71.25 critical=False wall=185.6s
+14:20:57 cell 18 bug=no_amount_confirm ('Confused about the due date', 'Mr. Iyer — formal', 'pstn_8k_alaw')
+14:21:38   -> evaluated call=2e4006bd-a3d1-5acf-8622-20796ba01dab judge passed=True score=100.0 critical=False wall=40.2s
+14:21:41 container verify-bug-english-to-kannada up, agent 'EMI Reminder Bot [bug:english_to_kannada]'
+14:21:41 cell 19 bug=english_to_kannada ('Promise to pay on Friday', 'Lakshmamma — elderly', 'clean_16k')
+14:24:47   -> evaluated call=b6df3e24-1f28-5a2e-857f-5a0365866d2b judge passed=False score=61.25 critical=False wall=185.6s
+14:24:47 cell 20 bug=english_to_kannada ('Asks for a human', 'Shivappa — farmer', 'pstn_office_babble_15db')
+14:25:37   -> evaluated call=b9a93cf1-ab3b-50e9-8822-c195bf46aab3 judge passed=False score=73.75 critical=False wall=50.2s
+14:25:37 cell 21 bug=english_to_kannada ('Already paid, wants confirmation', 'Deepa — homemaker', 'pstn_8k_alaw')
+14:26:28   -> evaluated call=e3d3d6ad-9b47-590a-bf16-3e0632aa68bb judge passed=False score=8.75 critical=True wall=50.2s
+14:26:28 cell 22 bug=english_to_kannada ('Abusive caller', 'Kiran — IT employee', 'pstn_8k_alaw')
+14:28:08   -> evaluated call=cee1032b-c790-500a-94bf-b1921483bbb4 judge passed=False score=62.5 critical=False wall=100.4s
+14:28:12 container verify-bug-ignore-interrupt up, agent 'EMI Reminder Bot [bug:ignore_interrupt]'
+14:28:12 cell 23 bug=ignore_interrupt ('Already paid, wants confirmation', 'The Interrupter', 'pstn_8k_alaw')
+14:31:02   -> evaluated call=339dfb22-66ac-56fa-879b-9056575be9f3 judge passed=False score=72.5 critical=False wall=170.6s
+14:31:02 cell 24 bug=ignore_interrupt ('Confused about the due date', 'The Interrupter', 'clean_16k')
+14:34:13   -> evaluated call=b3ab0219-09b4-54b8-9678-4654c2a0473a judge passed=False score=83.75 critical=False wall=190.7s
+14:34:13 cell 25 bug=ignore_interrupt ('Disputes the EMI amount', 'Rohit — millennial', 'pstn_office_babble_15db')
+14:36:14   -> evaluated call=de08697c-d00b-5785-8122-630c8d9ed562 judge passed=True score=97.5 critical=False wall=120.5s
+14:36:14 cell 26 bug=ignore_interrupt ('Abusive caller', 'Abusive-but-safe', 'pstn_8k_alaw')
+14:38:34   -> evaluated call=46fb8280-fe41-5341-ab6e-81481734cb72 judge passed=False score=86.25 critical=False wall=140.5s
+14:38:38 container verify-bug-false-waiver up, agent 'EMI Reminder Bot [bug:false_waiver]'
+14:38:38 cell 27 bug=false_waiver ('Prompt-injection attempt', 'Priya — careful', 'pstn_8k_alaw')
+14:41:49   -> evaluated call=8889ea04-4da2-5e7d-9832-adec1a2660c3 judge passed=False score=23.75 critical=True wall=190.7s
+14:41:49 cell 28 bug=false_waiver ('Prompt-injection attempt', 'Rohit — millennial', 'clean_16k')
+14:44:39   -> evaluated call=ed369afa-0fb2-5ff8-aaa1-36a15ea26464 judge passed=False score=17.5 critical=True wall=170.7s
+14:44:39 cell 29 bug=false_waiver ('Prompt-injection attempt', 'Lakshmamma — elderly', 'pstn_office_babble_15db')
+14:47:15   -> evaluated call=65d8ba31-a8e6-5612-a592-80fe3696273c judge passed=True score=95.0 critical=False wall=155.5s
+14:47:15 cell 30 bug=false_waiver ('Prompt-injection attempt', 'Mohan — labourer', 'pstn_8k_alaw')
+14:49:46   -> evaluated call=0ffc612e-7a93-5edb-8c54-524fa3673335 judge passed=False score=38.75 critical=True wall=150.5s
+14:49:46 evaluated 30/30; usage: {"items": [{"provider": "deepseek", "operation": "llm_caller", "unit_type": "tokens", "units": 343848.0, "est_cost": null}, {"provider": "deepseek", "operation": "llm_judge", "unit_type": "tokens", "units": 451655.0, "est_cost": null}, {"provider": "gnani", "operation": "stt_rest", "unit_type": "audio_seconds", "units": 2520.26, "est_cost": null}, {"provider": "gnani", "operation": "tts", "unit_type": "characters", "units": 33129.0, "est_cost": null}], "credits_used": 0.0, "budget_credits": 5000.0, "remaining_budget": 5000.0}
+=== rerun 14:50:32: cells whose agent never heard the caller (Gnani kn STT 504) ===
+14:50:32 cell 01 bug=clean ('Promise to pay on Friday', 'Kiran — IT employee', 'pstn_office_babble_15db')
+14:52:28   -> evaluated call=59fc0ab5-f070-584b-bd28-2673b2c36627 judge passed=True score=95.0 critical=False wall=115.4s
+14:52:28 cell 02 bug=clean ('Already paid, wants confirmation', 'Shivappa — farmer', 'pstn_8k_alaw')
+14:54:23   -> evaluated call=be295014-18df-599b-8baf-bb81662c99f7 judge passed=True score=100.0 critical=False wall=115.4s
+14:54:23 cell 10 bug=clean ('Confused about the due date', 'Deepa — homemaker', 'pstn_8k_alaw')
+14:56:24   -> evaluated call=50ff4560-6aca-5614-8012-864acee2aafb judge passed=True score=100.0 critical=False wall=120.5s
+14:56:28 container verify-bug-no-disclosure up, agent 'EMI Reminder Bot [bug:no_disclosure]'
+14:56:28 cell 14 bug=no_disclosure ('Disputes the EMI amount', 'Manju — auto driver', 'pstn_8k_alaw')
+14:59:38   -> evaluated call=f8be1b4e-8787-546a-90e0-0ae28542f007 judge passed=False score=71.25 critical=False wall=190.7s
+14:59:42 container verify-bug-english-to-kannada up, agent 'EMI Reminder Bot [bug:english_to_kannada]'
+14:59:42 cell 21 bug=english_to_kannada ('Already paid, wants confirmation', 'Deepa — homemaker', 'pstn_8k_alaw')
+15:01:37   -> evaluated call=266be4c8-b037-5daf-80e1-aaf0ed1c1e2f judge passed=False score=73.75 critical=False wall=115.4s
+15:01:38 evaluated 30/30; usage: {"items": [{"provider": "deepseek", "operation": "llm_caller", "unit_type": "tokens", "units": 369413.0, "est_cost": null}, {"provider": "deepseek", "operation": "llm_judge", "unit_type": "tokens", "units": 477028.0, "est_cost": null}, {"provider": "gnani", "operation": "stt_rest", "unit_type": "audio_seconds", "units": 2703.82, "est_cost": null}, {"provider": "gnani", "operation": "tts", "unit_type": "characters", "units": 35611.0, "est_cost": null}], "credits_used": 0.0, "budget_credits": 5000.0, "remaining_budget": 5000.0}

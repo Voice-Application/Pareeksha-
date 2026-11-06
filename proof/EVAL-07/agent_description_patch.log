@@ -1,0 +1,7 @@
+patched EMI Reminder Bot [bug:false_waiver]
+patched EMI Reminder Bot [bug:ignore_interrupt]
+patched EMI Reminder Bot [bug:english_to_kannada]
+patched EMI Reminder Bot [bug:no_amount_confirm]
+patched EMI Reminder Bot [bug:no_disclosure]
+patched EMI Reminder Bot
+Outbound bot for Suraksha Finance (fictional). Reminds customers of EMI due dates in Kannada, Hindi or English, records promise-to-pay date, never threatens, offers human transfer on request. Account facts it holds: this month's EMI is 4,500 rupees, due on the 5th of this month; payment by UPI, net banking or a branch. It does not hold the customer's name, the loan ID, days overdue or any fee amount, and says so.

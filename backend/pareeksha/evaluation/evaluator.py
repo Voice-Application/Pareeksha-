@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from pareeksha.evaluation.checks import run_checks
-from pareeksha.evaluation.judge import AgentInfo, JudgeInput, mask_turn, run_judge
+from pareeksha.evaluation.judge import JUDGE_PROMPT, AgentInfo, JudgeInput, mask_turn, run_judge
 from pareeksha.evaluation.metrics import CallMetrics, compute_metrics
 from pareeksha.evaluation.rubric import RUBRIC_VERSION
 from pareeksha.evaluation.scoring import finalize_scores
@@ -114,7 +114,7 @@ def judge_error_record(
         status="judge_error",
         judge_model=model,
         temperature=0.0,
-        prompt_hash="sha256:" + prompt_hash("judge_v1"),
+        prompt_hash="sha256:" + prompt_hash(JUDGE_PROMPT),
         dimensions={},
         overall_score=None,
         passed=None,
@@ -170,7 +170,8 @@ async def evaluate_call(snap: CallSnapshot, client: LLMClient) -> EvaluationReco
         return judge_error_record(snap, model, checks, metrics, f"judge_error: {exc}")
 
     judge: JudgeOutput = result.parsed
-    outcome = finalize_scores(judge, checks)
+    failure_types = merge_failure_types(judge.failure_types, checks)
+    outcome = finalize_scores(judge, checks, failure_types)
     return EvaluationRecord(
         id=evaluation_id(snap.call_id),
         call_id=snap.call_id,
@@ -178,14 +179,14 @@ async def evaluate_call(snap: CallSnapshot, client: LLMClient) -> EvaluationReco
         status="ok",
         judge_model=result.model,
         temperature=0.0,
-        prompt_hash="sha256:" + (result.prompt_hash or prompt_hash("judge_v1")),
+        prompt_hash="sha256:" + (result.prompt_hash or prompt_hash(JUDGE_PROMPT)),
         dimensions={k: v.model_dump() for k, v in judge.dimensions},
         overall_score=outcome.overall_score,
         passed=outcome.passed,
         critical_failure=outcome.critical_failure,
         needs_human_review=outcome.needs_human_review or bool(snap.review_reasons),
         review_reasons=list(dict.fromkeys([*outcome.review_reasons, *snap.review_reasons])),
-        failure_types=merge_failure_types(judge.failure_types, checks),
+        failure_types=failure_types,
         summary=judge.summary,
         confidence=judge.confidence,
         raw_response=judge.model_dump(mode="json"),

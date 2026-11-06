@@ -1,0 +1,19 @@
+# STT spellings of English words in Indic script, used only by the disclosure check (ISSUE-4).
+# Kannada and Hindi STT write English speech in native script ("This call is being recorded" comes
+# back as "ದಿಸ್ ಕಾಲ್ ಈಸ್ ಬೀಯಿಂಗ್ ರೆಕಾರ್ಡೆಡ್"). Each key is the English word; each value is a spelling
+# seen in real Gnani transcripts of this repo's calls (the labelling packets named after it), never a
+# guessed variant. A disclosure regex or phrase is tried on the transcript as written and on a copy
+# where these spellings are replaced by the English word. Add a spelling only when a transcript shows it.
+recorded:
+  - ರೆಕಾರ್ಡೆಡ್     # EVAL-06 L02 L04; EVAL-07 H12
+  - ರೆಕಾರ್ಡರ್ಡ್    # EVAL-07 H27 H28
+recorder:
+  - ರೆಕಾರ್ಡರ್      # EVAL-06 L07 L21; EVAL-07 H17 H27 H28
+recording:
+  - रिकॉर्डिंग      # EVAL-07 H15
+record:
+  - ರೆಕಾರ್ಡ್       # EVAL-06 L10 L14 L18 L27-L30; EVAL-07 H01 H05 H07 ...
+  - रिकॉर्ड         # EVAL-06 L01 L12 L15 ...; EVAL-07 H03 H10 H15 ...
+suraksha:
+  - ಸುರಕ್ಷಾ        # company name, Kannada script: EVAL-06 L02 L04 ...; EVAL-07 H01 H02 ...
+  - सुरक्षा         # company name, Devanagari: EVAL-06 L05 L12 ...; EVAL-07 H03 H10 ...
