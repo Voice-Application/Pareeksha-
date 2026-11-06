@@ -142,7 +142,8 @@ class PgEvaluatorStore:
             if rows:
                 persona = PersonaCreate.model_validate(rows[0])
 
-        glass_box = bool(call["glass_box"])
+        # a prompt agent's tool trace always exists: the text runner records every call
+        glass_box = bool(call["glass_box"]) or call["adapter"] == "prompt"
         tool_calls: list[ToolCall] | None = None
         # uploads / imports: the tool trace is unknown (None), not "no tools called"
         if glass_box and call["source"] == "simulation":
