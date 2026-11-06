@@ -17,6 +17,7 @@ from typing import Any
 import psycopg
 from psycopg.types.json import Jsonb
 
+from pareeksha.agent_llm.context import prompt_context
 from pareeksha.events.consumer import Ctx, Outgoing, consumer, run_worker
 from pareeksha.events.schemas import Envelope, ScenarioGenerateRequested
 from pareeksha.events.topics import MAX_ATTEMPTS, Topics
@@ -78,7 +79,7 @@ async def handle_generate_requested(
     agent = await _one(
         conn,
         "SELECT name, description, languages, expected_tools, mandatory_disclosures, "
-        "forbidden_phrases FROM agents WHERE id = %s",
+        "forbidden_phrases, adapter, adapter_config FROM agents WHERE id = %s",
         (p.agent_id,),
     )
     if agent is None:  # pragma: no cover - the FK cascade removes the draft with its agent
@@ -105,7 +106,15 @@ async def handle_generate_requested(
             ),
         )
 
-    name, description, languages, tools, disclosures, forbidden = agent
+    name, description, languages, tools, disclosures, forbidden, adapter, adapter_config = agent
+    if adapter == "prompt":  # the ACTIVE version: scenarios are written for what runs next
+        version_id = (adapter_config or {}).get("active_version_id")
+        row = await _one(
+            conn, "SELECT system_prompt FROM prompt_versions WHERE id = %s", (version_id,)
+        )
+        description = prompt_context(
+            description or "", {"system_prompt": row[0]} if row is not None else None
+        )
     brief = AgentBrief(
         name=name,
         description=description,

@@ -16,6 +16,7 @@ import psycopg
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
+from pareeksha.agent_llm.context import prompt_context
 from pareeksha.audit.roles import role_review_reasons
 from pareeksha.evaluation.evaluator import CallSnapshot, EvaluationRecord
 from pareeksha.evaluation.handlers import (
@@ -89,9 +90,11 @@ class PgEvaluatorStore:
                    ri.run_id, ri.scenario_id, ri.persona_id,
                    a.name AS agent_name, a.description AS agent_description,
                    a.languages AS agent_languages, a.glass_box,
-                   a.mandatory_disclosures, a.forbidden_phrases
+                   a.mandatory_disclosures, a.forbidden_phrases,
+                   a.adapter, a.adapter_config, tr.agent_snapshot
               FROM calls c
               LEFT JOIN run_items ri ON ri.id = c.run_item_id
+              LEFT JOIN test_runs tr ON tr.id = ri.run_id
               LEFT JOIN agents a ON a.id = c.agent_id
              WHERE c.id = %s
             """,
@@ -163,9 +166,18 @@ class PgEvaluatorStore:
             # A simulated caller speaks one language; the agent answering in another language it
             # merely supports (Kannada caller, English reply) is the failure this check exists for.
             allowed = [language]
+        description = call["agent_description"] or ""
+        if call["adapter"] == "prompt":
+            # the version the run was pinned to; audits (no run) use the agent's current one
+            config = (call["agent_snapshot"] or {}).get("adapter_config") or call["adapter_config"]
+            rows = await self._rows(
+                "SELECT system_prompt FROM prompt_versions WHERE id = %s",
+                ((config or {}).get("active_version_id"),),
+            )
+            description = prompt_context(description, rows[0] if rows else None)
         agent = AgentInfo(
             name=call["agent_name"] or "unknown agent",
-            description=call["agent_description"] or "",
+            description=description,
             mandatory_disclosures=[
                 Disclosure.from_dict(d) for d in (call["mandatory_disclosures"] or [])
             ],
