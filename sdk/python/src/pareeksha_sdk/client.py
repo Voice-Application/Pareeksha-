@@ -60,9 +60,12 @@ def _unwrap(call: c.Call_, response: httpx.Response) -> Any:
     if response.status_code == 204 or not response.content:
         return None
     try:
-        return response.json()
+        result = response.json()
     except ValueError as exc:
         raise PareekshaError(f"{call.method} {call.path}: response is not JSON") from exc
+    if call.flag_unchanged and isinstance(result, dict):
+        result["unchanged"] = response.status_code == 200
+    return result
 
 
 def _find_by_name(items: list[Named], name: str, kind: str) -> Named:
@@ -353,6 +356,20 @@ class Pareeksha:
         result: dict[str, Any] = self._core.call(c.metrics_summary())
         return result
 
+    def create_prompt_version(self, agent_id: UUID | str, **fields: Any) -> dict[str, Any]:
+        """Push a version (``system_prompt``, ``provider``, ``model``, ...); the answer has
+        ``unchanged=True`` when the server returned the identical existing version."""
+        result: dict[str, Any] = self._core.call(c.prompt_version_create(agent_id, fields))
+        return result
+
+    def list_prompt_versions(self, agent_id: UUID | str) -> list[dict[str, Any]]:
+        result: list[dict[str, Any]] = self._core.call(c.prompt_versions_list(agent_id))
+        return result
+
+    def activate_prompt_version(self, agent_id: UUID | str, version: int) -> dict[str, Any]:
+        result: dict[str, Any] = self._core.call(c.prompt_version_activate(agent_id, version))
+        return result
+
     def close(self) -> None:
         self._core.close()
 
@@ -605,6 +622,20 @@ class AsyncPareeksha:
 
     async def metrics_summary(self) -> dict[str, Any]:
         result: dict[str, Any] = await self._core.call(c.metrics_summary())
+        return result
+
+    async def create_prompt_version(self, agent_id: UUID | str, **fields: Any) -> dict[str, Any]:
+        """Push a version (``system_prompt``, ``provider``, ``model``, ...); the answer has
+        ``unchanged=True`` when the server returned the identical existing version."""
+        result: dict[str, Any] = await self._core.call(c.prompt_version_create(agent_id, fields))
+        return result
+
+    async def list_prompt_versions(self, agent_id: UUID | str) -> list[dict[str, Any]]:
+        result: list[dict[str, Any]] = await self._core.call(c.prompt_versions_list(agent_id))
+        return result
+
+    async def activate_prompt_version(self, agent_id: UUID | str, version: int) -> dict[str, Any]:
+        result: dict[str, Any] = await self._core.call(c.prompt_version_activate(agent_id, version))
         return result
 
     async def aclose(self) -> None:

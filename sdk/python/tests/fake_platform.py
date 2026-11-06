@@ -14,7 +14,17 @@ from contextlib import contextmanager
 from typing import Any
 
 import uvicorn
-from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile
+from fastapi import (
+    Depends,
+    FastAPI,
+    File,
+    Form,
+    Header,
+    HTTPException,
+    Request,
+    Response,
+    UploadFile,
+)
 from fastapi.responses import JSONResponse
 
 API_KEY = "pk_live_test"
@@ -37,6 +47,8 @@ class State:
         self.kafka = "ok"
         self.audit_uploads: list[dict[str, Any]] = []
         self.page_size = 200
+        self.prompt_versions: dict[str, list[dict[str, Any]]] = {}
+        self.prompt_bodies: list[dict[str, Any]] = []
 
 
 def build_app(state: State) -> FastAPI:
@@ -226,6 +238,29 @@ def build_app(state: State) -> FastAPI:
     def discard(dead_letter_id: str) -> dict[str, str]:
         state.dlq[dead_letter_id]["status"] = "discarded"
         return {"status": "discarded"}
+
+    @app.post(api + "/agents/{agent_id}/prompt-versions", dependencies=[Depends(auth)])
+    async def create_pv(agent_id: str, request: Request, response: Response) -> dict[str, Any]:
+        body = await request.json()
+        state.prompt_bodies.append(body)
+        rows = state.prompt_versions.setdefault(agent_id, [])
+        if rows and rows[0]["system_prompt"] == body["system_prompt"]:
+            return rows[0]
+        row = {**body, "version": len(rows) + 1}
+        rows.insert(0, row)
+        response.status_code = 201
+        return row
+
+    @app.get(api + "/agents/{agent_id}/prompt-versions", dependencies=[Depends(auth)])
+    def list_pv(agent_id: str) -> list[dict[str, Any]]:
+        return state.prompt_versions.get(agent_id, [])
+
+    @app.post(
+        api + "/agents/{agent_id}/prompt-versions/{version}/activate",
+        dependencies=[Depends(auth)],
+    )
+    def activate_pv(agent_id: str, version: int) -> dict[str, Any]:
+        return {"version": version, "active": True}
 
     return app
 

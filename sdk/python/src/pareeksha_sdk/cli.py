@@ -6,11 +6,12 @@ Exit codes: 0 success, 1 the thing under test failed (threshold, regression suit
 
 from __future__ import annotations
 
+import json
 import os
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import typer
 
@@ -31,6 +32,8 @@ from pareeksha_sdk.summary import Verdict, judge_run, render_summary
 app = typer.Typer(help="Pareeksha: crash-test voice agents.", no_args_is_help=True)
 dlq_app = typer.Typer(help="Inspect and replay dead letters.", no_args_is_help=True)
 app.add_typer(dlq_app, name="dlq")
+prompt_app = typer.Typer(help="Prompt-agent versions.", no_args_is_help=True)
+app.add_typer(prompt_app, name="prompt")
 
 EXIT_FAILED = 1
 EXIT_ERROR = 2
@@ -243,6 +246,72 @@ def dlq_replay(dead_letter_id: str) -> None:
     with _client() as client:
         client.dlq.replay(dead_letter_id)
     typer.echo(f"replay requested for {dead_letter_id}")
+
+
+@prompt_app.command("push")
+def prompt_push(
+    agent: Annotated[str, typer.Option(help="Agent name")],
+    file: Annotated[Path, typer.Option(exists=True, dir_okay=False, help="System prompt file")],
+    provider: Annotated[str, typer.Option(help="e.g. openai, anthropic, gemini, ollama")],
+    model: Annotated[str, typer.Option(help="Model id")],
+    tools: Annotated[Path | None, typer.Option(help="JSON file with a list of tools")] = None,
+    temperature: Annotated[float | None, typer.Option(help="Sampling temperature")] = None,
+    base_url: Annotated[str | None, typer.Option(help="Provider base URL")] = None,
+    note: Annotated[str | None, typer.Option(help="Version note")] = None,
+) -> None:
+    """Create a prompt version and make it active."""
+    fields: dict[str, Any] = {
+        "system_prompt": file.read_text(encoding="utf-8"),
+        "provider": provider,
+        "model": model,
+        "base_url": base_url,
+        "temperature": temperature,
+        "note": note,
+    }
+    if tools is not None:
+        try:
+            fields["tools"] = json.loads(tools.read_text(encoding="utf-8"))
+        except ValueError as exc:  # JSONDecodeError and bad UTF-8
+            raise _fail(f"{tools}: invalid JSON: {exc}") from exc
+        if not isinstance(fields["tools"], list):
+            raise _fail(f"{tools}: expected a JSON list of tools")
+    with _client() as client:
+        agent_obj = client.agents.get_by_name(agent)
+        result = client.create_prompt_version(
+            agent_obj.id, **{k: v for k, v in fields.items() if v is not None}
+        )
+    if result.get("unchanged"):
+        typer.echo(f"unchanged (still v{result['version']})")
+    else:
+        typer.echo(f"created v{result['version']} (active)")
+
+
+@prompt_app.command("versions")
+def prompt_versions(agent: Annotated[str, typer.Option(help="Agent name")]) -> None:
+    """List prompt versions, newest first."""
+    with _client() as client:
+        versions = client.list_prompt_versions(client.agents.get_by_name(agent).id)
+    for v in versions:
+        typer.echo(f"v{v['version']}  {v.get('provider')}/{v.get('model')}  {v.get('note') or ''}")
+
+
+@prompt_app.command("activate")
+def prompt_activate(agent: Annotated[str, typer.Option(help="Agent name")], version: int) -> None:
+    """Make an existing version the active one."""
+    with _client() as client:
+        client.activate_prompt_version(client.agents.get_by_name(agent).id, version)
+    typer.echo(f"v{version} is now active")
+
+
+@prompt_app.command("set-key")
+def prompt_set_key(agent: Annotated[str, typer.Option(help="Agent name")]) -> None:
+    """Store the LLM API key (env PAREEKSHA_AGENT_API_KEY or hidden prompt; write-only)."""
+    key = os.environ.get("PAREEKSHA_AGENT_API_KEY") or typer.prompt("API key", hide_input=True)
+    with _client() as client:
+        client.agents.update(
+            client.agents.get_by_name(agent).id, {"adapter_secrets": {"api_key": key}}
+        )
+    typer.echo("API key saved")
 
 
 @app.command()
