@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import json
 import time
-from collections.abc import Sequence
-from dataclasses import dataclass
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
 from typing import Any, Literal, Protocol
 
 import httpx
@@ -24,6 +24,8 @@ class ToolCallReq:
     name: str
     arguments: dict[str, Any]
     raw_arguments: str
+    #: Opaque provider state to echo back on the next request (e.g. Gemini thought signature).
+    provider_data: Mapping[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)

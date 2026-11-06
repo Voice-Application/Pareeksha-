@@ -47,7 +47,11 @@ def _wire(messages: Sequence[AgentMessage]) -> tuple[str, list[dict[str, Any]]]:
         prev_tool = False
         if m.role == "assistant":
             parts: list[dict[str, Any]] = [{"text": m.content}] if m.content else []
-            parts += [{"functionCall": {"name": c.name, "args": c.arguments}} for c in m.tool_calls]
+            for c in m.tool_calls:
+                call_part: dict[str, Any] = {"functionCall": {"name": c.name, "args": c.arguments}}
+                if sig := c.provider_data.get("thought_signature"):
+                    call_part["thoughtSignature"] = sig
+                parts.append(call_part)
             out.append({"role": "model", "parts": parts})
         else:
             out.append({"role": "user", "parts": [{"text": m.content}]})
@@ -105,6 +109,11 @@ class GeminiProvider:
                     name=p["functionCall"]["name"],
                     arguments=p["functionCall"].get("args") or {},
                     raw_arguments=json.dumps(p["functionCall"].get("args") or {}),
+                    provider_data=(
+                        {"thought_signature": p["thoughtSignature"]}
+                        if p.get("thoughtSignature")
+                        else {}
+                    ),
                 )
                 for i, p in enumerate(p for p in parts if "functionCall" in p)
             )

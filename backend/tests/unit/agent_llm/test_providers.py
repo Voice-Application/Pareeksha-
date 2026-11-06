@@ -196,3 +196,34 @@ async def test_defaults_and_custom_base_url() -> None:
     p = build_chat_provider("openai_compatible", api_key=None, base_url="http://x/v1/", http=http)
     await _chat(p)
     assert str(seen[-1].url) == "http://x/v1/chat/completions"
+
+
+async def test_gemini_echoes_thought_signature() -> None:
+    payload = {
+        "candidates": [
+            {
+                "content": {
+                    "parts": [
+                        {
+                            "functionCall": {"name": "get_order", "args": {"id": "7"}},
+                            "thoughtSignature": "SIG==",
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+    seen: list[httpx.Request] = []
+    p = _provider("gemini", _json_handler(payload, seen))
+    reply = await _chat(p)
+    call = reply.tool_calls[0]
+    assert call.provider_data == {"thought_signature": "SIG=="}
+    msgs = [
+        *MSGS,
+        AgentMessage("assistant", "", (call,)),
+        AgentMessage("tool", '{"ok": true}', tool_call_id=call.id, name="get_order"),
+    ]
+    await _chat(p, msgs)
+    part = json.loads(seen[-1].content)["contents"][1]["parts"][0]
+    assert part["functionCall"]["name"] == "get_order"
+    assert part["thoughtSignature"] == "SIG=="
