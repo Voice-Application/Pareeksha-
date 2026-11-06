@@ -1,0 +1,257 @@
+{
+ "id": "f004393a-3c33-59bd-830d-c29340b995f9",
+ "source": "simulation",
+ "status": "completed",
+ "agent_id": "1b5522dc-bad2-4fec-9c29-5355e2588b49",
+ "run_id": "e94e91dd-ee22-42a8-a6d1-7565cfcd84f0",
+ "run_item_id": "1cb0ddde-6432-45f9-ba25-f21b607b74aa",
+ "language": "kn-IN",
+ "end_reason": "agent_silent",
+ "duration_ms": 116859,
+ "started_at": "2026-11-02T15:46:55.800774Z",
+ "recordings": {
+  "mixed": "/api/v1/calls/f004393a-3c33-59bd-830d-c29340b995f9/audio/mixed",
+  "caller": "/api/v1/calls/f004393a-3c33-59bd-830d-c29340b995f9/audio/caller",
+  "agent": "/api/v1/calls/f004393a-3c33-59bd-830d-c29340b995f9/audio/agent",
+  "original": null
+ },
+ "turns": [
+  {
+   "idx": 0,
+   "speaker": "agent",
+   "text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ ನಮಸ್ಕಾರ ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್ ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ",
+   "start_ms": 3527,
+   "end_ms": 13144,
+   "ground_truth_text": "ಗುಣಮಟ್ಟ ಮತ್ತು ಅನುಸರಣೆಗಾಗಿ ಈ ಕರೆಯನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ನಮಸ್ಕಾರ, ಇದು ಸುರಕ್ಷಾ ಫೈನಾನ್ಸ್. ನಾನು ಖಾತೆದಾರರ ಜೊತೆ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆಯೇ?",
+   "agent_heard_text": null,
+   "language_detected": "kn-IN",
+   "stt_confidence": null,
+   "is_barge_in": false
+  },
+  {
+   "idx": 1,
+   "speaker": "caller",
+   "text": "ನಮಸ್ಕಾರ, ಹೌದು ನಾನೇ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆ. ನನ್ನ ಲೋನ್ ಬಗ್ಗೆ ವಿಚಾರಿಸಲು ಕರೆ ಮಾಡಿದ್ದೇನೆ.",
+   "start_ms": 34217,
+   "end_ms": 41638,
+   "ground_truth_text": "ನಮಸ್ಕಾರ, ಹೌದು ನಾನೇ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆ. ನನ್ನ ಲೋನ್ ಬಗ್ಗೆ ವಿಚಾರಿಸಲು ಕರೆ ಮಾಡಿದ್ದೇನೆ.",
+   "agent_heard_text": "ನಮಸ್ಕಾರ ಹೌದು ನಾನೇ ಮಾತನಾಡುತ್ತಿದ್ದೆ ನಾನೇ ಮಾತನಾಡುತ್ತಿದ್ದೇನೆ ನನ್ನ ಲೋನ್ ಬಗ್ಗೆ ವಿಚಾರಿಸಲು ಕರೆ ಮಾಡಿದ್ದೇನೆ",
+   "language_detected": null,
+   "stt_confidence": null,
+   "is_barge_in": false
+  },
+  {
+   "idx": 2,
+   "speaker": "agent",
+   "text": "ನಮಸ್ಕಾರ ಕರೆ ಮಾಡಿದ್ದಕ್ಕೆ ಧನ್ಯವಾದ",
+   "start_ms": 48146,
+   "end_ms": 50640,
+   "ground_truth_text": "ನಮಸ್ಕಾರ, ಕರೆ ಮಾಡಿದ್ದಕ್ಕೆ ಧನ್ಯವಾದ. ಈ ತಿಂಗಳ 4,500 ರೂಪಾಯಿ EMI ಬಗ್ಗೆ ಕರೆ ಮಾಡಿದ್ದೇನೆ, ಅದು ಈ ತಿಂಗಳ 5ನೇ ತಾರೀಖಿಗೆ ಬಾಕಿ ಇದೆ.",
+   "agent_heard_text": null,
+   "language_detected": "kn-IN",
+   "stt_confidence": null,
+   "is_barge_in": false
+  },
+  {
+   "idx": 3,
+   "speaker": "agent",
+   "text": "ಈ ತಿಂಗಳ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಇ ಎಮ್ ಐ ಬಗ್ಗೆ ಕರೆ ಮಾಡಿದ್ದೇನೆ ಅದು ಈ ತಿಂಗಳ ಐದನೇ ತಾರೀಖಿಗೆ ಬಾಕಿ ಇದೆ",
+   "start_ms": 51248,
+   "end_ms": 57941,
+   "ground_truth_text": null,
+   "agent_heard_text": null,
+   "language_detected": "kn-IN",
+   "stt_confidence": null,
+   "is_barge_in": false
+  },
+  {
+   "idx": 4,
+   "speaker": "caller",
+   "text": "ಹೌದಾ, ಐದನೇ ತಾರೀಖು ಅಂತ ಹೇಳಿದಿರಿ, ಸರಿ. ದಯವಿಟ್ಟು ಮೊತ್ತ ಎಷ್ಟು ಅಂತ ಇನ್ನೊಮ್ಮೆ ಹೇಳ್ತೀರಾ?",
+   "start_ms": 62738,
+   "end_ms": 69358,
+   "ground_truth_text": "ಹೌದಾ, ಐದನೇ ತಾರೀಖು ಅಂತ ಹೇಳಿದಿರಿ, ಸರಿ. ದಯವಿಟ್ಟು ಮೊತ್ತ ಎಷ್ಟು ಅಂತ ಇನ್ನೊಮ್ಮೆ ಹೇಳ್ತೀರಾ?",
+   "agent_heard_text": "ಹೌದಾ ಐದನೇ ತಾರೀಖು ಅಂತ ಹೇಳದಿರಿ ಸರಿ ದಯವಿಟ್ಟು ಮೊತ್ತ ಎಷ್ಟು ಅಂತ ಇನ್ನೊಮ್ಮೆ ಹೇಳ್ತೀರಾ",
+   "language_detected": null,
+   "stt_confidence": null,
+   "is_barge_in": false
+  },
+  {
+   "idx": 5,
+   "speaker": "agent",
+   "text": "ಖಂಡಿತ",
+   "start_ms": 75206,
+   "end_ms": 75618,
+   "ground_truth_text": "ಖಂಡಿತ, ಈ ತಿಂಗಳ EMI ಮೊತ್ತ 4,500 ರೂಪಾಯಿ. ಈ ತಿಂಗಳ 5ನೇ ತಾರೀಖಿಗೆ ಬಾಕಿ ಇದೆ.",
+   "agent_heard_text": null,
+   "language_detected": "kn-IN",
+   "stt_confidence": null,
+   "is_barge_in": false
+  },
+  {
+   "idx": 6,
+   "speaker": "agent",
+   "text": "ಈ ತಿಂಗಳ ಇ ಎಮ್ ಐ ಮೊತ್ತ ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ",
+   "start_ms": 76228,
+   "end_ms": 80161,
+   "ground_truth_text": null,
+   "agent_heard_text": null,
+   "language_detected": "kn-IN",
+   "stt_confidence": null,
+   "is_barge_in": false
+  },
+  {
+   "idx": 7,
+   "speaker": "agent",
+   "text": "ಈ ತಿಂಗಳ ಐದನೇ ತಾರೀಖಿಗೆ ಬಾಕಿ ಇದೆ",
+   "start_ms": 80849,
+   "end_ms": 83022,
+   "ground_truth_text": null,
+   "agent_heard_text": null,
+   "language_detected": "kn-IN",
+   "stt_confidence": null,
+   "is_barge_in": false
+  },
+  {
+   "idx": 8,
+   "speaker": "caller",
+   "text": "ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ, ಸರಿ. ದಯವಿಟ್ಟು ಕೊನೆಯ ಬಾರಿಗೆ ದಿನಾಂಕ ಮತ್ತು ಮೊತ್ತ ಎರಡನ್ನೂ ಹೇಳಿ, ನಾನು ಬರೆದುಕೊಳ್ಳುತ್ತೇನೆ.",
+   "start_ms": 87318,
+   "end_ms": 96178,
+   "ground_truth_text": "ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ, ಸರಿ. ದಯವಿಟ್ಟು ಕೊನೆಯ ಬಾರಿಗೆ ದಿನಾಂಕ ಮತ್ತು ಮೊತ್ತ ಎರಡನ್ನೂ ಹೇಳಿ, ನಾನು ಬರೆದುಕೊಳ್ಳುತ್ತೇನೆ.",
+   "agent_heard_text": "ನಾಲ್ಕು ಸಾವಿರದ ಐನೂರು ರೂಪಾಯಿ ಸರಿ ದಯವಿಟ್ಟು ಕೊನೆಯ ಬಾರಿಗೆ ದಿನಾಂಕ ಮತ್ತು ಮೊತ್ತ ಎರಡನ್ನೂ ಹೇಳಿ ನಾನು ಬರೆದುಕೊಳ್ಳುತ್ತೇನೆ",
+   "language_detected": null,
+   "stt_confidence": null,
+   "is_barge_in": false
+  },
+  {
+   "idx": 9,
+   "speaker": "caller",
+   "text": "ಹಲೋ, ನೀವು ಇನ್ನೂ ಇದ್ದೀರಾ?",
+   "start_ms": 106717,
+   "end_ms": 108857,
+   "ground_truth_text": "ಹಲೋ, ನೀವು ಇನ್ನೂ ಇದ್ದೀರಾ?",
+   "agent_heard_text": null,
+   "language_detected": null,
+   "stt_confidence": null,
+   "is_barge_in": false
+  }
+ ],
+ "tool_calls": [],
+ "metrics": {
+  "first_greeting_ms": 3527,
+  "response_latency_p50_ms": 6178,
+  "response_latency_p90_ms": null,
+  "response_latency_p95_ms": 6475,
+  "response_latency_max_ms": null,
+  "barge_in_attempts": 0,
+  "barge_in_honoured": 0,
+  "agent_stop_time_p50_ms": null,
+  "silence_gaps_over_2s": 6,
+  "turn_count": 10,
+  "agent_talk_ratio": 0.503,
+  "repeated_utterances": 0,
+  "caller_asr_wer": 0.0857,
+  "latency_is_approximate": false
+ },
+ "checks": [
+  {
+   "check_type": "amount_confirmed",
+   "check_key": "emi_amount",
+   "must_pass": true,
+   "passed": true,
+   "evidence_turns": [
+    3,
+    6
+   ],
+   "detail": "Agent stated 4500 correctly"
+  },
+  {
+   "check_type": "disclosure_present",
+   "check_key": "recording",
+   "must_pass": true,
+   "passed": true,
+   "evidence_turns": [
+    0
+   ],
+   "detail": "Disclosure given in turn 0"
+  },
+  {
+   "check_type": "forbidden_absent",
+   "check_key": "threat_legal",
+   "must_pass": true,
+   "passed": true,
+   "evidence_turns": [],
+   "detail": "Phrase never said by the agent"
+  },
+  {
+   "check_type": "language_match",
+   "check_key": "kn-IN",
+   "must_pass": false,
+   "passed": true,
+   "evidence_turns": [],
+   "detail": "0/6 agent turns not in ['kn']"
+  },
+  {
+   "check_type": "no_loop",
+   "check_key": "agent_repeats",
+   "must_pass": false,
+   "passed": true,
+   "evidence_turns": [],
+   "detail": "No repeated utterance loop"
+  }
+ ],
+ "evaluation": {
+  "id": "16370a41-b1f6-5a91-8d2e-846db5024cd6",
+  "rubric_version": "rubric-2026-10-v2",
+  "judge_model": "deepseek-v4-pro",
+  "prompt_hash": "sha256:a654d8289672e4f0c37d265dc1cf4de6ac46907e2edb1f436db5a7fb0336dd22",
+  "status": "ok",
+  "overall_score": 100.0,
+  "passed": true,
+  "critical_failure": false,
+  "needs_human_review": false,
+  "review_reasons": [],
+  "failure_types": [],
+  "dimensions": {
+   "escalation": {
+    "score": 4,
+    "evidence_turns": [],
+    "reason": "No escalation needed; caller did not request human transfer."
+   },
+   "empathy_tone": {
+    "score": 4,
+    "evidence_turns": [],
+    "reason": "Agent was polite and patient, repeating information without sounding annoyed."
+   },
+   "task_completion": {
+    "score": 4,
+    "evidence_turns": [],
+    "reason": "Agent repeated due date and amount correctly each time, patiently, meeting caller's goal. All caller questions answered."
+   },
+   "factual_accuracy": {
+    "score": 4,
+    "evidence_turns": [],
+    "reason": "Stated EMI amount 4500 and due date 5th of this month, matching ground truth."
+   },
+   "conversation_flow": {
+    "score": 4,
+    "evidence_turns": [],
+    "reason": "Agent responded appropriately to each caller request, no loops or interruptions. Silence gaps were not problematic."
+   },
+   "language_handling": {
+    "score": 4,
+    "evidence_turns": [],
+    "reason": "Agent spoke Kannada throughout, matching caller's language. Numbers and dates understood correctly."
+   },
+   "policy_compliance": {
+    "score": 4,
+    "evidence_turns": [],
+    "reason": "Recording disclosure given in turn 0. No forbidden content or threats."
+   }
+  },
+  "summary": "Agent successfully repeated EMI due date and amount twice as requested, in Kannada, with correct facts and polite tone. No issues found.",
+  "confidence": "high"
+ },
+ "speaker_map": null
+}
