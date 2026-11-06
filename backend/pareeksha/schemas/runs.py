@@ -140,6 +140,8 @@ class RunCompareCell(BaseModel):
     head_score: float | None = None
     delta: float | None = None
     newly_failing: bool = False
+    base_call_ids: list[UUID] = Field(default_factory=list)
+    head_call_ids: list[UUID] = Field(default_factory=list)
 
 
 class RunCompareSummary(BaseModel):
@@ -151,6 +153,8 @@ class RunCompareSummary(BaseModel):
 class RunCompareOut(BaseModel):
     cells: list[RunCompareCell]
     summary: RunCompareSummary
+    base_prompt_version: int | None = None
+    head_prompt_version: int | None = None
 
 
 # --- Server-Sent Events of GET /runs/{id}/events ---------------------------------------------

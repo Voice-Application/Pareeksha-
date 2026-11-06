@@ -19,7 +19,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from pareeksha.api.errors import ApiError
 from pareeksha.calls.service import latest_evaluations
-from pareeksha.db.models import Calls, NoiseProfiles, Personas, RunItems, Scenarios, TestRuns
+from pareeksha.db.models import (
+    Calls,
+    NoiseProfiles,
+    Personas,
+    PromptVersions,
+    RunItems,
+    Scenarios,
+    TestRuns,
+)
 from pareeksha.schemas.runs import RunCompareCell, RunCompareOut, RunCompareSummary
 
 Cell = tuple[str, str, str]
@@ -29,6 +37,7 @@ Cell = tuple[str, str, str]
 class CellResult:
     scores: list[float] = field(default_factory=list)
     passed: list[bool] = field(default_factory=list)
+    call_ids: list[uuid.UUID] = field(default_factory=list)
 
     @property
     def score(self) -> float | None:
@@ -42,7 +51,14 @@ class CellResult:
 async def cell_results(session: AsyncSession, run_id: uuid.UUID) -> dict[Cell, CellResult]:
     ev = latest_evaluations()
     rows = await session.execute(
-        select(Scenarios.title, Personas.name, NoiseProfiles.name, ev.c.overall_score, ev.c.passed)
+        select(
+            Scenarios.title,
+            Personas.name,
+            NoiseProfiles.name,
+            Calls.id,
+            ev.c.overall_score,
+            ev.c.passed,
+        )
         .select_from(RunItems)
         .join(Scenarios, Scenarios.id == RunItems.scenario_id)
         .join(Personas, Personas.id == RunItems.persona_id)
@@ -52,8 +68,10 @@ async def cell_results(session: AsyncSession, run_id: uuid.UUID) -> dict[Cell, C
         .where(RunItems.run_id == run_id)
     )
     cells: dict[Cell, CellResult] = defaultdict(CellResult)
-    for scenario, persona, profile, score, passed in rows.all():
+    for scenario, persona, profile, call_id, score, passed in rows.all():
         result = cells[(scenario, persona, profile)]
+        if call_id is not None:
+            result.call_ids.append(call_id)
         if score is not None:
             result.scores.append(float(score))
         if passed is not None:
@@ -85,6 +103,8 @@ def compare_cells(base: dict[Cell, CellResult], head: dict[Cell, CellResult]) ->
                 base_score=base_score,
                 head_score=head_score,
                 delta=delta,
+                base_call_ids=[] if b is None else b.call_ids,
+                head_call_ids=[] if h is None else h.call_ids,
                 newly_failing=(
                     b is not None
                     and h is not None
@@ -115,4 +135,21 @@ async def compare_runs(
     missing = [str(i) for i in (base, head) if i not in found]
     if missing:
         raise ApiError(404, "not_found", "Run not found", {"ids": missing})
-    return compare_cells(await cell_results(session, base), await cell_results(session, head))
+    out = compare_cells(await cell_results(session, base), await cell_results(session, head))
+    out.base_prompt_version = await _prompt_version(session, base)
+    out.head_prompt_version = await _prompt_version(session, head)
+    return out
+
+
+async def _prompt_version(session: AsyncSession, run_id: uuid.UUID) -> int | None:
+    """Version number of the prompt version a run used (None for voice runs / unknown)."""
+    snapshot = await session.scalar(select(TestRuns.agent_snapshot).where(TestRuns.id == run_id))
+    config = snapshot.get("adapter_config") if isinstance(snapshot, dict) else None
+    version_id = config.get("active_version_id") if isinstance(config, dict) else None
+    if not isinstance(version_id, str):
+        return None
+    try:
+        key = uuid.UUID(version_id)
+    except ValueError:
+        return None
+    return await session.scalar(select(PromptVersions.version).where(PromptVersions.id == key))
