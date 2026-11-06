@@ -119,7 +119,7 @@ def test_babble_bed_does_not_keep_the_utterance_open(noise: float) -> None:
     turn = [_speech_frame(rng, noise * 6, noise, i) for i in range(100)]  # 2 s of speech (+15 dB)
     after = [_noise_frame(rng, noise) for _ in range(100)]  # 2 s of noise again
     frames = bed + turn + after
-    old = _run(UtteranceDetector(noise_ratio=0.0), frames)  # no noise floor: only the fixed threshold
+    old = _run(UtteranceDetector(noise_ratio=0.0), frames)  # no noise floor, fixed threshold only
     new = _run(UtteranceDetector(), frames)
     assert old == []  # the noise reads as speech that never ends: the agent never answers
     assert len(new) == 1
