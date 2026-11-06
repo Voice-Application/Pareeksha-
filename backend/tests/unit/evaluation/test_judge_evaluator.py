@@ -5,8 +5,9 @@ import dataclasses
 import pytest
 
 from pareeksha.evaluation.evaluator import CHECK_FAILURE_TYPES, evaluate_call, evaluation_id
-from pareeksha.evaluation.judge import JudgeInput, render_judge_prompt
+from pareeksha.evaluation.judge import JUDGE_PROMPT, JudgeInput, render_judge_prompt
 from pareeksha.evaluation.metrics import compute_metrics
+from pareeksha.evaluation.rubric import RUBRIC_VERSION
 from pareeksha.evaluation.types import Turn
 from pareeksha.llm.base import LLMRetryableError
 from pareeksha.llm.prompts import prompt_hash
@@ -78,11 +79,13 @@ async def test_evaluate_call_scores_in_code_and_records_provenance() -> None:
     assert rec.status == "ok" and rec.overall_score == 40.0
     assert rec.critical_failure and rec.passed is False and rec.needs_human_review
     assert rec.review_reasons[0] == "critical_failure"
-    assert "check_failed:amount_confirmed" in rec.review_reasons
+    # v3 (R-c): a failed amount_confirmed check is stored but advisory, not a must-pass failure.
+    assert "check_failed:amount_confirmed" not in rec.review_reasons
+    assert any(c.check_type == "amount_confirmed" and c.passed is False for c in rec.checks)
     assert "check_failed:disclosure_present" in rec.review_reasons
     assert rec.failure_types[0] == "wrong_fact" and "missing_disclosure" in rec.failure_types
-    assert rec.id == evaluation_id(snap.call_id) and rec.rubric_version == "rubric-2026-10-v1"
-    assert rec.prompt_hash == "sha256:" + prompt_hash("judge_v1")
+    assert rec.id == evaluation_id(snap.call_id) and rec.rubric_version == RUBRIC_VERSION
+    assert rec.prompt_hash == "sha256:" + prompt_hash(JUDGE_PROMPT)
     assert rec.judge_model == "deepseek-v4-pro" and rec.temperature == 0.0
     assert (rec.input_tokens, rec.output_tokens) == (1000, 200)
     assert rec.est_cost == pytest.approx(0.0018)

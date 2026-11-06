@@ -1,0 +1,71 @@
+{
+ "interim": true,
+ "labelled": 10,
+ "total": 30,
+ "mode": "pass_fail_only",
+ "calibration_api": {
+  "n": 10,
+  "kappa_pass_fail": 1.0,
+  "spearman_overall": null,
+  "dimension_mae": {}
+ },
+ "calibration_offline": {
+  "n": 10,
+  "kappa_pass_fail": 1.0,
+  "spearman_overall": null,
+  "dimension_mae": {}
+ },
+ "agreement": {
+  "passed": {
+   "n": 10,
+   "judge_pass_human_pass": 1,
+   "judge_pass_human_fail": 0,
+   "judge_fail_human_pass": 0,
+   "judge_fail_human_fail": 9,
+   "agreement": 1.0,
+   "agreement_ci95_wilson": [
+    0.7225,
+    1.0
+   ],
+   "kappa_bootstrap": {
+    "method": "percentile bootstrap, calls resampled",
+    "resamples": 10000,
+    "seed": 20261030,
+    "ci95": [
+     1.0,
+     1.0
+    ],
+    "undefined_share": 0.3526
+   },
+   "judge_yes": 1,
+   "human_yes": 1,
+   "kappa": 1.0
+  },
+  "critical": {
+   "n": 10,
+   "judge_yes_human_yes": 4,
+   "judge_yes_human_no": 0,
+   "judge_no_human_yes": 5,
+   "judge_no_human_no": 1,
+   "agreement": 0.5,
+   "agreement_ci95_wilson": [
+    0.2366,
+    0.7634
+   ],
+   "kappa_bootstrap": {
+    "method": "percentile bootstrap, calls resampled",
+    "resamples": 10000,
+    "seed": 20261030,
+    "ci95": [
+     0.0,
+     0.5455
+    ],
+    "undefined_share": 0.0001
+   },
+   "judge_yes": 4,
+   "human_yes": 9,
+   "kappa": 0.1379
+  }
+ },
+ "disagreements": 5
+}

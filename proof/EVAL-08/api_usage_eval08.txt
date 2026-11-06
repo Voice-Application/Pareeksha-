@@ -1,0 +1,8 @@
+ provider | operation  |   unit_type   | n  |   units    
+----------+------------+---------------+----+------------
+ deepseek | llm_caller | tokens        | 48 |  48988.000
+ deepseek | llm_judge  | tokens        | 83 | 419228.000
+ gnani    | stt_rest   | audio_seconds | 77 |    473.020
+ gnani    | tts        | characters    | 94 |   5115.000
+(4 rows)
+

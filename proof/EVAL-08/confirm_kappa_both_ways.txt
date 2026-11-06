@@ -1,0 +1,2 @@
+as labelled: kappa=0.1667 agreement=9/15 judge_pass=8 owner_pass=12
+C02/C04/C12 follow R-a: kappa=0.5946 agreement=12/15 judge_pass=8 owner_pass=9

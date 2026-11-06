@@ -1,0 +1,136 @@
+{
+ "rubric_versions": [
+  "rubric-2026-11-v3"
+ ],
+ "interim": false,
+ "labelled": 15,
+ "total": 15,
+ "pending": [],
+ "mode": "pass_fail_only",
+ "calibration_api": {
+  "n": 75,
+  "kappa_pass_fail": 0.4673,
+  "spearman_overall": null,
+  "dimension_mae": {}
+ },
+ "calibration_offline": {
+  "n": 15,
+  "kappa_pass_fail": 0.5946,
+  "spearman_overall": null,
+  "dimension_mae": {}
+ },
+ "not_provided_by_owner": [
+  "spearman_overall",
+  "dimension_mae"
+ ],
+ "agreement": {
+  "passed": {
+   "n": 15,
+   "judge_pass_human_pass": 7,
+   "judge_pass_human_fail": 1,
+   "judge_fail_human_pass": 2,
+   "judge_fail_human_fail": 5,
+   "agreement": 0.8,
+   "agreement_ci95_wilson": [
+    0.5481,
+    0.9295
+   ],
+   "kappa_bootstrap": {
+    "method": "percentile bootstrap, calls resampled",
+    "resamples": 10000,
+    "seed": 20261030,
+    "ci95": [
+     0.1176,
+     1.0
+    ],
+    "undefined_share": 0.0001
+   },
+   "judge_yes": 8,
+   "human_yes": 9,
+   "kappa": 0.5946
+  },
+  "critical": {
+   "n": 15,
+   "judge_yes_human_yes": 2,
+   "judge_yes_human_no": 0,
+   "judge_no_human_yes": 1,
+   "judge_no_human_no": 12,
+   "agreement": 0.9333,
+   "agreement_ci95_wilson": [
+    0.7018,
+    0.9881
+   ],
+   "kappa_bootstrap": {
+    "method": "percentile bootstrap, calls resampled",
+    "resamples": 10000,
+    "seed": 20261030,
+    "ci95": [
+     0.0,
+     1.0
+    ],
+    "undefined_share": 0.0373
+   },
+   "judge_yes": 2,
+   "human_yes": 3,
+   "kappa": 0.7619
+  }
+ },
+ "inconsistent_labels": [],
+ "identical_rows": [],
+ "import": {
+  "reviewer": "preetham",
+  "posted": 0,
+  "already": 15,
+  "labels": 15,
+  "labels_file": "labelling/EVAL-08/labels.csv"
+ },
+ "disagreements": [
+  {
+   "label_id": "C11",
+   "call_id": "69173f00-5c7a-536e-8c26-1ba1f76f71ce",
+   "judge_passed": false,
+   "human_passed": true,
+   "judge_critical": false,
+   "human_critical": false,
+   "dimension_gaps": {},
+   "judge_score": 77.5,
+   "judge_failure_types": [
+    "intent_miss",
+    "loop"
+   ],
+   "judge_reasons": "Caller disputed EMI amount (4500 vs 4000) and asked for explanation. Agent repeatedly said it lacks info and offered human transfer, which caller declined. Agent did not confirm 4000, but also did not resolve or offer to check. Repetitive and poor flow with long silences. Needs human review to address dispute. / task_completion 2: Caller asked why EMI is 4500 vs 4000; agent never explained or offered to check, only repeated it lacks info and offered human. Caller refused human and asked to note 4000; agent did not confirm 4000 but also did not resolve the discrepancy. / conversation_flow 2: Agent repeated the same 'no info, offer human' line multiple times. Also had long silences and caller repeatedly asked 'are you there?' indicating poor flow. / empathy_tone 3: Polite and neutral, but did not acknowledge caller's frustration or time pressure. Slightly scripted. / escalation 2: Agent offered human transfer multiple times after caller explicitly declined. Should have stopped offering and instead offered callback or other resolution.",
+   "owner_note": ""
+  },
+  {
+   "label_id": "C13",
+   "call_id": "af70ac7a-00a9-5efd-a4b5-8654d2535c1c",
+   "judge_passed": false,
+   "human_passed": true,
+   "judge_critical": false,
+   "human_critical": false,
+   "dimension_gaps": {},
+   "judge_score": 81.25,
+   "judge_failure_types": [
+    "intent_miss",
+    "tool_selection"
+   ],
+   "judge_reasons": "Agent disclosed recording and company, then transferred to human as requested. However, it did not record the promise-to-pay date or amount, missing the caller's goal. / task_completion 1: Caller asked for human transfer; agent transferred without recording promise-to-pay date or amount. Success criteria not met.",
+   "owner_note": ""
+  },
+  {
+   "label_id": "C14",
+   "call_id": "4421a780-b7ff-5d76-adf7-bec80850411d",
+   "judge_passed": true,
+   "human_passed": false,
+   "judge_critical": false,
+   "human_critical": true,
+   "dimension_gaps": {},
+   "judge_score": 95.0,
+   "judge_failure_types": [],
+   "judge_reasons": "Caller reported EMI already paid via UPI and requested manager. Agent acknowledged payment, confirmed amount, and transferred to human. Disclosures present, no policy violations. Minor repetition of disclosure line. / conversation_flow 3: Agent repeated the same disclosure line in turn 2 after caller interrupted, causing minor friction. / empathy_tone 3: Polite and acknowledged caller's frustration, but slightly scripted.",
+   "owner_note": "agent did not ask or  utr and  it  diracty transferd the call to human"
+  }
+ ],
+ "note": "CONFIRMATION (FINAL, owner-corrected 2026-11-03): C01-C15 are new calls run after rubric-2026-11-v3 was fixed; v3 was not tuned on them. C02/C04/C12 corrected to fail by the owner under R-a. n = 15 (< 30, below the V9 minimum).",
+ "api_pooled": true
+}

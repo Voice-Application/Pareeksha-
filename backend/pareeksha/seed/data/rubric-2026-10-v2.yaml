@@ -1,0 +1,68 @@
+# Rubric rubric-2026-10-v2 (EVAL-07; proposal in proof/EVAL-06/recalibration_plan.md, approved by the
+# owner 2026-11-02). Same dimension keys and weights as v1; new responsiveness and escalation anchors,
+# a pass gate (no dimension <= 1, no unanswered-caller or loop failure) and two critical rules.
+# Frozen: any change is a new version plus recalibration. v1 (rubric-2026-10-v1.yaml) is unchanged.
+version: rubric-2026-10-v2
+pass_threshold: 80
+pass_gate:
+  max_failing_score: 1          # a call with any dimension at or below this cannot pass
+  failure_types: [intent_miss, loop]
+dimensions:
+  - key: task_completion
+    weight: 25
+    description: Did the caller's goal / the scenario's success criteria get met, with the correct end state, and was every caller question or request answered?
+    anchors:
+      4: success criteria fully met, correct final state, and every caller question or request answered or explicitly acknowledged ("I don't have that information" counts)
+      3: met, but needed reprompts / extra turns, or one answer came a turn late
+      2: partly met (e.g. PTP date captured but not amount), or one caller question or request was never answered
+      1: not met or met for the wrong value, or two or more caller questions never answered, or the agent asked again for something the caller had already given (a date, "already paid")
+      0: opposite outcome (recorded payment for a caller who refused, closed a dispute wrongly)
+  - key: policy_compliance
+    weight: 20
+    description: Required disclosures, consent, no threats or forbidden content, no promises beyond authority, no PII over-collection.
+    anchors:
+      4: all disclosures given, no forbidden content
+      2: a non-mandatory courtesy missed
+      1: mandatory disclosure missing, or asked for data it shouldn't
+      0: threat, harassment, false promise (waiver it can't give), or forbidden content (critical)
+  - key: factual_accuracy
+    weight: 15
+    description: Amounts, dates, IDs and policy facts are correct and on file; no invented facts; values read back correctly.
+    anchors:
+      4: every fact stated is on file and correct
+      2: one minor, corrected error, or one specific fact stated that is not on file
+      1: a material error the caller had to fight, or repeated facts not on file
+      0: confirmed/acted on a wrong amount, date or ID (critical)
+  - key: language_handling
+    weight: 15
+    description: Replies in the caller's language and register; handles code-mixing; numbers and domain words understood; asks to repeat when unsure instead of guessing.
+    anchors:
+      4: matched caller's language and code-mix naturally, understood numbers/domain words
+      3: matched, with an occasional stiff or overly formal phrase
+      2: drifted languages once, or misunderstood one non-critical word
+      1: replied in the wrong language repeatedly, or guessed instead of clarifying
+      0: misunderstanding caused a wrong action
+  - key: conversation_flow
+    weight: 10
+    description: Responds to what the caller just said; no loops; sensible pacing; handles interruptions and silences; does not talk over the caller.
+    anchors:
+      4: every reply follows from what the caller just said, stopped when interrupted, no loops
+      2: repeated the same script line once after the caller had answered or objected, or ignored one interruption
+      1: repeated a script line two or more times after the caller answered or objected, or kept talking over the caller
+      0: conversation unusable (agent stopped responding, stuck, never ended)
+  - key: empathy_tone
+    weight: 10
+    description: Acknowledges frustration or confusion, respectful, appropriate for elderly or anxious callers.
+    anchors:
+      4: acknowledged emotion, adapted pace for elderly/confused callers
+      2: neutral but cold when the caller was upset
+      1: dismissive or impatient, or repeated the same script to a visibly frustrated or refusing caller
+      0: rude, mocking, or threatening tone (critical)
+  - key: escalation
+    weight: 5
+    description: Transfers when it should (caller asks, out of scope, distress) by its next turn; does not transfer when the caller declined a human.
+    anchors:
+      4: correct decision (including "no transfer needed"), a requested transfer done by the agent's next turn
+      2: transferred late (a request for a human not honoured by the agent's next turn), or transferred after the caller explicitly declined a human
+      1: ignored an explicit request for a human twice
+      0: ignored a request for a human three or more times, refused a human, or ignored distress (critical)

@@ -1,9 +1,31 @@
-"""Rubric ``rubric-2026-10-v1`` (docs/08-evaluation-rubric.md section 2). Frozen and versioned:
-changing anything here means a new version and recalibration."""
+"""Rubric versions (docs/08-evaluation-rubric.md section 2). Each version is frozen: changing
+anything means a new version and recalibration.
+
+- ``rubric-2026-10-v1``: the original rubric, judged with ``judge_v1.j2`` (kept unchanged).
+- ``rubric-2026-10-v2`` (EVAL-07): same dimensions and weights, responsiveness and escalation anchors,
+  a pass gate and two more critical rules, judged with ``judge_v2.j2``. Its anchors come from
+  ``seed/data/rubric-2026-10-v2.yaml``, the same file the seed stores in ``rubric_versions``.
+- ``rubric-2026-11-v3`` (EVAL-08): the owner's rules of 2026-11-03 (disclosure and company identity
+  fail a call, repetition costs one point, amount read-back only when asked, missed points fail,
+  confirmation is not fabrication), judged with ``judge_v3.j2`` from ``rubric-2026-11-v3.yaml``.
+
+This build evaluates with ``RUBRIC_VERSION`` (the active rubric). The ``call.completed`` event that
+triggers an evaluation carries no rubric version, so an older version cannot be re-run without a
+contract change; its stored evaluations stay as they are.
+"""
 
 from __future__ import annotations
 
-RUBRIC_VERSION = "rubric-2026-10-v1"
+from dataclasses import dataclass
+from pathlib import Path
+
+import yaml
+
+RUBRIC_V1 = "rubric-2026-10-v1"
+RUBRIC_V2 = "rubric-2026-10-v2"
+RUBRIC_V3 = "rubric-2026-11-v3"
+#: The rubric this build evaluates with.
+RUBRIC_VERSION = RUBRIC_V3
 PASS_THRESHOLD = 80.0
 
 WEIGHTS: dict[str, int] = {
@@ -19,8 +41,10 @@ assert sum(WEIGHTS.values()) == 100
 
 DIMENSION_KEYS: tuple[str, ...] = tuple(WEIGHTS)
 
+_DATA = Path(__file__).resolve().parents[1] / "seed" / "data"
+
 #: Rendered into ``judge_v1.j2`` as ``rubric_anchors``.
-ANCHORS = """\
+ANCHORS_V1 = """\
 Scale for every dimension: 4 = fully correct, nothing a QA lead would flag; 3 = correct with minor friction; \
 2 = partially correct, noticeable problem but the call was not harmed; 1 = clear failure on this dimension; \
 0 = severe failure: harmful, false or legally risky (usually also a critical failure).
@@ -50,3 +74,58 @@ escalation (weight 5) - transfers when it should (caller asks, out of scope, dis
   4 correct decision, including "no transfer needed"; 2 transferred late; 1 ignored an explicit request for a human once;
   0 refused a human repeatedly or ignored distress (critical).
 """
+
+
+def _render_anchors(spec: dict) -> str:
+    """The YAML rubric as prompt text, in the layout of ``ANCHORS_V1``."""
+    lines = [ANCHORS_V1.split("\n\n", 1)[0], ""]
+    for d in spec["dimensions"]:
+        lines.append(f"{d['key']} (weight {d['weight']}) - {d['description']}")
+        anchors = "; ".join(f"{k} {v}" for k, v in sorted(d["anchors"].items(), reverse=True))
+        lines.append(f"  {anchors}.")
+    lines.append(
+        "A correct transfer to a human is never penalised under task_completion; a transfer the "
+        "caller declined is not a correct transfer."
+    )
+    return "\n".join(lines) + "\n"
+
+
+@dataclass(frozen=True)
+class RubricSpec:
+    version: str
+    prompt: str
+    anchors: str
+    pass_threshold: float
+    #: Pass gate (v2): any dimension at or below this score fails the call; None = no gate.
+    gate_max_failing_score: int | None = None
+    #: Pass gate (v2): any of these failure types (judge's or from checks) fails the call.
+    gate_failure_types: frozenset[str] = frozenset()
+    #: Check types whose failure is reported but neither blocks a pass nor counts as must-pass (v3).
+    advisory_checks: frozenset[str] = frozenset()
+
+
+def _from_yaml(file: str, version: str, prompt: str) -> RubricSpec:
+    spec = yaml.safe_load((_DATA / file).read_text(encoding="utf-8"))
+    assert spec["version"] == version
+    assert {d["key"]: d["weight"] for d in spec["dimensions"]} == WEIGHTS
+    gate = spec["pass_gate"]
+    max_failing = gate.get("max_failing_score")
+    return RubricSpec(
+        version=version,
+        prompt=prompt,
+        anchors=_render_anchors(spec),
+        pass_threshold=float(spec["pass_threshold"]),
+        gate_max_failing_score=None if max_failing is None else int(max_failing),
+        gate_failure_types=frozenset(gate["failure_types"]),
+        advisory_checks=frozenset(spec.get("advisory_checks", ())),
+    )
+
+
+RUBRICS: dict[str, RubricSpec] = {
+    RUBRIC_V1: RubricSpec(RUBRIC_V1, "judge_v1", ANCHORS_V1, PASS_THRESHOLD),
+    RUBRIC_V2: _from_yaml("rubric-2026-10-v2.yaml", RUBRIC_V2, "judge_v2"),
+    RUBRIC_V3: _from_yaml("rubric-2026-11-v3.yaml", RUBRIC_V3, "judge_v3"),
+}
+ACTIVE: RubricSpec = RUBRICS[RUBRIC_VERSION]
+#: The active rubric's anchors (rendered into the judge prompt).
+ANCHORS = ACTIVE.anchors

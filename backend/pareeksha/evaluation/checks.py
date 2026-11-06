@@ -6,6 +6,9 @@ language_match, tool_calls_expected, no_loop, amount_confirmed.
 
 Matching rules (text comes from the platform STT, so matching is tolerant):
   * `regex` on a disclosure / forbidden phrase wins when present (case-insensitive search).
+  * disclosures are tried on the turn text as written and on a copy where the Indic-script STT
+    spellings of English words seen in real transcripts (`stt_spellings.yaml`, e.g. ರೆಕಾರ್ಡೆಡ್ ->
+    recorded) are replaced by the English word (ISSUE-4). Only listed spellings are mapped.
   * otherwise the normalised phrase must be a substring of the normalised turn text, or,
     for phrases of >= 12 characters, rapidfuzz partial_ratio >= 85 (disclosures) / 92
     (forbidden). Negation is not understood: "we will not threaten you" still contains
@@ -17,8 +20,11 @@ from __future__ import annotations
 import itertools
 import re
 from collections.abc import Iterable, Mapping, Sequence
+from functools import cache
+from pathlib import Path
 from typing import Any
 
+import yaml
 from rapidfuzz import fuzz
 
 from .metrics import find_repeats, normalize_text
@@ -43,6 +49,30 @@ def _matches(phrase: str, regex: str | None, text: str, fuzzy: int) -> bool:
 
 # -- disclosure_present ------------------------------------------------------------------
 
+_STT_SPELLINGS = Path(__file__).with_name("stt_spellings.yaml")
+
+
+@cache
+def stt_spellings() -> tuple[tuple[str, str], ...]:
+    """(native-script spelling, English word) pairs, longest spelling first."""
+    data: dict[str, list[str]] = yaml.safe_load(_STT_SPELLINGS.read_text(encoding="utf-8"))
+    pairs = [(sp, word) for word, spellings in data.items() for sp in spellings]
+    return tuple(sorted(pairs, key=lambda p: -len(p[0])))
+
+
+def english_spelled(text: str) -> str:
+    """``text`` with every listed STT spelling of an English word replaced by that word."""
+    for spelling, word in stt_spellings():
+        text = text.replace(spelling, f" {word} ")
+    return text
+
+
+def _disclosed(d: Disclosure, text: str) -> bool:
+    if _matches(d.text, d.regex, text, DISCLOSURE_FUZZY):
+        return True
+    alt = english_spelled(text)
+    return alt != text and _matches(d.text, d.regex, alt, DISCLOSURE_FUZZY)
+
 
 def check_disclosures(
     turns: Iterable, disclosures: Iterable[Mapping | Disclosure]
@@ -52,7 +82,7 @@ def check_disclosures(
     for d in disclosures:
         d = d if isinstance(d, Disclosure) else Disclosure.from_dict(d)
         scope = agent_turns if d.within_turns is None else agent_turns[: d.within_turns]
-        hits = [t.idx for t in scope if _matches(d.text, d.regex, t.text, DISCLOSURE_FUZZY)]
+        hits = [t.idx for t in scope if _disclosed(d, t.text)]
         if hits:
             results.append(
                 CheckResult(

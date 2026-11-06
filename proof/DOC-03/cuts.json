@@ -1,0 +1,109 @@
+{
+ "total_s": 62.96,
+ "call_audio": {
+  "out_start_s": 13.1,
+  "len_s": 5.9,
+  "call_offset_s": 42.0
+ },
+ "cuts": [
+  {
+   "clip": "01_runs.webm",
+   "src_start_s": 1.5,
+   "src_end_s": 15.0,
+   "speed": 1.8,
+   "out_start_s": 0.0,
+   "out_len_s": 7.5,
+   "caption": "A real run: planted bug, Kannada caller, 8 kHz phone line. 0 of 1 calls passed."
+  },
+  {
+   "clip": "02_call.webm",
+   "src_start_s": 8.0,
+   "src_end_s": 19.5,
+   "speed": 1.0,
+   "out_start_s": 7.5,
+   "out_len_s": 11.5,
+   "caption": "The judge cites turn #6: the call ended without the promise to pay. 71.25 / 100, fail."
+  },
+  {
+   "clip": "03_promote.webm",
+   "src_start_s": 5.0,
+   "src_end_s": 17.0,
+   "speed": 2.0,
+   "out_start_s": 19.0,
+   "out_len_s": 6.0,
+   "caption": "Promote the failing call to a regression test."
+  },
+  {
+   "clip": "04_compare.webm",
+   "src_start_s": 6.0,
+   "src_end_s": 22.0,
+   "speed": 2.3,
+   "out_start_s": 25.0,
+   "out_len_s": 6.96,
+   "caption": "Same scenario, clean agent: 95.0, pass (+23.8 points)."
+  },
+  {
+   "clip": "05_dialect.webm",
+   "src_start_s": 3.0,
+   "src_end_s": 15.0,
+   "speed": 2.0,
+   "out_start_s": 31.96,
+   "out_len_s": 6.0,
+   "caption": "Dialect report on 20 Vaani clips. n = 4 per group, so cells are hatched as low sample."
+  },
+  {
+   "clip": "06_audit.webm",
+   "src_start_s": 10.0,
+   "src_end_s": 18.0,
+   "speed": 3.0,
+   "out_start_s": 37.96,
+   "out_len_s": 2.67,
+   "caption": "Upload a call recording (synthetic test call, 13 s)."
+  },
+  {
+   "clip": "06_audit.webm",
+   "src_start_s": 18.0,
+   "src_end_s": 45.3,
+   "speed": 9.0,
+   "out_start_s": 40.62,
+   "out_len_s": 3.03,
+   "caption": "Transcribed and scored with the same rubric."
+  },
+  {
+   "clip": "06_audit.webm",
+   "src_start_s": 45.3,
+   "src_end_s": 51.0,
+   "speed": 1.0,
+   "out_start_s": 43.66,
+   "out_len_s": 5.7,
+   "caption": "Audit: 48.75, critical. Wrong EMI amount and missing disclosure flagged."
+  },
+  {
+   "clip": "07_hubspot.webm",
+   "src_start_s": 3.0,
+   "src_end_s": 17.0,
+   "speed": 2.5,
+   "out_start_s": 49.36,
+   "out_len_s": 5.6,
+   "caption": "Live HubSpot integration: note delivered (HTTP 201). Delivery log, not the HubSpot app."
+  },
+  {
+   "clip": "08_github.webm",
+   "src_start_s": 3.5,
+   "src_end_s": 9.5,
+   "speed": 1.5,
+   "out_start_s": 54.96,
+   "out_len_s": 4.0,
+   "caption": "GitHub CI: pareeksha-regression fails on commit a8f8444 (planted bug)."
+  },
+  {
+   "clip": "08_github.webm",
+   "src_start_s": 11.5,
+   "src_end_s": 17.5,
+   "speed": 1.5,
+   "out_start_s": 58.96,
+   "out_len_s": 4.0,
+   "caption": "After the fix, the same check passes (run 41102511599)."
+  }
+ ]
+}

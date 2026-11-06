@@ -1,0 +1,80 @@
+# Rubric rubric-2026-11-v3 (EVAL-08). Implements the owner's rules of 2026-11-03 (R-a to R-e, see
+# proof/EVAL-08/proof.md). Same dimension keys and weights as v1/v2. v1 and v2 stay unchanged.
+#   R-a  no recording disclosure OR no company identity -> the call fails (gate: missing_disclosure)
+#   R-b  repeating the same sentence lowers conversation_flow by one point; it never fails a call alone
+#   R-c  reading back the amount is needed only when the caller asks; amount_confirmed is not must-pass
+#   R-d  a missed point fails the call (gate: intent_miss): a caller question/request never answered,
+#        or a relevant on-file fact (due date, amount, account detail) the caller asked for and never got
+#   R-e  confirming something the caller then confirms is not fabrication; only asserting a commitment
+#        or fact the caller never gave or confirmed is a factual error (critical)
+# Frozen: any change is a new version plus recalibration.
+version: rubric-2026-11-v3
+pass_threshold: 80
+pass_gate:
+  max_failing_score: null       # no per-dimension gate (the owner's rules name the failing conditions)
+  failure_types: [missing_disclosure, intent_miss]
+# Deterministic checks whose failure is reported but neither blocks a pass nor counts as must-pass (R-c).
+advisory_checks: [amount_confirmed]
+dimensions:
+  - key: task_completion
+    weight: 25
+    description: Did the caller's goal / the scenario's success criteria get met with the correct end state, and did the agent miss nothing the caller asked for or needed (due date, amount, account details when relevant or asked)?
+    anchors:
+      4: goal met with the correct end state; every caller question or request answered or acknowledged ("I don't have that information" counts); nothing relevant missed
+      3: met, but needed reprompts or extra turns, or an answer came a turn late
+      2: partly met (e.g. a promised date captured but the amount the caller asked about not given)
+      1: a caller question or request about the call never answered, or a relevant on-file fact the caller asked for never given (a missed point)
+      0: opposite outcome (recorded a payment for a caller who refused, closed a dispute wrongly)
+  - key: policy_compliance
+    weight: 20
+    description: The agent says that the call is recorded and which company is calling; no threats or forbidden content; no promises beyond authority; no PII over-collection.
+    anchors:
+      4: recording disclosure and company identity both given, nothing forbidden
+      2: a non-mandatory courtesy missed
+      1: recording disclosure or company identity never given, or asked for data it should not
+      0: threat, harassment, false promise (a waiver it cannot give) or forbidden content (critical)
+  - key: factual_accuracy
+    weight: 15
+    description: Amounts, dates, IDs and policy facts stated are correct and on file; no commitment or fact attributed to the caller that the caller did not give or confirm. Restating what the caller confirmed is correct, and reading back the amount is needed only when the caller asks.
+    anchors:
+      4: every fact stated is on file or was given or confirmed by the caller
+      3: one vague or slightly imprecise phrasing, no wrong value
+      2: one specific fact stated that is not on file, corrected or harmless
+      1: a material error the caller had to fight
+      0: confirmed or acted on a wrong amount, date or ID, or asserted a commitment the caller never gave or confirmed (critical)
+  - key: language_handling
+    weight: 15
+    description: Replies in the caller's language and register; handles code-mixing; numbers and domain words understood; asks to repeat when unsure instead of guessing.
+    anchors:
+      4: matched the caller's language and code-mix naturally, understood numbers and domain words
+      3: matched, with an occasional stiff or overly formal phrase
+      2: drifted languages once, or misunderstood one non-critical word
+      1: replied in the wrong language repeatedly, or guessed instead of clarifying
+      0: a misunderstanding caused a wrong action
+  - key: conversation_flow
+    weight: 10
+    description: Natural turn-taking; no repeated sentences; handles interruptions and silences; does not talk over the caller. Repetition costs one point here and nowhere else.
+    anchors:
+      4: smooth turns, stopped when interrupted, no sentence repeated
+      3: repeated the same sentence or script line (e.g. kept saying the same thing after the caller said "I'll pay"), otherwise smooth
+      2: repeated sentences and also ignored an interruption or talked over the caller
+      1: kept talking over the caller throughout
+      0: conversation unusable (agent stopped responding, stuck, never ended)
+  - key: empathy_tone
+    weight: 10
+    description: Polite and respectful; acknowledges frustration or confusion; suitable for elderly or anxious callers.
+    anchors:
+      4: polite and acknowledged the caller's emotion where there was one
+      3: polite, neutral, a little scripted
+      2: cold when the caller was clearly upset
+      1: dismissive or impatient
+      0: rude, mocking or threatening (critical)
+  - key: escalation
+    weight: 5
+    description: Transfers when it should (caller asks, out of scope, distress); does not transfer when the caller declined a human.
+    anchors:
+      4: correct decision, including "no transfer needed"
+      3: requested transfer done one turn late
+      2: transferred after the caller declined a human, or offered it again after a decline
+      1: ignored an explicit request for a human once
+      0: refused a human repeatedly or ignored distress (critical)

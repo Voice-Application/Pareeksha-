@@ -1,0 +1,343 @@
+#!/usr/bin/env python3
+"""EVAL-06 step 1: a real 30-call batch for judge calibration (docs/08-evaluation-rubric.md section 10).
+
+Each call is its own one-cell run through POST /runs (concurrency 1: Gnani allows one active request per
+key). Clean calls go to the seeded "EMI Reminder Bot"; each planted bug gets its own mock-agent container
+with MOCK_BUGS set and its own agent "EMI Reminder Bot [bug:<name>]" (same mechanism as V4,
+scripts/verify/v04_planted_bugs.py). The judge evaluates every call as usual.
+
+Writes proof/EVAL-06/batch.json (one row per call, appended as calls finish so a crash keeps the
+finished ones; a re-run skips cells already present) and logs to stdout.
+
+    COMPOSE="docker compose -f docker-compose.yml -f docker-compose.proxy.yml" \
+        python3 scripts/calibration/run_batch.py
+"""
+
+from __future__ import annotations
+
+import json
+import secrets
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts" / "verify"))
+import v04_planted_bugs as v4  # noqa: E402
+import vapi  # noqa: E402
+
+OUT = ROOT / "proof" / "EVAL-06" / "batch.json"  # replaced by --use (see PLANS)
+PLAN_NAME = "eval06"
+CLEAN = v4.CLEAN
+
+PAY, PAID, DISPUTE, HUMAN = (
+    "Promise to pay on Friday",
+    "Already paid, wants confirmation",
+    "Disputes the EMI amount",
+    "Asks for a human",
+)
+CONFUSED, INJECT, ABUSE, SILENT = (
+    "Confused about the due date",
+    "Prompt-injection attempt",
+    "Abusive caller",
+    "Caller goes silent",
+)
+# pstn_street_10db was tried first and dropped: its steady noise bed trips the mock agent's barge-in VAD
+# before the opening plays, so the agent stays mute (cells 3 and 7 of the first attempt, batch_run.log).
+ALAW, BABBLE, CLEAN16 = "pstn_8k_alaw", "pstn_office_babble_15db", "clean_16k"
+
+# bug (None = clean agent) -> [(scenario, persona, noise profile)]
+PLAN: dict[str | None, list[tuple[str, str, str]]] = {
+    None: [
+        (PAY, "Manju — auto driver", ALAW),
+        (PAID, "Rohit — millennial", BABBLE),
+        (DISPUTE, "Arjun — corporate", CLEAN16),
+        (HUMAN, "Lakshmamma — elderly", BABBLE),
+        (CONFUSED, "Ramesh ji — elderly", ALAW),
+        (INJECT, "Mr. Iyer — formal", ALAW),
+        (ABUSE, "Abusive-but-safe", CLEAN16),
+        # "Caller goes silent" ended infra_error 4 times (The Silent One x3, Pooja x1): the silent caller's
+        # line is punctuation only ("...") and Gnani TTS answers 500 "No audio generated during
+        # synthesis" until the caller TTS times out. Cell 8 therefore runs another scenario.
+        (DISPUTE, "Ramesh ji — elderly", ALAW),
+        (PAY, "Sunita — worried borrower", CLEAN16),
+        (PAID, "Neha — switcher", BABBLE),
+    ],
+    "no_disclosure": [
+        (PAY, "Priya — careful", ALAW),
+        (PAID, "Kiran — IT employee", BABBLE),
+        (CONFUSED, "Mohan — labourer", CLEAN16),
+        (HUMAN, "Pooja — student", ALAW),
+    ],
+    "no_amount_confirm": [
+        (PAY, "Priya — careful", BABBLE),
+        (PAY, "Shivappa — farmer", ALAW),
+        (PAY, "Rohit — millennial", CLEAN16),
+        (PAID, "Mr. Iyer — formal", ALAW),
+    ],
+    "english_to_kannada": [
+        (PAY, "Deepa — homemaker", ALAW),
+        (PAID, "Manju — auto driver", BABBLE),
+        (CONFUSED, "Lakshmamma — elderly", CLEAN16),
+        (DISPUTE, "Shivappa — farmer", ALAW),
+    ],
+    "ignore_interrupt": [
+        (PAY, "The Interrupter", ALAW),
+        (DISPUTE, "The Interrupter", BABBLE),
+        (ABUSE, "Vikram — angry", CLEAN16),
+        (CONFUSED, "Arjun — corporate", ALAW),
+    ],
+    "false_waiver": [
+        (INJECT, "Off-topic tester", ALAW),
+        (INJECT, "Vikram — angry", BABBLE),
+        (INJECT, "Imran — shopkeeper", CLEAN16),
+        (INJECT, "Neha — switcher", ALAW),
+    ],
+}
+
+# EVAL-07 held-out batch: the same mix (10 clean, 4 per planted bug, kn/hi/en) on scenario x persona x
+# noise cells that differ from the EVAL-06 plan, run against the LLM-driven mock agent and judged with
+# rubric-2026-10-v2. Office babble is included again now that the agent's VAD handles it (ISSUE-1);
+# "Caller goes silent" stays out (ISSUE-2, Gnani TTS 500 on the silent caller's "..." line).
+HELDOUT: dict[str | None, list[tuple[str, str, str]]] = {
+    None: [
+        (PAY, "Kiran — IT employee", BABBLE),
+        (PAID, "Shivappa — farmer", ALAW),
+        (DISPUTE, "Pooja — student", CLEAN16),
+        (HUMAN, "Mohan — labourer", ALAW),
+        (CONFUSED, "Neha — switcher", BABBLE),
+        (INJECT, "Imran — shopkeeper", CLEAN16),
+        (ABUSE, "Vikram — angry", ALAW),
+        (PAY, "Arjun — corporate", BABBLE),
+        (PAID, "Priya — careful", CLEAN16),
+        (CONFUSED, "Deepa — homemaker", ALAW),
+    ],
+    "no_disclosure": [
+        (PAY, "Lakshmamma — elderly", ALAW),
+        (PAID, "Sunita — worried borrower", BABBLE),
+        (HUMAN, "Arjun — corporate", CLEAN16),
+        (DISPUTE, "Manju — auto driver", ALAW),
+    ],
+    "no_amount_confirm": [
+        (PAY, "Ramesh ji — elderly", ALAW),
+        (PAY, "Neha — switcher", CLEAN16),
+        (PAY, "Imran — shopkeeper", BABBLE),
+        (CONFUSED, "Mr. Iyer — formal", ALAW),
+    ],
+    "english_to_kannada": [
+        (PAY, "Lakshmamma — elderly", CLEAN16),
+        (HUMAN, "Shivappa — farmer", BABBLE),
+        (PAID, "Deepa — homemaker", ALAW),
+        (ABUSE, "Kiran — IT employee", ALAW),
+    ],
+    "ignore_interrupt": [
+        (PAID, "The Interrupter", ALAW),
+        (CONFUSED, "The Interrupter", CLEAN16),
+        (DISPUTE, "Rohit — millennial", BABBLE),
+        (ABUSE, "Abusive-but-safe", ALAW),
+    ],
+    "false_waiver": [
+        (INJECT, "Priya — careful", ALAW),
+        (INJECT, "Rohit — millennial", CLEAN16),
+        (INJECT, "Lakshmamma — elderly", BABBLE),
+        (INJECT, "Mohan — labourer", ALAW),
+    ],
+}
+# EVAL-08 confirmation batch: 15 NEW calls in the same mix (5 clean, 2 per planted bug; 8 kn / 4 hi /
+# 3 en; noise 7 alaw / 4 babble / 4 clean), on cells that appear in neither earlier plan, each run with a
+# fresh random seed (POST /runs config.seed, stored per row), against the mock agent with the final VAD,
+# judged with rubric-2026-11-v3.
+CONFIRM: dict[str | None, list[tuple[str, str, str]]] = {
+    None: [
+        (PAY, "Deepa — homemaker", BABBLE),
+        (PAID, "Vikram — angry", CLEAN16),
+        (DISPUTE, "Kiran — IT employee", ALAW),
+        (HUMAN, "Priya — careful", ALAW),
+        (CONFUSED, "Pooja — student", ALAW),
+    ],
+    "no_disclosure": [
+        (PAY, "Mohan — labourer", BABBLE),
+        (HUMAN, "Manju — auto driver", CLEAN16),
+    ],
+    "no_amount_confirm": [
+        (PAY, "Mr. Iyer — formal", ALAW),
+        (PAY, "Kiran — IT employee", ALAW),
+    ],
+    "english_to_kannada": [
+        (PAID, "Imran — shopkeeper", BABBLE),
+        (DISPUTE, "Deepa — homemaker", CLEAN16),
+    ],
+    "ignore_interrupt": [
+        (HUMAN, "The Interrupter", ALAW),
+        (PAY, "Sunita — worried borrower", BABBLE),
+    ],
+    "false_waiver": [
+        (INJECT, "Arjun — corporate", ALAW),
+        (INJECT, "Shivappa — farmer", CLEAN16),
+    ],
+}
+_EARLIER = {c for plan in (PLAN, HELDOUT) for cells in plan.values() for c in cells}
+assert not _EARLIER & {c for cells in CONFIRM.values() for c in cells}, "confirm cell repeats"
+
+# EVAL-08 second confirmation batch (C16-C30; owner approved 2026-11-03, to reach n = 30 for v3): the same mix
+# as CONFIRM, on cells that appear in no earlier plan (EVAL-06, EVAL-07, CONFIRM), fresh seeds, v3 unchanged.
+CONFIRM2: dict[str | None, list[tuple[str, str, str]]] = {
+    None: [
+        (PAY, "Imran — shopkeeper", ALAW),
+        (PAID, "Deepa — homemaker", BABBLE),
+        (DISPUTE, "Sunita — worried borrower", ALAW),
+        (HUMAN, "Neha — switcher", CLEAN16),
+        (CONFUSED, "Manju — auto driver", ALAW),
+    ],
+    "no_disclosure": [
+        (PAY, "Shivappa — farmer", BABBLE),
+        (PAID, "Ramesh ji — elderly", ALAW),
+    ],
+    "no_amount_confirm": [
+        (PAY, "Arjun — corporate", ALAW),
+        (PAY, "Rohit — millennial", BABBLE),
+    ],
+    "english_to_kannada": [
+        (HUMAN, "Kiran — IT employee", ALAW),
+        (PAY, "Manju — auto driver", CLEAN16),
+    ],
+    "ignore_interrupt": [
+        (DISPUTE, "The Interrupter", CLEAN16),
+        (CONFUSED, "Vikram — angry", BABBLE),
+    ],
+    "false_waiver": [
+        (INJECT, "Deepa — homemaker", ALAW),
+        (INJECT, "Mr. Iyer — formal", CLEAN16),
+    ],
+}
+_CELLS2 = [c for cells in CONFIRM2.values() for c in cells]
+assert len(set(_CELLS2)) == len(_CELLS2) == 15, "confirm2 cells must be 15 distinct cells"
+assert not (_EARLIER | {c for cs in CONFIRM.values() for c in cs}) & set(_CELLS2), "confirm2 cell repeats"
+
+PLANS = {"eval06": (PLAN, ROOT / "proof" / "EVAL-06" / "batch.json"),
+         "heldout": (HELDOUT, ROOT / "proof" / "EVAL-07" / "heldout_batch.json"),
+         "confirm": (CONFIRM, ROOT / "proof" / "EVAL-08" / "confirm_batch.json"),
+         "confirm2": (CONFIRM2, ROOT / "proof" / "EVAL-08" / "confirm2_batch.json")}
+#: Plans whose runs each get a fresh random seed (the earlier plans used the API default, 42).
+FRESH_SEED = {"confirm", "confirm2"}
+
+
+def load() -> list[dict]:
+    return json.loads(OUT.read_text()) if OUT.exists() else []
+
+
+def save(rows: list[dict]) -> None:
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    OUT.write_text(json.dumps(rows, indent=1, ensure_ascii=False))
+
+
+def log(msg: str) -> None:
+    print(f"{time.strftime('%H:%M:%S')} {msg}", flush=True)
+
+
+def run_cell(agent: str, bug: str | None, cell: tuple[str, str, str], idx: int) -> dict:
+    scenario, persona, profile = cell
+    seed = secrets.randbits(31) if PLAN_NAME in FRESH_SEED else None
+    res = vapi.run_and_wait(
+        agent,
+        [scenario],
+        [persona],
+        [profile],
+        repeats=1,
+        concurrency=1,
+        name=f"{PLAN_NAME}-{idx:02d}-{bug or 'clean'}",
+        poll_s=5,
+        seed=seed,
+    )
+    item = res["items"][0]
+    row = {
+        "cell": idx,
+        "bug": bug,
+        "scenario": scenario,
+        "persona": persona,
+        "noise_profile": profile,
+        "agent": agent,
+        "run_id": res["run_id"],
+        "run_seed": seed if seed is not None else 42,
+        "wall_s": res["wall_s"],
+        "run_status": res["run"]["status"],
+        "item_status": item["status"],
+        "call_id": item.get("call_id"),
+    }
+    if row["call_id"]:
+        ev = vapi.call(row["call_id"]).get("evaluation") or {}
+        row.update(
+            judge_passed=ev.get("passed"),
+            judge_score=ev.get("overall_score"),
+            judge_critical=ev.get("critical_failure"),
+            evaluation_status=ev.get("status"),
+        )
+    return row
+
+
+def main() -> int:
+    planned = {
+        n: (bug, c)
+        for n, (bug, c) in enumerate(((b, c) for b, cs in PLAN.items() for c in cs), start=1)
+    }
+    tried = load()
+    # failed cells, and cells whose plan changed since they ran, are run again; the replaced rows are kept
+    # in batch_replaced.json for the record
+    keep = [
+        r
+        for r in tried
+        if r.get("evaluation_status") == "ok"
+        and planned.get(r["cell"]) == (r["bug"], (r["scenario"], r["persona"], r["noise_profile"]))
+    ]
+    replaced = [r for r in tried if r not in keep]
+    if replaced:
+        old = OUT.with_name("batch_replaced.json")
+        prev = json.loads(old.read_text()) if old.exists() else []
+        old.write_text(json.dumps(prev + replaced, indent=1, ensure_ascii=False))
+    rows = keep
+    done = {r["cell"] for r in rows}
+    clean = next(a for a in vapi.items("/agents") if a["name"] == CLEAN)
+    idx = 0
+    for bug, cells in PLAN.items():
+        todo = [(idx + i + 1, c) for i, c in enumerate(cells) if idx + i + 1 not in done]
+        idx += len(cells)
+        if not todo:
+            continue
+        container = None
+        agent = CLEAN
+        if bug:
+            container = v4.start_container(bug)
+            v4.wait_ready(container)
+            agent = v4.register(bug, container, clean)
+            log(f"container {container} up, agent {agent!r}")
+        try:
+            for n, cell in todo:
+                log(f"cell {n:02d} bug={bug or 'clean'} {cell}")
+                row = run_cell(agent, bug, cell, n)
+                log(
+                    f"  -> {row['item_status']} call={row['call_id']} judge passed={row.get('judge_passed')} "
+                    f"score={row.get('judge_score')} critical={row.get('judge_critical')} wall={row['wall_s']}s"
+                )
+                rows.append(row)
+                save(sorted(rows, key=lambda r: r["cell"]))
+        finally:
+            if container:
+                subprocess.run(["docker", "rm", "-f", container], capture_output=True, check=False)
+    ok = sum(r.get("evaluation_status") == "ok" for r in rows)
+    log(f"evaluated {ok}/{idx}; usage: {json.dumps(vapi.request('GET', '/usage'))}")
+    return 0 if ok == idx else 1
+
+
+if __name__ == "__main__":
+    # [--use eval06|heldout] [--plan]: pick the plan (default eval06); --plan only prints its mix
+    args = sys.argv[1:]
+    PLAN_NAME = "eval06"
+    if "--use" in args:
+        PLAN_NAME = args[args.index("--use") + 1]
+    PLAN, OUT = PLANS[PLAN_NAME]
+    if "--plan" in args:
+        for bug, cells in PLAN.items():
+            print(bug or "clean", len(cells))
+        raise SystemExit(0)
+    raise SystemExit(main())

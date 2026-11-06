@@ -1,0 +1,5 @@
+[
+ {"label_id": "C02", "passed": "no", "critical": "no", "reason": "owner correction 2026-11-03: R-a disclosure rule (C02 no company name; C04, C12 no recording notice)"},
+ {"label_id": "C04", "passed": "no", "critical": "no", "reason": "owner correction 2026-11-03: R-a disclosure rule (C02 no company name; C04, C12 no recording notice)"},
+ {"label_id": "C12", "passed": "no", "critical": "no", "reason": "owner correction 2026-11-03: R-a disclosure rule (C02 no company name; C04, C12 no recording notice)"}
+]

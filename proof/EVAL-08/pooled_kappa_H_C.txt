@@ -1,0 +1,3 @@
+pooled H01-H30 (SEEN) + C01-C15 (owner-corrected): n=45
+pass/fail kappa=0.3137 agreement=31/45 judge_pass=27 owner_pass=33
+critical  kappa=0.5574 agreement=39/45

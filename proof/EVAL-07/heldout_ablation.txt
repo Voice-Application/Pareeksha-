@@ -1,0 +1,57 @@
+DIAGNOSIS ONLY (no tuning): kappa if one blocking rule were removed, everything else as stored by v2.
+Check: rebuilding each verdict as `overall >= 80 and no blocking review_reason` matches the stored `passed` on all 60 calls.
+
+removed                                          | held-out: kappa  agree  judge-passes | in-sample: kappa  agree  judge-passes
+(none: v2 as stored)                             | +0.000  12/30  passes 10         | +0.609  27/30  passes  4
+check_failed:amount_confirmed                    | +0.000  12/30  passes 10         | +0.760  28/30  passes  5
+check_failed:disclosure_present                  | +0.000  12/30  passes 10         | +0.609  27/30  passes  4
+check_failed:tool_calls_expected                 | +0.000  12/30  passes 10         | +0.609  27/30  passes  4
+critical_failure                                 | +0.000  12/30  passes 10         | +0.609  27/30  passes  4
+gate:conversation_flow<=1                        | +0.000  12/30  passes 10         | +0.609  27/30  passes  4
+gate:empathy_tone<=1                             | +0.000  12/30  passes 10         | +0.609  27/30  passes  4
+gate:escalation<=1                               | +0.000  12/30  passes 10         | +0.609  27/30  passes  4
+gate:factual_accuracy<=1                         | +0.000  12/30  passes 10         | +0.609  27/30  passes  4
+gate:intent_miss                                 | +0.023  13/30  passes 11         | +0.520  26/30  passes  5
+gate:language_handling<=1                        | +0.000  12/30  passes 10         | +0.609  27/30  passes  4
+gate:loop                                        | +0.048  14/30  passes 12         | +0.609  27/30  passes  4
+gate:policy_compliance<=1                        | +0.000  12/30  passes 10         | +0.609  27/30  passes  4
+gate:task_completion<=1                          | +0.000  12/30  passes 10         | +0.609  27/30  passes  4
+gate:intent_miss + gate:loop                     | +0.074  15/30  passes 13         | +0.520  26/30  passes  5
+all gate:* (v1 pass rule)                        | +0.074  15/30  passes 13         | +0.520  26/30  passes  5
+all check_failed:*                               | +0.000  12/30  passes 10         | +0.760  28/30  passes  5
+all gate:* + check_failed:disclosure_present     | +0.074  15/30  passes 13         | +0.520  26/30  passes  5
+everything but critical_failure                  | +0.103  16/30  passes 14         | +0.667  27/30  passes  6
+everything (overall >= 80 only)                  | +0.103  16/30  passes 14         | +0.667  27/30  passes  6
+
+Calls carrying each blocking reason (held-out / in-sample):
+  check_failed:amount_confirmed       3 /  2
+  check_failed:disclosure_present     8 /  8
+  check_failed:tool_calls_expected    0 /  2
+  critical_failure                    4 /  9
+  gate:conversation_flow<=1           8 / 18
+  gate:empathy_tone<=1                5 / 11
+  gate:escalation<=1                  2 /  3
+  gate:factual_accuracy<=1            2 /  7
+  gate:intent_miss                   13 / 24
+  gate:language_handling<=1           4 /  4
+  gate:loop                          13 / 16
+  gate:policy_compliance<=1          11 / 11
+  gate:task_completion<=1             5 / 15
+
+Held-out calls the owner passed but v2 failed, with v2's blocking reasons and overall score:
+  H01 score  71.25 ['check_failed:amount_confirmed', 'gate:task_completion<=1', 'gate:conversation_flow<=1', 'gate:intent_miss', 'gate:loop']
+  H02 score  68.75 ['check_failed:disclosure_present', 'gate:policy_compliance<=1', 'gate:intent_miss']
+  H05 score  86.25 ['gate:loop']
+  H06 score   82.5 ['check_failed:amount_confirmed', 'gate:intent_miss']
+  H11 score   72.5 ['gate:conversation_flow<=1', 'gate:loop', 'gate:intent_miss']
+  H12 score  61.25 ['check_failed:disclosure_present', 'gate:policy_compliance<=1', 'gate:language_handling<=1', 'gate:loop']
+  H15 score   72.5 ['gate:conversation_flow<=1', 'gate:loop', 'gate:intent_miss']
+  H16 score   62.5 ['check_failed:disclosure_present', 'gate:policy_compliance<=1', 'gate:intent_miss', 'gate:loop']
+  H17 score  73.75 ['check_failed:disclosure_present', 'gate:policy_compliance<=1', 'gate:language_handling<=1']
+  H18 score  43.75 ['critical_failure', 'check_failed:disclosure_present', 'gate:task_completion<=1', 'gate:policy_compliance<=1', 'gate:conversation_flow<=1', 'gate:empathy_tone<=1', 'gate:escalation<=1', 'gate:intent_miss', 'gate:loop']
+  H21 score  83.75 ['gate:loop']
+  H25 score   72.5 ['check_failed:amount_confirmed', 'gate:intent_miss']
+  H26 score  88.75 ['gate:intent_miss']
+  H27 score   62.5 ['check_failed:disclosure_present', 'gate:policy_compliance<=1', 'gate:language_handling<=1', 'gate:loop']
+  H28 score  73.75 ['check_failed:disclosure_present', 'gate:policy_compliance<=1', 'gate:language_handling<=1']
+  H29 score  71.25 ['check_failed:disclosure_present', 'gate:policy_compliance<=1']

@@ -1,0 +1,6 @@
+labelling/EVAL-06: recording FAIL 4: L05(no_disclosure) L06(no_disclosure) L16(no_disclosure) L20(no_disclosure)
+   calls with Kannada-script 'recorded/recorder': L02:pass L04:pass L07:pass L21:pass
+labelling/EVAL-07: recording FAIL 4: H02(no_disclosure) H16(no_disclosure) H18(no_disclosure) H29(no_disclosure)
+   calls with Kannada-script 'recorded/recorder': H12:pass H17:pass H27:pass H28:pass
+labelling/EVAL-08: recording FAIL 2: C04(no_disclosure) C12(no_disclosure)
+   calls with Kannada-script 'recorded/recorder': C02:pass C09:pass

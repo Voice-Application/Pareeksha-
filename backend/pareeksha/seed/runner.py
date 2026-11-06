@@ -5,7 +5,8 @@ running it twice (or after a user edited a seeded row) changes nothing.
   ``PersonaCreate``;
 * noise profiles: the 8 definitions in ``pareeksha.audio.profiles.BUILTIN_PROFILES``, so the
   profiles the DSP runs and the ones the API lists can never differ;
-* rubric: ``data/rubric-2026-10-v1.yaml``, made the active rubric unless one is already active;
+* rubrics: ``data/rubric-2026-10-v1.yaml``, ``-v2.yaml`` and ``rubric-2026-11-v3.yaml``; the
+  build's ``RUBRIC_VERSION`` is made active;
 * the mock EMI agent and its scenarios;
 * the demo API key (admin scope). ``PAREEKSHA_API_KEY`` in the environment pins the key (only its
   hash is stored); otherwise a key is generated and returned once, on the run that creates it.
@@ -21,7 +22,7 @@ from pathlib import Path
 from typing import Any, Literal, cast
 
 import yaml
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from pareeksha.api.auth import DISPLAY_PREFIX_LEN, KEY_PREFIX, generate_api_key, hash_api_key
@@ -35,11 +36,14 @@ from pareeksha.db.models import (
     RubricVersions,
     Scenarios,
 )
+from pareeksha.evaluation.rubric import RUBRIC_VERSION
 from pareeksha.schemas.agents import AgentCreate
 from pareeksha.schemas.personas import Codec, NoiseProfileCreate, PersonaCreate
 from pareeksha.schemas.scenarios import ScenarioCreate
 
 DATA_DIR = Path(__file__).parent / "data"
+#: Shipped rubric versions, oldest first (docs/08 section 2).
+RUBRIC_FILES = ("rubric-2026-10-v1.yaml", "rubric-2026-10-v2.yaml", "rubric-2026-11-v3.yaml")
 PROJECT_NAME = "Pareeksha"
 DEMO_KEY_NAME = "demo"
 DEMO_KEY_SCOPES = ["admin"]
@@ -135,27 +139,42 @@ async def _seed_noise_profiles(session: AsyncSession, project: Projects, out: Se
 
 
 async def _seed_rubric(session: AsyncSession, out: SeedResult) -> None:
-    spec = _load("rubric-2026-10-v1.yaml")
-    version: str = spec["version"]
-    found = await session.scalar(select(RubricVersions.id).where(RubricVersions.version == version))
-    if found is None:
-        dimensions = [
-            {**d, "anchors": {str(k): v for k, v in d["anchors"].items()}}
-            for d in spec["dimensions"]
-        ]
-        has_active = await session.scalar(
-            select(RubricVersions.id).where(RubricVersions.is_active.is_(True)).limit(1)
+    """Store every shipped rubric version; the one this build evaluates with (``RUBRIC_VERSION``) is
+    made the active rubric, so ``GET /calibration`` and regression tests follow the evaluator."""
+    for name in RUBRIC_FILES:
+        spec = _load(name)
+        version: str = spec["version"]
+        found = await session.scalar(
+            select(RubricVersions.id).where(RubricVersions.version == version)
         )
-        session.add(
-            RubricVersions(
-                version=version,
-                dimensions=dimensions,
-                pass_threshold=spec["pass_threshold"],
-                prompt_hash=rubric_prompt_hash(version, spec["pass_threshold"], dimensions),
-                is_active=has_active is None,
+        if found is None:
+            dimensions = [
+                {**d, "anchors": {str(k): v for k, v in d["anchors"].items()}}
+                for d in spec["dimensions"]
+            ]
+            session.add(
+                RubricVersions(
+                    version=version,
+                    dimensions=dimensions,
+                    pass_threshold=spec["pass_threshold"],
+                    prompt_hash=rubric_prompt_hash(version, spec["pass_threshold"], dimensions),
+                    is_active=False,
+                )
             )
+        out.count("rubric_versions", found is None)
+    await session.flush()
+    active = await session.scalar(
+        select(RubricVersions).where(RubricVersions.is_active.is_(True)).limit(1)
+    )
+    if active is None or active.version != RUBRIC_VERSION:
+        if active is not None:
+            active.is_active = False
+            await session.flush()  # one_active_rubric is a partial unique index
+        await session.execute(
+            update(RubricVersions)
+            .where(RubricVersions.version == RUBRIC_VERSION)
+            .values(is_active=True)
         )
-    out.count("rubric_versions", found is None)
 
 
 async def _seed_agent(session: AsyncSession, project: Projects, out: SeedResult) -> None:

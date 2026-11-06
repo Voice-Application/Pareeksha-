@@ -1,0 +1,5 @@
+scripts/verify/run_all.sh 4
+== V4: >= 4 of 5 planted bugs caught with cited turn indices
+PASS V4: control (bugs off) pass rate 2/2; caught 4/5 (evidence: proof/verify/V4.md)
+
+| 4 | >= 4 of 5 planted bugs caught with cited turn indices | **PASS** | [proof/verify/V4.md](verify/V4.md) |

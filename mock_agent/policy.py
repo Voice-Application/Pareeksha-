@@ -308,9 +308,7 @@ def extract_when(text: str) -> str:
     """
     found: list[str] = []
     for m in _WHEN_RE.finditer(text):
-        if _NEGATED_RE.search(text[: m.start()]) or _NEGATED_AFTER_RE.search(
-            text[m.end() :]
-        ):
+        if _NEGATED_RE.search(text[: m.start()]) or _NEGATED_AFTER_RE.search(text[m.end() :]):
             continue
         found.append(m.group(0))
     specific = [w for w in found if not _TODAY_RE.match(w)]
@@ -382,20 +380,14 @@ class Dialog:
             {"amount_inr": 4500, "when": self.when or "caller_stated_date"},
             {"status": "recorded"},
         )
-        closing = (
-            CLOSING_WHEN[lang].format(when=self.when) if self.when else CLOSING[lang]
-        )
+        closing = CLOSING_WHEN[lang].format(when=self.when) if self.when else CLOSING[lang]
         return Reply(closing, lang, (tool,), end_call=True, stage=self.stage)
 
-    def _end(
-        self, text: dict[str, str], lang: str, tools: tuple[Any, ...] = ()
-    ) -> Reply:
+    def _end(self, text: dict[str, str], lang: str, tools: tuple[Any, ...] = ()) -> Reply:
         self.stage = "done"
         return Reply(text[lang], lang, tools, end_call=True, stage=self.stage)
 
-    def _say(
-        self, text: dict[str, str], lang: str, *, stage: str | None = None
-    ) -> Reply:
+    def _say(self, text: dict[str, str], lang: str, *, stage: str | None = None) -> Reply:
         if stage is not None:
             self.stage = stage
         return Reply(text[lang], lang, stage=self.stage)
@@ -426,9 +418,7 @@ class Dialog:
             return self._end(HANDOFF, lang, (tool,))
         if self.stage == "confirm":
             return self._confirm_when(lang) if self.when else self._say(CONFIRM, lang)
-        return self._say(
-            CALL_REASON if self.reasks % 2 else ASK_WHEN, lang, stage="ask_pay"
-        )
+        return self._say(CALL_REASON if self.reasks % 2 else ASK_WHEN, lang, stage="ask_pay")
 
     def respond(self, heard: str) -> Reply:
         text = heard.strip()
@@ -483,9 +473,7 @@ class Dialog:
             return self._say(PAID_ASK, lang, stage="await_utr")
         if _ABUSE_RE.search(text):
             self.abuse += 1
-            return (
-                self._say(CALM_ASK, lang) if self.abuse == 1 else self._end(CALM, lang)
-            )
+            return self._say(CALM_ASK, lang) if self.abuse == 1 else self._end(CALM, lang)
         if _BOT_RE.search(text) and open_stage:
             return self._say(BOT_ID, lang, stage="ask_pay")
         if _LOAN_RE.search(text) and open_stage:
@@ -526,9 +514,7 @@ class Dialog:
             and not extract_when(text)
         ):
             self.repeats += 1
-            return self._say(
-                DUE_YES if self.repeats < 3 else DUE_SLOW, lang, stage="ask_pay"
-            )
+            return self._say(DUE_YES if self.repeats < 3 else DUE_SLOW, lang, stage="ask_pay")
         if (
             _AMOUNT_RE.search(text)
             and open_stage

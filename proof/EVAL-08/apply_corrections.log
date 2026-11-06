@@ -1,0 +1,7 @@
+C02: passed/critical ('no', 'no') -> ('no', 'no')
+C04: passed/critical ('no', 'no') -> ('no', 'no')
+C12: passed/critical ('no', 'no') -> ('no', 'no')
+C02: correction posted as preetham-correction-2026-11-03 (201), passed=False
+C04: correction posted as preetham-correction-2026-11-03 (201), passed=False
+C12: correction posted as preetham-correction-2026-11-03 (201), passed=False
+GET /calibration: n=75 kappa_pass_fail=0.4673
