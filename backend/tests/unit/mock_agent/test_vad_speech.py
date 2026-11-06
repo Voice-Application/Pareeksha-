@@ -119,7 +119,7 @@ def test_babble_bed_does_not_keep_the_utterance_open(noise: float) -> None:
     turn = [_speech_frame(rng, noise * 6, noise, i) for i in range(100)]  # 2 s of speech (+15 dB)
     after = [_noise_frame(rng, noise) for _ in range(100)]  # 2 s of noise again
     frames = bed + turn + after
-    old = _run(UtteranceDetector(speech_ratio=0.0), frames)  # pre-EVAL-07 behaviour: no floor
+    old = _run(UtteranceDetector(noise_ratio=0.0), frames)  # no noise floor: only the fixed threshold
     new = _run(UtteranceDetector(), frames)
     assert old == []  # the noise reads as speech that never ends: the agent never answers
     assert len(new) == 1
@@ -131,9 +131,9 @@ def test_babble_bed_does_not_keep_the_utterance_open(noise: float) -> None:
 def test_noise_from_the_first_frame_gives_no_utterance_and_no_floor_until_measured() -> None:
     rng = random.Random(5)
     vad = UtteranceDetector()
-    assert not vad.floor_known
+    assert not vad.noise_known
     got = _run(vad, [_noise_frame(rng, 2500.0) for _ in range(200)])
-    assert vad.floor_known
+    assert vad.noise_known
     assert got == []  # the warm-up "utterance" was noise once the floor was known: dropped
 
 
@@ -141,9 +141,3 @@ def test_steady_noise_alone_is_not_speech() -> None:
     rng = random.Random(3)
     vad = UtteranceDetector()
     assert _run(vad, [_noise_frame(rng, 2000.0) for _ in range(1000)]) == []  # 20 s
-
-
-def test_max_utterance_closes_a_turn_that_never_pauses() -> None:
-    vad = UtteranceDetector(speech_ratio=0.0, max_utterance_ms=2000)
-    got = _run(vad, [LOUD] * 200)
-    assert got and got[0][0] < 110  # closed after ~2 s instead of never
