@@ -2,17 +2,25 @@
 
 from __future__ import annotations
 
+import uuid
 from datetime import UTC, datetime
+from typing import cast
 from uuid import UUID
 
 from fastapi import APIRouter
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from pareeksha.adapters.base import AgentTarget
 from pareeksha.adapters.connection_check import check_connection
+from pareeksha.agent_llm import AgentLLMError, AgentMessage, build_chat_provider
 from pareeksha.api.auth import ReadKey, WriteKey
 from pareeksha.api.crud import flush, get_or_404, paginate
 from pareeksha.api.deps import AUTH_ERRORS, Db, Pagination, errors
+from pareeksha.api.errors import ApiError
+from pareeksha.api.routers.integrations import _secret_box
+from pareeksha.api.routers.prompt_versions import active_version
 from pareeksha.db.models import Agents
+from pareeksha.integrations.crypto import SecretDecryptError
 from pareeksha.schemas.agents import (
     AgentCreate,
     AgentOut,
@@ -20,6 +28,7 @@ from pareeksha.schemas.agents import (
     TestConnectionResult,
 )
 from pareeksha.schemas.common import Page
+from pareeksha.schemas.prompts import ProviderName
 
 router = APIRouter(tags=["agents"], responses=AUTH_ERRORS)
 
@@ -27,7 +36,14 @@ _DUPLICATE = "An agent with this name already exists"
 
 
 def _out(row: Agents) -> AgentOut:
-    return AgentOut.model_validate(row, from_attributes=True)
+    out = AgentOut.model_validate(row, from_attributes=True)
+    out.has_adapter_secrets = bool(row.adapter_secrets_encrypted)
+    return out
+
+
+def _encrypt(secrets: dict[str, str]) -> bytes | None:
+    """Fernet token for the write-only provider secrets; ``{}`` clears them."""
+    return _secret_box().encrypt(secrets).encode() if secrets else None
 
 
 @router.post(
@@ -37,7 +53,16 @@ def _out(row: Agents) -> AgentOut:
     summary="Register an agent under test",
 )
 async def create_agent(body: AgentCreate, key: WriteKey, session: Db) -> AgentOut:
-    row = Agents(project_id=key.project_id, **body.model_dump(mode="json"))
+    agent_id = uuid.uuid4()
+    data = body.model_dump(mode="json")
+    if body.adapter == "prompt":
+        data["endpoint_url"] = f"prompt://{agent_id}"
+    row = Agents(
+        id=agent_id,
+        project_id=key.project_id,
+        adapter_secrets_encrypted=_encrypt(body.adapter_secrets or {}),
+        **data,
+    )
     session.add(row)
     await flush(session, _DUPLICATE, refresh=row)
     return _out(row)
@@ -64,6 +89,8 @@ async def update_agent(agent_id: UUID, body: AgentUpdate, key: WriteKey, session
     row = await get_or_404(session, Agents, agent_id, key.project_id, "Agent")
     for field, value in body.model_dump(mode="json", exclude_none=True).items():
         setattr(row, field, value)
+    if body.adapter_secrets is not None:
+        row.adapter_secrets_encrypted = _encrypt(body.adapter_secrets)
     row.updated_at = datetime.now(UTC)
     await flush(session, _DUPLICATE)
     return _out(row)
@@ -86,6 +113,8 @@ async def archive_agent(agent_id: UUID, key: WriteKey, session: Db) -> AgentOut:
 )
 async def test_agent_connection(agent_id: UUID, key: WriteKey, session: Db) -> TestConnectionResult:
     row = await get_or_404(session, Agents, agent_id, key.project_id, "Agent")
+    if row.adapter == "prompt":
+        return await _check_prompt_agent(session, row)
     target = AgentTarget(
         agent_id=row.id,
         adapter=row.adapter,
@@ -95,3 +124,39 @@ async def test_agent_connection(agent_id: UUID, key: WriteKey, session: Db) -> T
         glass_box=row.glass_box,
     )
     return await check_connection(target)
+
+
+async def _check_prompt_agent(session: AsyncSession, row: Agents) -> TestConnectionResult:
+    """One plain chat call ("Hello", no tools) with the active version's model and key."""
+    version = await active_version(session, row)
+    if version is None:
+        return TestConnectionResult(
+            ok=False, error="no_active_version", detail="Create a prompt version first"
+        )
+    try:
+        secrets = (
+            _secret_box().decrypt(row.adapter_secrets_encrypted.decode())
+            if row.adapter_secrets_encrypted
+            else {}
+        )
+    except SecretDecryptError as exc:
+        raise ApiError(500, "internal_error", str(exc)) from exc
+    try:
+        provider = build_chat_provider(
+            cast(ProviderName, version.provider),
+            api_key=secrets.get("api_key"),
+            base_url=version.base_url,
+        )
+        reply = await provider.chat(
+            [
+                AgentMessage(role="system", content=version.system_prompt),
+                AgentMessage(role="user", content="Hello"),
+            ],
+            [],
+            model=version.model,
+            temperature=version.temperature,
+            timeout_s=10.0,
+        )
+    except (AgentLLMError, ValueError) as exc:  # messages never carry the API key
+        return TestConnectionResult(ok=False, error="provider_error", detail=str(exc))
+    return TestConnectionResult(ok=True, first_audio_ms=reply.latency_ms, protocol=version.provider)

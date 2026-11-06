@@ -131,6 +131,12 @@ async def prepare(session: AsyncSession, project_id: uuid.UUID, body: RunCreate)
     ).one_or_none()
     if agent is None:
         raise ApiError(404, "not_found", "Agent not found", {"id": str(body.agent_id)})
+    if agent.adapter == "prompt" and not cast(dict[str, Any], agent.adapter_config).get(
+        "active_version_id"
+    ):
+        raise ApiError(
+            422, "prompt_agent_has_no_version", "Create a prompt version before running this agent"
+        )
     if agent.archived:
         raise ApiError(409, "conflict", "Agent is archived", {"id": str(body.agent_id)})
 
@@ -206,7 +212,7 @@ async def create_run(session: AsyncSession, project_id: uuid.UUID, body: RunCrea
             "repeats": body.repeats,
             "item_count": prepared.item_count,
         },
-        agent_snapshot=agent_snapshot.model_dump(mode="json"),
+        agent_snapshot=agent_snapshot.model_dump(mode="json", exclude={"has_adapter_secrets"}),
         estimated_cost=Decimal(str(prepared.estimate.est_cost)),
     )
     session.add(run)
