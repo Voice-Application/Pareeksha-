@@ -223,6 +223,7 @@ def test_run_checks_integration():
         ("language_match", "en-IN"): True,
         ("no_loop", "agent_repeats"): True,
         ("tool_calls_expected", "record_ptp"): False,
+        ("no_unexpected_tool", "no_unexpected_tool"): True,
         ("amount_confirmed", "emi"): False,
     }
     assert res[0].to_dict()["check_type"] == "disclosure_present"

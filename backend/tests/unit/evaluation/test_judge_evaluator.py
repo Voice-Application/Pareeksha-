@@ -137,6 +137,7 @@ def test_check_failure_types_cover_every_check_type() -> None:
         "no_loop",
         "amount_confirmed",
         "tool_calls_expected",
+        "no_unexpected_tool",
     }
 
 
