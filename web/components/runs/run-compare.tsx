@@ -177,8 +177,11 @@ export function RunCompare() {
     first ? `Newly failing: ${first.scenario} x ${first.persona} (${fmtScore(first.base_score)} to ${fmtScore(first.head_score)})${newly.length > 1 ? ` and ${newly.length - 1} more` : ""}.` : "",
   ].filter(Boolean).join(" ") || undefined;
 
+  const bv = cmp.data?.base_prompt_version;
+  const hv = cmp.data?.head_prompt_version;
   const eyebrow = (
     <span className="inline-flex flex-wrap items-center gap-x-2">
+      {bv != null && hv != null && <span className="mono normal-case" aria-label={`Prompt version ${bv} to ${hv}`}>v{bv} → v{hv}</span>}
       <span>Base</span><span className="normal-case">{runLabel(b)} ({dateOf(b.created_at)})</span>
       <span aria-hidden>to</span>
       <span>Head</span><span className="normal-case">{runLabel(h)} ({dateOf(h.created_at)})</span>
@@ -186,8 +189,17 @@ export function RunCompare() {
   );
 
   const link = (kind: "Base" | "Head", c: Compared) => {
-    const id = (kind === "Base" ? baseCall : headCall).get(cellKey(c.scenario, c.persona, c.profile));
-    return id ? <Link className="text-accent-fg underline underline-offset-2" href={`/calls/${id}`}>{kind} call</Link> : <span className="text-subtle">-</span>;
+    const fromCell = (kind === "Base" ? c.base_call_ids : c.head_call_ids) ?? [];
+    const one = (kind === "Base" ? baseCall : headCall).get(cellKey(c.scenario, c.persona, c.profile));
+    const ids = fromCell.length ? fromCell : one ? [one] : [];
+    if (!ids.length) return <span className="text-subtle">-</span>;
+    return (
+      <span className="inline-flex flex-wrap gap-x-2">
+        {ids.map((id, i) => (
+          <Link key={id} className="text-accent-fg underline underline-offset-2" href={`/calls/${id}`}>{ids.length > 1 ? `${kind} call ${i + 1}` : `${kind} call`}</Link>
+        ))}
+      </span>
+    );
   };
   const columns: Column<Compared>[] = [
     { key: "scenario", header: "Scenario", className: "min-w-[12rem]", cell: (c) => <span className="font-medium">{c.scenario}</span> },

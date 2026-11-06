@@ -17,6 +17,7 @@ import { FormSkeleton, PageError, Strip } from "@/components/ui/states";
 import { ConfirmDialog } from "@/components/ui/overlay";
 import { useToast } from "@/components/ui/toast";
 import { ConnectionTest } from "./connection-test";
+import { PromptVersions } from "./prompt-versions";
 
 type Agent = components["schemas"]["AgentOut"];
 type AgentCreate = components["schemas"]["AgentCreate"];
@@ -30,6 +31,8 @@ type Form = {
   languages: string[];
   adapter: AgentCreate["adapter"];
   endpoint_url: string;
+  api_key: string;
+  replaceKey: boolean;
   adapter_config: string;
   glass_box: boolean;
   max_call_seconds: string;
@@ -45,6 +48,8 @@ const EMPTY: Form = {
   languages: ["en-IN"],
   adapter: "audio_v1",
   endpoint_url: "",
+  api_key: "",
+  replaceKey: false,
   adapter_config: "{}",
   glass_box: false,
   max_call_seconds: "240",
@@ -60,7 +65,9 @@ function fromAgent(a: Agent): Form {
     description: a.description,
     languages: a.languages ?? [],
     adapter: a.adapter,
-    endpoint_url: a.endpoint_url,
+    endpoint_url: a.endpoint_url ?? "",
+    api_key: "",
+    replaceKey: false,
     adapter_config: JSON.stringify(a.adapter_config ?? {}, null, 2),
     glass_box: a.glass_box,
     max_call_seconds: String(a.max_call_seconds),
@@ -91,7 +98,9 @@ function validate(f: Form): Errors {
   const e: Errors = {};
   if (!f.name.trim()) e["agent-name"] = "Enter a name.";
   if (!f.description.trim()) e["agent-description"] = "Describe what the agent does. The judge and the scenario generator read this.";
-  if (!f.endpoint_url.trim()) e["agent-endpoint"] = "Enter the agent's WebSocket URL.";
+  if (f.adapter === "prompt") {
+    // Prompt agents have no endpoint; provider, model and prompt live in versions.
+  } else if (!f.endpoint_url.trim()) e["agent-endpoint"] = "Enter the agent's WebSocket URL.";
   else if (!/^(wss?|https?):\/\/\S+$/i.test(f.endpoint_url.trim())) e["agent-endpoint"] = "Use a full URL such as ws://host:8765/ws.";
   const secs = Number(f.max_call_seconds);
   if (!Number.isInteger(secs) || secs < 10 || secs > 1800) e["agent-max-seconds"] = "Use a whole number of seconds between 10 and 1800.";
@@ -128,14 +137,16 @@ function validate(f: Form): Errors {
 }
 
 function toPayload(f: Form): AgentCreate {
+  const prompt = f.adapter === "prompt";
   return {
     name: f.name.trim(),
     description: f.description.trim(),
     adapter: f.adapter,
-    adapter_config: JSON.parse(f.adapter_config || "{}"),
-    endpoint_url: f.endpoint_url.trim(),
+    // Prompt agents keep server-managed config (active_version_id), so the form never sends it.
+    ...(prompt ? {} : { adapter_config: JSON.parse(f.adapter_config || "{}"), endpoint_url: f.endpoint_url.trim() }),
+    ...(prompt && f.api_key ? { adapter_secrets: { api_key: f.api_key } } : {}),
     languages: f.languages,
-    glass_box: f.glass_box,
+    glass_box: prompt ? true : f.glass_box,
     mandatory_disclosures: f.disclosures.map((d) => ({ id: d.id.trim(), text: d.text.trim(), regex: d.regex.trim() || null, within_turns: Number(d.within_turns) })),
     forbidden_phrases: f.forbidden.map((d) => ({ id: d.id.trim(), text: d.text.trim(), regex: d.regex.trim() || null })),
     expected_tools: f.tools.map((t) => ({ name: t.name.trim(), description: t.description.trim() })),
@@ -303,6 +314,7 @@ export function AgentForm({ agentId }: { agentId?: string }) {
     );
   }
 
+  const isPrompt = form.adapter === "prompt";
   const errCount = Object.keys(errors).length;
 
   return (
@@ -367,10 +379,46 @@ export function AgentForm({ agentId }: { agentId?: string }) {
           </Panel>
 
           <Panel title="Connection" bodyClassName="grid gap-4">
-            <Segmented label="Adapter" value={form.adapter} onChange={(v) => patch({ adapter: v })} options={ADAPTERS} />
-            <TextField id="agent-endpoint" label="Endpoint URL" required className="mono" placeholder="ws://host:8765/ws" value={form.endpoint_url} onChange={(e) => patch({ endpoint_url: e.target.value })} error={errors["agent-endpoint"]} />
-            <TextAreaField id="agent-config" label="Adapter config (JSON)" className="mono" rows={3} spellCheck={false} value={form.adapter_config} onChange={(e) => patch({ adapter_config: e.target.value })} error={errors["agent-config"]} help="Extra settings for the adapter. Leave {} if unsure." />
-            <Switch label="Glass-box" checked={form.glass_box} onChange={(v) => patch({ glass_box: v })} help="The agent sends its transcript and tool calls over the socket, and Pareeksha stores them per turn." />
+            <Segmented
+              label="Agent type"
+              value={isPrompt ? "prompt" : "voice"}
+              onChange={(v) => patch({ adapter: v === "prompt" ? "prompt" : form.adapter === "prompt" ? "audio_v1" : form.adapter })}
+              options={[{ value: "voice", label: "Voice agent" }, { value: "prompt", label: "Prompt (text)" }]}
+              help={isPrompt ? "Paste the system prompt your LLM uses. Pareeksha runs it as text and mocks your tools." : undefined}
+            />
+            {!isPrompt && <Segmented label="Adapter" value={form.adapter} onChange={(v) => patch({ adapter: v })} options={ADAPTERS} />}
+            {isPrompt ? (
+              <div className="grid gap-2">
+                {agent.data?.has_adapter_secrets && !form.replaceKey ? (
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="text-sm font-medium">API key</span>
+                    <span className="inline-flex items-center gap-1 text-sm">
+                      <Check size={14} strokeWidth={1.6} className="text-pass-fg" aria-hidden />
+                      Key saved
+                    </span>
+                    <Button className="h-8 px-3" onClick={() => patch({ replaceKey: true })}>
+                      Replace key
+                    </Button>
+                  </div>
+                ) : (
+                  <TextField
+                    id="agent-api-key"
+                    type="password"
+                    label="API key"
+                    className="mono"
+                    autoComplete="new-password"
+                    value={form.api_key}
+                    onChange={(e) => patch({ api_key: e.target.value })}
+                    help="Used to call your LLM provider. Stored encrypted and never shown again. Leave empty for providers that need none, such as Ollama."
+                  />
+                )}
+                <p className="text-sm text-muted">{isNew ? "After you create the agent, paste its system prompt and pick the provider and model on the agent page." : "The provider, model, prompt and tools are saved as versions below."}</p>
+              </div>
+            ) : (
+              <TextField id="agent-endpoint" label="Endpoint URL" required className="mono" placeholder="ws://host:8765/ws" value={form.endpoint_url} onChange={(e) => patch({ endpoint_url: e.target.value })} error={errors["agent-endpoint"]} />
+            )}
+            {!isPrompt && <TextAreaField id="agent-config" label="Adapter config (JSON)" className="mono" rows={3} spellCheck={false} value={form.adapter_config} onChange={(e) => patch({ adapter_config: e.target.value })} error={errors["agent-config"]} help="Extra settings for the adapter. Leave {} if unsure." />}
+            {!isPrompt && <Switch label="Glass-box" checked={form.glass_box} onChange={(v) => patch({ glass_box: v })} help="The agent sends its transcript and tool calls over the socket, and Pareeksha stores them per turn." />}
             <NumberField id="agent-max-seconds" label="Max call seconds" min={10} max={1800} value={form.max_call_seconds} onChange={(e) => patch({ max_call_seconds: e.target.value })} error={errors["agent-max-seconds"]} fieldClassName="max-w-[200px]" />
           </Panel>
 
@@ -454,9 +502,11 @@ export function AgentForm({ agentId }: { agentId?: string }) {
         </fieldset>
 
         <aside className="min-w-0 min-[1180px]:sticky min-[1180px]:top-16 min-[1180px]:self-start">
-          <ConnectionTest agentId={agentId ?? null} settingsKey={JSON.stringify(form)} autoRun={search.get("test") === "1"} />
+          {!isPrompt && <ConnectionTest agentId={agentId ?? null} settingsKey={JSON.stringify(form)} autoRun={search.get("test") === "1"} />}
         </aside>
       </form>
+
+      {!isNew && agent.data?.adapter === "prompt" && <PromptVersions agentId={agentId} />}
 
       <ConfirmDialog
         open={archiveOpen}

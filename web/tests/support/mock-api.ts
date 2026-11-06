@@ -11,6 +11,7 @@ export type Agent = S["AgentOut"];
 export type Scenario = S["ScenarioOut"];
 export type Persona = S["PersonaOut"];
 export type Noise = S["NoiseProfileOut"];
+export type PromptVersion = S["PromptVersionOut"];
 
 export type Call = { method: string; path: string; query: URLSearchParams; body: unknown };
 
@@ -19,6 +20,8 @@ export type MockState = {
   scenarios: Scenario[];
   personas: Persona[];
   noise: Noise[];
+  /** Prompt versions per agent id, oldest first. */
+  promptVersions: Record<string, PromptVersion[]>;
   runsByAgent: Record<string, { id: string; created_at: string }>;
   /** Milliseconds every response is held, to observe loading states. */
   delay: number;
@@ -42,6 +45,7 @@ export function agent(n: number, over: Partial<Agent> = {}): Agent {
     description: "Outbound bot for a fictional lender. Reminds customers of EMI due dates.",
     adapter: "audio_v1",
     adapter_config: {},
+    has_adapter_secrets: false,
     endpoint_url: "ws://mock-agent:8765/ws",
     languages: ["kn-IN", "hi-IN", "en-IN"],
     glass_box: true,
@@ -140,6 +144,7 @@ export function freshState(): MockState {
       noise(3, { name: "auto_rickshaw_0db", description: "Adversarial", background_category: "auto_rickshaw", snr_db: 0, packet_loss_pct: 1 }),
       noise(4, { name: "mobile_weak_signal", description: "Patchy signal", background_category: "street_traffic", snr_db: 10, packet_loss_pct: 5, clipping: true }),
     ],
+    promptVersions: {},
     runsByAgent: { [uuid(101)]: { id: uuid(700), created_at: new Date(Date.now() - 14 * 60_000).toISOString() } },
     delay: 0,
     fail: [],
@@ -221,9 +226,34 @@ export async function mockApi(pg: Page, state: MockState) {
     if (path === "/agents" && method === "GET") return send({ json: page(url.searchParams.get("include_archived") === "true" ? state.agents : state.agents.filter((a) => !a.archived), url.searchParams) });
     if (path === "/agents" && method === "POST") {
       if (state.agents.some((a) => a.name === b.name)) return send(err(409, "conflict", "Agent name already exists."));
-      const a = { ...agent(0), ...(b as object), id: uuid(state.seq++), archived: false, created_at: ts, updated_at: ts } as Agent;
+      const { adapter_secrets, ...rest } = b;
+      const a = { ...agent(0), ...rest, has_adapter_secrets: !!adapter_secrets, id: uuid(state.seq++), archived: false, created_at: ts, updated_at: ts } as Agent;
       state.agents.push(a);
       return send({ status: 201, json: a });
+    }
+    if (/^\/agents\/[^/]+\/prompt-versions/.test(path)) {
+      const a = state.agents.find((x) => x.id === id);
+      if (!a) return send(err(404, "not_found", "Agent not found."));
+      if (a.adapter !== "prompt") return send(err(409, "not_a_prompt_agent", "Not a prompt agent."));
+      const list = (state.promptVersions[id] ??= []);
+      const m = path.match(/prompt-versions\/(\d+)(\/activate)?$/);
+      if (!m && method === "GET") return send({ json: [...list].reverse() });
+      if (!m && method === "POST") {
+        const sig = (x: Record<string, unknown>) => JSON.stringify([x.system_prompt, x.provider, x.model, x.base_url ?? null, x.temperature, x.tools ?? [], x.max_tool_rounds]);
+        const same = list.find((v) => v.id === a.adapter_config?.active_version_id && sig(v) === sig(b));
+        if (same) return send({ json: same });
+        const v = { ...(b as object), id: uuid(state.seq++), agent_id: id, version: list.length + 1, content_hash: `hash${list.length + 1}`.padEnd(64, "0"), created_at: ts } as PromptVersion;
+        list.push(v);
+        a.adapter_config = { ...(a.adapter_config ?? {}), active_version_id: v.id };
+        return send({ status: 201, json: v });
+      }
+      const v = m && list.find((x) => x.version === Number(m[1]));
+      if (!v) return send(err(404, "not_found", "Version not found."));
+      if (m[2] && method === "POST") {
+        a.adapter_config = { ...(a.adapter_config ?? {}), active_version_id: v.id };
+        return send({ json: v });
+      }
+      return send({ json: v });
     }
     if (/^\/agents\/[^/]+$/.test(path)) {
       const a = state.agents.find((x) => x.id === id);

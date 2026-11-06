@@ -186,7 +186,7 @@ export function AgentsList() {
       />
       <Panel bodyClassName="p-0">
         <FilterBar search={search} onSearch={(v) => url.set({ q: v })} placeholder="Search agents" chips={chips} onClear={url.clear}>
-          <FilterSelect label="Adapter" value={adapter} onChange={(v) => url.set({ adapter: v })} options={["audio_v1", "pipecat", "livekit", "vapi"].map((v) => ({ value: v, label: v }))} />
+          <FilterSelect label="Adapter" value={adapter} onChange={(v) => url.set({ adapter: v })} options={["audio_v1", "pipecat", "prompt", "livekit", "vapi"].map((v) => ({ value: v, label: v }))} />
           <FilterSelect label="Language" value={language} onChange={(v) => url.set({ lang: v })} options={LANGUAGES.map((v) => ({ value: v, label: v }))} />
           <Switch label="Show archived" checked={showArchived} onChange={(v) => url.set({ archived: v ? "1" : null })} />
         </FilterBar>
