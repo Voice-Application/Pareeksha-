@@ -132,7 +132,9 @@ async def test_rubrics_v1_v2_v3_seeded_v3_active(fresh_session_factory: Factory)
     assert rubric.prompt_hash != rubric_prompt_hash(rubric.version, 70, dims)
 
 
-async def test_a_custom_active_rubric_is_kept_but_the_builds_becomes_active(fresh_session_factory: Factory) -> None:
+async def test_custom_active_rubric_is_kept_but_the_builds_becomes_active(
+    fresh_session_factory: Factory,
+) -> None:
     async with fresh_session_factory() as session, session.begin():
         session.add(
             RubricVersions(version="custom", dimensions=[], prompt_hash="x", is_active=True)
