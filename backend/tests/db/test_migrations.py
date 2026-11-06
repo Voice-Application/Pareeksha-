@@ -20,6 +20,9 @@ from tests.conftest import BACKEND, alembic_config
 SCHEMA_SQL = BACKEND.parent / "docs" / "schema.sql"
 MIGRATION_SQL = BACKEND / "alembic" / "sql" / "0001_initial.sql"
 
+# Tables added by later Alembic revisions; not part of docs/schema.sql v0.2.
+POST_V02_TABLES = {"users", "prompt_versions"}
+
 
 def _documented_tables() -> set[str]:
     return set(re.findall(r"^CREATE TABLE (\w+)", SCHEMA_SQL.read_text(), flags=re.MULTILINE))
@@ -45,8 +48,8 @@ def test_migration_sql_is_a_copy_of_the_documented_schema() -> None:
 async def test_tables_columns_and_indexes_match_schema_sql(engine: AsyncEngine) -> None:
     async with engine.connect() as conn:
         tables, columns, indexes = await conn.run_sync(_live)
-    assert tables == _documented_tables()
-    assert len(tables) == 29
+    assert tables - POST_V02_TABLES == _documented_tables()
+    assert len(tables - POST_V02_TABLES) == 29
     assert indexes >= _documented_indexes()
     # The SQLAlchemy models mirror the live database exactly.
     assert set(Base.metadata.tables) == tables
