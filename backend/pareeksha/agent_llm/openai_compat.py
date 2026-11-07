@@ -19,6 +19,16 @@ from pareeksha.agent_llm.base import (
 )
 
 
+def _text(content: Any) -> str:
+    """Message content as text. Some servers (Mistral reasoning models) send a list of chunks
+    (``thinking`` + ``text``) instead of a string; only the ``text`` chunks are the reply."""
+    if content is None or isinstance(content, str):
+        return content or ""
+    if isinstance(content, list):
+        return "".join(c["text"] for c in content if c.get("type") == "text")
+    raise TypeError("message content is not a string or a list of chunks")
+
+
 def _wire(m: AgentMessage) -> dict[str, Any]:
     if m.role == "tool":
         return {"role": "tool", "tool_call_id": m.tool_call_id, "content": m.content}
@@ -97,11 +107,12 @@ class OpenAICompatProvider:
                 )
                 for i, c in enumerate(msg.get("tool_calls") or [])
             )
+            text = _text(msg.get("content"))
         except (KeyError, IndexError, TypeError, AttributeError) as exc:
             raise AgentLLMError("provider returned an unexpected response shape") from exc
         usage = data.get("usage") or {}
         return ChatReply(
-            text=msg.get("content") or "",
+            text=text,
             tool_calls=calls,
             input_tokens=int(usage.get("prompt_tokens") or 0),
             output_tokens=int(usage.get("completion_tokens") or 0),

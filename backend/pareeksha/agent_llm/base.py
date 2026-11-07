@@ -90,8 +90,10 @@ def _error_text(resp: httpx.Response, api_key: str | None) -> str:
         text = str(msg or "")
     except ValueError:
         text = resp.text
-    text = text[:200]
-    return text.replace(api_key, "***") if api_key else text
+    # redact before truncating so a key straddling the cut cannot leave a prefix behind
+    if api_key:
+        text = text.replace(api_key, "***")
+    return text[:200]
 
 
 async def _send(
@@ -149,12 +151,15 @@ async def post_json(
             resp = await http.post(url, headers=headers, json=body, timeout=timeout_s)
     except SSRFError as exc:
         raise AgentLLMError(f"provider URL not allowed: {exc}", retryable=False) from exc
+    except httpx.InvalidURL as exc:  # not an HTTPError subclass
+        raise AgentLLMError(f"provider URL is invalid: {exc}", retryable=False) from exc
     except httpx.TimeoutException as exc:
         raise AgentLLMError("provider request timed out", retryable=True) from exc
     except httpx.HTTPError as exc:
+        # no chaining: e.g. LocalProtocolError's text quotes the offending header (the API key)
         raise AgentLLMError(
             f"provider request failed: {type(exc).__name__}", retryable=True
-        ) from exc
+        ) from None
     latency_ms = int((time.monotonic() - start) * 1000)
     if resp.is_redirect:
         raise AgentLLMError(
