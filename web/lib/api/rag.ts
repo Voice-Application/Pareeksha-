@@ -1,0 +1,132 @@
+import { api } from "./client";
+import { ApiError, call } from "./call";
+import type { components } from "./schema";
+
+type S = components["schemas"];
+export type KnowledgeBase = S["KnowledgeBaseOut"];
+export type KbDocument = S["KbDocumentOut"];
+export type KbIndex = S["KbIndexOut"];
+export type KbChunk = S["KbChunkOut"];
+export type RagConfig = S["RagConfig"];
+export type RagMatrix = S["RagMatrixOut"];
+export type RagMatrixCreate = S["RagMatrixCreate"];
+export type RagReport = S["RagReport"];
+export type ReportRow = S["ReportRow"];
+export type PriceIn = S["PriceIn"];
+export type Pricing = S["PricingOut"];
+export type ChunkingConfig = S["ChunkingConfig"];
+export type EmbeddingConfig = S["EmbeddingConfig"];
+
+/** Response types carry the span as number[]; requests want a pair. */
+export const toSpan = (x: readonly number[] | null | undefined): [number, number] | null => (x && x.length === 2 ? [x[0], x[1]] : null);
+
+type ExpectationRead = { source_document_id?: string | null; source_span?: number[] | null; reference_answer: string; answerable: boolean };
+export type ScenarioRead = Omit<S["ScenarioOut"], "rag_expectation"> & { rag_expectation?: ExpectationRead | null };
+export const toExpectation = (e: ExpectationRead | null | undefined): S["RagExpectation"] | null | undefined => (e ? { ...e, source_span: toSpan(e.source_span) } : e);
+
+export const listKnowledgeBases = () => call(api.GET("/api/v1/knowledge-bases", { params: { query: { limit: 200 } } }));
+export const getKnowledgeBase = (kb_id: string) => call(api.GET("/api/v1/knowledge-bases/{kb_id}", { params: { path: { kb_id } } }));
+export const createKnowledgeBase = (body: S["KnowledgeBaseCreate"]) => call(api.POST("/api/v1/knowledge-bases", { body }));
+export const listDocuments = (kb_id: string) => call(api.GET("/api/v1/knowledge-bases/{kb_id}/documents", { params: { path: { kb_id }, query: { limit: 200 } } }));
+export const listIndexes = (kb_id: string) => call(api.GET("/api/v1/knowledge-bases/{kb_id}/indexes", { params: { path: { kb_id }, query: { limit: 200 } } }));
+export const getIndex = (kb_id: string, index_id: string) => call(api.GET("/api/v1/knowledge-bases/{kb_id}/indexes/{index_id}", { params: { path: { kb_id, index_id } } }));
+export const listChunks = (kb_id: string, index_id: string, offset: number, limit: number, document_id?: string) =>
+  call(api.GET("/api/v1/knowledge-bases/{kb_id}/indexes/{index_id}/chunks", { params: { path: { kb_id, index_id }, query: { offset, limit, document_id: document_id || null } } }));
+
+/** 201 is a new index version; 200 means an identical index already existed and is returned unchanged. */
+export async function buildIndex(kb_id: string, body: S["KbIndexCreate"]): Promise<{ index: KbIndex; created: boolean }> {
+  const req = api.POST("/api/v1/knowledge-bases/{kb_id}/indexes", { params: { path: { kb_id } }, body });
+  const index = await call(req);
+  const { response } = await req;
+  return { index, created: response.status === 201 };
+}
+
+/** Multipart upload through the BFF proxy. 201 = stored, 200 = the same file was already in the KB. */
+export async function uploadDocument(kb_id: string, file: File): Promise<{ doc: KbDocument; created: boolean }> {
+  const fd = new FormData();
+  fd.append("file", file);
+  let res: Response;
+  try {
+    res = await fetch(`/api/proxy/api/v1/knowledge-bases/${kb_id}/documents`, { method: "POST", body: fd });
+  } catch {
+    throw new ApiError(0, "network", "The API did not respond.");
+  }
+  const body = (await res.json().catch(() => null)) as { error?: { code?: string; message?: string; details?: Record<string, unknown> } } & KbDocument;
+  if (!res.ok) throw new ApiError(res.status, body?.error?.code ?? "unknown", body?.error?.message ?? res.statusText, body?.error?.details ?? {}, res.headers.get("x-request-id") ?? undefined);
+  return { doc: body, created: res.status === 201 };
+}
+
+export const listMatrices = () => call(api.GET("/api/v1/rag-matrices", { params: { query: { limit: 200 } } }));
+export const getMatrix = (id: string) => call(api.GET("/api/v1/rag-matrices/{id}", { params: { path: { id } } }));
+export const getReport = (id: string, monthly_conversations: number) => call(api.GET("/api/v1/rag-matrices/{id}/report", { params: { path: { id }, query: { monthly_conversations } } }));
+export const createMatrix = (body: RagMatrixCreate) => call(api.POST("/api/v1/rag-matrices", { body }));
+export const getPricing = () => call(api.GET("/api/v1/pricing"));
+export const putPricing = (body: PriceIn[]) => call(api.PUT("/api/v1/pricing", { body }));
+
+export type MissingIndex = { label: string; chunking: ChunkingConfig; embedding: EmbeddingConfig };
+
+/** The indexes a 409 rag_index_missing asks for, in the shape the build endpoint takes. */
+export function missingIndexes(e: unknown): MissingIndex[] {
+  if (!(e instanceof ApiError) || e.code !== "rag_index_missing") return [];
+  const m = (e.details as { missing?: MissingIndex[] }).missing;
+  return Array.isArray(m) ? m : [];
+}
+
+const FRIENDLY: Record<string, string> = {
+  local_only: "This knowledge base is local only. Use the local embedding model and reranker, and a model running on this deployment, or turn off Local only on the knowledge base.",
+  rag_index_missing: "No ready index matches this setup. Build the index first.",
+  full_context_too_large: "The whole knowledge base is larger than the full-context limit, so it cannot be sent to the model as one block. Use retrieval instead, or raise the limit.",
+  kb_limit_reached: "This knowledge base is full: at most 200 documents and 2,000,000 characters. Delete a document to add more.",
+  file_too_large: "That file is over 10 MB. Split it or export a smaller one.",
+  unsupported_document: "Pareeksha cannot read this file type. Use txt, md, html, csv, json, pdf or docx.",
+  extraction_failed: "The text could not be extracted from this file. It may be encrypted, scanned images only, or damaged.",
+};
+
+/** Plain sentence for the RAG error codes; other errors keep the API's own message. */
+export function ragErrorMessage(e: unknown): string {
+  if (e instanceof ApiError) return FRIENDLY[e.code] ?? e.userMessage();
+  return "The request failed.";
+}
+
+export const DEFAULT_RAG: Omit<RagConfig, "kb_id"> = {
+  mode: "retrieval",
+  chunking: { strategy: "recursive", size: 800, overlap: 100, window: 2 },
+  embedding: { provider: "local", model: "intfloat/multilingual-e5-large" },
+  method: "hybrid",
+  top_k: 5,
+  candidate_k: 20,
+  rrf_k: 60,
+  mmr_lambda: 0.5,
+  reranker_provider: "local",
+  reranker_model: "BAAI/bge-reranker-v2-m3-int8",
+  query_transform: "none",
+  small_to_big: false,
+  context_char_limit: 400000,
+  label: "",
+};
+
+export const METHODS: { value: RagConfig["method"]; label: string }[] = [
+  { value: "bm25", label: "BM25 (keywords)" },
+  { value: "dense", label: "Dense (embeddings)" },
+  { value: "hybrid", label: "Hybrid (BM25 + dense)" },
+  { value: "hybrid_rerank", label: "Hybrid + reranker" },
+  { value: "mmr", label: "MMR (diverse)" },
+];
+
+export const EMBEDDING_PROVIDERS: EmbeddingConfig["provider"][] = ["local", "gemini", "openai", "openai_compatible", "azure_openai", "cohere", "voyage", "jina", "mistral", "bedrock", "ollama"];
+
+/** Does this ready index have the chunking and embedding a config asks for? Matches the fields that decide the index key. */
+export function indexMatches(ix: KbIndex, c: Pick<RagConfig, "chunking" | "embedding">): boolean {
+  const ch = ix.chunking as Partial<ChunkingConfig>;
+  const em = ix.embedding as Partial<EmbeddingConfig>;
+  const wantCh = c.chunking ?? DEFAULT_RAG.chunking!;
+  const wantEm = c.embedding ?? DEFAULT_RAG.embedding!;
+  return ch.strategy === wantCh.strategy && ch.size === wantCh.size && ch.overlap === wantCh.overlap && em.provider === wantEm.provider && em.model === wantEm.model;
+}
+
+export const pct = (x: number | null | undefined, digits = 0) => (x == null ? "n/a" : `${(x * 100).toFixed(digits)}%`);
+/** "71% (58–81%)" */
+export const pctCi = (x: number | null | undefined, ci: readonly number[] | null | undefined) =>
+  x == null ? "n/a" : ci && ci.length === 2 ? `${pct(x)} (${(ci[0] * 100).toFixed(0)}–${(ci[1] * 100).toFixed(0)}%)` : pct(x);
+export const ms = (x: number | null | undefined) => (x == null ? "n/a" : `${Math.round(x).toLocaleString("en-IN")} ms`);
+export const inr = (x: number | null | undefined, digits = 2) => (x == null ? "unpriced" : `₹${x.toLocaleString("en-IN", { minimumFractionDigits: digits, maximumFractionDigits: digits })}`);

@@ -13,6 +13,18 @@ export type Persona = S["PersonaOut"];
 export type Noise = S["NoiseProfileOut"];
 export type PromptVersion = S["PromptVersionOut"];
 
+export type RagMock = {
+  kbs: S["KnowledgeBaseOut"][];
+  docs: Record<string, S["KbDocumentOut"][]>;
+  indexes: Record<string, S["KbIndexOut"][]>;
+  /** Index list GETs that answer "pending" before a pending index turns "ready". */
+  indexPendingPolls: number;
+  chunks: S["KbChunkOut"][];
+  matrices: S["RagMatrixOut"][];
+  report: S["RagReport"] | null;
+  pricing: S["PricingOut"];
+};
+
 export type Call = { method: string; path: string; query: URLSearchParams; body: unknown };
 
 export type MockState = {
@@ -33,6 +45,7 @@ export type MockState = {
   draftResult: { status: "ready" | "failed"; drafts: S["ScenarioCreate"][]; error?: string };
   calls: Call[];
   seq: number;
+  rag: RagMock;
 };
 
 const ts = "2026-10-20T10:00:00Z";
@@ -159,6 +172,7 @@ export function freshState(): MockState {
     },
     calls: [],
     seq: 1000,
+    rag: { kbs: [], docs: {}, indexes: {}, indexPendingPolls: 1, chunks: [], matrices: [], report: null, pricing: { prices: [], unpriced: [] } },
   };
 }
 
@@ -239,7 +253,7 @@ export async function mockApi(pg: Page, state: MockState) {
       const m = path.match(/prompt-versions\/(\d+)(\/activate)?$/);
       if (!m && method === "GET") return send({ json: [...list].reverse() });
       if (!m && method === "POST") {
-        const sig = (x: Record<string, unknown>) => JSON.stringify([x.system_prompt, x.provider, x.model, x.base_url ?? null, x.temperature, x.tools ?? [], x.max_tool_rounds]);
+        const sig = (x: Record<string, unknown>) => JSON.stringify([x.system_prompt, x.provider, x.model, x.base_url ?? null, x.temperature, x.tools ?? [], x.max_tool_rounds, x.rag_config ?? null]);
         const same = list.find((v) => v.id === a.adapter_config?.active_version_id && sig(v) === sig(b));
         if (same) return send({ json: same });
         const v = { ...(b as object), id: uuid(state.seq++), agent_id: id, version: list.length + 1, content_hash: `hash${list.length + 1}`.padEnd(64, "0"), created_at: ts } as PromptVersion;
@@ -361,6 +375,68 @@ export async function mockApi(pg: Page, state: MockState) {
         state.noise = state.noise.filter((x) => x.id !== id);
         return route.fulfill({ status: 204 });
       }
+    }
+    // knowledge bases and RAG lab
+    const rag = state.rag;
+    if (path === "/knowledge-bases" && method === "GET") return send({ json: page(rag.kbs, url.searchParams) });
+    if (path === "/knowledge-bases" && method === "POST") {
+      const { secrets, ...rest } = b;
+      const kb = { description: "", local_only: false, ...rest, has_secrets: !!secrets, id: uuid(state.seq++), created_at: ts, updated_at: ts } as S["KnowledgeBaseOut"];
+      rag.kbs.push(kb);
+      return send({ status: 201, json: kb });
+    }
+    const kbm = path.match(/^\/knowledge-bases\/([^/]+)(\/.*)?$/);
+    if (kbm) {
+      const kb = rag.kbs.find((x) => x.id === kbm[1]);
+      if (!kb) return send(err(404, "not_found", "Knowledge base not found."));
+      const sub = kbm[2] ?? "";
+      if (sub === "" && method === "GET") return send({ json: kb });
+      if (sub === "/documents" && method === "GET") return send({ json: page(rag.docs[kb.id] ?? [], url.searchParams) });
+      if (sub === "/documents" && method === "POST") {
+        const name = /filename="([^"]+)"/.exec(req.postData() ?? "")?.[1] ?? "file.txt";
+        if (name.endsWith(".exe")) return send(err(422, "unsupported_document", "Unsupported file type."));
+        const list = (rag.docs[kb.id] ??= []);
+        const dup = list.find((d) => d.filename === name);
+        if (dup) return send({ json: dup });
+        const d = { id: uuid(state.seq++), filename: name, mime: "text/plain", char_count: 1200, sha256: "a".repeat(64), created_at: ts };
+        list.push(d);
+        return send({ status: 201, json: d });
+      }
+      if (sub === "/indexes" && method === "GET") {
+        const list = (rag.indexes[kb.id] ??= []);
+        if (list.some((i) => i.status === "pending")) {
+          if (rag.indexPendingPolls > 0) rag.indexPendingPolls -= 1;
+          else list.forEach((i) => (i.status = "ready"));
+        }
+        return send({ json: page(list, url.searchParams) });
+      }
+      if (sub === "/indexes" && method === "POST") {
+        const list = (rag.indexes[kb.id] ??= []);
+        const same = list.find((i) => JSON.stringify([i.chunking, i.embedding]) === JSON.stringify([b.chunking, b.embedding]));
+        if (same) return send({ json: same });
+        const ix = { id: uuid(state.seq++), version: list.length + 1, index_key: `k${list.length + 1}`, status: "pending", chunking: b.chunking as Record<string, unknown>, embedding: b.embedding as Record<string, unknown>, chunk_count: 0, stats: {}, error: null, created_at: ts, finished_at: null };
+        list.push(ix);
+        return send({ status: 201, json: ix });
+      }
+      const ixm = sub.match(/^\/indexes\/([^/]+)(\/chunks)?$/);
+      if (ixm) {
+        const ix = (rag.indexes[kb.id] ?? []).find((i) => i.id === ixm[1]);
+        if (!ix) return send(err(404, "not_found", "Index not found."));
+        return send({ json: ixm[2] ? rag.chunks : ix });
+      }
+    }
+    if (path === "/rag-matrices" && method === "GET") return send({ json: page(rag.matrices, url.searchParams) });
+    if (path === "/rag-matrices" && method === "POST") {
+      const m = { id: uuid(state.seq++), agent_id: b.agent_id as string, kb_id: (b.configs as { kb_id: string }[])[0].kb_id, entries: [], created_at: ts } as S["RagMatrixOut"];
+      rag.matrices.push(m);
+      return send({ status: 201, json: m });
+    }
+    if (/^\/rag-matrices\/[^/]+\/report$/.test(path) && method === "GET") return rag.report ? send({ json: rag.report }) : send(err(404, "not_found", "Matrix not found."));
+    if (path === "/pricing" && method === "GET") return send({ json: rag.pricing });
+    if (path === "/pricing" && method === "PUT") {
+      const body = b as unknown as S["PriceIn"][];
+      rag.pricing = { prices: body.map((x) => ({ ...x, updated_at: ts })), unpriced: [] };
+      return send({ json: rag.pricing });
     }
     return send(err(404, "not_found", `No fixture for ${method} ${path}`));
   });

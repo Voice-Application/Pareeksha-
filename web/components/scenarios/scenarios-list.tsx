@@ -7,6 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ListChecks, Plus, Sparkles } from "lucide-react";
 import { api } from "@/lib/api/client";
 import { call, ApiError } from "@/lib/api/call";
+import { toExpectation, type ScenarioRead } from "@/lib/api/rag";
 import type { components } from "@/lib/api/schema";
 import { usePagedList } from "@/lib/hooks/use-paged-list";
 import { useUrlState } from "@/lib/hooks/use-url-state";
@@ -21,7 +22,7 @@ import { ConfirmDialog, Dialog } from "@/components/ui/overlay";
 import { useToast } from "@/components/ui/toast";
 import { GenerateSheet } from "./generate-sheet";
 
-type Scenario = components["schemas"]["ScenarioOut"];
+type Scenario = ScenarioRead;
 
 export const TAG_SUGGESTIONS = ["happy_path", "edge_case", "adversarial", "payment_dispute"];
 
@@ -56,6 +57,7 @@ function toCreateBody(s: Scenario): components["schemas"]["ScenarioCreate"] {
     caller_speaks_first: s.caller_speaks_first,
     max_turns: s.max_turns,
     tags: s.tags,
+    rag_expectation: toExpectation(s.rag_expectation),
   };
 }
 
