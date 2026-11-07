@@ -43,9 +43,10 @@ class LocalReranker:
         self._model = model
 
     async def rerank(self, query: str, docs: Sequence[str]) -> tuple[list[float], int]:
+        encoder = await asyncio.to_thread(_encoder, self._model)  # load outside the timed span
         start = time.monotonic()
         scores = await asyncio.to_thread(
-            lambda: [float(s) for s in _encoder(self._model).rerank(query, list(docs))]
+            lambda: [float(s) for s in encoder.rerank(query, list(docs))]
         )
         return scores, int((time.monotonic() - start) * 1000)
 

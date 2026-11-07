@@ -62,13 +62,18 @@ class LocalEmbedder:
         self._model = model
 
     async def embed(self, texts: Sequence[str], *, kind: Kind) -> EmbedResult:
+        if not texts:
+            return EmbedResult([], 0, 0)
+        # Load (and on first use download) the model outside the timed span: latency_ms is the
+        # inference time only, so a cold worker does not skew retrieval-latency metrics.
+        m = await asyncio.to_thread(_model, self._model)
+        fn = m.query_embed if kind == "query" else m.passage_embed
+
         def run() -> list[list[float]]:
-            m = _model(self._model)
-            fn = m.query_embed if kind == "query" else m.passage_embed
             return [[float(x) for x in v] for v in fn(list(texts))]
 
         start = time.monotonic()
-        vectors = await asyncio.to_thread(run) if texts else []
+        vectors = await asyncio.to_thread(run)
         return EmbedResult(vectors, _estimate_tokens(texts), int((time.monotonic() - start) * 1000))
 
 
