@@ -336,6 +336,133 @@ class _Dlq:
         self._core.call(c.dlq_discard(dead_letter_id))
 
 
+class _Kb:
+    """Knowledge bases, documents, indexes and ground-truth questions (plain dict answers)."""
+
+    def __init__(self, core: _SyncCore) -> None:
+        self._core = core
+
+    def create(self, name: str, *, local_only: bool = False, **fields: Any) -> dict[str, Any]:
+        """``fields``: ``description``, ``secrets`` (``embedding_api_key``/``reranker_api_key``)."""
+        body = {"name": name, "local_only": local_only, **fields}
+        result: dict[str, Any] = self._core.call(c.kb_create(body))
+        return result
+
+    def list_all(self) -> list[dict[str, Any]]:
+        result: list[dict[str, Any]] = self._core.call(c.kb_list())
+        return result
+
+    def get_by_name(self, name: str) -> dict[str, Any]:
+        for kb in self.list_all():
+            if kb["name"] == name:
+                return kb
+        raise NotFoundError(f"knowledge base {name!r} not found")
+
+    def update(self, kb_id: UUID | str, **fields: Any) -> dict[str, Any]:
+        result: dict[str, Any] = self._core.call(c.kb_update(kb_id, fields))
+        return result
+
+    def upload(self, kb_id: UUID | str, file: str | Path) -> dict[str, Any]:
+        """Upload a document; ``unchanged=True`` when the same content was already there."""
+        result: dict[str, Any] = self._core.call(c.kb_document_upload(kb_id, Path(file)))
+        return result
+
+    def documents(self, kb_id: UUID | str) -> list[dict[str, Any]]:
+        result: list[dict[str, Any]] = self._core.call(c.kb_documents_list(kb_id))
+        return result
+
+    def delete_document(self, kb_id: UUID | str, doc_id: UUID | str) -> None:
+        self._core.call(c.kb_document_delete(kb_id, doc_id))
+
+    def create_index(self, kb_id: UUID | str, **body: Any) -> dict[str, Any]:
+        """Start a build (``chunking``, ``embedding``); ``unchanged=True`` = ready index reused."""
+        result: dict[str, Any] = self._core.call(c.kb_index_create(kb_id, body))
+        return result
+
+    def indexes(self, kb_id: UUID | str) -> list[dict[str, Any]]:
+        result: list[dict[str, Any]] = self._core.call(c.kb_indexes_list(kb_id))
+        return result
+
+    def get_index(self, kb_id: UUID | str, index_id: UUID | str) -> dict[str, Any]:
+        result: dict[str, Any] = self._core.call(c.kb_index_get(kb_id, index_id))
+        return result
+
+    def wait_index(
+        self,
+        kb_id: UUID | str,
+        index_id: UUID | str,
+        *,
+        timeout_s: float = 1800,
+        poll_s: float = 2.0,
+        sleep: Callable[[float], None] = time.sleep,
+        clock: Callable[[], float] = time.monotonic,
+    ) -> dict[str, Any]:
+        deadline = clock() + timeout_s
+        while True:
+            index = self.get_index(kb_id, index_id)
+            if index["status"] in ("ready", "failed"):
+                return index
+            if clock() >= deadline:
+                raise WaitTimeoutError(
+                    f"index {index_id} still {index['status']} after {timeout_s}s"
+                )
+            sleep(poll_s)
+
+    def generate_questions(
+        self, kb_id: UUID | str, agent_id: UUID | str, count: int, unanswerable_share: float = 0.2
+    ) -> dict[str, Any]:
+        body = {"agent_id": str(agent_id), "count": count, "unanswerable_share": unanswerable_share}
+        result: dict[str, Any] = self._core.call(c.kb_questions_generate(kb_id, body))
+        return result
+
+    def import_questions(
+        self, kb_id: UUID | str, agent_id: UUID | str, file: str | Path
+    ) -> dict[str, Any]:
+        call = c.kb_questions_import(kb_id, agent_id, Path(file))
+        result: dict[str, Any] = self._core.call(call)
+        return result
+
+
+class _Rag:
+    """RAG matrices, reports and pricing."""
+
+    def __init__(self, core: _SyncCore, runs: _Runs) -> None:
+        self._core = core
+        self._runs = runs
+
+    def create_matrix(self, body: dict[str, Any]) -> dict[str, Any]:
+        """A 409 ``rag_index_missing`` raises ``ApiError`` with ``details["missing"]``."""
+        result: dict[str, Any] = self._core.call(c.rag_matrix_create(body))
+        return result
+
+    def get_matrix(self, matrix_id: UUID | str) -> dict[str, Any]:
+        result: dict[str, Any] = self._core.call(c.rag_matrix_get(matrix_id))
+        return result
+
+    def wait_matrix(
+        self, matrix_id: UUID | str, *, timeout_s: float = 3600, poll_s: float = 3.0
+    ) -> list[Run]:
+        """Block until every run of the matrix is final."""
+        entries = self.get_matrix(matrix_id)["entries"]
+        return [
+            self._runs.wait(e["run_id"], timeout_s=timeout_s, poll_s=poll_s)
+            for e in entries
+            if e.get("run_id")
+        ]
+
+    def report(self, matrix_id: UUID | str, monthly_conversations: int = 10_000) -> dict[str, Any]:
+        result: dict[str, Any] = self._core.call(c.rag_report(matrix_id, monthly_conversations))
+        return result
+
+    def pricing(self) -> dict[str, Any]:
+        result: dict[str, Any] = self._core.call(c.pricing_get())
+        return result
+
+    def set_prices(self, prices: list[dict[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = self._core.call(c.pricing_put(prices))
+        return result
+
+
 class Pareeksha:
     """Synchronous client."""
 
@@ -348,6 +475,8 @@ class Pareeksha:
         self.runs = _Runs(self._core)
         self.audits = _Audits(self._core)
         self.dlq = _Dlq(self._core)
+        self.kb = _Kb(self._core)
+        self.rag = _Rag(self._core, self.runs)
 
     def health(self) -> Health:
         return c.parse_health(self._core.call(c.health()))

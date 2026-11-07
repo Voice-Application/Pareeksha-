@@ -34,6 +34,12 @@ dlq_app = typer.Typer(help="Inspect and replay dead letters.", no_args_is_help=T
 app.add_typer(dlq_app, name="dlq")
 prompt_app = typer.Typer(help="Prompt-agent versions.", no_args_is_help=True)
 app.add_typer(prompt_app, name="prompt")
+kb_app = typer.Typer(help="Knowledge bases for RAG testing.", no_args_is_help=True)
+app.add_typer(kb_app, name="kb")
+questions_app = typer.Typer(help="Ground-truth questions.", no_args_is_help=True)
+kb_app.add_typer(questions_app, name="questions")
+rag_app = typer.Typer(help="RAG matrices, reports and pricing.", no_args_is_help=True)
+app.add_typer(rag_app, name="rag")
 
 EXIT_FAILED = 1
 EXIT_ERROR = 2
@@ -312,6 +318,303 @@ def prompt_set_key(agent: Annotated[str, typer.Option(help="Agent name")]) -> No
             client.agents.get_by_name(agent).id, {"adapter_secrets": {"api_key": key}}
         )
     typer.echo("API key saved")
+
+
+KbOpt = Annotated[str, typer.Option(help="Knowledge base name")]
+
+
+def _env_key(var: str | None) -> str | None:
+    """Read a key from the named env var; the key itself is never echoed."""
+    if var is None:
+        return None
+    value = os.environ.get(var)
+    if not value:
+        raise _fail(f"environment variable {var} is not set")
+    return value
+
+
+@kb_app.command("create")
+def kb_create(
+    name: Annotated[str, typer.Argument(help="Knowledge base name")],
+    local_only: Annotated[bool, typer.Option(help="Never send its text to a hosted LLM")] = False,
+    description: Annotated[str, typer.Option(help="Description")] = "",
+    embedding_key_env: Annotated[
+        str | None, typer.Option(help="Env var holding the embedding API key")
+    ] = None,
+    reranker_key_env: Annotated[
+        str | None, typer.Option(help="Env var holding the reranker API key")
+    ] = None,
+) -> None:
+    """Create a knowledge base (keys are read from the named env vars, never from arguments)."""
+    secrets = {
+        "embedding_api_key": _env_key(embedding_key_env),
+        "reranker_api_key": _env_key(reranker_key_env),
+    }
+    fields: dict[str, Any] = {"description": description}
+    if any(secrets.values()):
+        fields["secrets"] = {k: v for k, v in secrets.items() if v}
+    with _client() as client:
+        kb = client.kb.create(name, local_only=local_only, **fields)
+    typer.echo(f"created knowledge base {kb['name']} ({kb['id']})")
+
+
+@kb_app.command("set-keys")
+def kb_set_keys(kb: KbOpt) -> None:
+    """Replace the stored embedding/reranker keys (hidden prompts; blank clears that key)."""
+    secrets = {
+        "embedding_api_key": typer.prompt(
+            "Embedding API key", default="", hide_input=True, show_default=False
+        ),
+        "reranker_api_key": typer.prompt(
+            "Reranker API key", default="", hide_input=True, show_default=False
+        ),
+    }
+    with _client() as client:
+        client.kb.update(
+            client.kb.get_by_name(kb)["id"], secrets={k: v for k, v in secrets.items() if v}
+        )
+    typer.echo("keys saved")
+
+
+@kb_app.command("upload")
+def kb_upload(
+    files: Annotated[list[Path], typer.Argument(exists=True, dir_okay=False, readable=True)],
+    kb: KbOpt,
+) -> None:
+    """Upload documents (txt, md, html, csv, json, pdf, docx)."""
+    with _client() as client:
+        kb_id = client.kb.get_by_name(kb)["id"]
+        for file in files:
+            doc = client.kb.upload(kb_id, file)
+            state = "already there" if doc["unchanged"] else "uploaded"
+            typer.echo(f"{state}: {file.name} ({doc['char_count']} chars)")
+
+
+@kb_app.command("index")
+def kb_index(
+    kb: KbOpt,
+    strategy: Annotated[
+        str, typer.Option(help="fixed, recursive or sentence_window")
+    ] = "recursive",
+    size: Annotated[int, typer.Option(help="Chunk size in characters")] = 800,
+    overlap: Annotated[int, typer.Option(help="Chunk overlap in characters")] = 100,
+    embedding: Annotated[str, typer.Option(help="provider:model")] = (
+        "local:intfloat/multilingual-e5-large"
+    ),
+    wait: Annotated[bool, typer.Option("--wait/--no-wait")] = False,
+    timeout: Annotated[float, typer.Option(help="Seconds to wait for the build")] = 1800,
+    poll: Annotated[float, typer.Option(help="Seconds between status polls")] = 2.0,
+) -> None:
+    """Build an index; with --wait block until it is ready or failed (exit 1 on failure)."""
+    provider, _, model = embedding.partition(":")
+    if not model:
+        raise _fail("--embedding must look like provider:model")
+    with _client() as client:
+        kb_id = client.kb.get_by_name(kb)["id"]
+        index = client.kb.create_index(
+            kb_id,
+            chunking={"strategy": strategy, "size": size, "overlap": overlap},
+            embedding={"provider": provider, "model": model},
+        )
+        if index["unchanged"]:
+            typer.echo(f"using existing index v{index['version']}")
+            return
+        typer.echo(f"building index v{index['version']} ({index['id']})")
+        if not wait:
+            return
+        index = client.kb.wait_index(kb_id, index["id"], timeout_s=timeout, poll_s=poll)
+    if index["status"] == "failed":
+        typer.echo(f"index v{index['version']} failed: {index.get('error')}", err=True)
+        raise typer.Exit(EXIT_FAILED)
+    typer.echo(f"index v{index['version']} ready: {index['chunk_count']} chunks")
+    typer.echo(json.dumps(index.get("stats") or {}, sort_keys=True))
+
+
+@questions_app.command("generate")
+def kb_questions_generate(
+    kb: KbOpt,
+    agent: Annotated[str, typer.Option(help="Agent name")],
+    count: Annotated[int, typer.Option(help="How many questions (1-50)")] = 10,
+    unanswerable_share: Annotated[float, typer.Option(help="Share the KB cannot answer")] = 0.2,
+) -> None:
+    """Generate draft ground-truth questions from the documents."""
+    with _client() as client:
+        result = client.kb.generate_questions(
+            client.kb.get_by_name(kb)["id"],
+            client.agents.get_by_name(agent).id,
+            count,
+            unanswerable_share,
+        )
+    typer.echo(f"generating; draft {result['draft_id']}")
+
+
+@questions_app.command("import")
+def kb_questions_import(
+    file: Annotated[Path, typer.Argument(exists=True, dir_okay=False, readable=True)],
+    kb: KbOpt,
+    agent: Annotated[str, typer.Option(help="Agent name")],
+) -> None:
+    """Import questions from CSV (question, expected_answer, source_document, source_quote)."""
+    with _client() as client:
+        result = client.kb.import_questions(
+            client.kb.get_by_name(kb)["id"], client.agents.get_by_name(agent).id, file
+        )
+    typer.echo(f"imported {result['created']} question(s)")
+    for u in result["unmatched"]:
+        typer.echo(f"  skipped row {u['row']}: {u['reason']}", err=True)
+
+
+@rag_app.command("run")
+def rag_run(
+    agent: Annotated[str, typer.Option(help="Agent name")],
+    kb: KbOpt,
+    config: Annotated[
+        Path,
+        typer.Option("--config", "-f", exists=True, dir_okay=False, help="JSON RagConfig list"),
+    ],
+    tags: Annotated[str, typer.Option(help="Comma-separated scenario tags")] = "rag",
+    persona: Annotated[list[str] | None, typer.Option(help="Persona name (repeatable)")] = None,
+    noise: Annotated[list[str] | None, typer.Option(help="Noise profile (repeatable)")] = None,
+    baselines: Annotated[bool, typer.Option("--baselines/--no-baselines")] = True,
+    repeats: Annotated[int, typer.Option(help="Repeats per item")] = 1,
+    confirm_over_budget: Annotated[bool, typer.Option(help="Run even if over budget")] = False,
+    wait: Annotated[bool, typer.Option("--wait/--no-wait")] = False,
+    timeout: Annotated[float, typer.Option(help="Seconds to wait for the runs")] = 3600,
+    poll: Annotated[float, typer.Option(help="Seconds between status polls")] = 3.0,
+) -> None:
+    """Create a RAG matrix (one run per config plus the baselines) and print its id."""
+    try:
+        configs = json.loads(config.read_text(encoding="utf-8"))
+    except ValueError as exc:
+        raise _fail(f"{config}: invalid JSON: {exc}") from exc
+    if not isinstance(configs, list) or not all(isinstance(c, dict) for c in configs):
+        raise _fail(f"{config}: expected a JSON list of RagConfig objects")
+    spec = Suite(
+        scenarios=ScenarioSelector(tags=[t for t in tags.split(",") if t]),
+        personas=persona or [],
+        noise_profiles=noise or [],
+    )
+    with _client() as client:
+        kb_id = client.kb.get_by_name(kb)["id"]
+        resolved = resolve_suite(client, agent, spec)
+        body = {
+            "agent_id": str(resolved.agent.id),
+            "configs": [{"kb_id": kb_id, **c} for c in configs],
+            "baselines": {"no_rag": baselines, "full_context": baselines},
+            "scenario_ids": list(resolved.scenario_ids),
+            "persona_ids": list(resolved.persona_ids),
+            "noise_profile_ids": list(resolved.noise_profile_ids),
+            "repeats": repeats,
+            "confirm_over_budget": confirm_over_budget,
+        }
+        try:
+            matrix = client.rag.create_matrix(body)
+        except ApiError as exc:
+            if exc.code != "rag_index_missing":
+                raise
+            typer.echo("missing indexes (run `pareeksha kb index` first):", err=True)
+            for m in exc.details.get("missing", []):
+                typer.echo(f"  {m.get('label')}: {json.dumps(m, sort_keys=True)}", err=True)
+            raise typer.Exit(EXIT_ERROR) from exc
+        typer.echo(f"matrix {matrix['id']}")
+        if wait:
+            runs = client.rag.wait_matrix(matrix["id"], timeout_s=timeout, poll_s=poll)
+            for r in runs:
+                typer.echo(f"  run {r.id}: {r.status}", err=True)
+
+
+_COLUMNS = (
+    "label",
+    "n",
+    "hit-rate (CI)",
+    "MRR",
+    "faithfulness",
+    "hallucination (CI)",
+    "retr p50/p95 ms",
+    "₹/conv",
+    "savings vs full ctx",
+)
+
+
+def _num(value: float | None, digits: int = 2) -> str:
+    return "-" if value is None else f"{value:.{digits}f}"
+
+
+def _with_ci(value: float | None, ci: list[float] | None) -> str:
+    if value is None:
+        return "-"
+    return f"{value:.2f} [{ci[0]:.2f}-{ci[1]:.2f}]" if ci else f"{value:.2f}"
+
+
+def report_table(report: dict[str, Any]) -> str:
+    """Fixed-width table of the report rows followed by the recommendation line."""
+    body = []
+    for r in report["rows"]:
+        ret, gen, lat = r["retrieval"], r["generation"], r["latency_ms"]
+        saving = r.get("savings_vs_full_context")
+        body.append(
+            (
+                r["label"],
+                str(r["n_calls"]),
+                _with_ci(ret.get("hit_rate"), ret.get("hit_rate_ci")),
+                _num(ret.get("mrr")),
+                _num(gen.get("faithfulness")),
+                _with_ci(gen.get("hallucination_rate"), gen.get("hallucination_ci")),
+                f"{_num(lat.get('retrieval_p50'), 0)}/{_num(lat.get('retrieval_p95'), 0)}",
+                _num(r.get("cost_per_conversation_inr"), 4),
+                "-" if saving is None else f"{saving['pct']:.1f}%",
+            )
+        )
+    widths = [max(len(row[i]) for row in [_COLUMNS, *body]) for i in range(len(_COLUMNS))]
+    lines = [
+        "  ".join(cell.ljust(w) for cell, w in zip(row, widths, strict=True)).rstrip()
+        for row in [_COLUMNS, *body]
+    ]
+    rec = report["recommendation"]
+    lines.append("")
+    lines.append(f"Recommendation: {rec['label'] or 'none'} - {rec['reason']}")
+    return "\n".join(lines)
+
+
+@rag_app.command("report")
+def rag_report(
+    matrix_id: str,
+    monthly: Annotated[int, typer.Option(help="Conversations per month for savings")] = 10_000,
+    as_json: Annotated[bool, typer.Option("--json", help="Print the raw report")] = False,
+) -> None:
+    """Print the comparison table for a RAG matrix."""
+    with _client() as client:
+        report = client.rag.report(matrix_id, monthly)
+    typer.echo(json.dumps(report, indent=2) if as_json else report_table(report))
+
+
+@rag_app.command("pricing")
+def rag_pricing() -> None:
+    """Show entered prices (INR per 1M tokens) and models still unpriced."""
+    with _client() as client:
+        pricing = client.rag.pricing()
+    for p in pricing["prices"]:
+        out = "" if p.get("output_per_m_inr") is None else f" out {p['output_per_m_inr']}"
+        typer.echo(f"{p['kind']}  {p['provider']}/{p['model']}  in {p['input_per_m_inr']}{out}")
+    for u in pricing["unpriced"]:
+        typer.echo(f"UNPRICED {u['kind']}  {u['provider']}/{u['model']}")
+
+
+@rag_app.command("set-price")
+def rag_set_price(
+    kind: Annotated[str, typer.Option(help="llm, embedding or rerank")],
+    provider: Annotated[str, typer.Option(help="Provider name")],
+    model: Annotated[str, typer.Option(help="Model id")],
+    input_per_m: Annotated[float, typer.Option(help="INR per 1M input tokens")],
+    output_per_m: Annotated[float | None, typer.Option(help="INR per 1M output tokens")] = None,
+) -> None:
+    """Enter or update one price."""
+    price = {"kind": kind, "provider": provider, "model": model, "input_per_m_inr": input_per_m}
+    if output_per_m is not None:
+        price["output_per_m_inr"] = output_per_m
+    with _client() as client:
+        client.rag.set_prices([price])
+    typer.echo(f"price saved for {kind} {provider}/{model}")
 
 
 @app.command()
