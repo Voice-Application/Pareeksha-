@@ -99,9 +99,9 @@ A knowledge base created with `--local-only` (or `local_only: true`, changeable 
 
 - Embedding and reranking must use `local` models. A hosted embedding config is rejected when you build the index or start the matrix.
 - The model under test must be a local endpoint (for example Ollama on a private address). A hosted agent model is refused, because it would receive the retrieved text.
-- The platform LLM (DeepSeek or Gemini) never sees the text. Question generation from the knowledge base is refused, and the judged metrics (faithfulness, hallucination, answer correctness, refusal correctness) are skipped and shown as `local_only` in the report. The deterministic retrieval metrics (hit rate, MRR, context precision) and the latency and token numbers still work.
+- The platform LLM (DeepSeek or Gemini) never sees the text. Question generation from the knowledge base is refused. Because a test run sends the agent's answers (built from your text) to Pareeksha's hosted LLM, which plays the simulated caller and judges the call, **test runs and matrices on a local-only knowledge base are disabled** (`409 local_only`, with or without RAG) until a local Pareeksha LLM is configured. A run created earlier is stopped at call start if you switch the flag on afterwards (`connect_failed`, error `local_only`), and the rubric judge skips such a call (review reason `local_only`).
 
-Use it for documents you may not send to a third party. Importing your own questions works.
+Upload, index builds and chunk browsing still work, and importing your own questions works. Use it for documents you may not send to a third party.
 
 ## 6. Read the report
 

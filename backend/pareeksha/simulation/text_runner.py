@@ -63,6 +63,8 @@ async def run_text_call(
     usage: list[Any] = []
     retrievals: list[RetrievalRecord] = []
     rag: dict[str, Any] | None = spec.agent.adapter_config.get("rag")
+    if rag is not None and rag["config"]["mode"] == "off":
+        rag = None  # a baseline run: the store only carries the KB's local-only flag
     history: list[HistoryLine] = []
     messages = [AgentMessage("system", version.system_prompt)]
     specs = [ToolSpec(t.name, t.description, t.parameters) for t in version.tools]
@@ -89,7 +91,9 @@ async def run_text_call(
             glass_box=True,
         )
 
-    async def ask(msgs: list[AgentMessage], tools: list[ToolSpec]) -> ChatReply:
+    async def ask(
+        msgs: list[AgentMessage], tools: list[ToolSpec], purpose: str | None = None
+    ) -> ChatReply:
         reply = await chat.chat(msgs, tools, model=version.model, temperature=version.temperature)
         log(
             "agent_llm_usage",
@@ -97,6 +101,8 @@ async def run_text_call(
             output_tokens=reply.output_tokens,
             latency_ms=reply.latency_ms,
             model=version.model,
+            # "tool_simulation" is test scaffolding, not production cost
+            **({"purpose": purpose} if purpose else {}),
         )
         return reply
 
@@ -106,7 +112,9 @@ async def run_text_call(
             f"Arguments: {json.dumps(arguments)}\nReturn the result as a JSON object."
         )
         reply = await ask(
-            [AgentMessage("system", _SIMULATE_SYSTEM), AgentMessage("user", prompt)], []
+            [AgentMessage("system", _SIMULATE_SYSTEM), AgentMessage("user", prompt)],
+            [],
+            purpose="tool_simulation",
         )
         result = json.loads(_unfence(reply.text))
         if not isinstance(result, dict):
@@ -127,6 +135,7 @@ async def run_text_call(
         context = ""
         outcome_fields: dict[str, Any] = {}
         t = clock()
+        retriever_total_ms: int | None = None
         try:
             if cfg["mode"] == "full_context":
                 context = rag["full_context_text"]
@@ -143,6 +152,7 @@ async def run_text_call(
                 for w in out.warnings:
                     log(w)
                 context = out.context
+                retriever_total_ms = out.timings.get("total_ms")
                 outcome_fields = {
                     "queries": out.queries,
                     "results": out.results,
@@ -150,11 +160,14 @@ async def run_text_call(
                     "usage": out.usage,
                 }
         except Exception as exc:
-            log("retrieval_failed", error=str(exc)[:200])
-        total_ms = int((clock() - t) * 1000)
+            log("retrieval_failed", error=str(exc)[:200], turn_idx=turn_idx)
+        # the retriever's own total leaves out the (cold-start) model load; wall clock includes it
+        total_ms = (
+            retriever_total_ms if retriever_total_ms is not None else int((clock() - t) * 1000)
+        )
         prompt = version.system_prompt
         if "{{context}}" in prompt:
-            prompt = prompt.replace("{{context}}", context)
+            prompt = prompt.replace("{{context}}", context)  # every occurrence, same context
         elif context:
             prompt = f"{prompt}\n\nRetrieved context:\n{context}"
         messages[0] = AgentMessage("system", prompt)

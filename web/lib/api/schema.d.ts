@@ -1851,6 +1851,8 @@ export interface components {
             turns?: components["schemas"]["TurnOut"][];
             /** Tool Calls */
             tool_calls?: components["schemas"]["ToolCallOut"][];
+            /** Retrievals */
+            retrievals?: components["schemas"]["RetrievalOut"][];
             metrics?: components["schemas"]["CallMetricsOut"] | null;
             /** Checks */
             checks?: components["schemas"]["CheckOut"][];
@@ -3966,6 +3968,65 @@ export interface components {
             savings_vs_no_rag?: components["schemas"]["Savings"] | null;
             /** Token Savings Vs Full Context Pct */
             token_savings_vs_full_context_pct?: number | null;
+        };
+        /**
+         * RetrievalOut
+         * @description What was retrieved for one agent turn of a RAG run (prompt agents).
+         */
+        RetrievalOut: {
+            /**
+             * Turn Idx
+             * @description index of the agent turn it was retrieved for
+             */
+            turn_idx: number;
+            /** Query */
+            query: string;
+            /**
+             * Queries
+             * @description the query plus any rewrites
+             */
+            queries: string[];
+            /** Results */
+            results: components["schemas"]["RetrievalResultOut"][];
+            /**
+             * Timings
+             * @description ms: embed, search, rerank, rewrite, total
+             */
+            timings: {
+                [key: string]: number;
+            };
+            /** Context Chars */
+            context_chars: number;
+            /**
+             * Rag Label
+             * @description label of the RAG config the turn ran with
+             */
+            rag_label: string;
+        };
+        /** RetrievalResultOut */
+        RetrievalResultOut: {
+            /** Rank */
+            rank: number;
+            /**
+             * Chunk Id
+             * Format: uuid
+             */
+            chunk_id: string;
+            /**
+             * Document Id
+             * Format: uuid
+             */
+            document_id: string;
+            /** Filename */
+            filename: string;
+            /** Start Char */
+            start_char: number;
+            /** End Char */
+            end_char: number;
+            /** Score */
+            score: number;
+            /** Text */
+            text: string;
         };
         /** RetrievalStats */
         RetrievalStats: {

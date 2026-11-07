@@ -125,7 +125,6 @@ class Retriever:
 
     async def retrieve(self, query: str, *, chat: ChatProvider | None) -> RetrievalOutcome:
         cfg, idx = self.cfg, self.index
-        t0 = time.monotonic()
         timings: dict[str, int] = {}
         usage: dict[str, int] = {}
         warnings: list[str] = []
@@ -157,22 +156,25 @@ class Retriever:
             except (AgentLLMError, ValueError):
                 warnings.append("query_transform_failed")
                 queries, dense_texts = [query], [query]
-        timings["transform_ms"] = int((time.monotonic() - t) * 1000)
+        timings["rewrite_ms"] = int((time.monotonic() - t) * 1000)
 
         vecs: list[np.ndarray] = []
         if cfg.method != "bm25":
-            t = time.monotonic()
             emb = await self.embedder.embed(dense_texts, kind="query")
-            timings["embed_ms"] = int((time.monotonic() - t) * 1000)
+            # the embedder's own latency: a cold model load is not retrieval latency
+            timings["embed_ms"] = emb.latency_ms
             usage["embed_tokens"] = emb.input_tokens
             vecs = [np.asarray(v, dtype=np.float32) for v in emb.vectors]
 
         def bm25_rank(q: str) -> list[int]:
-            return [i for i, _ in top_k(idx.bm25.scores(tokenize(q)), cfg.candidate_k)]
+            # a chunk sharing no term with the query is not a candidate: padding the ranking with
+            # score-0 chunks would hand them RRF points and fill top_k with noise
+            return [i for i, sc in top_k(idx.bm25.scores(tokenize(q)), cfg.candidate_k) if sc > 0]
 
         def dense_rank(v: np.ndarray) -> list[int]:
             return [i for i, _ in top_k(dense_scores(v, idx.matrix), cfg.candidate_k)]
 
+        t_search = time.monotonic()
         rankings: list[list[int]] = []
         for n, q in enumerate(queries):
             v = vecs[n if len(vecs) == len(queries) else 0] if vecs else None
@@ -189,10 +191,18 @@ class Retriever:
         else:
             cands = rankings[0] if rankings else []
 
+        search_ms = int((time.monotonic() - t_search) * 1000)
         scores: dict[int, float] = {}
         if cfg.method == "hybrid_rerank" and self.reranker is not None and cands:
-            rr, ms = await self.reranker.rerank(query, [idx.chunks[i]["text"] for i in cands])
+            docs = [idx.chunks[i]["text"] for i in cands]
+            rr, ms = await self.reranker.rerank(query, docs)
             timings["rerank_ms"] = ms
+            # hosted rerankers bill tokens (estimate: chars / 4 of query x docs); local costs 0
+            usage["rerank_tokens"] = (
+                0
+                if cfg.reranker_provider == "local"
+                else len(docs) * (len(query) // 4) + sum(len(d) for d in docs) // 4
+            )
             picked = top_k(rr, cfg.top_k)
             chosen = [cands[p] for p, _ in picked]
             scores = {cands[p]: s for p, s in picked}
@@ -238,7 +248,10 @@ class Retriever:
                 if doc is not None:
                     text = doc[c["parent_start"] : c["parent_end"]]
             blocks.append((c["filename"], text))
-        timings["total_ms"] = int((time.monotonic() - t0) * 1000)
+        timings["search_ms"] = search_ms
+        timings["total_ms"] = sum(
+            timings.get(k, 0) for k in ("rewrite_ms", "embed_ms", "search_ms", "rerank_ms")
+        )
         return RetrievalOutcome(results, format_context(blocks), queries, timings, usage, warnings)
 
 

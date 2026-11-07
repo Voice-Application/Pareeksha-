@@ -92,6 +92,8 @@ def _tokens(calls: Sequence[CallData]) -> dict[str, int]:
         for e in c.events:
             if e.get("type") == "agent_llm_usage":
                 d = e.get("data") or {}
+                if d.get("purpose") == "tool_simulation":  # test scaffolding, no production cost
+                    continue
                 t["agent_input"] += int(d.get("input_tokens") or 0)
                 t["agent_output"] += int(d.get("output_tokens") or 0)
         for r in c.retrievals:

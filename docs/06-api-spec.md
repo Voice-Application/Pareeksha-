@@ -249,6 +249,9 @@ One self-contained page (inline CSS, no scripts): summary figures, top failure t
       "agent_heard_text": "…naalvattu saavira…", "start_ms": 6100, "end_ms": 9300, "is_barge_in": false }
   ],
   "tool_calls": [ { "seq": 0, "name": "record_promise_to_pay", "arguments": { "amount": 40000 }, "at_ms": 11200 } ],
+  "retrievals": [ { "turn_idx": 1, "query": "…", "queries": ["…"], "rag_label": "hybrid · recursive 800/100 · e5-large · k5",
+                    "results": [ { "rank": 1, "chunk_id": "…", "document_id": "…", "filename": "faq.txt", "start_char": 0, "end_char": 240, "score": 0.83, "text": "…" } ],
+                    "timings": { "embed_ms": 4, "search_ms": 1, "total_ms": 5 }, "context_chars": 960 } ],
   "metrics": { "first_greeting_ms": 820, "response_latency_p50_ms": 1040, "response_latency_p95_ms": 2210,
                "barge_in_attempts": 2, "barge_in_honoured": 0, "silence_gaps_over_2s": 1, "caller_asr_wer": 0.18 },
   "checks": [
@@ -500,7 +503,7 @@ Added with the RAG lab (see [Guide 10](guides/10-rag-testing.md)). Reads need sc
 | `GET /knowledge-bases/{id}/documents` | List documents | page of documents |
 | `GET /knowledge-bases/{id}/documents/{doc_id}` | Fetch one, with its extracted text | the document |
 | `DELETE /knowledge-bases/{id}/documents/{doc_id}` | Remove a document from later indexes | `204` |
-| `POST /knowledge-bases/{id}/indexes` | Build an index `{ chunking, embedding }`. An identical ready index over the same documents is returned as is | `202` the index (`pending`), or `200` the existing one. `422` if `local_only` forbids the embedding provider |
+| `POST /knowledge-bases/{id}/indexes` | Build an index `{ chunking, embedding }`. An identical ready index over the same documents is returned as is | `202` the index (`pending`), or `200` the existing one. `422` if `local_only` forbids the embedding provider, or `unsupported_model` for a `local` model that fastembed does not list |
 | `GET /knowledge-bases/{id}/indexes` | List indexes (version, status, chunk count, stats) | page of indexes |
 | `GET /knowledge-bases/{id}/indexes/{index_id}` | Fetch one; poll `status` (`pending`, `building`, `ready`, `failed`) | the index |
 | `GET /knowledge-bases/{id}/indexes/{index_id}/chunks?document_id=&offset=&limit=` | Chunk browser: text and offsets, no vectors | list of chunks |

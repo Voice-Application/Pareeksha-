@@ -43,12 +43,13 @@ from pareeksha.rag.guard import (
     require_local_agent,
     require_local_embedding,
     require_local_reranker,
+    require_platform_llm_allowed,
 )
 from pareeksha.runs.slots import StartResult, start_item
 from pareeksha.schemas.prompts import PromptVersionOut
 from pareeksha.schemas.rag import RagConfig
 from pareeksha.simulation import store
-from pareeksha.simulation.models import CallResult, CallSpec
+from pareeksha.simulation.models import CallEvent, CallResult, CallSpec
 from pareeksha.simulation.runner import CallRunner, quiet_pipecat_logs
 from pareeksha.simulation.runtime import BrainCallerSource, CallerSource
 from pareeksha.simulation.text_runner import run_text_call
@@ -172,6 +173,9 @@ async def _run_prompt_call(spec: CallSpec) -> CallResult:
     if rag:  # local-only knowledge base: the call itself must not leave the machine either
         cfg = RagConfig.model_validate(rag["config"])
         try:
+            # re-checked here: local_only may have been switched on after the run was created.
+            # Nothing has been sent yet (no caller brain, no agent call).
+            require_platform_llm_allowed(rag["local_only"])
             require_local_agent(rag["local_only"], version.provider, version.base_url)
             if cfg.mode == "retrieval":
                 require_local_embedding(rag["local_only"], cfg.embedding)
@@ -179,7 +183,11 @@ async def _run_prompt_call(spec: CallSpec) -> CallResult:
                     require_local_reranker(rag["local_only"], cfg.reranker_provider)
         except LocalOnlyError as exc:
             return CallResult(
-                call_id=spec.call_id, end_reason="connect_failed", duration_ms=0, error=str(exc)
+                call_id=spec.call_id,
+                end_reason="connect_failed",
+                duration_ms=0,
+                error="local_only",
+                events=[CallEvent(t_ms=0, type="local_only", data={"message": str(exc)})],
             )
     try:
         if version.base_url:

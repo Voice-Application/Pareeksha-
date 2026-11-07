@@ -184,7 +184,21 @@ async def _rag_target(
             return None
         cfg = RagConfig.model_validate(raw)
         if cfg.mode == "off":
-            return None
+            # nothing is retrieved, but the transcript still reaches the hosted caller and judge:
+            # the simulator must be told about a KB that is (now) local-only
+            await cur.execute(
+                "SELECT local_only FROM knowledge_bases WHERE id = %s AND project_id = %s",
+                (cfg.kb_id, project_id),
+            )
+            off_kb = await cur.fetchone()
+            if off_kb is None or off_kb["local_only"] is False:
+                return None
+            return {
+                "config": cfg.model_dump(mode="json"),
+                "index_id": None,
+                "kb_id": str(cfg.kb_id),
+                "local_only": True,
+            }, {}
         await cur.execute(
             "SELECT local_only, secrets_encrypted FROM knowledge_bases "
             "WHERE id = %s AND project_id = %s",

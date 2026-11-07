@@ -165,7 +165,15 @@ async def test_local_only_kb_makes_no_rag_llm_call(database_url: str) -> None:
     call = seed_run(libpq_url(database_url), 1)[0]
     seed_rag(database_url, call, local_only=True)
     provider = await deliver(database_url, call, [judge_json(evidence=[2])])
-    assert len(provider.requests) == 1  # only the rubric judge
+    # not even the rubric judge: the transcript carries the KB's text to the hosted LLM
+    assert provider.requests == []
+    ev = await fetch_rows(
+        database_url,
+        "SELECT status, needs_human_review, review_reasons FROM evaluations WHERE call_id = %s",
+        call.call_id,
+    )
+    assert len(ev) == 1 and ev[0]["needs_human_review"] is True
+    assert ev[0]["status"] == "judge_error" and "local_only" in ev[0]["review_reasons"]
     rows = await rag_rows(database_url, call.call_id)
     assert rows[0]["metrics"]["hit_at_k"] is True
     assert {s["reason"] for s in rows[0]["skipped"]} == {"local_only"}

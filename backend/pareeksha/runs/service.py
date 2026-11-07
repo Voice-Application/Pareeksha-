@@ -40,7 +40,9 @@ from pareeksha.rag.guard import (
     require_local_agent,
     require_local_embedding,
     require_local_reranker,
+    require_platform_llm_allowed,
 )
+from pareeksha.rag.local_models import UnsupportedModelError, require_supported_models
 from pareeksha.runs.estimate import (
     ScenarioShape,
     estimate_run,
@@ -204,15 +206,26 @@ async def _pin_rag(
     if not raw or version is None:
         return {}
     cfg = RagConfig.model_validate(raw)
-    if cfg.mode == "off":
-        return {}
     kb = await session.scalar(
         select(KnowledgeBases).where(
             KnowledgeBases.id == cfg.kb_id, KnowledgeBases.project_id == project_id
         )
     )
     if kb is None:
+        if cfg.mode == "off":
+            return {}
         raise ApiError(404, "not_found", "Knowledge base not found", {"id": str(cfg.kb_id)})
+    try:
+        # first, in every mode (also off): the transcript reaches the hosted caller and judge
+        require_platform_llm_allowed(kb.local_only)
+    except LocalOnlyError as exc:
+        raise ApiError(409, "local_only", str(exc)) from exc
+    if cfg.mode == "off":
+        return {}
+    try:
+        require_supported_models(cfg)
+    except UnsupportedModelError as exc:
+        raise ApiError(422, "unsupported_model", str(exc)) from exc
     try:
         require_local_agent(kb.local_only, version.provider, version.base_url)
         if cfg.mode == "retrieval":

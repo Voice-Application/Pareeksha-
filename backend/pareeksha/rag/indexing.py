@@ -19,7 +19,7 @@ from psycopg.types.json import Jsonb
 
 from pareeksha.agent_llm.base import AgentLLMError
 from pareeksha.events.topics import MAX_ATTEMPTS
-from pareeksha.integrations.crypto import SecretBox, SecretDecryptError
+from pareeksha.integrations.crypto import SecretBox
 from pareeksha.rag.chunking import chunk_document
 from pareeksha.rag.embeddings import Embedder, build_embedder
 from pareeksha.rag.guard import LocalOnlyError, require_local_embedding
@@ -76,34 +76,42 @@ async def build_index(
         "SELECT local_only, secrets_encrypted FROM knowledge_bases WHERE id = %s", (kb_id,)
     )
     kb = await cur.fetchone()
-    if kb is None:  # pragma: no cover - the FK cascade removes the index with its KB
-        return
-    local_only, secrets = kb
+    # fail closed: a KB (or flag) that cannot be read is treated as local-only
+    local_only = kb is None or kb[0] is None or bool(kb[0])
+    secrets = None if kb is None else kb[1]
     api_key: str | None = None
     try:
-        embedding = EmbeddingConfig.model_validate(embedding_raw)
-        require_local_embedding(local_only, embedding)
-        api_key = _api_key(secrets)
-        await conn.execute("UPDATE kb_indexes SET status = 'building' WHERE id = %s", (index_id,))
-        stats = await _build(
-            conn,
-            index_id,
-            kb_id,
-            ChunkingConfig.model_validate(chunking_raw),
-            embedder_for(embedding, api_key),
-            [uuid.UUID(d) for d in document_ids],
-            embedding_raw,
-        )
+        # a savepoint: after a SQL error the transaction stays usable for the ``failed`` update
+        async with conn.transaction():
+            embedding = EmbeddingConfig.model_validate(embedding_raw)
+            require_local_embedding(local_only, embedding)
+            api_key = _api_key(secrets)
+            await conn.execute(
+                "UPDATE kb_indexes SET status = 'building' WHERE id = %s", (index_id,)
+            )
+            stats = await _build(
+                conn,
+                index_id,
+                kb_id,
+                ChunkingConfig.model_validate(chunking_raw),
+                embedder_for(embedding, api_key),
+                [uuid.UUID(d) for d in document_ids],
+                embedding_raw,
+            )
     except LocalOnlyError as exc:
         await _fail(conn, index_id, str(exc), api_key)
         return
-    except AgentLLMError as exc:
-        if exc.retryable and attempt < MAX_ATTEMPTS:
-            raise  # rolls back to pending; the framework retries
+    except (AgentLLMError, TimeoutError, OSError, psycopg.OperationalError) as exc:
+        if attempt < MAX_ATTEMPTS and (
+            not isinstance(exc, AgentLLMError) or exc.retryable
+        ):  # transient: rolls back to pending and the framework retries
+            raise
         await _fail(conn, index_id, f"embedding failed: {exc}", api_key)
         return
-    except (ValueError, SecretDecryptError) as exc:  # bad config or unreadable secrets: no retry
-        await _fail(conn, index_id, f"index build failed: {exc}", api_key)
+    except Exception as exc:  # bad config, unreadable secrets, a bug: retrying cannot help
+        # every path ends ready or failed, never left ``pending`` for the DLQ to forget
+        log.warning("index %s build failed: %s", index_id, type(exc).__name__)
+        await _fail(conn, index_id, f"index build failed: {exc or type(exc).__name__}", api_key)
         return
     await conn.execute(
         "UPDATE kb_indexes SET status = 'ready', chunk_count = %s, stats = %s, error = NULL, "

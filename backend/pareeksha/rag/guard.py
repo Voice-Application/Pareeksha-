@@ -18,11 +18,7 @@ def _refuse(what: str) -> LocalOnlyError:
     return LocalOnlyError(f"knowledge base is local-only: {what} must run locally")
 
 
-def is_local_endpoint(provider: str, base_url: str | None) -> bool:
-    if provider in ("ollama", "local"):
-        return True
-    if provider != "openai_compatible" or not base_url or not allow_private_urls():
-        return False
+def _resolves_non_public(base_url: str) -> bool:
     host = urlsplit(base_url).hostname
     if not host:
         return False
@@ -31,6 +27,16 @@ def is_local_endpoint(provider: str, base_url: str | None) -> bool:
     except socket.gaierror:
         return False
     return bool(infos) and not any(is_public_ip(str(i[4][0])) for i in infos)
+
+
+def is_local_endpoint(provider: str, base_url: str | None) -> bool:
+    if provider == "local":
+        return True
+    if provider == "ollama" and not base_url:  # the default, http://localhost:11434
+        return True
+    if provider not in ("ollama", "openai_compatible") or not base_url or not allow_private_urls():
+        return False
+    return _resolves_non_public(base_url)
 
 
 def require_local_embedding(kb_local_only: bool, cfg: EmbeddingConfig) -> None:
@@ -51,3 +57,16 @@ def require_local_agent(kb_local_only: bool, provider: str, base_url: str | None
 def platform_llm_may_see_kb(kb_local_only: bool) -> bool:
     """The platform LLM (DeepSeek/Gemini) is always hosted."""
     return not kb_local_only
+
+
+PLATFORM_LLM_REFUSAL = (
+    "This knowledge base is local-only. Test runs send the agent's answers to Pareeksha's hosted "
+    "LLM (simulated caller and judge), so they are disabled until a local Pareeksha LLM is "
+    "configured. Upload, index builds and chunk browsing still work."
+)
+
+
+def require_platform_llm_allowed(kb_local_only: bool) -> None:
+    """A test run's transcript carries KB text to the hosted caller brain and judge."""
+    if not platform_llm_may_see_kb(kb_local_only):
+        raise LocalOnlyError(PLATFORM_LLM_REFUSAL)

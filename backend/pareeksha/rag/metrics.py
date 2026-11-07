@@ -51,6 +51,8 @@ class RagInputs:
     agent_turns: list[str] = field(default_factory=list)
     #: evidence texts the agent was shown (retrieved chunks or the live KB documents)
     context: list[str] = field(default_factory=list)
+    #: agent turns whose retrieval failed (event ``retrieval_failed``): they have no row above
+    failed_turns: list[int] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -107,7 +109,10 @@ async def compute_rag_metrics(
 
     # ---- retrieval (deterministic)
     if inp.mode == "retrieval":
-        first = min(inp.retrievals, key=lambda r: r["turn_idx"], default=None)
+        # the first attempt is the answer turn; a failed one has no row, so it counts as a miss
+        # instead of handing the grade to a later turn's retrieval
+        earliest = min([r["turn_idx"] for r in inp.retrievals] + inp.failed_turns, default=None)
+        first = next((r for r in inp.retrievals if r["turn_idx"] == earliest), None)
         got = (
             retrieval_metrics(list(first["results"]) if first else [], exp)
             if exp is not None

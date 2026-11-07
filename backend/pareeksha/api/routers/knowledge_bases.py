@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import Annotated
+from typing import Annotated, Any, Literal, ParamSpec, TypeVar
 from uuid import UUID
 
-from fastapi import APIRouter, File, Form, Query, Response, UploadFile
+from fastapi import APIRouter, File, Form, Query, Request, Response, UploadFile
+from fastapi.routing import APIRoute
 from sqlalchemy import func, select
 
 from pareeksha.api.auth import ReadKey, WriteKey
@@ -36,6 +38,7 @@ from pareeksha.events.schemas import (
 from pareeksha.rag.documents import active_document_ids
 from pareeksha.rag.extract import ExtractionError, extract_text
 from pareeksha.rag.guard import LocalOnlyError, platform_llm_may_see_kb, require_local_embedding
+from pareeksha.rag.local_models import UnsupportedModelError, require_supported_embedding
 from pareeksha.rag.questions import CsvError, locate_quote, parse_csv, question_scenario
 from pareeksha.schemas.common import Page
 from pareeksha.schemas.rag import (
@@ -56,11 +59,67 @@ from pareeksha.schemas.rag import (
 )
 from pareeksha.schemas.scenarios import DraftAccepted
 
-router = APIRouter(tags=["knowledge-bases"], responses=AUTH_ERRORS)
+#: Room for the multipart envelope around a file of ``MAX_UPLOAD_BYTES``.
+MULTIPART_SLACK = 1024 * 1024
+
+
+class _BodyCappedRoute(APIRoute):
+    """Refuse an oversized body by its Content-Length before the multipart form is parsed (and
+    spooled to disk). ``# ponytail: a chunked body without Content-Length is only bounded by the
+    proxy in front; add a streaming byte counter if the API is exposed directly``"""
+
+    def get_route_handler(self) -> Callable[[Request], Any]:
+        handler = super().get_route_handler()
+
+        async def capped(request: Request) -> Any:
+            try:
+                length = int(request.headers.get("content-length") or 0)
+            except ValueError:
+                length = 0
+            if length > MAX_UPLOAD_BYTES + MULTIPART_SLACK:
+                raise ApiError(
+                    413,
+                    "file_too_large",
+                    "File is larger than 10 MB",
+                    {"max_bytes": MAX_UPLOAD_BYTES},
+                )
+            return await handler(request)
+
+        return capped
+
+
+router = APIRouter(tags=["knowledge-bases"], responses=AUTH_ERRORS, route_class=_BodyCappedRoute)
 
 MAX_DOCUMENTS = 200
 MAX_CHARS = 2_000_000
 EXTRACT_TIMEOUT_S = 30
+P = ParamSpec("P")
+T = TypeVar("T")
+
+#: Extraction and CSV parsing run in threads, which Python cannot kill: at most this many at once,
+#: and a slot is only freed when its thread has really finished (not when we stop waiting for it).
+# ponytail: threads are not killable; move extraction to a process pool if hostile uploads become a problem  # noqa: E501
+_THREAD_SLOTS = asyncio.Semaphore(2)
+
+
+async def _in_slot(fn: Callable[P, T], *args: P.args, **kwargs: P.kwargs) -> T:
+    """``fn`` in a thread, under ``_THREAD_SLOTS``, within ``EXTRACT_TIMEOUT_S`` (TimeoutError)."""
+
+    async def run() -> T:
+        await _THREAD_SLOTS.acquire()
+        task = asyncio.ensure_future(asyncio.to_thread(fn, *args, **kwargs))
+
+        def done(t: asyncio.Future[T]) -> None:
+            _THREAD_SLOTS.release()
+            if not t.cancelled():
+                t.exception()  # retrieved: nobody awaits a thread we stopped waiting for
+
+        task.add_done_callback(done)
+        return await asyncio.shield(task)
+
+    return await asyncio.wait_for(run(), EXTRACT_TIMEOUT_S)
+
+
 _DUPLICATE = "A knowledge base with this name already exists"
 
 
@@ -161,9 +220,7 @@ async def upload_document(
         mime, text = existing.mime, existing.text
     else:
         try:
-            mime, text = await asyncio.wait_for(
-                asyncio.to_thread(extract_text, filename, data), EXTRACT_TIMEOUT_S
-            )
+            mime, text = await _in_slot(extract_text, filename, data)
         except TimeoutError as exc:
             raise ApiError(422, "extraction_failed", "Extraction took too long") from exc
         except ExtractionError as exc:
@@ -174,6 +231,9 @@ async def upload_document(
             )
             raise ApiError(422, code, f"Could not read document: {exc.code}") from exc
 
+    await session.execute(  # serialises uploads per KB: the limits below are check-then-insert
+        select(KnowledgeBases.id).where(KnowledgeBases.id == kb.id).with_for_update()
+    )
     count, chars = (
         await session.execute(
             select(func.count(), func.coalesce(func.sum(KbDocuments.char_count), 0)).where(
@@ -274,6 +334,10 @@ async def create_index(
         require_local_embedding(kb.local_only, body.embedding)
     except LocalOnlyError as exc:
         raise ApiError(422, "local_only", str(exc)) from exc
+    try:
+        require_supported_embedding(body.embedding.provider, body.embedding.model)
+    except UnsupportedModelError as exc:
+        raise ApiError(422, "unsupported_model", str(exc)) from exc
     await session.execute(  # serialises version numbers per KB
         select(KnowledgeBases.id).where(KnowledgeBases.id == kb.id).with_for_update()
     )
@@ -416,6 +480,32 @@ async def generate_questions(
     return DraftAccepted(draft_id=draft.id)
 
 
+_Unmatched = Literal["document_not_found", "quote_not_found", "empty_question"]
+
+
+def _locate_rows(
+    rows: list[dict[str, str]], by_name: dict[str, tuple[UUID, str]]
+) -> list[tuple[dict[str, str], RagExpectation | None, _Unmatched | None]]:
+    """Per CSV row: its expectation, or why it is unmatched. Blocking (thread)."""
+    out: list[tuple[dict[str, str], RagExpectation | None, _Unmatched | None]] = []
+    for row in rows:
+        if not row["question"]:
+            out.append((row, None, "empty_question"))
+        elif not row["source_quote"]:  # no quote = the knowledge base does not answer it
+            exp = RagExpectation(answerable=False, reference_answer=row["expected_answer"])
+            out.append((row, exp, None))
+        elif (doc := by_name.get(row["source_document"].lower())) is None:
+            out.append((row, None, "document_not_found"))
+        elif (span := locate_quote(doc[1], row["source_quote"])) is None:
+            out.append((row, None, "quote_not_found"))
+        else:
+            exp = RagExpectation(
+                source_document_id=doc[0], source_span=span, reference_answer=row["expected_answer"]
+            )
+            out.append((row, exp, None))
+    return out
+
+
 @router.post(
     "/knowledge-bases/{kb_id}/questions:import",
     responses=errors(404, 413, 422),
@@ -437,7 +527,9 @@ async def import_questions(
             413, "file_too_large", "File is larger than 10 MB", {"max_bytes": MAX_UPLOAD_BYTES}
         )
     try:
-        rows = parse_csv(data)
+        rows = await _in_slot(parse_csv, data)
+    except TimeoutError as exc:
+        raise ApiError(422, "validation_error", "Parsing took too long") from exc
     except CsvError as exc:
         raise ApiError(422, "validation_error", str(exc)) from exc
     ids = await active_document_ids(session, kb.id)
@@ -450,26 +542,16 @@ async def import_questions(
     for doc_id, filename, text in sorted(found.all(), key=lambda r: ids.index(r[0])):
         by_name.setdefault(filename.lower(), (doc_id, text))
 
+    try:  # quote search is O(rows x document size): off the event loop, under the same slots
+        located = await _in_slot(_locate_rows, rows, by_name)
+    except TimeoutError as exc:
+        raise ApiError(422, "validation_error", "Matching quotes took too long") from exc
     unmatched: list[QuestionUnmatched] = []
     created: list[Scenarios] = []
-    for n, row in enumerate(rows, 1):
-        if not row["question"]:
-            unmatched.append(QuestionUnmatched(row=n, reason="empty_question"))
+    for n, (row, expectation, reason) in enumerate(located, 1):
+        if expectation is None:
+            unmatched.append(QuestionUnmatched(row=n, reason=reason or "quote_not_found"))
             continue
-        if not row["source_quote"]:  # no quote = the knowledge base does not answer it
-            expectation = RagExpectation(answerable=False, reference_answer=row["expected_answer"])
-        else:
-            doc = by_name.get(row["source_document"].lower())
-            if doc is None:
-                unmatched.append(QuestionUnmatched(row=n, reason="document_not_found"))
-                continue
-            span = locate_quote(doc[1], row["source_quote"])
-            if span is None:
-                unmatched.append(QuestionUnmatched(row=n, reason="quote_not_found"))
-                continue
-            expectation = RagExpectation(
-                source_document_id=doc[0], source_span=span, reference_answer=row["expected_answer"]
-            )
         scenario = question_scenario(agent.id, row["question"], row["expected_answer"], expectation)
         created.append(Scenarios(project_id=key.project_id, source="manual", **_cols(scenario)))
     session.add_all(created)

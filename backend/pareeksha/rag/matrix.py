@@ -47,7 +47,16 @@ def _entries(body: RagMatrixCreate) -> list[tuple[str, str, RagConfig]]:
         )
         out.append(("Full context", "full_context", fc))
     out += [(rag_label(c), "rag", c) for c in body.configs]
-    return out
+    used: set[str] = set()
+    unique: list[tuple[str, str, RagConfig]] = []
+    for label, kind, cfg in out:  # entries are keyed by label: "x", "x (2)", "x (3)"
+        n, candidate = 1, label
+        while candidate in used:
+            n += 1
+            candidate = f"{label} ({n})"
+        used.add(candidate)
+        unique.append((candidate, kind, cfg))
+    return unique
 
 
 async def create_matrix(
@@ -86,11 +95,12 @@ async def create_matrix(
         )
     missing: list[dict[str, Any]] = []
     na: dict[str, str] = {}
-    total = 0.0
+    costs: dict[str, float] = {}
     for label, _kind, _cfg, req in reqs:
         p = await service.prepare(session, project_id, req)
-        total += p.estimate.est_cost
+        costs[label] = p.estimate.est_cost
         try:
+            # also refuses a local-only KB (409 local_only) for every entry, baselines included
             await service._pin_rag(session, project_id, p)
         except ApiError as exc:
             if exc.code == "rag_index_missing":
@@ -115,6 +125,7 @@ async def create_matrix(
             {"missing": missing},
         )
     n_runs = len(reqs) - len(na)
+    total = sum(c for label, c in costs.items() if label not in na)  # an n/a entry never runs
     if n_runs and is_over_budget(total, prepared.remaining) and not body.confirm_over_budget:
         raise ApiError(
             402,

@@ -23,6 +23,7 @@ from pareeksha.db.models import (
     DeterministicChecks,
     Evaluations,
     HumanReviews,
+    Retrievals,
     RubricVersions,
     RunItems,
     ToolCalls,
@@ -36,10 +37,12 @@ from pareeksha.schemas.calls import (
     DimensionScore,
     EvaluationOut,
     Recordings,
+    RetrievalOut,
     ToolCallOut,
     TurnOut,
 )
 from pareeksha.schemas.common import Page
+from pareeksha.schemas.rag import RagConfig, rag_label
 
 _TRACK_COLUMNS = {
     "mixed": Calls.recording_mixed,
@@ -163,6 +166,12 @@ async def get_call(
             select(ToolCalls).where(ToolCalls.call_id == call_id).order_by(ToolCalls.seq)
         )
     ).all()
+    # project-scoped through the call row fetched above
+    retrievals = (
+        await session.scalars(
+            select(Retrievals).where(Retrievals.call_id == call.id).order_by(Retrievals.turn_idx)
+        )
+    ).all()
     metrics = await session.get(CallMetrics, call_id)
     checks = (
         await session.scalars(
@@ -224,6 +233,7 @@ async def get_call(
             )
             for t in tool_calls
         ],
+        retrievals=[_retrieval(r) for r in retrievals],
         metrics=None if metrics is None else _metrics(metrics),
         checks=[
             CheckOut(
@@ -238,6 +248,24 @@ async def get_call(
         ],
         evaluation=None if evaluation is None else _evaluation(*evaluation),
         speaker_map=cast("Any", call.speaker_map),
+    )
+
+
+def _retrieval(r: Retrievals) -> RetrievalOut:
+    try:
+        label = rag_label(RagConfig.model_validate(r.rag_config))
+    except ValueError:  # a row written under an older config shape
+        label = str(r.rag_config.get("label") or "")
+    return RetrievalOut.model_validate(
+        {
+            "turn_idx": r.turn_idx,
+            "query": r.query,
+            "queries": r.queries,
+            "results": r.results,
+            "timings": r.timings,
+            "context_chars": r.context_chars,
+            "rag_label": label,
+        }
     )
 
 

@@ -136,6 +136,29 @@ class EvaluationOut(BaseModel):
     confidence: Literal["high", "medium", "low"] | None = None
 
 
+class RetrievalResultOut(BaseModel):
+    rank: int
+    chunk_id: UUID
+    document_id: UUID
+    filename: str
+    start_char: int
+    end_char: int
+    score: float
+    text: str
+
+
+class RetrievalOut(BaseModel):
+    """What was retrieved for one agent turn of a RAG run (prompt agents)."""
+
+    turn_idx: int = Field(description="index of the agent turn it was retrieved for")
+    query: str
+    queries: list[str] = Field(description="the query plus any rewrites")
+    results: list[RetrievalResultOut]
+    timings: dict[str, int] = Field(description="ms: embed, search, rerank, rewrite, total")
+    context_chars: int
+    rag_label: str = Field(description="label of the RAG config the turn ran with")
+
+
 class CallOut(BaseModel):
     id: UUID
     source: CallSource
@@ -150,6 +173,7 @@ class CallOut(BaseModel):
     recordings: Recordings = Field(default_factory=Recordings)
     turns: list[TurnOut] = Field(default_factory=list)
     tool_calls: list[ToolCallOut] = Field(default_factory=list)
+    retrievals: list[RetrievalOut] = Field(default_factory=list)
     metrics: CallMetricsOut | None = None
     checks: list[CheckOut] = Field(default_factory=list)
     evaluation: EvaluationOut | None = None
