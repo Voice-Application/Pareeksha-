@@ -266,8 +266,12 @@ def prompt_push(
     note: Annotated[str | None, typer.Option(help="Version note")] = None,
 ) -> None:
     """Create a prompt version and make it active."""
+    try:
+        system_prompt = file.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as exc:
+        raise _fail(f"{file}: cannot read prompt file: {exc}") from exc
     fields: dict[str, Any] = {
-        "system_prompt": file.read_text(encoding="utf-8"),
+        "system_prompt": system_prompt,
         "provider": provider,
         "model": model,
         "base_url": base_url,
@@ -276,8 +280,12 @@ def prompt_push(
     }
     if tools is not None:
         try:
-            fields["tools"] = json.loads(tools.read_text(encoding="utf-8"))
-        except ValueError as exc:  # JSONDecodeError and bad UTF-8
+            tools_text = tools.read_text(encoding="utf-8")
+        except (OSError, UnicodeError) as exc:
+            raise _fail(f"{tools}: cannot read tools file: {exc}") from exc
+        try:
+            fields["tools"] = json.loads(tools_text)
+        except ValueError as exc:  # JSONDecodeError
             raise _fail(f"{tools}: invalid JSON: {exc}") from exc
         if not isinstance(fields["tools"], list):
             raise _fail(f"{tools}: expected a JSON list of tools")

@@ -105,17 +105,19 @@ async def list_prompt_versions(agent_id: UUID, key: ReadKey, session: Db) -> lis
     await _prompt_agent(session, agent_id, key.project_id)
     stmt = (
         select(PromptVersions)
-        .where(PromptVersions.agent_id == agent_id)
+        .where(PromptVersions.agent_id == agent_id, PromptVersions.project_id == key.project_id)
         .order_by(PromptVersions.version.desc())
     )
     return [_out(r) for r in (await session.scalars(stmt)).all()]
 
 
-async def _version(session: AsyncSession, agent_id: UUID, version: int) -> PromptVersions:
+async def _version(session: AsyncSession, agent: Agents, version: int) -> PromptVersions:
     row = (
         await session.scalars(
             select(PromptVersions).where(
-                PromptVersions.agent_id == agent_id, PromptVersions.version == version
+                PromptVersions.agent_id == agent.id,
+                PromptVersions.project_id == agent.project_id,
+                PromptVersions.version == version,
             )
         )
     ).one_or_none()
@@ -132,8 +134,8 @@ async def _version(session: AsyncSession, agent_id: UUID, version: int) -> Promp
 async def get_prompt_version(
     agent_id: UUID, version: int, key: ReadKey, session: Db
 ) -> PromptVersionOut:
-    await _prompt_agent(session, agent_id, key.project_id)
-    return _out(await _version(session, agent_id, version))
+    agent = await _prompt_agent(session, agent_id, key.project_id)
+    return _out(await _version(session, agent, version))
 
 
 @router.post(
@@ -145,7 +147,10 @@ async def activate_prompt_version(
     agent_id: UUID, version: int, key: WriteKey, session: Db
 ) -> PromptVersionOut:
     agent = await _prompt_agent(session, agent_id, key.project_id)
-    row = await _version(session, agent_id, version)
+    row = await _version(session, agent, version)
+    if row.provider == "openai_compatible" and not (row.base_url or "").strip():
+        # stored before creation required it; a call with it can only fail
+        raise ApiError(422, "base_url_required", "openai_compatible versions need a base_url")
     await _check_url(row.base_url)
     _activate(agent, row)
     await flush(session, _CONFLICT)

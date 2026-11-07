@@ -59,6 +59,8 @@ class State:
         self.missing_indexes: list[dict[str, Any]] = []
         self.matrix_bodies: list[dict[str, Any]] = []
         self.prices: list[dict[str, Any]] = []
+        self.active_prompt_version: dict[str, int] = {}
+        self.prompt_activations: list[tuple[str, int]] = []
         self.designer_requests: list[dict[str, Any]] = []
         self.designer_commits: list[dict[str, Any]] = []
         self.llm_settings: dict[str, Any] = {
@@ -315,10 +317,15 @@ def build_app(state: State) -> FastAPI:
         body = await request.json()
         state.prompt_bodies.append(body)
         rows = state.prompt_versions.setdefault(agent_id, [])
-        if rows and rows[0]["system_prompt"] == body["system_prompt"]:
-            return rows[0]
+        # Like the server's content_hash: every field but the note, with defaults filled in,
+        # compared against the active version.
+        active = state.active_prompt_version.get(agent_id)
+        current = next((r for r in rows if r["version"] == active), None)
+        if current is not None and _pv_config(current) == _pv_config(body):
+            return current
         row = {**body, "version": len(rows) + 1}
         rows.insert(0, row)
+        state.active_prompt_version[agent_id] = row["version"]
         response.status_code = 201
         return row
 
@@ -331,6 +338,8 @@ def build_app(state: State) -> FastAPI:
         dependencies=[Depends(auth)],
     )
     def activate_pv(agent_id: str, version: int) -> dict[str, Any]:
+        state.prompt_activations.append((agent_id, version))
+        state.active_prompt_version[agent_id] = version
         return {"version": version, "active": True}
 
     # --- RAG lab ------------------------------------------------------------------------------
@@ -484,6 +493,19 @@ REPORT: dict[str, Any] = {
     ],
     "recommendation": {"label": None, "reason": "not enough ground-truth questions (2 < 10)"},
 }
+
+
+_PV_DEFAULTS: dict[str, Any] = {
+    "base_url": None,
+    "temperature": 0.2,
+    "tools": [],
+    "max_tool_rounds": 5,
+}
+
+
+def _pv_config(fields: dict[str, Any]) -> dict[str, Any]:
+    """The fields that make a prompt version distinct (the server hashes all but ``note``)."""
+    return {**_PV_DEFAULTS, **{k: v for k, v in fields.items() if k not in ("note", "version")}}
 
 
 def add_dead_letter(state: State) -> str:

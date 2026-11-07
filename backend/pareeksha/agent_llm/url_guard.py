@@ -28,6 +28,9 @@ def check_base_url(url: str, *, allow_private: bool) -> None:
         raise ValueError("base_url has no host")
     if parts.username or parts.password:
         raise ValueError("credentials in base_url are not allowed")
+    # checked on the raw string: urlsplit drops an empty "?" or "#"
+    if "?" in url or "#" in url:
+        raise ValueError("base_url must not contain a query string or fragment")
     if allow_private:
         return
     try:

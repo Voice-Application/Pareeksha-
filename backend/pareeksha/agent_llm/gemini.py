@@ -14,6 +14,7 @@ from pareeksha.agent_llm.base import (
     ChatReply,
     ToolCallReq,
     ToolSpec,
+    object_args,
     post_json,
 )
 
@@ -28,15 +29,36 @@ def _response_obj(content: str) -> dict[str, Any]:
     return parsed if isinstance(parsed, dict) else {"result": parsed}
 
 
+def _tool_call(i: int, part: dict[str, Any]) -> ToolCallReq:
+    fc = part["functionCall"]
+    args, raw = object_args(fc.get("args"))
+    data: dict[str, Any] = {}
+    if part.get("thoughtSignature"):
+        data["thought_signature"] = part["thoughtSignature"]
+    if fc.get("id"):  # Gemini 3 assigns ids; the functionResponse must echo them
+        data["function_call_id"] = fc["id"]
+    return ToolCallReq(
+        id=str(fc.get("id") or f"call_{i}"),
+        name=fc["name"],
+        arguments=args,
+        raw_arguments=raw,
+        provider_data=data,
+    )
+
+
 def _wire(messages: Sequence[AgentMessage]) -> tuple[str, list[dict[str, Any]]]:
     system = "\n\n".join(m.content for m in messages if m.role == "system")
     out: list[dict[str, Any]] = []
     prev_tool = False
+    model_ids: set[str] = set()  # call ids the model itself assigned (echoed on the response)
     for m in messages:
         if m.role == "system":
             continue
         if m.role == "tool":
-            part = {"functionResponse": {"name": m.name, "response": _response_obj(m.content)}}
+            resp: dict[str, Any] = {"name": m.name, "response": _response_obj(m.content)}
+            if m.tool_call_id in model_ids:
+                resp["id"] = m.tool_call_id
+            part = {"functionResponse": resp}
             # Consecutive tool results share one user turn.
             if prev_tool:
                 out[-1]["parts"].append(part)
@@ -48,7 +70,11 @@ def _wire(messages: Sequence[AgentMessage]) -> tuple[str, list[dict[str, Any]]]:
         if m.role == "assistant":
             parts: list[dict[str, Any]] = [{"text": m.content}] if m.content else []
             for c in m.tool_calls:
-                call_part: dict[str, Any] = {"functionCall": {"name": c.name, "args": c.arguments}}
+                call: dict[str, Any] = {"name": c.name, "args": c.arguments}
+                if c.provider_data.get("function_call_id"):
+                    call["id"] = c.provider_data["function_call_id"]
+                    model_ids.add(c.id)
+                call_part: dict[str, Any] = {"functionCall": call}
                 if sig := c.provider_data.get("thought_signature"):
                     call_part["thoughtSignature"] = sig
                 parts.append(call_part)
@@ -86,7 +112,13 @@ class GeminiProvider:
             body["tools"] = [
                 {
                     "functionDeclarations": [
-                        {"name": t.name, "description": t.description, "parameters": t.parameters}
+                        {
+                            "name": t.name,
+                            "description": t.description,
+                            # full JSON Schema; `parameters` is an OpenAPI subset that 400s on
+                            # keywords like additionalProperties or $schema
+                            "parametersJsonSchema": t.parameters,
+                        }
                         for t in tools
                     ]
                 }
@@ -104,18 +136,7 @@ class GeminiProvider:
             parts = data["candidates"][0]["content"].get("parts") or []
             text = "".join(p["text"] for p in parts if "text" in p)
             calls = tuple(
-                ToolCallReq(
-                    id=f"call_{i}",
-                    name=p["functionCall"]["name"],
-                    arguments=p["functionCall"].get("args") or {},
-                    raw_arguments=json.dumps(p["functionCall"].get("args") or {}),
-                    provider_data=(
-                        {"thought_signature": p["thoughtSignature"]}
-                        if p.get("thoughtSignature")
-                        else {}
-                    ),
-                )
-                for i, p in enumerate(p for p in parts if "functionCall" in p)
+                _tool_call(i, p) for i, p in enumerate(p for p in parts if "functionCall" in p)
             )
         except (KeyError, IndexError, TypeError, AttributeError) as exc:
             raise AgentLLMError("provider returned an unexpected response shape") from exc

@@ -168,7 +168,7 @@ async def handle_generate_requested(
     agent = await _one(
         conn,
         "SELECT name, description, languages, expected_tools, mandatory_disclosures, "
-        "forbidden_phrases, adapter, adapter_config FROM agents WHERE id = %s",
+        "forbidden_phrases, adapter, adapter_config, project_id FROM agents WHERE id = %s",
         (p.agent_id,),
     )
     if agent is None:  # pragma: no cover - the FK cascade removes the draft with its agent
@@ -195,10 +195,18 @@ async def handle_generate_requested(
             ),
         )
 
+    (
+        name,
+        description,
+        languages,
+        tools,
+        disclosures,
+        forbidden,
+        adapter,
+        adapter_config,
+        project_id,
+    ) = agent
     if llm_for is None:  # the project's own LLM settings if it has any, else the environment's
-        project_id = (
-            await _one(conn, "SELECT project_id FROM agents WHERE id = %s", (p.agent_id,))
-        )[0]
         try:
             resolved = await _project_llms.resolve(conn, project_id)
         except LLMConfigError as exc:
@@ -207,13 +215,13 @@ async def handle_generate_requested(
         llm_for = default_llm if resolved is None else resolved.client
     if (draft[1] or {}).get("kind") == "rag":
         return await _generate_rag(conn, p, draft[1], llm_for(sink), ctx.attempt)
-    name, description, languages, tools, disclosures, forbidden, adapter, adapter_config = agent
     if adapter == "prompt":  # the ACTIVE version: scenarios are written for what runs next
         version_id = (adapter_config or {}).get("active_version_id")
         row = await _one(
             conn,
-            "SELECT system_prompt FROM prompt_versions WHERE id = %s AND agent_id = %s",
-            (version_id, p.agent_id),
+            "SELECT system_prompt FROM prompt_versions "
+            "WHERE id = %s AND agent_id = %s AND project_id = %s",
+            (version_id, p.agent_id, project_id),
         )
         description = prompt_context(
             description or "", {"system_prompt": row[0]} if row is not None else None

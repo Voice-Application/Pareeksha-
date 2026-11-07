@@ -40,11 +40,11 @@
 ### Task 1: Schema, migration, shared types
 
 **Files:**
-- Create: `backend/alembic/versions/0003_prompt_versions.py`
+- Create: `backend/alembic/versions/0004_prompt_versions.py` (revises `0003_llm_settings`)
 - Create: `backend/pareeksha/schemas/prompts.py`
 - Modify: `backend/pareeksha/db/models.py` (Agents adapter CHECK ~454; checks `check_type` CHECK ~594; new `PromptVersions` class next to `Users`)
 - Modify: `backend/pareeksha/adapters/base.py:27` (`AdapterName` add `"prompt"`), `backend/pareeksha/schemas/common.py:12` (`AdapterType` add `"prompt"`)
-- Modify: `backend/tests/db/test_migrations.py` (tables added after the v0.2 schema: subtract `{"users", "prompt_versions"}` from the live set before comparing; table count assertion becomes documented + those)
+- Modify: `backend/tests/db/test_migrations.py` (tables added after the v0.2 schema: subtract `{"users", "llm_settings", "prompt_versions"}` from the live set before comparing; table count assertion becomes documented + those)
 - Test: `backend/tests/unit/test_prompt_schemas.py`
 
 **Interfaces — Produces:**
@@ -56,11 +56,11 @@
 - `PromptVersionOut(PromptVersionCreate)` + `id: UUID, agent_id: UUID, version: int, content_hash: str, created_at: datetime`
 - `def content_hash(body: PromptVersionCreate) -> str` — sha256 hex of `json.dumps(body.model_dump(mode="json", exclude={"note"}), sort_keys=True, separators=(",", ":"))`.
 - Table `prompt_versions`: `id uuid pk default gen_random_uuid()`, `project_id uuid not null fk projects on delete cascade`, `agent_id uuid not null fk agents on delete cascade`, `version int not null`, `system_prompt text not null`, `provider text not null`, `model text not null`, `base_url text null`, `temperature real not null`, `tools jsonb not null default '[]'`, `max_tool_rounds int not null default 5`, `rag_config jsonb not null default '{}'`, `note text not null default ''`, `content_hash text not null`, `created_at timestamptz not null default now()`; `UNIQUE (agent_id, version)`; index `prompt_versions_agent_id_idx`.
-- Constraint changes (in 0003, reversible): `agents_adapter_check` gains `'prompt'`; the checks table `check_type` constraint gains `'no_unexpected_tool'` (find its exact name in `docs/schema.sql` / models.py around line 594).
+- Constraint changes (in 0004, reversible): `agents_adapter_check` gains `'prompt'`; the checks table `check_type` constraint gains `'no_unexpected_tool'` (find its exact name in `docs/schema.sql` / models.py around line 594).
 
 - [ ] **Step 1: Write failing tests** in `test_prompt_schemas.py`: `test_tool_names_must_be_unique` (two tools named `refund` → ValidationError), `test_tool_parameters_must_be_object_schema` (`{"type":"string"}` → ValidationError), `test_content_hash_ignores_note` (same body, different `note` → equal hash; different `temperature` → different hash), `test_prompt_is_valid_adapter` (`AgentTarget(..., adapter="prompt", ...)` validates).
 - [ ] **Step 2: Run** `cd backend && python -m pytest tests/unit/test_prompt_schemas.py -q` → FAIL (module missing).
-- [ ] **Step 3: Implement** `schemas/prompts.py`, the literal changes, `PromptVersions` model, and migration `0003` (revision `"0003"`, down_revision `"0002"`, `op.create_table` style like 0002; constraint swaps via `op.drop_constraint`/`op.create_check_constraint`; downgrade restores the old constraints and drops the table).
+- [ ] **Step 3: Implement** `schemas/prompts.py`, the literal changes, `PromptVersions` model, and migration `0004` (revision `"0004"`, down_revision `"0003"`, `op.create_table` style like 0002; constraint swaps via `op.drop_constraint`/`op.create_check_constraint`; downgrade restores the old constraints and drops the table).
 - [ ] **Step 4: Run** the unit test → PASS; then `cd backend && ruff check . && mypy`. If Postgres is available, `python -m pytest tests/db -q` → PASS (including downgrade/upgrade round trip).
 - [ ] **Step 5: Commit** `feat(prompt): prompt_versions table, prompt adapter type, version schemas`.
 

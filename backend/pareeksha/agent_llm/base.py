@@ -53,12 +53,22 @@ class ChatReply:
 
 
 class AgentLLMError(Exception):
-    """Provider call failed. The message never contains the API key, headers or request body."""
+    """Provider call failed. The message never contains the API key, headers, request body or
+    the provider's own error text; that text (key-redacted, truncated) is kept separately in
+    ``provider_message`` for retry decisions and must not be shown or persisted."""
 
-    def __init__(self, message: str, *, status: int | None = None, retryable: bool = False):
+    def __init__(
+        self,
+        message: str,
+        *,
+        status: int | None = None,
+        retryable: bool = False,
+        provider_message: str = "",
+    ):
         super().__init__(message)
         self.status = status
         self.retryable = retryable
+        self.provider_message = provider_message
 
 
 class ChatProvider(Protocol):
@@ -82,6 +92,16 @@ def parse_args(raw: str) -> dict[str, Any]:
     return parsed if isinstance(parsed, dict) else {"_raw": raw}
 
 
+def object_args(value: Any) -> tuple[dict[str, Any], str]:
+    """``(arguments, raw_arguments)`` for an already-decoded tool input (Anthropic ``input``,
+    Gemini ``args``). Missing is ``{}``; a non-object becomes ``{"_raw": raw}`` like
+    ``parse_args``, so the mock layer answers ``invalid_arguments``."""
+    if value is None:
+        return {}, "{}"
+    raw = json.dumps(value)
+    return (value, raw) if isinstance(value, dict) else ({"_raw": raw}, raw)
+
+
 def _error_text(resp: httpx.Response, api_key: str | None) -> str:
     try:
         data = resp.json()
@@ -90,8 +110,10 @@ def _error_text(resp: httpx.Response, api_key: str | None) -> str:
         text = str(msg or "")
     except ValueError:
         text = resp.text
-    text = text[:200]
-    return text.replace(api_key, "***") if api_key else text
+    # redact before truncating so a key straddling the cut cannot leave a prefix behind
+    if api_key:
+        text = text.replace(api_key, "***")
+    return text[:200]
 
 
 async def _send(
@@ -149,12 +171,15 @@ async def post_json(
             resp = await http.post(url, headers=headers, json=body, timeout=timeout_s)
     except SSRFError as exc:
         raise AgentLLMError(f"provider URL not allowed: {exc}", retryable=False) from exc
+    except httpx.InvalidURL as exc:  # not an HTTPError subclass
+        raise AgentLLMError(f"provider URL is invalid: {exc}", retryable=False) from exc
     except httpx.TimeoutException as exc:
         raise AgentLLMError("provider request timed out", retryable=True) from exc
     except httpx.HTTPError as exc:
+        # no chaining: e.g. LocalProtocolError's text quotes the offending header (the API key)
         raise AgentLLMError(
             f"provider request failed: {type(exc).__name__}", retryable=True
-        ) from exc
+        ) from None
     latency_ms = int((time.monotonic() - start) * 1000)
     if resp.is_redirect:
         raise AgentLLMError(
@@ -163,9 +188,10 @@ async def post_json(
         )
     if resp.status_code >= 400:
         raise AgentLLMError(
-            f"provider returned HTTP {resp.status_code}: {_error_text(resp, api_key)}",
+            f"provider returned HTTP {resp.status_code}",
             status=resp.status_code,
             retryable=resp.status_code in (408, 409, 429) or resp.status_code >= 500,
+            provider_message=_error_text(resp, api_key),
         )
     try:
         data = resp.json()

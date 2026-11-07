@@ -64,7 +64,10 @@ PRODUCER = "simulator"
 
 _db: Database | None = None
 _usage: ApiUsageSink | None = None
+#: Injected through ``configure`` (tests, crash worker); used for every call, project or not.
 _runner: CallRunner | None = None
+#: The shared runner built from the environment for calls without project LLM settings.
+_default_runner: CallRunner | None = None
 _caller: CallerSource | None = None
 _providers: list[Any] = []
 _blobs: BlobStore | None = None
@@ -83,8 +86,9 @@ def configure(
     blobs: BlobStore | None = None,
 ) -> None:
     """Install collaborators (tests, crash worker); ``None`` rebuilds from the environment."""
-    global _db, _usage, _runner, _blobs
+    global _db, _usage, _runner, _default_runner, _blobs
     _db, _usage, _runner, _blobs = db, usage, runner, blobs
+    _default_runner = None
 
 
 def _database() -> Database:
@@ -117,13 +121,16 @@ def _caller_source() -> CallerSource:
 
 
 def _call_runner() -> CallRunner:
-    global _runner
-    if _runner is None:
+    """The injected runner, else the shared default one (built on first use)."""
+    global _default_runner
+    if _runner is not None:
+        return _runner
+    if _default_runner is None:
         quiet_pipecat_logs()
         stt, tts = get_stt_provider(), get_tts_provider()
         _providers.extend([stt, tts])
-        _runner = CallRunner(stt=stt, tts=tts, caller=_caller_source())
-    return _runner
+        _default_runner = CallRunner(stt=stt, tts=tts, caller=_caller_source())
+    return _default_runner
 
 
 async def _project_caller(project_id: Any) -> tuple[tuple[Any, str], CallerSource] | None:
@@ -236,7 +243,10 @@ async def _run_prompt_call(spec: CallSpec, project_id: Any = None) -> CallResult
             )
     try:
         if version.base_url:
-            check_base_url(version.base_url, allow_private=allow_private_urls())
+            # resolves the host: keep the DNS lookup off the event loop
+            await asyncio.to_thread(
+                check_base_url, version.base_url, allow_private=allow_private_urls()
+            )
         chat = build_chat_provider(
             version.provider,
             api_key=spec.agent.adapter_secrets.get("api_key"),

@@ -7,11 +7,12 @@ mocks (``agent_llm.mocks.mock_result``).
 
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 import time
-from collections.abc import Callable
-from typing import Any
+from collections.abc import Awaitable, Callable
+from typing import Any, TypeVar
 
 from pareeksha.agent_llm.base import AgentLLMError, AgentMessage, ChatProvider, ChatReply, ToolSpec
 from pareeksha.agent_llm.mocks import mock_result
@@ -34,10 +35,16 @@ _SIMULATE_SYSTEM = (
     "the tool's result for the given arguments."
 )
 
-#: Tool calls processed per model reply; the rest get an error result.
+#: Tool calls executed per model reply; the rest are recorded with an error result, not run.
 MAX_TOOL_CALLS_PER_REPLY = 16
 
 _FENCE = re.compile(r"^```[A-Za-z0-9_-]*\s*\n(.*?)\n?```$", re.DOTALL)
+
+T = TypeVar("T")
+
+
+class _CallTimeout(Exception):
+    """The call's ``max_call_seconds`` ran out while waiting for the caller or the agent."""
 
 
 def _unfence(text: str) -> str:
@@ -91,10 +98,23 @@ async def run_text_call(
             glass_box=True,
         )
 
+    async def before_deadline(aw: Awaitable[T]) -> T:
+        """``aw``, abandoned with :class:`_CallTimeout` once ``max_call_seconds`` run out."""
+        deadline = asyncio.timeout(max(spec.max_call_seconds - (clock() - t0), 0))
+        try:
+            async with deadline:
+                return await aw
+        except TimeoutError:
+            if deadline.expired():
+                raise _CallTimeout from None
+            raise
+
     async def ask(
         msgs: list[AgentMessage], tools: list[ToolSpec], purpose: str | None = None
     ) -> ChatReply:
-        reply = await chat.chat(msgs, tools, model=version.model, temperature=version.temperature)
+        reply = await before_deadline(
+            chat.chat(msgs, tools, model=version.model, temperature=version.temperature)
+        )
         log(
             "agent_llm_usage",
             input_tokens=reply.input_tokens,
@@ -200,7 +220,10 @@ async def run_text_call(
     for n in range(1, scenario.max_turns + 1):
         if timed_out():
             return finish("timeout")
-        line = await caller.next_line(spec.persona, scenario, list(history), n)
+        try:
+            line = await before_deadline(caller.next_line(spec.persona, scenario, list(history), n))
+        except _CallTimeout:
+            return finish("timeout")
         if line.usage is not None:
             usage.append(line.usage)
         at = now()
@@ -231,6 +254,8 @@ async def run_text_call(
                 return finish("timeout")
             try:
                 reply = await ask(messages, specs)
+            except _CallTimeout:
+                return finish("timeout")
             except AgentLLMError as exc:
                 has_agent_turn = any(t.speaker == "agent" for t in turns)
                 return finish("infra_error" if has_agent_turn else "connect_failed", str(exc))
@@ -260,21 +285,12 @@ async def run_text_call(
                     requested=len(reply.tool_calls),
                 )
             for i, tc in enumerate(reply.tool_calls):
-                if (
-                    i >= MAX_TOOL_CALLS_PER_REPLY
-                ):  # still answer it: providers need one result per call
-                    messages.append(
-                        AgentMessage(
-                            "tool",
-                            json.dumps({"error": "too_many_tool_calls"}),
-                            tool_call_id=tc.id,
-                            name=tc.name,
-                        )
-                    )
-                    continue
                 tool = tools_by_name.get(tc.name)
-                if tool is None:
-                    result: dict[str, Any] = {"error": "unknown_tool"}
+                if i >= MAX_TOOL_CALLS_PER_REPLY:
+                    # recorded (so not_called sees it) and answered, but its mock is not run
+                    result: dict[str, Any] = {"error": "too_many_tool_calls"}
+                elif tool is None:
+                    result = {"error": "unknown_tool"}
                 else:
                     result = await mock_result(
                         tool, tc.arguments, override_for(tc.name), simulate=simulate

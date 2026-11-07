@@ -168,6 +168,7 @@ async def test_other_400s_are_not_retried() -> None:
 
     http = httpx.AsyncClient(transport=httpx.MockTransport(handler))
     p = build_chat_provider("openai", api_key=KEY, http=http)
-    with pytest.raises(AgentLLMError, match="bad model"):
+    with pytest.raises(AgentLLMError, match="HTTP 400") as ei:
         await p.chat(MSGS, [], model="x", temperature=0.1)
     assert len(calls) == 1
+    assert "bad model" not in str(ei.value) and ei.value.provider_message == "bad model"

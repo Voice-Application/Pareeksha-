@@ -36,7 +36,8 @@ def create_database() -> Iterator[str]:
         admin.execute(psycopg.sql.SQL("CREATE DATABASE {}").format(psycopg.sql.Identifier(name)))
     url = f"{server_url()}/{name}"
     try:
-        command.upgrade(alembic_config(url), "head")
+        # set_main_option interpolates "%": escape it for Alembic, psycopg gets the plain URL
+        command.upgrade(alembic_config(url.replace("%", "%%")), "head")
         yield url
     finally:
         with psycopg.connect(f"{server_url()}/postgres", autocommit=True) as admin:

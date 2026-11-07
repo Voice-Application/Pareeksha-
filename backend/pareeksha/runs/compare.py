@@ -153,7 +153,9 @@ async def _prompt_version(session: AsyncSession, run_id: uuid.UUID) -> int | Non
     if run is None:
         return None
     snapshot, agent_id, project_id = run
-    config = snapshot.get("adapter_config") if isinstance(snapshot, dict) else None
+    if not isinstance(snapshot, dict) or snapshot.get("adapter") != "prompt":
+        return None
+    config = snapshot.get("adapter_config")
     version_id = config.get("active_version_id") if isinstance(config, dict) else None
     if not isinstance(version_id, str):
         return None

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from collections.abc import Sequence
 from typing import Any
 
@@ -14,6 +13,7 @@ from pareeksha.agent_llm.base import (
     ChatReply,
     ToolCallReq,
     ToolSpec,
+    object_args,
     post_json,
 )
 
@@ -38,7 +38,12 @@ def _wire(messages: Sequence[AgentMessage]) -> tuple[str, list[dict[str, Any]]]:
             prev_tool = True
             continue
         prev_tool = False
-        if m.role == "assistant":
+        echoed = m.tool_calls[0].provider_data.get("content") if m.tool_calls else None
+        if m.role == "assistant" and isinstance(echoed, list):
+            # Tool-use turns go back exactly as received: dropping or rebuilding thinking /
+            # redacted_thinking blocks there is a 400.
+            out.append({"role": "assistant", "content": echoed})
+        elif m.role == "assistant":
             blocks: list[dict[str, Any]] = (
                 [{"type": "text", "text": m.content}] if m.content else []
             )
@@ -86,21 +91,35 @@ class AnthropicProvider:
         headers = {"anthropic-version": "2023-06-01"}
         if self._key:
             headers["x-api-key"] = self._key
-        data, latency = await post_json(
-            self._http, self._url, headers, body, timeout_s=timeout_s, api_key=self._key
-        )
+
+        async def send() -> tuple[dict[str, Any], int]:
+            return await post_json(
+                self._http, self._url, headers, body, timeout_s=timeout_s, api_key=self._key
+            )
+
+        try:
+            data, latency = await send()
+        except AgentLLMError as exc:
+            # Claude Opus 4.7 and later reject sampling parameters: retry without.
+            if exc.status != 400 or "temperature" not in exc.provider_message.lower():
+                raise
+            del body["temperature"]
+            data, latency = await send()
         try:
             blocks = data["content"]
             text = "".join(b["text"] for b in blocks if b.get("type") == "text")
+            uses = [b for b in blocks if b.get("type") == "tool_use"]
+            args = [object_args(b.get("input")) for b in uses]
             calls = tuple(
                 ToolCallReq(
                     id=str(b["id"]),
                     name=b["name"],
-                    arguments=b.get("input") or {},
-                    raw_arguments=json.dumps(b.get("input") or {}),
+                    arguments=arguments,
+                    raw_arguments=raw,
+                    # the whole turn (incl. thinking blocks) rides on the first call for echoing
+                    provider_data={"content": blocks} if i == 0 else {},
                 )
-                for b in blocks
-                if b.get("type") == "tool_use"
+                for i, (b, (arguments, raw)) in enumerate(zip(uses, args, strict=True))
             )
         except (KeyError, TypeError, AttributeError) as exc:
             raise AgentLLMError("provider returned an unexpected response shape") from exc

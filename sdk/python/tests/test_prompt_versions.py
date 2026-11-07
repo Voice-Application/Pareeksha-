@@ -36,6 +36,21 @@ def test_client_create_list_activate(base_url: str, state: State) -> None:
         pk.create_prompt_version(agent_id, system_prompt="v2", provider="openai", model="m")
         assert [v["version"] for v in pk.list_prompt_versions(agent_id)] == [2, 1]
         assert pk.activate_prompt_version(agent_id, 1)["version"] == 1
+        assert state.prompt_activations == [(agent_id, 1)]
+
+
+def test_client_config_only_change_creates_version(base_url: str, state: State) -> None:
+    with Pareeksha(base_url, API_KEY) as pk:
+        agent_id = str(pk.agents.create(AGENT).id)
+        pk.create_prompt_version(agent_id, system_prompt="same", provider="openai", model="m1")
+        changed = pk.create_prompt_version(
+            agent_id, system_prompt="same", provider="openai", model="m2"
+        )
+        assert changed["version"] == 2 and changed["unchanged"] is False
+        again = pk.create_prompt_version(
+            agent_id, system_prompt="same", provider="openai", model="m2", note="only a note"
+        )
+        assert again["version"] == 2 and again["unchanged"] is True
 
 
 @pytest.fixture

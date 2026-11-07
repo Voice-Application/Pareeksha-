@@ -50,7 +50,7 @@ class AgentCreate(_AgentFields):
         default=None, min_length=1, examples=["ws://mock-agent:8765/ws"]
     )
     #: Write-only provider secrets (``{"api_key": ...}``); stored encrypted, never returned.
-    adapter_secrets: dict[str, str] | None = Field(default=None, exclude=True)
+    adapter_secrets: dict[str, str] | None = Field(default=None, exclude=True, repr=False)
 
     @model_validator(mode="after")
     def _endpoint_required(self) -> AgentCreate:
@@ -75,7 +75,7 @@ class AgentUpdate(RequestModel):
     bias_list: list[str] | None = None
     max_call_seconds: int | None = Field(default=None, ge=10, le=1800)
     #: Write-only; ``{}`` clears the stored secrets.
-    adapter_secrets: dict[str, str] | None = Field(default=None, exclude=True)
+    adapter_secrets: dict[str, str] | None = Field(default=None, exclude=True, repr=False)
 
     _speech = field_validator("adapter_config")(_check_speech_override)
 

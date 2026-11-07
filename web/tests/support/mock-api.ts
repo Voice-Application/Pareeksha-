@@ -274,7 +274,10 @@ export async function mockApi(pg: Page, state: MockState) {
       if (!a) return send(err(404, "not_found", "Agent not found."));
       if (method === "GET") return send({ json: a });
       if (method === "PATCH") {
-        Object.assign(a, b, { updated_at: "2026-10-24T11:00:00Z" });
+        // Like the API: secrets are write-only, null/absent keeps them, {} clears them.
+        const { adapter_secrets, ...rest } = b;
+        Object.assign(a, rest, { updated_at: "2026-10-24T11:00:00Z" });
+        if (adapter_secrets != null) a.has_adapter_secrets = Object.keys(adapter_secrets as object).length > 0;
         return send({ json: a });
       }
     }
