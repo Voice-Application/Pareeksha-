@@ -1,6 +1,6 @@
 """GOAL item 6 for evaluations: duplicate delivery and a worker crash each leave ONE evaluation.
 
-Real Kafka, real Postgres (the full ``docs/schema.sql`` schema), the production ``evaluator`` and
+Real Kafka, real Postgres (migrated to the Alembic head), the production ``evaluator`` and
 ``finalizer`` consumers with their Postgres stores. Only the judge is scripted: it makes the
 number of judge calls countable and keeps the test free of provider cost (the real DeepSeek call
 is in ``proof/EVAL-03b``).
