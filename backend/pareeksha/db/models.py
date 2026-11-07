@@ -1474,6 +1474,7 @@ class KbDocuments(Base):
     char_count: Mapped[int] = mapped_column(Integer, nullable=False)
     blob_key: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime.datetime] = _created()
+    deleted_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(True))
 
 
 class KbIndexes(Base):
@@ -1510,7 +1511,13 @@ class KbChunks(Base):
     __tablename__ = "kb_chunks"
     __table_args__ = (
         _fk("index_id", "kb_indexes", "kb_chunks"),
-        _fk("document_id", "kb_documents", "kb_chunks"),
+        ForeignKeyConstraint(
+            ["document_id"],
+            ["kb_documents.id"],
+            name="kb_chunks_document_id_fkey",
+            deferrable=True,
+            initially="DEFERRED",
+        ),
         PrimaryKeyConstraint("id", name="kb_chunks_pkey"),
         Index("kb_chunks_index_id_idx", "index_id"),
         Index("kb_chunks_text_sha_idx", "text_sha"),

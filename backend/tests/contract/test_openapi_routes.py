@@ -120,6 +120,15 @@ ADDITIONS: set[tuple[str, str]] = {
     ("GET", "/agents/{id}/prompt-versions"),
     ("GET", "/agents/{id}/prompt-versions/{id}"),
     ("POST", "/agents/{id}/prompt-versions/{id}/activate"),
+    # RAG lab (docs/superpowers/plans/2026-11-07-rag-lab.md, Task 2)
+    ("POST", "/knowledge-bases"),
+    ("GET", "/knowledge-bases"),
+    ("GET", "/knowledge-bases/{id}"),
+    ("PATCH", "/knowledge-bases/{id}"),
+    ("POST", "/knowledge-bases/{id}/documents"),
+    ("GET", "/knowledge-bases/{id}/documents"),
+    ("GET", "/knowledge-bases/{id}/documents/{id}"),
+    ("DELETE", "/knowledge-bases/{id}/documents/{id}"),
 }
 
 

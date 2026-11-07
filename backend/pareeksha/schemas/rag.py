@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from pareeksha.schemas.common import RequestModel
 
@@ -106,3 +107,55 @@ def index_key(cfg: RagConfig) -> str:
         separators=(",", ":"),
     )
     return hashlib.sha256(payload.encode()).hexdigest()
+
+
+class KbSecrets(RequestModel):
+    """Write-only provider keys for a knowledge base."""
+
+    embedding_api_key: str | None = None
+    reranker_api_key: str | None = None
+
+
+class KnowledgeBaseCreate(RequestModel):
+    name: str = Field(min_length=1, max_length=200)
+    description: str = ""
+    local_only: bool = False
+    #: Write-only; stored encrypted, never returned.
+    secrets: KbSecrets | None = Field(default=None, exclude=True)
+
+
+class KnowledgeBaseUpdate(RequestModel):
+    """PATCH: only provided fields change."""
+
+    name: str | None = Field(default=None, min_length=1, max_length=200)
+    description: str | None = None
+    local_only: bool | None = None
+    #: Write-only; `{}` clears the stored secrets.
+    secrets: KbSecrets | None = Field(default=None, exclude=True)
+
+
+class KnowledgeBaseOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    name: str
+    description: str
+    local_only: bool
+    has_secrets: bool = False
+    created_at: datetime
+    updated_at: datetime
+
+
+class KbDocumentOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    filename: str
+    mime: str
+    char_count: int
+    sha256: str
+    created_at: datetime
+
+
+class KbDocumentDetail(KbDocumentOut):
+    text: str

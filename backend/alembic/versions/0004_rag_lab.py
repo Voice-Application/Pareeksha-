@@ -64,6 +64,7 @@ def upgrade() -> None:
         sa.Column("char_count", sa.Integer(), nullable=False),
         sa.Column("blob_key", sa.Text(), nullable=False),
         _ts("created_at"),
+        sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         _fk("kb_id", "knowledge_bases", "kb_documents"),
         _fk("project_id", "projects", "kb_documents"),
         sa.PrimaryKeyConstraint("id", name="kb_documents_pkey"),
@@ -110,7 +111,15 @@ def upgrade() -> None:
         sa.Column("text_sha", sa.Text(), nullable=False),
         sa.Column("embedding", sa.ARRAY(sa.REAL()), nullable=True),
         _fk("index_id", "kb_indexes", "kb_chunks"),
-        _fk("document_id", "kb_documents", "kb_chunks"),
+        # NO ACTION, deferred to commit: chunks never vanish with a document, yet a whole-KB
+        # delete still works because the same transaction cascades the chunks away too.
+        sa.ForeignKeyConstraint(
+            ["document_id"],
+            ["kb_documents.id"],
+            name="kb_chunks_document_id_fkey",
+            deferrable=True,
+            initially="DEFERRED",
+        ),
         sa.PrimaryKeyConstraint("id", name="kb_chunks_pkey"),
     )
     op.create_index("kb_chunks_index_id_idx", "kb_chunks", ["index_id"])
