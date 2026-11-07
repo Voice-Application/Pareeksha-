@@ -27,6 +27,7 @@ _CODE_BY_STATUS: dict[int, str] = {
     413: "file_too_large",
     422: "unsupported_audio",
     501: "not_implemented",
+    429: "rate_limited",
     502: "upstream_error",
 }
 

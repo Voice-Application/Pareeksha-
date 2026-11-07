@@ -115,6 +115,13 @@ ADDITIONS: set[tuple[str, str]] = {
     ("GET", "/dialect-reports"),  # FR-DI-4
     ("GET", "/dialect-reports/{id}/clips"),  # FR-DB-4 drill-down to worst clips
     ("GET", "/speech/providers"),  # VOICE-07 (owner-approved 2026-10-24)
+    ("PUT", "/calls/{id}/tool-calls"),  # report tool calls after the call
+    ("GET", "/settings/llm"),  # per-project LLM settings
+    ("PUT", "/settings/llm"),
+    ("DELETE", "/settings/llm"),
+    ("POST", "/settings/llm/test"),
+    ("POST", "/designer/chat"),  # test designer assistant
+    ("POST", "/designer/commit"),
 }
 
 

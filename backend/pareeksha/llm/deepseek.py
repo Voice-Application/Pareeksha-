@@ -15,6 +15,7 @@ from typing import Any, ClassVar
 
 import httpx
 
+from pareeksha.integrations.ssrf import SSRFError, dev_allow_private, safe_request
 from pareeksha.llm._http import classify_status, classify_transport
 from pareeksha.llm._retry import call_with_retries
 from pareeksha.llm.base import (
@@ -46,6 +47,7 @@ class DeepSeekProvider(LLMProvider):
         http_client: httpx.AsyncClient | None = None,
         backoff_s: float = 0.5,
         sleep: Callable[[float], Awaitable[None]] = asyncio.sleep,
+        guard_public: bool = False,
     ) -> None:
         self._api_key = api_key
         self._url = base_url.rstrip("/") + "/chat/completions"
@@ -53,6 +55,8 @@ class DeepSeekProvider(LLMProvider):
         self._owns_client = http_client is None
         self._backoff_s = backoff_s
         self._sleep = sleep
+        #: user-supplied base URL: resolve and pin a public address on every request (SSRF guard)
+        self._guard_public = guard_public
 
     async def complete_json(self, request: JSONCompletionRequest) -> JSONCompletionResult:
         body = self._body(request)
@@ -98,13 +102,25 @@ class DeepSeekProvider(LLMProvider):
         self, request: JSONCompletionRequest, body: dict[str, Any]
     ) -> JSONCompletionResult:
         started = time.monotonic()
+        headers = {"Authorization": f"Bearer {self._api_key}"}
         try:
-            response = await self._client.post(
-                self._url,
-                json=body,
-                headers={"Authorization": f"Bearer {self._api_key}"},
-                timeout=request.timeout_s,
-            )
+            if self._guard_public:
+                # re-resolved on every call (DNS rebinding), connection pinned, no redirects
+                headers["Content-Type"] = "application/json"
+                response = await safe_request(
+                    "POST",
+                    self._url,
+                    headers=headers,
+                    content=json.dumps(body).encode(),
+                    timeout_s=request.timeout_s,
+                    allow_private=dev_allow_private(),
+                )
+            else:
+                response = await self._client.post(
+                    self._url, json=body, headers=headers, timeout=request.timeout_s
+                )
+        except SSRFError as exc:
+            raise LLMPermanentError(f"deepseek base_url is not allowed: {exc}") from exc
         except httpx.HTTPError as exc:
             raise classify_transport(exc, "deepseek") from exc
         error = classify_status(response, "deepseek")

@@ -243,6 +243,10 @@ GROUP BY 1, 2 ORDER BY cost DESC NULLS LAST;
 - Rule: never edit an applied migration; add a new one.
 - `rubric_versions` rows are data, not schema: a new rubric = insert a new row and flip `is_active`.
 
+### `llm_settings` (revision 0003, not in `schema.sql` v0.2)
+
+One row per project (`project_id` primary key, `ON DELETE CASCADE`): `provider` (`deepseek`, `gemini`, `openai_compatible`), `base_url`, `judge_model`, `caller_model`, `designer_model` (all nullable: null means the environment's value), `api_key_encrypted` (Fernet token, `SECRET_KEY`), `api_key_last4`, `updated_at` (part of the worker cache fingerprint). No row means the environment's settings apply.
+
 ## 7. Retention
 
 A maintenance script (`make maintenance`, run daily) deletes audio older than `AUDIO_RETENTION_DAYS` and nulls the paths, prunes published `outbox_events` older than 3 days, `processed_events` older than 14 days (longer than Kafka's 7-day retention, so a redelivered message is still recognised), and discarded `dead_letters` older than 30 days. Transcripts, scores and delivery logs are kept.

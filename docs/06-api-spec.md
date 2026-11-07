@@ -257,6 +257,9 @@ Files are read from `DATA_DIR` (`calls.recording_*` hold relative paths; a path 
 
 ### `POST /calls/{id}/reevaluate` (optional `{ "rubric_version": "…" }`) → `202`.
 
+### `PUT /calls/{id}/tool-calls` → `202 { "call_id": "…" }`
+Report the tool calls the bot made, after the call (write key). Body: `{ "tool_calls": [ { "name": "record_promise_to_pay", "arguments": {}, "result": null, "at_ms": 0 } ] }` (max 200; `name` 1-200 chars). Idempotent replace of the call's trace; completed calls are re-evaluated. `404` unknown call, `409` glass-box simulated call (the live trace is authoritative).
+
 ### `POST /calls/{id}/review`
 ```json
 { "reviewer": "preetham", "passed": false, "critical_failure": true,
@@ -406,8 +409,11 @@ Installed connectors (built-in + entry-point plugins) with their JSON schemas so
 Headers: `X-Pareeksha-Timestamp`, `X-Pareeksha-Signature: v1=<hex hmac_sha256(secret, "{ts}.{raw_body}")>`.
 ```json
 { "external_id": "exotel-CA123", "recording_url": "https://…/CA123.mp3", "agent_name": "EMI Reminder Bot",
-  "language": "kn-IN", "metadata": { "phone": "+91XXXXXXXX00", "crm_contact_id": "1234" } }
+  "language": "kn-IN", "metadata": { "phone": "+91XXXXXXXX00", "crm_contact_id": "1234" },
+  "tool_calls": [ { "name": "record_promise_to_pay", "arguments": {}, "at_ms": 0 } ] }
 ```
+`tool_calls` is optional (same items as `PUT /calls/{id}/tool-calls`).
+
 → `202 { "call_id": "…", "duplicate": false }` · `401 invalid_signature` · `408 timestamp_out_of_window` · `422 unsafe_url` · `422 unknown_agent` (no agent matches `agent_name` and the integration has no `default_agent_id`). A repeated `external_id` returns the first call with `duplicate: true`; nothing new is created.
 
 Outbound webhook payloads and signing: `10-integrations-and-dx.md §2.1`.
@@ -435,6 +441,32 @@ Web sign-in accounts (called only by the Next.js server with an `admin` key, whi
 ## 11. Event contract (for consumers outside the API)
 
 Kafka topics, keys and the envelope are specified in `03-TRD.md §10`. The Pydantic models in `backend/pareeksha/events/schemas.py` are the source of truth; `GET /events/schemas` returns their JSON Schemas so external consumers (e.g. a data team reading `evaluation.completed`) can validate messages.
+
+## 13. LLM settings (per project)
+
+The `llm_settings` row of a project overrides the environment (`LLM_PROVIDER`, `DEEPSEEK_*`, `GEMINI_*`) for that project's judge, caller, scenario generation, role detection and designer calls. DeepSeek stays the default when there is no row.
+
+### `GET /settings/llm` (scope `read`) → `LLMSettingsOut`
+`{ provider, base_url, judge_model, caller_model, designer_model, api_key_set, api_key_last4, source }`. `provider` is `deepseek`, `gemini` or `openai_compatible`; `source` is `project` or `environment` (no row: the environment's values are shown). The key is never returned.
+
+### `PUT /settings/llm` (scope `admin`) → `LLMSettingsOut`
+Body `{ provider, base_url?, judge_model?, caller_model?, designer_model?, api_key? }`. Replaces the settings. `api_key` is write-only; omit it to keep the stored key (same provider only), `""` is rejected (`400`). `openai_compatible` needs `base_url` (https, public host, no query, fragment or credentials: `422 unsafe_url` otherwise; the host is re-resolved and pinned to a public address on every LLM call), `judge_model`, `caller_model` and its own `api_key` (the environment's DeepSeek key is never sent to a custom URL). Switching provider without a key and without an environment key for that provider is `422`. `designer_model` defaults to the judge model.
+
+### `DELETE /settings/llm` (scope `admin`) → `204`
+Removes the row; the environment applies again.
+
+### `POST /settings/llm/test` (scope `admin`) → `{ ok, provider, model, latency_ms, error }`
+One tiny JSON completion with the effective settings. A provider failure is `ok=false` with a short message (never a `500`, never the key).
+
+## 14. Test designer
+
+### `POST /designer/chat` (scope `runs:write`) → `DesignerChatResponse`
+Stateless: send the whole history each time. Body `{ messages: [{ role: user|assistant, content }], draft: DesignerDraft | null }` (1 to 40 messages, each at most 20 000 characters, at most 60 000 in total). Response `{ reply, questions: [{ id, text, options }] (0 to 5), draft: DesignerDraft | null, ready }`. The assistant (prompt `designer_v1`, project LLM settings, purpose `designer`) reads the bot prompt the user pastes, asks only what it cannot infer, then returns a draft and `ready=true` (also needs `agent.endpoint_url`); on later turns it revises `draft`. The pasted prompt is fenced as data and is never treated as instructions. Persona and noise profile ids that are not in the project are dropped (the `reply` says so); scenario tool calls must name tools of `agent.expected_tools`; regexes must compile. Invalid model output is retried once, then `502 designer_invalid_output`; provider failures are `502 upstream_error` (status code only, never the provider's text); `402 budget_exceeded` when the project budget is used up; `429 rate_limited` (20 requests per minute per key, per API process; `Retry-After`); regexes in the draft are at most 200 characters with no nested quantifiers; usage is recorded even when the call fails; no key configured is `422 llm_not_configured`.
+
+`DesignerDraft` = `{ agent: { name, description, languages, endpoint_url|null, adapter, glass_box, mandatory_disclosures, forbidden_phrases, expected_tools, bias_list }, scenarios: [ScenarioCreate without agent_id] (1 to 30), personas: [{ existing_id } | { new: PersonaCreate }] (1 to 10), noise_profile_ids: [uuid] (1 to 8) }`.
+
+### `POST /designer/commit` (scope `runs:write`) → `201`
+Body `{ draft }`. In one transaction: creates the agent (`422` naming `draft.agent.endpoint_url` if missing, `409` on a name clash), its scenarios and the `new` personas; `existing_id` personas and noise profiles must belong to the project (`404`). Returns `{ agent_id, scenario_ids, persona_ids, noise_profile_ids, calls, run_wizard_path }` where `calls = scenarios x personas x noise profiles` and `run_wizard_path` is `/runs/new?agent=<id>&s=<ids>&p=<ids>&l=<ids>&step=review` (comma-separated ids; the run wizard reads exactly these parameters).
 
 ## 12. Additions frozen by TL-01 (page data gaps)
 

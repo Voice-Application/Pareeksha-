@@ -146,3 +146,27 @@ async def test_scores_without_cited_turns_are_fixed_by_the_second_repair() -> No
     rec = await evaluate_call(sc.clean_call(), client_for(provider))
     assert rec.status == "ok"
     assert "MUST have a non-empty evidence_turns" in provider.requests[1].messages[-1].content
+
+
+def test_prompt_masks_pii_in_nested_tool_call_args() -> None:
+    from pareeksha.evaluation.types import ToolCall
+
+    call = ToolCall(
+        name="record_ptp",
+        args={"phone": "9876543210", "nested": {"notes": ["call 9876543210"]}, "n": 5},
+        turn_idx=1,
+    )
+    text = render_judge_prompt(dataclasses.replace(judge_input(), tool_calls=(call,)))
+    assert "9876543210" not in text and "[PHONE]" in text
+    assert "record_ptp" in text and '"n": 5' in text
+
+
+def test_prompt_includes_masked_tool_call_result() -> None:
+    from pareeksha.evaluation.types import ToolCall
+
+    call = ToolCall(
+        name="book", args={}, turn_idx=1, result={"status": "failed", "note": "call 9876543210"}
+    )
+    text = render_judge_prompt(dataclasses.replace(judge_input(), tool_calls=(call,)))
+    assert '"status": "failed"' in text
+    assert "9876543210" not in text and "[PHONE]" in text
