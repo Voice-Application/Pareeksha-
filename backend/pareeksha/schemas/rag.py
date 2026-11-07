@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -99,14 +99,17 @@ def rag_label(cfg: RagConfig) -> str:
     return f"{method} · {c.strategy} {c.size}/{c.overlap} · {model} · k{cfg.top_k}"
 
 
-def index_key(cfg: RagConfig) -> str:
-    e = cfg.embedding
+def index_key_for(chunking: ChunkingConfig, e: EmbeddingConfig) -> str:
     payload = json.dumps(
-        [cfg.chunking.model_dump(mode="json"), e.provider, e.model, e.dimensions],
+        [chunking.model_dump(mode="json"), e.provider, e.model, e.dimensions],
         sort_keys=True,
         separators=(",", ":"),
     )
     return hashlib.sha256(payload.encode()).hexdigest()
+
+
+def index_key(cfg: RagConfig) -> str:
+    return index_key_for(cfg.chunking, cfg.embedding)
 
 
 class KbSecrets(RequestModel):
@@ -159,3 +162,39 @@ class KbDocumentOut(BaseModel):
 
 class KbDocumentDetail(KbDocumentOut):
     text: str
+
+
+class KbIndexCreate(RequestModel):
+    chunking: ChunkingConfig = Field(default_factory=ChunkingConfig)
+    embedding: EmbeddingConfig = Field(default_factory=EmbeddingConfig)
+
+
+class KbIndexOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    version: int
+    index_key: str
+    status: str
+    chunking: dict[str, Any]
+    embedding: dict[str, Any]
+    chunk_count: int
+    stats: dict[str, Any]
+    error: str | None
+    created_at: datetime
+    finished_at: datetime | None
+
+
+class KbChunkOut(BaseModel):
+    """A chunk as the browser shows it: text and offsets, never the vector."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    document_id: UUID
+    ordinal: int
+    text: str
+    start_char: int
+    end_char: int
+    parent_start: int
+    parent_end: int

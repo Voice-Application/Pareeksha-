@@ -49,6 +49,7 @@ class Topics(StrEnum):
     PROGRESS = "pareeksha.progress.v1"
     SCENARIO_GENERATE_REQUESTED = "pareeksha.scenario.generate.requested.v1"
     DIALECT_CLIP_REQUESTED = "pareeksha.dialect.clip.requested.v1"
+    KB_INDEX_REQUESTED = "pareeksha.kb.index.requested.v1"
     RETRY_30S = "pareeksha.retry.30s.v1"
     RETRY_5M = "pareeksha.retry.5m.v1"
     DLQ = "pareeksha.dlq.v1"
@@ -65,6 +66,7 @@ class ConsumerGroups(StrEnum):
     INTEGRATIONS = "integrations"
     DIALECT = "dialect"
     GENERATOR = "generator"
+    INDEXER = "indexer"
     RETRIER = "retrier"
     DLQ_RECORDER = "dlq-recorder"
 
@@ -158,6 +160,14 @@ TOPIC_SPECS: dict[Topics, TopicSpec] = {
             (ConsumerGroups.DIALECT,),
         ),
         TopicSpec(
+            Topics.KB_INDEX_REQUESTED,
+            "kb_id",
+            PARTITIONS_SMALL,
+            RETENTION_DEFAULT_MS,
+            ("api (outbox)",),
+            (ConsumerGroups.INDEXER,),
+        ),
+        TopicSpec(
             Topics.RETRY_30S,
             "original key",
             PARTITIONS_SMALL,
@@ -195,6 +205,7 @@ EVENT_TOPICS: tuple[Topics, ...] = (
     Topics.PROGRESS,
     Topics.SCENARIO_GENERATE_REQUESTED,
     Topics.DIALECT_CLIP_REQUESTED,
+    Topics.KB_INDEX_REQUESTED,
 )
 
 #: Topics that carry copies of messages from the topics above (envelope unchanged except attempt).

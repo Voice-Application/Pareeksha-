@@ -8,25 +8,33 @@ from datetime import UTC, datetime
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, File, Response, UploadFile
+from fastapi import APIRouter, File, Query, Response, UploadFile
 from sqlalchemy import func, select
 
 from pareeksha.api.auth import ReadKey, WriteKey
 from pareeksha.api.crud import flush, get_or_404, paginate
 from pareeksha.api.deps import AUTH_ERRORS, Blobs, Db, Pagination, errors
 from pareeksha.api.errors import ApiError
+from pareeksha.api.outbox import enqueue_event
 from pareeksha.api.routers.integrations import _secret_box
 from pareeksha.audit.ingest import MAX_UPLOAD_BYTES
-from pareeksha.db.models import KbDocuments, KnowledgeBases
+from pareeksha.db.models import KbChunks, KbDocuments, KbIndexes, KnowledgeBases
+from pareeksha.events.schemas import KbIndexRequested, make_envelope
+from pareeksha.rag.documents import active_document_ids
 from pareeksha.rag.extract import ExtractionError, extract_text
+from pareeksha.rag.guard import LocalOnlyError, require_local_embedding
 from pareeksha.schemas.common import Page
 from pareeksha.schemas.rag import (
+    KbChunkOut,
     KbDocumentDetail,
     KbDocumentOut,
+    KbIndexCreate,
+    KbIndexOut,
     KbSecrets,
     KnowledgeBaseCreate,
     KnowledgeBaseOut,
     KnowledgeBaseUpdate,
+    index_key_for,
 )
 
 router = APIRouter(tags=["knowledge-bases"], responses=AUTH_ERRORS)
@@ -231,3 +239,117 @@ async def delete_document(kb_id: UUID, doc_id: UUID, key: WriteKey, session: Db)
     if row.deleted_at is None:
         row.deleted_at = datetime.now(UTC)
     return Response(status_code=204)
+
+
+@router.post(
+    "/knowledge-bases/{kb_id}/indexes",
+    status_code=202,
+    responses=errors(404, 422),
+    summary="Build an index (chunk and embed the current documents)",
+)
+async def create_index(
+    kb_id: UUID, body: KbIndexCreate, key: WriteKey, session: Db, response: Response
+) -> KbIndexOut:
+    kb = await get_or_404(session, KnowledgeBases, kb_id, key.project_id, "Knowledge base")
+    try:
+        require_local_embedding(kb.local_only, body.embedding)
+    except LocalOnlyError as exc:
+        raise ApiError(422, "local_only", str(exc)) from exc
+    await session.execute(  # serialises version numbers per KB
+        select(KnowledgeBases.id).where(KnowledgeBases.id == kb.id).with_for_update()
+    )
+    docs = [str(d) for d in await active_document_ids(session, kb.id)]
+    if not docs:
+        raise ApiError(422, "validation_error", "Upload at least one document first")
+    ikey = index_key_for(body.chunking, body.embedding)
+    ready = await session.scalar(
+        select(KbIndexes)
+        .where(
+            KbIndexes.kb_id == kb.id,
+            KbIndexes.index_key == ikey,
+            KbIndexes.status == "ready",
+            KbIndexes.document_ids == docs,
+        )
+        .order_by(KbIndexes.version.desc())
+        .limit(1)
+    )
+    if ready is not None:
+        response.status_code = 200
+        return KbIndexOut.model_validate(ready)
+    version = (
+        await session.scalar(
+            select(func.coalesce(func.max(KbIndexes.version), 0)).where(KbIndexes.kb_id == kb.id)
+        )
+        or 0
+    ) + 1
+    row = KbIndexes(
+        kb_id=kb.id,
+        project_id=key.project_id,
+        version=version,
+        index_key=ikey,
+        chunking=body.chunking.model_dump(mode="json"),
+        embedding=body.embedding.model_dump(mode="json"),
+        status="pending",
+        document_ids=docs,
+    )
+    session.add(row)
+    await flush(session, "Index could not be created", refresh=row)
+    enqueue_event(
+        session,
+        make_envelope(
+            KbIndexRequested(index_id=row.id, kb_id=kb.id),
+            producer="api",
+            correlation_id=str(row.id),
+        ),
+    )
+    return KbIndexOut.model_validate(row)
+
+
+@router.get("/knowledge-bases/{kb_id}/indexes", responses=errors(404), summary="List indexes")
+async def list_indexes(
+    kb_id: UUID, key: ReadKey, session: Db, page: Pagination
+) -> Page[KbIndexOut]:
+    await get_or_404(session, KnowledgeBases, kb_id, key.project_id, "Knowledge base")
+    rows, next_cursor = await paginate(
+        session,
+        KbIndexes,
+        [KbIndexes.kb_id == kb_id, KbIndexes.project_id == key.project_id],
+        page,
+    )
+    return Page(items=[KbIndexOut.model_validate(r) for r in rows], next_cursor=next_cursor)
+
+
+async def _index_or_404(session: Db, kb_id: UUID, index_id: UUID, project_id: UUID) -> KbIndexes:
+    row = await get_or_404(session, KbIndexes, index_id, project_id, "Index")
+    if row.kb_id != kb_id:
+        raise ApiError(404, "not_found", "Index not found")
+    return row  # type: ignore[no-any-return]
+
+
+@router.get(
+    "/knowledge-bases/{kb_id}/indexes/{index_id}", responses=errors(404), summary="Get an index"
+)
+async def get_index(kb_id: UUID, index_id: UUID, key: ReadKey, session: Db) -> KbIndexOut:
+    return KbIndexOut.model_validate(await _index_or_404(session, kb_id, index_id, key.project_id))
+
+
+@router.get(
+    "/knowledge-bases/{kb_id}/indexes/{index_id}/chunks",
+    responses=errors(404),
+    summary="Browse the chunks of an index (text only, no vectors)",
+)
+async def list_chunks(
+    kb_id: UUID,
+    index_id: UUID,
+    key: ReadKey,
+    session: Db,
+    document_id: UUID | None = None,
+    offset: Annotated[int, Query(ge=0)] = 0,
+    limit: Annotated[int, Query(ge=1, le=200)] = 50,
+) -> list[KbChunkOut]:
+    await _index_or_404(session, kb_id, index_id, key.project_id)
+    stmt = select(KbChunks).where(KbChunks.index_id == index_id)
+    if document_id is not None:
+        stmt = stmt.where(KbChunks.document_id == document_id)
+    rows = await session.scalars(stmt.order_by(KbChunks.ordinal).offset(offset).limit(limit))
+    return [KbChunkOut.model_validate(r) for r in rows]

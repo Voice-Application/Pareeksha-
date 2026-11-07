@@ -129,6 +129,10 @@ ADDITIONS: set[tuple[str, str]] = {
     ("GET", "/knowledge-bases/{id}/documents"),
     ("GET", "/knowledge-bases/{id}/documents/{id}"),
     ("DELETE", "/knowledge-bases/{id}/documents/{id}"),
+    ("POST", "/knowledge-bases/{id}/indexes"),
+    ("GET", "/knowledge-bases/{id}/indexes"),
+    ("GET", "/knowledge-bases/{id}/indexes/{id}"),
+    ("GET", "/knowledge-bases/{id}/indexes/{id}/chunks"),
 }
 
 
