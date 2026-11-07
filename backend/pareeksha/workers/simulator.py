@@ -35,6 +35,7 @@ from pareeksha.events.settings import EventSettings
 from pareeksha.events.topics import ConsumerGroups, Topics
 from pareeksha.llm.caller import CallerBrain
 from pareeksha.llm.factory import build_client
+from pareeksha.llm.project_settings import ProjectLLMClients
 from pareeksha.llm.usage_db import ApiUsageSink
 from pareeksha.runs.slots import StartResult, start_item
 from pareeksha.simulation import store
@@ -54,6 +55,10 @@ _usage: ApiUsageSink | None = None
 _runner: CallRunner | None = None
 _providers: list[Any] = []
 _blobs: BlobStore | None = None
+_project_llms = ProjectLLMClients()
+#: One runner per (project, settings fingerprint) for projects that override the LLM settings
+#: (ponytail: one small entry per settings change; restart the worker to drop old ones).
+_project_runners: dict[tuple[Any, str], CallRunner] = {}
 
 
 def configure(
@@ -99,6 +104,26 @@ def _call_runner() -> CallRunner:
     return _runner
 
 
+async def _runner_for(project_id: Any) -> CallRunner:
+    """The runner whose caller brain uses the project's LLM settings, else the shared one."""
+    if _runner is not None:  # injected (tests, crash worker)
+        return _runner
+    resolved = await _project_llms.resolve(await _database().connection(), project_id)
+    if resolved is None:
+        return _call_runner()
+    key = (project_id, resolved.fingerprint)
+    runner = _project_runners.get(key)
+    if runner is None:
+        quiet_pipecat_logs()
+        brain = CallerBrain(resolved.client(_usage if _usage is not None else _usage_sink()))
+        stt, tts = get_stt_provider(), get_tts_provider()
+        _providers.extend([stt, tts, brain])
+        runner = _project_runners[key] = CallRunner(
+            stt=stt, tts=tts, caller=BrainCallerSource(brain)
+        )
+    return runner
+
+
 def _completed(req: CallRequested, spec: CallSpec, result: CallResult) -> Outgoing:
     return Outgoing(
         CallCompleted(
@@ -137,10 +162,11 @@ async def _reproduce(env: Envelope[CallRequested], ctx: Ctx) -> Sequence[Outgoin
     ]
 
 
-async def _run_call(spec: CallSpec) -> tuple[CallResult, dict[str, bytes]]:
+async def _run_call(spec: CallSpec, project_id: Any = None) -> tuple[CallResult, dict[str, bytes]]:
     """Run the call; an unexpected crash of the pipeline becomes an ``infra_error`` result."""
     try:
-        outcome = await _call_runner().run(spec)
+        runner = _call_runner() if project_id is None else await _runner_for(project_id)
+        outcome = await runner.run(spec)
     except Exception as exc:
         log.exception("call %s crashed", spec.call_id)
         return (
@@ -185,7 +211,7 @@ async def on_call_requested(env: Envelope[CallRequested], ctx: Ctx) -> Sequence[
 
     sink = _usage if _usage is not None else _usage_sink()
     with sink.scope(run_id=req.run_id, call_id=spec.call_id, project_id=project_id):
-        result, audio = await _run_call(spec)
+        result, audio = await _run_call(spec, project_id)
 
     keys: dict[str, str] | None = None
     if audio:
@@ -207,6 +233,7 @@ async def main() -> None:
     finally:
         for provider in _providers[:2]:
             await provider.aclose()
+        await _project_llms.aclose()
         if _usage is not None:
             await _usage.close()
         elif _usage_sink.cache_info().currsize:

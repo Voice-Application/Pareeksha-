@@ -30,19 +30,25 @@ class LLMSettings(BaseSettings):
 
     deepseek_api_key: str | None = Field(default=None, repr=False)
     deepseek_base_url: str = DEEPSEEK_DEFAULT_BASE_URL
+    #: set for a project-supplied (openai_compatible) base URL: every call is SSRF-guarded
+    deepseek_guard_base_url: bool = False
     deepseek_judge_model: str = DEEPSEEK_DEFAULT_JUDGE_MODEL
     deepseek_caller_model: str = DEEPSEEK_DEFAULT_CALLER_MODEL
+    #: Test-designer chat model; unset = the judge model.
+    deepseek_designer_model: str | None = None
     cost_deepseek_per_1k_input_tokens: float | None = Field(default=None, ge=0)
     cost_deepseek_per_1k_output_tokens: float | None = Field(default=None, ge=0)
 
     gemini_api_key: str | None = Field(default=None, repr=False)
     gemini_judge_model: str | None = None
     gemini_caller_model: str | None = None
+    gemini_designer_model: str | None = None
     cost_gemini_per_1k_input_tokens: float | None = Field(default=None, ge=0)
     cost_gemini_per_1k_output_tokens: float | None = Field(default=None, ge=0)
 
     judge_temperature: float = Field(default=0.0, ge=0, le=2)
     caller_temperature: float = Field(default=0.7, ge=0, le=2)
+    designer_temperature: float = Field(default=0.2, ge=0, le=2)
 
     @property
     def api_key(self) -> str:
@@ -76,8 +82,19 @@ class LLMSettings(BaseSettings):
             "CALLER",
         )
 
+    @property
+    def designer_model(self) -> str:
+        own = (
+            self.deepseek_designer_model
+            if self.llm_provider is LLMProviderName.DEEPSEEK
+            else self.gemini_designer_model
+        )
+        return own or self.judge_model
+
     def model_for(self, purpose: LLMPurpose) -> str:
         """Judge model for deterministic tasks, caller model for generative ones."""
+        if purpose is LLMPurpose.DESIGNER:
+            return self.designer_model
         if purpose in (LLMPurpose.CALLER, LLMPurpose.SCENARIO_GEN):
             return self.caller_model
         return self.judge_model
@@ -88,6 +105,8 @@ class LLMSettings(BaseSettings):
             return self.caller_temperature
         if purpose is LLMPurpose.SCENARIO_GEN:
             return 0.8
+        if purpose is LLMPurpose.DESIGNER:
+            return self.designer_temperature
         return self.judge_temperature
 
     def estimate_cost(self, usage: LLMUsage) -> float | None:

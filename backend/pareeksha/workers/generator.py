@@ -24,6 +24,7 @@ from pareeksha.llm.base import LLMError, LLMRetryableError
 from pareeksha.llm.client import JSONGenerationError, LLMClient, UsageRecord
 from pareeksha.llm.config import LLMConfigError, LLMSettings
 from pareeksha.llm.factory import build_provider
+from pareeksha.llm.project_settings import ProjectLLMClients
 from pareeksha.scenario_gen.generator import AgentBrief, generate_scenarios
 
 log = logging.getLogger(__name__)
@@ -40,6 +41,9 @@ def _llm_parts() -> tuple[Any, LLMSettings]:
 def default_llm(sink: Callable[[UsageRecord], Any]) -> LLMClient:
     provider, settings = _llm_parts()
     return LLMClient(provider, settings, usage_sink=sink)
+
+
+_project_llms = ProjectLLMClients()
 
 
 async def _one(conn: psycopg.AsyncConnection[Any], sql: str, params: tuple[Any, ...]) -> Any:
@@ -63,7 +67,7 @@ async def _finish(
 async def handle_generate_requested(
     env: Envelope[ScenarioGenerateRequested],
     ctx: Ctx,
-    llm_for: Callable[[Callable[[UsageRecord], Any]], LLMClient] = default_llm,
+    llm_for: Callable[[Callable[[UsageRecord], Any]], LLMClient] | None = None,
 ) -> Sequence[Outgoing]:
     p = env.payload
     conn = ctx.tx
@@ -105,6 +109,16 @@ async def handle_generate_requested(
             ),
         )
 
+    if llm_for is None:  # the project's own LLM settings if it has any, else the environment's
+        project_id = (
+            await _one(conn, "SELECT project_id FROM agents WHERE id = %s", (p.agent_id,))
+        )[0]
+        try:
+            resolved = await _project_llms.resolve(conn, project_id)
+        except LLMConfigError as exc:
+            await _finish(conn, p.draft_id, "failed", [], str(exc)[:MAX_ERROR_CHARS])
+            return []
+        llm_for = default_llm if resolved is None else resolved.client
     name, description, languages, tools, disclosures, forbidden = agent
     brief = AgentBrief(
         name=name,

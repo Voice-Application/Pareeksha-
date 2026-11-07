@@ -349,6 +349,59 @@ class Pareeksha:
     def health(self) -> Health:
         return c.parse_health(self._core.call(c.health()))
 
+    def report_tool_calls(self, call_id: UUID | str, tool_calls: list[dict[str, Any]]) -> CallRef:
+        """Report the tool calls the bot made; replaces any earlier report for the call."""
+        return c.parse_call_ref(self._core.call(c.tool_calls_report(call_id, tool_calls)))
+
+    def designer_chat(
+        self, messages: list[dict[str, str]], draft: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        """One turn with the test designer. Stateless: pass the whole history and the last draft.
+
+        Returns ``{reply, questions, draft, ready}``; commit a ready ``draft`` with
+        :meth:`designer_commit`.
+        """
+        result: dict[str, Any] = self._core.call(c.designer_chat(messages, draft))
+        return result
+
+    def designer_commit(self, draft: dict[str, Any]) -> dict[str, Any]:
+        """Create the agent, scenarios and new personas of a draft; returns the ids, the number of
+        ``calls`` and the web app's ``run_wizard_path``."""
+        result: dict[str, Any] = self._core.call(c.designer_commit(draft))
+        return result
+
+    def get_llm_settings(self) -> dict[str, Any]:
+        """The project's effective LLM settings (never the API key)."""
+        result: dict[str, Any] = self._core.call(c.llm_settings_get())
+        return result
+
+    def update_llm_settings(
+        self,
+        provider: str,
+        *,
+        base_url: str | None = None,
+        judge_model: str | None = None,
+        caller_model: str | None = None,
+        designer_model: str | None = None,
+        api_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Set the project's LLM provider (admin key); ``api_key=None`` keeps the stored key."""
+        body = c._clean(
+            provider=provider,
+            base_url=base_url,
+            judge_model=judge_model,
+            caller_model=caller_model,
+            designer_model=designer_model,
+            api_key=api_key,
+        )
+        result: dict[str, Any] = self._core.call(c.llm_settings_update(body))
+        return result
+
+    def test_llm_settings(self) -> dict[str, Any]:
+        """One tiny call with the effective settings: ``{ok, provider, model, latency_ms, ...}``."""
+        result: dict[str, Any] = self._core.call(c.llm_settings_test())
+        return result
+
     def metrics_summary(self) -> dict[str, Any]:
         result: dict[str, Any] = self._core.call(c.metrics_summary())
         return result
@@ -599,6 +652,61 @@ class AsyncPareeksha:
         self.runs = _AsyncRuns(self._core)
         self.audits = _AsyncAudits(self._core)
         self.dlq = _AsyncDlq(self._core)
+
+    async def report_tool_calls(
+        self, call_id: UUID | str, tool_calls: list[dict[str, Any]]
+    ) -> CallRef:
+        """Report the tool calls the bot made; replaces any earlier report for the call."""
+        return c.parse_call_ref(await self._core.call(c.tool_calls_report(call_id, tool_calls)))
+
+    async def designer_chat(
+        self, messages: list[dict[str, str]], draft: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        """One turn with the test designer. Stateless: pass the whole history and the last draft.
+
+        Returns ``{reply, questions, draft, ready}``; commit a ready ``draft`` with
+        :meth:`designer_commit`.
+        """
+        result: dict[str, Any] = await self._core.call(c.designer_chat(messages, draft))
+        return result
+
+    async def designer_commit(self, draft: dict[str, Any]) -> dict[str, Any]:
+        """Create the agent, scenarios and new personas of a draft; returns the ids, the number of
+        ``calls`` and the web app's ``run_wizard_path``."""
+        result: dict[str, Any] = await self._core.call(c.designer_commit(draft))
+        return result
+
+    async def get_llm_settings(self) -> dict[str, Any]:
+        """The project's effective LLM settings (never the API key)."""
+        result: dict[str, Any] = await self._core.call(c.llm_settings_get())
+        return result
+
+    async def update_llm_settings(
+        self,
+        provider: str,
+        *,
+        base_url: str | None = None,
+        judge_model: str | None = None,
+        caller_model: str | None = None,
+        designer_model: str | None = None,
+        api_key: str | None = None,
+    ) -> dict[str, Any]:
+        """Set the project's LLM provider (admin key); ``api_key=None`` keeps the stored key."""
+        body = c._clean(
+            provider=provider,
+            base_url=base_url,
+            judge_model=judge_model,
+            caller_model=caller_model,
+            designer_model=designer_model,
+            api_key=api_key,
+        )
+        result: dict[str, Any] = await self._core.call(c.llm_settings_update(body))
+        return result
+
+    async def test_llm_settings(self) -> dict[str, Any]:
+        """One tiny call with the effective settings: ``{ok, provider, model, latency_ms, ...}``."""
+        result: dict[str, Any] = await self._core.call(c.llm_settings_test())
+        return result
 
     async def health(self) -> Health:
         return c.parse_health(await self._core.call(c.health()))

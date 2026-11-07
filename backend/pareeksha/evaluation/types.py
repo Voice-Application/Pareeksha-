@@ -121,7 +121,13 @@ class ToolCall:
     name: str
     args: dict[str, Any] = field(default_factory=dict)
     turn_idx: int | None = None
+    result: Any = None
 
     @classmethod
     def from_dict(cls, d: Mapping[str, Any]) -> ToolCall:
-        return cls(name=d["name"], args=dict(d.get("args") or {}), turn_idx=d.get("turn_idx"))
+        return cls(
+            name=d["name"],
+            args=dict(d.get("args") or {}),
+            turn_idx=d.get("turn_idx"),
+            result=d.get("result"),
+        )

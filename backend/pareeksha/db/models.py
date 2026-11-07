@@ -1370,3 +1370,28 @@ class Users(Base):
         DateTime(True), nullable=False, server_default=text("now()")
     )
     last_login_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(True))
+
+
+class ProjectLlmSettings(Base):
+    """Per-project LLM provider settings (Alembic revision 0003; overrides the environment)."""
+
+    __tablename__ = "llm_settings"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["project_id"], ["projects.id"], ondelete="CASCADE", name="llm_settings_project_id_fkey"
+        ),
+        PrimaryKeyConstraint("project_id", name="llm_settings_pkey"),
+    )
+
+    project_id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    provider: Mapped[str] = mapped_column(Text, nullable=False)
+    base_url: Mapped[str | None] = mapped_column(Text)
+    judge_model: Mapped[str | None] = mapped_column(Text)
+    caller_model: Mapped[str | None] = mapped_column(Text)
+    designer_model: Mapped[str | None] = mapped_column(Text)
+    #: Fernet token over {"api_key": ...} (integrations.crypto.SecretBox); never returned by the API.
+    api_key_encrypted: Mapped[str | None] = mapped_column(Text)
+    api_key_last4: Mapped[str | None] = mapped_column(Text)
+    updated_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime(True), nullable=False, server_default=text("now()")
+    )

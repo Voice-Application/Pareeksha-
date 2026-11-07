@@ -17,7 +17,12 @@ def build_provider(
     """Provider for ``settings.llm_provider``; raises ``LLMConfigError`` if its key is missing."""
     key = settings.api_key
     if settings.llm_provider is LLMProviderName.DEEPSEEK:
-        return DeepSeekProvider(key, base_url=settings.deepseek_base_url, http_client=http_client)
+        return DeepSeekProvider(
+            key,
+            base_url=settings.deepseek_base_url,
+            http_client=http_client,
+            guard_public=settings.deepseek_guard_base_url,
+        )
     return GeminiProvider(key, http_client=http_client)
 
 

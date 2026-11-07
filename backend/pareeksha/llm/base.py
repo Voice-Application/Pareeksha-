@@ -36,6 +36,7 @@ class LLMPurpose(StrEnum):
     SCENARIO_GEN = "scenario_gen"
     ROLE_DETECT = "role_detect"
     ASR_INTENT = "asr_intent"
+    DESIGNER = "designer"
 
 
 class ChatMessage(BaseModel):
