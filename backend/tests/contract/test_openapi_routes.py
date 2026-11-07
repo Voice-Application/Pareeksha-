@@ -120,6 +120,13 @@ ADDITIONS: set[tuple[str, str]] = {
     ("GET", "/agents/{id}/prompt-versions"),
     ("GET", "/agents/{id}/prompt-versions/{id}"),
     ("POST", "/agents/{id}/prompt-versions/{id}/activate"),
+    ("PUT", "/calls/{id}/tool-calls"),  # report tool calls after the call
+    ("GET", "/settings/llm"),  # per-project LLM settings
+    ("PUT", "/settings/llm"),
+    ("DELETE", "/settings/llm"),
+    ("POST", "/settings/llm/test"),
+    ("POST", "/designer/chat"),  # test designer assistant
+    ("POST", "/designer/commit"),
 }
 
 

@@ -81,6 +81,17 @@ curl -s -X POST -H "Authorization: Bearer $PAREEKSHA_API_KEY" http://localhost:$
 
 An `ok:false` answer carries `error` (`timeout`, `connect_failed`, ...) and `detail`.
 
+## Report tool calls after the call
+
+A bot that cannot send live `tool_call` frames (or whose platform logs them) can report them once the call is over. The call is judged against the scenario's expected tool calls with this trace; a call with no trace stays "unknown" for those checks.
+
+```bash
+curl -s -X PUT -H "Authorization: Bearer $PAREEKSHA_API_KEY" -H "Content-Type: application/json"   http://localhost:${API_HOST_PORT:-8000}/api/v1/calls/<call_id>/tool-calls   -d '{"tool_calls":[{"name":"record_promise_to_pay","arguments":{"date":"2026-11-10"},"result":{"ok":true},"at_ms":42000}]}'
+# {"call_id":"..."}  (202)
+```
+
+The call id is in the `start` frame of a simulated call. Each PUT replaces the previous report; a completed call is re-evaluated. A glass-box agent's simulated call answers `409` (its live trace wins). Python SDK: `Pareeksha.report_tool_calls(call_id, [...])`.
+
 ## Tips
 
 - From the simulator container, `localhost` is the container itself. Use `host.docker.internal` (mapped in this repo's compose), a compose service name, or a public hostname.

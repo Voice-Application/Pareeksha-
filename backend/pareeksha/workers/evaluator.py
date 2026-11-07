@@ -38,7 +38,9 @@ from pareeksha.events.settings import EventSettings
 from pareeksha.events.topics import ConsumerGroups, Topics
 from pareeksha.llm.base import LLMPermanentError, LLMRetryableError
 from pareeksha.llm.client import LLMClient
+from pareeksha.llm.config import LLMConfigError
 from pareeksha.llm.factory import build_client
+from pareeksha.llm.project_settings import ProjectLLMClients
 from pareeksha.llm.usage_db import ApiUsageSink
 from pareeksha.workers._outgoing import to_outgoing
 
@@ -49,6 +51,9 @@ GROUP = ConsumerGroups.EVALUATOR
 _client: LLMClient | None = None
 _usage: ApiUsageSink | None = None
 _status_db: Database | None = None
+_injected = False  # set_client was given a client: it wins over per-project settings
+#: Providers of projects that override the environment's LLM settings (see get_client).
+_project_llms = ProjectLLMClients()
 
 
 def set_client(
@@ -57,8 +62,9 @@ def set_client(
     status_db: Database | None = None,
 ) -> None:
     """Install the judge client (tests and the crash worker inject a provider here)."""
-    global _client, _usage, _status_db
+    global _client, _usage, _status_db, _injected
     _client, _usage, _status_db = client, usage, status_db
+    _injected = client is not None
 
 
 async def _mark_evaluating(call_id: Any) -> None:
@@ -73,14 +79,33 @@ async def _mark_evaluating(call_id: Any) -> None:
         log.warning("could not mark run item evaluating", exc_info=True)
 
 
-def get_client() -> tuple[LLMClient, ApiUsageSink]:
-    """The process-wide judge client (provider from ``LLM_PROVIDER``, DeepSeek by default)."""
-    global _client, _usage
+def get_usage() -> ApiUsageSink:
+    global _usage
     if _usage is None:
         _usage = ApiUsageSink(EventSettings.from_env())
+    return _usage
+
+
+async def _project_client(conn: Any, call_id: Any) -> LLMClient | None:
+    """The judge client for a project with its own LLM settings (``PUT /settings/llm``), else
+    ``None`` (use the process-wide environment client). Skipped when a client was injected."""
+    if _injected:
+        return None
+    cur = await conn.execute("SELECT project_id FROM calls WHERE id = %s", (call_id,))
+    found = await cur.fetchone()
+    if found is None:
+        return None
+    resolved = await _project_llms.resolve(conn, found[0])
+    return None if resolved is None else resolved.client(get_usage())
+
+
+def get_client() -> tuple[LLMClient, ApiUsageSink]:
+    """The process-wide judge client (provider from ``LLM_PROVIDER``, DeepSeek by default)."""
+    global _client
+    usage = get_usage()
     if _client is None:
-        _client = build_client(usage_sink=_usage)
-    return _client, _usage
+        _client = build_client(usage_sink=usage)
+    return _client, usage
 
 
 async def reproduce(env: Any, ctx: Ctx) -> list[Outgoing]:
@@ -90,7 +115,14 @@ async def reproduce(env: Any, ctx: Ctx) -> list[Outgoing]:
 
 @consumer(group=GROUP, topic=Topics.CALL_COMPLETED, reproduce=reproduce)
 async def on_call_completed(env: Any, ctx: Ctx) -> list[Outgoing]:
-    client, usage = get_client()
+    try:
+        project_client = await _project_client(ctx.tx, env.payload.call_id)
+    except LLMConfigError as exc:  # the project's own settings are unusable: retrying cannot help
+        raise PermanentError(f"judge: {exc}") from exc
+    if project_client is None:
+        client, usage = get_client()
+    else:
+        client, usage = project_client, get_usage()
     store = PgEvaluatorStore(ctx.tx)
     await _mark_evaluating(env.payload.call_id)
     try:
@@ -113,6 +145,7 @@ async def main() -> None:
     finally:
         if _client is not None:
             await _client.aclose()
+        await _project_llms.aclose()
         if _usage is not None:
             await _usage.close()
         if _status_db is not None:

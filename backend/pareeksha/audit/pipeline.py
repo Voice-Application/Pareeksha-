@@ -46,6 +46,7 @@ from pareeksha.events.schemas import AuditRequested, CallCompleted, Envelope
 from pareeksha.events.topics import MAX_ATTEMPTS
 from pareeksha.llm.base import LLMRetryableError
 from pareeksha.llm.client import LLMClient
+from pareeksha.llm.config import LLMConfigError
 from pareeksha.speech.agent_config import speech_selection
 from pareeksha.speech.base import (
     SpeechConfigError,
@@ -103,6 +104,9 @@ class AuditDeps:
     stt_factory: Callable[..., STTProvider]
     llm: LLMClient | None
     fetch: Fetcher
+    #: ``(connection, project_id)`` -> the project's own role-detection client, or ``None`` to use
+    #: ``llm`` (set by the worker so a project's LLM settings apply).
+    llm_for: Callable[[Any, Any], Awaitable[LLMClient | None]] | None = None
 
 
 class _Unusable(Exception):
@@ -123,7 +127,8 @@ class Auditor:
             await cur.execute(
                 "SELECT c.id, c.source, c.status, c.agent_id, c.language, c.metadata, "
                 "a.name AS agent_name, a.description AS agent_description, "
-                "a.bias_list AS bias_list, a.adapter_config AS adapter_config "
+                "a.bias_list AS bias_list, a.adapter_config AS adapter_config, "
+                "c.project_id AS project_id "
                 "FROM calls c LEFT JOIN agents a ON a.id = c.agent_id "
                 "WHERE c.id = %s FOR UPDATE OF c",
                 (p.call_id,),
@@ -262,10 +267,16 @@ class Auditor:
         if not segments:
             raise _Unusable("no speech detected in the recording")
 
+        llm = self.deps.llm
+        if self.deps.llm_for is not None:
+            try:
+                llm = await self.deps.llm_for(ctx.tx, call["project_id"]) or llm
+            except LLMConfigError:
+                pass  # the project's settings are unusable: keep the environment client
         try:
             decision = await detect_roles(
                 segments,
-                self.deps.llm,
+                llm,
                 agent_name=call["agent_name"] or "voice agent",
                 agent_description=call["agent_description"] or "",
                 language=primary_language(p.language),
@@ -289,7 +300,7 @@ class Auditor:
             ).encode(),
         )
         await self.deps.blobs.put(f"{prefix}/mixed.wav", audio.mixed_wav)
-        await self._persist(p, ctx, audio, transcripts, decision, turns, notes)
+        await self._persist(p, ctx, audio, transcripts, decision, turns, notes, llm)
 
     async def _persist(
         self,
@@ -300,6 +311,7 @@ class Auditor:
         decision: RoleDecision,
         turns: Sequence[BuiltTurn],
         notes: Sequence[str],
+        llm: LLMClient | None,
     ) -> None:
         tx = ctx.tx
         language = primary_language(p.language)
@@ -344,13 +356,13 @@ class Auditor:
                     p.call_id,
                 ),
             )
-        if decision.llm_model is not None and self.deps.llm is not None:
+        if decision.llm_model is not None and llm is not None:
             await tx.execute(
                 "INSERT INTO api_usage (provider, operation, units, unit_type, est_cost, call_id, "
                 "project_id) VALUES (%s, 'llm_role_detect', %s, 'tokens', %s, %s, "
                 "(SELECT project_id FROM calls WHERE id = %s))",
                 (
-                    self.deps.llm.provider.name.value,
+                    llm.provider.name.value,
                     decision.input_tokens + decision.output_tokens,
                     decision.est_cost,
                     p.call_id,

@@ -95,6 +95,30 @@ The mock agent now skips the recording disclosure, so the run reports a failed c
 
 The mock agent's voice detection goes by loudness, so on `auto_rickshaw_0db` it can stop answering and the call ends `agent_silent`. That is a limit of the mock, not a finding about a real bot: see [its README](../../mock_agent/README.md#noisy-lines).
 
+## Design tests by chat
+
+Instead of writing the agent, scenarios and personas by hand, paste your bot's prompt or workflow into the test designer. It asks only what it cannot infer (endpoint URL, languages, mandatory disclosures, tools, target callers, line conditions), then returns a draft you commit in one call:
+
+```python
+from pareeksha_sdk import Pareeksha
+
+client = Pareeksha(base_url="http://localhost:8000", api_key="pk_live_...")
+messages = [{"role": "user", "content": open("bot_prompt.txt").read()}]
+reply = client.designer_chat(messages)          # reply["questions"]: what it still needs
+messages += [{"role": "assistant", "content": reply["reply"]},
+             {"role": "user", "content": "ws://my-bot:8765/ws, Hindi and Kannada, recorded-call disclosure"}]
+reply = client.designer_chat(messages, draft=reply["draft"])
+if reply["ready"]:
+    done = client.designer_commit(reply["draft"])  # agent + scenarios + personas, one transaction
+    print(done["calls"], "calls; review and start the run at", done["run_wizard_path"])
+```
+
+The chat is stateless: send the whole history each time. Open `run_wizard_path` in the web app to review and start the run.
+
+### Choose the LLM per project
+
+DeepSeek is the default (set `DEEPSEEK_API_KEY` in `.env`). An admin key can override it for one project, without a restart: `client.update_llm_settings(provider="gemini", judge_model="...", caller_model="...", api_key="...")`, or `provider="openai_compatible"` with an https `base_url` of any OpenAI-compatible API. `client.test_llm_settings()` makes one tiny call to check it; `DELETE /settings/llm` goes back to `.env`. The key is write-only: the API only shows its last four characters.
+
 ## Troubleshooting
 
 | Symptom | Fix |

@@ -7,6 +7,7 @@ from __future__ import annotations
 import dataclasses
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from typing import Any
 
 from pareeksha.evaluation.evidence import evidence_problems
 from pareeksha.evaluation.metrics import CallMetrics
@@ -58,6 +59,17 @@ def mask_turn(turn: Turn) -> Turn:
     )
 
 
+def _mask_values(value: Any) -> Any:
+    """mask_pii on every string value (dict keys and non-strings untouched)."""
+    if isinstance(value, str):
+        return mask_pii(value)
+    if isinstance(value, dict):
+        return {k: _mask_values(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_mask_values(v) for v in value]
+    return value
+
+
 def render_judge_prompt(data: JudgeInput) -> str:
     return render_prompt(
         JUDGE_PROMPT,
@@ -67,7 +79,13 @@ def render_judge_prompt(data: JudgeInput) -> str:
         call_language=data.call_language,
         turns=[mask_turn(t) for t in data.turns],
         tool_calls=[
-            {"name": t.name, "args": t.args, "turn_idx": t.turn_idx} for t in data.tool_calls
+            {
+                "name": t.name,
+                "args": _mask_values(t.args),
+                "result": _mask_values(t.result),
+                "turn_idx": t.turn_idx,
+            }
+            for t in data.tool_calls
         ],
         metrics=data.metrics,
         checks=list(data.checks),

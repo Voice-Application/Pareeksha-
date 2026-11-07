@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import json
 from datetime import datetime
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from pareeksha.schemas.common import CallSource, RequestModel
 
@@ -158,6 +159,29 @@ class CallOut(BaseModel):
 
 class ReevaluateRequest(RequestModel):
     rubric_version: str | None = None
+
+
+MAX_REPORTED_JSON_BYTES = 4096
+
+
+class ReportedToolCall(RequestModel):
+    """A tool call the bot (or its platform) reports after the call ended."""
+
+    name: str = Field(min_length=1, max_length=200)
+    arguments: dict[str, Any] = Field(default_factory=dict)
+    result: Any | None = None
+    at_ms: int = Field(default=0, ge=0)
+
+    @field_validator("arguments", "result")
+    @classmethod
+    def _small(cls, value: Any) -> Any:
+        if len(json.dumps(value, default=str).encode()) > MAX_REPORTED_JSON_BYTES:
+            raise ValueError(f"must serialize to at most {MAX_REPORTED_JSON_BYTES} bytes")
+        return value
+
+
+class ToolCallsReport(RequestModel):
+    tool_calls: list[ReportedToolCall] = Field(max_length=200)
 
 
 class DimensionReview(RequestModel):

@@ -60,6 +60,16 @@ curl -s -H "Authorization: Bearer $PAREEKSHA_API_KEY" "$API/calls/$CALL_ID" | py
 
 `status` moves `transcribing` to `completed`; then `evaluation.overall_score` and the verdict appear, and the call shows up under Audits in the web app. If the agent/caller roles were guessed wrong, `POST /calls/{id}/speaker-map` with `{"spk_0":"caller","spk_1":"agent"}` re-judges without re-transcribing.
 
+## Report tool calls after the call
+
+The `call_id` in the webhook answer lets you report what the bot did, so tool-call checks are not "unknown". Either add `tool_calls` to the webhook body, or send it afterwards:
+
+```bash
+curl -s -X PUT -H "Authorization: Bearer $PAREEKSHA_API_KEY" -H "Content-Type: application/json"   "$API/calls/$CALL_ID/tool-calls"   -d '{"tool_calls":[{"name":"record_promise_to_pay","arguments":{"date":"2026-11-10"},"result":{"ok":true},"at_ms":42000}]}'
+```
+
+`tool_calls` items are `{name, arguments?, result?, at_ms?}` (max 200). Each PUT replaces the previous report, and a completed call is re-evaluated.
+
 ## 4. Local testing without a public recording host
 
 Local receivers on `localhost` are blocked on purpose. For development only, switch the guard to allow private addresses and let the containers trust your self-signed certificate:

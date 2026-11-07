@@ -49,6 +49,18 @@ class State:
         self.page_size = 200
         self.prompt_versions: dict[str, list[dict[str, Any]]] = {}
         self.prompt_bodies: list[dict[str, Any]] = []
+        self.designer_requests: list[dict[str, Any]] = []
+        self.designer_commits: list[dict[str, Any]] = []
+        self.llm_settings: dict[str, Any] = {
+            "provider": "deepseek",
+            "base_url": "https://api.deepseek.com",
+            "judge_model": "j",
+            "caller_model": "c",
+            "designer_model": "j",
+            "api_key_set": False,
+            "api_key_last4": None,
+            "source": "environment",
+        }
 
 
 def build_app(state: State) -> FastAPI:
@@ -223,6 +235,55 @@ def build_app(state: State) -> FastAPI:
             "status": "completed" if done else "transcribing",
             "evaluation": {"overall_score": 72.5} if done else None,
         }
+
+    @app.put(api + "/calls/{call_id}/tool-calls", status_code=202, dependencies=[Depends(auth)])
+    def report_tool_calls(call_id: str, body: dict[str, Any]) -> dict[str, Any]:
+        state.calls[call_id]["tool_calls"] = body["tool_calls"]
+        return {"call_id": call_id}
+
+    @app.post(api + "/designer/chat", dependencies=[Depends(auth)])
+    def designer_chat(body: dict[str, Any]) -> dict[str, Any]:
+        state.designer_requests.append(body)
+        if body.get("draft") is None:
+            question = {"id": "endpoint_url", "text": "Where does the bot listen?", "options": []}
+            return {"reply": "One question", "questions": [question], "draft": None, "ready": False}
+        return {"reply": "Done", "questions": [], "draft": body["draft"], "ready": True}
+
+    @app.post(api + "/designer/commit", status_code=201, dependencies=[Depends(auth)])
+    def designer_commit(body: dict[str, Any]) -> dict[str, Any]:
+        state.designer_commits.append(body["draft"])
+        return {
+            "agent_id": str(uuid.uuid4()),
+            "scenario_ids": [],
+            "persona_ids": [],
+            "noise_profile_ids": [],
+            "calls": 0,
+            "run_wizard_path": "/runs/new?step=review",
+        }
+
+    @app.get(api + "/settings/llm", dependencies=[Depends(auth)])
+    def get_llm_settings() -> dict[str, Any]:
+        return state.llm_settings
+
+    @app.put(api + "/settings/llm", dependencies=[Depends(auth)])
+    def put_llm_settings(body: dict[str, Any]) -> dict[str, Any]:
+        key = body.pop("api_key", None)
+        state.llm_settings = {
+            "provider": body["provider"],
+            "base_url": body.get("base_url"),
+            "judge_model": body.get("judge_model"),
+            "caller_model": body.get("caller_model"),
+            "designer_model": body.get("designer_model"),
+            "api_key_set": key is not None,
+            "api_key_last4": key[-4:] if key else None,
+            "source": "project",
+        }
+        return state.llm_settings
+
+    @app.post(api + "/settings/llm/test", dependencies=[Depends(auth)])
+    def test_llm_settings() -> dict[str, Any]:
+        provider = state.llm_settings["provider"]
+        return {"ok": True, "provider": provider, "model": "m", "latency_ms": 12, "error": None}
 
     @app.get(api + "/dlq", dependencies=[Depends(auth)])
     def dlq(status: str = "open", limit: int = 50, cursor: str | None = None) -> dict[str, Any]:

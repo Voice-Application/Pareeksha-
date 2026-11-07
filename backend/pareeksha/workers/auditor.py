@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Sequence
 from functools import cache
+from typing import Any
 
 from pareeksha.audit.fetch import fetch_recording
 from pareeksha.audit.pipeline import AuditDeps, Auditor
@@ -18,6 +19,7 @@ from pareeksha.events.topics import ConsumerGroups, Topics
 from pareeksha.llm.client import LLMClient
 from pareeksha.llm.config import LLMConfigError, LLMSettings
 from pareeksha.llm.factory import build_client
+from pareeksha.llm.project_settings import ProjectLLMClients
 from pareeksha.speech.registry import get_stt_provider
 from pareeksha.storage.blob import blob_store_from_env
 
@@ -35,6 +37,17 @@ def _llm_or_none() -> LLMClient | None:
         return None
 
 
+_project_llms = ProjectLLMClients()
+
+
+async def _llm_for_project(conn: Any, project_id: Any) -> LLMClient | None:
+    """The project's own role-detection client, or ``None`` (use the environment's)."""
+    if project_id is None:
+        return None
+    resolved = await _project_llms.resolve(conn, project_id)
+    return None if resolved is None else resolved.client()
+
+
 @cache
 def get_auditor() -> Auditor:
     return Auditor(
@@ -43,6 +56,7 @@ def get_auditor() -> Auditor:
             stt_factory=get_stt_provider,
             llm=_llm_or_none(),
             fetch=fetch_recording,
+            llm_for=_llm_for_project,
         )
     )
 
@@ -63,7 +77,10 @@ async def handle_audit_requested(env: Envelope[AuditRequested], ctx: Ctx) -> Seq
 
 
 async def main() -> None:
-    await run_worker(GROUP)
+    try:
+        await run_worker(GROUP)
+    finally:
+        await _project_llms.aclose()
 
 
 if __name__ == "__main__":

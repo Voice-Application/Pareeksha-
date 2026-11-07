@@ -21,7 +21,7 @@ SCHEMA_SQL = BACKEND.parent / "docs" / "schema.sql"
 MIGRATION_SQL = BACKEND / "alembic" / "sql" / "0001_initial.sql"
 
 # Tables added by later Alembic revisions; not part of docs/schema.sql v0.2.
-POST_V02_TABLES = {"users", "prompt_versions"}
+POST_V02_TABLES = {"users", "llm_settings", "prompt_versions"}
 
 
 def _documented_tables() -> set[str]:
@@ -82,7 +82,7 @@ def test_downgrade_then_upgrade_round_trips(database_url: str) -> None:
         assert conn.execute("select count(*) from projects").fetchone() == (0,)
 
 
-def test_downgrade_0003_keeps_prompt_agents_and_drops_new_checks() -> None:
+def test_downgrade_0004_keeps_prompt_agents_and_drops_new_checks() -> None:
     """Rows using 'prompt' / 'no_unexpected_tool' must not block re-adding the old CHECKs."""
     for url in _migrated_database():
         cfg = alembic_config(url)
@@ -107,7 +107,7 @@ def test_downgrade_0003_keeps_prompt_agents_and_drops_new_checks() -> None:
                 "values (%s, 'no_unexpected_tool', 'k')",
                 (call_id,),
             )
-        command.downgrade(cfg, "0002")
+        command.downgrade(cfg, "0003")
         with psycopg.connect(sync_url) as conn:
             row = conn.execute("select adapter, archived from agents").fetchone()
             checks = conn.execute("select count(*) from deterministic_checks").fetchone()
