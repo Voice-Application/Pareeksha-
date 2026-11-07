@@ -205,6 +205,10 @@ function page<T>(items: T[], q: URLSearchParams): { items: T[]; next_cursor: str
 
 const err = (status: number, code: string, message: string, details: Record<string, unknown> = {}) => ({ status, json: { error: { code, message, details } } });
 
+/**
+ * Serve every `/api/v1` request of the page from the in-memory `state`, recording each call.
+ * Entries in `state.fail` force an error response for matching requests.
+ */
 export async function mockApi(pg: Page, state: MockState) {
   let polls = 0;
   await pg.route(/\/api\/proxy\/api\/v1\//, async (route: Route) => {
@@ -253,6 +257,7 @@ export async function mockApi(pg: Page, state: MockState) {
       const m = path.match(/prompt-versions\/(\d+)(\/activate)?$/);
       if (!m && method === "GET") return send({ json: [...list].reverse() });
       if (!m && method === "POST") {
+        /** The fields the server's content hash covers (all but the note), with defaults filled in. */
         const sig = (x: Record<string, unknown>) => JSON.stringify([x.system_prompt, x.provider, x.model, x.base_url ?? null, x.temperature, x.tools ?? [], x.max_tool_rounds, x.rag_config ?? null]);
         const same = list.find((v) => v.id === a.adapter_config?.active_version_id && sig(v) === sig(b));
         if (same) return send({ json: same });

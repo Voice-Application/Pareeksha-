@@ -38,6 +38,9 @@ class PromptTool(RequestModel):
     @field_validator("parameters")
     @classmethod
     def _object_schema(cls, v: dict[str, Any]) -> dict[str, Any]:
+        """Require an object JSON Schema with schema-valued ``properties`` and a name-list
+        ``required``.
+        """
         if v.get("type") != "object":
             raise ValueError('parameters must be a JSON Schema with "type": "object"')
         props = v.get("properties", {})
@@ -62,6 +65,7 @@ class _PromptVersionFields(RequestModel):
 
     @model_validator(mode="after")
     def _unique_tool_names(self) -> _PromptVersionFields:
+        """Reject a version that declares two tools with the same name."""
         names = [t.name for t in self.tools]
         if len(names) != len(set(names)):
             raise ValueError("tool names must be unique")
@@ -71,6 +75,7 @@ class _PromptVersionFields(RequestModel):
 class PromptVersionCreate(_PromptVersionFields):
     @model_validator(mode="after")
     def _compatible_needs_base_url(self) -> PromptVersionCreate:
+        """Require a non-blank ``base_url`` for ``openai_compatible`` (checked on create only)."""
         # create-only: versions stored before this rule must still load
         if self.provider == "openai_compatible" and not (self.base_url or "").strip():
             raise ValueError("openai_compatible requires a base_url")

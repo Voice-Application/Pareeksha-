@@ -76,6 +76,7 @@ class State:
 
 
 def build_app(state: State) -> FastAPI:
+    """An in-memory FastAPI stand-in for the platform API, reading and recording ``state``."""
     app = FastAPI()
 
     def auth(authorization: str | None = Header(default=None)) -> None:
@@ -314,6 +315,7 @@ def build_app(state: State) -> FastAPI:
 
     @app.post(api + "/agents/{agent_id}/prompt-versions", dependencies=[Depends(auth)])
     async def create_pv(agent_id: str, request: Request, response: Response) -> dict[str, Any]:
+        """Create a prompt version, or return the active one when only the note differs."""
         body = await request.json()
         state.prompt_bodies.append(body)
         rows = state.prompt_versions.setdefault(agent_id, [])

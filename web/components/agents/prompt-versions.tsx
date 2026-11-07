@@ -44,6 +44,7 @@ type Errors = Record<string, string>;
 
 const BLANK: Draft = { system_prompt: "", provider: "openai", model: "", base_url: "", temperature: "0.2", max_tool_rounds: "5", tools: "[]", note: "", ragOn: false, rag: { ...DEFAULT_RAG, kb_id: "" } };
 
+/** Editor draft prefilled from a saved version; the note starts empty because it belongs to that version. */
 function fromVersion(v: PromptVersion): Draft {
   return {
     system_prompt: v.system_prompt,
@@ -66,6 +67,7 @@ const EXAMPLE_TOOL: PromptTool = {
   mock: { mode: "static", result: { emi_amount: 4000, due_date: "2026-11-10" }, cases: [] },
 };
 
+/** True for a plain object (not null, not an array). */
 const isObj = (x: unknown): x is Record<string, unknown> => !!x && typeof x === "object" && !Array.isArray(x);
 
 /** Client-side check of the PromptTool shape, so most mistakes show before the API answers 400. */
@@ -109,6 +111,10 @@ export function parseTools(text: string): { tools: PromptTool[] | null; issues: 
   return { tools: issues.length ? null : (raw as PromptTool[]), issues };
 }
 
+/**
+ * Validate the draft: field errors keyed by input id, plus the create body when there are none.
+ * Mirrors the server's limits; `openai_compatible` needs a base URL.
+ */
 function check(d: Draft): { errors: Errors; body: PromptVersionCreate | null } {
   const e: Errors = {};
   if (!d.system_prompt.trim()) e["pv-system-prompt"] = "Paste the system prompt your agent uses.";
@@ -133,6 +139,7 @@ function check(d: Draft): { errors: Errors; body: PromptVersionCreate | null } {
   };
 }
 
+/** Help text for the base URL field, which depends on the provider. */
 function baseUrlHelp(p: Provider): string {
   if (p === "openai_compatible") return "The server's OpenAI-compatible endpoint, such as https://llm.example.com/v1.";
   if (p === "ollama") return "Your Ollama server. Leave empty for the default.";
@@ -184,14 +191,20 @@ function CodeArea({ id, value, describedBy, invalid, className, ...rest }: { id:
   );
 }
 
+/** Space-joined truthy ids for `aria-describedby`, or undefined when there are none. */
 const ids = (...xs: (string | false | undefined)[]) => xs.filter(Boolean).join(" ") || undefined;
 
+/**
+ * Prompt versions panel for a prompt agent (renders nothing for other agents): edit and save the
+ * prompt, model and tools as a new version, list versions, activate one and diff two of them.
+ */
 export function PromptVersions({ agentId }: { agentId: string }) {
   const qc = useQueryClient();
   const { toast } = useToast();
   const agent = useQuery({
     queryKey: ["agent", agentId],
     queryFn: () => call(api.GET("/api/v1/agents/{agent_id}", { params: { path: { agent_id: agentId } } })),
+    /** Retry once, except on 404 (the agent is gone). */
     retry: (n, e) => !(e instanceof ApiError && e.status === 404) && n < 1,
   });
   const isPrompt = agent.data?.adapter === "prompt";
@@ -230,6 +243,7 @@ export function PromptVersions({ agentId }: { agentId: string }) {
   const save = useMutation({ mutationFn: (body: PromptVersionCreate) => createPromptVersion(agentId, body) });
   const activate = useMutation({
     mutationFn: (version: number) => activatePromptVersion(agentId, version),
+    /** Load the activated version into a clean editor (a dirty draft is kept) and refetch. */
     onSuccess: (v) => {
       toast(`v${v.version} is now the active version.`);
       // A clean editor follows the active version; a dirty draft is the user's work and stays.
@@ -246,6 +260,7 @@ export function PromptVersions({ agentId }: { agentId: string }) {
     onError: (e, version) => toast(`Could not activate v${version}: ${promptErrorMessage(e)}`, { tone: "error" }),
   });
 
+  /** Merge `p` into the draft, clear the last save message and revalidate after a first submit. */
   function patch(p: Partial<Draft>) {
     const next = { ...draft, ...p };
     setDraft(next);
@@ -253,6 +268,10 @@ export function PromptVersions({ agentId }: { agentId: string }) {
     if (submitted) setErrors(check(next).errors);
   }
 
+  /**
+   * Validate and save the draft as a new version (the server returns the active one if nothing
+   * changed). Focuses the first invalid field; a rejected base URL is shown on that field.
+   */
   async function submit(ev: FormEvent) {
     ev.preventDefault();
     setSubmitted(true);
@@ -282,6 +301,7 @@ export function PromptVersions({ agentId }: { agentId: string }) {
     }
   }
 
+  /** Append the example tool, renamed to a free `lookup_emi_N` if needed; refuses tools JSON that is not an array. */
   function insertExample() {
     const { issues } = parseTools(draft.tools);
     let current: PromptTool[] = [];
@@ -311,6 +331,7 @@ export function PromptVersions({ agentId }: { agentId: string }) {
     {
       key: "version",
       header: "Version",
+      /** Version number, with an "active" chip on the agent's active version. */
       cell: (v) => (
         <span className="inline-flex items-center gap-2">
           <span className="mono font-medium">v{v.version}</span>
@@ -323,6 +344,7 @@ export function PromptVersions({ agentId }: { agentId: string }) {
         </span>
       ),
     },
+    /** Note column: the version's note clamped to two lines, or a dash when it has none. */
     { key: "note", header: "Note", cell: (v) => (v.note ? <span className="line-clamp-2">{v.note}</span> : <span className="text-subtle">-</span>) },
     {
       key: "saved",
@@ -538,6 +560,10 @@ export function PromptVersions({ agentId }: { agentId: string }) {
   );
 }
 
+/**
+ * Line diff of `before` to `after` with added/removed counts. Unchanged runs fold into expandable
+ * skip rows (2 lines of context); inputs too large to diff show a message instead.
+ */
 function DiffView({ title, caption, before, after }: { title: string; caption: string; before: string; after: string }) {
   const diff = useMemo(() => lineDiff(before, after), [before, after]);
   const lines = useMemo(() => (diff.tooLarge ? [] : diff.lines), [diff]);
@@ -588,6 +614,7 @@ function DiffView({ title, caption, before, after }: { title: string; caption: s
   );
 }
 
+/** One diff table row: old and new line numbers, a +/- marker (with screen-reader text) and the line. */
 function Row({ l }: { l: DiffLine }) {
   const tone = l.kind === "add" ? "bg-pass-tint" : l.kind === "del" ? "bg-fail-tint" : undefined;
   return (

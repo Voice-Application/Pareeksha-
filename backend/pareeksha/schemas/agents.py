@@ -54,6 +54,7 @@ class AgentCreate(_AgentFields):
 
     @model_validator(mode="after")
     def _endpoint_required(self) -> AgentCreate:
+        """Require ``endpoint_url`` for every adapter except ``prompt``."""
         if self.endpoint_url is None and self.adapter != "prompt":
             raise ValueError("endpoint_url is required")
         return self

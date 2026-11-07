@@ -27,6 +27,7 @@ _CHECKS = [
 
 
 def _any(col: str, values: list[str]) -> str:
+    """The CHECK constraint expression allowing ``col`` to be one of ``values`` (text literals)."""
     return f"{col} = ANY (ARRAY[{', '.join(f'{v!r}::text' for v in values)}])"
 
 

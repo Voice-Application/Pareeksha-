@@ -55,6 +55,11 @@ def _should_retry(call: c.Call_, status: int) -> bool:
 
 
 def _unwrap(call: c.Call_, response: httpx.Response) -> Any:
+    """The JSON body of a successful response (``None`` when empty); errors are raised.
+
+    For ``flag_unchanged`` calls, ``unchanged`` says whether the server answered 200 (an existing
+    resource) rather than 201.
+    """
     if response.status_code >= 400:
         raise _error_from(response)
     if response.status_code == 204 or not response.content:

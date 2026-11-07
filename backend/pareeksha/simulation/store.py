@@ -147,6 +147,7 @@ async def read_spec(conn: Conn, req: CallRequested) -> tuple[CallSpec, uuid.UUID
 
 
 def _secret_box() -> SecretBox:
+    """The ``SecretBox`` keyed by ``SECRET_KEY``; raises ``RuntimeError`` when it is unset."""
     key = os.environ.get("SECRET_KEY")
     if not key:
         raise RuntimeError("SECRET_KEY is not configured")

@@ -43,6 +43,7 @@ def env(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 async def _agent(api: AsyncClient, tenant: Tenant, **extra: Any) -> dict[str, Any]:
+    """Create a prompt agent for ``tenant`` (``extra`` adds body fields) and return it."""
     body = {"name": f"prompt-{uuid.uuid4().hex[:6]}", "adapter": "prompt", **extra}
     response = await api.post(f"{API}/agents", json=body, headers=tenant.admin)
     assert response.status_code == 201, response.text
@@ -53,6 +54,9 @@ async def _agent(api: AsyncClient, tenant: Tenant, **extra: Any) -> dict[str, An
 async def _version(
     api: AsyncClient, tenant: Tenant, agent_id: str, **overrides: Any
 ) -> dict[str, Any]:
+    """Post ``VERSION`` with ``overrides`` as a prompt version and return the created or unchanged
+    one.
+    """
     response = await api.post(
         f"{API}/agents/{agent_id}/prompt-versions",
         json={**VERSION, **overrides},
@@ -64,6 +68,7 @@ async def _version(
 
 
 async def test_create_prompt_agent_without_endpoint(api: AsyncClient, tenant: Tenant) -> None:
+    """A prompt agent gets a ``prompt://`` endpoint; a voice agent still needs ``endpoint_url``."""
     agent = await _agent(api, tenant)
     assert agent["endpoint_url"] == f"prompt://{agent['id']}"
     assert agent["adapter"] == "prompt" and agent["has_adapter_secrets"] is False
@@ -74,6 +79,7 @@ async def test_create_prompt_agent_without_endpoint(api: AsyncClient, tenant: Te
 async def test_create_version_sets_active_and_expected_tools(
     api: AsyncClient, tenant: Tenant
 ) -> None:
+    """A new version becomes active and its tools become the agent's expected tools."""
     agent = await _agent(api, tenant)
     created = await api.post(
         f"{API}/agents/{agent['id']}/prompt-versions", json=VERSION, headers=tenant.admin
@@ -94,6 +100,7 @@ async def test_create_version_sets_active_and_expected_tools(
 
 
 async def test_identical_version_is_not_duplicated(api: AsyncClient, tenant: Tenant) -> None:
+    """Posting the active version again with only a new note returns it with 200."""
     agent = await _agent(api, tenant)
     first = await _version(api, tenant, agent["id"])
     again = await api.post(
@@ -107,6 +114,7 @@ async def test_identical_version_is_not_duplicated(api: AsyncClient, tenant: Ten
 
 
 async def test_versions_listed_newest_first(api: AsyncClient, tenant: Tenant) -> None:
+    """Versions list newest first; one version is fetched by number and unknown numbers 404."""
     agent = await _agent(api, tenant)
     for i in range(3):
         await _version(api, tenant, agent["id"], system_prompt=f"prompt {i}")
@@ -119,6 +127,7 @@ async def test_versions_listed_newest_first(api: AsyncClient, tenant: Tenant) ->
 
 
 async def test_activate_older_version(api: AsyncClient, tenant: Tenant) -> None:
+    """Activating v1 makes it active again and restores its expected tools."""
     agent = await _agent(api, tenant)
     first = await _version(api, tenant, agent["id"])
     await _version(api, tenant, agent["id"], tools=[])
@@ -137,6 +146,7 @@ async def test_activate_older_version(api: AsyncClient, tenant: Tenant) -> None:
 async def test_other_tenant_gets_404(
     api: AsyncClient, tenant: Tenant, other_tenant: Tenant
 ) -> None:
+    """Every prompt-version route answers 404 to another tenant."""
     agent = await _agent(api, tenant)
     await _version(api, tenant, agent["id"])
     base = f"{API}/agents/{agent['id']}/prompt-versions"
@@ -147,6 +157,7 @@ async def test_other_tenant_gets_404(
 
 
 async def test_versions_rejected_for_voice_agent(api: AsyncClient, tenant: Tenant) -> None:
+    """Prompt-version routes answer 409 ``not_a_prompt_agent`` for a voice agent."""
     voice = await api.post(
         f"{API}/agents",
         json={"name": "voice", "endpoint_url": "ws://mock-agent:8765/ws"},
@@ -165,6 +176,7 @@ async def test_versions_rejected_for_voice_agent(api: AsyncClient, tenant: Tenan
 async def test_api_key_never_returned(
     api: AsyncClient, tenant: Tenant, session_factory: async_sessionmaker[AsyncSession]
 ) -> None:
+    """The API key never appears in responses or run snapshots and is encrypted at rest."""
     agent = await _agent(api, tenant, adapter_secrets={"api_key": KEY})
     assert agent["has_adapter_secrets"] is True and KEY not in json.dumps(agent)
     version = await _version(api, tenant, agent["id"])
@@ -202,6 +214,7 @@ async def test_api_key_never_returned(
 async def test_replacement_api_key_persists(
     api: AsyncClient, tenant: Tenant, session_factory: async_sessionmaker[AsyncSession]
 ) -> None:
+    """A key sent in a PATCH replaces the stored one (encrypted) and is not echoed."""
     agent = await _agent(api, tenant, adapter_secrets={"api_key": KEY})
     new_key = "sk-test-replacement"
     patched = await api.patch(
@@ -221,6 +234,7 @@ async def test_replacement_api_key_persists(
 
 
 async def test_private_base_url_rejected(api: AsyncClient, tenant: Tenant) -> None:
+    """Link-local and loopback base URLs are rejected with ``base_url_not_allowed``."""
     agent = await _agent(api, tenant)
     for url in ("http://169.254.169.254/", "http://127.0.0.1:8080"):
         response = await api.post(
@@ -235,6 +249,7 @@ async def test_private_base_url_rejected(api: AsyncClient, tenant: Tenant) -> No
 async def test_private_base_url_allowed_with_flag(
     api: AsyncClient, tenant: Tenant, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """``AGENT_LLM_ALLOW_PRIVATE_URLS`` lets a version use a local Ollama base URL."""
     monkeypatch.setenv("AGENT_LLM_ALLOW_PRIVATE_URLS", "true")
     agent = await _agent(api, tenant)
     created = await api.post(
@@ -246,6 +261,7 @@ async def test_private_base_url_allowed_with_flag(
 
 
 async def test_run_refused_without_version(api: AsyncClient, tenant: Tenant) -> None:
+    """A prompt agent without an active version cannot be run."""
     agent = await _agent(api, tenant)
     fx = await make_fixture(api, tenant, scenarios=1, personas=1, profiles=1)
     response = await api.post(
@@ -269,6 +285,7 @@ class _FakeProvider:
         temperature: float,
         timeout_s: float = 60.0,
     ) -> ChatReply:
+        """Record ``messages``, then raise ``self.error`` if set or answer a short greeting."""
         self.messages = messages
         if self.error:
             raise self.error
@@ -279,6 +296,7 @@ class _FakeProvider:
 async def test_test_connection_for_prompt_agent(
     api: AsyncClient, tenant: Tenant, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Test-connection needs a version, uses the stored key and hides it when the call fails."""
     agent = await _agent(api, tenant, adapter_secrets={"api_key": KEY})
     url = f"{API}/agents/{agent['id']}/test-connection"
     no_version = await api.post(url, headers=tenant.admin)

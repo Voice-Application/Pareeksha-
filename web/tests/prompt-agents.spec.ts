@@ -1,6 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { agent, freshState, mockApi, uuid, type MockState } from "./support/mock-api";
 
+/** Load `path` against a fresh mock API state (adjusted by `mutate` first) and return that state. */
 async function open(page: Page, path: string, mutate?: (s: MockState) => void) {
   const state = freshState();
   mutate?.(state);

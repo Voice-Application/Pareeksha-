@@ -58,6 +58,7 @@ async def _point_at(pg: psycopg.AsyncConnection[Any], agent_id: str, version_id:
 async def test_client_cannot_set_active_version_id(
     api: AsyncClient, tenant: Tenant, other_tenant: Tenant
 ) -> None:
+    """``active_version_id`` sent on create or PATCH is dropped; the server keeps its own."""
     foreign = await _version(api, other_tenant, (await _agent(api, other_tenant))["id"])
     mine = await _agent(api, tenant, adapter_config={"active_version_id": foreign["id"], "k": 1})
     assert mine["adapter_config"] == {"k": 1}  # stripped on create
@@ -78,6 +79,7 @@ async def test_client_cannot_set_active_version_id(
 async def test_patch_cannot_turn_prompt_agent_into_endpointless_voice_agent(
     api: AsyncClient, tenant: Tenant
 ) -> None:
+    """Leaving the prompt adapter needs an endpoint; a prompt agent's endpoint cannot be set."""
     agent = await _agent(api, tenant)
     url = f"{API}/agents/{agent['id']}"
     refused = await api.patch(url, json={"adapter": "audio_v1"}, headers=tenant.admin)
@@ -103,6 +105,7 @@ async def test_patch_cannot_turn_prompt_agent_into_endpointless_voice_agent(
 async def test_run_refused_for_foreign_version(
     api: AsyncClient, tenant: Tenant, other_tenant: Tenant, pg: psycopg.AsyncConnection[Any]
 ) -> None:
+    """A run is refused when the agent points at another tenant's version."""
     foreign = await _foreign_version(pg, other_tenant, api)
     fx = await make_fixture(api, tenant, 1, 1, 1)
     await _point_at(pg, fx.agent_id, foreign)
@@ -114,6 +117,7 @@ async def test_run_refused_for_foreign_version(
 async def test_test_connection_ignores_foreign_version(
     api: AsyncClient, tenant: Tenant, other_tenant: Tenant, pg: psycopg.AsyncConnection[Any]
 ) -> None:
+    """Test-connection treats another tenant's version as no active version."""
     foreign = await _foreign_version(pg, other_tenant, api)
     agent = await _agent(api, tenant, adapter_secrets={"api_key": KEY})
     await _point_at(pg, agent["id"], foreign)
@@ -128,6 +132,7 @@ async def test_read_spec_ignores_foreign_pinned_version(
     database_url: str,
     pg: psycopg.AsyncConnection[Any],
 ) -> None:
+    """``read_spec`` loads the run's own pinned version but never another tenant's."""
     fx = await make_fixture(api, tenant, 1, 1, 1)
     own = await add_version(pg, tenant, uuid.UUID(fx.agent_id), 1, "my prompt")
     await _point_at(pg, fx.agent_id, own)
@@ -160,6 +165,7 @@ async def test_compare_ignores_foreign_version(
     session_factory: async_sessionmaker[AsyncSession],
     pg: psycopg.AsyncConnection[Any],
 ) -> None:
+    """Compare resolves a run's own pinned version number and reports a foreign one as null."""
     fx = await make_fixture(api, tenant, scenarios=1, personas=1, profiles=1)
     rubric = await new_rubric(session_factory)
     base_run = await seed_run(
@@ -200,6 +206,7 @@ async def test_scenario_generation_ignores_foreign_version(
     session_factory: async_sessionmaker[AsyncSession],
     pg: psycopg.AsyncConnection[Any],
 ) -> None:
+    """Scenario generation never puts another tenant's prompt in the brief."""
     world = await build_world(api, tenant)
     foreign = await _foreign_version(pg, other_tenant, api)
     await _point_at(pg, str(world.agent_id), foreign)
@@ -211,6 +218,7 @@ async def test_scenario_generation_ignores_foreign_version(
 async def test_judge_snapshot_ignores_foreign_version(
     api: AsyncClient, tenant: Tenant, other_tenant: Tenant, database_url: str
 ) -> None:
+    """The judge's agent description never includes another tenant's prompt."""
     call_id, _, run_id = await make_simulation(api, tenant, database_url)
     async with transaction(database_url) as ctx:
         tx = ctx.tx
@@ -251,6 +259,7 @@ def _guard(monkeypatch: pytest.MonkeyPatch, ip: str) -> list[httpx.Request]:
 async def test_test_connection_blocks_host_that_rebinds_to_loopback(
     api: AsyncClient, tenant: Tenant, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """A host that resolves to loopback at request time is blocked; a public IP is called."""
     # the name passes the create-time check (it would resolve publicly then) ...
     monkeypatch.setattr(
         "pareeksha.api.routers.prompt_versions.check_base_url", lambda *a, **k: None
@@ -279,6 +288,7 @@ async def test_test_connection_blocks_host_that_rebinds_to_loopback(
 async def test_test_connection_blocks_ollama_default_without_flag(
     api: AsyncClient, tenant: Tenant, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """The plain-http Ollama default is refused unless private URLs are allowed."""
     agent = await _agent(api, tenant)
     await _version(api, tenant, agent["id"], provider="ollama", model="llama3")
     seen = _guard(monkeypatch, "8.8.8.8")
@@ -290,6 +300,7 @@ async def test_test_connection_blocks_ollama_default_without_flag(
 async def test_version_create_requires_https_unless_private_allowed(
     api: AsyncClient, tenant: Tenant
 ) -> None:
+    """A plain-http base URL is rejected on create while private URLs are not allowed."""
     agent = await _agent(api, tenant)
     plain = await api.post(
         f"{API}/agents/{agent['id']}/prompt-versions",
@@ -308,6 +319,7 @@ async def test_version_create_requires_https_unless_private_allowed(
 async def test_invalid_adapter_secrets_are_not_echoed(
     api: AsyncClient, tenant: Tenant, secrets: Any
 ) -> None:
+    """A 400 for malformed ``adapter_secrets`` never repeats the submitted values."""
     created = await _agent(api, tenant)
     body = {"name": "s", "adapter": "prompt", "adapter_secrets": secrets}
     for response in (

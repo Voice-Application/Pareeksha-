@@ -68,6 +68,11 @@ async def _api_error_handler(_: Request, exc: Exception) -> JSONResponse:
 
 
 async def _validation_handler(_: Request, exc: Exception) -> JSONResponse:
+    """400 ``validation_error`` listing the request's validation errors without their inputs.
+
+    The offending ``input`` is always dropped, and ``ctx`` too for ``adapter_secrets`` fields, so a
+    secret sent in the wrong shape is never echoed.
+    """
     assert isinstance(exc, RequestValidationError)
     # `input` is the offending value as sent: it can be a secret (agent `adapter_secrets`), so it
     # is never echoed back; `ctx` goes too for secret fields.

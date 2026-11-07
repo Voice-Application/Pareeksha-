@@ -562,6 +562,11 @@ def run_checks(
     tool_calls: Iterable | None = None,
     expected_amounts: Mapping[str, Any] | None = None,
 ) -> list[CheckResult]:
+    """Run every deterministic check that applies to one call and return the results in order.
+
+    The language and amount checks run only when an expected language or amounts are given; ``None``
+    tool expectations or trace mean unknown, not empty.
+    """
     ts = as_turns(turns)
     expected_tool_calls = None if expected_tool_calls is None else list(expected_tool_calls)
     tool_calls = None if tool_calls is None else list(tool_calls)

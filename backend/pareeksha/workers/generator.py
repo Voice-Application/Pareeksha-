@@ -155,6 +155,11 @@ async def handle_generate_requested(
     ctx: Ctx,
     llm_for: Callable[[Callable[[UsageRecord], Any]], LLMClient] | None = None,
 ) -> Sequence[Outgoing]:
+    """Generate scenario drafts for the agent and store them on the pending draft.
+
+    A redelivered request is a no-op. A prompt agent is described with its active version's prompt.
+    Permanent LLM errors mark the draft failed; retryable ones are re-raised until the last attempt.
+    """
     p = env.payload
     conn = ctx.tx
     draft = await _one(

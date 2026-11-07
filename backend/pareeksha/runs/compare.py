@@ -49,6 +49,7 @@ class CellResult:
 
 
 async def cell_results(session: AsyncSession, run_id: uuid.UUID) -> dict[Cell, CellResult]:
+    """Each cell's call ids, latest evaluation scores and pass flags for one run."""
     ev = latest_evaluations()
     rows = await session.execute(
         select(
@@ -80,6 +81,7 @@ async def cell_results(session: AsyncSession, run_id: uuid.UUID) -> dict[Cell, C
 
 
 def compare_cells(base: dict[Cell, CellResult], head: dict[Cell, CellResult]) -> RunCompareOut:
+    """Per-cell score deltas between two runs, worst delta first, with the summary counts."""
     out: list[RunCompareCell] = []
     regressed = improved = unchanged = 0
     for key in sorted(base.keys() | head.keys()):
@@ -123,6 +125,10 @@ def compare_cells(base: dict[Cell, CellResult], head: dict[Cell, CellResult]) ->
 async def compare_runs(
     session: AsyncSession, project_id: uuid.UUID, base: uuid.UUID, head: uuid.UUID
 ) -> RunCompareOut:
+    """Compare two of the project's runs, adding the prompt version each run pinned.
+
+    Raises 404 listing the ids of runs that are missing or belong to another project.
+    """
     found = set(
         (
             await session.scalars(

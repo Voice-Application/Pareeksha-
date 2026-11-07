@@ -76,6 +76,7 @@ function Connection({ result, testing }: { result?: ConnResult; testing: boolean
   );
 }
 
+/** Agents table with URL-backed filters (archived, adapter, language, name) and sort, per-row connection tests and archiving. */
 export function AgentsList() {
   const url = useUrlState();
   const router = useRouter();
