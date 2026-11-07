@@ -16,9 +16,17 @@ from typing import Any
 from pareeksha.agent_llm.base import AgentLLMError, AgentMessage, ChatProvider, ChatReply, ToolSpec
 from pareeksha.agent_llm.mocks import mock_result
 from pareeksha.llm.caller import HistoryLine
+from pareeksha.rag.retriever import Retriever, build_retriever
 from pareeksha.schemas.calls import EndReason
 from pareeksha.schemas.prompts import PromptTool, PromptVersionOut
-from pareeksha.simulation.models import CallEvent, CallResult, CallSpec, ToolCallRecord, TurnRecord
+from pareeksha.simulation.models import (
+    CallEvent,
+    CallResult,
+    CallSpec,
+    RetrievalRecord,
+    ToolCallRecord,
+    TurnRecord,
+)
 from pareeksha.simulation.runtime import CallerSource
 
 _SIMULATE_SYSTEM = (
@@ -44,6 +52,7 @@ async def run_text_call(
     caller: CallerSource,
     chat: ChatProvider,
     clock: Callable[[], float] = time.monotonic,
+    retriever: Retriever | None = None,
 ) -> CallResult:
     version = PromptVersionOut.model_validate(spec.agent.adapter_config["prompt_version"])
     scenario = spec.scenario
@@ -52,6 +61,8 @@ async def run_text_call(
     tool_calls: list[ToolCallRecord] = []
     events: list[CallEvent] = []
     usage: list[Any] = []
+    retrievals: list[RetrievalRecord] = []
+    rag: dict[str, Any] | None = spec.agent.adapter_config.get("rag")
     history: list[HistoryLine] = []
     messages = [AgentMessage("system", version.system_prompt)]
     specs = [ToolSpec(t.name, t.description, t.parameters) for t in version.tools]
@@ -73,6 +84,7 @@ async def run_text_call(
             tool_calls=tool_calls,
             events=events,
             usage=usage,
+            retrievals=retrievals,
             error=error,
             glass_box=True,
         )
@@ -106,6 +118,64 @@ async def run_text_call(
             if exp.get("name") == name and isinstance(exp.get("mock_result"), dict):
                 return dict(exp["mock_result"])
         return None
+
+    async def add_context(query: str, turn_idx: int) -> None:
+        """Retrieve for this turn and put the context into the system prompt (never fatal)."""
+        nonlocal retriever
+        assert rag is not None
+        cfg = rag["config"]
+        context = ""
+        outcome_fields: dict[str, Any] = {}
+        t = clock()
+        try:
+            if cfg["mode"] == "full_context":
+                context = rag["full_context_text"]
+                outcome_fields = {"queries": [query], "results": []}
+            else:
+                if retriever is None:
+                    retriever = build_retriever(
+                        rag,
+                        spec.agent.adapter_secrets,
+                        model=version.model,
+                        temperature=version.temperature,
+                    )
+                out = await retriever.retrieve(query, chat=chat)
+                for w in out.warnings:
+                    log(w)
+                context = out.context
+                outcome_fields = {
+                    "queries": out.queries,
+                    "results": out.results,
+                    "timings": out.timings,
+                    "usage": out.usage,
+                }
+        except Exception as exc:
+            log("retrieval_failed", error=str(exc)[:200])
+        total_ms = int((clock() - t) * 1000)
+        prompt = version.system_prompt
+        if "{{context}}" in prompt:
+            prompt = prompt.replace("{{context}}", context)
+        elif context:
+            prompt = f"{prompt}\n\nRetrieved context:\n{context}"
+        messages[0] = AgentMessage("system", prompt)
+        if not outcome_fields:
+            return
+        n = len(outcome_fields.get("results", []))
+        timings = {**outcome_fields.get("timings", {}), "total_ms": total_ms}
+        log("retrieval", total_ms=total_ms, n_results=n)
+        retrievals.append(
+            RetrievalRecord(
+                turn_idx=turn_idx,
+                rag_config=cfg,
+                index_id=rag.get("index_id"),
+                query=query,
+                queries=outcome_fields["queries"],
+                results=outcome_fields["results"],
+                context_chars=len(context),
+                timings=timings,
+                usage=outcome_fields.get("usage", {}),
+            )
+        )
 
     def timed_out() -> bool:
         return clock() - t0 > spec.max_call_seconds
@@ -141,6 +211,8 @@ async def run_text_call(
 
         agent_idx = len(turns)
         started = now()
+        if rag is not None:
+            await add_context(line.utterance, agent_idx)
         for _ in range(version.max_tool_rounds):
             if timed_out():
                 return finish("timeout")
