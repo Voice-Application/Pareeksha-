@@ -49,7 +49,7 @@ Details: [docs/04-system-design.md](docs/04-system-design.md).
 | 7 | [Write your own connector](docs/guides/07-write-a-connector.md) |
 | 8 | [Operating Kafka: topics, lag, DLQ replay](docs/guides/08-operating-kafka.md) |
 | 9 | [Test a prompt before you ship it](docs/guides/09-prompt-testing.md) |
-| 9 | [Test a prompt before you ship it](docs/guides/09-prompt-testing.md) |
+| 10 | [Test retrieval (RAG) before you ship it](docs/guides/10-rag-testing.md) |
 | - | [SDK and CLI reference](docs/guides/sdk-reference.md) |
 
 ## Limitations
