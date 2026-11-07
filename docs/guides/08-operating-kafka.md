@@ -11,7 +11,7 @@ Pareeksha is event-driven: the API writes rows and an outbox in one Postgres tra
 | `outbox-relay` | polls `outbox_events` and produces; at-least-once, so consumers dedupe |
 | consumer groups | `planner`, `simulator`, `auditor`, `evaluator`, `finalizer`, `integrations`, `dialect`, `generator`, `retrier`, `dlq-recorder`, `reconciler` (a timer) |
 
-Topics (all `pareeksha.<name>.v1`): `run.requested`, `call.requested` (key = run item), `audit.requested`, `call.completed`, `evaluation.completed`, `run.completed`, `progress`, `scenario.generate.requested`, `dialect.clip.requested`, plus `retry.30s`, `retry.5m` and `dlq`. Partitions default to 6 (`TOPIC_PARTITIONS`), retention 7 days (`TOPIC_RETENTION_HOURS`), DLQ 30 days. Simulators scale up to the partition count (`SIMULATOR_REPLICAS <= TOPIC_PARTITIONS`).
+Topics (all `pareeksha.<name>.v1`): `run.requested`, `call.requested` (key = run item), `audit.requested`, `call.completed`, `evaluation.completed`, `run.completed`, `progress`, `scenario.generate.requested`, `dialect.clip.requested`, `kb.index.requested`, plus `retry.30s`, `retry.5m` and `dlq`. Partitions default to 6 (`TOPIC_PARTITIONS`), retention 7 days (`TOPIC_RETENTION_HOURS`), DLQ 30 days. Simulators scale up to the partition count (`SIMULATOR_REPLICAS <= TOPIC_PARTITIONS`).
 
 Failure handling per message: a transient error goes to `retry.30s` then `retry.5m`; a permanent error (malformed message, bad config) or the third failed attempt goes to `dlq`, where `dlq-recorder` stores it in the `dead_letters` table. An already-processed event is skipped (`processed_events`), so replays are safe.
 

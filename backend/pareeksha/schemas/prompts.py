@@ -11,6 +11,7 @@ from uuid import UUID
 from pydantic import Field, field_validator, model_validator
 
 from pareeksha.schemas.common import RequestModel
+from pareeksha.schemas.rag import RagConfig
 
 ProviderName = Literal[
     "openai", "openai_compatible", "deepseek", "groq", "mistral", "ollama", "anthropic", "gemini"
@@ -59,6 +60,7 @@ class _PromptVersionFields(RequestModel):
     temperature: float = Field(default=0.2, ge=0, le=2)
     tools: list[PromptTool] = Field(default_factory=list, max_length=64)
     max_tool_rounds: int = Field(default=5, ge=1, le=10)
+    rag_config: RagConfig | None = None
     note: str = Field(default="", max_length=500)
 
     @model_validator(mode="after")
@@ -89,7 +91,8 @@ class PromptVersionOut(_PromptVersionFields):
 
 
 def content_hash(body: PromptVersionCreate) -> str:
-    payload = json.dumps(
-        body.model_dump(mode="json", exclude={"note"}), sort_keys=True, separators=(",", ":")
-    )
+    data = body.model_dump(mode="json", exclude={"note"})
+    if data["rag_config"] is None:
+        del data["rag_config"]  # versions without RAG keep their pre-RAG hash
+    payload = json.dumps(data, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(payload.encode()).hexdigest()

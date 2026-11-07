@@ -18,6 +18,8 @@ import {
   type PromptVersionCreate,
   type Provider,
 } from "@/lib/api/prompt-versions";
+import { DEFAULT_RAG, listKnowledgeBases, type RagConfig } from "@/lib/api/rag";
+import { RagConfigFields } from "@/components/rag/rag-fields";
 import { collapse, hasChanges, lineDiff, type DiffLine } from "@/lib/line-diff";
 import { relativeTime } from "@/lib/format";
 import { useLatest } from "@/lib/hooks/use-latest";
@@ -25,7 +27,7 @@ import { useUnsavedGuard } from "@/lib/hooks/use-unsaved-guard";
 import { cn } from "@/lib/utils";
 import { Chip, Panel } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
-import { Field, NumberField, SelectField, TextField } from "@/components/ui/field";
+import { Field, NumberField, SelectField, Switch, TextField } from "@/components/ui/field";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { ErrorPanel, Strip, TableSkeleton } from "@/components/ui/states";
 import { useToast } from "@/components/ui/toast";
@@ -37,10 +39,10 @@ const TOOL_KEYS = new Set(["name", "description", "parameters", "mock"]);
 const MOCK_KEYS = new Set(["mode", "result", "cases"]);
 const MOCK_MODES = new Set(["static", "by_args", "simulated"]);
 
-type Draft = { system_prompt: string; provider: Provider; model: string; base_url: string; temperature: string; max_tool_rounds: string; tools: string; note: string };
+type Draft = { system_prompt: string; provider: Provider; model: string; base_url: string; temperature: string; max_tool_rounds: string; tools: string; note: string; ragOn: boolean; rag: RagConfig };
 type Errors = Record<string, string>;
 
-const BLANK: Draft = { system_prompt: "", provider: "openai", model: "", base_url: "", temperature: "0.2", max_tool_rounds: "5", tools: "[]", note: "" };
+const BLANK: Draft = { system_prompt: "", provider: "openai", model: "", base_url: "", temperature: "0.2", max_tool_rounds: "5", tools: "[]", note: "", ragOn: false, rag: { ...DEFAULT_RAG, kb_id: "" } };
 
 /** Editor draft prefilled from a saved version; the note starts empty because it belongs to that version. */
 function fromVersion(v: PromptVersion): Draft {
@@ -53,6 +55,8 @@ function fromVersion(v: PromptVersion): Draft {
     max_tool_rounds: String(v.max_tool_rounds),
     tools: JSON.stringify(v.tools ?? [], null, 2),
     note: "",
+    ragOn: !!v.rag_config,
+    rag: v.rag_config ?? { ...DEFAULT_RAG, kb_id: "" },
   };
 }
 
@@ -126,11 +130,12 @@ function check(d: Draft): { errors: Errors; body: PromptVersionCreate | null } {
   if (!Number.isInteger(rounds) || rounds < 1 || rounds > 10) e["pv-max-rounds"] = "Use a whole number from 1 to 10.";
   const { tools, issues } = parseTools(d.tools);
   if (issues.length) e["pv-tools"] = issues.slice(0, 3).join(" ") + (issues.length > 3 ? ` And ${issues.length - 3} more.` : "");
+  if (d.ragOn && !d.rag.kb_id) e["pv-rag-kb"] = "Choose the knowledge base this prompt retrieves from.";
   if (d.note.length > NOTE_MAX) e["pv-note"] = `Keep the note under ${NOTE_MAX} characters.`;
   if (Object.keys(e).length || !tools) return { errors: e, body: null };
   return {
     errors: e,
-    body: { system_prompt: d.system_prompt, provider: d.provider, model: d.model.trim(), base_url: url || null, temperature: temp, tools, max_tool_rounds: rounds, note: d.note.trim() },
+    body: { system_prompt: d.system_prompt, provider: d.provider, model: d.model.trim(), base_url: url || null, temperature: temp, tools, max_tool_rounds: rounds, note: d.note.trim(), rag_config: d.ragOn ? d.rag : null },
   };
 }
 
@@ -232,6 +237,7 @@ export function PromptVersions({ agentId }: { agentId: string }) {
   const guard = useUnsavedGuard(dirty && isPrompt);
   const editor = useLatest({ draft, baseline });
 
+  const kbs = useQuery({ queryKey: ["knowledge-bases"], queryFn: listKnowledgeBases, enabled: isPrompt && draft.ragOn, select: (p) => p.items ?? [] });
   const view = useQuery({ queryKey: ["prompt-version", agentId, viewing], queryFn: () => getPromptVersion(agentId, viewing as number), enabled: viewing != null });
 
   const save = useMutation({ mutationFn: (body: PromptVersionCreate) => createPromptVersion(agentId, body) });
@@ -418,6 +424,17 @@ export function PromptVersions({ agentId }: { agentId: string }) {
                       </Button>
                     </div>
                   </Field>
+
+                  <fieldset className="grid gap-4 rounded-sm border border-border p-4">
+                    <legend className="px-1 text-sm font-medium">Retrieval (RAG)</legend>
+                    <Switch label="Retrieve from a knowledge base" checked={draft.ragOn} onChange={(v) => patch({ ragOn: v })} help={<>Put <code className="mono">{"{{context}}"}</code> in the system prompt where the retrieved passages should go. Without it, Pareeksha adds them after the prompt under &quot;Retrieved context:&quot;.</>} />
+                    {draft.ragOn && (
+                      <>
+                        {kbs.isError && <ErrorPanel error={kbs.error} what="knowledge bases" onRetry={() => void kbs.refetch()} />}
+                        <RagConfigFields ids="pv-rag" value={draft.rag} onChange={(rag) => patch({ rag })} kbs={kbs.data ?? []} kbError={errors["pv-rag-kb"]} />
+                      </>
+                    )}
+                  </fieldset>
 
                   <TextField id="pv-note" label="Version note" placeholder="What changed, for example: stricter amount confirmation" maxLength={NOTE_MAX} value={draft.note} onChange={(e) => patch({ note: e.target.value })} error={errors["pv-note"]} help="Optional. Shown in the version list." />
 

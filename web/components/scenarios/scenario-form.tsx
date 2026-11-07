@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, Plus, Trash2, TriangleAlert } from "lucide-react";
 import { api } from "@/lib/api/client";
 import { call, ApiError } from "@/lib/api/call";
+import { type ScenarioRead } from "@/lib/api/rag";
 import type { components } from "@/lib/api/schema";
 import { useAgentOptions } from "@/lib/hooks/use-agents";
 import { useUnsavedGuard } from "@/lib/hooks/use-unsaved-guard";
@@ -17,7 +18,7 @@ import { FormSkeleton, PageError, Strip } from "@/components/ui/states";
 import { useToast } from "@/components/ui/toast";
 import { TAG_SUGGESTIONS } from "./scenarios-list";
 
-type Scenario = components["schemas"]["ScenarioOut"];
+type Scenario = ScenarioRead;
 type ScenarioCreate = components["schemas"]["ScenarioCreate"];
 
 type ToolRow = { name: string; args?: unknown };

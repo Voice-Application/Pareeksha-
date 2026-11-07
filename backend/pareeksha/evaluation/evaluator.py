@@ -18,6 +18,7 @@ from pareeksha.evaluation.scoring import finalize_scores
 from pareeksha.evaluation.types import CheckResult, ToolCall, Turn
 from pareeksha.llm.client import JSONGenerationError, LLMClient
 from pareeksha.llm.prompts import prompt_hash
+from pareeksha.rag.guard import platform_llm_may_see_kb
 from pareeksha.schemas.evaluation import JudgeOutput
 from pareeksha.schemas.personas import PersonaCreate
 from pareeksha.schemas.scenarios import ScenarioCreate
@@ -55,6 +56,8 @@ class CallSnapshot:
     ws_open_ms: int = 0
     #: Extra reasons to route the call to a human (e.g. uncertain audit role detection).
     review_reasons: Sequence[str] = ()
+    #: The call's knowledge base is local-only (fail closed: unknown counts as local-only).
+    local_only: bool = False
 
 
 @dataclass
@@ -106,8 +109,10 @@ def judge_error_record(
     checks: list[CheckResult],
     metrics: CallMetrics,
     error: str,
+    reason: str = "judge_error",
 ) -> EvaluationRecord:
-    """A judge that never produced valid output: no score, always routed to a human."""
+    """A judge that never produced (or was not allowed to produce) output: no score, always
+    routed to a human."""
     return EvaluationRecord(
         id=evaluation_id(snap.call_id),
         call_id=snap.call_id,
@@ -121,7 +126,7 @@ def judge_error_record(
         passed=None,
         critical_failure=False,
         needs_human_review=True,
-        review_reasons=list(dict.fromkeys(["judge_error", *snap.review_reasons])),
+        review_reasons=list(dict.fromkeys([reason, *snap.review_reasons])),
         failure_types=merge_failure_types([], checks),
         summary=error[:400],
         confidence=None,
@@ -165,6 +170,11 @@ async def evaluate_call(snap: CallSnapshot, client: LLMClient) -> EvaluationReco
         tool_calls=snap.tool_calls or (),
     )
     model = client.settings.judge_model
+    if not platform_llm_may_see_kb(snap.local_only):
+        # the hosted judge must never read a transcript built from a local-only knowledge base
+        return judge_error_record(
+            snap, model, checks, metrics, "judge skipped: local_only", reason="local_only"
+        )
     try:
         result = await run_judge(client, data)
     except JSONGenerationError as exc:

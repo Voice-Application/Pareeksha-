@@ -267,5 +267,5 @@ def test_events_schemas_endpoint() -> None:
     response = client.get(f"{API}/events/schemas", headers=AUTH)
     assert response.status_code == 200
     body = response.json()
-    assert len(body["events"]) == 9
+    assert len(body["events"]) == 10
     assert "evaluation.completed" in body["events"]

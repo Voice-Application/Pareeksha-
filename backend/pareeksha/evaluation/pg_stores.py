@@ -41,7 +41,9 @@ from pareeksha.events.schemas import (
     RunFinalStatus,
     RunKind,
 )
+from pareeksha.rag.metrics import RagInputs, RagMetricsRecord
 from pareeksha.schemas.personas import PersonaCreate
+from pareeksha.schemas.rag import RagExpectation
 from pareeksha.schemas.scenarios import ScenarioCreate
 
 Conn = psycopg.AsyncConnection[Any]
@@ -91,7 +93,8 @@ class PgEvaluatorStore:
         """
         calls = await self._rows(
             """
-            SELECT c.id, c.agent_id, c.run_item_id, c.language, c.source, c.event_log, c.metadata,
+            SELECT c.id, c.project_id, c.agent_id, c.run_item_id, c.language, c.source,
+                   c.event_log, c.metadata, tr.config -> 'rag' AS rag,
                    ri.run_id, ri.scenario_id, ri.persona_id,
                    a.name AS agent_name, a.description AS agent_description,
                    a.languages AS agent_languages, a.glass_box,
@@ -227,7 +230,64 @@ class PgEvaluatorStore:
             run_id=call["run_id"],
             run_item_id=call["run_item_id"],
             review_reasons=role_review_reasons(call["event_log"]),
+            local_only=await self._call_local_only(call_id, call["project_id"], call["rag"]),
         )
+
+    async def _effective_rag(
+        self, call_id: uuid.UUID, run_rag: dict[str, Any] | None
+    ) -> dict[str, Any] | None:
+        """The RAG config the call ran with: the run's override, else what its retrievals recorded,
+        else the pinned prompt version's (a call whose every retrieval failed has no row)."""
+        if run_rag:
+            return run_rag
+        rows = await self._rows(
+            "SELECT rag_config FROM retrievals WHERE call_id = %s ORDER BY turn_idx LIMIT 1",
+            (call_id,),
+        )
+        if rows:
+            return cast("dict[str, Any]", rows[0]["rag_config"])
+        rows = await self._rows(
+            """
+            SELECT pv.rag_config
+              FROM calls c
+              JOIN run_items ri ON ri.id = c.run_item_id
+              JOIN test_runs tr ON tr.id = ri.run_id
+              JOIN agents a ON a.id = c.agent_id
+              JOIN prompt_versions pv ON pv.agent_id = c.agent_id AND pv.project_id = a.project_id
+                   AND pv.id::text =
+                   COALESCE(tr.agent_snapshot -> 'adapter_config' ->> 'active_version_id',
+                            a.adapter_config ->> 'active_version_id')
+             WHERE c.id = %s
+            """,
+            (call_id,),
+        )
+        return cast("dict[str, Any] | None", rows[0]["rag_config"] or None) if rows else None
+
+    async def _failed_retrieval_turns(self, call_id: uuid.UUID) -> list[int]:
+        rows = await self._rows("SELECT event_log FROM calls WHERE id = %s", (call_id,))
+        events = (rows[0]["event_log"] if rows else None) or []
+        return [
+            int(e["data"]["turn_idx"])
+            for e in events
+            if e.get("type") == "retrieval_failed"
+            and isinstance((e.get("data") or {}).get("turn_idx"), int)
+        ]
+
+    async def _kb_local_only(self, cfg: dict[str, Any], project_id: uuid.UUID) -> bool:
+        """Fail closed: a KB (or flag) that cannot be loaded counts as local-only."""
+        if not cfg.get("kb_id"):
+            return True
+        rows = await self._rows(
+            "SELECT local_only FROM knowledge_bases WHERE id = %s AND project_id = %s",
+            (cfg["kb_id"], project_id),
+        )
+        return rows[0]["local_only"] is not False if rows else True
+
+    async def _call_local_only(
+        self, call_id: uuid.UUID, project_id: uuid.UUID, run_rag: dict[str, Any] | None
+    ) -> bool:
+        cfg = await self._effective_rag(call_id, run_rag)
+        return False if cfg is None else await self._kb_local_only(cfg, project_id)
 
     async def _rubric_id(self, version: str) -> uuid.UUID:
         rows = await self._rows("SELECT id FROM rubric_versions WHERE version = %s", (version,))
@@ -367,6 +427,116 @@ class PgEvaluatorStore:
                 "wer": m.caller_wer,
                 "extra": Jsonb(m.to_dict()),
             },
+        )
+
+    async def load_rag_inputs(self, call_id: uuid.UUID) -> RagInputs | None:
+        calls = await self._rows(
+            """
+            SELECT c.project_id, ri.scenario_id, tr.config -> 'rag' AS rag
+              FROM calls c
+              LEFT JOIN run_items ri ON ri.id = c.run_item_id
+              LEFT JOIN test_runs tr ON tr.id = ri.run_id
+             WHERE c.id = %s
+            """,
+            (call_id,),
+        )
+        if not calls:
+            return None
+        call = calls[0]
+        retrievals = await self._rows(
+            "SELECT turn_idx, rag_config, index_id, results FROM retrievals "
+            "WHERE call_id = %s ORDER BY turn_idx",
+            (call_id,),
+        )
+        cfg = await self._effective_rag(call_id, call["rag"])
+        if cfg is None:
+            return None
+        mode = str(cfg.get("mode") or "retrieval")
+        project_id = call["project_id"]
+        local_only = await self._kb_local_only(cfg, project_id)
+
+        expectation: RagExpectation | None = None
+        if call["scenario_id"] is not None:
+            rows = await self._rows(
+                "SELECT rag_expectation FROM scenarios WHERE id = %s", (call["scenario_id"],)
+            )
+            if rows and rows[0]["rag_expectation"]:
+                try:
+                    expectation = RagExpectation.model_validate(rows[0]["rag_expectation"])
+                except ValueError:
+                    expectation = None
+
+        source_text: str | None = None
+        if expectation and expectation.source_document_id and expectation.source_span:
+            start, end = expectation.source_span
+            rows = await self._rows(
+                "SELECT substr(text, %s, %s) AS t FROM kb_documents WHERE id = %s "
+                "AND project_id = %s",
+                (start + 1, max(end - start, 0), expectation.source_document_id, project_id),
+            )
+            source_text = rows[0]["t"] if rows else None
+
+        failed_turns = await self._failed_retrieval_turns(call_id)
+        turn_rows = await self._rows(
+            "SELECT text FROM turns WHERE call_id = %s AND speaker = 'agent' ORDER BY idx",
+            (call_id,),
+        )
+
+        context: list[str] = []
+        if mode == "full_context" and cfg.get("kb_id"):
+            docs = await self._rows(
+                "SELECT filename, text FROM kb_documents WHERE kb_id = %s AND project_id = %s "
+                "AND deleted_at IS NULL ORDER BY filename",
+                (cfg["kb_id"], project_id),
+            )
+            context = [f"# {d['filename']}\n{d['text']}" for d in docs]
+        elif mode == "retrieval":
+            small = bool(cfg.get("small_to_big"))
+            seen: set[Any] = set()
+            for ret in retrievals:
+                ids = [uuid.UUID(str(r["chunk_id"])) for r in ret["results"] or []]
+                if not ids or ret["index_id"] is None:
+                    continue
+                rows = await self._rows(
+                    """
+                    SELECT k.id, k.document_id, k.parent_start, k.parent_end,
+                           CASE WHEN %s THEN substr(d.text, k.parent_start + 1,
+                                                    k.parent_end - k.parent_start)
+                                ELSE k.text END AS t
+                      FROM kb_chunks k JOIN kb_documents d ON d.id = k.document_id
+                     WHERE k.id = ANY(%s) AND k.index_id = %s
+                    """,
+                    (small, ids, ret["index_id"]),
+                )
+                by_id = {r["id"]: r for r in rows}
+                for i in ids:
+                    r = by_id.get(i)
+                    if r is None:
+                        continue
+                    key = (r["document_id"], r["parent_start"], r["parent_end"]) if small else i
+                    if key not in seen:
+                        seen.add(key)
+                        context.append(r["t"])
+
+        return RagInputs(
+            mode=mode,
+            retrievals=[{"turn_idx": r["turn_idx"], "results": r["results"]} for r in retrievals],
+            expectation=expectation,
+            source_text=source_text,
+            local_only=local_only,
+            agent_turns=[r["text"] for r in turn_rows],
+            context=context,
+            failed_turns=failed_turns,
+        )
+
+    async def save_rag_metrics(self, call_id: uuid.UUID, record: RagMetricsRecord) -> None:
+        await self._conn.execute(
+            """
+            INSERT INTO rag_metrics (call_id, metrics, skipped) VALUES (%s, %s, %s)
+            ON CONFLICT (call_id) DO UPDATE SET
+                metrics = EXCLUDED.metrics, skipped = EXCLUDED.skipped, updated_at = now()
+            """,
+            (call_id, Jsonb(record.metrics), Jsonb(record.skipped)),
         )
 
     async def load_completed(self, call_id: uuid.UUID) -> EvaluationCompleted | None:

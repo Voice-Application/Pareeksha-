@@ -43,6 +43,7 @@ class EventType(StrEnum):
     PROGRESS = "progress"
     SCENARIO_GENERATE_REQUESTED = "scenario.generate.requested"
     DIALECT_CLIP_REQUESTED = "dialect.clip.requested"
+    KB_INDEX_REQUESTED = "kb.index.requested"
 
 
 # ---------------------------------------------------------------------------------------------
@@ -329,6 +330,19 @@ class DialectClipRequested(EventPayload):
         return str(self.sample_id)
 
 
+class KbIndexRequested(EventPayload):
+    """API (outbox) -> indexer. Key: kb_id."""
+
+    event_type: ClassVar[EventType] = EventType.KB_INDEX_REQUESTED
+    topic: ClassVar[Topics] = Topics.KB_INDEX_REQUESTED
+
+    index_id: uuid.UUID
+    kb_id: uuid.UUID
+
+    def partition_key(self) -> str:
+        return str(self.kb_id)
+
+
 #: Every payload class, in a stable order.
 PAYLOAD_MODELS: tuple[type[EventPayload], ...] = (
     RunRequested,
@@ -340,6 +354,7 @@ PAYLOAD_MODELS: tuple[type[EventPayload], ...] = (
     ProgressEvent,
     ScenarioGenerateRequested,
     DialectClipRequested,
+    KbIndexRequested,
 )
 EVENT_PAYLOADS: dict[EventType, type[EventPayload]] = {m.event_type: m for m in PAYLOAD_MODELS}
 EVENT_TOPIC: dict[EventType, Topics] = {m.event_type: m.topic for m in PAYLOAD_MODELS}
@@ -489,6 +504,7 @@ __all__ = [
     "EvaluationCompleted",
     "EventPayload",
     "EventType",
+    "KbIndexRequested",
     "ProgressEvent",
     "RunCompleted",
     "RunCompletedSummary",

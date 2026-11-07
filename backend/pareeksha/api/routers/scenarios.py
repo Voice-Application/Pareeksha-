@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Response
@@ -34,6 +35,15 @@ router = APIRouter(tags=["scenarios"], responses=AUTH_ERRORS)
 _IN_USE = "Scenario is referenced by a run and cannot be deleted"
 
 
+def _cols(body: ScenarioCreate | ScenarioUpdate, **dump: Any) -> dict[str, Any]:
+    """Model fields as column values; rag_expectation becomes JSON-safe for the jsonb column."""
+    cols = body.model_dump(exclude={"rag_expectation"}, **dump)
+    if "rag_expectation" in body.model_fields_set or isinstance(body, ScenarioCreate):
+        rag = body.rag_expectation
+        cols["rag_expectation"] = rag.model_dump(mode="json") if rag else None
+    return cols
+
+
 def _out(row: Scenarios) -> ScenarioOut:
     return ScenarioOut.model_validate(row, from_attributes=True)
 
@@ -54,7 +64,7 @@ async def _require_agent(session: AsyncSession, agent_id: UUID | None, project_i
 @router.post("/scenarios", status_code=201)
 async def create_scenario(body: ScenarioCreate, key: WriteKey, session: Db) -> ScenarioOut:
     await _require_agent(session, body.agent_id, key.project_id)
-    row = Scenarios(project_id=key.project_id, source="manual", **body.model_dump())
+    row = Scenarios(project_id=key.project_id, source="manual", **_cols(body))
     session.add(row)
     await flush(session, "Scenario could not be saved", refresh=row)
     return _out(row)
@@ -71,8 +81,7 @@ async def bulk_create_scenarios(
     for agent_id in {s.agent_id for s in body.scenarios}:
         await _require_agent(session, agent_id, key.project_id)
     rows = [
-        Scenarios(project_id=key.project_id, source=body.source, **s.model_dump())
-        for s in body.scenarios
+        Scenarios(project_id=key.project_id, source=body.source, **_cols(s)) for s in body.scenarios
     ]
     session.add_all(rows)
     await flush(session, "Scenarios could not be saved")
@@ -108,9 +117,11 @@ async def update_scenario(
     scenario_id: UUID, body: ScenarioUpdate, key: WriteKey, session: Db
 ) -> ScenarioOut:
     row = await get_or_404(session, Scenarios, scenario_id, key.project_id, "Scenario")
-    changes = body.model_dump(exclude_unset=True)
-    # agent_id may be set to null (reusable across agents); every other column is NOT NULL.
-    changes = {k: v for k, v in changes.items() if v is not None or k == "agent_id"}
+    changes = _cols(body, exclude_unset=True)
+    # agent_id / rag_expectation may be set to null; every other column is NOT NULL.
+    changes = {
+        k: v for k, v in changes.items() if v is not None or k in ("agent_id", "rag_expectation")
+    }
     if changes.get("agent_id") is not None:
         await _require_agent(session, changes["agent_id"], key.project_id)
     for field, value in changes.items():

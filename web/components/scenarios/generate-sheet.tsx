@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import { api } from "@/lib/api/client";
 import { call, ApiError } from "@/lib/api/call";
+import { toExpectation } from "@/lib/api/rag";
 import type { components } from "@/lib/api/schema";
 import { useAgentOptions } from "@/lib/hooks/use-agents";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ import { NumberField, SelectField, SliderField, TagInput, TextAreaField, TextFie
 import { Skeleton, Strip } from "@/components/ui/states";
 import { useToast } from "@/components/ui/toast";
 
-type Draft = components["schemas"]["ScenarioCreate"];
+type Draft = Omit<components["schemas"]["ScenarioCreate"], "rag_expectation"> & { rag_expectation?: Parameters<typeof toExpectation>[0] };
 type Mix = { happy_path: number; edge_case: number; adversarial: number };
 const MIX_KEYS: { key: keyof Mix; label: string }[] = [
   { key: "happy_path", label: "Happy path" },
@@ -98,7 +99,7 @@ export function GenerateSheet({ open, onClose, defaultAgentId }: { open: boolean
   const failedMessage = poll.data?.status === "failed" ? (poll.data.error ?? "The generator could not produce scenarios.") : null;
 
   const save = useMutation({
-    mutationFn: () => call(api.POST("/api/v1/scenarios:bulk", { body: { scenarios: drafts.filter((_, i) => selected.has(i)), source: "generated" } })),
+    mutationFn: () => call(api.POST("/api/v1/scenarios:bulk", { body: { scenarios: drafts.filter((_, i) => selected.has(i)).map((d) => ({ ...d, rag_expectation: toExpectation(d.rag_expectation) })), source: "generated" } })),
     onSuccess: (r) => {
       toast(`Saved ${r.items.length} ${r.items.length === 1 ? "scenario" : "scenarios"}.`);
       void qc.invalidateQueries({ queryKey: ["scenarios"] });

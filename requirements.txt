@@ -40,6 +40,10 @@ jiwer>=4.0
 indic-nlp-library>=0.92
 rapidfuzz>=3.9                 # fuzzy disclosure matching, repeat detection
 
+# --- RAG lab ------------------------------------------------------------------------
+fastembed>=0.9.1               # local embedding and reranker models (ONNX)
+pypdf>=7.0.0                   # PDF text extraction for knowledge-base uploads
+
 # --- Reports, config, security ------------------------------------------------------
 jinja2>=3.1
 pyyaml>=6.0

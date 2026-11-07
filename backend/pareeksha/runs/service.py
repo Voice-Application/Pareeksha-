@@ -24,6 +24,9 @@ from pareeksha.db.models import (
     ApiUsage,
     Calls,
     Evaluations,
+    KbDocuments,
+    KbIndexes,
+    KnowledgeBases,
     NoiseProfiles,
     Personas,
     RunItems,
@@ -32,6 +35,14 @@ from pareeksha.db.models import (
 )
 from pareeksha.events.outbox import enqueue_session
 from pareeksha.events.schemas import ProgressEvent, RunRequested, make_envelope
+from pareeksha.rag.guard import (
+    LocalOnlyError,
+    require_local_agent,
+    require_local_embedding,
+    require_local_reranker,
+    require_platform_llm_allowed,
+)
+from pareeksha.rag.local_models import UnsupportedModelError, require_supported_models
 from pareeksha.runs.estimate import (
     ScenarioShape,
     estimate_run,
@@ -41,6 +52,7 @@ from pareeksha.runs.estimate import (
 from pareeksha.runs.matrix import MAX_RUN_ITEMS, item_count, unique_in_order
 from pareeksha.schemas.agents import AgentOut
 from pareeksha.schemas.common import Page
+from pareeksha.schemas.rag import RagConfig, index_key
 from pareeksha.schemas.runs import (
     RunCreate,
     RunCreated,
@@ -184,9 +196,97 @@ async def estimate(session: AsyncSession, project_id: uuid.UUID, body: RunCreate
 # --------------------------------------------------------------------------------------------
 
 
+async def _pin_rag(
+    session: AsyncSession, project_id: uuid.UUID, prepared: Prepared
+) -> dict[str, Any]:
+    """Effective RAG config (run override, else the active version's): guards and index pin.
+
+    Returns the extra ``test_runs.config`` keys (``rag_index_id`` or ``rag_full_context_chars``).
+    """
+    agent = prepared.agent
+    if agent.adapter != "prompt":
+        return {}
+    version = await active_version(session, agent)
+    raw = prepared.body.config.rag or (version.rag_config if version else None)
+    if not raw or version is None:
+        return {}
+    cfg = RagConfig.model_validate(raw)
+    kb = await session.scalar(
+        select(KnowledgeBases).where(
+            KnowledgeBases.id == cfg.kb_id, KnowledgeBases.project_id == project_id
+        )
+    )
+    if kb is None:
+        if cfg.mode == "off":
+            return {}
+        raise ApiError(404, "not_found", "Knowledge base not found", {"id": str(cfg.kb_id)})
+    try:
+        # first, in every mode (also off): the transcript reaches the hosted caller and judge
+        require_platform_llm_allowed(kb.local_only)
+    except LocalOnlyError as exc:
+        raise ApiError(409, "local_only", str(exc)) from exc
+    if cfg.mode == "off":
+        return {}
+    try:
+        require_supported_models(cfg)
+    except UnsupportedModelError as exc:
+        raise ApiError(422, "unsupported_model", str(exc)) from exc
+    try:
+        require_local_agent(kb.local_only, version.provider, version.base_url)
+        if cfg.mode == "retrieval":
+            require_local_embedding(kb.local_only, cfg.embedding)
+            if cfg.method == "hybrid_rerank":
+                require_local_reranker(kb.local_only, cfg.reranker_provider)
+    except LocalOnlyError as exc:
+        raise ApiError(409, "local_only", str(exc)) from exc
+    if cfg.mode == "full_context":
+        chars = int(
+            await session.scalar(
+                select(func.coalesce(func.sum(KbDocuments.char_count), 0)).where(
+                    KbDocuments.kb_id == kb.id,
+                    KbDocuments.project_id == project_id,
+                    KbDocuments.deleted_at.is_(None),
+                )
+            )
+            or 0
+        )
+        if chars > cfg.context_char_limit:
+            raise ApiError(
+                409,
+                "full_context_too_large",
+                "The knowledge base is larger than the context limit",
+                {"chars": chars, "context_char_limit": cfg.context_char_limit},
+            )
+        return {"rag_full_context_chars": chars}
+    index_id = await session.scalar(
+        select(KbIndexes.id)
+        .where(
+            KbIndexes.kb_id == kb.id,
+            KbIndexes.project_id == project_id,
+            KbIndexes.index_key == index_key(cfg),
+            KbIndexes.status == "ready",
+        )
+        .order_by(KbIndexes.version.desc())
+        .limit(1)
+    )
+    if index_id is None:
+        raise ApiError(
+            409,
+            "rag_index_missing",
+            "Build an index with this chunking and embedding model first",
+            {
+                "kb_id": str(kb.id),
+                "chunking": cfg.chunking.model_dump(mode="json"),
+                "embedding": cfg.embedding.model_dump(mode="json"),
+            },
+        )
+    return {"rag_index_id": str(index_id)}
+
+
 async def create_run(session: AsyncSession, project_id: uuid.UUID, body: RunCreate) -> RunCreated:
     """Insert the run and its ``run.requested`` outbox row; both commit with the request."""
     prepared = await prepare(session, project_id, body)
+    rag_pins = await _pin_rag(session, project_id, prepared)
     if prepared.over_budget and not body.confirm_over_budget:
         raise ApiError(
             402,
@@ -208,12 +308,13 @@ async def create_run(session: AsyncSession, project_id: uuid.UUID, body: RunCrea
         kind=body.kind,
         status="queued",
         config={
-            **body.config.model_dump(),
+            **body.config.model_dump(mode="json", exclude_none=True),
             "scenario_ids": [str(i) for i in prepared.scenario_ids],
             "persona_ids": [str(i) for i in prepared.persona_ids],
             "noise_profile_ids": [str(i) for i in prepared.noise_profile_ids],
             "repeats": body.repeats,
             "item_count": prepared.item_count,
+            **rag_pins,
         },
         agent_snapshot=agent_snapshot.model_dump(mode="json", exclude={"has_adapter_secrets"}),
         estimated_cost=Decimal(str(prepared.estimate.est_cost)),

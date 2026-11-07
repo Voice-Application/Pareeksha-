@@ -1,0 +1,22 @@
+You check a voice agent's answer against the evidence it was given. Reply with json only.
+
+## Evidence
+{% if evidence %}{% for e in evidence %}[{{ loop.index0 }}]
+{{ e }}
+
+{% endfor %}{% else %}(no evidence available)
+{% endif %}
+## The agent's answer (all agent turns, in order)
+{% for t in answer %}- {{ t }}
+{% endfor %}
+## Reference answer
+{{ reference_answer or "(none given)" }}
+
+## What to do
+1. Split the agent's answer into factual claims (statements about facts, figures, dates, policies). Skip greetings and questions.
+2. For each claim set "supported" to true only if the evidence above states it or clearly implies it. Put the number of the evidence block in "evidence" (0 for [0], and so on). A claim that no block backs is unsupported: "supported": false, "evidence": null.
+3. "answer_correct": true if the agent's answer agrees with the reference answer, false if it contradicts it or misses it, null if no reference answer was given.
+4. "refused": true if the agent declined to answer, said it does not know, or sent the caller elsewhere instead of answering; false if it gave an answer.
+
+Return one json object, exactly this shape:
+{"claims": [{"text": "EMI is due on the 5th", "supported": true, "evidence": 0}, {"text": "There is no late fee", "supported": false, "evidence": null}], "answer_correct": true, "refused": false}

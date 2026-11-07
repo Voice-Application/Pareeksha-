@@ -120,6 +120,27 @@ ADDITIONS: set[tuple[str, str]] = {
     ("GET", "/agents/{id}/prompt-versions"),
     ("GET", "/agents/{id}/prompt-versions/{id}"),
     ("POST", "/agents/{id}/prompt-versions/{id}/activate"),
+    # RAG lab (docs/superpowers/plans/2026-11-07-rag-lab.md, Task 2)
+    ("POST", "/knowledge-bases"),
+    ("GET", "/knowledge-bases"),
+    ("GET", "/knowledge-bases/{id}"),
+    ("PATCH", "/knowledge-bases/{id}"),
+    ("POST", "/knowledge-bases/{id}/documents"),
+    ("GET", "/knowledge-bases/{id}/documents"),
+    ("GET", "/knowledge-bases/{id}/documents/{id}"),
+    ("DELETE", "/knowledge-bases/{id}/documents/{id}"),
+    ("POST", "/knowledge-bases/{id}/indexes"),
+    ("GET", "/knowledge-bases/{id}/indexes"),
+    ("GET", "/knowledge-bases/{id}/indexes/{id}"),
+    ("GET", "/knowledge-bases/{id}/indexes/{id}/chunks"),
+    ("POST", "/knowledge-bases/{id}/questions:generate"),
+    ("POST", "/knowledge-bases/{id}/questions:import"),
+    ("POST", "/rag-matrices"),  # Task 9
+    ("GET", "/rag-matrices"),
+    ("GET", "/rag-matrices/{id}"),
+    ("GET", "/rag-matrices/{id}/report"),
+    ("GET", "/pricing"),
+    ("PUT", "/pricing"),
     ("PUT", "/calls/{id}/tool-calls"),  # report tool calls after the call
     ("GET", "/settings/llm"),  # per-project LLM settings
     ("PUT", "/settings/llm"),

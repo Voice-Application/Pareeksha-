@@ -153,8 +153,11 @@ async def test_mock_agent_and_scenarios(fresh_session_factory: Factory) -> None:
     result = await seed_database(fresh_session_factory)
     assert result.created["agents"] == 1 and result.created["scenarios"] == 8
     async with fresh_session_factory() as session:
-        agent = (await session.scalars(select(Agents))).one()
-        scenarios = list(await session.scalars(select(Scenarios)))
+        # the first-run demo adds prompt agents of its own (tests/integration/test_seed_demo.py)
+        agent = (await session.scalars(select(Agents).where(Agents.adapter == "audio_v1"))).one()
+        scenarios = list(
+            await session.scalars(select(Scenarios).where(Scenarios.agent_id == agent.id))
+        )
     assert agent.name == "EMI Reminder Bot" and agent.adapter == "audio_v1"
     assert agent.endpoint_url == "ws://mock-agent:8765/ws" and agent.glass_box
     assert agent.languages == ["kn-IN", "hi-IN", "en-IN"]

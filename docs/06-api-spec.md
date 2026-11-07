@@ -249,6 +249,9 @@ One self-contained page (inline CSS, no scripts): summary figures, top failure t
       "agent_heard_text": "…naalvattu saavira…", "start_ms": 6100, "end_ms": 9300, "is_barge_in": false }
   ],
   "tool_calls": [ { "seq": 0, "name": "record_promise_to_pay", "arguments": { "amount": 40000 }, "at_ms": 11200 } ],
+  "retrievals": [ { "turn_idx": 1, "query": "…", "queries": ["…"], "rag_label": "hybrid · recursive 800/100 · e5-large · k5",
+                    "results": [ { "rank": 1, "chunk_id": "…", "document_id": "…", "filename": "faq.txt", "start_char": 0, "end_char": 240, "score": 0.83, "text": "…" } ],
+                    "timings": { "embed_ms": 4, "search_ms": 1, "total_ms": 5 }, "context_chars": 960 } ],
   "metrics": { "first_greeting_ms": 820, "response_latency_p50_ms": 1040, "response_latency_p95_ms": 2210,
                "barge_in_attempts": 2, "barge_in_honoured": 0, "silence_gaps_over_2s": 1, "caller_asr_wer": 0.18 },
   "checks": [
@@ -517,3 +520,32 @@ Added on 23 Oct 2026 after DES-01 listed API data gaps for the FR-DB-1 pages (se
 | `GET /speech/providers` | Speech provider abstraction (VOICE-07, owner-approved 2026-10-24): which of gnani / google / azure / elevenlabs / deepgram have credentials set, which are the `STT_PROVIDER` / `TTS_PROVIDER` defaults, and their capabilities; scope `read`; never returns key material | `{ items: [{ name, configured, missing_env, stt_default, tts_default, stt: {streaming, batch, word_timings, word_confidence, diarization, ...}, tts: {sample_rates, voice_listing, speed_control, ...} }] }` |
 
 Field additions: `RunSummary.score_distribution` (10 buckets, FR-DB-2); `run_id` and `run_item_id` on the call object.
+
+## 13. Knowledge bases and the RAG lab
+
+Added with the RAG lab (see [Guide 10](guides/10-rag-testing.md)). Reads need scope `read`, writes `runs:write`. Request and response models are in the OpenAPI document; the shape of each route is summarised here. Provider keys (`secrets`) are write-only and never returned; the knowledge base shows `has_secrets`.
+
+| Method & path | Purpose | Returns |
+|---|---|---|
+| `POST /knowledge-bases` | Create `{ name, description, local_only, secrets: { embedding_api_key, reranker_api_key } }` | `201` the knowledge base |
+| `GET /knowledge-bases` | List | page of knowledge bases |
+| `GET /knowledge-bases/{id}` | Fetch one | the knowledge base |
+| `PATCH /knowledge-bases/{id}` | Change name, description, `local_only` or secrets (`secrets: {}` clears them) | the knowledge base |
+| `POST /knowledge-bases/{id}/documents` | Upload one file as multipart `file` (txt, md, html, csv, json, pdf, docx; 10 MiB; at most 200 documents and 2,000,000 characters per knowledge base). The same content again changes nothing | `201` the document (`unchanged` when it was already there) |
+| `GET /knowledge-bases/{id}/documents` | List documents | page of documents |
+| `GET /knowledge-bases/{id}/documents/{doc_id}` | Fetch one, with its extracted text | the document |
+| `DELETE /knowledge-bases/{id}/documents/{doc_id}` | Remove a document from later indexes | `204` |
+| `POST /knowledge-bases/{id}/indexes` | Build an index `{ chunking, embedding }`. An identical ready index over the same documents is returned as is | `202` the index (`pending`), or `200` the existing one. `422` if `local_only` forbids the embedding provider, or `unsupported_model` for a `local` model that fastembed does not list |
+| `GET /knowledge-bases/{id}/indexes` | List indexes (version, status, chunk count, stats) | page of indexes |
+| `GET /knowledge-bases/{id}/indexes/{index_id}` | Fetch one; poll `status` (`pending`, `building`, `ready`, `failed`) | the index |
+| `GET /knowledge-bases/{id}/indexes/{index_id}/chunks?document_id=&offset=&limit=` | Chunk browser: text and offsets, no vectors | list of chunks |
+| `POST /knowledge-bases/{id}/questions:generate` | Draft questions from the documents `{ agent_id, count, unanswerable_share }`; refused for a `local_only` knowledge base | `202 { draft_id }`; read it with `GET /scenario-drafts/{id}` |
+| `POST /knowledge-bases/{id}/questions:import` | Multipart `agent_id` and a CSV `file` with columns `question`, `expected_answer`, `source_document`, `source_quote` (at most 1000 rows) | `{ created, unmatched: [{ row, reason }] }` |
+| `POST /rag-matrices` | Create a matrix: `{ agent_id, prompt_version?, configs[1..4], baselines, scenario_ids, persona_ids, noise_profile_ids, repeats, confirm_over_budget }`. Makes one run per entry (baselines first). `409 rag_index_missing` lists configs without a ready index and creates nothing | `201` `{ id, agent_id, kb_id, entries: [{ label, kind, run_id, status_note }] }` |
+| `GET /rag-matrices` | List matrices | page of matrices |
+| `GET /rag-matrices/{id}` | Fetch one | the matrix |
+| `GET /rag-matrices/{id}/report?monthly_conversations=` | Per-entry retrieval, generation, latency, token and cost figures with confidence intervals, savings, and a `recommendation: { label, reason }` | the report |
+| `GET /pricing` | Prices entered for the project and the models still unpriced | `{ prices, unpriced }` |
+| `PUT /pricing` | Set prices: a list of `{ kind: llm\|embedding\|rerank, provider, model, input_per_m_inr, output_per_m_inr? }`. `400` for a `local` embedding or reranker (local always costs 0) | `{ prices, unpriced }` |
+
+Any two matrix entries compare with the existing `GET /runs/compare`.

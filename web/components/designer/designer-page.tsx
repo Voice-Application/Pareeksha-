@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import { ApiError, call } from "@/lib/api/call";
+import { toExpectation } from "@/lib/api/rag";
 import { PageHeader } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/overlay";
@@ -142,7 +143,15 @@ function Designer({ saved }: { saved: Saved | null }) {
         ...cur,
         { role: "assistant", content: r.reply, questions: r.questions ?? [] },
       ]);
-      if (r.draft) setDraft(r.draft);
+      if (r.draft)
+        setDraft({
+          ...r.draft,
+          // response types carry the span as number[]; the draft is sent back as a request
+          scenarios: r.draft.scenarios.map((s) => ({
+            ...s,
+            rag_expectation: toExpectation(s.rag_expectation),
+          })),
+        });
       setReady(r.ready);
     },
   });

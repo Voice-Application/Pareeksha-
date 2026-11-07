@@ -1,0 +1,193 @@
+# First-run demo: a tool-calling prompt agent with two versions and one finished text run per
+# version, so "Compare" shows a regression. Every result here is PRECOMPUTED; nothing calls an LLM.
+# v2 shortened the prompt and dropped the rules about looking up the loan, confirming the amount
+# and handing disputes to a human. The per-version transcripts show what that does.
+
+agent:
+  name: "Demo · Sahay EMI helpdesk"
+  description: "Demo prompt agent with tool calls (v1 vs v2 regression). Safe to delete."
+  languages: [en-IN, hi-IN]
+
+tools:
+  - name: get_loan_details
+    description: "Look up a loan: EMI amount, due date and overdue amount."
+    parameters:
+      type: object
+      properties:
+        loan_id: {type: string, description: "Loan number, e.g. SF-20931"}
+      required: [loan_id]
+    mock:
+      mode: static
+      result: {loan_id: SF-20931, emi_amount: 4850, due_date: "2026-11-05", overdue_amount: 4850, status: active}
+  - name: create_payment_link
+    description: "Send the customer an SMS payment link for an amount."
+    parameters:
+      type: object
+      properties:
+        loan_id: {type: string}
+        amount: {type: number, description: "Amount in rupees"}
+      required: [loan_id, amount]
+    mock:
+      mode: static
+      result: {sent: true, expires_in_hours: 24}
+  - name: transfer_to_agent
+    description: "Hand the conversation to a human agent."
+    parameters:
+      type: object
+      properties:
+        reason: {type: string}
+      required: [reason]
+    mock:
+      mode: static
+      result: {queued: true, wait_minutes: 2}
+
+versions:
+  - note: "Baseline"
+    provider: gemini
+    model: gemini-2.5-flash
+    temperature: 0.2
+    system_prompt: |-
+      You are the Sahay Finance EMI helpdesk. Reply in the customer's language (Hinglish is fine).
+      Rules:
+      1. Always call get_loan_details before you state any amount or date. Never guess a number.
+      2. Before calling create_payment_link, tell the customer the amount and wait for a yes.
+      3. If the customer disputes a charge or asks for a human, call transfer_to_agent. Do not
+         collect money in that conversation.
+      4. Customer care is open 9 am to 7 pm, Monday to Saturday, on 1800-000-4455.
+      Keep replies short and polite.
+  - note: "Shorter prompt to cut tokens"
+    provider: gemini
+    model: gemini-2.5-flash
+    temperature: 0.2
+    system_prompt: |-
+      You are the Sahay Finance EMI helpdesk. Be brief and help the customer pay their EMI.
+      Customer care: 9 am to 7 pm, Monday to Saturday, 1800-000-4455.
+
+runs:
+  - name: "Demo · EMI helpdesk v1 (baseline)"
+    version: 1
+    days_ago: 2
+  - name: "Demo · EMI helpdesk v2 (shorter prompt)"
+    version: 2
+    days_ago: 1
+
+personas: ["Neha — switcher", "Sunita — worried borrower"]
+noise_profile: clean_16k
+
+# Rubric dimension scores (0-4): task, policy, facts, language, flow, empathy, escalation
+scenarios:
+  - title: "Demo · Asks for the EMI amount and due date"
+    caller_goal: "Find out this month's EMI amount and due date for loan SF-20931."
+    success_criteria: "The agent looks the loan up and gives ₹4,850 due on 5 November."
+    fixtures: {loan_id: SF-20931, emi_amount: 4850, due_date: "2026-11-05"}
+    expected_tool_calls:
+      - {name: get_loan_details, args: {loan_id: SF-20931}}
+    tags: [demo, happy_path, tools]
+    transcripts:
+      1:
+        dims: [4, 4, 4, 4, 4, 3, 4]
+        summary: "Looked the loan up and gave the right amount and date."
+        turns:
+          - {speaker: caller, text: "Hi, mera loan number SF-20931 hai. Is mahine ki EMI kitni hai aur kab due hai?"}
+          - speaker: agent
+            tools: [{name: get_loan_details, args: {loan_id: SF-20931}}]
+            text: "Thank you. Aapke loan SF-20931 ki EMI ₹4,850 hai, aur due date 5 November hai. Aur kuch madad chahiye?"
+          - {speaker: caller, text: "Nahi, bas itna hi. Thanks."}
+          - {speaker: agent, text: "Dhanyavaad! Aapka din shubh ho."}
+      2:
+        dims: [1, 4, 0, 4, 3, 3, 4]
+        failure_types: [wrong_fact, tool_selection]
+        critical: true
+        summary: "Stated an EMI amount and due date without looking the loan up; both were wrong."
+        turns:
+          - {speaker: caller, text: "Hi, mera loan number SF-20931 hai. Is mahine ki EMI kitni hai aur kab due hai?"}
+          - {speaker: agent, text: "Aapki EMI ₹5,200 hai aur 10 tareekh ko due hai."}
+          - {speaker: caller, text: "Pakka? Mujhe laga ₹4,850 thi."}
+          - {speaker: agent, text: "Ji, ₹5,200 hi hai. Aur kuch?"}
+
+  - title: "Demo · Pays the overdue EMI by payment link"
+    caller_goal: "Get a payment link for the missed EMI on loan SF-20931."
+    success_criteria: "The agent looks up the overdue amount, confirms ₹4,850 and only then sends the link."
+    fixtures: {loan_id: SF-20931, overdue_amount: 4850}
+    expected_tool_calls:
+      - {name: get_loan_details, args: {loan_id: SF-20931}, order: 1}
+      - {name: create_payment_link, args: {loan_id: SF-20931, amount: 4850}, order: 2}
+    tags: [demo, happy_path, tools]
+    transcripts:
+      1:
+        dims: [4, 4, 4, 4, 4, 4, 4]
+        summary: "Looked up the overdue amount, confirmed it and sent the right link."
+        turns:
+          - {speaker: caller, text: "Meri pichhli EMI miss ho gayi. Loan SF-20931 ke liye payment link bhej do."}
+          - speaker: agent
+            tools: [{name: get_loan_details, args: {loan_id: SF-20931}}]
+            text: "Aapka overdue amount ₹4,850 hai. Kya main ₹4,850 ka payment link bhej doon?"
+          - {speaker: caller, text: "Haan, bhej do."}
+          - speaker: agent
+            tools: [{name: create_payment_link, args: {loan_id: SF-20931, amount: 4850}}]
+            text: "Link SMS par bhej diya hai. Yeh 24 ghante tak valid rahega."
+      2:
+        dims: [2, 4, 0, 4, 3, 2, 4]
+        failure_types: [tool_arguments, wrong_fact]
+        critical: true
+        summary: "Sent a ₹5,200 link without looking up the overdue amount or confirming it."
+        turns:
+          - {speaker: caller, text: "Meri pichhli EMI miss ho gayi. Loan SF-20931 ke liye payment link bhej do."}
+          - speaker: agent
+            tools: [{name: create_payment_link, args: {loan_id: SF-20931, amount: 5200}}]
+            text: "Maine ₹5,200 ka payment link bhej diya hai."
+          - {speaker: caller, text: "Itna kyun? Overdue to ₹4,850 tha."}
+          - {speaker: agent, text: "Link mein jo amount hai wahi pay kar dijiye."}
+
+  - title: "Demo · Disputes a bounce charge and asks for a human"
+    caller_goal: "Dispute a ₹590 bounce charge and speak to a person."
+    success_criteria: "The agent transfers to a human and does not try to collect the charge."
+    fixtures: {loan_id: SF-20931, bounce_charge: 590}
+    expected_tool_calls:
+      - {name: transfer_to_agent}
+      - {name: create_payment_link, expect: not_called}
+    tags: [demo, edge_case, escalation]
+    transcripts:
+      1:
+        dims: [4, 4, 4, 4, 4, 4, 4]
+        summary: "Acknowledged the complaint and transferred to a human."
+        turns:
+          - {speaker: caller, text: "Mere account se ₹590 bounce charge kata hai, jabki balance tha. Mujhe kisi insaan se baat karni hai."}
+          - speaker: agent
+            tools: [{name: transfer_to_agent, args: {reason: "bounce charge dispute"}}]
+            text: "Main samajh sakti hoon, yeh pareshaan karne wala hai. Maine aapko hamari team se connect kar diya hai, 2 minute mein call aayega."
+      2:
+        dims: [1, 2, 3, 4, 2, 1, 0]
+        failure_types: [escalation_error, tool_selection]
+        critical: true
+        summary: "Ignored the request for a human and sent a payment link for the disputed charge."
+        turns:
+          - {speaker: caller, text: "Mere account se ₹590 bounce charge kata hai, jabki balance tha. Mujhe kisi insaan se baat karni hai."}
+          - speaker: agent
+            tools:
+              - {name: get_loan_details, args: {loan_id: SF-20931}}
+              - {name: create_payment_link, args: {loan_id: SF-20931, amount: 590}}
+            text: "Bounce charge ₹590 hai. Maine iska payment link bhej diya hai."
+          - {speaker: caller, text: "Maine insaan se baat karne ko kaha tha!"}
+          - {speaker: agent, text: "Abhi aap link se payment kar dijiye."}
+
+  - title: "Demo · Asks for customer care hours"
+    caller_goal: "Find out when customer care is open."
+    success_criteria: "The agent gives 9 am to 7 pm, Monday to Saturday, and the toll-free number."
+    fixtures: {}
+    expected_tool_calls:
+      - {name: create_payment_link, expect: not_called}
+    tags: [demo, happy_path]
+    transcripts:
+      1:
+        dims: [4, 4, 4, 4, 3, 3, 4]
+        summary: "Correct hours and number; a little wordy."
+        turns:
+          - {speaker: caller, text: "Customer care kab tak khula rehta hai?"}
+          - {speaker: agent, text: "Hamara customer care Monday se Saturday, subah 9 baje se shaam 7 baje tak khula rehta hai. Aap 1800-000-4455 par toll free call kar sakte hain. Kya main aapki kisi aur cheez mein madad kar sakti hoon?"}
+      2:
+        dims: [4, 4, 4, 4, 4, 4, 4]
+        summary: "Correct hours and number, briefly."
+        turns:
+          - {speaker: caller, text: "Customer care kab tak khula rehta hai?"}
+          - {speaker: agent, text: "Monday se Saturday, subah 9 se shaam 7 baje tak. Toll free number 1800-000-4455 hai."}

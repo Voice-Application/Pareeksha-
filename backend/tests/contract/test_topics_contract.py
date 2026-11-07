@@ -25,8 +25,8 @@ SCRIPT_CANDIDATES = [
 ]
 
 
-def test_twelve_versioned_topics() -> None:
-    assert len(Topics) == 12
+def test_thirteen_versioned_topics() -> None:
+    assert len(Topics) == 13
     assert set(TOPIC_SPECS) == set(Topics)
     assert all(t.value.startswith("pareeksha.") and t.value.endswith(".v1") for t in Topics)
     assert set(EVENT_TOPICS) | set(FAILURE_TOPICS) == set(Topics)
