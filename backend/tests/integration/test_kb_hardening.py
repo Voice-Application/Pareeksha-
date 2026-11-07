@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import threading
 import uuid
+import weakref
 from typing import Any
 
 import pytest
@@ -48,7 +49,7 @@ async def test_hostile_uploads_cannot_pile_up_threads(
         return "text/plain", data.decode()
 
     monkeypatch.setattr(kb_router, "extract_text", hang)
-    monkeypatch.setattr(kb_router, "_THREAD_SLOTS", asyncio.Semaphore(2))
+    monkeypatch.setattr(kb_router, "_THREAD_SLOTS", weakref.WeakKeyDictionary())
     monkeypatch.setattr(kb_router, "EXTRACT_TIMEOUT_S", 0.5)
     kb_id = await make_kb(api, tenant)
     try:

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import weakref
 from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Annotated, Any, Literal, ParamSpec, TypeVar
@@ -99,18 +100,31 @@ T = TypeVar("T")
 #: Extraction and CSV parsing run in threads, which Python cannot kill: at most this many at once,
 #: and a slot is only freed when its thread has really finished (not when we stop waiting for it).
 # ponytail: threads are not killable; move extraction to a process pool if hostile uploads become a problem  # noqa: E501
-_THREAD_SLOTS = asyncio.Semaphore(2)
+MAX_EXTRACT_THREADS = 2
+#: One semaphore per event loop: an asyncio.Semaphore binds to the first loop that waits on it.
+_THREAD_SLOTS: weakref.WeakKeyDictionary[asyncio.AbstractEventLoop, asyncio.Semaphore] = (
+    weakref.WeakKeyDictionary()
+)
+
+
+def _thread_slots() -> asyncio.Semaphore:
+    loop = asyncio.get_running_loop()
+    slots = _THREAD_SLOTS.get(loop)
+    if slots is None:
+        slots = _THREAD_SLOTS[loop] = asyncio.Semaphore(MAX_EXTRACT_THREADS)
+    return slots
 
 
 async def _in_slot(fn: Callable[P, T], *args: P.args, **kwargs: P.kwargs) -> T:
     """``fn`` in a thread, under ``_THREAD_SLOTS``, within ``EXTRACT_TIMEOUT_S`` (TimeoutError)."""
+    slots = _thread_slots()
 
     async def run() -> T:
-        await _THREAD_SLOTS.acquire()
+        await slots.acquire()
         task = asyncio.ensure_future(asyncio.to_thread(fn, *args, **kwargs))
 
         def done(t: asyncio.Future[T]) -> None:
-            _THREAD_SLOTS.release()
+            slots.release()
             if not t.cancelled():
                 t.exception()  # retrieved: nobody awaits a thread we stopped waiting for
 
