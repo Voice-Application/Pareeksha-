@@ -9,6 +9,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 from pareeksha.schemas.common import RequestModel
+from pareeksha.schemas.rag import RagExpectation
 
 ScenarioSource = Literal["manual", "generated", "promoted"]
 DraftStatus = Literal["pending", "ready", "failed"]
@@ -27,6 +28,7 @@ class ScenarioCreate(RequestModel):
     caller_speaks_first: bool = False
     max_turns: int = Field(default=15, ge=1, le=60)
     tags: list[str] = Field(default_factory=list)
+    rag_expectation: RagExpectation | None = None
 
 
 class ScenarioUpdate(RequestModel):
@@ -42,6 +44,7 @@ class ScenarioUpdate(RequestModel):
     caller_speaks_first: bool | None = None
     max_turns: int | None = Field(default=None, ge=1, le=60)
     tags: list[str] | None = None
+    rag_expectation: RagExpectation | None = None
 
 
 class ScenarioOut(ScenarioCreate):

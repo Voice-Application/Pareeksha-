@@ -91,7 +91,7 @@ async def create_regression_run(
         name=body.name,
         kind="regression",
         status="queued",
-        config={**body.config.model_dump(), "statuses": statuses},
+        config={**body.config.model_dump(mode="json", exclude_none=True), "statuses": statuses},
         agent_snapshot=agent_snapshot(agent),
         summary={},
         rubric_version_id=rubric,

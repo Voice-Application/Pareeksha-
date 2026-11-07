@@ -9,6 +9,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 from pareeksha.schemas.common import RequestModel
+from pareeksha.schemas.rag import RagConfig
 
 RunKind = Literal["matrix", "regression", "dry_run"]
 RunStatus = Literal["draft", "queued", "running", "completed", "partial", "cancelled", "failed"]
@@ -31,6 +32,7 @@ class RunConfig(RequestModel):
     max_concurrency: int = Field(default=3, ge=1, le=20)
     seed: int = 42
     dry_run: bool = False
+    rag: RagConfig | None = None
 
 
 class RunCreate(RequestModel):

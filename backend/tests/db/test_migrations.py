@@ -21,7 +21,18 @@ SCHEMA_SQL = BACKEND.parent / "docs" / "schema.sql"
 MIGRATION_SQL = BACKEND / "alembic" / "sql" / "0001_initial.sql"
 
 # Tables added by later Alembic revisions; not part of docs/schema.sql v0.2.
-POST_V02_TABLES = {"users", "prompt_versions"}
+POST_V02_TABLES = {
+    "users",
+    "prompt_versions",
+    "knowledge_bases",
+    "kb_documents",
+    "kb_indexes",
+    "kb_chunks",
+    "retrievals",
+    "rag_metrics",
+    "rag_matrices",
+    "price_overrides",
+}
 
 
 def _documented_tables() -> set[str]:

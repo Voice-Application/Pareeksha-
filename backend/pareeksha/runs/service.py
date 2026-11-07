@@ -203,7 +203,7 @@ async def create_run(session: AsyncSession, project_id: uuid.UUID, body: RunCrea
         kind=body.kind,
         status="queued",
         config={
-            **body.config.model_dump(),
+            **body.config.model_dump(mode="json", exclude_none=True),
             "scenario_ids": [str(i) for i in prepared.scenario_ids],
             "persona_ids": [str(i) for i in prepared.persona_ids],
             "noise_profile_ids": [str(i) for i in prepared.noise_profile_ids],
