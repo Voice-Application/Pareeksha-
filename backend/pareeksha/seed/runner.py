@@ -8,6 +8,8 @@ running it twice (or after a user edited a seeded row) changes nothing.
 * rubrics: ``data/rubric-2026-10-v1.yaml``, ``-v2.yaml`` and ``rubric-2026-11-v3.yaml``; the
   build's ``RUBRIC_VERSION`` is made active;
 * the mock EMI agent and its scenarios;
+* first-run demo data (``pareeksha.seed.demo``): a prompt agent with a v1-vs-v2 regression and a
+  bilingual knowledge base with a finished RAG matrix, all precomputed (no API keys needed);
 * the demo API key (admin scope). ``PAREEKSHA_API_KEY`` in the environment pins the key (only its
   hash is stored); otherwise a key is generated and returned once, on the run that creates it.
 """
@@ -40,6 +42,7 @@ from pareeksha.evaluation.rubric import RUBRIC_VERSION
 from pareeksha.schemas.agents import AgentCreate
 from pareeksha.schemas.personas import Codec, NoiseProfileCreate, PersonaCreate
 from pareeksha.schemas.scenarios import ScenarioCreate
+from pareeksha.seed.demo import seed_demo
 
 DATA_DIR = Path(__file__).parent / "data"
 #: Shipped rubric versions, oldest first (docs/08 section 2).
@@ -254,5 +257,6 @@ async def seed_database(factory: async_sessionmaker[AsyncSession]) -> SeedResult
         await _seed_noise_profiles(session, project, out)
         await _seed_rubric(session, out)
         await _seed_agent(session, project, out)
+        await seed_demo(session, project, RUBRIC_VERSION, out)
         await _seed_demo_key(session, project, out)
     return out

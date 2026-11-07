@@ -55,7 +55,17 @@ Behind a TLS-intercepting proxy, use the overlay for every compose command: `BUI
 docker compose run --rm api python -m pareeksha.seed
 ```
 
-This creates the 20 personas, the 8 noise profiles, the active rubric, the **EMI Reminder Bot** agent (pointing at the bundled mock agent, `ws://mock-agent:8765/ws`) with 8 scenarios, and an admin API key. It is get-or-create, so running it twice changes nothing. Because you pinned `PAREEKSHA_API_KEY` in `.env`, that exact value is the key (it is stored hashed). Restart the web app so it picks the key up:
+This creates the 20 personas, the 8 noise profiles, the active rubric, the **EMI Reminder Bot** agent (pointing at the bundled mock agent, `ws://mock-agent:8765/ws`) with 8 scenarios, and an admin API key. It is get-or-create, so running it twice changes nothing. Because you pinned `PAREEKSHA_API_KEY` in `.env`, that exact value is the key (it is stored hashed).
+
+It also adds demo data, so the prompt and RAG pages are not empty on a fresh install. Every result in it was computed in advance; nothing calls an LLM and no API keys are needed. Every demo name starts with "Demo ·", and you can delete any of it:
+
+- **Demo · Sahay EMI helpdesk**: a prompt agent with tool calls. v2 shortened the prompt and broke three of four scenarios. Open its two runs in **Runs → Compare** to see the regression.
+- **Demo · Sahay Finance FAQ (EN + HI)**: a knowledge base of four FAQ documents (three English, one Hindi). It comes with 14 ground-truth questions and a finished RAG matrix on **RAG lab**, which compares three retrieval methods against no RAG and against the full knowledge base, with ₹ cost.
+- The knowledge base's index is built by the `indexer` worker. The first build downloads the local embedding model, about 2.2 GB, once.
+- The demo also adds a price for `gemini-2.5-flash` (₹26 input, ₹220 output per 1M tokens) so the report can show costs. You can edit it under **Settings → Pricing**.
+
+Restart the web app so it picks the key up:
+
 
 ```bash
 docker compose up -d web

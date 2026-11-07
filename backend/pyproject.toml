@@ -62,7 +62,7 @@ hubspot = "pareeksha.integrations.hubspot:HubSpotConnector"
 include = ["pareeksha*"]
 
 [tool.setuptools.package-data]
-"pareeksha.seed" = ["data/*.yaml"]
+"pareeksha.seed" = ["data/*.yaml", "data/demo_kb/*.md"]
 "pareeksha.llm" = ["prompts/*.j2"]
 "pareeksha.dialect" = ["*.yaml"]
 "pareeksha.evaluation" = ["*.yaml"]
