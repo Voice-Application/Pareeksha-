@@ -30,6 +30,7 @@ from pareeksha.events.schemas import (
     make_envelope,
 )
 from pareeksha.llm.client import LLMClient
+from pareeksha.rag.metrics import RagInputs, RagMetricsRecord, evaluate_rag
 from pareeksha.regression.verdict import DEFAULT_TOLERANCE, regression_passed
 
 #: ``call.completed`` end reasons with no usable conversation: nothing to evaluate. The run item
@@ -57,6 +58,12 @@ class EvaluatorStore(Protocol):
         ``deterministic_checks``; set ``run_items.status`` to ``evaluated`` or ``judge_error``
         (same transaction as the ``processed_events`` row)."""
 
+    async def load_rag_inputs(self, call_id: uuid.UUID) -> RagInputs | None:
+        """The call's RAG inputs, or ``None`` when the run has no rag config and no retrievals."""
+
+    async def save_rag_metrics(self, call_id: uuid.UUID, record: RagMetricsRecord) -> None:
+        """Idempotent upsert of the call's ``rag_metrics`` row."""
+
 
 async def handle_call_completed(
     env: Envelope[CallCompleted],
@@ -74,6 +81,7 @@ async def handle_call_completed(
         raise CallNotFoundError(f"call {payload.call_id} not found")
     record = await evaluate_call(snap, client)
     await store.save_evaluation(record)
+    await evaluate_rag(store, client, payload.call_id)
 
     completed = EvaluationCompleted(
         call_id=record.call_id,

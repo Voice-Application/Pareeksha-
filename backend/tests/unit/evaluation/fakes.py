@@ -16,6 +16,7 @@ from pareeksha.llm.base import (
 )
 from pareeksha.llm.client import LLMClient
 from pareeksha.llm.config import LLMSettings
+from pareeksha.rag.metrics import RagInputs, RagMetricsRecord
 
 
 class ScriptedProvider(LLMProvider):
@@ -93,12 +94,20 @@ class FakeEvaluatorStore:
     def __init__(self, snapshot: CallSnapshot | None) -> None:
         self.snapshot = snapshot
         self.saved: list[EvaluationRecord] = []
+        self.rag_inputs: RagInputs | None = None
+        self.rag_saved: list[RagMetricsRecord] = []
 
     async def load_snapshot(self, call_id: uuid.UUID) -> CallSnapshot | None:
         return self.snapshot
 
     async def save_evaluation(self, record: EvaluationRecord) -> None:
         self.saved.append(record)
+
+    async def load_rag_inputs(self, call_id: uuid.UUID) -> RagInputs | None:
+        return self.rag_inputs
+
+    async def save_rag_metrics(self, call_id: uuid.UUID, record: RagMetricsRecord) -> None:
+        self.rag_saved.append(record)
 
 
 class FakeFinalizerStore:

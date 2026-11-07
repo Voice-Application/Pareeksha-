@@ -41,7 +41,9 @@ from pareeksha.events.schemas import (
     RunFinalStatus,
     RunKind,
 )
+from pareeksha.rag.metrics import RagInputs, RagMetricsRecord
 from pareeksha.schemas.personas import PersonaCreate
+from pareeksha.schemas.rag import RagExpectation
 from pareeksha.schemas.scenarios import ScenarioCreate
 
 Conn = psycopg.AsyncConnection[Any]
@@ -348,6 +350,123 @@ class PgEvaluatorStore:
                 "wer": m.caller_wer,
                 "extra": Jsonb(m.to_dict()),
             },
+        )
+
+    async def load_rag_inputs(self, call_id: uuid.UUID) -> RagInputs | None:
+        calls = await self._rows(
+            """
+            SELECT c.project_id, ri.scenario_id, tr.config -> 'rag' AS rag
+              FROM calls c
+              LEFT JOIN run_items ri ON ri.id = c.run_item_id
+              LEFT JOIN test_runs tr ON tr.id = ri.run_id
+             WHERE c.id = %s
+            """,
+            (call_id,),
+        )
+        if not calls:
+            return None
+        call = calls[0]
+        retrievals = await self._rows(
+            "SELECT turn_idx, rag_config, index_id, results FROM retrievals "
+            "WHERE call_id = %s ORDER BY turn_idx",
+            (call_id,),
+        )
+        cfg: dict[str, Any] | None = call["rag"] or (
+            retrievals[0]["rag_config"] if retrievals else None
+        )
+        if cfg is None:
+            return None
+        mode = str(cfg.get("mode") or "retrieval")
+        project_id = call["project_id"]
+
+        local_only = False
+        if cfg.get("kb_id"):
+            rows = await self._rows(
+                "SELECT local_only FROM knowledge_bases WHERE id = %s AND project_id = %s",
+                (cfg["kb_id"], project_id),
+            )
+            local_only = bool(rows[0]["local_only"]) if rows else False
+
+        expectation: RagExpectation | None = None
+        if call["scenario_id"] is not None:
+            rows = await self._rows(
+                "SELECT rag_expectation FROM scenarios WHERE id = %s", (call["scenario_id"],)
+            )
+            if rows and rows[0]["rag_expectation"]:
+                try:
+                    expectation = RagExpectation.model_validate(rows[0]["rag_expectation"])
+                except ValueError:
+                    expectation = None
+
+        source_text: str | None = None
+        if expectation and expectation.source_document_id and expectation.source_span:
+            start, end = expectation.source_span
+            rows = await self._rows(
+                "SELECT substr(text, %s, %s) AS t FROM kb_documents WHERE id = %s "
+                "AND project_id = %s",
+                (start + 1, max(end - start, 0), expectation.source_document_id, project_id),
+            )
+            source_text = rows[0]["t"] if rows else None
+
+        turn_rows = await self._rows(
+            "SELECT text FROM turns WHERE call_id = %s AND speaker = 'agent' ORDER BY idx",
+            (call_id,),
+        )
+
+        context: list[str] = []
+        if mode == "full_context" and cfg.get("kb_id"):
+            docs = await self._rows(
+                "SELECT filename, text FROM kb_documents WHERE kb_id = %s AND project_id = %s "
+                "AND deleted_at IS NULL ORDER BY filename",
+                (cfg["kb_id"], project_id),
+            )
+            context = [f"# {d['filename']}\n{d['text']}" for d in docs]
+        elif mode == "retrieval":
+            small = bool(cfg.get("small_to_big"))
+            seen: set[Any] = set()
+            for ret in retrievals:
+                ids = [uuid.UUID(str(r["chunk_id"])) for r in ret["results"] or []]
+                if not ids or ret["index_id"] is None:
+                    continue
+                rows = await self._rows(
+                    """
+                    SELECT k.id, k.document_id, k.parent_start, k.parent_end,
+                           CASE WHEN %s THEN substr(d.text, k.parent_start + 1,
+                                                    k.parent_end - k.parent_start)
+                                ELSE k.text END AS t
+                      FROM kb_chunks k JOIN kb_documents d ON d.id = k.document_id
+                     WHERE k.id = ANY(%s) AND k.index_id = %s
+                    """,
+                    (small, ids, ret["index_id"]),
+                )
+                by_id = {r["id"]: r for r in rows}
+                for i in ids:
+                    r = by_id.get(i)
+                    if r is None:
+                        continue
+                    key = (r["document_id"], r["parent_start"], r["parent_end"]) if small else i
+                    if key not in seen:
+                        seen.add(key)
+                        context.append(r["t"])
+
+        return RagInputs(
+            mode=mode,
+            retrievals=[{"turn_idx": r["turn_idx"], "results": r["results"]} for r in retrievals],
+            expectation=expectation,
+            source_text=source_text,
+            local_only=local_only,
+            agent_turns=[r["text"] for r in turn_rows],
+            context=context,
+        )
+
+    async def save_rag_metrics(self, call_id: uuid.UUID, record: RagMetricsRecord) -> None:
+        await self._conn.execute(
+            """
+            INSERT INTO rag_metrics (call_id, metrics, skipped) VALUES (%s, %s, %s)
+            ON CONFLICT (call_id) DO UPDATE SET
+                metrics = EXCLUDED.metrics, skipped = EXCLUDED.skipped, updated_at = now()
+            """,
+            (call_id, Jsonb(record.metrics), Jsonb(record.skipped)),
         )
 
     async def load_completed(self, call_id: uuid.UUID) -> EvaluationCompleted | None:
