@@ -32,6 +32,7 @@ CheckType = Literal[
     "forbidden_absent",
     "language_match",
     "tool_calls_expected",
+    "no_unexpected_tool",
     "no_loop",
     "amount_confirmed",
 ]

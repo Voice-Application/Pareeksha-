@@ -17,6 +17,7 @@ from typing import Any
 import psycopg
 from psycopg.types.json import Jsonb
 
+from pareeksha.agent_llm.context import prompt_context
 from pareeksha.events.consumer import Ctx, Outgoing, consumer, run_worker
 from pareeksha.events.schemas import Envelope, ScenarioGenerateRequested
 from pareeksha.events.topics import MAX_ATTEMPTS, Topics
@@ -69,6 +70,11 @@ async def handle_generate_requested(
     ctx: Ctx,
     llm_for: Callable[[Callable[[UsageRecord], Any]], LLMClient] | None = None,
 ) -> Sequence[Outgoing]:
+    """Generate scenario drafts for the agent and store them on the pending draft.
+
+    A redelivered request is a no-op. A prompt agent is described with its active version's prompt.
+    Permanent LLM errors mark the draft failed; retryable ones are re-raised until the last attempt.
+    """
     p = env.payload
     conn = ctx.tx
     draft = await _one(
@@ -82,7 +88,7 @@ async def handle_generate_requested(
     agent = await _one(
         conn,
         "SELECT name, description, languages, expected_tools, mandatory_disclosures, "
-        "forbidden_phrases FROM agents WHERE id = %s",
+        "forbidden_phrases, adapter, adapter_config, project_id FROM agents WHERE id = %s",
         (p.agent_id,),
     )
     if agent is None:  # pragma: no cover - the FK cascade removes the draft with its agent
@@ -109,17 +115,35 @@ async def handle_generate_requested(
             ),
         )
 
+    (
+        name,
+        description,
+        languages,
+        tools,
+        disclosures,
+        forbidden,
+        adapter,
+        adapter_config,
+        project_id,
+    ) = agent
     if llm_for is None:  # the project's own LLM settings if it has any, else the environment's
-        project_id = (
-            await _one(conn, "SELECT project_id FROM agents WHERE id = %s", (p.agent_id,))
-        )[0]
         try:
             resolved = await _project_llms.resolve(conn, project_id)
         except LLMConfigError as exc:
             await _finish(conn, p.draft_id, "failed", [], str(exc)[:MAX_ERROR_CHARS])
             return []
         llm_for = default_llm if resolved is None else resolved.client
-    name, description, languages, tools, disclosures, forbidden = agent
+    if adapter == "prompt":  # the ACTIVE version: scenarios are written for what runs next
+        version_id = (adapter_config or {}).get("active_version_id")
+        row = await _one(
+            conn,
+            "SELECT system_prompt FROM prompt_versions "
+            "WHERE id = %s AND agent_id = %s AND project_id = %s",
+            (version_id, p.agent_id, project_id),
+        )
+        description = prompt_context(
+            description or "", {"system_prompt": row[0]} if row is not None else None
+        )
     brief = AgentBrief(
         name=name,
         description=description,

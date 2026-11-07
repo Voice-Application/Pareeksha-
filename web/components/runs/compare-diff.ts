@@ -3,7 +3,7 @@ import { RUBRIC } from "@/lib/api/calls";
 
 export const cellKey = (scenario: string, persona: string, profile: string) => `${scenario}\u0000${persona}\u0000${profile}`;
 
-export type Compared = { scenario: string; persona: string; profile: string; base_score?: number | null; head_score?: number | null; delta?: number | null; newly_failing: boolean };
+export type Compared = { scenario: string; persona: string; profile: string; base_score?: number | null; head_score?: number | null; delta?: number | null; newly_failing: boolean; base_call_ids?: string[]; head_call_ids?: string[] };
 export type Group = "newly" | "regressed" | "improved" | "unchanged" | "partial";
 
 export function groupOf(c: Compared): Group {

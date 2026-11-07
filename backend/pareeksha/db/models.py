@@ -7,13 +7,14 @@ migration test compares these tables and columns with the live schema.
 import datetime
 import decimal
 import uuid
-from typing import Optional
+from typing import Any, Optional
 
 from sqlalchemy import (
     BigInteger,
     Boolean,
     CheckConstraint,
     DateTime,
+    Float,
     ForeignKeyConstraint,
     Index,
     Integer,
@@ -451,7 +452,7 @@ class Agents(Base):
     __tablename__ = "agents"
     __table_args__ = (
         CheckConstraint(
-            "adapter = ANY (ARRAY['audio_v1'::text, 'pipecat'::text, 'livekit'::text, 'vapi'::text])",
+            "adapter = ANY (ARRAY['audio_v1'::text, 'pipecat'::text, 'livekit'::text, 'vapi'::text, 'prompt'::text])",
             name="agents_adapter_check",
         ),
         CheckConstraint(
@@ -591,7 +592,7 @@ class DeterministicChecks(Base):
     __tablename__ = "deterministic_checks"
     __table_args__ = (
         CheckConstraint(
-            "check_type = ANY (ARRAY['disclosure_present'::text, 'forbidden_absent'::text, 'language_match'::text, 'tool_calls_expected'::text, 'no_loop'::text, 'amount_confirmed'::text])",
+            "check_type = ANY (ARRAY['disclosure_present'::text, 'forbidden_absent'::text, 'language_match'::text, 'tool_calls_expected'::text, 'no_loop'::text, 'amount_confirmed'::text, 'no_unexpected_tool'::text])",
             name="deterministic_checks_check_type_check",
         ),
         ForeignKeyConstraint(
@@ -1370,6 +1371,48 @@ class Users(Base):
         DateTime(True), nullable=False, server_default=text("now()")
     )
     last_login_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(True))
+
+
+class PromptVersions(Base):
+    """Immutable prompt-agent definitions (Alembic revision 0004; not in docs/schema.sql v0.2)."""
+
+    __tablename__ = "prompt_versions"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["agent_id"], ["agents.id"], ondelete="CASCADE", name="prompt_versions_agent_id_fkey"
+        ),
+        ForeignKeyConstraint(
+            ["project_id"],
+            ["projects.id"],
+            ondelete="CASCADE",
+            name="prompt_versions_project_id_fkey",
+        ),
+        PrimaryKeyConstraint("id", name="prompt_versions_pkey"),
+        UniqueConstraint("agent_id", "version", name="prompt_versions_agent_id_version_key"),
+        Index("prompt_versions_agent_id_idx", "agent_id"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    project_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    agent_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    system_prompt: Mapped[str] = mapped_column(Text, nullable=False)
+    provider: Mapped[str] = mapped_column(Text, nullable=False)
+    model: Mapped[str] = mapped_column(Text, nullable=False)
+    base_url: Mapped[str | None] = mapped_column(Text)
+    temperature: Mapped[float] = mapped_column(Float, nullable=False)
+    tools: Mapped[list[Any]] = mapped_column(JSONB, nullable=False, server_default=text("'[]'"))
+    max_tool_rounds: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("5"))
+    rag_config: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, server_default=text("'{}'")
+    )
+    note: Mapped[str] = mapped_column(Text, nullable=False, server_default=text("''"))
+    content_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime(True), nullable=False, server_default=text("now()")
+    )
 
 
 class ProjectLlmSettings(Base):

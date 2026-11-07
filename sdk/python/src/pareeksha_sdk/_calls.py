@@ -36,6 +36,8 @@ class Call_:
     paged: bool = False
     #: PATCH/PUT/GET/DELETE are safe to retry on any 5xx; POST only on gateway errors
     idempotent: bool = True
+    #: add ``unchanged`` to the dict answer: True when the server said 200, not 201
+    flag_unchanged: bool = False
 
 
 _NAMED_LIST = TypeAdapter(list[Named])
@@ -70,6 +72,24 @@ def agent_create(body: dict[str, Any]) -> Call_:
 
 def agent_update(agent_id: UUID | str, body: dict[str, Any]) -> Call_:
     return Call_("PATCH", f"/agents/{agent_id}", json=body)
+
+
+def prompt_version_create(agent_id: UUID | str, body: dict[str, Any]) -> Call_:
+    return Call_(
+        "POST",
+        f"/agents/{agent_id}/prompt-versions",
+        json=body,
+        idempotent=False,
+        flag_unchanged=True,
+    )
+
+
+def prompt_versions_list(agent_id: UUID | str) -> Call_:
+    return Call_("GET", f"/agents/{agent_id}/prompt-versions")
+
+
+def prompt_version_activate(agent_id: UUID | str, version: int) -> Call_:
+    return Call_("POST", f"/agents/{agent_id}/prompt-versions/{version}/activate", idempotent=False)
 
 
 def library_list(kind: str, **filters: Any) -> Call_:

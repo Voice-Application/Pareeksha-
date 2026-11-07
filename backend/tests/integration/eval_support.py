@@ -1,7 +1,8 @@
 """Seeding and probes for the evaluator / finalizer integration tests (real Postgres schema).
 
-``create_database`` applies ``docs/schema.sql`` (the whole documented schema, as the Alembic
-migration does) to a throwaway database on the integration-test server.
+``create_database`` migrates a throwaway database on the integration-test server to the Alembic
+head, so it has every table and constraint the workers write to (``docs/schema.sql`` v0.2 plus
+the later revisions).
 """
 
 from __future__ import annotations
@@ -14,11 +15,13 @@ from dataclasses import dataclass
 from typing import Any
 
 import psycopg
+from alembic import command
 from psycopg.types.json import Jsonb
 
 from pareeksha.evaluation.rubric import RUBRIC_VERSION
+from tests.conftest import alembic_config
 from tests.fixtures import synthetic_calls as sc
-from tests.integration.support import SCHEMA_SQL, TEST_DB_URL
+from tests.integration.support import TEST_DB_URL
 
 
 def server_url() -> str:
@@ -27,14 +30,14 @@ def server_url() -> str:
 
 @contextlib.contextmanager
 def create_database() -> Iterator[str]:
-    """A fresh database with the full schema; dropped afterwards. Yields its libpq URL."""
+    """A fresh database migrated to the Alembic head; dropped afterwards. Yields its libpq URL."""
     name = f"eval03b_{secrets.token_hex(4)}"
     with psycopg.connect(f"{server_url()}/postgres", autocommit=True) as admin:
         admin.execute(psycopg.sql.SQL("CREATE DATABASE {}").format(psycopg.sql.Identifier(name)))
     url = f"{server_url()}/{name}"
     try:
-        with psycopg.connect(url, autocommit=True) as conn:
-            conn.execute(SCHEMA_SQL.read_text(encoding="utf-8"))
+        # set_main_option interpolates "%": escape it for Alembic, psycopg gets the plain URL
+        command.upgrade(alembic_config(url.replace("%", "%%")), "head")
         yield url
     finally:
         with psycopg.connect(f"{server_url()}/postgres", autocommit=True) as admin:

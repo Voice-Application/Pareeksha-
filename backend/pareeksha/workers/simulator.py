@@ -28,6 +28,8 @@ from collections.abc import Sequence
 from functools import cache
 from typing import Any
 
+from pareeksha.agent_llm import build_chat_provider
+from pareeksha.agent_llm.url_guard import allow_private_urls, check_base_url
 from pareeksha.events.consumer import Ctx, Outgoing, PermanentError, Throttled, consumer, run_worker
 from pareeksha.events.runtime import Database
 from pareeksha.events.schemas import CallCompleted, CallRequested, Envelope
@@ -38,10 +40,12 @@ from pareeksha.llm.factory import build_client
 from pareeksha.llm.project_settings import ProjectLLMClients
 from pareeksha.llm.usage_db import ApiUsageSink
 from pareeksha.runs.slots import StartResult, start_item
+from pareeksha.schemas.prompts import PromptVersionOut
 from pareeksha.simulation import store
 from pareeksha.simulation.models import CallResult, CallSpec
 from pareeksha.simulation.runner import CallRunner, quiet_pipecat_logs
-from pareeksha.simulation.runtime import BrainCallerSource
+from pareeksha.simulation.runtime import BrainCallerSource, CallerSource
+from pareeksha.simulation.text_runner import run_text_call
 from pareeksha.speech.registry import get_stt_provider, get_tts_provider
 from pareeksha.storage.blob import BlobStore, blob_store_from_env
 
@@ -52,13 +56,18 @@ PRODUCER = "simulator"
 
 _db: Database | None = None
 _usage: ApiUsageSink | None = None
+#: Injected through ``configure`` (tests, crash worker); used for every call, project or not.
 _runner: CallRunner | None = None
+#: The shared runner built from the environment for calls without project LLM settings.
+_default_runner: CallRunner | None = None
+_caller: CallerSource | None = None
 _providers: list[Any] = []
 _blobs: BlobStore | None = None
 _project_llms = ProjectLLMClients()
 #: One runner per (project, settings fingerprint) for projects that override the LLM settings
 #: (ponytail: one small entry per settings change; restart the worker to drop old ones).
 _project_runners: dict[tuple[Any, str], CallRunner] = {}
+_project_callers: dict[tuple[Any, str], CallerSource] = {}
 
 
 def configure(
@@ -69,8 +78,9 @@ def configure(
     blobs: BlobStore | None = None,
 ) -> None:
     """Install collaborators (tests, crash worker); ``None`` rebuilds from the environment."""
-    global _db, _usage, _runner, _blobs
+    global _db, _usage, _runner, _default_runner, _blobs
     _db, _usage, _runner, _blobs = db, usage, runner, blobs
+    _default_runner = None
 
 
 def _database() -> Database:
@@ -92,35 +102,65 @@ def _usage_sink() -> ApiUsageSink:
     return ApiUsageSink(EventSettings.from_env())
 
 
-def _call_runner() -> CallRunner:
-    global _runner
-    if _runner is None:
-        quiet_pipecat_logs()
+def _caller_source() -> CallerSource:
+    """The caller brain, built on first use (a text-only worker never needs STT/TTS)."""
+    global _caller
+    if _caller is None:
         sink = _usage if _usage is not None else _usage_sink()
         brain = CallerBrain(build_client(usage_sink=sink))
+        _caller = BrainCallerSource(brain)
+    return _caller
+
+
+def _call_runner() -> CallRunner:
+    """The injected runner, else the shared default one (built on first use)."""
+    global _default_runner
+    if _runner is not None:
+        return _runner
+    if _default_runner is None:
+        quiet_pipecat_logs()
         stt, tts = get_stt_provider(), get_tts_provider()
-        _providers.extend([stt, tts, brain])
-        _runner = CallRunner(stt=stt, tts=tts, caller=BrainCallerSource(brain))
-    return _runner
+        _providers.extend([stt, tts])
+        _default_runner = CallRunner(stt=stt, tts=tts, caller=_caller_source())
+    return _default_runner
+
+
+async def _project_caller(project_id: Any) -> tuple[tuple[Any, str], CallerSource] | None:
+    """The caller brain built from the project's own LLM settings; ``None`` if it has none."""
+    resolved = await _project_llms.resolve(await _database().connection(), project_id)
+    if resolved is None:
+        return None
+    key = (project_id, resolved.fingerprint)
+    caller = _project_callers.get(key)
+    if caller is None:
+        brain = CallerBrain(resolved.client(_usage if _usage is not None else _usage_sink()))
+        _providers.append(brain)
+        caller = _project_callers[key] = BrainCallerSource(brain)
+    return key, caller
+
+
+async def _caller_for(project_id: Any) -> CallerSource:
+    """The caller for a text call: the project's LLM settings, else the shared caller brain."""
+    if _runner is not None:  # injected (tests, crash worker)
+        return _caller_source()
+    found = await _project_caller(project_id)
+    return _caller_source() if found is None else found[1]
 
 
 async def _runner_for(project_id: Any) -> CallRunner:
     """The runner whose caller brain uses the project's LLM settings, else the shared one."""
     if _runner is not None:  # injected (tests, crash worker)
         return _runner
-    resolved = await _project_llms.resolve(await _database().connection(), project_id)
-    if resolved is None:
+    found = await _project_caller(project_id)
+    if found is None:
         return _call_runner()
-    key = (project_id, resolved.fingerprint)
+    key, caller = found
     runner = _project_runners.get(key)
     if runner is None:
         quiet_pipecat_logs()
-        brain = CallerBrain(resolved.client(_usage if _usage is not None else _usage_sink()))
         stt, tts = get_stt_provider(), get_tts_provider()
-        _providers.extend([stt, tts, brain])
-        runner = _project_runners[key] = CallRunner(
-            stt=stt, tts=tts, caller=BrainCallerSource(brain)
-        )
+        _providers.extend([stt, tts])
+        runner = _project_runners[key] = CallRunner(stt=stt, tts=tts, caller=caller)
     return runner
 
 
@@ -162,9 +202,41 @@ async def _reproduce(env: Envelope[CallRequested], ctx: Ctx) -> Sequence[Outgoin
     ]
 
 
+async def _run_prompt_call(spec: CallSpec, project_id: Any = None) -> CallResult:
+    """A prompt agent's scenario as a typed conversation (no audio)."""
+    raw = spec.agent.adapter_config.get("prompt_version")
+    if raw is None:
+        return CallResult(
+            call_id=spec.call_id,
+            end_reason="connect_failed",
+            duration_ms=0,
+            error="prompt agent has no version",
+        )
+    version = PromptVersionOut.model_validate(raw)
+    try:
+        if version.base_url:
+            # resolves the host: keep the DNS lookup off the event loop
+            await asyncio.to_thread(
+                check_base_url, version.base_url, allow_private=allow_private_urls()
+            )
+        chat = build_chat_provider(
+            version.provider,
+            api_key=spec.agent.adapter_secrets.get("api_key"),
+            base_url=version.base_url,
+        )
+    except ValueError as exc:
+        return CallResult(
+            call_id=spec.call_id, end_reason="connect_failed", duration_ms=0, error=str(exc)
+        )
+    caller = _caller_source() if project_id is None else await _caller_for(project_id)
+    return await run_text_call(spec, caller=caller, chat=chat)
+
+
 async def _run_call(spec: CallSpec, project_id: Any = None) -> tuple[CallResult, dict[str, bytes]]:
     """Run the call; an unexpected crash of the pipeline becomes an ``infra_error`` result."""
     try:
+        if spec.agent.adapter == "prompt":
+            return await _run_prompt_call(spec, project_id), {}
         runner = _call_runner() if project_id is None else await _runner_for(project_id)
         outcome = await runner.run(spec)
     except Exception as exc:

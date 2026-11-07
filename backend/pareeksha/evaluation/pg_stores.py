@@ -16,6 +16,7 @@ import psycopg
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
+from pareeksha.agent_llm.context import prompt_context
 from pareeksha.audit.roles import role_review_reasons
 from pareeksha.evaluation.evaluator import CallSnapshot, EvaluationRecord
 from pareeksha.evaluation.handlers import (
@@ -83,15 +84,23 @@ class PgEvaluatorStore:
             return await cur.fetchall()
 
     async def load_snapshot(self, call_id: uuid.UUID) -> CallSnapshot | None:
+        """Everything the evaluator needs about one call, or ``None`` if the call does not exist.
+
+        A run's calls use the adapter and prompt version the run snapshotted; the prompt is only
+        read from a version of the same agent and project.
+        """
         calls = await self._rows(
             """
             SELECT c.id, c.agent_id, c.run_item_id, c.language, c.source, c.event_log, c.metadata,
                    ri.run_id, ri.scenario_id, ri.persona_id,
                    a.name AS agent_name, a.description AS agent_description,
                    a.languages AS agent_languages, a.glass_box,
-                   a.mandatory_disclosures, a.forbidden_phrases
+                   a.mandatory_disclosures, a.forbidden_phrases,
+                   a.adapter, a.adapter_config, a.project_id AS agent_project_id,
+                   tr.agent_snapshot
               FROM calls c
               LEFT JOIN run_items ri ON ri.id = c.run_item_id
+              LEFT JOIN test_runs tr ON tr.id = ri.run_id
               LEFT JOIN agents a ON a.id = c.agent_id
              WHERE c.id = %s
             """,
@@ -139,7 +148,12 @@ class PgEvaluatorStore:
             if rows:
                 persona = PersonaCreate.model_validate(rows[0])
 
-        glass_box = bool(call["glass_box"])
+        # a run's calls use the adapter and version the run snapshotted (the agent row can change
+        # after the run was created); calls without a run (uploads) use the agent as it is now
+        snapshot = call["agent_snapshot"] or {}
+        adapter = snapshot.get("adapter") or call["adapter"]
+        # a prompt agent's tool trace always exists: the text runner records every call
+        glass_box = bool(call["glass_box"]) or adapter == "prompt"
         tool_calls: list[ToolCall] | None = None
         # uploads / imports: the tool trace is unknown (None), not "no tools called"
         reported = (call["metadata"] or {}).get("tool_trace") == "reported"
@@ -170,9 +184,20 @@ class PgEvaluatorStore:
             # A simulated caller speaks one language; the agent answering in another language it
             # merely supports (Kannada caller, English reply) is the failure this check exists for.
             allowed = [language]
+        description = call["agent_description"] or ""
+        if adapter == "prompt":
+            # the version the run was pinned to; audits (no run) use the agent's current one
+            pinned = (snapshot.get("adapter_config") or {}).get("active_version_id")
+            version_id = pinned or (call["adapter_config"] or {}).get("active_version_id")
+            rows = await self._rows(
+                "SELECT system_prompt FROM prompt_versions "
+                "WHERE id = %s AND agent_id = %s AND project_id = %s",
+                (version_id, call["agent_id"], call["agent_project_id"]),
+            )
+            description = prompt_context(description, rows[0] if rows else None)
         agent = AgentInfo(
             name=call["agent_name"] or "unknown agent",
-            description=call["agent_description"] or "",
+            description=description,
             mandatory_disclosures=[
                 Disclosure.from_dict(d) for d in (call["mandatory_disclosures"] or [])
             ],

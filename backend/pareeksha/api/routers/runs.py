@@ -45,7 +45,7 @@ _SSE_RESPONSE: dict[int | str, dict[str, Any]] = {
 @router.post(
     "/runs",
     status_code=201,
-    responses=errors(402, 404, 409),
+    responses=errors(402, 404, 409, 422),
     summary="Create a run (writes the run and its run.requested outbox event in one transaction)",
 )
 async def create_run(body: RunCreate, key: WriteKey, session: Db) -> RunCreated:
@@ -54,7 +54,7 @@ async def create_run(body: RunCreate, key: WriteKey, session: Db) -> RunCreated:
 
 @router.post(
     "/runs:estimate",
-    responses=errors(404, 409),
+    responses=errors(404, 409, 422),
     summary="Dry estimate of a run (item count, cost, budget check); creates nothing",
 )
 async def estimate_run(body: RunCreate, key: ReadKey, session: Db) -> RunEstimateOut:

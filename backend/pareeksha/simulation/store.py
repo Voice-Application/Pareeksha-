@@ -8,6 +8,7 @@ slot release commit together with the framework's ``processed_events`` row.
 
 from __future__ import annotations
 
+import os
 import uuid
 from typing import Any
 
@@ -19,8 +20,10 @@ from pareeksha.adapters.base import AgentTarget
 from pareeksha.audio.profiles import LineProfile
 from pareeksha.evaluation.pii import mask_pii
 from pareeksha.events.schemas import CallRequested
+from pareeksha.integrations.crypto import SecretBox, SecretDecryptError
 from pareeksha.runs.slots import release_slot
 from pareeksha.schemas.personas import PersonaCreate
+from pareeksha.schemas.prompts import PromptVersionOut
 from pareeksha.schemas.scenarios import ScenarioCreate
 from pareeksha.simulation.models import CallResult, CallSpec
 
@@ -35,15 +38,16 @@ def call_id_for(run_item_id: uuid.UUID) -> uuid.UUID:
 
 
 class SpecNotFoundError(LookupError):
-    """The request names an agent, scenario, persona or noise profile that does not exist."""
+    """The request names an agent, scenario, persona or noise profile that does not exist
+    (or the agent's stored secrets cannot be read)."""
 
 
 async def read_spec(conn: Conn, req: CallRequested) -> tuple[CallSpec, uuid.UUID]:
     """Build the :class:`CallSpec` for ``req``; also returns the project id."""
     async with conn.cursor(row_factory=dict_row) as cur:
         await cur.execute(
-            "SELECT project_id, adapter, endpoint_url, adapter_config, languages, glass_box, "
-            "max_call_seconds FROM agents WHERE id = %s",
+            "SELECT project_id, adapter, endpoint_url, adapter_config, adapter_secrets_encrypted, "
+            "languages, glass_box, max_call_seconds FROM agents WHERE id = %s",
             (req.agent_id,),
         )
         agent = await cur.fetchone()
@@ -68,6 +72,8 @@ async def read_spec(conn: Conn, req: CallRequested) -> tuple[CallSpec, uuid.UUID
             (req.noise_profile_id,),
         )
         noise = await cur.fetchone()
+        await cur.execute("SELECT agent_snapshot FROM test_runs WHERE id = %s", (req.run_id,))
+        run = await cur.fetchone()
     missing = [
         name
         for name, row in (
@@ -81,14 +87,35 @@ async def read_spec(conn: Conn, req: CallRequested) -> tuple[CallSpec, uuid.UUID
     if missing or agent is None or scenario is None or persona is None or noise is None:
         raise SpecNotFoundError(f"call.requested names unknown {', '.join(missing)}")
 
+    snapshot = (run or {}).get("agent_snapshot") or {}
+    # the adapter the run was created with: a queued prompt run stays a prompt run even if the
+    # agent's adapter is changed later
+    adapter = snapshot.get("adapter") or agent["adapter"]
     config = dict(agent["adapter_config"] or {})
+    # only a version resolved below is ever run, never one stored in the agent's config
+    config.pop("prompt_version", None)
+    secrets: dict[str, str] = {}
+    if adapter == "prompt":
+        pinned = (snapshot.get("adapter_config") or {}).get("active_version_id")
+        version = await _prompt_version(
+            conn, req, agent["project_id"], pinned or config.get("active_version_id")
+        )
+        if version is not None:  # absent -> the simulator ends the call connect_failed
+            config["prompt_version"] = version.model_dump(mode="json")
+        if agent["adapter_secrets_encrypted"]:
+            try:
+                secrets = _secret_box().decrypt(bytes(agent["adapter_secrets_encrypted"]).decode())
+            except (SecretDecryptError, RuntimeError, ValueError) as exc:
+                # permanent (wrong/missing SECRET_KEY): fail the item rather than retry forever
+                raise SpecNotFoundError("the agent's provider secrets cannot be decrypted") from exc
     spec = CallSpec(
         call_id=call_id_for(req.run_item_id),
         agent=AgentTarget(
             agent_id=req.agent_id,
-            adapter=agent["adapter"],
+            adapter=adapter,
             endpoint_url=agent["endpoint_url"],
             adapter_config=config,
+            adapter_secrets=secrets,
             languages=list(agent["languages"] or []),
             glass_box=agent["glass_box"],
         ),
@@ -110,6 +137,31 @@ async def read_spec(conn: Conn, req: CallRequested) -> tuple[CallSpec, uuid.UUID
         metadata=dict(config.get("start_metadata") or {}),
     )
     return spec, agent["project_id"]
+
+
+def _secret_box() -> SecretBox:
+    """The ``SecretBox`` keyed by ``SECRET_KEY``; raises ``RuntimeError`` when it is unset."""
+    key = os.environ.get("SECRET_KEY")
+    if not key:
+        raise RuntimeError("SECRET_KEY is not configured")
+    return SecretBox(key)
+
+
+async def _prompt_version(
+    conn: Conn, req: CallRequested, project_id: uuid.UUID, version_id: Any
+) -> PromptVersionOut | None:
+    """The version the run pinned in its agent snapshot, else the agent's current active one."""
+    if not version_id:
+        return None
+    async with conn.cursor(row_factory=dict_row) as cur:
+        await cur.execute(
+            "SELECT id, agent_id, version, system_prompt, provider, model, base_url, temperature, "
+            "tools, max_tool_rounds, note, content_hash, created_at FROM prompt_versions "
+            "WHERE id = %s AND agent_id = %s AND project_id = %s",
+            (version_id, req.agent_id, project_id),
+        )
+        row = await cur.fetchone()
+    return PromptVersionOut.model_validate(row) if row else None
 
 
 async def mark_in_progress(conn: Conn, run_item_id: uuid.UUID) -> None:

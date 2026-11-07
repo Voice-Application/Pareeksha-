@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from pareeksha.schemas.common import (
     AdapterType,
@@ -28,12 +28,11 @@ def _check_speech_override(value: dict[str, object] | None) -> dict[str, object]
     return value
 
 
-class AgentCreate(RequestModel):
+class _AgentFields(RequestModel):
     name: str = Field(min_length=1, max_length=200, examples=["EMI Reminder Bot"])
     description: str = ""
     adapter: AdapterType = "audio_v1"
     adapter_config: dict[str, object] = Field(default_factory=dict)
-    endpoint_url: str = Field(min_length=1, examples=["ws://mock-agent:8765/ws"])
     languages: list[str] = Field(default_factory=list, examples=[["kn-IN", "hi-IN", "en-IN"]])
     glass_box: bool = False
     mandatory_disclosures: list[Disclosure] = Field(default_factory=list)
@@ -43,6 +42,22 @@ class AgentCreate(RequestModel):
     max_call_seconds: int = Field(default=300, ge=10, le=1800)
 
     _speech = field_validator("adapter_config")(_check_speech_override)
+
+
+class AgentCreate(_AgentFields):
+    #: Optional only for ``adapter == "prompt"`` (the server stores ``prompt://<agent_id>``).
+    endpoint_url: str | None = Field(
+        default=None, min_length=1, examples=["ws://mock-agent:8765/ws"]
+    )
+    #: Write-only provider secrets (``{"api_key": ...}``); stored encrypted, never returned.
+    adapter_secrets: dict[str, str] | None = Field(default=None, exclude=True, repr=False)
+
+    @model_validator(mode="after")
+    def _endpoint_required(self) -> AgentCreate:
+        """Require ``endpoint_url`` for every adapter except ``prompt``."""
+        if self.endpoint_url is None and self.adapter != "prompt":
+            raise ValueError("endpoint_url is required")
+        return self
 
 
 class AgentUpdate(RequestModel):
@@ -60,12 +75,16 @@ class AgentUpdate(RequestModel):
     expected_tools: list[ExpectedTool] | None = None
     bias_list: list[str] | None = None
     max_call_seconds: int | None = Field(default=None, ge=10, le=1800)
+    #: Write-only; ``{}`` clears the stored secrets.
+    adapter_secrets: dict[str, str] | None = Field(default=None, exclude=True, repr=False)
 
     _speech = field_validator("adapter_config")(_check_speech_override)
 
 
-class AgentOut(AgentCreate):
+class AgentOut(_AgentFields):
     id: UUID
+    endpoint_url: str
+    has_adapter_secrets: bool = False
     archived: bool = False
     created_at: datetime
     updated_at: datetime

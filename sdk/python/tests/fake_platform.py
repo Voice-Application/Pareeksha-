@@ -14,7 +14,17 @@ from contextlib import contextmanager
 from typing import Any
 
 import uvicorn
-from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile
+from fastapi import (
+    Depends,
+    FastAPI,
+    File,
+    Form,
+    Header,
+    HTTPException,
+    Request,
+    Response,
+    UploadFile,
+)
 from fastapi.responses import JSONResponse
 
 API_KEY = "pk_live_test"
@@ -37,6 +47,10 @@ class State:
         self.kafka = "ok"
         self.audit_uploads: list[dict[str, Any]] = []
         self.page_size = 200
+        self.prompt_versions: dict[str, list[dict[str, Any]]] = {}
+        self.prompt_bodies: list[dict[str, Any]] = []
+        self.active_prompt_version: dict[str, int] = {}
+        self.prompt_activations: list[tuple[str, int]] = []
         self.designer_requests: list[dict[str, Any]] = []
         self.designer_commits: list[dict[str, Any]] = []
         self.llm_settings: dict[str, Any] = {
@@ -52,6 +66,7 @@ class State:
 
 
 def build_app(state: State) -> FastAPI:
+    """An in-memory FastAPI stand-in for the platform API, reading and recording ``state``."""
     app = FastAPI()
 
     def auth(authorization: str | None = Header(default=None)) -> None:
@@ -288,7 +303,51 @@ def build_app(state: State) -> FastAPI:
         state.dlq[dead_letter_id]["status"] = "discarded"
         return {"status": "discarded"}
 
+    @app.post(api + "/agents/{agent_id}/prompt-versions", dependencies=[Depends(auth)])
+    async def create_pv(agent_id: str, request: Request, response: Response) -> dict[str, Any]:
+        """Create a prompt version, or return the active one when only the note differs."""
+        body = await request.json()
+        state.prompt_bodies.append(body)
+        rows = state.prompt_versions.setdefault(agent_id, [])
+        # Like the server's content_hash: every field but the note, with defaults filled in,
+        # compared against the active version.
+        active = state.active_prompt_version.get(agent_id)
+        current = next((r for r in rows if r["version"] == active), None)
+        if current is not None and _pv_config(current) == _pv_config(body):
+            return current
+        row = {**body, "version": len(rows) + 1}
+        rows.insert(0, row)
+        state.active_prompt_version[agent_id] = row["version"]
+        response.status_code = 201
+        return row
+
+    @app.get(api + "/agents/{agent_id}/prompt-versions", dependencies=[Depends(auth)])
+    def list_pv(agent_id: str) -> list[dict[str, Any]]:
+        return state.prompt_versions.get(agent_id, [])
+
+    @app.post(
+        api + "/agents/{agent_id}/prompt-versions/{version}/activate",
+        dependencies=[Depends(auth)],
+    )
+    def activate_pv(agent_id: str, version: int) -> dict[str, Any]:
+        state.prompt_activations.append((agent_id, version))
+        state.active_prompt_version[agent_id] = version
+        return {"version": version, "active": True}
+
     return app
+
+
+_PV_DEFAULTS: dict[str, Any] = {
+    "base_url": None,
+    "temperature": 0.2,
+    "tools": [],
+    "max_tool_rounds": 5,
+}
+
+
+def _pv_config(fields: dict[str, Any]) -> dict[str, Any]:
+    """The fields that make a prompt version distinct (the server hashes all but ``note``)."""
+    return {**_PV_DEFAULTS, **{k: v for k, v in fields.items() if k not in ("note", "version")}}
 
 
 def add_dead_letter(state: State) -> str:

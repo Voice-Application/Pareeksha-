@@ -30,6 +30,7 @@ CHECK_FAILURE_TYPES = {
     "no_loop": "loop",
     "amount_confirmed": "wrong_fact",
     "tool_calls_expected": "tool_selection",
+    "no_unexpected_tool": "tool_selection",
 }
 
 

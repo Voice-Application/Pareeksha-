@@ -51,7 +51,7 @@ _DESCRIPTIONS: dict[int, str] = {
     408: "timestamp_out_of_window",
     409: "conflict",
     413: "file_too_large",
-    422: "unsupported_audio / unsafe_url",
+    422: "unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version",
     429: "rate_limited: too many requests, see Retry-After",
     502: "upstream_error: Gnani/LLM failed after retries",
 }

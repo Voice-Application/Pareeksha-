@@ -70,6 +70,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/agents/{agent_id}/prompt-versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List prompt versions, newest first */
+        get: operations["list_prompt_versions"];
+        put?: never;
+        /** Create a prompt version and make it active */
+        post: operations["create_prompt_version"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/agents/{agent_id}/prompt-versions/{version}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get one prompt version */
+        get: operations["get_prompt_version"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/agents/{agent_id}/prompt-versions/{version}/activate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Make an existing prompt version the active one */
+        post: operations["activate_prompt_version"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/scenarios": {
         parameters: {
             query?: never;
@@ -1233,16 +1285,11 @@ export interface components {
              * @default audio_v1
              * @enum {string}
              */
-            adapter: "audio_v1" | "pipecat" | "livekit" | "vapi";
+            adapter: "audio_v1" | "pipecat" | "livekit" | "vapi" | "prompt";
             /** Adapter Config */
             adapter_config?: {
                 [key: string]: unknown;
             };
-            /**
-             * Endpoint Url
-             * @example ws://mock-agent:8765/ws
-             */
-            endpoint_url: string;
             /**
              * Languages
              * @example [
@@ -1270,6 +1317,15 @@ export interface components {
              * @default 300
              */
             max_call_seconds: number;
+            /**
+             * Endpoint Url
+             * @example ws://mock-agent:8765/ws
+             */
+            endpoint_url?: string | null;
+            /** Adapter Secrets */
+            adapter_secrets?: {
+                [key: string]: string;
+            } | null;
         };
         /** AgentOut */
         AgentOut: {
@@ -1288,16 +1344,11 @@ export interface components {
              * @default audio_v1
              * @enum {string}
              */
-            adapter: "audio_v1" | "pipecat" | "livekit" | "vapi";
+            adapter: "audio_v1" | "pipecat" | "livekit" | "vapi" | "prompt";
             /** Adapter Config */
             adapter_config?: {
                 [key: string]: unknown;
             };
-            /**
-             * Endpoint Url
-             * @example ws://mock-agent:8765/ws
-             */
-            endpoint_url: string;
             /**
              * Languages
              * @example [
@@ -1330,6 +1381,13 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /** Endpoint Url */
+            endpoint_url: string;
+            /**
+             * Has Adapter Secrets
+             * @default false
+             */
+            has_adapter_secrets: boolean;
             /**
              * Archived
              * @default false
@@ -1356,7 +1414,7 @@ export interface components {
             /** Description */
             description?: string | null;
             /** Adapter */
-            adapter?: ("audio_v1" | "pipecat" | "livekit" | "vapi") | null;
+            adapter?: ("audio_v1" | "pipecat" | "livekit" | "vapi" | "prompt") | null;
             /** Adapter Config */
             adapter_config?: {
                 [key: string]: unknown;
@@ -1377,6 +1435,10 @@ export interface components {
             bias_list?: string[] | null;
             /** Max Call Seconds */
             max_call_seconds?: number | null;
+            /** Adapter Secrets */
+            adapter_secrets?: {
+                [key: string]: string;
+            } | null;
         };
         /** ApiKeyCreate */
         ApiKeyCreate: {
@@ -1701,7 +1763,7 @@ export interface components {
              * Check Type
              * @enum {string}
              */
-            check_type: "disclosure_present" | "forbidden_absent" | "language_match" | "tool_calls_expected" | "no_loop" | "amount_confirmed";
+            check_type: "disclosure_present" | "forbidden_absent" | "language_match" | "tool_calls_expected" | "no_unexpected_tool" | "no_loop" | "amount_confirmed";
             /** Check Key */
             check_key: string;
             /**
@@ -2104,7 +2166,7 @@ export interface components {
              * @default audio_v1
              * @enum {string}
              */
-            adapter: "audio_v1" | "pipecat" | "livekit" | "vapi";
+            adapter: "audio_v1" | "pipecat" | "livekit" | "vapi" | "prompt";
             /**
              * Glass Box
              * @default false
@@ -2601,6 +2663,32 @@ export interface components {
             /** Credits Used */
             credits_used: number;
         };
+        /** MockCase */
+        MockCase: {
+            /** When */
+            when: {
+                [key: string]: unknown;
+            };
+            /** Result */
+            result: {
+                [key: string]: unknown;
+            };
+        };
+        /** MockSpec */
+        MockSpec: {
+            /**
+             * Mode
+             * @default static
+             * @enum {string}
+             */
+            mode: "static" | "by_args" | "simulated";
+            /** Result */
+            result?: {
+                [key: string]: unknown;
+            };
+            /** Cases */
+            cases?: components["schemas"]["MockCase"][];
+        };
         /** NewPersona */
         NewPersona: {
             new: components["schemas"]["PersonaCreate"];
@@ -3040,6 +3128,105 @@ export interface components {
              */
             regression_test_id: string;
         };
+        /** PromptTool */
+        PromptTool: {
+            /** Name */
+            name: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /**
+             * Parameters
+             * @description JSON Schema; must have "type": "object"
+             */
+            parameters: {
+                [key: string]: unknown;
+            };
+            mock?: components["schemas"]["MockSpec"];
+        };
+        /** PromptVersionCreate */
+        PromptVersionCreate: {
+            /** System Prompt */
+            system_prompt: string;
+            /**
+             * Provider
+             * @enum {string}
+             */
+            provider: "openai" | "openai_compatible" | "deepseek" | "groq" | "mistral" | "ollama" | "anthropic" | "gemini";
+            /** Model */
+            model: string;
+            /** Base Url */
+            base_url?: string | null;
+            /**
+             * Temperature
+             * @default 0.2
+             */
+            temperature: number;
+            /** Tools */
+            tools?: components["schemas"]["PromptTool"][];
+            /**
+             * Max Tool Rounds
+             * @default 5
+             */
+            max_tool_rounds: number;
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+        };
+        /** PromptVersionOut */
+        PromptVersionOut: {
+            /** System Prompt */
+            system_prompt: string;
+            /**
+             * Provider
+             * @enum {string}
+             */
+            provider: "openai" | "openai_compatible" | "deepseek" | "groq" | "mistral" | "ollama" | "anthropic" | "gemini";
+            /** Model */
+            model: string;
+            /** Base Url */
+            base_url?: string | null;
+            /**
+             * Temperature
+             * @default 0.2
+             */
+            temperature: number;
+            /** Tools */
+            tools?: components["schemas"]["PromptTool"][];
+            /**
+             * Max Tool Rounds
+             * @default 5
+             */
+            max_tool_rounds: number;
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Agent Id
+             * Format: uuid
+             */
+            agent_id: string;
+            /** Version */
+            version: number;
+            /** Content Hash */
+            content_hash: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
         /**
          * ProviderStatus
          * @description One row of ``GET /api/v1/speech/providers``. Never contains key material.
@@ -3251,12 +3438,20 @@ export interface components {
              * @default false
              */
             newly_failing: boolean;
+            /** Base Call Ids */
+            base_call_ids?: string[];
+            /** Head Call Ids */
+            head_call_ids?: string[];
         };
         /** RunCompareOut */
         RunCompareOut: {
             /** Cells */
             cells: components["schemas"]["RunCompareCell"][];
             summary: components["schemas"]["RunCompareSummary"];
+            /** Base Prompt Version */
+            base_prompt_version?: number | null;
+            /** Head Prompt Version */
+            head_prompt_version?: number | null;
         };
         /** RunCompareSummary */
         RunCompareSummary: {
@@ -4400,6 +4595,307 @@ export interface operations {
             };
             /** @description not_found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_prompt_versions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agent_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptVersionOut"][];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    create_prompt_version: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agent_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PromptVersionCreate"];
+            };
+        };
+        responses: {
+            /** @description identical to the active version */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptVersionOut"];
+                };
+            };
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptVersionOut"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_prompt_version: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agent_id: string;
+                version: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptVersionOut"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    activate_prompt_version: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agent_id: string;
+                version: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptVersionOut"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5619,7 +6115,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description unsupported_audio / unsafe_url */
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -5763,6 +6259,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
     estimate_run: {
@@ -5825,6 +6330,15 @@ export interface operations {
             };
             /** @description conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6275,6 +6789,15 @@ export interface operations {
             };
             /** @description conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7008,7 +7531,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description unsupported_audio / unsafe_url */
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -8105,7 +8628,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description unsupported_audio / unsafe_url */
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -8567,7 +9090,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description unsupported_audio / unsafe_url */
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -8734,7 +9257,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description unsupported_audio / unsafe_url */
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -8814,7 +9337,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description unsupported_audio / unsafe_url */
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -8921,7 +9444,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description unsupported_audio / unsafe_url */
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -9082,7 +9605,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description unsupported_audio / unsafe_url */
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -9178,7 +9701,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description unsupported_audio / unsafe_url */
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
             422: {
                 headers: {
                     [name: string]: unknown;
