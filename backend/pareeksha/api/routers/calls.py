@@ -19,7 +19,15 @@ from pareeksha.audit.pipeline import primary_language, stt_blob_key
 from pareeksha.audit.turns import LabelledSegment, build_turns, labels_in_order
 from pareeksha.calls import service
 from pareeksha.calls.audio import audio_response
-from pareeksha.db.models import Calls, Evaluations, HumanReviews, RubricVersions, RunItems, Turns
+from pareeksha.db.models import (
+    Agents,
+    Calls,
+    Evaluations,
+    HumanReviews,
+    RubricVersions,
+    RunItems,
+    Turns,
+)
 from pareeksha.evaluation.pii import mask_pii
 from pareeksha.evaluation.rubric import DIMENSION_KEYS, RUBRIC_VERSION
 from pareeksha.evaluation.scoring import overall_score
@@ -38,6 +46,7 @@ from pareeksha.schemas.calls import (
     ReevaluateRequest,
     ReviewCreate,
     Speaker,
+    ToolCallsReport,
 )
 from pareeksha.schemas.common import CallRef, CallSource, ErrorResponse, Page
 from pareeksha.storage.blob import BlobNotFoundError
@@ -135,6 +144,11 @@ async def reevaluate_call(
             )
     if call.status != "completed":
         raise ApiError(409, "conflict", f"The call is {call.status}; it has no transcript yet")
+    await _enqueue_reevaluation(session, call)
+    return CallRef(call_id=call.id)
+
+
+async def _enqueue_reevaluation(session: Db, call: Calls) -> None:
     run_id = None
     if call.run_item_id is not None:
         run_id = await session.scalar(
@@ -145,18 +159,52 @@ async def reevaluate_call(
     enqueue_event(
         session,
         make_envelope(
-            CallCompleted(
-                call_id=call.id,
-                source=call.source,
-                agent_id=call.agent_id,
-                run_id=run_id,
-                run_item_id=call.run_item_id,
-                end_reason=call.end_reason,
+            CallCompleted.model_validate(  # validates the DB's text columns against the Literals
+                {
+                    "call_id": call.id,
+                    "source": call.source,
+                    "agent_id": call.agent_id,
+                    "run_id": run_id,
+                    "run_item_id": call.run_item_id,
+                    "end_reason": call.end_reason,
+                }
             ),
             producer="api",
             correlation_id=str(call.id),  # a fresh event id: re-evaluating is a new request
         ),
     )
+
+
+@router.put(
+    "/calls/{call_id}/tool-calls",
+    status_code=202,
+    responses=errors(404, 409),
+    summary="Report the tool calls the bot made (replaces any earlier report)",
+)
+async def report_tool_calls(
+    call_id: UUID, body: ToolCallsReport, key: WriteKey, session: Db
+) -> CallRef:
+    # row lock: concurrent PUTs serialize, and status/metadata are read fresh
+    call = (
+        await session.scalars(
+            select(Calls)
+            .where(Calls.id == call_id, Calls.project_id == key.project_id)
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        )
+    ).one_or_none()
+    if call is None:
+        raise ApiError(404, "not_found", "Call not found", {"id": str(call_id)})
+    live = cast("dict[str, Any]", call.metadata_ or {}).get("glass_box")
+    if live is None:  # the call is still running: fall back to the agent's flag
+        live = await session.scalar(select(Agents.glass_box).where(Agents.id == call.agent_id))
+    if call.source == "simulation" and live:
+        raise ApiError(
+            409, "conflict", "A glass-box simulated call already has its live tool trace"
+        )
+    await service.replace_tool_calls(session, call, body.tool_calls)
+    if call.status == "completed":
+        await _enqueue_reevaluation(session, call)
     return CallRef(call_id=call.id)
 
 

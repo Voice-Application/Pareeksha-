@@ -15,6 +15,7 @@ from pareeksha.api.deps import Db, errors
 from pareeksha.api.errors import ApiError
 from pareeksha.api.routers.audits import _clean_languages
 from pareeksha.api.routers.integrations import _stored_secrets
+from pareeksha.calls import service
 from pareeksha.db.models import Agents, Calls, ExternalRefs, Integrations
 from pareeksha.events.outbox import enqueue_session
 from pareeksha.events.schemas import AuditRequested, make_envelope
@@ -161,18 +162,20 @@ async def receive_inbound_webhook(
     call_id = uuid.uuid4()
     try:
         async with session.begin_nested():  # a lost race on external_id rolls back only this
-            session.add(
-                Calls(
-                    id=call_id,
-                    project_id=row.project_id,
-                    agent_id=agent_id,
-                    source="import",
-                    language=languages,
-                    status="transcribing",
-                    metadata_=dict(audit.metadata),
-                )
+            call = Calls(
+                id=call_id,
+                project_id=row.project_id,
+                agent_id=agent_id,
+                source="import",
+                language=languages,
+                status="transcribing",
+                # "tool_trace" is ours (set only by replace_tool_calls); never trust the sender's
+                metadata_={k: v for k, v in audit.metadata.items() if k != "tool_trace"},
             )
+            session.add(call)
             await session.flush()
+            if body.tool_calls is not None:
+                await service.replace_tool_calls(session, call, body.tool_calls)
             session.add(
                 ExternalRefs(
                     integration_id=integration_id, external_id=audit.external_id, call_id=call_id

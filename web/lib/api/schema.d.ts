@@ -805,6 +805,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/calls/{call_id}/tool-calls": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Report the tool calls the bot made (replaces any earlier report) */
+        put: operations["report_tool_calls"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/calls/{call_id}/review": {
         parameters: {
             query?: never;
@@ -1292,6 +1309,76 @@ export interface paths {
         head?: never;
         /** Update name, role, disabled flag or password */
         patch: operations["update_user"];
+        trace?: never;
+    };
+    "/api/v1/settings/llm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The project's effective LLM settings (never the key) */
+        get: operations["get_llm_settings"];
+        /** Set the project's LLM provider, models and key (admin) */
+        put: operations["put_llm_settings"];
+        post?: never;
+        /** Remove the project's LLM settings; the environment's apply again (admin) */
+        delete: operations["delete_llm_settings"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/settings/llm/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** One tiny call with the effective settings (admin); errors come back as ok=false */
+        post: operations["test_llm_settings"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/designer/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** One turn with the test designer assistant (stateless: send the whole history) */
+        post: operations["designer_chat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/designer/commit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create the agent, scenarios and new personas of a draft in one transaction */
+        post: operations["designer_commit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/health": {
@@ -1924,6 +2011,16 @@ export interface components {
              */
             human_reviewed: boolean;
         };
+        /** ChatTurn */
+        ChatTurn: {
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "user" | "assistant";
+            /** Content */
+            content: string;
+        };
         /** CheckOut */
         CheckOut: {
             /**
@@ -2155,6 +2252,66 @@ export interface components {
              */
             created_at: string;
         };
+        /** DesignerChatRequest */
+        DesignerChatRequest: {
+            /** Messages */
+            messages: components["schemas"]["ChatTurn"][];
+            draft?: components["schemas"]["DesignerDraft"] | null;
+        };
+        /** DesignerChatResponse */
+        DesignerChatResponse: {
+            /** Reply */
+            reply: string;
+            /** Questions */
+            questions?: components["schemas"]["DesignerQuestion"][];
+            draft?: components["schemas"]["DesignerDraft"] | null;
+            /**
+             * Ready
+             * @default false
+             */
+            ready: boolean;
+        };
+        /** DesignerCommitRequest */
+        DesignerCommitRequest: {
+            draft: components["schemas"]["DesignerDraft"];
+        };
+        /** DesignerCommitResult */
+        DesignerCommitResult: {
+            /**
+             * Agent Id
+             * Format: uuid
+             */
+            agent_id: string;
+            /** Scenario Ids */
+            scenario_ids: string[];
+            /** Persona Ids */
+            persona_ids: string[];
+            /** Noise Profile Ids */
+            noise_profile_ids: string[];
+            /** Calls */
+            calls: number;
+            /** Run Wizard Path */
+            run_wizard_path: string;
+        };
+        /** DesignerDraft */
+        DesignerDraft: {
+            agent: components["schemas"]["DraftAgent"];
+            /** Scenarios */
+            scenarios: components["schemas"]["DraftScenario"][];
+            /** Personas */
+            personas: (components["schemas"]["ExistingPersona"] | components["schemas"]["NewPersona"])[];
+            /** Noise Profile Ids */
+            noise_profile_ids: string[];
+        };
+        /** DesignerQuestion */
+        DesignerQuestion: {
+            /** Id */
+            id: string;
+            /** Text */
+            text: string;
+            /** Options */
+            options?: string[];
+        };
         /** DialectEvaluateAccepted */
         DialectEvaluateAccepted: {
             /**
@@ -2277,6 +2434,89 @@ export interface components {
              * Format: uuid
              */
             draft_id: string;
+        };
+        /** DraftAgent */
+        DraftAgent: {
+            /** Name */
+            name: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /** Languages */
+            languages?: string[];
+            /**
+             * Endpoint Url
+             * @description required to commit; null while the assistant still has to ask
+             */
+            endpoint_url?: string | null;
+            /**
+             * Adapter
+             * @default audio_v1
+             * @enum {string}
+             */
+            adapter: "audio_v1" | "pipecat" | "livekit" | "vapi" | "prompt";
+            /**
+             * Glass Box
+             * @default false
+             */
+            glass_box: boolean;
+            /** Mandatory Disclosures */
+            mandatory_disclosures?: components["schemas"]["Disclosure"][];
+            /** Forbidden Phrases */
+            forbidden_phrases?: components["schemas"]["ForbiddenPhrase"][];
+            /** Expected Tools */
+            expected_tools?: components["schemas"]["ExpectedTool"][];
+            /** Bias List */
+            bias_list?: string[];
+        };
+        /**
+         * DraftScenario
+         * @description A scenario of the draft; it is bound to the new agent on commit.
+         */
+        DraftScenario: {
+            /** Agent Id */
+            agent_id?: null;
+            /** Title */
+            title: string;
+            /** Caller Goal */
+            caller_goal: string;
+            /**
+             * Fixtures
+             * @description synthetic facts only
+             */
+            fixtures?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Reveal Rules
+             * @default
+             */
+            reveal_rules: string;
+            /** Success Criteria */
+            success_criteria: string;
+            /** Must Say */
+            must_say?: string[];
+            /** Must Not Say */
+            must_not_say?: string[];
+            /** Expected Tool Calls */
+            expected_tool_calls?: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Caller Speaks First
+             * @default false
+             */
+            caller_speaks_first: boolean;
+            /**
+             * Max Turns
+             * @default 15
+             */
+            max_turns: number;
+            /** Tags */
+            tags?: string[];
+            rag_expectation?: components["schemas"]["RagExpectation"] | null;
         };
         /** EmbeddingConfig */
         EmbeddingConfig: {
@@ -2403,6 +2643,14 @@ export interface components {
             only_failed: boolean;
             /** Min Score Below */
             min_score_below?: number | null;
+        };
+        /** ExistingPersona */
+        ExistingPersona: {
+            /**
+             * Existing Id
+             * Format: uuid
+             */
+            existing_id: string;
         };
         /** ExpectedTool */
         ExpectedTool: {
@@ -2536,6 +2784,11 @@ export interface components {
             metadata?: {
                 [key: string]: string;
             };
+            /**
+             * Tool Calls
+             * @description tool calls the bot made, if known
+             */
+            tool_calls?: components["schemas"]["ReportedToolCall"][] | null;
         };
         /** IndexOneTime */
         IndexOneTime: {
@@ -2838,6 +3091,78 @@ export interface components {
             local_only?: boolean | null;
             secrets?: components["schemas"]["KbSecrets"] | null;
         };
+        /** LLMSettingsOut */
+        LLMSettingsOut: {
+            /**
+             * Provider
+             * @enum {string}
+             */
+            provider: "deepseek" | "gemini" | "openai_compatible";
+            /** Base Url */
+            base_url: string | null;
+            /** Judge Model */
+            judge_model: string | null;
+            /** Caller Model */
+            caller_model: string | null;
+            /** Designer Model */
+            designer_model: string | null;
+            /** Api Key Set */
+            api_key_set: boolean;
+            /** Api Key Last4 */
+            api_key_last4: string | null;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "project" | "environment";
+        };
+        /**
+         * LLMSettingsUpdate
+         * @description ``PUT /settings/llm``: replaces the project's settings; only ``api_key`` can be omitted to
+         *     keep the stored key.
+         */
+        LLMSettingsUpdate: {
+            /**
+             * Provider
+             * @enum {string}
+             */
+            provider: "deepseek" | "gemini" | "openai_compatible";
+            /**
+             * Base Url
+             * @description openai_compatible only: https URL of the API root (SSRF-checked)
+             */
+            base_url?: string | null;
+            /** Judge Model */
+            judge_model?: string | null;
+            /** Caller Model */
+            caller_model?: string | null;
+            /**
+             * Designer Model
+             * @description default: the judge model
+             */
+            designer_model?: string | null;
+            /**
+             * Api Key
+             * @description write-only; omitted keeps the stored key
+             */
+            api_key?: string | null;
+        };
+        /** LLMTestResult */
+        LLMTestResult: {
+            /** Ok */
+            ok: boolean;
+            /**
+             * Provider
+             * @enum {string}
+             */
+            provider: "deepseek" | "gemini" | "openai_compatible";
+            /** Model */
+            model: string | null;
+            /** Latency Ms */
+            latency_ms: number | null;
+            /** Error */
+            error: string | null;
+        };
         /** LatencyStats */
         LatencyStats: {
             /** Retrieval P50 */
@@ -2908,6 +3233,10 @@ export interface components {
             };
             /** Cases */
             cases?: components["schemas"]["MockCase"][];
+        };
+        /** NewPersona */
+        NewPersona: {
+            new: components["schemas"]["PersonaCreate"];
         };
         /** NoiseProfileCreate */
         NoiseProfileCreate: {
@@ -3970,6 +4299,25 @@ export interface components {
             token_savings_vs_full_context_pct?: number | null;
         };
         /**
+         * ReportedToolCall
+         * @description A tool call the bot (or its platform) reports after the call ended.
+         */
+        ReportedToolCall: {
+            /** Name */
+            name: string;
+            /** Arguments */
+            arguments?: {
+                [key: string]: unknown;
+            };
+            /** Result */
+            result?: unknown | null;
+            /**
+             * At Ms
+             * @default 0
+             */
+            at_ms: number;
+        };
+        /**
          * RetrievalOut
          * @description What was retrieved for one agent turn of a RAG run (prompt agents).
          */
@@ -4699,6 +5047,11 @@ export interface components {
             at_ms: number;
             /** Turn Idx */
             turn_idx?: number | null;
+        };
+        /** ToolCallsReport */
+        ToolCallsReport: {
+            /** Tool Calls */
+            tool_calls: components["schemas"]["ReportedToolCall"][];
         };
         /** TopError */
         TopError: {
@@ -9133,6 +9486,77 @@ export interface operations {
             };
         };
     };
+    report_tool_calls: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                call_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ToolCallsReport"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallRef"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     review_call: {
         parameters: {
             query?: never;
@@ -11165,6 +11589,370 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserOut"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_llm_settings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LLMSettingsOut"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    put_llm_settings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LLMSettingsUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LLMSettingsOut"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    delete_llm_settings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    test_llm_settings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LLMTestResult"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    designer_chat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DesignerChatRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DesignerChatResponse"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description budget_exceeded: estimate above remaining budget */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description rate_limited: too many requests, see Retry-After */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description upstream_error: Gnani/LLM failed after retries */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    designer_commit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DesignerCommitRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DesignerCommitResult"];
                 };
             };
             /** @description validation_error */

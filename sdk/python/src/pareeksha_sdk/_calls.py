@@ -233,6 +233,31 @@ def call_get(call_id: UUID | str) -> Call_:
     return Call_("GET", f"/calls/{call_id}")
 
 
+def tool_calls_report(call_id: UUID | str, tool_calls: list[dict[str, Any]]) -> Call_:
+    return Call_("PUT", f"/calls/{call_id}/tool-calls", json={"tool_calls": tool_calls})
+
+
+def designer_chat(messages: list[dict[str, str]], draft: dict[str, Any] | None) -> Call_:
+    body = {"messages": messages, "draft": draft}
+    return Call_("POST", "/designer/chat", json=body, idempotent=False)
+
+
+def designer_commit(draft: dict[str, Any]) -> Call_:
+    return Call_("POST", "/designer/commit", json={"draft": draft}, idempotent=False)
+
+
+def llm_settings_get() -> Call_:
+    return Call_("GET", "/settings/llm")
+
+
+def llm_settings_update(body: dict[str, Any]) -> Call_:
+    return Call_("PUT", "/settings/llm", json=body)
+
+
+def llm_settings_test() -> Call_:
+    return Call_("POST", "/settings/llm/test", idempotent=False)
+
+
 def dlq_list(status: str | None = "open") -> Call_:
     return Call_("GET", "/dlq", _clean(status=status), paged=True)
 

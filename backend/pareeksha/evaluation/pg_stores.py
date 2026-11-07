@@ -89,7 +89,7 @@ class PgEvaluatorStore:
         calls = await self._rows(
             """
             SELECT c.id, c.project_id, c.agent_id, c.run_item_id, c.language, c.source,
-                   c.event_log, tr.config -> 'rag' AS rag,
+                   c.event_log, c.metadata, tr.config -> 'rag' AS rag,
                    ri.run_id, ri.scenario_id, ri.persona_id,
                    a.name AS agent_name, a.description AS agent_description,
                    a.languages AS agent_languages, a.glass_box,
@@ -149,13 +149,20 @@ class PgEvaluatorStore:
         glass_box = bool(call["glass_box"]) or call["adapter"] == "prompt"
         tool_calls: list[ToolCall] | None = None
         # uploads / imports: the tool trace is unknown (None), not "no tools called"
-        if glass_box and call["source"] == "simulation":
+        reported = (call["metadata"] or {}).get("tool_trace") == "reported"
+        if (glass_box and call["source"] == "simulation") or reported:
             tc_rows = await self._rows(
-                "SELECT name, arguments, turn_idx FROM tool_calls WHERE call_id = %s ORDER BY seq",
+                "SELECT name, arguments, turn_idx, result FROM tool_calls "
+                "WHERE call_id = %s ORDER BY seq",
                 (call_id,),
             )
             tool_calls = [
-                ToolCall(name=r["name"], args=dict(r["arguments"] or {}), turn_idx=r["turn_idx"])
+                ToolCall(
+                    name=r["name"],
+                    args=dict(r["arguments"] or {}),
+                    turn_idx=r["turn_idx"],
+                    result=r["result"],
+                )
                 for r in tc_rows
             ]
 

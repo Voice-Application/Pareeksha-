@@ -141,6 +141,13 @@ ADDITIONS: set[tuple[str, str]] = {
     ("GET", "/rag-matrices/{id}/report"),
     ("GET", "/pricing"),
     ("PUT", "/pricing"),
+    ("PUT", "/calls/{id}/tool-calls"),  # report tool calls after the call
+    ("GET", "/settings/llm"),  # per-project LLM settings
+    ("PUT", "/settings/llm"),
+    ("DELETE", "/settings/llm"),
+    ("POST", "/settings/llm/test"),
+    ("POST", "/designer/chat"),  # test designer assistant
+    ("POST", "/designer/commit"),
 }
 
 

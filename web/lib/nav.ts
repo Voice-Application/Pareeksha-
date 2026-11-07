@@ -3,6 +3,7 @@ export type NavItem = { href: string; label: string; group: "Build" | "Evaluate"
 
 export const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Overview", group: null },
+  { href: "/designer", label: "Test designer", group: "Build" },
   { href: "/agents", label: "Agents", group: "Build" },
   { href: "/scenarios", label: "Scenarios", group: "Build" },
   { href: "/personas", label: "Personas", group: "Build" },
@@ -20,5 +21,6 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/calibration", label: "Calibration", group: "Operate" },
   { href: "/settings/pricing", label: "Pricing", group: "Operate" },
   { href: "/settings/api-keys", label: "API keys", group: "Operate" },
+  { href: "/settings/llm", label: "LLM", group: "Operate", adminOnly: true },
   { href: "/settings/users", label: "Users", group: "Operate", adminOnly: true },
 ];

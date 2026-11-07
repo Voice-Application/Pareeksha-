@@ -250,3 +250,36 @@ async def test_unknown_disabled_and_sink_only_integrations_are_404(
         headers=tenant.admin,
     )
     assert (await _post(api, hubspot.json()["id"], _payload(name))).status_code == 404
+
+
+async def test_payload_tool_calls_are_stored_and_mark_the_call(
+    api: AsyncClient, tenant: Tenant, database_url: str
+) -> None:
+    name = await _agent_name(api, tenant)
+    integration = await _source(api, tenant)
+    body = _payload(name, tool_calls=[{"name": "record_utr", "arguments": {"utr": "X1"}}])
+    response = await _post(api, integration, body)
+    assert response.status_code == 202, response.text
+    call_id = response.json()["call_id"]
+    (row,) = await fetch_rows(
+        database_url, "SELECT name, arguments FROM tool_calls WHERE call_id = %s", call_id
+    )
+    assert (row["name"], row["arguments"]) == ("record_utr", {"utr": "X1"})
+    (call,) = await fetch_rows(database_url, "SELECT metadata FROM calls WHERE id = %s", call_id)
+    assert call["metadata"]["tool_trace"] == "reported"
+    again = await _post(api, integration, body)  # dedupe still holds
+    assert again.json() == {"call_id": call_id, "duplicate": True}
+
+
+async def test_payload_metadata_cannot_forge_the_tool_trace_marker(
+    api: AsyncClient, tenant: Tenant, database_url: str
+) -> None:
+    name = await _agent_name(api, tenant)
+    integration = await _source(api, tenant)
+    body = _payload(name, metadata={"phone": "1", "tool_trace": "reported"})
+    response = await _post(api, integration, body)
+    assert response.status_code == 202, response.text
+    (call,) = await fetch_rows(
+        database_url, "SELECT metadata FROM calls WHERE id = %s", response.json()["call_id"]
+    )
+    assert call["metadata"] == {"phone": "1"}

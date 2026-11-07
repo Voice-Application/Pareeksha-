@@ -7,11 +7,11 @@ row). ``human_reviewed`` means a ``human_reviews`` row exists for that evaluatio
 from __future__ import annotations
 
 import uuid
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from typing import Any, cast
 
-from sqlalchemy import Select, exists, func, select
-from sqlalchemy.dialects.postgresql import distinct_on
+from sqlalchemy import Select, delete, exists, func, literal, select, update
+from sqlalchemy.dialects.postgresql import JSONB, distinct_on
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pareeksha.api.crud import paginate_rows
@@ -37,6 +37,7 @@ from pareeksha.schemas.calls import (
     DimensionScore,
     EvaluationOut,
     Recordings,
+    ReportedToolCall,
     RetrievalOut,
     ToolCallOut,
     TurnOut,
@@ -50,6 +51,33 @@ _TRACK_COLUMNS = {
     "agent": Calls.recording_agent,
     "original": Calls.recording_original,
 }
+
+
+async def replace_tool_calls(
+    session: AsyncSession, call: Calls, reported: Sequence[ReportedToolCall]
+) -> None:
+    """Idempotent: a reported trace replaces any earlier rows, and marks the call as traced."""
+    await session.execute(delete(ToolCalls).where(ToolCalls.call_id == call.id))
+    session.add_all(
+        ToolCalls(
+            call_id=call.id,
+            seq=i,
+            name=t.name,
+            arguments=t.arguments,
+            at_ms=t.at_ms,
+            turn_idx=None,
+            result=t.result,
+        )
+        for i, t in enumerate(reported)
+    )
+    # merged in SQL so keys another writer (the simulator) added are never overwritten
+    await session.execute(
+        update(Calls)
+        .where(Calls.id == call.id)
+        .values(metadata_=Calls.metadata_.op("||")(literal({"tool_trace": "reported"}, JSONB)))
+        .execution_options(synchronize_session=False)
+    )
+    await session.flush()
 
 
 def latest_evaluations() -> Any:

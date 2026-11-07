@@ -8,6 +8,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+from pareeksha.schemas.calls import ReportedToolCall
 from pareeksha.schemas.common import RequestModel
 
 ConnectorDirection = Literal["source", "sink", "both"]
@@ -94,6 +95,9 @@ class InboundCallPayload(BaseModel):
     agent_name: str | None = Field(default=None, examples=["EMI Reminder Bot"])
     language: str = Field(examples=["kn-IN"])
     metadata: dict[str, str] = Field(default_factory=dict)
+    tool_calls: list[ReportedToolCall] | None = Field(
+        default=None, max_length=200, description="tool calls the bot made, if known"
+    )
 
 
 class InboundAccepted(BaseModel):

@@ -8,6 +8,7 @@ import {
   BookOpen,
   Bot,
   CirclePlay,
+  Cpu,
   FileAudio,
   FlaskConical,
   GitCompareArrows,
@@ -17,6 +18,7 @@ import {
   Languages,
   LayoutDashboard,
   ListChecks,
+  MessageSquareText,
   Plug,
   Scale,
   ShieldCheck,
@@ -33,6 +35,7 @@ const GROUPS: NavItem["group"][] = [null, "Build", "Evaluate", "Operate"];
 /** One icon per destination, all from Lucide at 16px on a 1.6 stroke. */
 const ICONS: Record<string, LucideIcon> = {
   "/": LayoutDashboard,
+  "/designer": MessageSquareText,
   "/agents": Bot,
   "/scenarios": ListChecks,
   "/personas": Users,
@@ -50,6 +53,7 @@ const ICONS: Record<string, LucideIcon> = {
   "/dlq": Inbox,
   "/calibration": Scale,
   "/settings/api-keys": KeyRound,
+  "/settings/llm": Cpu,
   "/settings/users": UserCog,
 };
 

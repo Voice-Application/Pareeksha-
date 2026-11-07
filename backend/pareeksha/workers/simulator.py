@@ -37,6 +37,7 @@ from pareeksha.events.settings import EventSettings
 from pareeksha.events.topics import ConsumerGroups, Topics
 from pareeksha.llm.caller import CallerBrain
 from pareeksha.llm.factory import build_client
+from pareeksha.llm.project_settings import ProjectLLMClients
 from pareeksha.llm.usage_db import ApiUsageSink
 from pareeksha.rag.guard import (
     LocalOnlyError,
@@ -67,6 +68,11 @@ _runner: CallRunner | None = None
 _caller: CallerSource | None = None
 _providers: list[Any] = []
 _blobs: BlobStore | None = None
+_project_llms = ProjectLLMClients()
+#: One runner per (project, settings fingerprint) for projects that override the LLM settings
+#: (ponytail: one small entry per settings change; restart the worker to drop old ones).
+_project_runners: dict[tuple[Any, str], CallRunner] = {}
+_project_callers: dict[tuple[Any, str], CallerSource] = {}
 
 
 def configure(
@@ -120,6 +126,45 @@ def _call_runner() -> CallRunner:
     return _runner
 
 
+async def _project_caller(project_id: Any) -> tuple[tuple[Any, str], CallerSource] | None:
+    """The caller brain built from the project's own LLM settings; ``None`` if it has none."""
+    resolved = await _project_llms.resolve(await _database().connection(), project_id)
+    if resolved is None:
+        return None
+    key = (project_id, resolved.fingerprint)
+    caller = _project_callers.get(key)
+    if caller is None:
+        brain = CallerBrain(resolved.client(_usage if _usage is not None else _usage_sink()))
+        _providers.append(brain)
+        caller = _project_callers[key] = BrainCallerSource(brain)
+    return key, caller
+
+
+async def _caller_for(project_id: Any) -> CallerSource:
+    """The caller for a text call: the project's LLM settings, else the shared caller brain."""
+    if _runner is not None:  # injected (tests, crash worker)
+        return _caller_source()
+    found = await _project_caller(project_id)
+    return _caller_source() if found is None else found[1]
+
+
+async def _runner_for(project_id: Any) -> CallRunner:
+    """The runner whose caller brain uses the project's LLM settings, else the shared one."""
+    if _runner is not None:  # injected (tests, crash worker)
+        return _runner
+    found = await _project_caller(project_id)
+    if found is None:
+        return _call_runner()
+    key, caller = found
+    runner = _project_runners.get(key)
+    if runner is None:
+        quiet_pipecat_logs()
+        stt, tts = get_stt_provider(), get_tts_provider()
+        _providers.extend([stt, tts])
+        runner = _project_runners[key] = CallRunner(stt=stt, tts=tts, caller=caller)
+    return runner
+
+
 def _completed(req: CallRequested, spec: CallSpec, result: CallResult) -> Outgoing:
     return Outgoing(
         CallCompleted(
@@ -158,7 +203,7 @@ async def _reproduce(env: Envelope[CallRequested], ctx: Ctx) -> Sequence[Outgoin
     ]
 
 
-async def _run_prompt_call(spec: CallSpec) -> CallResult:
+async def _run_prompt_call(spec: CallSpec, project_id: Any = None) -> CallResult:
     """A prompt agent's scenario as a typed conversation (no audio)."""
     raw = spec.agent.adapter_config.get("prompt_version")
     if raw is None:
@@ -201,15 +246,17 @@ async def _run_prompt_call(spec: CallSpec) -> CallResult:
         return CallResult(
             call_id=spec.call_id, end_reason="connect_failed", duration_ms=0, error=str(exc)
         )
-    return await run_text_call(spec, caller=_caller_source(), chat=chat)
+    caller = _caller_source() if project_id is None else await _caller_for(project_id)
+    return await run_text_call(spec, caller=caller, chat=chat)
 
 
-async def _run_call(spec: CallSpec) -> tuple[CallResult, dict[str, bytes]]:
+async def _run_call(spec: CallSpec, project_id: Any = None) -> tuple[CallResult, dict[str, bytes]]:
     """Run the call; an unexpected crash of the pipeline becomes an ``infra_error`` result."""
     try:
         if spec.agent.adapter == "prompt":
-            return await _run_prompt_call(spec), {}
-        outcome = await _call_runner().run(spec)
+            return await _run_prompt_call(spec, project_id), {}
+        runner = _call_runner() if project_id is None else await _runner_for(project_id)
+        outcome = await runner.run(spec)
     except Exception as exc:
         log.exception("call %s crashed", spec.call_id)
         return (
@@ -254,7 +301,7 @@ async def on_call_requested(env: Envelope[CallRequested], ctx: Ctx) -> Sequence[
 
     sink = _usage if _usage is not None else _usage_sink()
     with sink.scope(run_id=req.run_id, call_id=spec.call_id, project_id=project_id):
-        result, audio = await _run_call(spec)
+        result, audio = await _run_call(spec, project_id)
 
     keys: dict[str, str] | None = None
     if audio:
@@ -276,6 +323,7 @@ async def main() -> None:
     finally:
         for provider in _providers[:2]:
             await provider.aclose()
+        await _project_llms.aclose()
         if _usage is not None:
             await _usage.close()
         elif _usage_sink.cache_info().currsize:

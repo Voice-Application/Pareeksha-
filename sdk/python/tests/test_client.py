@@ -100,12 +100,50 @@ def test_regression_audits_dlq(base_url: str, state: State, tmp_path: Path) -> N
     wav.write_bytes(b"abc")
     ref = pk.audits.create(wav, agent_id, "kn-IN", stereo_channels_are_speakers=True)
     assert pk.audits.wait(ref.call_id, poll_s=0, sleep=lambda _: None).status == "completed"
+    pk.report_tool_calls(ref.call_id, [{"name": "lookup", "arguments": {"a": 1}}])
+    pk.report_tool_calls(ref.call_id, [{"name": "pay"}])
+    assert state.calls[str(ref.call_id)]["tool_calls"] == [{"name": "pay"}]
     dl = add_dead_letter(state)
     assert [d.id for d in pk.dlq.list()] == [uuid.UUID(dl)]
     pk.dlq.replay(dl)
     assert pk.dlq.list() == []
     pk.dlq.discard(dl)
     assert state.dlq[dl]["status"] == "discarded"
+
+
+def test_designer_and_llm_settings(base_url: str, state: State) -> None:
+    pk = Pareeksha(base_url, API_KEY)
+    messages = [{"role": "user", "content": "my bot prompt"}]
+    first = pk.designer_chat(messages)
+    assert first["ready"] is False and first["questions"][0]["id"] == "endpoint_url"
+    assert state.designer_requests[0] == {"messages": messages, "draft": None}
+    draft = {"agent": {"name": "bot", "endpoint_url": "ws://bot/ws"}}
+    second = pk.designer_chat(messages, draft=draft)
+    assert second["ready"] is True and second["draft"] == draft
+    assert state.designer_requests[1]["draft"] == draft
+    done = pk.designer_commit(draft)
+    assert done["run_wizard_path"].startswith("/runs/new") and state.designer_commits == [draft]
+
+    assert pk.get_llm_settings()["source"] == "environment"
+    updated = pk.update_llm_settings(
+        "gemini", judge_model="g1", caller_model="g2", api_key="k-1234"
+    )
+    assert updated["provider"] == "gemini" and updated["api_key_last4"] == "1234"
+    assert "k-1234" not in str(pk.get_llm_settings())
+    assert pk.test_llm_settings()["ok"] is True
+
+
+async def test_async_designer_and_llm_settings(base_url: str, state: State) -> None:
+    async with AsyncPareeksha(base_url, API_KEY) as pk:
+        turn = await pk.designer_chat([{"role": "user", "content": "prompt"}])
+        assert turn["ready"] is False
+        assert (await pk.update_llm_settings("deepseek", api_key="abcd9999"))[
+            "api_key_last4"
+        ] == "9999"
+        assert (await pk.get_llm_settings())["provider"] == "deepseek"
+        assert (await pk.test_llm_settings())["ok"] is True
+        draft = {"agent": {"name": "bot", "endpoint_url": "ws://bot/ws"}}
+        assert (await pk.designer_commit(draft))["calls"] == 0
 
 
 def test_audit_wait_times_out(base_url: str, state: State, tmp_path: Path) -> None:
