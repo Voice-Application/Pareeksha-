@@ -20,6 +20,9 @@ from tests.conftest import Tenant
 from tests.integration.domain import outbox_for
 
 KB = "/api/v1/knowledge-bases"
+
+# Uploads write blobs: always use the temp-dir store, never the repo's ./data/runtime.
+pytestmark = pytest.mark.usefixtures("blobs")
 SMALL = {"strategy": "fixed", "size": 100, "overlap": 0}
 TEXT = " ".join(f"Sentence number {i} about refunds and delivery." for i in range(40)).encode()
 

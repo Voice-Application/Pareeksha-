@@ -16,6 +16,9 @@ from tests.conftest import Tenant
 
 KB = "/api/v1/knowledge-bases"
 
+# Uploads write blobs: always use the temp-dir store, never the repo's ./data/runtime.
+pytestmark = pytest.mark.usefixtures("blobs")
+
 
 async def _kb(api: AsyncClient, tenant: Tenant, **body: Any) -> dict[str, Any]:
     body.setdefault("name", f"kb-{uuid.uuid4().hex[:8]}")
