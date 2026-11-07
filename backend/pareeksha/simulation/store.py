@@ -72,6 +72,8 @@ async def read_spec(conn: Conn, req: CallRequested) -> tuple[CallSpec, uuid.UUID
             (req.noise_profile_id,),
         )
         noise = await cur.fetchone()
+        await cur.execute("SELECT agent_snapshot FROM test_runs WHERE id = %s", (req.run_id,))
+        run = await cur.fetchone()
     missing = [
         name
         for name, row in (
@@ -85,10 +87,19 @@ async def read_spec(conn: Conn, req: CallRequested) -> tuple[CallSpec, uuid.UUID
     if missing or agent is None or scenario is None or persona is None or noise is None:
         raise SpecNotFoundError(f"call.requested names unknown {', '.join(missing)}")
 
+    snapshot = (run or {}).get("agent_snapshot") or {}
+    # the adapter the run was created with: a queued prompt run stays a prompt run even if the
+    # agent's adapter is changed later
+    adapter = snapshot.get("adapter") or agent["adapter"]
     config = dict(agent["adapter_config"] or {})
+    # only a version resolved below is ever run, never one stored in the agent's config
+    config.pop("prompt_version", None)
     secrets: dict[str, str] = {}
-    if agent["adapter"] == "prompt":
-        version = await _prompt_version(conn, req, agent["project_id"], config)
+    if adapter == "prompt":
+        pinned = (snapshot.get("adapter_config") or {}).get("active_version_id")
+        version = await _prompt_version(
+            conn, req, agent["project_id"], pinned or config.get("active_version_id")
+        )
         if version is not None:  # absent -> the simulator ends the call connect_failed
             config["prompt_version"] = version.model_dump(mode="json")
         if agent["adapter_secrets_encrypted"]:
@@ -101,7 +112,7 @@ async def read_spec(conn: Conn, req: CallRequested) -> tuple[CallSpec, uuid.UUID
         call_id=call_id_for(req.run_item_id),
         agent=AgentTarget(
             agent_id=req.agent_id,
-            adapter=agent["adapter"],
+            adapter=adapter,
             endpoint_url=agent["endpoint_url"],
             adapter_config=config,
             adapter_secrets=secrets,
@@ -136,17 +147,12 @@ def _secret_box() -> SecretBox:
 
 
 async def _prompt_version(
-    conn: Conn, req: CallRequested, project_id: uuid.UUID, config: dict[str, Any]
+    conn: Conn, req: CallRequested, project_id: uuid.UUID, version_id: Any
 ) -> PromptVersionOut | None:
     """The version the run pinned in its agent snapshot, else the agent's current active one."""
+    if not version_id:
+        return None
     async with conn.cursor(row_factory=dict_row) as cur:
-        await cur.execute("SELECT agent_snapshot FROM test_runs WHERE id = %s", (req.run_id,))
-        run = await cur.fetchone()
-        snapshot = (run or {}).get("agent_snapshot") or {}
-        pinned = (snapshot.get("adapter_config") or {}).get("active_version_id")
-        version_id = pinned or config.get("active_version_id")
-        if not version_id:
-            return None
         await cur.execute(
             "SELECT id, agent_id, version, system_prompt, provider, model, base_url, temperature, "
             "tools, max_tool_rounds, note, content_hash, created_at FROM prompt_versions "

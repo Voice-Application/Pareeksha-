@@ -91,7 +91,8 @@ class PgEvaluatorStore:
                    a.name AS agent_name, a.description AS agent_description,
                    a.languages AS agent_languages, a.glass_box,
                    a.mandatory_disclosures, a.forbidden_phrases,
-                   a.adapter, a.adapter_config, tr.agent_snapshot
+                   a.adapter, a.adapter_config, a.project_id AS agent_project_id,
+                   tr.agent_snapshot
               FROM calls c
               LEFT JOIN run_items ri ON ri.id = c.run_item_id
               LEFT JOIN test_runs tr ON tr.id = ri.run_id
@@ -142,8 +143,12 @@ class PgEvaluatorStore:
             if rows:
                 persona = PersonaCreate.model_validate(rows[0])
 
+        # a run's calls use the adapter and version the run snapshotted (the agent row can change
+        # after the run was created); calls without a run (uploads) use the agent as it is now
+        snapshot = call["agent_snapshot"] or {}
+        adapter = snapshot.get("adapter") or call["adapter"]
         # a prompt agent's tool trace always exists: the text runner records every call
-        glass_box = bool(call["glass_box"]) or call["adapter"] == "prompt"
+        glass_box = bool(call["glass_box"]) or adapter == "prompt"
         tool_calls: list[ToolCall] | None = None
         # uploads / imports: the tool trace is unknown (None), not "no tools called"
         reported = (call["metadata"] or {}).get("tool_trace") == "reported"
@@ -175,12 +180,14 @@ class PgEvaluatorStore:
             # merely supports (Kannada caller, English reply) is the failure this check exists for.
             allowed = [language]
         description = call["agent_description"] or ""
-        if call["adapter"] == "prompt":
+        if adapter == "prompt":
             # the version the run was pinned to; audits (no run) use the agent's current one
-            config = (call["agent_snapshot"] or {}).get("adapter_config") or call["adapter_config"]
+            pinned = (snapshot.get("adapter_config") or {}).get("active_version_id")
+            version_id = pinned or (call["adapter_config"] or {}).get("active_version_id")
             rows = await self._rows(
-                "SELECT system_prompt FROM prompt_versions WHERE id = %s AND agent_id = %s",
-                ((config or {}).get("active_version_id"), call["agent_id"]),
+                "SELECT system_prompt FROM prompt_versions "
+                "WHERE id = %s AND agent_id = %s AND project_id = %s",
+                (version_id, call["agent_id"], call["agent_project_id"]),
             )
             description = prompt_context(description, rows[0] if rows else None)
         agent = AgentInfo(

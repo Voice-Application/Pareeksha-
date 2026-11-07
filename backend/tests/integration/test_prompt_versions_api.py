@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import uuid
 from collections.abc import Sequence
 from typing import Any
@@ -14,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from pareeksha.agent_llm import AgentLLMError, AgentMessage, ChatReply, ToolSpec
 from pareeksha.db.models import Agents, TestRuns
+from pareeksha.integrations.crypto import SecretBox
 from tests.conftest import Tenant
 from tests.integration.runs_support import make_fixture
 
@@ -195,6 +197,27 @@ async def test_api_key_never_returned(
         f"{API}/agents/{agent['id']}", json={"adapter_secrets": {}}, headers=tenant.admin
     )
     assert cleared.json()["has_adapter_secrets"] is False
+
+
+async def test_replacement_api_key_persists(
+    api: AsyncClient, tenant: Tenant, session_factory: async_sessionmaker[AsyncSession]
+) -> None:
+    agent = await _agent(api, tenant, adapter_secrets={"api_key": KEY})
+    new_key = "sk-test-replacement"
+    patched = await api.patch(
+        f"{API}/agents/{agent['id']}",
+        json={"adapter_secrets": {"api_key": new_key}},
+        headers=tenant.admin,
+    )
+    assert patched.status_code == 200, patched.text
+    body = patched.json()
+    assert body["has_adapter_secrets"] is True and "adapter_secrets" not in body
+    assert new_key not in patched.text and KEY not in patched.text
+    async with session_factory() as session:
+        stored = await session.get(Agents, uuid.UUID(agent["id"]))
+        assert stored is not None and stored.adapter_secrets_encrypted
+        token = bytes(stored.adapter_secrets_encrypted).decode()
+    assert SecretBox(os.environ["SECRET_KEY"]).decrypt(token) == {"api_key": new_key}
 
 
 async def test_private_base_url_rejected(api: AsyncClient, tenant: Tenant) -> None:

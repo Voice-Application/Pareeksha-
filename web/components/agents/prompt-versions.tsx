@@ -20,6 +20,7 @@ import {
 } from "@/lib/api/prompt-versions";
 import { collapse, hasChanges, lineDiff, type DiffLine } from "@/lib/line-diff";
 import { relativeTime } from "@/lib/format";
+import { useLatest } from "@/lib/hooks/use-latest";
 import { useUnsavedGuard } from "@/lib/hooks/use-unsaved-guard";
 import { cn } from "@/lib/utils";
 import { Chip, Panel } from "@/components/ui/layout";
@@ -142,6 +143,9 @@ function settingsText(v: PromptVersion): string {
 function CodeArea({ id, value, describedBy, invalid, className, ...rest }: { id: string; value: string; describedBy?: string; invalid?: boolean } & TextareaHTMLAttributes<HTMLTextAreaElement>) {
   const gutter = useRef<HTMLDivElement>(null);
   const count = value === "" ? 1 : value.split("\n").length;
+  // The numbers sit in an absolutely positioned layer, so the gutter takes the textarea's height
+  // (including manual resizes) instead of growing with the line count.
+  const digits = String(count).length;
   return (
     <div
       className={cn(
@@ -149,10 +153,13 @@ function CodeArea({ id, value, describedBy, invalid, className, ...rest }: { id:
         invalid ? "border-fail" : "border-border-strong",
       )}
     >
-      <div ref={gutter} aria-hidden className="mono shrink-0 select-none overflow-hidden border-r border-border bg-sunken py-1.5 pl-2 pr-2 text-right text-xs leading-5 text-subtle">
-        {Array.from({ length: count }, (_, i) => (
-          <div key={i}>{i + 1}</div>
-        ))}
+      <div aria-hidden className="mono relative shrink-0 select-none border-r border-border bg-sunken text-xs" style={{ width: `calc(${digits}ch + 1rem + 1px)` }}>
+        {/* Extra bottom padding covers the textarea's horizontal scrollbar, so both reach the last line together. */}
+        <div ref={gutter} className="absolute inset-0 overflow-hidden px-2 pb-6 pt-1.5 text-right leading-5 text-subtle">
+          {Array.from({ length: count }, (_, i) => (
+            <div key={i}>{i + 1}</div>
+          ))}
+        </div>
       </div>
       <textarea
         id={id}
@@ -210,6 +217,7 @@ export function PromptVersions({ agentId }: { agentId: string }) {
 
   const dirty = JSON.stringify(draft) !== baseline;
   const guard = useUnsavedGuard(dirty && isPrompt);
+  const editor = useLatest({ draft, baseline });
 
   const view = useQuery({ queryKey: ["prompt-version", agentId, viewing], queryFn: () => getPromptVersion(agentId, viewing as number), enabled: viewing != null });
 
@@ -218,6 +226,14 @@ export function PromptVersions({ agentId }: { agentId: string }) {
     mutationFn: (version: number) => activatePromptVersion(agentId, version),
     onSuccess: (v) => {
       toast(`v${v.version} is now the active version.`);
+      // A clean editor follows the active version; a dirty draft is the user's work and stays.
+      const { draft: cur, baseline: base } = editor.current;
+      if (JSON.stringify(cur) === base) {
+        const d = fromVersion(v);
+        setDraft(d);
+        setBaseline(JSON.stringify(d));
+        setResult(null);
+      }
       void qc.invalidateQueries({ queryKey: ["agent", agentId] });
       void qc.invalidateQueries({ queryKey: ["prompt-versions", agentId] });
     },
@@ -246,9 +262,11 @@ export function PromptVersions({ agentId }: { agentId: string }) {
     try {
       const r = await save.mutateAsync(body);
       setResult(r.created ? `Saved v${r.version.version}. It is now the active version.` : `No changes, still v${r.version.version}.`);
-      const next = { ...draft, note: "" };
-      setDraft(next);
-      setBaseline(JSON.stringify(next));
+      // The baseline is what was submitted. Edits made while the save was pending stay in the draft
+      // (and keep it dirty); only the note, which went into this version, is cleared.
+      const snapshot = draft;
+      setBaseline(JSON.stringify({ ...snapshot, note: "" }));
+      setDraft((cur) => (cur.note === snapshot.note ? { ...cur, note: "" } : cur));
       if (r.created) setPair(null);
       void qc.invalidateQueries({ queryKey: ["prompt-versions", agentId] });
       void qc.invalidateQueries({ queryKey: ["agent", agentId] });
@@ -387,7 +405,7 @@ export function PromptVersions({ agentId }: { agentId: string }) {
                       <Button type="submit" variant="primary" loading={save.isPending}>
                         Save as new version
                       </Button>
-                      {dirty && !result && <span className="text-xs text-subtle">Unsaved prompt changes</span>}
+                      {dirty && <span className="text-xs text-subtle">Unsaved prompt changes</span>}
                       <p role="status" aria-live="polite" className="text-sm">
                         {result}
                       </p>
@@ -504,7 +522,8 @@ export function PromptVersions({ agentId }: { agentId: string }) {
 }
 
 function DiffView({ title, caption, before, after }: { title: string; caption: string; before: string; after: string }) {
-  const lines = useMemo(() => lineDiff(before, after), [before, after]);
+  const diff = useMemo(() => lineDiff(before, after), [before, after]);
+  const lines = useMemo(() => (diff.tooLarge ? [] : diff.lines), [diff]);
   const rows = useMemo(() => collapse(lines, 2), [lines]);
   const [open, setOpen] = useState<Set<number>>(new Set());
   const added = lines.filter((l) => l.kind === "add").length;
@@ -513,8 +532,9 @@ function DiffView({ title, caption, before, after }: { title: string; caption: s
     <section aria-label={title} className="flex flex-col gap-2">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 className="text-sm font-medium">{title}</h3>
-        <p className="num text-xs text-muted">{hasChanges(lines) ? `${added} added, ${removed} removed` : "No changes"}</p>
+        <p className="num text-xs text-muted">{diff.tooLarge ? "Too large to diff" : hasChanges(lines) ? `${added} added, ${removed} removed` : "No changes"}</p>
       </div>
+      {diff.tooLarge && <p className="text-sm text-muted">{diff.message}</p>}
       {hasChanges(lines) && (
         <div className="overflow-x-auto rounded-sm border border-border">
           <table className="mono w-full border-collapse text-sm leading-5">

@@ -53,12 +53,22 @@ class ChatReply:
 
 
 class AgentLLMError(Exception):
-    """Provider call failed. The message never contains the API key, headers or request body."""
+    """Provider call failed. The message never contains the API key, headers, request body or
+    the provider's own error text; that text (key-redacted, truncated) is kept separately in
+    ``provider_message`` for retry decisions and must not be shown or persisted."""
 
-    def __init__(self, message: str, *, status: int | None = None, retryable: bool = False):
+    def __init__(
+        self,
+        message: str,
+        *,
+        status: int | None = None,
+        retryable: bool = False,
+        provider_message: str = "",
+    ):
         super().__init__(message)
         self.status = status
         self.retryable = retryable
+        self.provider_message = provider_message
 
 
 class ChatProvider(Protocol):
@@ -80,6 +90,16 @@ def parse_args(raw: str) -> dict[str, Any]:
     except ValueError:
         return {"_raw": raw}
     return parsed if isinstance(parsed, dict) else {"_raw": raw}
+
+
+def object_args(value: Any) -> tuple[dict[str, Any], str]:
+    """``(arguments, raw_arguments)`` for an already-decoded tool input (Anthropic ``input``,
+    Gemini ``args``). Missing is ``{}``; a non-object becomes ``{"_raw": raw}`` like
+    ``parse_args``, so the mock layer answers ``invalid_arguments``."""
+    if value is None:
+        return {}, "{}"
+    raw = json.dumps(value)
+    return (value, raw) if isinstance(value, dict) else ({"_raw": raw}, raw)
 
 
 def _error_text(resp: httpx.Response, api_key: str | None) -> str:
@@ -168,9 +188,10 @@ async def post_json(
         )
     if resp.status_code >= 400:
         raise AgentLLMError(
-            f"provider returned HTTP {resp.status_code}: {_error_text(resp, api_key)}",
+            f"provider returned HTTP {resp.status_code}",
             status=resp.status_code,
             retryable=resp.status_code in (408, 409, 429) or resp.status_code >= 500,
+            provider_message=_error_text(resp, api_key),
         )
     try:
         data = resp.json()

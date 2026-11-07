@@ -174,7 +174,10 @@ async def test_compare_ignores_foreign_version(
     async def pin(run_id: Any, version_id: str) -> None:
         await pg.execute(
             "UPDATE test_runs SET agent_snapshot = %s WHERE id = %s",
-            (Jsonb({"adapter_config": {"active_version_id": version_id}}), run_id),
+            (
+                Jsonb({"adapter": "prompt", "adapter_config": {"active_version_id": version_id}}),
+                run_id,
+            ),
         )
 
     await pin(base_run.run_id, own)

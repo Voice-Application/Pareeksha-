@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from collections.abc import Sequence
 from typing import Any
 
@@ -14,6 +13,7 @@ from pareeksha.agent_llm.base import (
     ChatReply,
     ToolCallReq,
     ToolSpec,
+    object_args,
     post_json,
 )
 
@@ -101,7 +101,7 @@ class AnthropicProvider:
             data, latency = await send()
         except AgentLLMError as exc:
             # Claude Opus 4.7 and later reject sampling parameters: retry without.
-            if exc.status != 400 or "temperature" not in str(exc).lower():
+            if exc.status != 400 or "temperature" not in exc.provider_message.lower():
                 raise
             del body["temperature"]
             data, latency = await send()
@@ -109,16 +109,17 @@ class AnthropicProvider:
             blocks = data["content"]
             text = "".join(b["text"] for b in blocks if b.get("type") == "text")
             uses = [b for b in blocks if b.get("type") == "tool_use"]
+            args = [object_args(b.get("input")) for b in uses]
             calls = tuple(
                 ToolCallReq(
                     id=str(b["id"]),
                     name=b["name"],
-                    arguments=b.get("input") or {},
-                    raw_arguments=json.dumps(b.get("input") or {}),
+                    arguments=arguments,
+                    raw_arguments=raw,
                     # the whole turn (incl. thinking blocks) rides on the first call for echoing
                     provider_data={"content": blocks} if i == 0 else {},
                 )
-                for i, b in enumerate(uses)
+                for i, (b, (arguments, raw)) in enumerate(zip(uses, args, strict=True))
             )
         except (KeyError, TypeError, AttributeError) as exc:
             raise AgentLLMError("provider returned an unexpected response shape") from exc

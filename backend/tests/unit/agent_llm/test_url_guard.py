@@ -30,3 +30,8 @@ def test_loopback_allowed_when_private_allowed() -> None:
 def test_scheme_still_checked_when_private_allowed() -> None:
     with pytest.raises(ValueError):
         check_base_url("file:///etc/passwd", allow_private=True)
+
+
+def test_https_to_loopback_is_non_public() -> None:
+    with pytest.raises(ValueError, match="non-public address"):
+        check_base_url("https://127.0.0.1:8080", allow_private=False)

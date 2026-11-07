@@ -122,6 +122,14 @@ async def _spent(session: AsyncSession, project_id: uuid.UUID) -> float:
     return float(total or 0)
 
 
+async def require_active_version(session: AsyncSession, agent: Agents) -> None:
+    """422 for a prompt agent without an active version (nothing to run); other adapters pass."""
+    if agent.adapter == "prompt" and await active_version(session, agent) is None:
+        raise ApiError(
+            422, "prompt_agent_has_no_version", "Create a prompt version before running this agent"
+        )
+
+
 async def prepare(session: AsyncSession, project_id: uuid.UUID, body: RunCreate) -> Prepared:
     """404 for unknown/foreign ids (and an archived agent), 400 for an oversized matrix."""
     agent = (
@@ -131,10 +139,7 @@ async def prepare(session: AsyncSession, project_id: uuid.UUID, body: RunCreate)
     ).one_or_none()
     if agent is None:
         raise ApiError(404, "not_found", "Agent not found", {"id": str(body.agent_id)})
-    if agent.adapter == "prompt" and await active_version(session, agent) is None:
-        raise ApiError(
-            422, "prompt_agent_has_no_version", "Create a prompt version before running this agent"
-        )
+    await require_active_version(session, agent)
     if agent.archived:
         raise ApiError(409, "conflict", "Agent is archived", {"id": str(body.agent_id)})
 

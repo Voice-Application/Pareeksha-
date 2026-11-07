@@ -92,7 +92,7 @@ class OpenAICompatProvider:
             data, latency = await send()
         except AgentLLMError as exc:
             # Reasoning models (o-series, gpt-5) accept only the default temperature: retry without.
-            if exc.status != 400 or "temperature" not in str(exc).lower():
+            if exc.status != 400 or "temperature" not in exc.provider_message.lower():
                 raise
             del body["temperature"]
             data, latency = await send()

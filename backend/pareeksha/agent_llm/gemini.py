@@ -14,6 +14,7 @@ from pareeksha.agent_llm.base import (
     ChatReply,
     ToolCallReq,
     ToolSpec,
+    object_args,
     post_json,
 )
 
@@ -30,7 +31,7 @@ def _response_obj(content: str) -> dict[str, Any]:
 
 def _tool_call(i: int, part: dict[str, Any]) -> ToolCallReq:
     fc = part["functionCall"]
-    args = fc.get("args") or {}
+    args, raw = object_args(fc.get("args"))
     data: dict[str, Any] = {}
     if part.get("thoughtSignature"):
         data["thought_signature"] = part["thoughtSignature"]
@@ -40,7 +41,7 @@ def _tool_call(i: int, part: dict[str, Any]) -> ToolCallReq:
         id=str(fc.get("id") or f"call_{i}"),
         name=fc["name"],
         arguments=args,
-        raw_arguments=json.dumps(args),
+        raw_arguments=raw,
         provider_data=data,
     )
 

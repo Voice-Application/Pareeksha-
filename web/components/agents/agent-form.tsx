@@ -104,11 +104,15 @@ function validate(f: Form): Errors {
   else if (!/^(wss?|https?):\/\/\S+$/i.test(f.endpoint_url.trim())) e["agent-endpoint"] = "Use a full URL such as ws://host:8765/ws.";
   const secs = Number(f.max_call_seconds);
   if (!Number.isInteger(secs) || secs < 10 || secs > 1800) e["agent-max-seconds"] = "Use a whole number of seconds between 10 and 1800.";
-  try {
-    const cfg = JSON.parse(f.adapter_config || "{}");
-    if (cfg === null || typeof cfg !== "object" || Array.isArray(cfg)) e["agent-config"] = "Adapter config must be a JSON object, for example {}.";
-  } catch (err) {
-    e["agent-config"] = `This is not valid JSON: ${(err as Error).message}`;
+  // Prompt agents hide the adapter config and tools fields and never send them (see toPayload).
+  const prompt = f.adapter === "prompt";
+  if (!prompt) {
+    try {
+      const cfg = JSON.parse(f.adapter_config || "{}");
+      if (cfg === null || typeof cfg !== "object" || Array.isArray(cfg)) e["agent-config"] = "Adapter config must be a JSON object, for example {}.";
+    } catch (err) {
+      e["agent-config"] = `This is not valid JSON: ${(err as Error).message}`;
+    }
   }
   const seen = new Set<string>();
   f.disclosures.forEach((d, i) => {
@@ -130,9 +134,10 @@ function validate(f: Form): Errors {
     const { error } = compileRegex(d.regex);
     if (error) e[`forb-${i}-regex`] = `This pattern is not valid: ${error}`;
   });
-  f.tools.forEach((t, i) => {
-    if (!t.name.trim()) e[`tool-${i}-name`] = "Enter the tool name.";
-  });
+  if (!prompt)
+    f.tools.forEach((t, i) => {
+      if (!t.name.trim()) e[`tool-${i}-name`] = "Enter the tool name.";
+    });
   return e;
 }
 
@@ -494,9 +499,12 @@ export function AgentForm({ agentId }: { agentId?: string }) {
               <Button type="submit" variant="primary" loading={save.isPending}>
                 {isNew ? "Create agent" : "Save changes"}
               </Button>
-              <Button disabled={save.isPending} onClick={() => void submit("test")}>
-                Save and test
-              </Button>
+              {/* Prompt agents have no ConnectionTest panel to show the result, so there is no Save and test. */}
+              {!isPrompt && (
+                <Button disabled={save.isPending} onClick={() => void submit("test")}>
+                  Save and test
+                </Button>
+              )}
               <Link href="/agents" className="inline-flex h-9 items-center px-3 text-sm text-muted hover:text-fg">
                 Cancel
               </Link>

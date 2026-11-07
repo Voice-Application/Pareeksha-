@@ -196,7 +196,9 @@ async def test_compare_reports_prompt_versions(
         await session.commit()
     for run, vid in ((base, ids[0]), (head, ids[1])):
         await _set_snapshot(
-            session_factory, run.run_id, {"adapter_config": {"active_version_id": str(vid)}}
+            session_factory,
+            run.run_id,
+            {"adapter": "prompt", "adapter_config": {"active_version_id": str(vid)}},
         )
     body = await _compare(api, tenant, base.run_id, head.run_id)
     assert (body["base_prompt_version"], body["head_prompt_version"]) == (1, 2)

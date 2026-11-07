@@ -6259,6 +6259,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
     estimate_run: {
@@ -6321,6 +6330,15 @@ export interface operations {
             };
             /** @description conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6771,6 +6789,15 @@ export interface operations {
             };
             /** @description conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

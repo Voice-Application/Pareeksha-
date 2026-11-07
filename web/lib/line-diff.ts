@@ -2,10 +2,14 @@
 
 export type DiffLine = { kind: "same" | "add" | "del"; text: string; /** 1-based line in the old text */ a?: number; /** 1-based line in the new text */ b?: number };
 export type DiffRow = { type: "line"; line: DiffLine } | { type: "skip"; lines: DiffLine[] };
+export type DiffResult = { tooLarge: false; lines: DiffLine[] } | { tooLarge: true; message: string };
+
+/** Upper bound on LCS table cells (4 bytes each, so 16 MB). Larger changed regions are not diffed. */
+export const MAX_DIFF_CELLS = 4_000_000;
 
 const split = (s: string) => (s === "" ? [] : s.replace(/\r\n?/g, "\n").split("\n"));
 
-export function lineDiff(before: string, after: string): DiffLine[] {
+export function lineDiff(before: string, after: string): DiffResult {
   const a = split(before);
   const b = split(after);
   // Trim the shared head and tail so the quadratic table only covers the changed middle.
@@ -19,6 +23,8 @@ export function lineDiff(before: string, after: string): DiffLine[] {
   }
   const n = endA - start;
   const m = endB - start;
+  if ((n + 1) * (m + 1) > MAX_DIFF_CELLS)
+    return { tooLarge: true, message: `Too large to diff here: the changed part is ${n.toLocaleString("en-IN")} lines before and ${m.toLocaleString("en-IN")} lines after.` };
   // lcs[i][j] = LCS length of a[start+i..endA) and b[start+j..endB), row-major in one typed array.
   const w = m + 1;
   const lcs = new Uint32Array((n + 1) * w);
@@ -47,7 +53,7 @@ export function lineDiff(before: string, after: string): DiffLine[] {
   }
   for (let k = 0; k < a.length - endA; k++) out.push({ kind: "same", text: a[endA + k], a: endA + k + 1, b: endB + k + 1 });
   // Within a changed block, show removals before additions.
-  return reorder(out);
+  return { tooLarge: false, lines: reorder(out) };
 }
 
 function reorder(lines: DiffLine[]): DiffLine[] {

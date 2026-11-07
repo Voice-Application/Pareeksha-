@@ -62,11 +62,22 @@ test.describe("Prompt agents", () => {
   });
 
   test("a saved key shows 'Key saved' with a Replace key action and is never prefilled", async ({ page }) => {
-    await open(page, "/agents/" + pid, promptAgent({ has_adapter_secrets: true }));
+    const s = await open(page, "/agents/" + pid, promptAgent({ has_adapter_secrets: true }));
     await expect(page.getByText("Key saved")).toBeVisible();
     await page.getByRole("button", { name: "Replace key" }).click();
     await expect(page.getByLabel("API key")).toHaveValue("");
     await expect(page.getByLabel("API key")).toHaveAttribute("type", "password");
+
+    await page.getByLabel("API key").fill("sk-replacement-not-real");
+    const response = page.waitForResponse((r) => r.request().method() === "PATCH" && r.url().endsWith(`/agents/${pid}`));
+    await page.getByRole("button", { name: "Save changes" }).click();
+    const saved = await (await response).json();
+    const patch = s.calls.find((c) => c.method === "PATCH" && c.path === `/agents/${pid}`);
+    expect(patch?.body).toMatchObject({ adapter_secrets: { api_key: "sk-replacement-not-real" } });
+    expect(saved).not.toHaveProperty("adapter_secrets");
+    expect(saved.has_adapter_secrets).toBe(true);
+    await expect(page.getByText("Key saved")).toBeVisible();
+    await expect(page.getByLabel("API key")).toHaveCount(0);
   });
 
   test("a private base URL error is shown on the field", async ({ page }) => {

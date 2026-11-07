@@ -186,8 +186,12 @@ pieces at a **prompt** instead of a deployed voice bot, and adds a **RAG lab** o
   until deleted. `prompt_versions.rag_config` names the KB; each run pins the exact
   `kb_index_version` it used. Compare shows a "KB changed" banner when v1 and v2 runs used
   different index versions.
-- **Text runs in the run matrix.** `run_items.noise_profile_id` becomes nullable (null = text
-  mode; a CHECK ties null noise to text mode). Personas still apply in text mode as caller style
+- **Text runs in the run matrix.** A `run_items` CHECK cannot see its parent run's mode, so the
+  text/noise invariant is enforced in the run service and planner, not by a table constraint. As
+  built, `run_items.noise_profile_id` stays NOT NULL: the simulator plays every item of a prompt
+  agent (`adapter = "prompt"`) as text, and the item's noise profile is recorded but not applied.
+  If the column later becomes nullable (null = text mode), the planner sets and checks it.
+  Personas still apply in text mode as caller style
   and language. RAG matrix adds nullable `run_items.rag_config_id` to the unique key; the planner
   and the compare cell key gain prompt version and RAG config.
 - **Judge, caller and comparability.** Caller brain, judge and claim-level faithfulness checks
