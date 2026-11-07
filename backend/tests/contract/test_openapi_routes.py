@@ -133,6 +133,14 @@ ADDITIONS: set[tuple[str, str]] = {
     ("GET", "/knowledge-bases/{id}/indexes"),
     ("GET", "/knowledge-bases/{id}/indexes/{id}"),
     ("GET", "/knowledge-bases/{id}/indexes/{id}/chunks"),
+    ("POST", "/knowledge-bases/{id}/questions:generate"),
+    ("POST", "/knowledge-bases/{id}/questions:import"),
+    ("POST", "/rag-matrices"),  # Task 9
+    ("GET", "/rag-matrices"),
+    ("GET", "/rag-matrices/{id}"),
+    ("GET", "/rag-matrices/{id}/report"),
+    ("GET", "/pricing"),
+    ("PUT", "/pricing"),
 }
 
 
