@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { TriangleAlert } from "lucide-react";
+import { ChevronRight, TriangleAlert } from "lucide-react";
 import { mmss, type CallDetailData, type Turn } from "@/lib/api/calls";
 import { Panel } from "@/components/ui/layout";
 import { Segmented } from "@/components/ui/field";
@@ -90,6 +90,12 @@ export function Transcript({
     return m;
   }, [call.tool_calls]);
 
+  const retrievalsByTurn = useMemo(() => {
+    const m: Record<number, Retrieval[]> = {};
+    for (const r of call.retrievals ?? []) (m[r.turn_idx] ??= []).push(r);
+    return m;
+  }, [call.retrievals]);
+
   return (
     <Panel
       title="Transcript"
@@ -130,6 +136,7 @@ export function Transcript({
                 tags={turnTags[t.idx] ?? []}
                 latency={latencyByTurn[t.idx]}
                 tools={toolsByTurn[t.idx] ?? []}
+                retrievals={retrievalsByTurn[t.idx] ?? []}
                 simulated={simulated}
                 lang={LANG_ATTR[t.language_detected ?? call.language ?? ""] ?? "en"}
               />
@@ -141,7 +148,42 @@ export function Transcript({
   );
 }
 
-function TurnRow({ t, playing, selected, evidence, onSelect, tags, latency, tools, simulated, lang }: { t: Turn; playing: boolean; selected: boolean; evidence: boolean; onSelect: (i: number) => void; tags: TurnTags[number]; latency?: number; tools: NonNullable<CallDetailData["tool_calls"]>; simulated: boolean; lang: string }) {
+type Retrieval = NonNullable<CallDetailData["retrievals"]>[number];
+
+function RetrievalCard({ r }: { r: Retrieval }) {
+  const [open, setOpen] = useState(false);
+  const stages = (["embed", "search", "rerank", "rewrite"] as const).filter((k) => r.timings[`${k}_ms`] != null);
+  const n = r.results.length;
+  return (
+    <div className="mt-1.5 rounded-xs bg-sunken px-2 py-1 text-xs" data-testid="retrieval-card">
+      <button type="button" aria-expanded={open} onClick={() => setOpen(!open)} className="mono flex w-full items-center gap-1 text-left">
+        <ChevronRight size={12} strokeWidth={1.6} aria-hidden className={cn("shrink-0", open && "rotate-90")} />
+        <span>Retrieved {n} {n === 1 ? "chunk" : "chunks"} · {r.rag_label} · {Math.round(r.timings.total_ms ?? 0)} ms</span>
+      </button>
+      {open && (
+        <div className="mt-1 space-y-1">
+          {stages.length > 0 && <p className="mono text-subtle">{stages.map((k) => `${k} ${Math.round(r.timings[`${k}_ms`])} ms`).join(" / ")}</p>}
+          {r.queries.length > 1 && (
+            <p className="text-muted">
+              <span className="text-subtle">Rewritten queries: </span>
+              {r.queries.filter((q) => q !== r.query).join(" | ")}
+            </p>
+          )}
+          <ol className="space-y-1">
+            {r.results.map((c) => (
+              <li key={c.chunk_id}>
+                <span className="mono text-muted">#{c.rank} · {c.score.toFixed(3)} · {c.filename}</span>
+                <p lang="en">{c.text}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TurnRow({ t, playing, selected, evidence, onSelect, tags, latency, tools, retrievals, simulated, lang }: { t: Turn; playing: boolean; selected: boolean; evidence: boolean; onSelect: (i: number) => void; tags: TurnTags[number]; latency?: number; tools: NonNullable<CallDetailData["tool_calls"]>; retrievals: Retrieval[]; simulated: boolean; lang: string }) {
   const heard = simulated && t.speaker === "caller" && t.ground_truth_text && t.agent_heard_text && norm(t.ground_truth_text) !== norm(t.agent_heard_text);
   return (
     <li
@@ -177,6 +219,9 @@ function TurnRow({ t, playing, selected, evidence, onSelect, tags, latency, tool
               <span className="text-subtle">Tool call </span>
               {tc.name}({Object.entries(tc.arguments ?? {}).map(([k, v]) => `${k}=${JSON.stringify(v)}`).join(", ")}) at {mmss(tc.at_ms)}
             </p>
+          ))}
+          {retrievals.map((r, i) => (
+            <RetrievalCard key={i} r={r} />
           ))}
           {t.is_barge_in && (
             <p className="mt-1.5 flex items-center gap-1 text-xs text-warn-fg">

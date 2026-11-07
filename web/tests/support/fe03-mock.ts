@@ -52,6 +52,11 @@ export const callDetail = (over: Record<string, unknown> = {}) => ({
   recordings: { mixed: "a/mixed.wav", caller: "a/caller.wav", agent: "a/agent.wav" },
   turns,
   tool_calls: [{ seq: 0, name: "record_promise_to_pay", arguments: { amount: 40000 }, at_ms: 10000, turn_idx: 2 }],
+  retrievals: [{
+    turn_idx: 2, query: "emi amount", queries: ["emi amount", "monthly instalment due"], context_chars: 120, rag_label: "hybrid k=3",
+    timings: { embed_ms: 12, search_ms: 8, rewrite_ms: 30, total_ms: 55 },
+    results: [{ rank: 1, chunk_id: uuid(970), document_id: uuid(971), filename: "emi-policy.md", start_char: 0, end_char: 60, score: 0.8123, text: "The monthly EMI is four thousand rupees." }],
+  }],
   metrics: { barge_in_attempts: 0, barge_in_honoured: 0, silence_gaps_over_2s: 0, turn_count: 3, repeated_utterances: 0, latency_is_approximate: false, response_latency_p50_ms: 2600, response_latency_p95_ms: 2600, first_greeting_ms: 800, agent_talk_ratio: 0.6 },
   checks: [{ check_type: "amount_confirmed", check_key: "emi_amount", must_pass: true, passed: false, evidence_turns: [2], detail: "Agent confirmed 40000, expected 4000" }],
   evaluation: {
