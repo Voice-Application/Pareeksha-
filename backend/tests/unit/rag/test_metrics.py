@@ -18,7 +18,12 @@ def exp(**kw: Any) -> RagExpectation:
 
 
 def res(doc: uuid.UUID, start: int, end: int) -> dict[str, Any]:
-    return {"chunk_id": str(uuid.uuid4()), "document_id": str(doc), "start": start, "end": end}
+    return {
+        "chunk_id": str(uuid.uuid4()),
+        "document_id": str(doc),
+        "start_char": start,
+        "end_char": end,
+    }
 
 
 def judge(claims: list[tuple[bool, int | None]], refused: bool = False, correct: Any = None) -> str:

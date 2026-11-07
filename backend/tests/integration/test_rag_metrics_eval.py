@@ -86,8 +86,8 @@ def seed_rag(url: str, call: SeededCall, *, local_only: bool = False) -> None:
         result = {
             "chunk_id": str(chunk),
             "document_id": str(doc),
-            "start": SPAN[0],
-            "end": SPAN[1],
+            "start_char": SPAN[0],
+            "end_char": SPAN[1],
             "score": 1.0,
             "rank": 1,
             "method": "bm25",

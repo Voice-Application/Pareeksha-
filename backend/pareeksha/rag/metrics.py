@@ -69,8 +69,8 @@ class RagStore(Protocol):
 def _overlaps(r: dict[str, Any], doc_id: uuid.UUID | None, span: tuple[int, int]) -> bool:
     return (
         str(r.get("document_id")) == str(doc_id)
-        and int(r.get("start", 0)) < span[1]
-        and span[0] < int(r.get("end", 0))
+        and int(r.get("start_char", 0)) < span[1]
+        and span[0] < int(r.get("end_char", 0))
     )
 
 
