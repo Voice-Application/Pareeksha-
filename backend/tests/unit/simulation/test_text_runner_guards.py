@@ -31,10 +31,12 @@ from tests.unit.simulation.test_text_runner import (
     ],
 )
 def test_unfence(raw: str, expected: dict[str, int]) -> None:
+    """``_unfence`` strips one surrounding code fence, with or without a language tag."""
     assert json.loads(_unfence(raw)) == expected
 
 
 async def test_simulated_tool_accepts_fenced_json() -> None:
+    """A simulated tool result wrapped in a json code fence is still parsed."""
     spec = make()
     spec.agent.adapter_config["prompt_version"]["tools"][0]["mock"] = {"mode": "simulated"}
     # agent asks for the tool, the simulator model answers in a ```json fence, the agent replies
@@ -46,6 +48,10 @@ async def test_simulated_tool_accepts_fenced_json() -> None:
 
 
 async def test_tool_calls_beyond_the_cap_are_recorded_but_not_run() -> None:
+    """Calls past ``MAX_TOOL_CALLS_PER_REPLY`` are traced and answered with an error, unrun.
+
+    A forbidden tool called past the cap still fails its ``not_called`` expectation.
+    """
     spec = make()
     forbidden = {**TOOL, "name": "waive_fee", "mock": {"mode": "static", "result": {"ok": True}}}
     spec.agent.adapter_config["prompt_version"]["tools"].append(forbidden)

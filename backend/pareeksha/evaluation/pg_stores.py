@@ -84,6 +84,11 @@ class PgEvaluatorStore:
             return await cur.fetchall()
 
     async def load_snapshot(self, call_id: uuid.UUID) -> CallSnapshot | None:
+        """Everything the evaluator needs about one call, or ``None`` if the call does not exist.
+
+        A run's calls use the adapter and prompt version the run snapshotted; the prompt is only
+        read from a version of the same agent and project.
+        """
         calls = await self._rows(
             """
             SELECT c.id, c.agent_id, c.run_item_id, c.language, c.source, c.event_log, c.metadata,

@@ -57,6 +57,7 @@ async def _chat(base_url: str | None = URL, provider: Any = "openai_compatible")
 async def test_public_host_is_called_pinned_to_the_resolved_ip(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """A public host is called at its resolved IP with the original ``Host`` header."""
     seen = _wire(monkeypatch, lambda r: httpx.Response(200, json=OK))
     assert (await _chat()).text == "hi"
     assert seen[0].url.host == "8.8.8.8" and seen[0].headers["host"] == "llm.example.test"
@@ -66,6 +67,7 @@ async def test_public_host_is_called_pinned_to_the_resolved_ip(
 async def test_host_resolving_to_loopback_is_rejected_at_request_time(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """A host resolving to loopback is refused before any request, as a non-retryable error."""
     seen = _wire(monkeypatch, lambda r: httpx.Response(200, json=OK), ip="127.0.0.1")
     with pytest.raises(AgentLLMError) as exc:
         await _chat()
@@ -76,6 +78,7 @@ async def test_host_resolving_to_loopback_is_rejected_at_request_time(
 async def test_ollama_default_is_blocked_without_the_private_flag(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """The plain-http Ollama default is refused without the private-URL flag."""
     seen = _wire(monkeypatch, lambda r: httpx.Response(200, json=OK))
     with pytest.raises(AgentLLMError, match="https"):
         await _chat(None, "ollama")
@@ -90,6 +93,7 @@ async def test_oversized_response_is_rejected(monkeypatch: pytest.MonkeyPatch) -
 
 
 async def test_redirects_are_not_followed(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A redirect raises an ``AgentLLMError`` carrying its status and is not followed."""
     seen = _wire(
         monkeypatch,
         lambda r: httpx.Response(302, headers={"location": "https://169.254.169.254/x"}),
@@ -120,6 +124,7 @@ def _wire_plain(
 
 
 async def test_private_opt_in_allows_http_localhost(monkeypatch: pytest.MonkeyPatch) -> None:
+    """With the private-URL flag the Ollama default on http://localhost is called."""
     seen = _wire_plain(monkeypatch, lambda r: httpx.Response(200, json=OK))
     assert (await _chat(None, "ollama")).text == "hi"
     assert str(seen[0].url) == "http://localhost:11434/v1/chat/completions"
@@ -128,6 +133,7 @@ async def test_private_opt_in_allows_http_localhost(monkeypatch: pytest.MonkeyPa
 async def test_private_opt_in_still_rejects_redirects_and_big_bodies(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """The private-URL flag still refuses redirects and oversized response bodies."""
     seen = _wire_plain(
         monkeypatch, lambda r: httpx.Response(307, headers={"location": "http://x/"})
     )
@@ -144,9 +150,11 @@ async def test_private_opt_in_still_rejects_redirects_and_big_bodies(
 
 
 async def test_openai_retries_without_temperature_when_rejected() -> None:
+    """A 400 that names ``temperature`` is retried once without it."""
     bodies: list[dict[str, Any]] = []
 
     def handler(req: httpx.Request) -> httpx.Response:
+        """Answer 400 to a body that sets ``temperature`` and 200 otherwise, recording each body."""
         bodies.append(json.loads(req.content))
         if "temperature" in bodies[-1]:
             msg = "Unsupported value: 'temperature' does not support 0.1 with this model."
@@ -160,6 +168,7 @@ async def test_openai_retries_without_temperature_when_rejected() -> None:
 
 
 async def test_other_400s_are_not_retried() -> None:
+    """Other 400s raise at once; the provider message is kept apart from the error text."""
     calls: list[int] = []
 
     def handler(req: httpx.Request) -> httpx.Response:

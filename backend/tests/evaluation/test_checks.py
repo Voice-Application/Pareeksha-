@@ -202,6 +202,7 @@ def test_amount_confirmed_ignores_dates_and_other_known_amounts():
 
 
 def test_run_checks_integration():
+    """``run_checks`` runs every applicable check on one call and reports each result."""
     turns = [
         T(0, "agent", "Hello, this call is being recorded."),
         T(1, "caller", "I pay 4000"),

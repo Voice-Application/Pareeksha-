@@ -75,6 +75,11 @@ function RunPicker({ label, value, runs, onChange, exclude }: { label: string; v
   );
 }
 
+/**
+ * Compare two runs picked via the `base` and `head` URL params: summary deltas, per-dimension
+ * means, per-cell scores with call links and the prompt versions each run pinned. Polls while
+ * either run is still active.
+ */
 export function RunCompare() {
   const url = useUrlState();
   const base = url.get("base");
@@ -188,6 +193,7 @@ export function RunCompare() {
     </span>
   );
 
+  /** Links to a cell's calls on one side: the ids the compare endpoint lists, else the call found by cell key, else a dash. */
   const link = (kind: "Base" | "Head", c: Compared) => {
     const fromCell = (kind === "Base" ? c.base_call_ids : c.head_call_ids) ?? [];
     const one = (kind === "Base" ? baseCall : headCall).get(cellKey(c.scenario, c.persona, c.profile));

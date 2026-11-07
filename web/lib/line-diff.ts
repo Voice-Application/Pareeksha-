@@ -7,8 +7,13 @@ export type DiffResult = { tooLarge: false; lines: DiffLine[] } | { tooLarge: tr
 /** Upper bound on LCS table cells (4 bytes each, so 16 MB). Larger changed regions are not diffed. */
 export const MAX_DIFF_CELLS = 4_000_000;
 
+/** Lines of `s` with CRLF and CR normalised to LF; the empty string has no lines. */
 const split = (s: string) => (s === "" ? [] : s.replace(/\r\n?/g, "\n").split("\n"));
 
+/**
+ * Line diff of `before` to `after`, with 1-based old/new line numbers. The shared head and tail are
+ * trimmed first; a changed middle whose LCS table exceeds `MAX_DIFF_CELLS` returns `tooLarge`.
+ */
 export function lineDiff(before: string, after: string): DiffResult {
   const a = split(before);
   const b = split(after);
@@ -56,6 +61,7 @@ export function lineDiff(before: string, after: string): DiffResult {
   return { tooLarge: false, lines: reorder(out) };
 }
 
+/** Within each changed block, put all removed lines before the added ones; unchanged lines stay in place. */
 function reorder(lines: DiffLine[]): DiffLine[] {
   const out: DiffLine[] = [];
   let dels: DiffLine[] = [];
@@ -86,6 +92,7 @@ export function collapse(lines: DiffLine[], context = 2): DiffRow[] {
   });
   const rows: DiffRow[] = [];
   let run: DiffLine[] = [];
+  /** Emit the pending unchanged run as one skip row, if there is one. */
   const flush = () => {
     if (run.length) rows.push({ type: "skip", lines: run });
     run = [];

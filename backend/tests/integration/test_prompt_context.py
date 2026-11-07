@@ -43,6 +43,7 @@ def assert_fenced(rendered: str, trusted: str, prompt: str) -> None:
 async def add_version(
     pg: psycopg.AsyncConnection[Any], tenant: Tenant, agent_id: Any, version: int, prompt: str
 ) -> str:
+    """Insert a prompt version for the agent directly and return its id."""
     cur = await pg.execute(
         "INSERT INTO prompt_versions (project_id, agent_id, version, system_prompt, provider, "
         "model, temperature, content_hash) VALUES (%s, %s, %s, %s, 'openai', 'm', 0, %s) "
@@ -76,6 +77,7 @@ async def test_prompt_agent_brief_includes_system_prompt(
     session_factory: async_sessionmaker[AsyncSession],
     pg: psycopg.AsyncConnection[Any],
 ) -> None:
+    """Scenario generation sees the active version's prompt as a fenced block, not older ones."""
     world = await build_world(api, tenant)
     await add_version(pg, tenant, world.agent_id, 1, "OLD-PROMPT-TEXT")
     active = await add_version(pg, tenant, world.agent_id, 2, "NEW-PROMPT-TEXT")
@@ -110,6 +112,7 @@ async def test_voice_agent_brief_unchanged(
     session_factory: async_sessionmaker[AsyncSession],
     pg: psycopg.AsyncConnection[Any],
 ) -> None:
+    """A voice agent's brief ignores any prompt versions stored for it."""
     world = await build_world(api, tenant)
     await add_version(pg, tenant, world.agent_id, 1, "STRAY-PROMPT-TEXT")
     prompt = await generated_prompt(api, tenant, session_factory, pg, world.agent_id)
@@ -121,6 +124,7 @@ async def test_voice_agent_brief_unchanged(
 async def test_judge_agent_info_includes_pinned_prompt(
     api: AsyncClient, tenant: Tenant, database_url: str
 ) -> None:
+    """The judge sees the version the run pinned, not the agent's later active one."""
     call_id, _, run_id = await make_simulation(api, tenant, database_url)
     async with transaction(database_url) as ctx:
         tx = ctx.tx
@@ -149,6 +153,7 @@ async def test_judge_agent_info_includes_pinned_prompt(
 async def test_judge_keeps_injected_prompt_inside_the_data_block(
     api: AsyncClient, tenant: Tenant, database_url: str
 ) -> None:
+    """An injection attempt in the pinned prompt stays inside the judge prompt's data block."""
     call_id, _, run_id = await make_simulation(api, tenant, database_url)
     async with transaction(database_url) as ctx:
         tx = ctx.tx

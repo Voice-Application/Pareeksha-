@@ -103,6 +103,7 @@ def object_args(value: Any) -> tuple[dict[str, Any], str]:
 
 
 def _error_text(resp: httpx.Response, api_key: str | None) -> str:
+    """The provider's error message from ``resp``, with ``api_key`` redacted, cut to 200 chars."""
     try:
         data = resp.json()
         err = data.get("error", data) if isinstance(data, dict) else data

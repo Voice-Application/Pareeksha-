@@ -111,6 +111,7 @@ async def _run_version(
 
 
 async def _checks(database_url: str, run_id: str) -> dict[tuple[str, str], bool | None]:
+    """The run's deterministic check results, keyed by ``(check_type, check_key)``."""
     rows = await fetch_rows(
         database_url,
         "SELECT c.check_type, c.check_key, c.passed FROM deterministic_checks c "
@@ -128,6 +129,11 @@ async def test_prompt_agent_flow_and_version_compare(
     workers: Database,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Two prompt versions run end to end; v2 calls a tool it must not, so compare flags it.
+
+    Covers the transcript, the mocked tool trace, the tool checks and the v1 to v2 compare with the
+    prompt versions each run pinned.
+    """
     fx = await make_fixture(api, tenant, 0, 1, 1)
     await _seed(database_url)
 

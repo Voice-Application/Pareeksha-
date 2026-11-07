@@ -21,6 +21,7 @@ from tests.integration.runs_support import API, make_fixture, plan_in_db
 async def test_read_spec_loads_pinned_version_and_secrets(
     api: AsyncClient, tenant: Tenant, database_url: str, monkeypatch: MonkeyPatch
 ) -> None:
+    """``read_spec`` loads the run's pinned version, not the newer active one, and the secrets."""
     key = Fernet.generate_key().decode()
     monkeypatch.setenv("SECRET_KEY", key)
     fx = await make_fixture(api, tenant, 1, 1, 1)

@@ -26,6 +26,10 @@ def build_chat_provider(
     base_url: str | None = None,
     http: httpx.AsyncClient | None = None,
 ) -> ChatProvider:
+    """The ``ChatProvider`` for ``provider``; OpenAI-style providers default to their public URL.
+
+    ``openai_compatible`` has no default and raises ``ValueError`` without ``base_url``.
+    """
     if provider == "anthropic":
         return AnthropicProvider(base_url, api_key, http)
     if provider == "gemini":

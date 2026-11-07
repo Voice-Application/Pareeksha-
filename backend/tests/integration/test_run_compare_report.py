@@ -151,6 +151,7 @@ async def test_report_escapes_names_and_handles_unfinished_runs(
 
 
 async def _set_snapshot(factory: Factory, run_id: uuid.UUID, snapshot: dict[str, object]) -> None:
+    """Overwrite the run's ``agent_snapshot``."""
     async with factory() as session:
         run = await session.get(models.TestRuns, run_id)
         assert run is not None
@@ -161,6 +162,7 @@ async def _set_snapshot(factory: Factory, run_id: uuid.UUID, snapshot: dict[str,
 async def _compare(
     api: AsyncClient, tenant: Tenant, base: uuid.UUID, head: uuid.UUID
 ) -> dict[str, Any]:
+    """GET ``/runs/compare`` for ``base`` and ``head`` and return the body (asserting 200)."""
     r = await api.get(
         f"{API}/runs/compare",
         params={"base": str(base), "head": str(head)},
@@ -174,6 +176,7 @@ async def _compare(
 async def test_compare_reports_prompt_versions(
     api: AsyncClient, tenant: Tenant, session_factory: Factory
 ) -> None:
+    """Compare reports the prompt version each run pinned."""
     fx = await make_fixture(api, tenant, scenarios=1, personas=1, profiles=1)
     base = await seed_run(api, session_factory, tenant, fx=fx, scores=[(80, True)])
     head = await seed_run(api, session_factory, tenant, fx=fx, scores=[(70, True)])
@@ -207,6 +210,7 @@ async def test_compare_reports_prompt_versions(
 async def test_compare_cells_carry_call_ids(
     api: AsyncClient, tenant: Tenant, session_factory: Factory
 ) -> None:
+    """Each cell lists its base and head call ids; an unscored item has no call yet."""
     fx = await make_fixture(api, tenant, scenarios=2, personas=1, profiles=1)
     base = await seed_run(api, session_factory, tenant, fx=fx, scores=[(80, True), (60, True)])
     head = await seed_run(api, session_factory, tenant, fx=fx, scores=[(70, True), None])
@@ -222,6 +226,7 @@ async def test_compare_cells_carry_call_ids(
 async def test_voice_compare_versions_null(
     api: AsyncClient, tenant: Tenant, session_factory: Factory
 ) -> None:
+    """Runs without a prompt-agent snapshot compare with null prompt versions."""
     base = await seed_run(api, session_factory, tenant, scores=[(80, True)])
     head = await seed_run(api, session_factory, tenant, scores=[(70, True)])
     await _set_snapshot(session_factory, head.run_id, {"adapter_config": {"provider": "x"}})

@@ -46,6 +46,7 @@ def test_migration_sql_is_a_copy_of_the_documented_schema() -> None:
 
 
 async def test_tables_columns_and_indexes_match_schema_sql(engine: AsyncEngine) -> None:
+    """The live schema has the documented tables and indexes, and the models mirror its columns."""
     async with engine.connect() as conn:
         tables, columns, indexes = await conn.run_sync(_live)
     assert tables - POST_V02_TABLES == _documented_tables()

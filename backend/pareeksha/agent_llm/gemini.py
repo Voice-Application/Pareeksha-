@@ -22,6 +22,10 @@ DEFAULT_BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
 
 
 def _response_obj(content: str) -> dict[str, Any]:
+    """A tool result as the JSON object ``functionResponse.response`` requires.
+
+    Text that is not JSON, or JSON that is not an object, is wrapped as ``{"result": ...}``.
+    """
     try:
         parsed = json.loads(content)
     except ValueError:
@@ -30,6 +34,11 @@ def _response_obj(content: str) -> dict[str, Any]:
 
 
 def _tool_call(i: int, part: dict[str, Any]) -> ToolCallReq:
+    """A ``ToolCallReq`` for a ``functionCall`` part, keeping what must be echoed back.
+
+    The model's call id and thought signature go into ``provider_data``; calls without an id get
+    ``call_{i}``.
+    """
     fc = part["functionCall"]
     args, raw = object_args(fc.get("args"))
     data: dict[str, Any] = {}
@@ -47,6 +56,11 @@ def _tool_call(i: int, part: dict[str, Any]) -> ToolCallReq:
 
 
 def _wire(messages: Sequence[AgentMessage]) -> tuple[str, list[dict[str, Any]]]:
+    """Split ``messages`` into Gemini's ``systemInstruction`` text and its ``contents`` list.
+
+    Consecutive tool results share one user turn. Call ids and thought signatures are echoed only
+    when the model sent them.
+    """
     system = "\n\n".join(m.content for m in messages if m.role == "system")
     out: list[dict[str, Any]] = []
     prev_tool = False
@@ -88,6 +102,7 @@ class GeminiProvider:
     def __init__(
         self, base_url: str | None, api_key: str | None, http: httpx.AsyncClient | None = None
     ):
+        """Use ``base_url``, or the public Generative Language API, as the models endpoint root."""
         self._base = (base_url or DEFAULT_BASE_URL).rstrip("/")
         self._key = api_key
         self._http = http
@@ -101,6 +116,12 @@ class GeminiProvider:
         temperature: float,
         timeout_s: float = 60.0,
     ) -> ChatReply:
+        """Send one ``generateContent`` request and parse the reply's text, function calls and
+        usage.
+
+        Tools are declared with full JSON Schema; an unexpected response shape raises
+        ``AgentLLMError``.
+        """
         system, contents = _wire(messages)
         body: dict[str, Any] = {
             "contents": contents,

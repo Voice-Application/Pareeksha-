@@ -52,6 +52,12 @@ async def run_text_call(
     chat: ChatProvider,
     clock: Callable[[], float] = time.monotonic,
 ) -> CallResult:
+    """Run the scenario as a typed conversation between the caller and the version's model.
+
+    Tool calls are answered by mocks, at most ``MAX_TOOL_CALLS_PER_REPLY`` per reply. The call ends
+    when the caller hangs up, at ``max_turns`` or the time limit, when the agent goes silent (or
+    only calls tools for ``max_tool_rounds``), or on a provider error.
+    """
     version = PromptVersionOut.model_validate(spec.agent.adapter_config["prompt_version"])
     scenario = spec.scenario
     t0 = clock()
@@ -109,6 +115,7 @@ async def run_text_call(
         return reply
 
     async def simulate(tool: PromptTool, arguments: dict[str, Any]) -> dict[str, Any]:
+        """Ask the model to invent the tool's result for ``arguments``; it must be a JSON object."""
         prompt = (
             f"Tool: {tool.name}\nDescription: {tool.description}\n"
             f"Arguments: {json.dumps(arguments)}\nReturn the result as a JSON object."
@@ -122,6 +129,7 @@ async def run_text_call(
         return result
 
     def override_for(name: str) -> dict[str, Any] | None:
+        """The scenario's ``mock_result`` for tool ``name``, if an expected call defines one."""
         for exp in scenario.expected_tool_calls:
             if exp.get("name") == name and isinstance(exp.get("mock_result"), dict):
                 return dict(exp["mock_result"])

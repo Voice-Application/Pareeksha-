@@ -81,6 +81,7 @@ async def _chat(p: Any, msgs: list[AgentMessage] = MSGS, tools: list[ToolSpec] =
 
 @pytest.mark.parametrize("family", FAMILIES)
 async def test_parses_text_reply(family: str) -> None:
+    """Each provider family parses a plain text reply and its token usage."""
     p = _provider(family, _json_handler(FAMILIES[family][0], []))
     r = await _chat(p)
     assert (r.text, r.tool_calls, r.input_tokens, r.output_tokens) == ("hello", (), 3, 2)
@@ -88,6 +89,7 @@ async def test_parses_text_reply(family: str) -> None:
 
 @pytest.mark.parametrize("family", FAMILIES)
 async def test_parses_tool_call(family: str) -> None:
+    """Each provider family parses a tool call's name, arguments and id."""
     p = _provider(family, _json_handler(FAMILIES[family][1], []))
     r = await _chat(p)
     (c,) = r.tool_calls
@@ -96,6 +98,7 @@ async def test_parses_tool_call(family: str) -> None:
 
 
 async def test_openai_sends_tools_and_system() -> None:
+    """The OpenAI request carries the bearer key, system message, tools and tool round trip."""
     seen: list[httpx.Request] = []
     await _chat(_provider("openai", _json_handler(OPENAI_TEXT, seen)), TOOL_TURN)
     req = seen[0]
@@ -109,6 +112,7 @@ async def test_openai_sends_tools_and_system() -> None:
 
 
 async def test_anthropic_sends_tools_and_system() -> None:
+    """The Anthropic request carries the key and version headers, system, tools and tool blocks."""
     seen: list[httpx.Request] = []
     await _chat(_provider("anthropic", _json_handler(ANTHROPIC_TEXT, seen)), TOOL_TURN)
     req = seen[0]
@@ -127,6 +131,7 @@ async def test_anthropic_sends_tools_and_system() -> None:
 
 
 async def test_gemini_sends_tools_and_system() -> None:
+    """The Gemini request sends the key as a header (not in the URL), system, tools and parts."""
     seen: list[httpx.Request] = []
     await _chat(_provider("gemini", _json_handler(GEMINI_TEXT, seen)), TOOL_TURN)
     req = seen[0]
@@ -146,6 +151,7 @@ async def test_gemini_sends_tools_and_system() -> None:
 
 
 async def test_invalid_tool_arguments_kept_raw() -> None:
+    """Unparseable tool arguments become ``{"_raw": ...}`` and keep the raw text."""
     payload = json.loads(json.dumps(OPENAI_CALL))
     payload["choices"][0]["message"]["tool_calls"][0]["function"]["arguments"] = "{bad"
     r = await _chat(_provider("openai", _json_handler(payload, [])))
@@ -156,6 +162,8 @@ async def test_invalid_tool_arguments_kept_raw() -> None:
 @pytest.mark.parametrize("family", FAMILIES)
 @pytest.mark.parametrize(("status", "retryable"), [(401, False), (429, True), (503, True)])
 async def test_http_errors_raise_agent_llm_error(family: str, status: int, retryable: bool) -> None:
+    """HTTP errors raise ``AgentLLMError`` with the status and retryability, never the key."""
+
     def handler(req: httpx.Request) -> httpx.Response:
         return httpx.Response(status, json={"error": {"message": f"bad key {KEY}"}})
 
@@ -167,6 +175,8 @@ async def test_http_errors_raise_agent_llm_error(family: str, status: int, retry
 
 
 async def test_timeout_is_retryable_and_key_free() -> None:
+    """A timeout is a retryable ``AgentLLMError`` that does not mention the key."""
+
     def handler(req: httpx.Request) -> httpx.Response:
         raise httpx.ReadTimeout("slow", request=req)
 
@@ -182,6 +192,7 @@ def test_openai_compatible_requires_base_url() -> None:
 
 
 async def test_defaults_and_custom_base_url() -> None:
+    """OpenAI-style providers call their public URLs; ``openai_compatible`` uses ``base_url``."""
     seen: list[httpx.Request] = []
     h = _json_handler(OPENAI_TEXT, seen)
     http = httpx.AsyncClient(transport=httpx.MockTransport(h))
@@ -199,6 +210,7 @@ async def test_defaults_and_custom_base_url() -> None:
 
 
 async def test_gemini_echoes_thought_signature() -> None:
+    """Gemini's thought signature is kept on the tool call and sent back with it."""
     payload = {
         "candidates": [
             {

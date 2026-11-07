@@ -59,6 +59,7 @@ const EMPTY: Form = {
   bias: [],
 };
 
+/** Form state for an existing agent. The API key is write-only, so the key field starts empty. */
 function fromAgent(a: Agent): Form {
   return {
     name: a.name,
@@ -94,6 +95,7 @@ function compileRegex(p: string): { re: RegExp | null; error: string | null } {
 
 type Errors = Record<string, string>;
 
+/** Field errors keyed by input id. Prompt agents skip the endpoint and adapter config checks. */
 function validate(f: Form): Errors {
   const e: Errors = {};
   if (!f.name.trim()) e["agent-name"] = "Enter a name.";
@@ -141,6 +143,10 @@ function validate(f: Form): Errors {
   return e;
 }
 
+/**
+ * The create/update body for a valid form. Prompt agents never send endpoint, adapter config or
+ * expected tools (the server owns them) and send the API key only when one was typed.
+ */
 function toPayload(f: Form): AgentCreate {
   const prompt = f.adapter === "prompt";
   return {
@@ -207,6 +213,10 @@ const ADAPTERS: { value: AgentCreate["adapter"]; label: string; disabled?: boole
   { value: "vapi", label: "vapi", disabled: true, hint: "Vapi is not supported in this build." },
 ];
 
+/**
+ * Create or edit an agent (edit when `agentId` is given). Voice agents get endpoint, adapter and
+ * connection-test fields; prompt agents hide those and show their prompt versions instead.
+ */
 export function AgentForm({ agentId }: { agentId?: string }) {
   const router = useRouter();
   const qc = useQueryClient();

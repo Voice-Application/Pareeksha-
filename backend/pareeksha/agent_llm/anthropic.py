@@ -22,6 +22,11 @@ MAX_TOKENS = 4096
 
 
 def _wire(messages: Sequence[AgentMessage]) -> tuple[str, list[dict[str, Any]]]:
+    """Split ``messages`` into Anthropic's top-level ``system`` text and its ``messages`` list.
+
+    Consecutive tool results share one user turn; an assistant tool-use turn is sent back exactly as
+    the provider returned it (thinking blocks included).
+    """
     system = "\n\n".join(m.content for m in messages if m.role == "system")
     out: list[dict[str, Any]] = []
     prev_tool = False
@@ -61,6 +66,7 @@ class AnthropicProvider:
     def __init__(
         self, base_url: str | None, api_key: str | None, http: httpx.AsyncClient | None = None
     ):
+        """Post to ``{base_url}/messages``, the public Anthropic API when ``base_url`` is empty."""
         self._url = (base_url or DEFAULT_BASE_URL).rstrip("/") + "/messages"
         self._key = api_key
         self._http = http
@@ -74,6 +80,11 @@ class AnthropicProvider:
         temperature: float,
         timeout_s: float = 60.0,
     ) -> ChatReply:
+        """Send one Messages API request and parse the reply's text, tool calls and token usage.
+
+        A 400 that names ``temperature`` (models that reject sampling parameters) is retried once
+        without it; an unexpected response shape raises ``AgentLLMError``.
+        """
         system, wire = _wire(messages)
         body: dict[str, Any] = {
             "model": model,

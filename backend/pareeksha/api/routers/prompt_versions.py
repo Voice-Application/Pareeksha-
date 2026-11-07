@@ -30,6 +30,7 @@ def _out(row: PromptVersions) -> PromptVersionOut:
 
 
 async def _prompt_agent(session: AsyncSession, agent_id: UUID, project_id: UUID) -> Agents:
+    """The project's agent (404 if missing), or 409 ``not_a_prompt_agent`` for other adapters."""
     agent: Agents = await get_or_404(session, Agents, agent_id, project_id, "Agent")
     if agent.adapter != "prompt":
         raise ApiError(409, "not_a_prompt_agent", "This agent is not a prompt agent")
@@ -37,6 +38,10 @@ async def _prompt_agent(session: AsyncSession, agent_id: UUID, project_id: UUID)
 
 
 async def _check_url(base_url: str | None) -> None:
+    """422 ``base_url_not_allowed`` when ``base_url`` fails the SSRF check; empty is allowed.
+
+    The check resolves the host, so it runs in a worker thread.
+    """
     if not base_url:
         return
     try:  # getaddrinfo blocks
@@ -112,6 +117,7 @@ async def list_prompt_versions(agent_id: UUID, key: ReadKey, session: Db) -> lis
 
 
 async def _version(session: AsyncSession, agent: Agents, version: int) -> PromptVersions:
+    """The agent's version number ``version`` within its project, or 404."""
     row = (
         await session.scalars(
             select(PromptVersions).where(

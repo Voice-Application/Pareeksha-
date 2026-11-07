@@ -30,6 +30,7 @@ def _text(content: Any) -> str:
 
 
 def _wire(m: AgentMessage) -> dict[str, Any]:
+    """One message in Chat Completions format; assistant tool calls keep their raw argument text."""
     if m.role == "tool":
         return {"role": "tool", "tool_call_id": m.tool_call_id, "content": m.content}
     out: dict[str, Any] = {"role": m.role, "content": m.content}
@@ -64,6 +65,11 @@ class OpenAICompatProvider:
         temperature: float,
         timeout_s: float = 60.0,
     ) -> ChatReply:
+        """Send one Chat Completions request and parse the reply's text, tool calls and token usage.
+
+        A 400 that names ``temperature`` (reasoning models) is retried once without it; an
+        unexpected response shape raises ``AgentLLMError``.
+        """
         body: dict[str, Any] = {
             "model": model,
             "temperature": temperature,

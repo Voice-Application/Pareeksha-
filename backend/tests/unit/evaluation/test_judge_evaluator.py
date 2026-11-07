@@ -130,6 +130,7 @@ async def test_provider_errors_propagate_for_retry_routing() -> None:
 
 
 def test_check_failure_types_cover_every_check_type() -> None:
+    """Every deterministic check type has a judge failure type."""
     assert set(CHECK_FAILURE_TYPES) == {
         "disclosure_present",
         "forbidden_absent",

@@ -16,6 +16,7 @@ def _body(**over: Any) -> PromptVersionCreate:
 
 
 def _tool(name: str = "refund", parameters: dict[str, Any] | None = None) -> dict[str, Any]:
+    """A minimal tool dict; ``parameters`` defaults to an object schema."""
     return {"name": name, "parameters": parameters or {"type": "object"}}
 
 
@@ -30,10 +31,12 @@ def test_tool_parameters_must_be_object_schema() -> None:
 
 
 def test_content_hash_ignores_note() -> None:
+    """The content hash ignores the note but changes with the settings."""
     assert content_hash(_body(note="a")) == content_hash(_body(note="b"))
     assert content_hash(_body()) != content_hash(_body(temperature=0.9))
 
 
 def test_prompt_is_valid_adapter() -> None:
+    """``prompt`` is an accepted ``AgentTarget`` adapter, with an empty endpoint."""
     target = AgentTarget(agent_id=uuid.uuid4(), adapter="prompt", endpoint_url="")
     assert target.adapter == "prompt"
