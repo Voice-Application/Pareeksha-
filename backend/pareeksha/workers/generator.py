@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import random
 import uuid
 from collections.abc import Callable, Sequence
 from functools import lru_cache
@@ -25,7 +26,16 @@ from pareeksha.llm.base import LLMError, LLMRetryableError
 from pareeksha.llm.client import JSONGenerationError, LLMClient, UsageRecord
 from pareeksha.llm.config import LLMConfigError, LLMSettings
 from pareeksha.llm.factory import build_provider
+from pareeksha.rag.guard import platform_llm_may_see_kb
+from pareeksha.rag.questions import (
+    generate_questions,
+    locate_quote,
+    question_scenario,
+    sample_passages,
+    split_counts,
+)
 from pareeksha.scenario_gen.generator import AgentBrief, generate_scenarios
+from pareeksha.schemas.rag import RagExpectation
 
 log = logging.getLogger(__name__)
 GROUP = "generator"
@@ -61,6 +71,81 @@ async def _finish(
     )
 
 
+async def _fail(conn: psycopg.AsyncConnection[Any], draft_id: uuid.UUID, reason: str) -> list[Any]:
+    await _finish(conn, draft_id, "failed", [], reason[:MAX_ERROR_CHARS])
+    return []
+
+
+async def _generate_rag(
+    conn: psycopg.AsyncConnection[Any],
+    p: ScenarioGenerateRequested,
+    request: dict[str, Any],
+    client: LLMClient,
+    attempt: int,
+) -> list[Any]:
+    """Ground-truth questions from a knowledge base (``request.kind == "rag"``)."""
+    kb = await _one(
+        conn,
+        "SELECT kb.name, kb.description, kb.local_only FROM knowledge_bases kb "
+        "JOIN agents a ON a.project_id = kb.project_id WHERE kb.id = %s AND a.id = %s",
+        (request["kb_id"], p.agent_id),
+    )
+    if kb is None:
+        return await _fail(conn, p.draft_id, "knowledge base no longer exists")
+    if not platform_llm_may_see_kb(kb[2]):  # re-checked: it may have been switched since the POST
+        return await _fail(conn, p.draft_id, "local_only: the platform LLM cannot read this KB")
+    cur = await conn.execute(
+        "SELECT id, filename, text FROM kb_documents WHERE kb_id = %s AND deleted_at IS NULL "
+        "ORDER BY created_at, id",
+        (request["kb_id"],),
+    )
+    docs = {d[0]: (d[0], d[1], d[2]) for d in await cur.fetchall()}
+    n_answerable, n_unanswerable = split_counts(p.count, float(request["unanswerable_share"]))
+    passages = sample_passages(list(docs.values()), n_answerable, random.Random(p.draft_id.int))
+    if not passages:
+        return await _fail(conn, p.draft_id, "the knowledge base has no text to ask about")
+    n_answerable = len(passages)
+    try:
+        batch = await generate_questions(
+            client, kb[0], kb[1], passages, n_answerable, n_unanswerable
+        )
+    except (JSONGenerationError, LLMConfigError) as exc:
+        return await _fail(conn, p.draft_id, str(exc))
+    except LLMRetryableError as exc:
+        if attempt >= MAX_ATTEMPTS:
+            return await _fail(conn, p.draft_id, f"LLM unavailable: {exc}")
+        raise
+    except LLMError as exc:
+        return await _fail(conn, p.draft_id, str(exc))
+    drafts: list[dict[str, Any]] = []
+    unmatched = 0
+    for q in batch.questions:
+        question = q.question.strip()
+        if not question:
+            unmatched += 1
+            continue
+        if q.answerable:
+            assert q.passage is not None  # semantic_check guarantees it
+            doc_id = passages[q.passage - 1].document_id
+            span = locate_quote(docs[doc_id][2], q.quote)
+            if span is None:  # never store a wrong span
+                unmatched += 1
+                continue
+            expectation = RagExpectation(
+                source_document_id=doc_id, source_span=span, reference_answer=q.reference_answer
+            )
+        else:
+            expectation = RagExpectation(answerable=False)
+        scenario = question_scenario(p.agent_id, question, q.reference_answer, expectation)
+        drafts.append(scenario.model_dump(mode="json"))
+    await conn.execute(
+        "UPDATE scenario_drafts SET request = request || %s WHERE id = %s",
+        (Jsonb({"unmatched": unmatched}), p.draft_id),
+    )
+    await _finish(conn, p.draft_id, "ready", drafts, None)
+    return []
+
+
 async def handle_generate_requested(
     env: Envelope[ScenarioGenerateRequested],
     ctx: Ctx,
@@ -69,7 +154,7 @@ async def handle_generate_requested(
     p = env.payload
     conn = ctx.tx
     draft = await _one(
-        conn, "SELECT status FROM scenario_drafts WHERE id = %s FOR UPDATE", (p.draft_id,)
+        conn, "SELECT status, request FROM scenario_drafts WHERE id = %s FOR UPDATE", (p.draft_id,)
     )
     if draft is None:
         log.warning("draft %s no longer exists", p.draft_id)
@@ -106,6 +191,8 @@ async def handle_generate_requested(
             ),
         )
 
+    if (draft[1] or {}).get("kind") == "rag":
+        return await _generate_rag(conn, p, draft[1], llm_for(sink), ctx.attempt)
     name, description, languages, tools, disclosures, forbidden, adapter, adapter_config = agent
     if adapter == "prompt":  # the ACTIVE version: scenarios are written for what runs next
         version_id = (adapter_config or {}).get("active_version_id")

@@ -9,7 +9,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 from pareeksha.schemas.common import RequestModel
-from pareeksha.schemas.rag import RagExpectation
+from pareeksha.schemas.rag import RagDraftRequest, RagExpectation
 
 ScenarioSource = Literal["manual", "generated", "promoted"]
 DraftStatus = Literal["pending", "ready", "failed"]
@@ -83,7 +83,7 @@ class ScenarioDraftOut(BaseModel):
     id: UUID
     agent_id: UUID
     status: DraftStatus
-    request: ScenarioGenerateRequest
+    request: ScenarioGenerateRequest | RagDraftRequest
     drafts: list[ScenarioCreate] = Field(default_factory=list)
     error: str | None = None
     created_at: datetime

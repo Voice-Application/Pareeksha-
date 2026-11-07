@@ -198,3 +198,31 @@ class KbChunkOut(BaseModel):
     end_char: int
     parent_start: int
     parent_end: int
+
+
+class QuestionGenerateRequest(RequestModel):
+    """``POST /knowledge-bases/{id}/questions:generate``."""
+
+    agent_id: UUID
+    count: int = Field(ge=1, le=50, examples=[10])
+    unanswerable_share: float = Field(default=0.2, ge=0, le=1)
+
+
+class RagDraftRequest(BaseModel):
+    """The ``request`` of a draft made by KB question generation (``kind == "rag"``)."""
+
+    kind: Literal["rag"]
+    kb_id: UUID
+    count: int
+    unanswerable_share: float
+    unmatched: int = 0  # questions dropped because their quote was not in the document
+
+
+class QuestionUnmatched(BaseModel):
+    row: int = Field(description="1-based, header excluded")
+    reason: Literal["document_not_found", "quote_not_found", "empty_question"]
+
+
+class QuestionImportResult(BaseModel):
+    created: int
+    unmatched: list[QuestionUnmatched]

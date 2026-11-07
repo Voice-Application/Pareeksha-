@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, File, Query, Response, UploadFile
+from fastapi import APIRouter, File, Form, Query, Response, UploadFile
 from sqlalchemy import func, select
 
 from pareeksha.api.auth import ReadKey, WriteKey
@@ -17,12 +17,26 @@ from pareeksha.api.deps import AUTH_ERRORS, Blobs, Db, Pagination, errors
 from pareeksha.api.errors import ApiError
 from pareeksha.api.outbox import enqueue_event
 from pareeksha.api.routers.integrations import _secret_box
+from pareeksha.api.routers.scenarios import _cols
 from pareeksha.audit.ingest import MAX_UPLOAD_BYTES
-from pareeksha.db.models import KbChunks, KbDocuments, KbIndexes, KnowledgeBases
-from pareeksha.events.schemas import KbIndexRequested, make_envelope
+from pareeksha.db.models import (
+    Agents,
+    KbChunks,
+    KbDocuments,
+    KbIndexes,
+    KnowledgeBases,
+    ScenarioDrafts,
+    Scenarios,
+)
+from pareeksha.events.schemas import (
+    KbIndexRequested,
+    ScenarioGenerateRequested,
+    make_envelope,
+)
 from pareeksha.rag.documents import active_document_ids
 from pareeksha.rag.extract import ExtractionError, extract_text
-from pareeksha.rag.guard import LocalOnlyError, require_local_embedding
+from pareeksha.rag.guard import LocalOnlyError, platform_llm_may_see_kb, require_local_embedding
+from pareeksha.rag.questions import CsvError, locate_quote, parse_csv, question_scenario
 from pareeksha.schemas.common import Page
 from pareeksha.schemas.rag import (
     KbChunkOut,
@@ -34,8 +48,13 @@ from pareeksha.schemas.rag import (
     KnowledgeBaseCreate,
     KnowledgeBaseOut,
     KnowledgeBaseUpdate,
+    QuestionGenerateRequest,
+    QuestionImportResult,
+    QuestionUnmatched,
+    RagExpectation,
     index_key_for,
 )
+from pareeksha.schemas.scenarios import DraftAccepted
 
 router = APIRouter(tags=["knowledge-bases"], responses=AUTH_ERRORS)
 
@@ -353,3 +372,106 @@ async def list_chunks(
         stmt = stmt.where(KbChunks.document_id == document_id)
     rows = await session.scalars(stmt.order_by(KbChunks.ordinal).offset(offset).limit(limit))
     return [KbChunkOut.model_validate(r) for r in rows]
+
+
+@router.post(
+    "/knowledge-bases/{kb_id}/questions:generate",
+    status_code=202,
+    responses=errors(404, 409, 422),
+    summary="Generate ground-truth questions from the documents (drafts to review)",
+)
+async def generate_questions(
+    kb_id: UUID, body: QuestionGenerateRequest, key: WriteKey, session: Db
+) -> DraftAccepted:
+    kb = await get_or_404(session, KnowledgeBases, kb_id, key.project_id, "Knowledge base")
+    agent = await get_or_404(session, Agents, body.agent_id, key.project_id, "Agent")
+    if not platform_llm_may_see_kb(kb.local_only):
+        raise ApiError(
+            409, "local_only", "Knowledge base is local-only: the platform LLM cannot read it"
+        )
+    if not await active_document_ids(session, kb.id):
+        raise ApiError(422, "validation_error", "Upload at least one document first")
+    draft = ScenarioDrafts(
+        agent_id=agent.id,
+        status="pending",
+        request={
+            "kind": "rag",
+            "kb_id": str(kb.id),
+            "count": body.count,
+            "unanswerable_share": body.unanswerable_share,
+        },
+    )
+    session.add(draft)
+    await flush(session, "Draft could not be created")
+    enqueue_event(
+        session,
+        make_envelope(
+            ScenarioGenerateRequested(
+                draft_id=draft.id, agent_id=agent.id, count=body.count, mix={}
+            ),
+            producer="api",
+            correlation_id=str(draft.id),
+        ),
+    )
+    return DraftAccepted(draft_id=draft.id)
+
+
+@router.post(
+    "/knowledge-bases/{kb_id}/questions:import",
+    responses=errors(404, 413, 422),
+    summary="Import ground-truth questions from CSV (question, expected_answer, "
+    "source_document, source_quote)",
+)
+async def import_questions(
+    kb_id: UUID,
+    key: WriteKey,
+    session: Db,
+    agent_id: Annotated[UUID, Form()],
+    file: Annotated[UploadFile, File(description="CSV, at most 10 MB and 1000 rows")],
+) -> QuestionImportResult:
+    kb = await get_or_404(session, KnowledgeBases, kb_id, key.project_id, "Knowledge base")
+    agent = await get_or_404(session, Agents, agent_id, key.project_id, "Agent")
+    data = await file.read(MAX_UPLOAD_BYTES + 1)
+    if len(data) > MAX_UPLOAD_BYTES:
+        raise ApiError(
+            413, "file_too_large", "File is larger than 10 MB", {"max_bytes": MAX_UPLOAD_BYTES}
+        )
+    try:
+        rows = parse_csv(data)
+    except CsvError as exc:
+        raise ApiError(422, "validation_error", str(exc)) from exc
+    ids = await active_document_ids(session, kb.id)
+    found = await session.execute(
+        select(KbDocuments.id, KbDocuments.filename, KbDocuments.text).where(
+            KbDocuments.id.in_(ids)
+        )
+    )
+    by_name: dict[str, tuple[UUID, str]] = {}
+    for doc_id, filename, text in sorted(found.all(), key=lambda r: ids.index(r[0])):
+        by_name.setdefault(filename.lower(), (doc_id, text))
+
+    unmatched: list[QuestionUnmatched] = []
+    created: list[Scenarios] = []
+    for n, row in enumerate(rows, 1):
+        if not row["question"]:
+            unmatched.append(QuestionUnmatched(row=n, reason="empty_question"))
+            continue
+        if not row["source_quote"]:  # no quote = the knowledge base does not answer it
+            expectation = RagExpectation(answerable=False, reference_answer=row["expected_answer"])
+        else:
+            doc = by_name.get(row["source_document"].lower())
+            if doc is None:
+                unmatched.append(QuestionUnmatched(row=n, reason="document_not_found"))
+                continue
+            span = locate_quote(doc[1], row["source_quote"])
+            if span is None:
+                unmatched.append(QuestionUnmatched(row=n, reason="quote_not_found"))
+                continue
+            expectation = RagExpectation(
+                source_document_id=doc[0], source_span=span, reference_answer=row["expected_answer"]
+            )
+        scenario = question_scenario(agent.id, row["question"], row["expected_answer"], expectation)
+        created.append(Scenarios(project_id=key.project_id, source="manual", **_cols(scenario)))
+    session.add_all(created)
+    await flush(session, "Scenarios could not be saved")
+    return QuestionImportResult(created=len(created), unmatched=unmatched)
