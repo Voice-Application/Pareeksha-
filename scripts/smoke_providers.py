@@ -27,6 +27,8 @@ Keys are read ONLY from environment variables, never from arguments, files or ``
     AWS_BEARER_TOKEN_BEDROCK      embed bedrock (a Bedrock API key, sent as a bearer token;
                                   SigV4 access keys are not supported), with
       AWS_REGION                    default us-east-1 (falls back to AWS_DEFAULT_REGION)
+    OLLAMA_BASE_URL               embed ollama (keyless; e.g. http://localhost:11434/v1, the
+                                  same server Pareeksha trusts; default model qwen3-embedding:0.6b)
 
 Models default to a small current model per provider and are overridden with
 ``SMOKE_<PROVIDER>_MODEL`` (chat), ``SMOKE_<PROVIDER>_EMBED_MODEL`` (embed) and
@@ -62,6 +64,7 @@ from pareeksha.rag.rerank import build_reranker  # noqa: E402
 from pareeksha.schemas.rag import EmbeddingConfig  # noqa: E402
 
 Kind = Literal["chat", "embed", "rerank"]
+OLLAMA_ENV = "OLLAMA_BASE_URL"
 
 KEY_ENVS = {
     "openai": "OPENAI_API_KEY",
@@ -94,6 +97,7 @@ EMBED_MODELS = {
     "jina": "jina-embeddings-v3",
     "mistral": "mistral-embed",
     "bedrock": "amazon.titan-embed-text-v2:0",
+    "ollama": "qwen3-embedding:0.6b",
 }
 RERANK_MODELS = {
     "cohere": "rerank-v3.5",
@@ -159,8 +163,15 @@ def _model(kind: Kind, provider: str, default: str) -> str:
 
 
 def _key(provider: str) -> str:
-    """The provider's key from the environment, or "" when unset."""
-    return os.environ.get(KEY_ENVS[provider], "").strip()
+    """The provider's key from the environment, or "" when unset (Ollama needs none)."""
+    return os.environ.get(KEY_ENVS[provider], "").strip() if provider in KEY_ENVS else ""
+
+
+def _missing(provider: str) -> str | None:
+    """Why `provider` is skipped (the env var it needs), or None when it can run."""
+    if provider == "ollama":
+        return None if os.environ.get(OLLAMA_ENV, "").strip() else f"{OLLAMA_ENV} not set"
+    return None if _key(provider) else f"{KEY_ENVS[provider]} not set"
 
 
 async def check_chat(provider: str, model: str, key: str) -> str:
@@ -232,8 +243,9 @@ async def run_one(
         default_model = os.environ.get("AZURE_OPENAI_EMBEDDING_DEPLOYMENT", "").strip()
     model = _model(kind, provider, default_model)
     key = _key(provider)
-    if not key:
-        return Result("SKIP", kind, provider, model or "-", 0, f"{KEY_ENVS[provider]} not set")
+    missing = _missing(provider)
+    if missing:
+        return Result("SKIP", kind, provider, model or "-", 0, missing)
     start = time.monotonic()
     try:
         detail = await runner(provider, model, key)

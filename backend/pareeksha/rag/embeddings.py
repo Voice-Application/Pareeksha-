@@ -14,6 +14,7 @@ from urllib.parse import quote
 import httpx
 
 from pareeksha.agent_llm.base import AgentLLMError, post_json
+from pareeksha.agent_llm.url_guard import ollama_base_url
 from pareeksha.schemas.rag import EmbeddingConfig
 
 BATCH_SIZE = 64
@@ -22,11 +23,11 @@ Kind = Literal["query", "document"]
 _MODELS: dict[str, Any] = {}
 _LOCK = threading.Lock()
 
+#: Public endpoints; Ollama's comes from ``ollama_base_url()`` (``OLLAMA_BASE_URL``).
 _BASE_URLS = {
     "openai": "https://api.openai.com/v1",
     "mistral": "https://api.mistral.ai/v1",
     "jina": "https://api.jina.ai/v1",
-    "ollama": "http://localhost:11434/v1",
 }
 _GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta"
 
@@ -91,7 +92,8 @@ class HostedEmbedder:
         p = cfg.provider
         if p in ("openai_compatible", "azure_openai", "bedrock") and not cfg.base_url:
             raise ValueError(f"{p} embeddings require base_url")
-        self._base = (cfg.base_url or _BASE_URLS.get(p) or "").rstrip("/")
+        default = ollama_base_url() if p == "ollama" else _BASE_URLS.get(p)
+        self._base = (cfg.base_url or default or "").rstrip("/")
 
     async def _post(
         self, url: str, headers: dict[str, str], body: dict[str, Any]

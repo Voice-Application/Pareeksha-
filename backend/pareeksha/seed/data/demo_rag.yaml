@@ -25,8 +25,8 @@ agent:
   description: "Demo prompt agent that answers from the Sahay Finance FAQ knowledge base. Safe to delete."
   languages: [en-IN, hi-IN]
   version:
-    provider: gemini
-    model: gemini-2.5-flash
+    provider: deepseek
+    model: deepseek-flash
     temperature: 0.2
     note: "Demo v1"
     system_prompt: |-
@@ -37,14 +37,15 @@ agent:
       Context:
       {{context}}
 
-# ₹ per 1M tokens, so the report can show cost and savings. Approximate list price; edit or delete
-# it under Settings → Pricing. An existing price for the same model is never overwritten.
+# ₹ per 1M tokens, so the report can show cost and savings: deepseek-flash at the off-peak list
+# price ($0.15 in / $0.60 out, api-docs.deepseek.com, 2026-11; peak hours cost double) at about
+# ₹88 per $. Edit or delete it under Settings → Pricing. An existing price is never overwritten.
 price:
   kind: llm
-  provider: gemini
-  model: gemini-2.5-flash
-  input_per_m_inr: 26
-  output_per_m_inr: 220
+  provider: deepseek
+  model: deepseek-flash
+  input_per_m_inr: 13
+  output_per_m_inr: 53
 
 persona: "Neha — switcher"
 noise_profile: clean_16k

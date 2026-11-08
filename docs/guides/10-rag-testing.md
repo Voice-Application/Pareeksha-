@@ -26,6 +26,14 @@ pareeksha kb index --kb faq --strategy fixed --size 800 --overlap 0 --wait
 
 The default embedding model is `local:intfloat/multilingual-e5-large`. Pass `--embedding provider:model` to use a hosted one, and set its key with `pareeksha kb create --embedding-key-env VAR` or `pareeksha kb set-keys`. Keys are write-only: stored encrypted, never returned.
 
+**Ollama.** To embed with a model on your own Ollama server (for example `qwen3-embedding:0.6b`, 1024 dimensions, multilingual), set `OLLAMA_BASE_URL` in `.env` and restart the stack. In Docker, `localhost` is the container itself, so use the host's address: `OLLAMA_BASE_URL=http://host.docker.internal:11434/v1`. Then choose provider `ollama` in the web app, or pass it on the CLI:
+
+```bash
+pareeksha kb index --kb faq --embedding ollama:qwen3-embedding:0.6b --wait
+```
+
+That one server is trusted without `AGENT_LLM_ALLOW_PRIVATE_URLS`, and it counts as local, so a local-only knowledge base may embed with it. Use the same embedding in the RAG config of the prompt version or matrix, since runs embed each question with it.
+
 **Chunking trade-offs.**
 
 - Small chunks (200 to 400 characters) find the exact sentence and keep the prompt short, but a fact that spans two paragraphs gets cut in half.
