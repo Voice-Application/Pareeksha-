@@ -63,6 +63,8 @@ The CSV has four columns: `question`, `expected_answer`, `source_document` (the 
 
 Generated questions are drafted by the platform LLM from your document text and each quote is checked against the document. Generation is refused for a local-only knowledge base. Review the drafts in the web app before you save them; the imported or saved questions become scenarios tagged `rag`.
 
+In the web app, both are on the knowledge base page under **Questions**. The panel lists the questions on this knowledge base's documents plus every unanswerable one. **Generate** shows the drafts for review; untick the ones you do not want. **Import CSV** offers an example file with the four columns, reports how many questions were created, and lists every skipped row with its reason.
+
 You need at least 10 questions with a known source before the report will recommend a config, and 30 or more before the confidence intervals are useful.
 
 ## 4. Run the matrix

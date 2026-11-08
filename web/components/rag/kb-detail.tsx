@@ -13,6 +13,7 @@ import { DataTable, type Column } from "@/components/ui/data-table";
 import { ErrorPanel, PageError, Skeleton, TableSkeleton } from "@/components/ui/states";
 import { NumberField, SelectField, TextField } from "@/components/ui/field";
 import { IndexChip, useBuildIndex, useIndexes } from "./index-status";
+import { KbQuestions } from "./kb-questions";
 import { useToast } from "@/components/ui/toast";
 
 type FileResult = { name: string; tone: "ok" | "info" | "error"; text: string };
@@ -337,6 +338,7 @@ export function KbDetail({ id }: { id: string }) {
       <div className="grid gap-6">
         <Documents kbId={id} />
         <Indexes kbId={id} hasDocs={(docs.data?.length ?? 0) > 0} />
+        <KbQuestions kbId={id} localOnly={kb.data.local_only} />
         <ProviderKeys kb={kb.data} />
       </div>
     </>
