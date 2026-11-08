@@ -9,8 +9,14 @@ PKG = Path(__file__).resolve().parents[2] / "pareeksha"
 
 # Hosts / SDKs only the owning module may reference. Allowed: where each lives.
 RULES = {
-    r"api\.deepseek\.com": {"llm"},
-    r"generativelanguage\.googleapis\.com|google\.genai|google\.generativeai": {"llm"},
+    # agent_llm calls the customer's model under test (tool calling); llm is Pareeksha's own LLM;
+    # rag holds the customer-selected embedding providers (Gemini embeddings).
+    r"api\.deepseek\.com": {"llm", "agent_llm"},
+    r"generativelanguage\.googleapis\.com|google\.genai|google\.generativeai": {
+        "llm",
+        "agent_llm",
+        "rag",
+    },
     r"inya\.ai|gnani\.ai": {"gnani", "speech"},
     r"^\s*(from|import)\s+gnani\b": {"gnani", "speech"},
 }

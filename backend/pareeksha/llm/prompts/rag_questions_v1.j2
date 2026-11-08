@@ -1,0 +1,20 @@
+You write test questions for a support chatbot that answers from a knowledge base called "{{ kb.name }}"{% if kb.description %} ({{ kb.description }}){% endif %}. The questions are asked by customers and checked later against the source text, so every answerable question must be answerable from exactly one passage below.
+
+## Passages
+{% for p in passages %}
+### Passage {{ p.n }} (from {{ p.filename }})
+{{ p.text }}
+{% endfor %}
+## Task
+Write {{ n_answerable + n_unanswerable }} questions:
+- {{ n_answerable }} answerable questions, each about a different passage where possible. Set "passage" to the passage number, "answerable" to true, "reference_answer" to a short correct answer, and "quote" to ONE contiguous sentence or phrase copied character for character from that passage that contains the answer.
+- {{ n_unanswerable }} unanswerable questions: realistic questions on the knowledge base's topic whose answer is NOT in any passage above. Set "passage" to null, "answerable" to false, "reference_answer" and "quote" to "".
+
+## Rules
+- Write each question the way a customer would ask it, in the language of the passage. Do not mention "the passage" or "the document".
+- Never invent facts for the reference answer; use only the passage text.
+- The quote must be copied exactly, never paraphrased.
+
+## Output
+Return json only, an object with exactly {{ n_answerable + n_unanswerable }} questions, for example:
+{"questions": [{"passage": 1, "question": "How many days do I have to return an item?", "reference_answer": "7 days from delivery.", "quote": "Items can be returned within 7 days of delivery.", "answerable": true}, {"passage": null, "question": "Do you ship to Nepal?", "reference_answer": "", "quote": "", "answerable": false}]}

@@ -4,7 +4,7 @@ Frozen as code on 23 Oct 2026 for the Day 1 checkpoint. After approval, any chan
 
 ## 1. Kafka topics (`backend/pareeksha/events/topics.py`)
 
-12 topics, all `pareeksha.<name>.v1`. Work topics 6 partitions, others 3; retention 7 days (progress 1 day, DLQ 30 days). A test checks this module against `03-TRD.md` section 10.2 and `create-topics.sh`.
+13 topics, all `pareeksha.<name>.v1`. Work topics 6 partitions, others 3; retention 7 days (progress 1 day, DLQ 30 days). A test checks this module against `03-TRD.md` section 10.2 and `create-topics.sh`.
 
 | Topic | Key | Producer to consumer group |
 |---|---|---|
@@ -16,6 +16,7 @@ Frozen as code on 23 Oct 2026 for the Day 1 checkpoint. After approval, any chan
 | `run.completed` | run_id | finalizer to integrations |
 | `progress` | run_id or call_id | all workers to API SSE |
 | `scenario.generate.requested` | agent_id | api to generator |
+| `kb.index.requested` | kb_id | api to indexer |
 | `dialect.clip.requested` | sample_id | api to dialect |
 | `retry.30s`, `retry.5m`, `dlq` | original key | any consumer to retrier / dlq-recorder |
 
@@ -35,6 +36,7 @@ Envelope: `event_id, type, version, occurred_at (UTC), correlation_id, causation
 | `run.completed` | run_id, agent_id, kind, status, summary (counts, pass_rate, critical_failures, score_mean, suite_passed?) |
 | `progress` | kind (`item.status`, `call.evaluated`, `run.completed`), run_id?, call_id?, plus the SSE fields of that kind |
 | `scenario.generate.requested` | draft_id, agent_id, count, mix |
+| `kb.index.requested` | index_id, kb_id |
 | `dialect.clip.requested` | report_id, dataset_id, sample_id, noise_profile_id, engines, expected_results |
 
 Additive behaviour (EVAL-03b, no schema change): `run.completed` has the per-run event id `uuid5(run_id, "run.completed")` (not per input event) and is emitted exactly once per run, by the finalizer consumer or by the finalizer's completion reconciler (via the outbox), whichever wins the atomic claim (`UPDATE test_runs ... WHERE finished_at IS NULL`). It is also emitted for a run the API cancelled (`status: "cancelled"` in the payload) once every item is terminal; the finalizer never changes a `cancelled` run's status, it only fills `summary` and `finished_at`. `run_items.status` goes `completed -> evaluating` when the evaluator starts judging.

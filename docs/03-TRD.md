@@ -161,6 +161,7 @@ Triggered by `audit.requested` (from `POST /audits`, the inbound webhook connect
 | `pareeksha.progress.v1` | run_id or call_id | all workers | api SSE (unique group per API instance, `auto.offset.reset=latest`) | 3 |
 | `pareeksha.scenario.generate.requested.v1` | agent_id | api (outbox) | generator | 3 |
 | `pareeksha.dialect.clip.requested.v1` | sample_id | api (outbox) | dialect | 6 |
+| `pareeksha.kb.index.requested.v1` | kb_id | api (outbox) | indexer | 3 |
 | `pareeksha.retry.30s.v1` | original key | any consumer | retrier | 3 |
 | `pareeksha.retry.5m.v1` | original key | any consumer | retrier | 3 |
 | `pareeksha.dlq.v1` | original key | any consumer | dlq-recorder | 3 |

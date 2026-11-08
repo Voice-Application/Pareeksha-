@@ -7,7 +7,7 @@ import binascii
 import json
 from collections.abc import Callable
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 from uuid import UUID
 
 from sqlalchemy import delete, select, tuple_
@@ -16,6 +16,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from pareeksha.api.deps import PageParams
 from pareeksha.api.errors import ApiError
+from pareeksha.db.models import Agents, PromptVersions
+
+#: Server-owned key in ``agents.adapter_config``; clients may not set it.
+ACTIVE_VERSION_KEY = "active_version_id"
 
 _UNIQUE_VIOLATION = "23505"
 _FOREIGN_KEY_VIOLATION = "23503"
@@ -117,3 +121,21 @@ async def flush(session: AsyncSession, conflict_message: str, refresh: Any = Non
             await session.refresh(refresh)
     except IntegrityError as exc:
         raise constraint_error(exc, conflict_message) from exc
+
+
+async def active_version(session: AsyncSession, agent: Agents) -> PromptVersions | None:
+    """The agent's active prompt version, only if it belongs to this agent and project."""
+    active_id = cast(dict[str, Any], agent.adapter_config).get(ACTIVE_VERSION_KEY)
+    if not active_id:
+        return None
+    try:
+        version_id = UUID(str(active_id))
+    except ValueError:
+        return None
+    return await session.scalar(
+        select(PromptVersions).where(
+            PromptVersions.id == version_id,
+            PromptVersions.agent_id == agent.id,
+            PromptVersions.project_id == agent.project_id,
+        )
+    )

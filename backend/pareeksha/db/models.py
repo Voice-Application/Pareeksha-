@@ -7,13 +7,15 @@ migration test compares these tables and columns with the live schema.
 import datetime
 import decimal
 import uuid
-from typing import Optional
+from typing import Any, Optional
 
 from sqlalchemy import (
+    REAL,
     BigInteger,
     Boolean,
     CheckConstraint,
     DateTime,
+    Float,
     ForeignKeyConstraint,
     Index,
     Integer,
@@ -437,6 +439,7 @@ class Scenarios(Base):
     )
     agent_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)
     source_call_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)
+    rag_expectation: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
 
     regression_tests: Mapped[list["RegressionTests"]] = relationship(
         "RegressionTests", back_populates="scenario"
@@ -451,7 +454,7 @@ class Agents(Base):
     __tablename__ = "agents"
     __table_args__ = (
         CheckConstraint(
-            "adapter = ANY (ARRAY['audio_v1'::text, 'pipecat'::text, 'livekit'::text, 'vapi'::text])",
+            "adapter = ANY (ARRAY['audio_v1'::text, 'pipecat'::text, 'livekit'::text, 'vapi'::text, 'prompt'::text])",
             name="agents_adapter_check",
         ),
         CheckConstraint(
@@ -591,7 +594,7 @@ class DeterministicChecks(Base):
     __tablename__ = "deterministic_checks"
     __table_args__ = (
         CheckConstraint(
-            "check_type = ANY (ARRAY['disclosure_present'::text, 'forbidden_absent'::text, 'language_match'::text, 'tool_calls_expected'::text, 'no_loop'::text, 'amount_confirmed'::text])",
+            "check_type = ANY (ARRAY['disclosure_present'::text, 'forbidden_absent'::text, 'language_match'::text, 'tool_calls_expected'::text, 'no_loop'::text, 'amount_confirmed'::text, 'no_unexpected_tool'::text])",
             name="deterministic_checks_check_type_check",
         ),
         ForeignKeyConstraint(
@@ -1370,6 +1373,247 @@ class Users(Base):
         DateTime(True), nullable=False, server_default=text("now()")
     )
     last_login_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(True))
+
+
+class PromptVersions(Base):
+    """Immutable prompt-agent definitions (Alembic revision 0004; not in docs/schema.sql v0.2)."""
+
+    __tablename__ = "prompt_versions"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["agent_id"], ["agents.id"], ondelete="CASCADE", name="prompt_versions_agent_id_fkey"
+        ),
+        ForeignKeyConstraint(
+            ["project_id"],
+            ["projects.id"],
+            ondelete="CASCADE",
+            name="prompt_versions_project_id_fkey",
+        ),
+        PrimaryKeyConstraint("id", name="prompt_versions_pkey"),
+        UniqueConstraint("agent_id", "version", name="prompt_versions_agent_id_version_key"),
+        Index("prompt_versions_agent_id_idx", "agent_id"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, server_default=text("gen_random_uuid()")
+    )
+    project_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    agent_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    system_prompt: Mapped[str] = mapped_column(Text, nullable=False)
+    provider: Mapped[str] = mapped_column(Text, nullable=False)
+    model: Mapped[str] = mapped_column(Text, nullable=False)
+    base_url: Mapped[str | None] = mapped_column(Text)
+    temperature: Mapped[float] = mapped_column(Float, nullable=False)
+    tools: Mapped[list[Any]] = mapped_column(JSONB, nullable=False, server_default=text("'[]'"))
+    max_tool_rounds: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("5"))
+    rag_config: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, server_default=text("'{}'")
+    )
+    note: Mapped[str] = mapped_column(Text, nullable=False, server_default=text("''"))
+    content_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime(True), nullable=False, server_default=text("now()")
+    )
+
+
+def _fk(col: str, target: str, table: str) -> ForeignKeyConstraint:
+    return ForeignKeyConstraint(
+        [col], [f"{target}.id"], ondelete="CASCADE", name=f"{table}_{col}_fkey"
+    )
+
+
+def _pk_uuid() -> Mapped[uuid.UUID]:
+    return mapped_column(Uuid, primary_key=True, server_default=text("gen_random_uuid()"))
+
+
+def _created() -> Mapped[datetime.datetime]:
+    return mapped_column(DateTime(True), nullable=False, server_default=text("now()"))
+
+
+def _json(default: str) -> Mapped[Any]:
+    return mapped_column(JSONB, nullable=False, server_default=text(f"'{default}'"))
+
+
+class KnowledgeBases(Base):
+    """RAG lab tables (Alembic revision 0005; not in docs/schema.sql v0.2)."""
+
+    __tablename__ = "knowledge_bases"
+    __table_args__ = (
+        _fk("project_id", "projects", "knowledge_bases"),
+        PrimaryKeyConstraint("id", name="knowledge_bases_pkey"),
+        UniqueConstraint("project_id", "name", name="knowledge_bases_project_id_name_key"),
+    )
+
+    id: Mapped[uuid.UUID] = _pk_uuid()
+    project_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False, server_default=text("''"))
+    local_only: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
+    secrets_encrypted: Mapped[bytes | None] = mapped_column(LargeBinary)
+    created_at: Mapped[datetime.datetime] = _created()
+    updated_at: Mapped[datetime.datetime] = _created()
+
+
+class KbDocuments(Base):
+    __tablename__ = "kb_documents"
+    __table_args__ = (
+        _fk("kb_id", "knowledge_bases", "kb_documents"),
+        _fk("project_id", "projects", "kb_documents"),
+        PrimaryKeyConstraint("id", name="kb_documents_pkey"),
+        UniqueConstraint("kb_id", "sha256", name="kb_documents_kb_id_sha256_key"),
+    )
+
+    id: Mapped[uuid.UUID] = _pk_uuid()
+    kb_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    project_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    filename: Mapped[str] = mapped_column(Text, nullable=False)
+    mime: Mapped[str] = mapped_column(Text, nullable=False)
+    sha256: Mapped[str] = mapped_column(Text, nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    char_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    blob_key: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime.datetime] = _created()
+    deleted_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(True))
+
+
+class KbIndexes(Base):
+    __tablename__ = "kb_indexes"
+    __table_args__ = (
+        CheckConstraint(
+            "status = ANY (ARRAY['pending'::text, 'building'::text, 'ready'::text, 'failed'::text])",
+            name="kb_indexes_status_check",
+        ),
+        _fk("kb_id", "knowledge_bases", "kb_indexes"),
+        _fk("project_id", "projects", "kb_indexes"),
+        PrimaryKeyConstraint("id", name="kb_indexes_pkey"),
+        UniqueConstraint("kb_id", "version", name="kb_indexes_kb_id_version_key"),
+        Index("kb_indexes_kb_key_status_idx", "kb_id", "index_key", "status"),
+    )
+
+    id: Mapped[uuid.UUID] = _pk_uuid()
+    kb_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    project_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    index_key: Mapped[str] = mapped_column(Text, nullable=False)
+    chunking: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
+    embedding: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
+    status: Mapped[str] = mapped_column(Text, nullable=False, server_default=text("'pending'"))
+    error: Mapped[str | None] = mapped_column(Text)
+    document_ids: Mapped[list[Any]] = _json("[]")
+    chunk_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
+    stats: Mapped[dict[str, Any]] = _json("{}")
+    created_at: Mapped[datetime.datetime] = _created()
+    finished_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(True))
+
+
+class KbChunks(Base):
+    __tablename__ = "kb_chunks"
+    __table_args__ = (
+        _fk("index_id", "kb_indexes", "kb_chunks"),
+        ForeignKeyConstraint(
+            ["document_id"],
+            ["kb_documents.id"],
+            name="kb_chunks_document_id_fkey",
+            deferrable=True,
+            initially="DEFERRED",
+        ),
+        PrimaryKeyConstraint("id", name="kb_chunks_pkey"),
+        Index("kb_chunks_index_id_idx", "index_id"),
+        Index("kb_chunks_text_sha_idx", "text_sha"),
+    )
+
+    id: Mapped[uuid.UUID] = _pk_uuid()
+    index_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    document_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    ordinal: Mapped[int] = mapped_column(Integer, nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    start_char: Mapped[int] = mapped_column(Integer, nullable=False)
+    end_char: Mapped[int] = mapped_column(Integer, nullable=False)
+    parent_start: Mapped[int] = mapped_column(Integer, nullable=False)
+    parent_end: Mapped[int] = mapped_column(Integer, nullable=False)
+    text_sha: Mapped[str] = mapped_column(Text, nullable=False)
+    embedding: Mapped[list[float] | None] = mapped_column(ARRAY(REAL))
+
+
+class Retrievals(Base):
+    __tablename__ = "retrievals"
+    __table_args__ = (
+        _fk("call_id", "calls", "retrievals"),
+        PrimaryKeyConstraint("id", name="retrievals_pkey"),
+        Index("retrievals_call_id_idx", "call_id"),
+    )
+
+    id: Mapped[uuid.UUID] = _pk_uuid()
+    call_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    turn_idx: Mapped[int] = mapped_column(Integer, nullable=False)
+    rag_config: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
+    index_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)
+    query: Mapped[str] = mapped_column(Text, nullable=False)
+    queries: Mapped[list[Any]] = _json("[]")
+    results: Mapped[list[Any]] = _json("[]")
+    context_chars: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
+    timings: Mapped[dict[str, Any]] = _json("{}")
+    usage: Mapped[dict[str, Any]] = _json("{}")
+    created_at: Mapped[datetime.datetime] = _created()
+
+
+class RagMetrics(Base):
+    __tablename__ = "rag_metrics"
+    __table_args__ = (
+        _fk("call_id", "calls", "rag_metrics"),
+        PrimaryKeyConstraint("call_id", name="rag_metrics_pkey"),
+    )
+
+    call_id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    metrics: Mapped[dict[str, Any]] = _json("{}")
+    skipped: Mapped[list[Any]] = _json("[]")
+    created_at: Mapped[datetime.datetime] = _created()
+    updated_at: Mapped[datetime.datetime] = _created()
+
+
+class RagMatrices(Base):
+    __tablename__ = "rag_matrices"
+    __table_args__ = (
+        _fk("project_id", "projects", "rag_matrices"),
+        _fk("agent_id", "agents", "rag_matrices"),
+        _fk("prompt_version_id", "prompt_versions", "rag_matrices"),
+        _fk("kb_id", "knowledge_bases", "rag_matrices"),
+        PrimaryKeyConstraint("id", name="rag_matrices_pkey"),
+    )
+
+    id: Mapped[uuid.UUID] = _pk_uuid()
+    project_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    agent_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    prompt_version_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    kb_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    request: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
+    entries: Mapped[list[Any]] = _json("[]")
+    created_at: Mapped[datetime.datetime] = _created()
+
+
+class PriceOverrides(Base):
+    __tablename__ = "price_overrides"
+    __table_args__ = (
+        CheckConstraint(
+            "kind = ANY (ARRAY['llm'::text, 'embedding'::text, 'rerank'::text])",
+            name="price_overrides_kind_check",
+        ),
+        _fk("project_id", "projects", "price_overrides"),
+        PrimaryKeyConstraint("id", name="price_overrides_pkey"),
+        UniqueConstraint(
+            "project_id", "kind", "provider", "model", name="price_overrides_project_kind_key"
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = _pk_uuid()
+    project_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    kind: Mapped[str] = mapped_column(Text, nullable=False)
+    provider: Mapped[str] = mapped_column(Text, nullable=False)
+    model: Mapped[str] = mapped_column(Text, nullable=False)
+    input_per_m_inr: Mapped[decimal.Decimal] = mapped_column(Numeric, nullable=False)
+    output_per_m_inr: Mapped[decimal.Decimal | None] = mapped_column(Numeric)
+    updated_at: Mapped[datetime.datetime] = _created()
 
 
 class ProjectLlmSettings(Base):

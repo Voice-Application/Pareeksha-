@@ -9,6 +9,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 from pareeksha.schemas.common import RequestModel
+from pareeksha.schemas.rag import RagConfig
 
 RunKind = Literal["matrix", "regression", "dry_run"]
 RunStatus = Literal["draft", "queued", "running", "completed", "partial", "cancelled", "failed"]
@@ -31,6 +32,7 @@ class RunConfig(RequestModel):
     max_concurrency: int = Field(default=3, ge=1, le=20)
     seed: int = 42
     dry_run: bool = False
+    rag: RagConfig | None = None
 
 
 class RunCreate(RequestModel):
@@ -140,6 +142,8 @@ class RunCompareCell(BaseModel):
     head_score: float | None = None
     delta: float | None = None
     newly_failing: bool = False
+    base_call_ids: list[UUID] = Field(default_factory=list)
+    head_call_ids: list[UUID] = Field(default_factory=list)
 
 
 class RunCompareSummary(BaseModel):
@@ -151,6 +155,8 @@ class RunCompareSummary(BaseModel):
 class RunCompareOut(BaseModel):
     cells: list[RunCompareCell]
     summary: RunCompareSummary
+    base_prompt_version: int | None = None
+    head_prompt_version: int | None = None
 
 
 # --- Server-Sent Events of GET /runs/{id}/events ---------------------------------------------

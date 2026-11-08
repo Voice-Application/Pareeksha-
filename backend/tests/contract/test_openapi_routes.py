@@ -115,6 +115,32 @@ ADDITIONS: set[tuple[str, str]] = {
     ("GET", "/dialect-reports"),  # FR-DI-4
     ("GET", "/dialect-reports/{id}/clips"),  # FR-DB-4 drill-down to worst clips
     ("GET", "/speech/providers"),  # VOICE-07 (owner-approved 2026-10-24)
+    # Prompt testing phase 1 (docs/superpowers/plans/2026-11-06-prompt-testing-phase1.md, Task 3)
+    ("POST", "/agents/{id}/prompt-versions"),
+    ("GET", "/agents/{id}/prompt-versions"),
+    ("GET", "/agents/{id}/prompt-versions/{id}"),
+    ("POST", "/agents/{id}/prompt-versions/{id}/activate"),
+    # RAG lab (docs/superpowers/plans/2026-11-07-rag-lab.md, Task 2)
+    ("POST", "/knowledge-bases"),
+    ("GET", "/knowledge-bases"),
+    ("GET", "/knowledge-bases/{id}"),
+    ("PATCH", "/knowledge-bases/{id}"),
+    ("POST", "/knowledge-bases/{id}/documents"),
+    ("GET", "/knowledge-bases/{id}/documents"),
+    ("GET", "/knowledge-bases/{id}/documents/{id}"),
+    ("DELETE", "/knowledge-bases/{id}/documents/{id}"),
+    ("POST", "/knowledge-bases/{id}/indexes"),
+    ("GET", "/knowledge-bases/{id}/indexes"),
+    ("GET", "/knowledge-bases/{id}/indexes/{id}"),
+    ("GET", "/knowledge-bases/{id}/indexes/{id}/chunks"),
+    ("POST", "/knowledge-bases/{id}/questions:generate"),
+    ("POST", "/knowledge-bases/{id}/questions:import"),
+    ("POST", "/rag-matrices"),  # Task 9
+    ("GET", "/rag-matrices"),
+    ("GET", "/rag-matrices/{id}"),
+    ("GET", "/rag-matrices/{id}/report"),
+    ("GET", "/pricing"),
+    ("PUT", "/pricing"),
     ("PUT", "/calls/{id}/tool-calls"),  # report tool calls after the call
     ("GET", "/settings/llm"),  # per-project LLM settings
     ("PUT", "/settings/llm"),

@@ -147,6 +147,20 @@ class UsageItem(BaseModel):
     cached: bool = False
 
 
+class RetrievalRecord(BaseModel):
+    """One retrieval before an agent turn (``retrievals`` row)."""
+
+    turn_idx: int
+    rag_config: dict[str, Any]
+    index_id: uuid.UUID | None = None
+    query: str
+    queries: list[str] = Field(default_factory=list)
+    results: list[dict[str, Any]] = Field(default_factory=list)
+    context_chars: int = 0
+    timings: dict[str, Any] = Field(default_factory=dict)
+    usage: dict[str, Any] = Field(default_factory=dict)
+
+
 class CallResult(BaseModel):
     call_id: uuid.UUID
     end_reason: EndReason
@@ -157,6 +171,7 @@ class CallResult(BaseModel):
     barge_in_attempts: list[BargeInAttempt] = Field(default_factory=list)
     recordings: RecordingFiles | None = None
     usage: list[UsageItem] = Field(default_factory=list)
+    retrievals: list[RetrievalRecord] = Field(default_factory=list)
     #: Set with ``end_reason`` ``infra_error`` / ``connect_failed``.
     error: str | None = None
     #: The agent sent glass-box messages (transcripts or tool calls) during the call.

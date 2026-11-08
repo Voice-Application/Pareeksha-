@@ -27,6 +27,7 @@ create pareeksha.run.completed.v1                3             "$RETENTION_MS"
 create pareeksha.progress.v1                     3             86400000          # 1 day
 create pareeksha.scenario.generate.requested.v1  3             "$RETENTION_MS"
 create pareeksha.dialect.clip.requested.v1       "$PARTITIONS" "$RETENTION_MS"
+create pareeksha.kb.index.requested.v1         3             "$RETENTION_MS"
 create pareeksha.retry.30s.v1                    3             "$RETENTION_MS"
 create pareeksha.retry.5m.v1                     3             "$RETENTION_MS"
 create pareeksha.dlq.v1                          3             $(( 30 * 86400000 ))  # 30 days

@@ -70,6 +70,286 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/agents/{agent_id}/prompt-versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List prompt versions, newest first */
+        get: operations["list_prompt_versions"];
+        put?: never;
+        /** Create a prompt version and make it active */
+        post: operations["create_prompt_version"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/agents/{agent_id}/prompt-versions/{version}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get one prompt version */
+        get: operations["get_prompt_version"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/agents/{agent_id}/prompt-versions/{version}/activate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Make an existing prompt version the active one */
+        post: operations["activate_prompt_version"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/knowledge-bases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List knowledge bases */
+        get: operations["list_knowledge_bases"];
+        put?: never;
+        /** Create a knowledge base */
+        post: operations["create_knowledge_base"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/knowledge-bases/{kb_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a knowledge base */
+        get: operations["get_knowledge_base"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update a knowledge base */
+        patch: operations["update_knowledge_base"];
+        trace?: never;
+    };
+    "/api/v1/knowledge-bases/{kb_id}/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List documents */
+        get: operations["list_documents"];
+        put?: never;
+        /** Upload a document (txt, md, html, csv, json, pdf, docx; up to 10 MB) */
+        post: operations["upload_document"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/knowledge-bases/{kb_id}/documents/{doc_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a document with its extracted text */
+        get: operations["get_document"];
+        put?: never;
+        post?: never;
+        /** Delete a document (soft delete; existing indexes keep their chunks) */
+        delete: operations["delete_document"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/knowledge-bases/{kb_id}/indexes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List indexes */
+        get: operations["list_indexes"];
+        put?: never;
+        /** Build an index (chunk and embed the current documents) */
+        post: operations["create_index"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/knowledge-bases/{kb_id}/indexes/{index_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get an index */
+        get: operations["get_index"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/knowledge-bases/{kb_id}/indexes/{index_id}/chunks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Browse the chunks of an index (text only, no vectors) */
+        get: operations["list_chunks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/knowledge-bases/{kb_id}/questions:generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Generate ground-truth questions from the documents (drafts to review) */
+        post: operations["generate_questions"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/knowledge-bases/{kb_id}/questions:import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Import ground-truth questions from CSV (question, expected_answer, source_document, source_quote) */
+        post: operations["import_questions"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rag-matrices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List RAG matrices */
+        get: operations["list_rag_matrices"];
+        put?: never;
+        /** Create a RAG matrix (one run per config and baseline) */
+        post: operations["post_rag_matrix"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rag-matrices/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a RAG matrix */
+        get: operations["get_rag_matrix"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/rag-matrices/{id}/report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Retrieval quality, hallucination, latency, cost, savings and a recommendation */
+        get: operations["get_rag_report"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/pricing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Prices entered for this project, and models still unpriced */
+        get: operations["get_pricing"];
+        /** Upsert prices (₹ per 1M tokens); local models are always 0 */
+        put: operations["put_pricing"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/scenarios": {
         parameters: {
             query?: never;
@@ -1233,16 +1513,11 @@ export interface components {
              * @default audio_v1
              * @enum {string}
              */
-            adapter: "audio_v1" | "pipecat" | "livekit" | "vapi";
+            adapter: "audio_v1" | "pipecat" | "livekit" | "vapi" | "prompt";
             /** Adapter Config */
             adapter_config?: {
                 [key: string]: unknown;
             };
-            /**
-             * Endpoint Url
-             * @example ws://mock-agent:8765/ws
-             */
-            endpoint_url: string;
             /**
              * Languages
              * @example [
@@ -1270,6 +1545,15 @@ export interface components {
              * @default 300
              */
             max_call_seconds: number;
+            /**
+             * Endpoint Url
+             * @example ws://mock-agent:8765/ws
+             */
+            endpoint_url?: string | null;
+            /** Adapter Secrets */
+            adapter_secrets?: {
+                [key: string]: string;
+            } | null;
         };
         /** AgentOut */
         AgentOut: {
@@ -1288,16 +1572,11 @@ export interface components {
              * @default audio_v1
              * @enum {string}
              */
-            adapter: "audio_v1" | "pipecat" | "livekit" | "vapi";
+            adapter: "audio_v1" | "pipecat" | "livekit" | "vapi" | "prompt";
             /** Adapter Config */
             adapter_config?: {
                 [key: string]: unknown;
             };
-            /**
-             * Endpoint Url
-             * @example ws://mock-agent:8765/ws
-             */
-            endpoint_url: string;
             /**
              * Languages
              * @example [
@@ -1330,6 +1609,13 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /** Endpoint Url */
+            endpoint_url: string;
+            /**
+             * Has Adapter Secrets
+             * @default false
+             */
+            has_adapter_secrets: boolean;
             /**
              * Archived
              * @default false
@@ -1356,7 +1642,7 @@ export interface components {
             /** Description */
             description?: string | null;
             /** Adapter */
-            adapter?: ("audio_v1" | "pipecat" | "livekit" | "vapi") | null;
+            adapter?: ("audio_v1" | "pipecat" | "livekit" | "vapi" | "prompt") | null;
             /** Adapter Config */
             adapter_config?: {
                 [key: string]: unknown;
@@ -1377,6 +1663,10 @@ export interface components {
             bias_list?: string[] | null;
             /** Max Call Seconds */
             max_call_seconds?: number | null;
+            /** Adapter Secrets */
+            adapter_secrets?: {
+                [key: string]: string;
+            } | null;
         };
         /** ApiKeyCreate */
         ApiKeyCreate: {
@@ -1459,6 +1749,19 @@ export interface components {
             /** Has Users */
             has_users: boolean;
         };
+        /** Baselines */
+        Baselines: {
+            /**
+             * No Rag
+             * @default true
+             */
+            no_rag: boolean;
+            /**
+             * Full Context
+             * @default true
+             */
+            full_context: boolean;
+        };
         /** Body_create_audit */
         Body_create_audit: {
             /**
@@ -1483,6 +1786,19 @@ export interface components {
              */
             stereo_channels_are_speakers: boolean;
         };
+        /** Body_import_questions */
+        Body_import_questions: {
+            /**
+             * Agent Id
+             * Format: uuid
+             */
+            agent_id: string;
+            /**
+             * File
+             * @description CSV, at most 10 MB and 1000 rows
+             */
+            file: string;
+        };
         /** Body_preview_noise_profile */
         Body_preview_noise_profile: {
             /**
@@ -1503,6 +1819,14 @@ export interface components {
              * @description ZIP with the files named in the manifest
              */
             clips: string;
+        };
+        /** Body_upload_document */
+        Body_upload_document: {
+            /**
+             * File
+             * @description At most 10 MB
+             */
+            file: string;
         };
         /** BootstrapIn */
         BootstrapIn: {
@@ -1614,6 +1938,8 @@ export interface components {
             turns?: components["schemas"]["TurnOut"][];
             /** Tool Calls */
             tool_calls?: components["schemas"]["ToolCallOut"][];
+            /** Retrievals */
+            retrievals?: components["schemas"]["RetrievalOut"][];
             metrics?: components["schemas"]["CallMetricsOut"] | null;
             /** Checks */
             checks?: components["schemas"]["CheckOut"][];
@@ -1701,7 +2027,7 @@ export interface components {
              * Check Type
              * @enum {string}
              */
-            check_type: "disclosure_present" | "forbidden_absent" | "language_match" | "tool_calls_expected" | "no_loop" | "amount_confirmed";
+            check_type: "disclosure_present" | "forbidden_absent" | "language_match" | "tool_calls_expected" | "no_unexpected_tool" | "no_loop" | "amount_confirmed";
             /** Check Key */
             check_key: string;
             /**
@@ -1721,6 +2047,32 @@ export interface components {
              * @default
              */
             detail: string;
+        };
+        /** ChunkingConfig */
+        ChunkingConfig: {
+            /**
+             * Strategy
+             * @default recursive
+             * @enum {string}
+             */
+            strategy: "fixed" | "recursive" | "sentence_window";
+            /**
+             * Size
+             * @description characters
+             * @default 800
+             */
+            size: number;
+            /**
+             * Overlap
+             * @default 100
+             */
+            overlap: number;
+            /**
+             * Window
+             * @description sentence_window only
+             * @default 2
+             */
+            window: number;
         };
         /**
          * ClipResultOut
@@ -2104,7 +2456,7 @@ export interface components {
              * @default audio_v1
              * @enum {string}
              */
-            adapter: "audio_v1" | "pipecat" | "livekit" | "vapi";
+            adapter: "audio_v1" | "pipecat" | "livekit" | "vapi" | "prompt";
             /**
              * Glass Box
              * @default false
@@ -2164,6 +2516,25 @@ export interface components {
             max_turns: number;
             /** Tags */
             tags?: string[];
+            rag_expectation?: components["schemas"]["RagExpectation"] | null;
+        };
+        /** EmbeddingConfig */
+        EmbeddingConfig: {
+            /**
+             * Provider
+             * @default local
+             * @enum {string}
+             */
+            provider: "local" | "gemini" | "openai" | "openai_compatible" | "azure_openai" | "cohere" | "voyage" | "jina" | "mistral" | "bedrock" | "ollama";
+            /**
+             * Model
+             * @default intfloat/multilingual-e5-large
+             */
+            model: string;
+            /** Base Url */
+            base_url?: string | null;
+            /** Dimensions */
+            dimensions?: number | null;
         };
         /** EngineAggregate */
         EngineAggregate: {
@@ -2304,6 +2675,31 @@ export interface components {
             /** Regex */
             regex?: string | null;
         };
+        /** GenerationStats */
+        GenerationStats: {
+            /** Faithfulness */
+            faithfulness?: number | null;
+            /**
+             * N Judged
+             * @default 0
+             */
+            n_judged: number;
+            /** Hallucination Rate */
+            hallucination_rate?: number | null;
+            /** Hallucination Ci */
+            hallucination_ci?: [
+                number,
+                number
+            ] | null;
+            /** Answer Correct Rate */
+            answer_correct_rate?: number | null;
+            /** Refusal Correct Rate */
+            refusal_correct_rate?: number | null;
+            /** Skipped */
+            skipped?: {
+                [key: string]: number;
+            };
+        };
         /**
          * HealthOut
          * @description Each value is ``"ok"`` or ``"down: <reason>"``.
@@ -2393,6 +2789,16 @@ export interface components {
              * @description tool calls the bot made, if known
              */
             tool_calls?: components["schemas"]["ReportedToolCall"][] | null;
+        };
+        /** IndexOneTime */
+        IndexOneTime: {
+            /**
+             * Input Tokens
+             * @default 0
+             */
+            input_tokens: number;
+            /** Cost Inr */
+            cost_inr?: number | null;
         };
         /** IntegrationCreate */
         IntegrationCreate: {
@@ -2503,6 +2909,188 @@ export interface components {
             /** Enabled */
             enabled?: boolean | null;
         };
+        /**
+         * KbChunkOut
+         * @description A chunk as the browser shows it: text and offsets, never the vector.
+         */
+        KbChunkOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Document Id
+             * Format: uuid
+             */
+            document_id: string;
+            /** Ordinal */
+            ordinal: number;
+            /** Text */
+            text: string;
+            /** Start Char */
+            start_char: number;
+            /** End Char */
+            end_char: number;
+            /** Parent Start */
+            parent_start: number;
+            /** Parent End */
+            parent_end: number;
+        };
+        /** KbDocumentDetail */
+        KbDocumentDetail: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Filename */
+            filename: string;
+            /** Mime */
+            mime: string;
+            /** Char Count */
+            char_count: number;
+            /** Sha256 */
+            sha256: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Text */
+            text: string;
+        };
+        /** KbDocumentOut */
+        KbDocumentOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Filename */
+            filename: string;
+            /** Mime */
+            mime: string;
+            /** Char Count */
+            char_count: number;
+            /** Sha256 */
+            sha256: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** KbIndexCreate */
+        KbIndexCreate: {
+            chunking?: components["schemas"]["ChunkingConfig"];
+            embedding?: components["schemas"]["EmbeddingConfig"];
+        };
+        /** KbIndexOut */
+        KbIndexOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Version */
+            version: number;
+            /** Index Key */
+            index_key: string;
+            /** Status */
+            status: string;
+            /** Chunking */
+            chunking: {
+                [key: string]: unknown;
+            };
+            /** Embedding */
+            embedding: {
+                [key: string]: unknown;
+            };
+            /** Chunk Count */
+            chunk_count: number;
+            /** Stats */
+            stats: {
+                [key: string]: unknown;
+            };
+            /** Error */
+            error: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Finished At */
+            finished_at: string | null;
+        };
+        /**
+         * KbSecrets
+         * @description Write-only provider keys for a knowledge base.
+         */
+        KbSecrets: {
+            /** Embedding Api Key */
+            embedding_api_key?: string | null;
+            /** Reranker Api Key */
+            reranker_api_key?: string | null;
+        };
+        /** KnowledgeBaseCreate */
+        KnowledgeBaseCreate: {
+            /** Name */
+            name: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /**
+             * Local Only
+             * @default false
+             */
+            local_only: boolean;
+            secrets?: components["schemas"]["KbSecrets"] | null;
+        };
+        /** KnowledgeBaseOut */
+        KnowledgeBaseOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Description */
+            description: string;
+            /** Local Only */
+            local_only: boolean;
+            /**
+             * Has Secrets
+             * @default false
+             */
+            has_secrets: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /**
+         * KnowledgeBaseUpdate
+         * @description PATCH: only provided fields change.
+         */
+        KnowledgeBaseUpdate: {
+            /** Name */
+            name?: string | null;
+            /** Description */
+            description?: string | null;
+            /** Local Only */
+            local_only?: boolean | null;
+            secrets?: components["schemas"]["KbSecrets"] | null;
+        };
         /** LLMSettingsOut */
         LLMSettingsOut: {
             /**
@@ -2575,6 +3163,25 @@ export interface components {
             /** Error */
             error: string | null;
         };
+        /** LatencyStats */
+        LatencyStats: {
+            /** Retrieval P50 */
+            retrieval_p50?: number | null;
+            /** Retrieval P95 */
+            retrieval_p95?: number | null;
+            /** Embed P50 */
+            embed_p50?: number | null;
+            /** Search P50 */
+            search_p50?: number | null;
+            /** Rerank P50 */
+            rerank_p50?: number | null;
+            /** Rewrite P50 */
+            rewrite_p50?: number | null;
+            /** Turn P50 */
+            turn_p50?: number | null;
+            /** Turn P95 */
+            turn_p95?: number | null;
+        };
         /** LoginIn */
         LoginIn: {
             /** Email */
@@ -2600,6 +3207,32 @@ export interface components {
             dlq_open: number;
             /** Credits Used */
             credits_used: number;
+        };
+        /** MockCase */
+        MockCase: {
+            /** When */
+            when: {
+                [key: string]: unknown;
+            };
+            /** Result */
+            result: {
+                [key: string]: unknown;
+            };
+        };
+        /** MockSpec */
+        MockSpec: {
+            /**
+             * Mode
+             * @default static
+             * @enum {string}
+             */
+            mode: "static" | "by_args" | "simulated";
+            /** Result */
+            result?: {
+                [key: string]: unknown;
+            };
+            /** Cases */
+            cases?: components["schemas"]["MockCase"][];
         };
         /** NewPersona */
         NewPersona: {
@@ -2793,6 +3426,27 @@ export interface components {
             /** Next Cursor */
             next_cursor?: string | null;
         };
+        /** Page[KbDocumentOut] */
+        Page_KbDocumentOut_: {
+            /** Items */
+            items: components["schemas"]["KbDocumentOut"][];
+            /** Next Cursor */
+            next_cursor?: string | null;
+        };
+        /** Page[KbIndexOut] */
+        Page_KbIndexOut_: {
+            /** Items */
+            items: components["schemas"]["KbIndexOut"][];
+            /** Next Cursor */
+            next_cursor?: string | null;
+        };
+        /** Page[KnowledgeBaseOut] */
+        Page_KnowledgeBaseOut_: {
+            /** Items */
+            items: components["schemas"]["KnowledgeBaseOut"][];
+            /** Next Cursor */
+            next_cursor?: string | null;
+        };
         /** Page[NoiseProfileOut] */
         Page_NoiseProfileOut_: {
             /** Items */
@@ -2804,6 +3458,13 @@ export interface components {
         Page_PersonaOut_: {
             /** Items */
             items: components["schemas"]["PersonaOut"][];
+            /** Next Cursor */
+            next_cursor?: string | null;
+        };
+        /** Page[RagMatrixOut] */
+        Page_RagMatrixOut_: {
+            /** Items */
+            items: components["schemas"]["RagMatrixOut"][];
             /** Next Cursor */
             next_cursor?: string | null;
         };
@@ -3003,6 +3664,56 @@ export interface components {
             /** Behaviour Notes */
             behaviour_notes?: string | null;
         };
+        /** PriceIn */
+        PriceIn: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "llm" | "embedding" | "rerank";
+            /** Provider */
+            provider: string;
+            /** Model */
+            model: string;
+            /**
+             * Input Per M Inr
+             * @description ₹ per 1M input tokens
+             */
+            input_per_m_inr: number;
+            /** Output Per M Inr */
+            output_per_m_inr?: number | null;
+        };
+        /** PriceOut */
+        PriceOut: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "llm" | "embedding" | "rerank";
+            /** Provider */
+            provider: string;
+            /** Model */
+            model: string;
+            /**
+             * Input Per M Inr
+             * @description ₹ per 1M input tokens
+             */
+            input_per_m_inr: number;
+            /** Output Per M Inr */
+            output_per_m_inr?: number | null;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** PricingOut */
+        PricingOut: {
+            /** Prices */
+            prices: components["schemas"]["PriceOut"][];
+            /** Unpriced */
+            unpriced: components["schemas"]["UnpricedModel"][];
+        };
         /** PromoteRequest */
         PromoteRequest: {
             /**
@@ -3040,6 +3751,107 @@ export interface components {
              */
             regression_test_id: string;
         };
+        /** PromptTool */
+        PromptTool: {
+            /** Name */
+            name: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /**
+             * Parameters
+             * @description JSON Schema; must have "type": "object"
+             */
+            parameters: {
+                [key: string]: unknown;
+            };
+            mock?: components["schemas"]["MockSpec"];
+        };
+        /** PromptVersionCreate */
+        PromptVersionCreate: {
+            /** System Prompt */
+            system_prompt: string;
+            /**
+             * Provider
+             * @enum {string}
+             */
+            provider: "openai" | "openai_compatible" | "deepseek" | "groq" | "mistral" | "ollama" | "anthropic" | "gemini";
+            /** Model */
+            model: string;
+            /** Base Url */
+            base_url?: string | null;
+            /**
+             * Temperature
+             * @default 0.2
+             */
+            temperature: number;
+            /** Tools */
+            tools?: components["schemas"]["PromptTool"][];
+            /**
+             * Max Tool Rounds
+             * @default 5
+             */
+            max_tool_rounds: number;
+            rag_config?: components["schemas"]["RagConfig"] | null;
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+        };
+        /** PromptVersionOut */
+        PromptVersionOut: {
+            /** System Prompt */
+            system_prompt: string;
+            /**
+             * Provider
+             * @enum {string}
+             */
+            provider: "openai" | "openai_compatible" | "deepseek" | "groq" | "mistral" | "ollama" | "anthropic" | "gemini";
+            /** Model */
+            model: string;
+            /** Base Url */
+            base_url?: string | null;
+            /**
+             * Temperature
+             * @default 0.2
+             */
+            temperature: number;
+            /** Tools */
+            tools?: components["schemas"]["PromptTool"][];
+            /**
+             * Max Tool Rounds
+             * @default 5
+             */
+            max_tool_rounds: number;
+            rag_config?: components["schemas"]["RagConfig"] | null;
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Agent Id
+             * Format: uuid
+             */
+            agent_id: string;
+            /** Version */
+            version: number;
+            /** Content Hash */
+            content_hash: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
         /**
          * ProviderStatus
          * @description One row of ``GET /api/v1/speech/providers``. Never contains key material.
@@ -3056,6 +3868,264 @@ export interface components {
             tts_default: boolean;
             stt: components["schemas"]["STTCapabilities"];
             tts: components["schemas"]["TTSCapabilities"];
+        };
+        /**
+         * QuestionGenerateRequest
+         * @description ``POST /knowledge-bases/{id}/questions:generate``.
+         */
+        QuestionGenerateRequest: {
+            /**
+             * Agent Id
+             * Format: uuid
+             */
+            agent_id: string;
+            /**
+             * Count
+             * @example 10
+             */
+            count: number;
+            /**
+             * Unanswerable Share
+             * @default 0.2
+             */
+            unanswerable_share: number;
+        };
+        /** QuestionImportResult */
+        QuestionImportResult: {
+            /** Created */
+            created: number;
+            /** Unmatched */
+            unmatched: components["schemas"]["QuestionUnmatched"][];
+        };
+        /** QuestionUnmatched */
+        QuestionUnmatched: {
+            /**
+             * Row
+             * @description 1-based, header excluded
+             */
+            row: number;
+            /**
+             * Reason
+             * @enum {string}
+             */
+            reason: "document_not_found" | "quote_not_found" | "empty_question";
+        };
+        /** RagConfig */
+        RagConfig: {
+            /**
+             * Mode
+             * @default retrieval
+             * @enum {string}
+             */
+            mode: "off" | "retrieval" | "full_context";
+            /**
+             * Kb Id
+             * Format: uuid
+             */
+            kb_id: string;
+            chunking?: components["schemas"]["ChunkingConfig"];
+            embedding?: components["schemas"]["EmbeddingConfig"];
+            /**
+             * Method
+             * @default hybrid
+             * @enum {string}
+             */
+            method: "bm25" | "dense" | "hybrid" | "hybrid_rerank" | "mmr";
+            /**
+             * Top K
+             * @default 5
+             */
+            top_k: number;
+            /**
+             * Candidate K
+             * @default 20
+             */
+            candidate_k: number;
+            /**
+             * Rrf K
+             * @default 60
+             */
+            rrf_k: number;
+            /**
+             * Mmr Lambda
+             * @default 0.5
+             */
+            mmr_lambda: number;
+            /**
+             * Reranker Provider
+             * @default local
+             * @enum {string}
+             */
+            reranker_provider: "local" | "cohere" | "jina" | "voyage";
+            /**
+             * Reranker Model
+             * @default BAAI/bge-reranker-v2-m3-int8
+             */
+            reranker_model: string;
+            /**
+             * Query Transform
+             * @default none
+             * @enum {string}
+             */
+            query_transform: "none" | "multi_query" | "hyde";
+            /**
+             * Small To Big
+             * @default false
+             */
+            small_to_big: boolean;
+            /**
+             * Context Char Limit
+             * @default 400000
+             */
+            context_char_limit: number;
+            /**
+             * Label
+             * @default
+             */
+            label: string;
+        };
+        /**
+         * RagDraftRequest
+         * @description The ``request`` of a draft made by KB question generation (``kind == "rag"``).
+         */
+        RagDraftRequest: {
+            /**
+             * Kind
+             * @constant
+             */
+            kind: "rag";
+            /**
+             * Kb Id
+             * Format: uuid
+             */
+            kb_id: string;
+            /** Count */
+            count: number;
+            /** Unanswerable Share */
+            unanswerable_share: number;
+            /**
+             * Unmatched
+             * @default 0
+             */
+            unmatched: number;
+        };
+        /** RagExpectation */
+        RagExpectation: {
+            /** Source Document Id */
+            source_document_id?: string | null;
+            /** Source Span */
+            source_span?: [
+                number,
+                number
+            ] | null;
+            /**
+             * Reference Answer
+             * @default
+             */
+            reference_answer: string;
+            /**
+             * Answerable
+             * @default true
+             */
+            answerable: boolean;
+        };
+        /** RagMatrixCreate */
+        RagMatrixCreate: {
+            /**
+             * Agent Id
+             * Format: uuid
+             */
+            agent_id: string;
+            /**
+             * Prompt Version
+             * @description default: the active one
+             */
+            prompt_version?: number | null;
+            /** Configs */
+            configs: components["schemas"]["RagConfig"][];
+            baselines?: components["schemas"]["Baselines"];
+            /** Scenario Ids */
+            scenario_ids: string[];
+            /** Persona Ids */
+            persona_ids: string[];
+            /** Noise Profile Ids */
+            noise_profile_ids: string[];
+            /**
+             * Repeats
+             * @default 1
+             */
+            repeats: number;
+            /**
+             * Confirm Over Budget
+             * @default false
+             */
+            confirm_over_budget: boolean;
+        };
+        /** RagMatrixEntry */
+        RagMatrixEntry: {
+            /** Label */
+            label: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "rag" | "no_rag" | "full_context";
+            /** Run Id */
+            run_id?: string | null;
+            /** Status Note */
+            status_note?: string | null;
+            /** Rag */
+            rag?: {
+                [key: string]: unknown;
+            };
+        };
+        /** RagMatrixOut */
+        RagMatrixOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Agent Id
+             * Format: uuid
+             */
+            agent_id: string;
+            /**
+             * Kb Id
+             * Format: uuid
+             */
+            kb_id: string;
+            /** Entries */
+            entries: components["schemas"]["RagMatrixEntry"][];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** RagReport */
+        RagReport: {
+            /**
+             * Matrix Id
+             * Format: uuid
+             */
+            matrix_id: string;
+            /** Monthly Conversations */
+            monthly_conversations: number;
+            /** Rows */
+            rows: components["schemas"]["ReportRow"][];
+            recommendation: components["schemas"]["Recommendation"];
+        };
+        /** Recommendation */
+        Recommendation: {
+            /**
+             * Label
+             * @description null when no config is eligible
+             */
+            label: string | null;
+            /** Reason */
+            reason: string;
         };
         /**
          * Recordings
@@ -3189,6 +4259,45 @@ export interface components {
             /** Expected Results */
             expected_results: number;
         };
+        /** ReportRow */
+        ReportRow: {
+            /** Label */
+            label: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "rag" | "no_rag" | "full_context";
+            /** Run Id */
+            run_id?: string | null;
+            /** Run Status */
+            run_status?: string | null;
+            /** Status Note */
+            status_note?: string | null;
+            /**
+             * N Calls
+             * @default 0
+             */
+            n_calls: number;
+            /**
+             * N Questions With Truth
+             * @default 0
+             */
+            n_questions_with_truth: number;
+            retrieval?: components["schemas"]["RetrievalStats"];
+            generation?: components["schemas"]["GenerationStats"];
+            latency_ms?: components["schemas"]["LatencyStats"];
+            tokens_per_conversation?: components["schemas"]["TokenStats"];
+            /** Cost Per Conversation Inr */
+            cost_per_conversation_inr?: number | null;
+            index_one_time?: components["schemas"]["IndexOneTime"];
+            /** Monthly Cost Inr */
+            monthly_cost_inr?: number | null;
+            savings_vs_full_context?: components["schemas"]["Savings"] | null;
+            savings_vs_no_rag?: components["schemas"]["Savings"] | null;
+            /** Token Savings Vs Full Context Pct */
+            token_savings_vs_full_context_pct?: number | null;
+        };
         /**
          * ReportedToolCall
          * @description A tool call the bot (or its platform) reports after the call ended.
@@ -3207,6 +4316,79 @@ export interface components {
              * @default 0
              */
             at_ms: number;
+        };
+        /**
+         * RetrievalOut
+         * @description What was retrieved for one agent turn of a RAG run (prompt agents).
+         */
+        RetrievalOut: {
+            /**
+             * Turn Idx
+             * @description index of the agent turn it was retrieved for
+             */
+            turn_idx: number;
+            /** Query */
+            query: string;
+            /**
+             * Queries
+             * @description the query plus any rewrites
+             */
+            queries: string[];
+            /** Results */
+            results: components["schemas"]["RetrievalResultOut"][];
+            /**
+             * Timings
+             * @description ms: embed, search, rerank, rewrite, total
+             */
+            timings: {
+                [key: string]: number;
+            };
+            /** Context Chars */
+            context_chars: number;
+            /**
+             * Rag Label
+             * @description label of the RAG config the turn ran with
+             */
+            rag_label: string;
+        };
+        /** RetrievalResultOut */
+        RetrievalResultOut: {
+            /** Rank */
+            rank: number;
+            /**
+             * Chunk Id
+             * Format: uuid
+             */
+            chunk_id: string;
+            /**
+             * Document Id
+             * Format: uuid
+             */
+            document_id: string;
+            /** Filename */
+            filename: string;
+            /** Start Char */
+            start_char: number;
+            /** End Char */
+            end_char: number;
+            /** Score */
+            score: number;
+            /** Text */
+            text: string;
+        };
+        /** RetrievalStats */
+        RetrievalStats: {
+            /** Hit Rate */
+            hit_rate?: number | null;
+            /** Hit Rate Ci */
+            hit_rate_ci?: [
+                number,
+                number
+            ] | null;
+            /** Mrr */
+            mrr?: number | null;
+            /** Context Precision */
+            context_precision?: number | null;
         };
         /** ReviewCreate */
         ReviewCreate: {
@@ -3251,12 +4433,20 @@ export interface components {
              * @default false
              */
             newly_failing: boolean;
+            /** Base Call Ids */
+            base_call_ids?: string[];
+            /** Head Call Ids */
+            head_call_ids?: string[];
         };
         /** RunCompareOut */
         RunCompareOut: {
             /** Cells */
             cells: components["schemas"]["RunCompareCell"][];
             summary: components["schemas"]["RunCompareSummary"];
+            /** Base Prompt Version */
+            base_prompt_version?: number | null;
+            /** Head Prompt Version */
+            head_prompt_version?: number | null;
         };
         /** RunCompareSummary */
         RunCompareSummary: {
@@ -3284,6 +4474,7 @@ export interface components {
              * @default false
              */
             dry_run: boolean;
+            rag?: components["schemas"]["RagConfig"] | null;
         };
         /** RunCreate */
         RunCreate: {
@@ -3536,6 +4727,16 @@ export interface components {
             /** Rejected */
             rejected?: components["schemas"]["RejectedRow"][];
         };
+        /** Savings */
+        Savings: {
+            /**
+             * Inr
+             * @description per month, at monthly_conversations
+             */
+            inr: number;
+            /** Pct */
+            pct: number;
+        };
         /**
          * ScenarioBulkCreate
          * @description ``POST /scenarios:bulk`` - save reviewed drafts.
@@ -3600,6 +4801,7 @@ export interface components {
             max_turns: number;
             /** Tags */
             tags?: string[];
+            rag_expectation?: components["schemas"]["RagExpectation"] | null;
         };
         /**
          * ScenarioDraftOut
@@ -3621,7 +4823,8 @@ export interface components {
              * @enum {string}
              */
             status: "pending" | "ready" | "failed";
-            request: components["schemas"]["ScenarioGenerateRequest"];
+            /** Request */
+            request: components["schemas"]["ScenarioGenerateRequest"] | components["schemas"]["RagDraftRequest"];
             /** Drafts */
             drafts?: components["schemas"]["ScenarioCreate"][];
             /** Error */
@@ -3696,6 +4899,7 @@ export interface components {
             max_turns: number;
             /** Tags */
             tags?: string[];
+            rag_expectation?: components["schemas"]["RagExpectation"] | null;
             /**
              * Id
              * Format: uuid
@@ -3750,6 +4954,7 @@ export interface components {
             max_turns?: number | null;
             /** Tags */
             tags?: string[] | null;
+            rag_expectation?: components["schemas"]["RagExpectation"] | null;
         };
         /**
          * SpeechProviderName
@@ -3800,6 +5005,29 @@ export interface components {
             error?: string | null;
             /** Detail */
             detail?: string | null;
+        };
+        /** TokenStats */
+        TokenStats: {
+            /**
+             * Agent Input
+             * @default 0
+             */
+            agent_input: number;
+            /**
+             * Agent Output
+             * @default 0
+             */
+            agent_output: number;
+            /**
+             * Query Embedding
+             * @default 0
+             */
+            query_embedding: number;
+            /**
+             * Rerank
+             * @default 0
+             */
+            rerank: number;
         };
         /** ToolCallOut */
         ToolCallOut: {
@@ -3868,6 +5096,18 @@ export interface components {
              * @default false
              */
             is_barge_in: boolean;
+        };
+        /** UnpricedModel */
+        UnpricedModel: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "llm" | "embedding" | "rerank";
+            /** Provider */
+            provider: string;
+            /** Model */
+            model: string;
         };
         /** UsageOut */
         UsageOut: {
@@ -4400,6 +5640,1588 @@ export interface operations {
             };
             /** @description not_found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_prompt_versions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agent_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptVersionOut"][];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    create_prompt_version: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agent_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PromptVersionCreate"];
+            };
+        };
+        responses: {
+            /** @description identical to the active version */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptVersionOut"];
+                };
+            };
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptVersionOut"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_prompt_version: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agent_id: string;
+                version: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptVersionOut"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    activate_prompt_version: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                agent_id: string;
+                version: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptVersionOut"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_knowledge_bases: {
+        parameters: {
+            query?: {
+                /** @description page size (max 200) */
+                limit?: number;
+                /** @description opaque cursor from next_cursor */
+                cursor?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_KnowledgeBaseOut_"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    create_knowledge_base: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KnowledgeBaseCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KnowledgeBaseOut"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_knowledge_base: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kb_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KnowledgeBaseOut"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    update_knowledge_base: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kb_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KnowledgeBaseUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KnowledgeBaseOut"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_documents: {
+        parameters: {
+            query?: {
+                /** @description page size (max 200) */
+                limit?: number;
+                /** @description opaque cursor from next_cursor */
+                cursor?: string | null;
+            };
+            header?: never;
+            path: {
+                kb_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_KbDocumentOut_"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    upload_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kb_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_document"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbDocumentOut"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description file_too_large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kb_id: string;
+                doc_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbDocumentDetail"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    delete_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kb_id: string;
+                doc_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_indexes: {
+        parameters: {
+            query?: {
+                /** @description page size (max 200) */
+                limit?: number;
+                /** @description opaque cursor from next_cursor */
+                cursor?: string | null;
+            };
+            header?: never;
+            path: {
+                kb_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_KbIndexOut_"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    create_index: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kb_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KbIndexCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbIndexOut"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_index: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kb_id: string;
+                index_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbIndexOut"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_chunks: {
+        parameters: {
+            query?: {
+                document_id?: string | null;
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                kb_id: string;
+                index_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KbChunkOut"][];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    generate_questions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kb_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuestionGenerateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftAccepted"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    import_questions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kb_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_import_questions"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionImportResult"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description file_too_large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_rag_matrices: {
+        parameters: {
+            query?: {
+                agent_id?: string | null;
+                /** @description page size (max 200) */
+                limit?: number;
+                /** @description opaque cursor from next_cursor */
+                cursor?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_RagMatrixOut_"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    post_rag_matrix: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RagMatrixCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RagMatrixOut"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description budget_exceeded: estimate above remaining budget */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_rag_matrix: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RagMatrixOut"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_rag_report: {
+        parameters: {
+            query?: {
+                monthly_conversations?: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RagReport"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_pricing: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PricingOut"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    put_pricing: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PriceIn"][];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PricingOut"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5619,7 +8441,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description unsupported_audio / unsafe_url */
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -5763,6 +8585,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
     estimate_run: {
@@ -5825,6 +8656,15 @@ export interface operations {
             };
             /** @description conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6275,6 +9115,15 @@ export interface operations {
             };
             /** @description conflict */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7008,7 +9857,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description unsupported_audio / unsafe_url */
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -8105,7 +10954,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description unsupported_audio / unsafe_url */
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -8567,7 +11416,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description unsupported_audio / unsafe_url */
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -8734,7 +11583,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description unsupported_audio / unsafe_url */
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -8814,7 +11663,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description unsupported_audio / unsafe_url */
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -8921,7 +11770,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description unsupported_audio / unsafe_url */
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -9082,7 +11931,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description unsupported_audio / unsafe_url */
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -9178,7 +12027,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description unsupported_audio / unsafe_url */
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
             422: {
                 headers: {
                     [name: string]: unknown;

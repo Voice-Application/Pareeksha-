@@ -8,6 +8,7 @@ slot release commit together with the framework's ``processed_events`` row.
 
 from __future__ import annotations
 
+import os
 import uuid
 from typing import Any
 
@@ -19,8 +20,12 @@ from pareeksha.adapters.base import AgentTarget
 from pareeksha.audio.profiles import LineProfile
 from pareeksha.evaluation.pii import mask_pii
 from pareeksha.events.schemas import CallRequested
+from pareeksha.integrations.crypto import SecretBox, SecretDecryptError
+from pareeksha.rag.retriever import LoadedIndex, build_loaded_index, get_or_load
 from pareeksha.runs.slots import release_slot
 from pareeksha.schemas.personas import PersonaCreate
+from pareeksha.schemas.prompts import PromptVersionOut
+from pareeksha.schemas.rag import RagConfig, index_key
 from pareeksha.schemas.scenarios import ScenarioCreate
 from pareeksha.simulation.models import CallResult, CallSpec
 
@@ -35,15 +40,16 @@ def call_id_for(run_item_id: uuid.UUID) -> uuid.UUID:
 
 
 class SpecNotFoundError(LookupError):
-    """The request names an agent, scenario, persona or noise profile that does not exist."""
+    """The request names an agent, scenario, persona or noise profile that does not exist
+    (or the agent's stored secrets cannot be read)."""
 
 
 async def read_spec(conn: Conn, req: CallRequested) -> tuple[CallSpec, uuid.UUID]:
     """Build the :class:`CallSpec` for ``req``; also returns the project id."""
     async with conn.cursor(row_factory=dict_row) as cur:
         await cur.execute(
-            "SELECT project_id, adapter, endpoint_url, adapter_config, languages, glass_box, "
-            "max_call_seconds FROM agents WHERE id = %s",
+            "SELECT project_id, adapter, endpoint_url, adapter_config, adapter_secrets_encrypted, "
+            "languages, glass_box, max_call_seconds FROM agents WHERE id = %s",
             (req.agent_id,),
         )
         agent = await cur.fetchone()
@@ -68,6 +74,8 @@ async def read_spec(conn: Conn, req: CallRequested) -> tuple[CallSpec, uuid.UUID
             (req.noise_profile_id,),
         )
         noise = await cur.fetchone()
+        await cur.execute("SELECT agent_snapshot FROM test_runs WHERE id = %s", (req.run_id,))
+        run = await cur.fetchone()
     missing = [
         name
         for name, row in (
@@ -81,14 +89,40 @@ async def read_spec(conn: Conn, req: CallRequested) -> tuple[CallSpec, uuid.UUID
     if missing or agent is None or scenario is None or persona is None or noise is None:
         raise SpecNotFoundError(f"call.requested names unknown {', '.join(missing)}")
 
+    snapshot = (run or {}).get("agent_snapshot") or {}
+    # the adapter the run was created with: a queued prompt run stays a prompt run even if the
+    # agent's adapter is changed later
+    adapter = snapshot.get("adapter") or agent["adapter"]
     config = dict(agent["adapter_config"] or {})
+    # only a version resolved below is ever run, never one stored in the agent's config
+    config.pop("prompt_version", None)
+    secrets: dict[str, str] = {}
+    if adapter == "prompt":
+        pinned = (snapshot.get("adapter_config") or {}).get("active_version_id")
+        version = await _prompt_version(
+            conn, req, agent["project_id"], pinned or config.get("active_version_id")
+        )
+        if version is not None:  # absent -> the simulator ends the call connect_failed
+            config["prompt_version"] = version.model_dump(mode="json")
+        if agent["adapter_secrets_encrypted"]:
+            try:
+                secrets = _secret_box().decrypt(bytes(agent["adapter_secrets_encrypted"]).decode())
+            except (SecretDecryptError, RuntimeError, ValueError) as exc:
+                # permanent (wrong/missing SECRET_KEY): fail the item rather than retry forever
+                raise SpecNotFoundError("the agent's provider secrets cannot be decrypted") from exc
+        if version is not None:
+            rag = await _rag_target(conn, req, agent["project_id"], version)
+            if rag is not None:
+                config["rag"], kb_secrets = rag
+                secrets = {**secrets, **kb_secrets}
     spec = CallSpec(
         call_id=call_id_for(req.run_item_id),
         agent=AgentTarget(
             agent_id=req.agent_id,
-            adapter=agent["adapter"],
+            adapter=adapter,
             endpoint_url=agent["endpoint_url"],
             adapter_config=config,
+            adapter_secrets=secrets,
             languages=list(agent["languages"] or []),
             glass_box=agent["glass_box"],
         ),
@@ -110,6 +144,138 @@ async def read_spec(conn: Conn, req: CallRequested) -> tuple[CallSpec, uuid.UUID
         metadata=dict(config.get("start_metadata") or {}),
     )
     return spec, agent["project_id"]
+
+
+def _secret_box() -> SecretBox:
+    """The ``SecretBox`` keyed by ``SECRET_KEY``; raises ``RuntimeError`` when it is unset."""
+    key = os.environ.get("SECRET_KEY")
+    if not key:
+        raise RuntimeError("SECRET_KEY is not configured")
+    return SecretBox(key)
+
+
+async def _prompt_version(
+    conn: Conn, req: CallRequested, project_id: uuid.UUID, version_id: Any
+) -> PromptVersionOut | None:
+    """The version the run pinned in its agent snapshot, else the agent's current active one."""
+    if not version_id:
+        return None
+    async with conn.cursor(row_factory=dict_row) as cur:
+        await cur.execute(
+            "SELECT id, agent_id, version, system_prompt, provider, model, base_url, temperature, "
+            "tools, max_tool_rounds, rag_config, note, content_hash, created_at "
+            "FROM prompt_versions "
+            "WHERE id = %s AND agent_id = %s AND project_id = %s",
+            (version_id, req.agent_id, project_id),
+        )
+        row = await cur.fetchone()
+    if row is None:
+        return None
+    row["rag_config"] = row["rag_config"] or None  # stored as {} when the version has no RAG
+    return PromptVersionOut.model_validate(row)
+
+
+async def _rag_target(
+    conn: Conn, req: CallRequested, project_id: uuid.UUID, version: PromptVersionOut
+) -> tuple[dict[str, Any], dict[str, str]] | None:
+    """The effective RAG setup (run override, else the version's) and the KB's decrypted secrets.
+
+    Retrieval loads exactly the index pinned in ``test_runs.config["rag_index_id"]``; if that is
+    missing, not ready or built for another chunking/model, the item fails (no fallback).
+    """
+    async with conn.cursor(row_factory=dict_row) as cur:
+        await cur.execute("SELECT config FROM test_runs WHERE id = %s", (req.run_id,))
+        run_config = ((await cur.fetchone()) or {}).get("config") or {}
+        raw = run_config["rag"] if "rag" in run_config else version.rag_config
+        if not raw:
+            return None
+        cfg = RagConfig.model_validate(raw)
+        if cfg.mode == "off":
+            # nothing is retrieved, but the transcript still reaches the hosted caller and judge:
+            # the simulator must be told about a KB that is (now) local-only
+            await cur.execute(
+                "SELECT local_only FROM knowledge_bases WHERE id = %s AND project_id = %s",
+                (cfg.kb_id, project_id),
+            )
+            off_kb = await cur.fetchone()
+            if off_kb is None or off_kb["local_only"] is False:
+                return None
+            return {
+                "config": cfg.model_dump(mode="json"),
+                "index_id": None,
+                "kb_id": str(cfg.kb_id),
+                "local_only": True,
+            }, {}
+        await cur.execute(
+            "SELECT local_only, secrets_encrypted FROM knowledge_bases "
+            "WHERE id = %s AND project_id = %s",
+            (cfg.kb_id, project_id),
+        )
+        kb = await cur.fetchone()
+        if kb is None:
+            raise SpecNotFoundError("the run's knowledge base does not exist")
+        kb_secrets: dict[str, str] = {}
+        if kb["secrets_encrypted"]:
+            try:
+                kb_secrets = _secret_box().decrypt(bytes(kb["secrets_encrypted"]).decode())
+            except (SecretDecryptError, RuntimeError, ValueError) as exc:
+                raise SpecNotFoundError("the knowledge base secrets cannot be decrypted") from exc
+        rag: dict[str, Any] = {
+            "config": cfg.model_dump(mode="json"),
+            "index_id": None,
+            "kb_id": str(cfg.kb_id),
+            "local_only": bool(kb["local_only"]),
+        }
+        if cfg.mode == "full_context":
+            # live documents only; same predicate as rag.documents.active_document_ids
+            await cur.execute(
+                "SELECT filename, text FROM kb_documents "
+                "WHERE kb_id = %s AND project_id = %s AND deleted_at IS NULL ORDER BY filename, id",
+                (cfg.kb_id, project_id),
+            )
+            rag["full_context_text"] = "".join(
+                f"\n\n# {d['filename']}\n{d['text']}" for d in await cur.fetchall()
+            )
+            return rag, kb_secrets
+        index_id = run_config.get("rag_index_id")
+        if not index_id:
+            raise SpecNotFoundError("the run did not pin a knowledge base index")
+        await cur.execute(
+            "SELECT index_key, status FROM kb_indexes "
+            "WHERE id = %s AND kb_id = %s AND project_id = %s",
+            (index_id, cfg.kb_id, project_id),
+        )
+        idx = await cur.fetchone()
+    if idx is None or idx["status"] != "ready" or idx["index_key"] != index_key(cfg):
+        raise SpecNotFoundError("the pinned knowledge base index is not ready or does not match")
+    rag["index_id"] = str(index_id)
+    rag["index"] = await get_or_load(
+        str(index_id), lambda: _load_index(conn, index_id, cfg.kb_id, project_id)
+    )
+    return rag, kb_secrets
+
+
+async def _load_index(
+    conn: Conn, index_id: uuid.UUID | str, kb_id: uuid.UUID, project_id: uuid.UUID
+) -> LoadedIndex:
+    """All chunks of one index (soft-deleted documents included: the build snapshotted them)."""
+    async with conn.cursor(row_factory=dict_row) as cur:
+        await cur.execute(
+            "SELECT c.id, c.document_id, d.filename, c.text, c.start_char, c.end_char, "
+            "c.parent_start, c.parent_end, c.embedding FROM kb_chunks c "
+            "JOIN kb_documents d ON d.id = c.document_id "
+            "WHERE c.index_id = %s AND d.kb_id = %s AND d.project_id = %s "
+            "ORDER BY c.document_id, c.ordinal",
+            (index_id, kb_id, project_id),
+        )
+        chunks = await cur.fetchall()
+        await cur.execute(
+            "SELECT id, text FROM kb_documents WHERE kb_id = %s AND project_id = %s "
+            "AND id = ANY(%s)",
+            (kb_id, project_id, list({c["document_id"] for c in chunks})),
+        )
+        docs = {str(d["id"]): d["text"] for d in await cur.fetchall()}
+    return build_loaded_index(chunks, docs)
 
 
 async def mark_in_progress(conn: Conn, run_item_id: uuid.UUID) -> None:
@@ -231,6 +397,26 @@ async def save_call(
             [
                 (call_id, c.seq, c.name, Jsonb(c.arguments), c.at_ms, c.turn_idx, Jsonb(c.result))
                 for c in result.tool_calls
+            ],
+        )
+        await cur.executemany(
+            "INSERT INTO retrievals (call_id, turn_idx, rag_config, index_id, query, queries, "
+            "results, context_chars, timings, usage) "
+            "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            [
+                (
+                    call_id,
+                    r.turn_idx,
+                    Jsonb(r.rag_config),
+                    r.index_id,
+                    r.query,
+                    Jsonb(r.queries),
+                    Jsonb(r.results),
+                    r.context_chars,
+                    Jsonb(r.timings),
+                    Jsonb(r.usage),
+                )
+                for r in result.retrievals
             ],
         )
         await cur.executemany(

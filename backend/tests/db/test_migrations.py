@@ -15,10 +15,25 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from pareeksha.db.models import Base
-from tests.conftest import BACKEND, alembic_config
+from tests.conftest import BACKEND, _migrated_database, alembic_config
 
 SCHEMA_SQL = BACKEND.parent / "docs" / "schema.sql"
 MIGRATION_SQL = BACKEND / "alembic" / "sql" / "0001_initial.sql"
+
+# Tables added by later Alembic revisions; not part of docs/schema.sql v0.2.
+POST_V02_TABLES = {
+    "users",
+    "llm_settings",
+    "prompt_versions",
+    "knowledge_bases",
+    "kb_documents",
+    "kb_indexes",
+    "kb_chunks",
+    "retrievals",
+    "rag_metrics",
+    "rag_matrices",
+    "price_overrides",
+}
 
 
 def _documented_tables() -> set[str]:
@@ -43,10 +58,11 @@ def test_migration_sql_is_a_copy_of_the_documented_schema() -> None:
 
 
 async def test_tables_columns_and_indexes_match_schema_sql(engine: AsyncEngine) -> None:
+    """The live schema has the documented tables and indexes, and the models mirror its columns."""
     async with engine.connect() as conn:
         tables, columns, indexes = await conn.run_sync(_live)
-    assert tables == _documented_tables()
-    assert len(tables) == 29
+    assert tables - POST_V02_TABLES == _documented_tables()
+    assert len(tables - POST_V02_TABLES) == 29
     assert indexes >= _documented_indexes()
     # The SQLAlchemy models mirror the live database exactly.
     assert set(Base.metadata.tables) == tables
@@ -77,6 +93,40 @@ def test_downgrade_then_upgrade_round_trips(database_url: str) -> None:
     command.upgrade(cfg, "head")
     with psycopg.connect(sync_url) as conn:
         assert conn.execute("select count(*) from projects").fetchone() == (0,)
+
+
+def test_downgrade_0004_keeps_prompt_agents_and_drops_new_checks() -> None:
+    """Rows using 'prompt' / 'no_unexpected_tool' must not block re-adding the old CHECKs."""
+    for url in _migrated_database():
+        cfg = alembic_config(url)
+        sync_url = url.replace("+psycopg", "")
+        with psycopg.connect(sync_url, autocommit=True) as conn:
+            project = conn.execute("insert into projects (name) values ('p') returning id")
+            project_id = project.fetchone()[0]  # type: ignore[index]
+            agent = conn.execute(
+                "insert into agents (project_id, name, adapter, endpoint_url) "
+                "values (%s, 'a', 'prompt', 'prompt://x') returning id",
+                (project_id,),
+            )
+            agent_id = agent.fetchone()[0]  # type: ignore[index]
+            call = conn.execute(
+                "insert into calls (project_id, agent_id, source) values (%s, %s, 'upload') "
+                "returning id",
+                (project_id, agent_id),
+            )
+            call_id = call.fetchone()[0]  # type: ignore[index]
+            conn.execute(
+                "insert into deterministic_checks (call_id, check_type, check_key) "
+                "values (%s, 'no_unexpected_tool', 'k')",
+                (call_id,),
+            )
+        command.downgrade(cfg, "0003")
+        with psycopg.connect(sync_url) as conn:
+            row = conn.execute("select adapter, archived from agents").fetchone()
+            checks = conn.execute("select count(*) from deterministic_checks").fetchone()
+        assert row == ("audio_v1", True)
+        assert checks == (0,)
+        command.upgrade(cfg, "head")
 
 
 @pytest.mark.parametrize("run", [1, 2])

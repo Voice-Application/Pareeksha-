@@ -36,6 +36,8 @@ class Call_:
     paged: bool = False
     #: PATCH/PUT/GET/DELETE are safe to retry on any 5xx; POST only on gateway errors
     idempotent: bool = True
+    #: add ``unchanged`` to the dict answer: True when the server said 200, not 201
+    flag_unchanged: bool = False
 
 
 _NAMED_LIST = TypeAdapter(list[Named])
@@ -70,6 +72,110 @@ def agent_create(body: dict[str, Any]) -> Call_:
 
 def agent_update(agent_id: UUID | str, body: dict[str, Any]) -> Call_:
     return Call_("PATCH", f"/agents/{agent_id}", json=body)
+
+
+def prompt_version_create(agent_id: UUID | str, body: dict[str, Any]) -> Call_:
+    return Call_(
+        "POST",
+        f"/agents/{agent_id}/prompt-versions",
+        json=body,
+        idempotent=False,
+        flag_unchanged=True,
+    )
+
+
+def prompt_versions_list(agent_id: UUID | str) -> Call_:
+    return Call_("GET", f"/agents/{agent_id}/prompt-versions")
+
+
+def prompt_version_activate(agent_id: UUID | str, version: int) -> Call_:
+    return Call_("POST", f"/agents/{agent_id}/prompt-versions/{version}/activate", idempotent=False)
+
+
+def kb_create(body: dict[str, Any]) -> Call_:
+    return Call_("POST", "/knowledge-bases", json=body, idempotent=False)
+
+
+def kb_list() -> Call_:
+    return Call_("GET", "/knowledge-bases", paged=True)
+
+
+def kb_update(kb_id: UUID | str, body: dict[str, Any]) -> Call_:
+    return Call_("PATCH", f"/knowledge-bases/{kb_id}", json=body)
+
+
+def kb_document_upload(kb_id: UUID | str, file: Path) -> Call_:
+    return Call_(
+        "POST",
+        f"/knowledge-bases/{kb_id}/documents",
+        file=file,
+        idempotent=False,
+        flag_unchanged=True,
+    )
+
+
+def kb_documents_list(kb_id: UUID | str) -> Call_:
+    return Call_("GET", f"/knowledge-bases/{kb_id}/documents", paged=True)
+
+
+def kb_document_delete(kb_id: UUID | str, doc_id: UUID | str) -> Call_:
+    return Call_("DELETE", f"/knowledge-bases/{kb_id}/documents/{doc_id}")
+
+
+def kb_index_create(kb_id: UUID | str, body: dict[str, Any]) -> Call_:
+    return Call_(
+        "POST",
+        f"/knowledge-bases/{kb_id}/indexes",
+        json=body,
+        idempotent=False,
+        flag_unchanged=True,
+    )
+
+
+def kb_indexes_list(kb_id: UUID | str) -> Call_:
+    return Call_("GET", f"/knowledge-bases/{kb_id}/indexes", paged=True)
+
+
+def kb_index_get(kb_id: UUID | str, index_id: UUID | str) -> Call_:
+    return Call_("GET", f"/knowledge-bases/{kb_id}/indexes/{index_id}")
+
+
+def kb_questions_generate(kb_id: UUID | str, body: dict[str, Any]) -> Call_:
+    return Call_(
+        "POST", f"/knowledge-bases/{kb_id}/questions:generate", json=body, idempotent=False
+    )
+
+
+def kb_questions_import(kb_id: UUID | str, agent_id: UUID | str, file: Path) -> Call_:
+    return Call_(
+        "POST",
+        f"/knowledge-bases/{kb_id}/questions:import",
+        data={"agent_id": str(agent_id)},
+        file=file,
+        idempotent=False,
+    )
+
+
+def rag_matrix_create(body: dict[str, Any]) -> Call_:
+    return Call_("POST", "/rag-matrices", json=body, idempotent=False)
+
+
+def rag_matrix_get(matrix_id: UUID | str) -> Call_:
+    return Call_("GET", f"/rag-matrices/{matrix_id}")
+
+
+def rag_report(matrix_id: UUID | str, monthly_conversations: int) -> Call_:
+    return Call_(
+        "GET", f"/rag-matrices/{matrix_id}/report", {"monthly_conversations": monthly_conversations}
+    )
+
+
+def pricing_get() -> Call_:
+    return Call_("GET", "/pricing")
+
+
+def pricing_put(prices: list[dict[str, Any]]) -> Call_:
+    return Call_("PUT", "/pricing", json=prices)
 
 
 def library_list(kind: str, **filters: Any) -> Call_:

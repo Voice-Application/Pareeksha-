@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 T = TypeVar("T")
 
-AdapterType = Literal["audio_v1", "pipecat", "livekit", "vapi"]
+AdapterType = Literal["audio_v1", "pipecat", "livekit", "vapi", "prompt"]
 Scope = Literal["read", "runs:write", "audits:write", "admin"]
 CallSource = Literal["simulation", "upload", "import"]
 

@@ -19,6 +19,7 @@ from pareeksha.db.models import Agents, RegressionTests, RubricVersions, Scenari
 from pareeksha.events.schemas import RunRequested, make_envelope
 from pareeksha.regression.estimate import estimate_run, remaining_budget
 from pareeksha.regression.outcomes import latest_results
+from pareeksha.runs.service import require_active_version
 from pareeksha.schemas.common import Page
 from pareeksha.schemas.regression import RegressionTestOut, RegressionTestUpdate
 from pareeksha.schemas.runs import RegressionRunCreate, RegressionStatus, RunCreated
@@ -49,13 +50,14 @@ def agent_snapshot(agent: Agents) -> dict[str, Any]:
 @router.post(
     "/runs:regression",
     status_code=201,
-    responses=errors(402, 404, 409),
+    responses=errors(402, 404, 409, 422),
     summary="Run the agent's regression tests with the given statuses (default: blocking)",
 )
 async def create_regression_run(
     body: RegressionRunCreate, key: WriteKey, session: Db
 ) -> RunCreated:
     agent = await get_or_404(session, Agents, body.agent_id, key.project_id, "Agent")
+    await require_active_version(session, agent)
     statuses: list[RegressionStatus] = list(dict.fromkeys(body.statuses))
     rows = (
         await session.execute(
@@ -91,7 +93,7 @@ async def create_regression_run(
         name=body.name,
         kind="regression",
         status="queued",
-        config={**body.config.model_dump(), "statuses": statuses},
+        config={**body.config.model_dump(mode="json", exclude_none=True), "statuses": statuses},
         agent_snapshot=agent_snapshot(agent),
         summary={},
         rubric_version_id=rubric,

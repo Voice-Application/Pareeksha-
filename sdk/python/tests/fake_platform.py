@@ -14,7 +14,17 @@ from contextlib import contextmanager
 from typing import Any
 
 import uvicorn
-from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile
+from fastapi import (
+    Depends,
+    FastAPI,
+    File,
+    Form,
+    Header,
+    HTTPException,
+    Request,
+    Response,
+    UploadFile,
+)
 from fastapi.responses import JSONResponse
 
 API_KEY = "pk_live_test"
@@ -37,6 +47,20 @@ class State:
         self.kafka = "ok"
         self.audit_uploads: list[dict[str, Any]] = []
         self.page_size = 200
+        self.prompt_versions: dict[str, list[dict[str, Any]]] = {}
+        self.prompt_bodies: list[dict[str, Any]] = []
+        self.kbs: dict[str, dict[str, Any]] = {}
+        self.kb_bodies: list[dict[str, Any]] = []
+        self.docs: list[dict[str, Any]] = []
+        self.indexes: dict[str, dict[str, Any]] = {}
+        self.index_bodies: list[dict[str, Any]] = []
+        self.index_reuse = False
+        self.index_final = "ready"
+        self.missing_indexes: list[dict[str, Any]] = []
+        self.matrix_bodies: list[dict[str, Any]] = []
+        self.prices: list[dict[str, Any]] = []
+        self.active_prompt_version: dict[str, int] = {}
+        self.prompt_activations: list[tuple[str, int]] = []
         self.designer_requests: list[dict[str, Any]] = []
         self.designer_commits: list[dict[str, Any]] = []
         self.llm_settings: dict[str, Any] = {
@@ -52,6 +76,7 @@ class State:
 
 
 def build_app(state: State) -> FastAPI:
+    """An in-memory FastAPI stand-in for the platform API, reading and recording ``state``."""
     app = FastAPI()
 
     def auth(authorization: str | None = Header(default=None)) -> None:
@@ -288,7 +313,201 @@ def build_app(state: State) -> FastAPI:
         state.dlq[dead_letter_id]["status"] = "discarded"
         return {"status": "discarded"}
 
+    @app.post(api + "/agents/{agent_id}/prompt-versions", dependencies=[Depends(auth)])
+    async def create_pv(agent_id: str, request: Request, response: Response) -> dict[str, Any]:
+        """Create a prompt version, or return the active one when only the note differs."""
+        body = await request.json()
+        state.prompt_bodies.append(body)
+        rows = state.prompt_versions.setdefault(agent_id, [])
+        # Like the server's content_hash: every field but the note, with defaults filled in,
+        # compared against the active version.
+        active = state.active_prompt_version.get(agent_id)
+        current = next((r for r in rows if r["version"] == active), None)
+        if current is not None and _pv_config(current) == _pv_config(body):
+            return current
+        row = {**body, "version": len(rows) + 1}
+        rows.insert(0, row)
+        state.active_prompt_version[agent_id] = row["version"]
+        response.status_code = 201
+        return row
+
+    @app.get(api + "/agents/{agent_id}/prompt-versions", dependencies=[Depends(auth)])
+    def list_pv(agent_id: str) -> list[dict[str, Any]]:
+        return state.prompt_versions.get(agent_id, [])
+
+    @app.post(
+        api + "/agents/{agent_id}/prompt-versions/{version}/activate",
+        dependencies=[Depends(auth)],
+    )
+    def activate_pv(agent_id: str, version: int) -> dict[str, Any]:
+        state.prompt_activations.append((agent_id, version))
+        state.active_prompt_version[agent_id] = version
+        return {"version": version, "active": True}
+
+    # --- RAG lab ------------------------------------------------------------------------------
+
+    @app.post(api + "/knowledge-bases", status_code=201, dependencies=[Depends(auth)])
+    async def create_kb(request: Request) -> dict[str, Any]:
+        body = await request.json()
+        state.kb_bodies.append(body)
+        row = {
+            "id": str(uuid.uuid4()),
+            "name": body["name"],
+            "local_only": body.get("local_only", False),
+            "has_secrets": bool(body.get("secrets")),
+        }
+        state.kbs[row["id"]] = row
+        return row
+
+    @app.get(api + "/knowledge-bases", dependencies=[Depends(auth)])
+    def list_kbs(limit: int = 50, cursor: str | None = None) -> dict[str, Any]:
+        return page(list(state.kbs.values()), limit, cursor)
+
+    @app.patch(api + "/knowledge-bases/{kb_id}", dependencies=[Depends(auth)])
+    async def patch_kb(kb_id: str, request: Request) -> dict[str, Any]:
+        body = await request.json()
+        state.kb_bodies.append(body)
+        state.kbs[kb_id]["has_secrets"] = bool(body.get("secrets"))
+        return state.kbs[kb_id]
+
+    @app.post(api + "/knowledge-bases/{kb_id}/documents", dependencies=[Depends(auth)])
+    async def upload_doc(
+        kb_id: str,
+        response: Response,
+        file: UploadFile = File(...),  # noqa: B008
+    ) -> dict[str, Any]:
+        data = await file.read()
+        for doc in state.docs:
+            if doc["data"] == data:
+                return {k: v for k, v in doc.items() if k != "data"}
+        doc = {
+            "id": str(uuid.uuid4()),
+            "filename": file.filename,
+            "char_count": len(data),
+            "data": data,
+        }
+        state.docs.append(doc)
+        response.status_code = 201
+        return {k: v for k, v in doc.items() if k != "data"}
+
+    def index_view(index: dict[str, Any], status: str) -> dict[str, Any]:
+        failed = status == "failed"
+        return {
+            "id": index["id"],
+            "version": index["version"],
+            "status": status,
+            "chunk_count": 0 if failed else 12,
+            "stats": {} if failed else {"tokens": 3400},
+            "error": "embedding endpoint down" if failed else None,
+        }
+
+    @app.post(api + "/knowledge-bases/{kb_id}/indexes", dependencies=[Depends(auth)])
+    async def create_index(kb_id: str, request: Request, response: Response) -> dict[str, Any]:
+        state.index_bodies.append(await request.json())
+        index: dict[str, Any] = {"id": str(uuid.uuid4()), "version": 1, "polls": 0}
+        state.indexes[index["id"]] = index
+        if state.index_reuse:
+            response.status_code = 200
+            return index_view(index, "ready")
+        response.status_code = 202
+        return index_view(index, "pending")
+
+    @app.get(api + "/knowledge-bases/{kb_id}/indexes/{index_id}", dependencies=[Depends(auth)])
+    def get_index(kb_id: str, index_id: str) -> dict[str, Any]:
+        index = state.indexes[index_id]
+        index["polls"] += 1
+        return index_view(index, "pending" if index["polls"] == 1 else state.index_final)
+
+    @app.post(api + "/knowledge-bases/{kb_id}/questions:import", dependencies=[Depends(auth)])
+    async def import_questions(
+        kb_id: str,
+        agent_id: str = Form(...),
+        file: UploadFile = File(...),  # noqa: B008
+    ) -> dict[str, Any]:
+        await file.read()
+        return {"created": 2, "unmatched": [{"row": 3, "reason": "quote_not_found"}]}
+
+    @app.post(api + "/rag-matrices", status_code=201, dependencies=[Depends(auth)])
+    async def create_matrix(request: Request) -> Any:
+        state.matrix_bodies.append(await request.json())
+        if state.missing_indexes:
+            return JSONResponse(
+                {
+                    "error": {
+                        "code": "rag_index_missing",
+                        "message": "Build the missing indexes first",
+                        "details": {"missing": state.missing_indexes},
+                    }
+                },
+                status_code=409,
+            )
+        run = new_run("rag", 1)
+        return {"id": "m-1", "entries": [{"label": "hybrid", "kind": "rag", "run_id": run["id"]}]}
+
+    @app.get(api + "/rag-matrices/{matrix_id}", dependencies=[Depends(auth)])
+    def get_matrix(matrix_id: str) -> dict[str, Any]:
+        run_id = list(state.runs)[-1]
+        return {"id": matrix_id, "entries": [{"label": "hybrid", "kind": "rag", "run_id": run_id}]}
+
+    @app.get(api + "/rag-matrices/{matrix_id}/report", dependencies=[Depends(auth)])
+    def get_report(matrix_id: str, monthly_conversations: int = 10_000) -> dict[str, Any]:
+        return {**REPORT, "monthly_conversations": monthly_conversations}
+
+    @app.get(api + "/pricing", dependencies=[Depends(auth)])
+    def get_pricing() -> dict[str, Any]:
+        unpriced = [{"kind": "llm", "provider": "p", "model": "m"}]
+        return {"prices": state.prices, "unpriced": unpriced}
+
+    @app.put(api + "/pricing", dependencies=[Depends(auth)])
+    async def put_pricing(request: Request) -> dict[str, Any]:
+        state.prices = await request.json()
+        return {"prices": state.prices, "unpriced": []}
+
     return app
+
+
+REPORT: dict[str, Any] = {
+    "matrix_id": "m-1",
+    "monthly_conversations": 10_000,
+    "rows": [
+        {
+            "label": "hybrid",
+            "kind": "rag",
+            "n_calls": 24,
+            "retrieval": {"hit_rate": 0.9, "hit_rate_ci": [0.75, 0.97], "mrr": 0.71},
+            "generation": {
+                "faithfulness": 0.88,
+                "hallucination_rate": 0.04,
+                "hallucination_ci": [0.01, 0.15],
+            },
+            "latency_ms": {"retrieval_p50": 42.0, "retrieval_p95": 120.0},
+            "cost_per_conversation_inr": 0.0123,
+            "savings_vs_full_context": {"inr": 5000.0, "pct": 82.5},
+        },
+        {
+            "label": "no_rag",
+            "kind": "no_rag",
+            "n_calls": 24,
+            "retrieval": {},
+            "generation": {},
+            "latency_ms": {},
+        },
+    ],
+    "recommendation": {"label": None, "reason": "not enough ground-truth questions (2 < 10)"},
+}
+
+
+_PV_DEFAULTS: dict[str, Any] = {
+    "base_url": None,
+    "temperature": 0.2,
+    "tools": [],
+    "max_tool_rounds": 5,
+}
+
+
+def _pv_config(fields: dict[str, Any]) -> dict[str, Any]:
+    """The fields that make a prompt version distinct (the server hashes all but ``note``)."""
+    return {**_PV_DEFAULTS, **{k: v for k, v in fields.items() if k not in ("note", "version")}}
 
 
 def add_dead_letter(state: State) -> str:

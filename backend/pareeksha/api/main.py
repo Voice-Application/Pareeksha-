@@ -23,8 +23,11 @@ from pareeksha.api.routers import (
     dialect,
     dlq,
     integrations,
+    knowledge_bases,
     noise_profiles,
     personas,
+    prompt_versions,
+    rag_matrices,
     regression,
     runs,
     scenarios,
@@ -47,6 +50,9 @@ _DESCRIPTION = (
 
 ROUTERS = (
     agents.router,
+    prompt_versions.router,
+    knowledge_bases.router,
+    rag_matrices.router,
     scenarios.router,
     personas.router,
     noise_profiles.router,

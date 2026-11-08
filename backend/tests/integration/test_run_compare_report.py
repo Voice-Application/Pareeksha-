@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import uuid
+from typing import Any
 
 from httpx import AsyncClient
 
+from pareeksha.db import models
 from tests.conftest import Tenant, new_tenant
 from tests.integration.api04_support import Factory, new_rubric, seed_run
 from tests.integration.runs_support import API, make_fixture
@@ -146,3 +148,87 @@ async def test_report_escapes_names_and_handles_unfinished_runs(
     assert (
         await api.get(f"{API}/runs/{uuid.uuid4()}/report", headers=tenant.read)
     ).status_code == 404
+
+
+async def _set_snapshot(factory: Factory, run_id: uuid.UUID, snapshot: dict[str, object]) -> None:
+    """Overwrite the run's ``agent_snapshot``."""
+    async with factory() as session:
+        run = await session.get(models.TestRuns, run_id)
+        assert run is not None
+        run.agent_snapshot = snapshot
+        await session.commit()
+
+
+async def _compare(
+    api: AsyncClient, tenant: Tenant, base: uuid.UUID, head: uuid.UUID
+) -> dict[str, Any]:
+    """GET ``/runs/compare`` for ``base`` and ``head`` and return the body (asserting 200)."""
+    r = await api.get(
+        f"{API}/runs/compare",
+        params={"base": str(base), "head": str(head)},
+        headers=tenant.read,
+    )
+    assert r.status_code == 200, r.text
+    body: dict[str, Any] = r.json()
+    return body
+
+
+async def test_compare_reports_prompt_versions(
+    api: AsyncClient, tenant: Tenant, session_factory: Factory
+) -> None:
+    """Compare reports the prompt version each run pinned."""
+    fx = await make_fixture(api, tenant, scenarios=1, personas=1, profiles=1)
+    base = await seed_run(api, session_factory, tenant, fx=fx, scores=[(80, True)])
+    head = await seed_run(api, session_factory, tenant, fx=fx, scores=[(70, True)])
+    async with session_factory() as session:
+        ids = []
+        for version in (1, 2):
+            pv = models.PromptVersions(
+                project_id=tenant.project_id,
+                agent_id=uuid.UUID(fx.agent_id),
+                version=version,
+                system_prompt=f"v{version}",
+                provider="openai",
+                model="m",
+                temperature=0.0,
+                content_hash=f"h{version}",
+            )
+            session.add(pv)
+            await session.flush()
+            ids.append(pv.id)
+        await session.commit()
+    for run, vid in ((base, ids[0]), (head, ids[1])):
+        await _set_snapshot(
+            session_factory,
+            run.run_id,
+            {"adapter": "prompt", "adapter_config": {"active_version_id": str(vid)}},
+        )
+    body = await _compare(api, tenant, base.run_id, head.run_id)
+    assert (body["base_prompt_version"], body["head_prompt_version"]) == (1, 2)
+
+
+async def test_compare_cells_carry_call_ids(
+    api: AsyncClient, tenant: Tenant, session_factory: Factory
+) -> None:
+    """Each cell lists its base and head call ids; an unscored item has no call yet."""
+    fx = await make_fixture(api, tenant, scenarios=2, personas=1, profiles=1)
+    base = await seed_run(api, session_factory, tenant, fx=fx, scores=[(80, True), (60, True)])
+    head = await seed_run(api, session_factory, tenant, fx=fx, scores=[(70, True), None])
+    body = await _compare(api, tenant, base.run_id, head.run_id)
+    assert len(body["cells"]) == 2
+    for cell in body["cells"]:
+        i = int(cell["scenario"].split()[1])
+        assert cell["base_call_ids"] == [str(base.calls[i].call_id)]
+        # the unscored head item has no call yet
+        assert cell["head_call_ids"] == ([str(head.calls[0].call_id)] if i == 0 else [])
+
+
+async def test_voice_compare_versions_null(
+    api: AsyncClient, tenant: Tenant, session_factory: Factory
+) -> None:
+    """Runs without a prompt-agent snapshot compare with null prompt versions."""
+    base = await seed_run(api, session_factory, tenant, scores=[(80, True)])
+    head = await seed_run(api, session_factory, tenant, scores=[(70, True)])
+    await _set_snapshot(session_factory, head.run_id, {"adapter_config": {"provider": "x"}})
+    body = await _compare(api, tenant, base.run_id, head.run_id)
+    assert body["base_prompt_version"] is None and body["head_prompt_version"] is None

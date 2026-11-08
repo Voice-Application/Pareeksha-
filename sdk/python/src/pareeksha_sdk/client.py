@@ -55,14 +55,22 @@ def _should_retry(call: c.Call_, status: int) -> bool:
 
 
 def _unwrap(call: c.Call_, response: httpx.Response) -> Any:
+    """The JSON body of a successful response (``None`` when empty); errors are raised.
+
+    For ``flag_unchanged`` calls, ``unchanged`` says whether the server answered 200 (an existing
+    resource) rather than 201.
+    """
     if response.status_code >= 400:
         raise _error_from(response)
     if response.status_code == 204 or not response.content:
         return None
     try:
-        return response.json()
+        result = response.json()
     except ValueError as exc:
         raise PareekshaError(f"{call.method} {call.path}: response is not JSON") from exc
+    if call.flag_unchanged and isinstance(result, dict):
+        result["unchanged"] = response.status_code == 200
+    return result
 
 
 def _find_by_name(items: list[Named], name: str, kind: str) -> Named:
@@ -333,6 +341,133 @@ class _Dlq:
         self._core.call(c.dlq_discard(dead_letter_id))
 
 
+class _Kb:
+    """Knowledge bases, documents, indexes and ground-truth questions (plain dict answers)."""
+
+    def __init__(self, core: _SyncCore) -> None:
+        self._core = core
+
+    def create(self, name: str, *, local_only: bool = False, **fields: Any) -> dict[str, Any]:
+        """``fields``: ``description``, ``secrets`` (``embedding_api_key``/``reranker_api_key``)."""
+        body = {"name": name, "local_only": local_only, **fields}
+        result: dict[str, Any] = self._core.call(c.kb_create(body))
+        return result
+
+    def list_all(self) -> list[dict[str, Any]]:
+        result: list[dict[str, Any]] = self._core.call(c.kb_list())
+        return result
+
+    def get_by_name(self, name: str) -> dict[str, Any]:
+        for kb in self.list_all():
+            if kb["name"] == name:
+                return kb
+        raise NotFoundError(f"knowledge base {name!r} not found")
+
+    def update(self, kb_id: UUID | str, **fields: Any) -> dict[str, Any]:
+        result: dict[str, Any] = self._core.call(c.kb_update(kb_id, fields))
+        return result
+
+    def upload(self, kb_id: UUID | str, file: str | Path) -> dict[str, Any]:
+        """Upload a document; ``unchanged=True`` when the same content was already there."""
+        result: dict[str, Any] = self._core.call(c.kb_document_upload(kb_id, Path(file)))
+        return result
+
+    def documents(self, kb_id: UUID | str) -> list[dict[str, Any]]:
+        result: list[dict[str, Any]] = self._core.call(c.kb_documents_list(kb_id))
+        return result
+
+    def delete_document(self, kb_id: UUID | str, doc_id: UUID | str) -> None:
+        self._core.call(c.kb_document_delete(kb_id, doc_id))
+
+    def create_index(self, kb_id: UUID | str, **body: Any) -> dict[str, Any]:
+        """Start a build (``chunking``, ``embedding``); ``unchanged=True`` = ready index reused."""
+        result: dict[str, Any] = self._core.call(c.kb_index_create(kb_id, body))
+        return result
+
+    def indexes(self, kb_id: UUID | str) -> list[dict[str, Any]]:
+        result: list[dict[str, Any]] = self._core.call(c.kb_indexes_list(kb_id))
+        return result
+
+    def get_index(self, kb_id: UUID | str, index_id: UUID | str) -> dict[str, Any]:
+        result: dict[str, Any] = self._core.call(c.kb_index_get(kb_id, index_id))
+        return result
+
+    def wait_index(
+        self,
+        kb_id: UUID | str,
+        index_id: UUID | str,
+        *,
+        timeout_s: float = 1800,
+        poll_s: float = 2.0,
+        sleep: Callable[[float], None] = time.sleep,
+        clock: Callable[[], float] = time.monotonic,
+    ) -> dict[str, Any]:
+        deadline = clock() + timeout_s
+        while True:
+            index = self.get_index(kb_id, index_id)
+            if index["status"] in ("ready", "failed"):
+                return index
+            if clock() >= deadline:
+                raise WaitTimeoutError(
+                    f"index {index_id} still {index['status']} after {timeout_s}s"
+                )
+            sleep(poll_s)
+
+    def generate_questions(
+        self, kb_id: UUID | str, agent_id: UUID | str, count: int, unanswerable_share: float = 0.2
+    ) -> dict[str, Any]:
+        body = {"agent_id": str(agent_id), "count": count, "unanswerable_share": unanswerable_share}
+        result: dict[str, Any] = self._core.call(c.kb_questions_generate(kb_id, body))
+        return result
+
+    def import_questions(
+        self, kb_id: UUID | str, agent_id: UUID | str, file: str | Path
+    ) -> dict[str, Any]:
+        call = c.kb_questions_import(kb_id, agent_id, Path(file))
+        result: dict[str, Any] = self._core.call(call)
+        return result
+
+
+class _Rag:
+    """RAG matrices, reports and pricing."""
+
+    def __init__(self, core: _SyncCore, runs: _Runs) -> None:
+        self._core = core
+        self._runs = runs
+
+    def create_matrix(self, body: dict[str, Any]) -> dict[str, Any]:
+        """A 409 ``rag_index_missing`` raises ``ApiError`` with ``details["missing"]``."""
+        result: dict[str, Any] = self._core.call(c.rag_matrix_create(body))
+        return result
+
+    def get_matrix(self, matrix_id: UUID | str) -> dict[str, Any]:
+        result: dict[str, Any] = self._core.call(c.rag_matrix_get(matrix_id))
+        return result
+
+    def wait_matrix(
+        self, matrix_id: UUID | str, *, timeout_s: float = 3600, poll_s: float = 3.0
+    ) -> list[Run]:
+        """Block until every run of the matrix is final."""
+        entries = self.get_matrix(matrix_id)["entries"]
+        return [
+            self._runs.wait(e["run_id"], timeout_s=timeout_s, poll_s=poll_s)
+            for e in entries
+            if e.get("run_id")
+        ]
+
+    def report(self, matrix_id: UUID | str, monthly_conversations: int = 10_000) -> dict[str, Any]:
+        result: dict[str, Any] = self._core.call(c.rag_report(matrix_id, monthly_conversations))
+        return result
+
+    def pricing(self) -> dict[str, Any]:
+        result: dict[str, Any] = self._core.call(c.pricing_get())
+        return result
+
+    def set_prices(self, prices: list[dict[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = self._core.call(c.pricing_put(prices))
+        return result
+
+
 class Pareeksha:
     """Synchronous client."""
 
@@ -345,6 +480,8 @@ class Pareeksha:
         self.runs = _Runs(self._core)
         self.audits = _Audits(self._core)
         self.dlq = _Dlq(self._core)
+        self.kb = _Kb(self._core)
+        self.rag = _Rag(self._core, self.runs)
 
     def health(self) -> Health:
         return c.parse_health(self._core.call(c.health()))
@@ -404,6 +541,20 @@ class Pareeksha:
 
     def metrics_summary(self) -> dict[str, Any]:
         result: dict[str, Any] = self._core.call(c.metrics_summary())
+        return result
+
+    def create_prompt_version(self, agent_id: UUID | str, **fields: Any) -> dict[str, Any]:
+        """Push a version (``system_prompt``, ``provider``, ``model``, ...); the answer has
+        ``unchanged=True`` when the server returned the identical existing version."""
+        result: dict[str, Any] = self._core.call(c.prompt_version_create(agent_id, fields))
+        return result
+
+    def list_prompt_versions(self, agent_id: UUID | str) -> list[dict[str, Any]]:
+        result: list[dict[str, Any]] = self._core.call(c.prompt_versions_list(agent_id))
+        return result
+
+    def activate_prompt_version(self, agent_id: UUID | str, version: int) -> dict[str, Any]:
+        result: dict[str, Any] = self._core.call(c.prompt_version_activate(agent_id, version))
         return result
 
     def close(self) -> None:
@@ -713,6 +864,20 @@ class AsyncPareeksha:
 
     async def metrics_summary(self) -> dict[str, Any]:
         result: dict[str, Any] = await self._core.call(c.metrics_summary())
+        return result
+
+    async def create_prompt_version(self, agent_id: UUID | str, **fields: Any) -> dict[str, Any]:
+        """Push a version (``system_prompt``, ``provider``, ``model``, ...); the answer has
+        ``unchanged=True`` when the server returned the identical existing version."""
+        result: dict[str, Any] = await self._core.call(c.prompt_version_create(agent_id, fields))
+        return result
+
+    async def list_prompt_versions(self, agent_id: UUID | str) -> list[dict[str, Any]]:
+        result: list[dict[str, Any]] = await self._core.call(c.prompt_versions_list(agent_id))
+        return result
+
+    async def activate_prompt_version(self, agent_id: UUID | str, version: int) -> dict[str, Any]:
+        result: dict[str, Any] = await self._core.call(c.prompt_version_activate(agent_id, version))
         return result
 
     async def aclose(self) -> None:

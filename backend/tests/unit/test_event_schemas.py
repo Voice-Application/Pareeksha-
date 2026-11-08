@@ -143,6 +143,7 @@ SAMPLES: dict[EventType, tuple[dict[str, Any], uuid.UUID]] = {
         {"draft_id": SAMPLE, "agent_id": AGENT, "count": 10, "mix": {"happy_path": 3}},
         AGENT,
     ),
+    EventType.KB_INDEX_REQUESTED: ({"index_id": SAMPLE, "kb_id": AGENT}, AGENT),
     EventType.DIALECT_CLIP_REQUESTED: (
         {
             "report_id": EVAL,

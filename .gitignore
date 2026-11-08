@@ -19,6 +19,8 @@ npm-debug.log*
 
 # Runtime data
 data/runtime/
+# ...also when the backend runs (or its tests run) with backend/ as the working directory
+backend/data/
 .claude/worktrees/
 .coverage
 .mypy_cache/

@@ -24,7 +24,7 @@ AUDIO_FRAME_MS = 20
 #: 16-bit mono PCM: 16000 Hz * 0.020 s * 2 bytes.
 AUDIO_FRAME_BYTES = AUDIO_SAMPLE_RATE * AUDIO_FRAME_MS // 1000 * 2
 
-AdapterName = Literal["audio_v1", "pipecat", "livekit", "vapi"]
+AdapterName = Literal["audio_v1", "pipecat", "livekit", "vapi", "prompt"]
 
 
 class AdapterError(Exception):

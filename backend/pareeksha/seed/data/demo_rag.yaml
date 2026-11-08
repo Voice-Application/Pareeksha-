@@ -1,0 +1,197 @@
+# First-run demo: a bilingual knowledge base, a RAG prompt agent, ground-truth questions and a
+# finished RAG matrix whose results are PRECOMPUTED (nothing here calls an LLM or embeds text).
+#
+# Per question:
+#   doc / quote      the source document (file in demo_kb/) and the exact sentence that answers it
+#   outcomes         what the agent did in each matrix entry:
+#                    correct | partial (right answer plus one unsupported claim) | hallucinated | refused
+#   ranks            rank (1-3, top_k is 3) of the chunk holding the quote in each retrieval
+#                    config; null = not retrieved
+# Unanswerable questions have no doc/quote/ranks.
+
+knowledge_base:
+  name: "Demo · Sahay Finance FAQ (EN + HI)"
+  description: >-
+    Demo data from the first-run seed: four FAQ documents of a fictional lender, three in English
+    and one in Hindi. Safe to delete.
+  documents:
+    - emi_payments.md
+    - foreclosure_and_part_payment.md
+    - account_and_kyc.md
+    - emi_sahayata_hi.md
+
+agent:
+  name: "Demo · Sahay FAQ assistant"
+  description: "Demo prompt agent that answers from the Sahay Finance FAQ knowledge base. Safe to delete."
+  languages: [en-IN, hi-IN]
+  version:
+    provider: gemini
+    model: gemini-2.5-flash
+    temperature: 0.2
+    note: "Demo v1"
+    system_prompt: |-
+      You are the Sahay Finance help assistant. Answer only from the context below.
+      If the context does not contain the answer, say you do not have that information and give the
+      customer care number 1800-000-4455. Reply in the customer's language, in two sentences or fewer.
+
+      Context:
+      {{context}}
+
+# ₹ per 1M tokens, so the report can show cost and savings. Approximate list price; edit or delete
+# it under Settings → Pricing. An existing price for the same model is never overwritten.
+price:
+  kind: llm
+  provider: gemini
+  model: gemini-2.5-flash
+  input_per_m_inr: 26
+  output_per_m_inr: 220
+
+persona: "Neha — switcher"
+noise_profile: clean_16k
+
+# The matrix: three retrieval configs on one index (default chunking and local embedding model)
+# plus the no-RAG and full-context baselines. The agent's version uses the first one.
+configs:
+  - {key: rerank, method: hybrid_rerank, top_k: 3}
+  - {key: hybrid, method: hybrid, top_k: 3}
+  - {key: bm25, method: bm25, top_k: 3}
+
+refusal:
+  en: "I'm sorry, I don't have that information. You can call customer care on 1800-000-4455."
+  hi: "माफ़ कीजिए, मेरे पास इसकी जानकारी नहीं है। आप कस्टमर केयर 1800-000-4455 पर बात कर सकते हैं।"
+
+questions:
+  - question: "What is the late fee if I miss my EMI?"
+    lang: en
+    doc: emi_payments.md
+    quote: "a late payment fee of ₹500 is charged for each missed EMI"
+    reference_answer: "₹500 for each missed EMI, charged once the 3-day grace period is over."
+    answer: "If the EMI is not paid within the 3-day grace period, a late fee of ₹500 is charged for each missed EMI."
+    wrong: "The late fee is ₹1,000 plus 18% GST for every missed EMI."
+    extra: "The late fee is waived once a year if you ask customer care."
+    ranks: {bm25: 1, hybrid: 1, rerank: 1}
+    outcomes: {no_rag: hallucinated, full_context: correct, bm25: correct, hybrid: correct, rerank: correct}
+
+  - question: "My auto-debit bounced. How much will I be charged?"
+    lang: en
+    doc: emi_payments.md
+    quote: "a bounce charge of ₹590 (including GST) is added"
+    reference_answer: "A bounce charge of ₹590, including GST."
+    answer: "A bounce charge of ₹590, including GST, is added when an auto-debit bounces."
+    wrong: "A bounce charge of ₹750 is added, plus whatever your bank charges."
+    ranks: {bm25: 2, hybrid: 1, rerank: 1}
+    outcomes: {no_rag: hallucinated, full_context: correct, bm25: correct, hybrid: correct, rerank: correct}
+
+  - question: "Is there a grace period after the due date?"
+    lang: en
+    doc: emi_payments.md
+    quote: "There is a grace period of 3 days; no late fee is charged if the payment reaches us by the 8th."
+    reference_answer: "Yes, 3 days: there is no late fee if the payment reaches Sahay by the 8th."
+    answer: "Yes, there is a 3-day grace period, so there is no late fee if your payment reaches us by the 8th."
+    wrong: "Yes, you get a 7-day grace period after the due date."
+    extra: "During the grace period the EMI is also not reported to the credit bureaus."
+    ranks: {bm25: 1, hybrid: 1, rerank: 1}
+    outcomes: {no_rag: hallucinated, full_context: partial, bm25: correct, hybrid: correct, rerank: correct}
+
+  - question: "How long is the SMS payment link valid?"
+    lang: en
+    doc: emi_payments.md
+    quote: "A payment link sent by SMS is valid for 24 hours."
+    reference_answer: "24 hours."
+    answer: "The payment link we send by SMS is valid for 24 hours."
+    wrong: "The payment link is valid for 7 days."
+    ranks: {bm25: 1, hybrid: 2, rerank: 1}
+    outcomes: {no_rag: refused, full_context: correct, bm25: correct, hybrid: correct, rerank: correct}
+
+  - question: "I changed my bank. How long until the new auto-debit account works?"
+    lang: en
+    doc: emi_payments.md
+    quote: "the change takes 7 working days to activate"
+    reference_answer: "7 working days after submitting a new NACH mandate in the app."
+    answer: "Submit a new NACH mandate in the app; the new account starts working in 7 working days."
+    wrong: "The new account is updated within 24 hours."
+    ranks: {bm25: null, hybrid: null, rerank: 2}
+    outcomes: {no_rag: hallucinated, full_context: correct, bm25: refused, hybrid: refused, rerank: correct}
+
+  - question: "What is the foreclosure charge on a fixed-rate personal loan?"
+    lang: en
+    doc: foreclosure_and_part_payment.md
+    quote: "Personal loans with a fixed rate carry a foreclosure charge of 4% of the principal outstanding, plus GST."
+    reference_answer: "4% of the principal outstanding, plus GST."
+    answer: "For a fixed-rate personal loan the foreclosure charge is 4% of the principal outstanding, plus GST."
+    wrong: "The foreclosure charge is 2% of the outstanding amount, with no GST."
+    ranks: {bm25: 1, hybrid: 1, rerank: 1}
+    outcomes: {no_rag: hallucinated, full_context: correct, bm25: correct, hybrid: correct, rerank: correct}
+
+  - question: "How many part-payments can I make in a year?"
+    lang: en
+    doc: foreclosure_and_part_payment.md
+    quote: "you can make at most 2 part-payments in a financial year"
+    reference_answer: "At most 2 per financial year, each of at least one EMI."
+    answer: "You can make at most 2 part-payments in a financial year, and each must be at least one EMI."
+    wrong: "You can make as many part-payments as you like, with a minimum of ₹10,000."
+    extra: "There is no charge for part-payments on any loan."
+    ranks: {bm25: 2, hybrid: 1, rerank: 1}
+    outcomes: {no_rag: hallucinated, full_context: correct, bm25: correct, hybrid: partial, rerank: correct}
+
+  - question: "When will I get my NOC after closing the loan?"
+    lang: en
+    doc: foreclosure_and_part_payment.md
+    quote: "The No Objection Certificate (NOC) is emailed within 15 working days of the loan being closed."
+    reference_answer: "By email, within 15 working days of closure."
+    answer: "Your NOC is emailed to you within 15 working days of the loan being closed."
+    wrong: "The NOC is couriered to you within 30 days."
+    ranks: {bm25: 1, hybrid: 1, rerank: 1}
+    outcomes: {no_rag: refused, full_context: correct, bm25: correct, hybrid: correct, rerank: correct}
+
+  - question: "Can I change my registered mobile number online?"
+    lang: en
+    doc: account_and_kyc.md
+    quote: "online changes are not allowed for security reasons"
+    reference_answer: "No. Visit a branch with your Aadhaar or passport."
+    answer: "No, for security reasons the mobile number can only be changed at a branch, with your Aadhaar or passport."
+    wrong: "Yes, you can change it in the app under Profile > Edit."
+    ranks: {bm25: 3, hybrid: 1, rerank: 1}
+    outcomes: {no_rag: hallucinated, full_context: hallucinated, bm25: correct, hybrid: correct, rerank: correct}
+
+  - question: "How many times can I change my EMI date, and what does it cost?"
+    lang: en
+    doc: emi_sahayata_hi.md
+    quote: "EMI की तारीख पूरे लोन के दौरान केवल एक बार बदली जा सकती है। तारीख बदलने का शुल्क ₹250 है"
+    reference_answer: "Only once during the loan, for a fee of ₹250."
+    answer: "You can change the EMI date only once during the loan, and the fee is ₹250."
+    wrong: "You can change the EMI date twice a year, free of charge."
+    ranks: {bm25: null, hybrid: 1, rerank: 1}
+    outcomes: {no_rag: hallucinated, full_context: correct, bm25: hallucinated, hybrid: correct, rerank: correct}
+
+  - question: "मेरी नौकरी छूट गई है, क्या मैं कुछ महीनों के लिए EMI टाल सकता हूँ?"
+    lang: hi
+    doc: emi_sahayata_hi.md
+    quote: "राहत के तहत अधिकतम 3 महीने तक EMI टाली जा सकती है, लेकिन इस अवधि का ब्याज जुड़ता रहता है।"
+    reference_answer: "हाँ, अधिकतम 3 महीने तक, लेकिन उस अवधि का ब्याज जुड़ता रहेगा।"
+    answer: "जी हाँ, आर्थिक कठिनाई में EMI अधिकतम 3 महीने तक टाली जा सकती है, लेकिन इस दौरान ब्याज जुड़ता रहेगा।"
+    wrong: "जी हाँ, आप 6 महीने तक बिना ब्याज के EMI टाल सकते हैं।"
+    ranks: {bm25: null, hybrid: 2, rerank: 1}
+    outcomes: {no_rag: hallucinated, full_context: correct, bm25: refused, hybrid: correct, rerank: correct}
+
+  - question: "शिकायत का 30 दिन में समाधान नहीं हुआ, अब क्या करूँ?"
+    lang: hi
+    doc: emi_sahayata_hi.md
+    quote: "अगर 30 दिनों में समाधान नहीं होता, तो आप नोडल अधिकारी से संपर्क कर सकते हैं और उसके बाद RBI लोकपाल के पास शिकायत कर सकते हैं।"
+    reference_answer: "पहले नोडल अधिकारी से संपर्क करें, फिर RBI लोकपाल के पास शिकायत करें।"
+    answer: "आप पहले नोडल अधिकारी से संपर्क कर सकते हैं, और उसके बाद भी समाधान न हो तो RBI लोकपाल के पास शिकायत कर सकते हैं।"
+    wrong: "आप सीधे उपभोक्ता अदालत में केस कर सकते हैं।"
+    ranks: {bm25: 1, hybrid: 1, rerank: 1}
+    outcomes: {no_rag: refused, full_context: correct, bm25: correct, hybrid: correct, rerank: correct}
+
+  - question: "Do you offer gold loans?"
+    lang: en
+    answerable: false
+    wrong: "Yes, we offer gold loans at 9.5% interest with same-day disbursal."
+    outcomes: {no_rag: hallucinated, full_context: refused, bm25: hallucinated, hybrid: refused, rerank: refused}
+
+  - question: "What is the interest rate on the Sahay credit card?"
+    lang: en
+    answerable: false
+    wrong: "The Sahay credit card has an interest rate of 3.5% per month."
+    outcomes: {no_rag: hallucinated, full_context: refused, bm25: refused, hybrid: refused, rerank: refused}

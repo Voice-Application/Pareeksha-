@@ -282,6 +282,8 @@ def check_tool_calls(
     expected = list(expected or [])
     if not expected:
         return []
+    forbidden = [e for e in expected if e.get("expect") == "not_called"]
+    expected = [e for e in expected if e.get("expect") != "not_called"]
     if actual is None:
         return [
             CheckResult(
@@ -292,7 +294,7 @@ def check_tool_calls(
                 (),
                 "Tool trace not available",
             )
-            for e in expected
+            for e in [*expected, *forbidden]
         ]
     calls = [c if isinstance(c, ToolCall) else ToolCall.from_dict(c) for c in actual]
     results: list[CheckResult] = []
@@ -360,7 +362,55 @@ def check_tool_calls(
                 results[idx].evidence_turns,
                 f"{k2} was called before {k1} but should come after",
             )
+    for exp in forbidden:
+        hit = next((c for c in calls if c.name == exp["name"]), None)
+        ev = (hit.turn_idx,) if hit is not None and hit.turn_idx is not None else ()
+        results.append(
+            CheckResult(
+                "tool_calls_expected",
+                f"not_called:{exp['name']}",
+                hit is None,
+                True,
+                ev,
+                f"{exp['name']} was not called, as expected"
+                if hit is None
+                else f"{exp['name']} must not be called but was (args {hit.args})",
+            )
+        )
     return results
+
+
+def check_no_unexpected_tool(
+    expected: Iterable[Mapping] | None, actual: Iterable[Mapping | ToolCall] | None
+) -> list[CheckResult]:
+    """Fail once per actual call whose name is not an expected tool (not_called names excluded)."""
+    allowed = {e["name"] for e in expected or [] if e.get("expect") != "not_called"}
+    if not allowed or actual is None:  # only "must not call X" expectations: just X is forbidden
+        return []
+    calls = [c if isinstance(c, ToolCall) else ToolCall.from_dict(c) for c in actual]
+    bad = [(i, c) for i, c in enumerate(calls, 1) if c.name not in allowed]
+    if not bad:
+        return [
+            CheckResult(
+                "no_unexpected_tool",
+                "no_unexpected_tool",
+                True,
+                True,
+                (),
+                "No unexpected tool calls",
+            )
+        ]
+    return [
+        CheckResult(
+            "no_unexpected_tool",
+            f"{c.name}#{i}",
+            False,
+            True,
+            (c.turn_idx,) if c.turn_idx is not None else (),
+            f"Unexpected tool call: {c.name}({c.args})",
+        )
+        for i, c in bad
+    ]
 
 
 # -- amount_confirmed -------------------------------------------------------------------
@@ -512,14 +562,22 @@ def run_checks(
     tool_calls: Iterable | None = None,
     expected_amounts: Mapping[str, Any] | None = None,
 ) -> list[CheckResult]:
+    """Run every deterministic check that applies to one call and return the results in order.
+
+    The language and amount checks run only when an expected language or amounts are given; ``None``
+    tool expectations or trace mean unknown, not empty.
+    """
     ts = as_turns(turns)
+    expected_tool_calls = None if expected_tool_calls is None else list(expected_tool_calls)
+    tool_calls = None if tool_calls is None else list(tool_calls)
     out: list[CheckResult] = []
     out += check_disclosures(ts, disclosures)
     out += check_forbidden(ts, forbidden)
     if expected_language:
         out.append(check_language(ts, expected_language, allowed_languages))
     out.append(check_no_loop(ts))
-    out += check_tool_calls(expected_tool_calls, None if tool_calls is None else list(tool_calls))
+    out += check_tool_calls(expected_tool_calls, tool_calls)
+    out += check_no_unexpected_tool(expected_tool_calls, tool_calls)
     if expected_amounts:
         out += check_amounts(ts, expected_amounts, tool_calls)
     return out
