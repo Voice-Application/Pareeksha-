@@ -74,7 +74,7 @@ export function KbList() {
 
   return (
     <>
-      <PageHeader title="Knowledge" description="Documents your agent retrieves from. Upload files, build an index for each chunking and embedding you want to compare, then test them in the RAG lab." />
+      <PageHeader title="Documents" description="The files your bot answers from. Upload them here; Pareeksha indexes them, and you can pick them in Test my prompt. The RAG lab compares chunking and embedding settings." />
       <div className="grid gap-6 min-[1100px]:grid-cols-[minmax(0,1fr)_380px]">
         <Panel title="Knowledge bases" bodyClassName="p-0" aux={list.isSuccess ? <span className="num">{list.data.length}</span> : null}>
           {list.isPending && <TableSkeleton rows={3} label="Loading knowledge bases" />}

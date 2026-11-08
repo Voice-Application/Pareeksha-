@@ -148,6 +148,13 @@ ADDITIONS: set[tuple[str, str]] = {
     ("POST", "/settings/llm/test"),
     ("POST", "/designer/chat"),  # test designer assistant
     ("POST", "/designer/commit"),
+    ("GET", "/quick-tests/setup"),  # Test my prompt
+    ("POST", "/quick-tests"),
+    ("GET", "/quick-tests"),
+    ("GET", "/quick-tests/{id}"),
+    ("POST", "/quick-tests/{id}/improve"),
+    ("POST", "/quick-tests/{id}/retest"),
+    ("POST", "/assistant/chat"),  # in-app assistant
 }
 
 

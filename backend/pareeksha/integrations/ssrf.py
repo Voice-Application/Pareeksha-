@@ -91,6 +91,22 @@ async def resolve_public(
     return host, addresses[0], port
 
 
+#: Headers that describe the wire body; they no longer apply once the body is read and decoded.
+_WIRE_HEADERS = ("content-encoding", "content-length", "transfer-encoding")
+
+
+def buffered_response(response: httpx.Response, content: bytes) -> httpx.Response:
+    """A complete response holding ``content``, the already *decoded* body of ``response``.
+
+    ``aiter_bytes`` undoes gzip / br / zstd, so the wire headers are dropped: keeping
+    ``Content-Encoding`` would make httpx decode the plain body again (``DecodingError``).
+    """
+    headers = [(k, v) for k, v in response.headers.multi_items() if k.lower() not in _WIRE_HEADERS]
+    return httpx.Response(
+        response.status_code, headers=headers, content=content, request=response.request
+    )
+
+
 def _pinned_url(url: str, ip: str, port: int) -> str:
     parts = urlsplit(url)
     netloc = f"[{ip}]:{port}" if ":" in ip else f"{ip}:{port}"
@@ -146,9 +162,4 @@ async def safe_request(
             if total > max_bytes:
                 raise SSRFError(f"response larger than {max_bytes} bytes")
             chunks.append(chunk)
-        return httpx.Response(
-            response.status_code,
-            headers=response.headers,
-            content=b"".join(chunks),
-            request=response.request,
-        )
+        return buffered_response(response, b"".join(chunks))

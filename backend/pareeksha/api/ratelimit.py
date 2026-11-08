@@ -40,3 +40,7 @@ class TokenBucket:
 
 #: POST /designer/chat: one LLM call (plus a repair retry) per request.
 DESIGNER_CHAT_LIMIT = TokenBucket(20)
+#: POST /assistant/chat: one LLM call, sometimes a test plan or a prompt rewrite as well.
+ASSISTANT_LIMIT = TokenBucket(30)
+#: POST /quick-tests and /improve: a plan or rewrite call, then a run of conversations.
+QUICK_TEST_LIMIT = TokenBucket(10)

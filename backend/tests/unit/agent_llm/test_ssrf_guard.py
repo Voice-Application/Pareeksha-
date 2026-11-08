@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import functools
+import gzip
 import json
 from collections.abc import Callable
 from typing import Any
@@ -86,10 +87,26 @@ async def test_ollama_default_is_blocked_without_the_private_flag(
 
 
 async def test_oversized_response_is_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A body over the size cap is refused."""
     big = b"x" * (MAX_RESPONSE_BYTES + 1)
     _wire(monkeypatch, lambda r: httpx.Response(200, content=big))
     with pytest.raises(AgentLLMError, match="larger than"):
         await _chat()
+
+
+async def test_gzip_response_is_decoded_once(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A gzip body (DeepSeek's default) parses; the decoded body is not decoded a second time."""
+    packed = gzip.compress(json.dumps(OK).encode())
+    _wire(
+        monkeypatch,
+        lambda r: httpx.Response(
+            200,
+            headers={"content-encoding": "gzip", "content-type": "application/json"},
+            content=packed,
+        ),
+    )
+    reply = await _chat()
+    assert reply.text == "hi"
 
 
 async def test_redirects_are_not_followed(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -144,6 +161,16 @@ async def test_private_opt_in_still_rejects_redirects_and_big_bodies(
     _wire_plain(monkeypatch, lambda r: httpx.Response(200, content=big))
     with pytest.raises(AgentLLMError, match="larger than"):
         await _chat("http://localhost:1/v1")
+
+
+async def test_private_opt_in_decodes_gzip_once(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The plain-httpx path also returns the decoded body without decoding it twice."""
+    packed = gzip.compress(json.dumps(OK).encode())
+    _wire_plain(
+        monkeypatch,
+        lambda r: httpx.Response(200, headers={"content-encoding": "gzip"}, content=packed),
+    )
+    assert (await _chat("http://localhost:1/v1")).text == "hi"
 
 
 # -- reasoning models reject a non-default temperature ---------------------------------------

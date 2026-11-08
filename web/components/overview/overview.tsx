@@ -7,6 +7,8 @@ import { Bot, CircleCheck, CircleHelp, CircleX, Play } from "lucide-react";
 import { api } from "@/lib/api/client";
 import { call } from "@/lib/api/call";
 import { listRunItems, listRuns } from "@/lib/api/runs";
+import { asList, listPoll, listQuickTests } from "@/lib/api/quick-tests";
+import { QuickStatus } from "@/components/quick/status";
 import { useUrlState } from "@/lib/hooks/use-url-state";
 import { useNow } from "@/lib/hooks/use-now";
 import { relativeTime } from "@/lib/format";
@@ -72,8 +74,17 @@ export function Overview() {
   if (!agent)
     return (
       <>
-        <PageHeader eyebrow="Overview" title="Add your first agent" description="An agent is the voice bot you want to test. Add one and run synthetic callers against it." actions={<LinkButton variant="primary" href="/agents/new">Add agent</LinkButton>} />
-        <Panel bodyClassName="p-0"><EmptyState icon={Bot} title="No agents yet" body="Pareeksha scores calls to an agent, so start by adding yours." /></Panel>
+        <PageHeader
+          title="Test your first bot"
+          description="Paste your bot's system prompt and Pareeksha chats with it as normal and tricky customers, then shows which of its rules it keeps and where it breaks them. Voice bots on a phone line can be added as agents."
+          actions={
+            <>
+              <LinkButton variant="primary" href="/test">Test my prompt</LinkButton>
+              <LinkButton href="/agents/new">Add a voice agent</LinkButton>
+            </>
+          }
+        />
+        <Panel bodyClassName="p-0"><EmptyState icon={Bot} title="Nothing tested yet" body="Your tests and their results will show up here." action={<LinkButton variant="primary" href="/test">Test my prompt</LinkButton>} /></Panel>
       </>
     );
 
@@ -109,7 +120,12 @@ export function Overview() {
         }
         title={title}
         description={desc}
-        actions={<LinkButton variant="primary" href={`/runs/new?agent=${agent.id}`}><Play size={14} strokeWidth={1.6} aria-hidden />New run</LinkButton>}
+        actions={
+          <>
+            <LinkButton variant="primary" href="/test">Test my prompt</LinkButton>
+            <LinkButton href={`/runs/new?agent=${agent.id}`}><Play size={14} strokeWidth={1.6} aria-hidden />New run</LinkButton>
+          </>
+        }
       />
       <TileRow cols="grid-cols-2 min-[860px]:grid-cols-4">
         <StatTile href={latest ? `/runs/${latest.id}` : "/runs"} hero label={`Pass rate${running ? " so far" : ""}`} value={s?.pass_rate != null ? `${Math.round(s.pass_rate * 100)}%` : "-"} caption={latest ? `${latest.progress.evaluated} scored` : "no runs"} />
@@ -169,6 +185,7 @@ export function Overview() {
         </div>
 
         <div className="flex min-w-0 flex-col gap-6">
+          <PromptTests />
           <Panel title="Needs human review" aux={<Link className={linkCls} href="/calibration">Calibration</Link>}>
             <PanelBody q={review} rows={review.data?.items?.length ?? 0} empty="No calls are waiting for review.">
               <ul className="flex flex-col divide-y divide-border">
@@ -220,6 +237,31 @@ export function Overview() {
         </div>
       </div>
     </>
+  );
+}
+
+function PromptTests() {
+  const q = useQuery({ queryKey: ["quick-tests"], queryFn: listQuickTests, refetchInterval: (s) => listPoll(s.state.data) });
+  const list = asList(q.data);
+  return (
+    <Panel title="Prompt tests" aux={<Link className={linkCls} href="/test">Test a prompt</Link>}>
+      <PanelBody q={q} rows={list.length} empty="No prompt tests yet. Paste a prompt in Test my prompt to start one.">
+        <ul className="flex flex-col divide-y divide-border">
+          {list.slice(0, 4).map((t) => (
+            <li key={t.id} className="relative flex flex-col gap-1 py-3 first:pt-1 last:pb-0">
+              <Link href={`/test/${t.id}`} className="truncate font-medium underline-offset-2 after:absolute after:inset-0 hover:underline">
+                {t.name}
+                {t.parent_id ? " (improved)" : ""}
+              </Link>
+              <span className="flex flex-wrap items-center gap-x-3 text-sm text-muted">
+                <QuickStatus status={t.status} broken={t.rules_broken} total={t.rules_total} />
+                <time dateTime={t.created_at} className="text-subtle">{relativeTime(t.created_at)}</time>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </PanelBody>
+    </Panel>
   );
 }
 

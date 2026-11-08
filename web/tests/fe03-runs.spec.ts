@@ -11,7 +11,7 @@ test.describe("runs list", () => {
   test("lists runs with pass rate, suite verdict and progress; compare needs two", async ({ page }) => {
     await mockFe(page, opsState());
     await page.goto("/runs");
-    await expect(page.getByRole("heading", { level: 1, name: "Runs" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Results" })).toBeVisible();
     const rows = page.getByRole("table", { name: "Runs" }).getByRole("row");
     await expect(rows).toHaveCount(4);
     await expect(page.getByRole("link", { name: "Prompt v3 baseline" })).toBeVisible();

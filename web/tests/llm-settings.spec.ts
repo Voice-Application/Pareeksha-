@@ -30,7 +30,7 @@ async function open(page: Page, opts: { member?: boolean; testResult?: object } 
 test.describe("LLM settings", () => {
   test("loads the environment defaults with the source line", async ({ page }) => {
     await open(page);
-    await expect(page.getByRole("heading", { level: 1, name: "LLM", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "AI settings", exact: true })).toBeVisible();
     await expect(page.getByText("Using environment defaults (.env)")).toBeVisible();
     await expect(page.getByLabel("Judge model")).toHaveValue("deepseek-chat");
     await expect(page.getByRole("radio", { name: "DeepSeek" })).toBeChecked();

@@ -33,6 +33,7 @@ POST_V02_TABLES = {
     "rag_metrics",
     "rag_matrices",
     "price_overrides",
+    "quick_tests",
 }
 
 

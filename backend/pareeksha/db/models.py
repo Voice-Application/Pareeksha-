@@ -1639,3 +1639,50 @@ class ProjectLlmSettings(Base):
     updated_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(True), nullable=False, server_default=text("now()")
     )
+
+
+class QuickTests(Base):
+    """ "Test my prompt" runs (Alembic revision 0006; not in docs/schema.sql v0.2).
+
+    ``plan``: the rules found in the prompt and the scenario ids made for them. ``verdicts``:
+    ``{call_id: [{rule_id, verdict, turn, quote, why}]}``, filled as calls finish.
+    ``improvement``: the last suggested rewrite of the prompt (and document fixes).
+    """
+
+    __tablename__ = "quick_tests"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["project_id"], ["projects.id"], ondelete="CASCADE", name="quick_tests_project_id_fkey"
+        ),
+        ForeignKeyConstraint(
+            ["agent_id"], ["agents.id"], ondelete="CASCADE", name="quick_tests_agent_id_fkey"
+        ),
+        ForeignKeyConstraint(
+            ["run_id"], ["test_runs.id"], ondelete="CASCADE", name="quick_tests_run_id_fkey"
+        ),
+        ForeignKeyConstraint(
+            ["parent_id"],
+            ["quick_tests.id"],
+            ondelete="SET NULL",
+            name="quick_tests_parent_id_fkey",
+        ),
+        ForeignKeyConstraint(
+            ["kb_id"], ["knowledge_bases.id"], ondelete="SET NULL", name="quick_tests_kb_id_fkey"
+        ),
+        PrimaryKeyConstraint("id", name="quick_tests_pkey"),
+        Index("quick_tests_project_created", "project_id", "created_at"),
+    )
+
+    id: Mapped[uuid.UUID] = _pk_uuid()
+    project_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    agent_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    run_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    parent_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)
+    kb_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    system_prompt: Mapped[str] = mapped_column(Text, nullable=False)
+    user_details: Mapped[str] = mapped_column(Text, nullable=False, server_default=text("''"))
+    plan: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
+    verdicts: Mapped[dict[str, Any]] = _json("{}")
+    improvement: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    created_at: Mapped[datetime.datetime] = _created()

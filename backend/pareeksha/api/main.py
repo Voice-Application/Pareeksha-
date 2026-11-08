@@ -27,6 +27,7 @@ from pareeksha.api.routers import (
     noise_profiles,
     personas,
     prompt_versions,
+    quick_tests,
     rag_matrices,
     regression,
     runs,
@@ -68,6 +69,7 @@ ROUTERS = (
     users.router,
     settings.router,
     designer.router,
+    quick_tests.router,
     system.router,
     system.authed,
 )
