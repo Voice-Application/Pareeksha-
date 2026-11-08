@@ -58,6 +58,10 @@ async def test_create_run_writes_run_and_run_requested_outbox_row(
         "stt_seconds",
         "judge_calls",
         "caller_llm_calls",
+        # the prompt agent's own model (0 / False for this audio agent)
+        "agent_llm_calls",
+        "agent_llm_tokens",
+        "agent_llm_unpriced",
         "est_cost",
     }
     assert body["estimate"]["judge_calls"] == 16

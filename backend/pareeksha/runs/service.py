@@ -6,6 +6,7 @@ session, so both commit in one transaction (FR-RN-1); the planner worker creates
 
 from __future__ import annotations
 
+import json
 import uuid
 from collections import defaultdict
 from collections.abc import Sequence
@@ -35,6 +36,7 @@ from pareeksha.db.models import (
     KnowledgeBases,
     NoiseProfiles,
     Personas,
+    PriceOverrides,
     PromptVersions,
     RunItems,
     Scenarios,
@@ -51,6 +53,7 @@ from pareeksha.rag.guard import (
 )
 from pareeksha.rag.local_models import UnsupportedModelError, require_supported_models
 from pareeksha.runs.estimate import (
+    AgentModelLoad,
     ScenarioShape,
     estimate_run,
     is_over_budget,
@@ -182,6 +185,60 @@ async def resolve_version(
     return version
 
 
+async def agent_model_load(
+    session: AsyncSession,
+    project_id: uuid.UUID,
+    version: PromptVersions | None,
+    rag: RagConfig | None,
+) -> AgentModelLoad | None:
+    """What each reply of a prompt agent sends its own model, for the estimate (None otherwise).
+
+    The RAG context is the run's override, else the version's config: ``top_k`` chunks of the
+    chunk size for retrieval, the knowledge base's live characters for full context, nothing
+    when off. The price is the project's ``llm`` price for the version's provider and model.
+    """
+    if version is None:
+        return None
+    raw = rag.model_dump(mode="json") if rag is not None else (version.rag_config or None)
+    context = 0
+    if raw:
+        cfg = RagConfig.model_validate(raw)
+        if cfg.mode == "retrieval":
+            context = cfg.top_k * cfg.chunking.size
+        elif cfg.mode == "full_context":
+            context = int(
+                await session.scalar(
+                    select(func.coalesce(func.sum(KbDocuments.char_count), 0)).where(
+                        KbDocuments.kb_id == cfg.kb_id,
+                        KbDocuments.project_id == project_id,
+                        KbDocuments.deleted_at.is_(None),
+                    )
+                )
+                or 0
+            )
+            context = min(context, cfg.context_char_limit)  # larger: the run is refused
+    tools = list(version.tools or [])
+    price = await session.scalar(
+        select(PriceOverrides).where(
+            PriceOverrides.project_id == project_id,
+            PriceOverrides.kind == "llm",
+            PriceOverrides.provider == version.provider,
+            PriceOverrides.model == version.model,
+        )
+    )
+    return AgentModelLoad(
+        prompt_chars=len(version.system_prompt) + (len(json.dumps(tools)) if tools else 0),
+        context_chars=context,
+        has_tools=bool(tools),
+        input_per_m=None if price is None else float(price.input_per_m_inr),
+        output_per_m=(
+            None
+            if price is None or price.output_per_m_inr is None
+            else float(price.output_per_m_inr)
+        ),
+    )
+
+
 async def prepare(
     session: AsyncSession,
     project_id: uuid.UUID,
@@ -226,6 +283,7 @@ async def prepare(
         cells_per_scenario=len(persona_ids) * len(noise_ids) * body.repeats,
         max_call_seconds=agent.max_call_seconds,
         text_only=dry_run,
+        agent=await agent_model_load(session, project_id, version, body.config.rag),
     )
     remaining = remaining_budget(await _spent(session, project_id))
     return Prepared(

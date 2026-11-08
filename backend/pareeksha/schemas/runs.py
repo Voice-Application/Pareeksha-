@@ -60,6 +60,17 @@ class RunEstimate(BaseModel):
     stt_seconds: float
     judge_calls: int
     caller_llm_calls: int
+    agent_llm_calls: int = Field(
+        default=0, description="prompt agents: model rounds of the model under test"
+    )
+    agent_llm_tokens: int = Field(
+        default=0, description="prompt agents: input + output tokens of the model under test"
+    )
+    agent_llm_unpriced: bool = Field(
+        default=False,
+        description="the model under test has no price under Settings > Pricing, so its "
+        "tokens are counted at 0 in est_cost",
+    )
     est_cost: float
 
 

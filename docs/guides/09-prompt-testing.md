@@ -110,6 +110,8 @@ pareeksha run --agent refund-bot --tags smoke --wait
 
 Each call is a typed conversation between a simulated caller (persona) and your model. Personas and noise profiles are selected as in a voice run, but noise is ignored. The run, judge and scoring work as in [Guide 1](01-quickstart.md). A call ends when the caller finishes, at the scenario's `max_turns`, or when the model keeps asking for tools past `max_tool_rounds` (event `tool_round_limit`). A provider error (bad key, rate limit, timeout) ends the call as `connect_failed` or `infra_error`; the message never contains your key.
 
+**Cost estimate.** The pre-run estimate (`POST /runs:estimate`, the run wizard, and each RAG matrix entry) includes your model's tokens. It assumes one reply per caller line up to `max_turns`, and about 1.5 model rounds per reply when the version has tools. Each round resends the system prompt, the tool schemas, the history and the RAG context (`top_k` × chunk size for retrieval, the whole knowledge base for full context), so the figure errs high. The tokens are priced from **Settings → Pricing** (`llm`, your provider and model, ₹ per 1M tokens). Without a price they are counted in `agent_llm_tokens` but not in `est_cost`, and the estimate shows `agent_llm_unpriced: true`.
+
 ## 7. Read the tool-call checks
 
 Open a call: the tool calls appear inline with their arguments and the mocked result. Three checks use them:
@@ -132,5 +134,5 @@ Push the new prompt, run the same scenarios, then compare the two runs in the we
 - Tools are mocked. Pareeksha does not call your real tool backends.
 - Tool arguments match by exact value (subset, numbers by value). Semantic matching comes later.
 - No retrieval (RAG) testing yet; it comes later.
-- Azure OpenAI and Bedrock are not supported yet. Token usage of the model under test is recorded as call events, not in cost reports.
+- Azure OpenAI and Bedrock are not supported yet. The pre-run estimate prices the model under test (see "Cost estimate" above); after a run, its token usage is recorded as call events and in the RAG report, not in `GET /usage`.
 - A `base_url` that points at a private, loopback or link-local address is rejected, so a tenant cannot make the API probe your network. For Ollama or any local endpoint, set `AGENT_LLM_ALLOW_PRIVATE_URLS=true` on the API and the simulator worker. Leave it off on shared deployments.
