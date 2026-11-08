@@ -21,7 +21,15 @@ class Baselines(RequestModel):
 
 class RagMatrixCreate(RequestModel):
     agent_id: UUID
-    prompt_version: int | None = Field(default=None, ge=1, description="default: the active one")
+    prompt_version: int | None = Field(
+        default=None,
+        ge=1,
+        description=(
+            "Version number of the agent's prompt to test; any existing version, active or not "
+            "(404 if the agent has none with this number). Every run of the matrix executes this "
+            "version; the agent's active version is not changed. Default: the active version."
+        ),
+    )
     configs: list[RagConfig] = Field(min_length=1, max_length=4)
     baselines: Baselines = Field(default_factory=Baselines)
     scenario_ids: list[UUID] = Field(min_length=1)

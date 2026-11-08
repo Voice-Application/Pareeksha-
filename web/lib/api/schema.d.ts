@@ -4045,7 +4045,7 @@ export interface components {
             agent_id: string;
             /**
              * Prompt Version
-             * @description default: the active one
+             * @description Version number of the agent's prompt to test; any existing version, active or not (404 if the agent has none with this number). Every run of the matrix executes this version; the agent's active version is not changed. Default: the active version.
              */
             prompt_version?: number | null;
             /** Configs */
@@ -4546,6 +4546,24 @@ export interface components {
             judge_calls: number;
             /** Caller Llm Calls */
             caller_llm_calls: number;
+            /**
+             * Agent Llm Calls
+             * @description prompt agents: model rounds of the model under test
+             * @default 0
+             */
+            agent_llm_calls: number;
+            /**
+             * Agent Llm Tokens
+             * @description prompt agents: input + output tokens of the model under test
+             * @default 0
+             */
+            agent_llm_tokens: number;
+            /**
+             * Agent Llm Unpriced
+             * @description the model under test has no price under Settings > Pricing, so its tokens are counted at 0 in est_cost
+             * @default false
+             */
+            agent_llm_unpriced: boolean;
             /** Est Cost */
             est_cost: number;
         };

@@ -389,9 +389,25 @@ export function RunWizard() {
                 <dd className="mono text-right">{est!.estimate.judge_calls}</dd>
                 <dt className="text-muted">Caller LLM calls</dt>
                 <dd className="mono text-right">{est!.estimate.caller_llm_calls}</dd>
+                {(est!.estimate.agent_llm_calls ?? 0) > 0 && (
+                  <>
+                    <dt className="text-muted">Agent model calls</dt>
+                    <dd className="mono text-right" title={`${(est!.estimate.agent_llm_tokens ?? 0).toLocaleString("en-IN")} tokens`}>
+                      {est!.estimate.agent_llm_calls}
+                    </dd>
+                  </>
+                )}
                 <dt className="border-t border-border pt-1 font-medium">Total</dt>
                 <dd className="mono border-t border-border pt-1 text-right text-md font-medium">{est!.estimate.est_cost === 0 && est!.estimate.tts_seconds > 0 ? <span className="text-sm font-normal text-subtle" title="The COST_* rates are not set in the API environment, so the total cannot be priced.">rates not set</span> : inr(est!.estimate.est_cost)}</dd>
               </dl>
+            )}
+            {est?.estimate.agent_llm_unpriced && (
+              <p className="mt-2 text-xs text-subtle">
+                The agent&apos;s model has no price, so its tokens are not in the total.{" "}
+                <Link href="/settings/pricing" className="text-accent-fg underline-offset-2 hover:underline">
+                  Add a price
+                </Link>
+              </p>
             )}
             {remaining !== null && remaining !== undefined && (
               <div className="mt-3 flex items-center justify-between gap-2 text-sm">

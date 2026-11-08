@@ -6,6 +6,7 @@ session, so both commit in one transaction (FR-RN-1); the planner worker creates
 
 from __future__ import annotations
 
+import json
 import uuid
 from collections import defaultdict
 from collections.abc import Sequence
@@ -16,7 +17,13 @@ from typing import Any, cast
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from pareeksha.api.crud import active_version, decode_cursor, encode_cursor, paginate
+from pareeksha.api.crud import (
+    ACTIVE_VERSION_KEY,
+    active_version,
+    decode_cursor,
+    encode_cursor,
+    paginate,
+)
 from pareeksha.api.deps import PageParams
 from pareeksha.api.errors import ApiError
 from pareeksha.db.models import (
@@ -29,6 +36,8 @@ from pareeksha.db.models import (
     KnowledgeBases,
     NoiseProfiles,
     Personas,
+    PriceOverrides,
+    PromptVersions,
     RunItems,
     Scenarios,
     TestRuns,
@@ -44,6 +53,7 @@ from pareeksha.rag.guard import (
 )
 from pareeksha.rag.local_models import UnsupportedModelError, require_supported_models
 from pareeksha.runs.estimate import (
+    AgentModelLoad,
     ScenarioShape,
     estimate_run,
     is_over_budget,
@@ -93,7 +103,11 @@ async def _require_all(
 
 
 class Prepared:
-    """A validated run request with its estimate (nothing written yet)."""
+    """A validated run request with its estimate (nothing written yet).
+
+    ``version`` is the prompt version the run executes (None for other adapters): the agent's
+    active one unless the caller pinned another.
+    """
 
     def __init__(
         self,
@@ -104,9 +118,12 @@ class Prepared:
         noise_profile_ids: list[uuid.UUID],
         estimate: RunEstimate,
         remaining: float | None,
+        version: PromptVersions | None = None,
     ) -> None:
+        """Keep the validated pieces; ``item_count`` is derived from the de-duplicated ids."""
         self.body = body
         self.agent = agent
+        self.version = version
         self.scenario_ids = scenario_ids
         self.persona_ids = persona_ids
         self.noise_profile_ids = noise_profile_ids
@@ -142,8 +159,98 @@ async def require_active_version(session: AsyncSession, agent: Agents) -> None:
         )
 
 
-async def prepare(session: AsyncSession, project_id: uuid.UUID, body: RunCreate) -> Prepared:
-    """404 for unknown/foreign ids (and an archived agent), 400 for an oversized matrix."""
+async def resolve_version(
+    session: AsyncSession, agent: Agents, number: int | None = None
+) -> PromptVersions | None:
+    """The prompt version a run of ``agent`` executes: version ``number``, else the active one.
+
+    None for adapters other than ``prompt``. Raises 422 ``prompt_agent_has_no_version`` when no
+    number is given and nothing is active, 404 ``not_found`` (``{"version": n}``) when the agent
+    has no version ``number``. Never changes which version is active.
+    """
+    if agent.adapter != "prompt":
+        return None
+    if number is None:
+        await require_active_version(session, agent)
+        return await active_version(session, agent)
+    version = await session.scalar(
+        select(PromptVersions).where(
+            PromptVersions.agent_id == agent.id,
+            PromptVersions.project_id == agent.project_id,
+            PromptVersions.version == number,
+        )
+    )
+    if version is None:
+        raise ApiError(404, "not_found", "Prompt version not found", {"version": number})
+    return version
+
+
+async def agent_model_load(
+    session: AsyncSession,
+    project_id: uuid.UUID,
+    version: PromptVersions | None,
+    rag: RagConfig | None,
+) -> AgentModelLoad | None:
+    """What each reply of a prompt agent sends its own model, for the estimate (None otherwise).
+
+    The RAG context is the run's override, else the version's config: ``top_k`` chunks of the
+    chunk size for retrieval, the knowledge base's live characters for full context, nothing
+    when off. The price is the project's ``llm`` price for the version's provider and model.
+    """
+    if version is None:
+        return None
+    raw = rag.model_dump(mode="json") if rag is not None else (version.rag_config or None)
+    context = 0
+    if raw:
+        cfg = RagConfig.model_validate(raw)
+        if cfg.mode == "retrieval":
+            context = cfg.top_k * cfg.chunking.size
+        elif cfg.mode == "full_context":
+            context = int(
+                await session.scalar(
+                    select(func.coalesce(func.sum(KbDocuments.char_count), 0)).where(
+                        KbDocuments.kb_id == cfg.kb_id,
+                        KbDocuments.project_id == project_id,
+                        KbDocuments.deleted_at.is_(None),
+                    )
+                )
+                or 0
+            )
+            context = min(context, cfg.context_char_limit)  # larger: the run is refused
+    tools = list(version.tools or [])
+    price = await session.scalar(
+        select(PriceOverrides).where(
+            PriceOverrides.project_id == project_id,
+            PriceOverrides.kind == "llm",
+            PriceOverrides.provider == version.provider,
+            PriceOverrides.model == version.model,
+        )
+    )
+    return AgentModelLoad(
+        prompt_chars=len(version.system_prompt) + (len(json.dumps(tools)) if tools else 0),
+        context_chars=context,
+        has_tools=bool(tools),
+        input_per_m=None if price is None else float(price.input_per_m_inr),
+        output_per_m=(
+            None
+            if price is None or price.output_per_m_inr is None
+            else float(price.output_per_m_inr)
+        ),
+    )
+
+
+async def prepare(
+    session: AsyncSession,
+    project_id: uuid.UUID,
+    body: RunCreate,
+    *,
+    prompt_version: int | None = None,
+) -> Prepared:
+    """404 for unknown/foreign ids (and an archived agent), 400 for an oversized matrix.
+
+    ``prompt_version`` pins a prompt agent's run to that version number instead of the active
+    one (see :func:`resolve_version`); ``Prepared.version`` carries the result.
+    """
     agent = (
         await session.scalars(
             select(Agents).where(Agents.id == body.agent_id, Agents.project_id == project_id)
@@ -151,7 +258,7 @@ async def prepare(session: AsyncSession, project_id: uuid.UUID, body: RunCreate)
     ).one_or_none()
     if agent is None:
         raise ApiError(404, "not_found", "Agent not found", {"id": str(body.agent_id)})
-    await require_active_version(session, agent)
+    version = await resolve_version(session, agent, prompt_version)
     if agent.archived:
         raise ApiError(409, "conflict", "Agent is archived", {"id": str(body.agent_id)})
 
@@ -176,9 +283,12 @@ async def prepare(session: AsyncSession, project_id: uuid.UUID, body: RunCreate)
         cells_per_scenario=len(persona_ids) * len(noise_ids) * body.repeats,
         max_call_seconds=agent.max_call_seconds,
         text_only=dry_run,
+        agent=await agent_model_load(session, project_id, version, body.config.rag),
     )
     remaining = remaining_budget(await _spent(session, project_id))
-    return Prepared(body, agent, scenario_ids, persona_ids, noise_ids, estimate, remaining)
+    return Prepared(
+        body, agent, scenario_ids, persona_ids, noise_ids, estimate, remaining, version=version
+    )
 
 
 async def estimate(session: AsyncSession, project_id: uuid.UUID, body: RunCreate) -> RunEstimateOut:
@@ -199,14 +309,16 @@ async def estimate(session: AsyncSession, project_id: uuid.UUID, body: RunCreate
 async def _pin_rag(
     session: AsyncSession, project_id: uuid.UUID, prepared: Prepared
 ) -> dict[str, Any]:
-    """Effective RAG config (run override, else the active version's): guards and index pin.
+    """Effective RAG config (run override, else the run's version's): guards and index pin.
 
-    Returns the extra ``test_runs.config`` keys (``rag_index_id`` or ``rag_full_context_chars``).
+    The version is ``prepared.version``, the one the run executes (pinned or active), so the
+    local-only check sees that version's provider and base URL. Returns the extra
+    ``test_runs.config`` keys (``rag_index_id`` or ``rag_full_context_chars``).
     """
     agent = prepared.agent
     if agent.adapter != "prompt":
         return {}
-    version = await active_version(session, agent)
+    version = prepared.version
     raw = prepared.body.config.rag or (version.rag_config if version else None)
     if not raw or version is None:
         return {}
@@ -283,9 +395,20 @@ async def _pin_rag(
     return {"rag_index_id": str(index_id)}
 
 
-async def create_run(session: AsyncSession, project_id: uuid.UUID, body: RunCreate) -> RunCreated:
-    """Insert the run and its ``run.requested`` outbox row; both commit with the request."""
-    prepared = await prepare(session, project_id, body)
+async def create_run(
+    session: AsyncSession,
+    project_id: uuid.UUID,
+    body: RunCreate,
+    *,
+    prompt_version: int | None = None,
+) -> RunCreated:
+    """Insert the run and its ``run.requested`` outbox row; both commit with the request.
+
+    A prompt agent's run executes ``prompt_version`` (default: the active version): its id is
+    written to ``agent_snapshot.adapter_config.active_version_id``, which the simulator's
+    ``read_spec``, the evaluator and compare read instead of the agent's live config.
+    """
+    prepared = await prepare(session, project_id, body, prompt_version=prompt_version)
     rag_pins = await _pin_rag(session, project_id, prepared)
     if prepared.over_budget and not body.confirm_over_budget:
         raise ApiError(
@@ -299,7 +422,14 @@ async def create_run(session: AsyncSession, project_id: uuid.UUID, body: RunCrea
                 "hint": "send confirm_over_budget=true to run anyway",
             },
         )
-    agent_snapshot = AgentOut.model_validate(prepared.agent, from_attributes=True)
+    snapshot = AgentOut.model_validate(prepared.agent, from_attributes=True).model_dump(
+        mode="json", exclude={"has_adapter_secrets"}
+    )
+    if prepared.version is not None:  # the version this run executes, whatever is active later
+        snapshot["adapter_config"] = {
+            **(snapshot.get("adapter_config") or {}),
+            ACTIVE_VERSION_KEY: str(prepared.version.id),
+        }
     run = TestRuns(
         id=uuid.uuid4(),
         project_id=project_id,
@@ -316,7 +446,7 @@ async def create_run(session: AsyncSession, project_id: uuid.UUID, body: RunCrea
             "item_count": prepared.item_count,
             **rag_pins,
         },
-        agent_snapshot=agent_snapshot.model_dump(mode="json", exclude={"has_adapter_secrets"}),
+        agent_snapshot=snapshot,
         estimated_cost=Decimal(str(prepared.estimate.est_cost)),
     )
     session.add(run)

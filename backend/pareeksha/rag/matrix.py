@@ -14,7 +14,6 @@ from typing import Any, cast
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from pareeksha.api.crud import active_version
 from pareeksha.api.errors import ApiError
 from pareeksha.db.models import (
     Calls,
@@ -62,6 +61,13 @@ def _entries(body: RagMatrixCreate) -> list[tuple[str, str, RagConfig]]:
 async def create_matrix(
     session: AsyncSession, project_id: uuid.UUID, body: RagMatrixCreate
 ) -> RagMatrixOut:
+    """Validate every entry, then create one run per entry plus the ``rag_matrices`` row.
+
+    All runs execute ``body.prompt_version`` (default: the agent's active version; 404 if the
+    agent has no such version) and the row's ``prompt_version_id`` names it. 409
+    ``rag_index_missing`` lists every entry without a ready index; 402 if the summed estimate
+    is over budget and not confirmed.
+    """
     reqs = [
         (
             label,
@@ -81,23 +87,20 @@ async def create_matrix(
         for label, kind, cfg in _entries(body)
     ]
     # Phase 1: validate everything, write nothing.
-    prepared = await service.prepare(session, project_id, reqs[0][3])
+    # The matrix tests body.prompt_version (default: the active one); every run is pinned to it
+    # and nothing changes which version is active.
+    prepared = await service.prepare(
+        session, project_id, reqs[0][3], prompt_version=body.prompt_version
+    )
     if prepared.agent.adapter != "prompt":
         raise ApiError(422, "validation_error", "RAG matrices need a prompt agent")
-    version = await active_version(session, prepared.agent)
-    assert version is not None  # prepare() raised prompt_agent_has_no_version otherwise
-    if body.prompt_version is not None and body.prompt_version != version.version:
-        raise ApiError(
-            422,
-            "validation_error",
-            "prompt_version must be the agent's active version",
-            {"active": version.version},
-        )
+    version = prepared.version
+    assert version is not None  # resolve_version raised (422 / 404) otherwise
     missing: list[dict[str, Any]] = []
     na: dict[str, str] = {}
     costs: dict[str, float] = {}
     for label, _kind, _cfg, req in reqs:
-        p = await service.prepare(session, project_id, req)
+        p = await service.prepare(session, project_id, req, prompt_version=version.version)
         costs[label] = p.estimate.est_cost
         try:
             # also refuses a local-only KB (409 local_only) for every entry, baselines included
@@ -140,7 +143,13 @@ async def create_matrix(
     # Phase 2: create.
     entries: list[dict[str, Any]] = []
     for label, kind, cfg, req in reqs:
-        run_id = None if label in na else (await service.create_run(session, project_id, req)).id
+        run_id = (
+            None
+            if label in na
+            else (
+                await service.create_run(session, project_id, req, prompt_version=version.version)
+            ).id
+        )
         entries.append(
             {
                 "label": label,

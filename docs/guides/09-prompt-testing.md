@@ -110,6 +110,8 @@ pareeksha run --agent refund-bot --tags smoke --wait
 
 Each call is a typed conversation between a simulated caller (persona) and your model. Personas and noise profiles are selected as in a voice run, but noise is ignored. The run, judge and scoring work as in [Guide 1](01-quickstart.md). A call ends when the caller finishes, at the scenario's `max_turns`, or when the model keeps asking for tools past `max_tool_rounds` (event `tool_round_limit`). A provider error (bad key, rate limit, timeout) ends the call as `connect_failed` or `infra_error`; the message never contains your key.
 
+**Cost estimate.** The pre-run estimate (`POST /runs:estimate`, the run wizard, and each RAG matrix entry) includes your model's tokens. It assumes one reply per caller line up to `max_turns`, and about 1.5 model rounds per reply when the version has tools. Each round resends the system prompt, the tool schemas, the history and the RAG context (`top_k` × chunk size for retrieval, the whole knowledge base for full context), so the figure errs high. The tokens are priced from **Settings → Pricing** (`llm`, your provider and model, ₹ per 1M tokens). Without a price they are counted in `agent_llm_tokens` but not in `est_cost`, and the estimate shows `agent_llm_unpriced: true`.
+
 ## 7. Read the tool-call checks
 
 Open a call: the tool calls appear inline with their arguments and the mocked result. Three checks use them:

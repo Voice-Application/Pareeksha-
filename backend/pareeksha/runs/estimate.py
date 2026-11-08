@@ -32,6 +32,13 @@ CALLER_TOKENS_OUT = 80
 #: Tokens per judge call (rubric + masked transcript in, scores and evidence out).
 JUDGE_TOKENS_IN = 4000
 JUDGE_TOKENS_OUT = 800
+#: Prompt agents (the model under test): tokens out per model round, history tokens one
+#: caller-plus-agent exchange adds, and how many model rounds a reply takes when the version
+#: has tools (a tool call, then the answer; not every reply calls a tool).
+AGENT_TOKENS_OUT = 120
+AGENT_HISTORY_TOKENS_PER_EXCHANGE = 120
+AGENT_TOOL_ROUNDS = 1.5
+_PER_M = 1_000_000
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,6 +46,41 @@ class ScenarioShape:
     """What the estimate needs to know about one scenario."""
 
     max_turns: int
+
+
+@dataclass(frozen=True, slots=True)
+class AgentModelLoad:
+    """What one reply of a prompt agent sends its own model, and that model's price.
+
+    ``prompt_chars``: system prompt plus tool schemas. ``context_chars``: RAG text per reply
+    (top_k chunks, or the whole knowledge base for full context). Prices are per 1M tokens
+    (Settings > Pricing); ``None`` = the model has no price, its tokens are counted at 0.
+    """
+
+    prompt_chars: int
+    context_chars: int = 0
+    has_tools: bool = False
+    input_per_m: float | None = None
+    output_per_m: float | None = None
+
+    @property
+    def priced(self) -> bool:
+        """Whether both rates are known."""
+        return self.input_per_m is not None and self.output_per_m is not None
+
+
+def agent_model_tokens(max_turns: int, load: AgentModelLoad) -> tuple[float, int, int]:
+    """``(model rounds, input tokens, output tokens)`` of one call of the prompt agent.
+
+    The text runner gives the agent one reply per caller line, up to ``max_turns`` of them.
+    Each round resends the prompt, the context and the history so far (about half the call's
+    history on average), so this errs high like the rest of the estimate.
+    """
+    rounds = max_turns * (AGENT_TOOL_ROUNDS if load.has_tools else 1.0)
+    per_round_in = (
+        load.prompt_chars + load.context_chars
+    ) / 4 + max_turns * AGENT_HISTORY_TOKENS_PER_EXCHANGE / 2
+    return rounds, round(rounds * per_round_in), round(rounds * AGENT_TOKENS_OUT)
 
 
 def call_seconds(max_turns: int, max_call_seconds: int) -> float:
@@ -53,10 +95,13 @@ def estimate_run(
     text_only: bool = False,
     speech: SpeechSettings | None = None,
     llm: LLMSettings | None = None,
+    agent: AgentModelLoad | None = None,
 ) -> RunEstimate:
     """Estimate ``cells_per_scenario`` calls (personas x profiles x repeats) of every scenario.
 
     ``text_only`` is the dry run (PRD risk table): no TTS or STT, only the LLM calls.
+    ``agent`` (prompt agents) adds the model under test, priced from Settings > Pricing; its
+    calls happen in a dry run too.
     """
     speech = speech or SpeechSettings()
     llm = llm or LLMSettings()
@@ -85,11 +130,24 @@ def estimate_run(
         )
         or 0.0
     )
+    agent_rounds = 0.0
+    agent_in = agent_out = 0
+    if agent is not None:
+        for scenario in scenarios:
+            r, i, o = agent_model_tokens(scenario.max_turns, agent)
+            agent_rounds += r * cells_per_scenario
+            agent_in += i * cells_per_scenario
+            agent_out += o * cells_per_scenario
+        if agent.input_per_m is not None and agent.output_per_m is not None:
+            cost += agent_in * agent.input_per_m / _PER_M + agent_out * agent.output_per_m / _PER_M
     return RunEstimate(
         tts_seconds=round(tts_seconds, 1),
         stt_seconds=round(stt_seconds, 1),
         judge_calls=judge_calls,
         caller_llm_calls=caller_calls,
+        agent_llm_calls=math.ceil(agent_rounds),
+        agent_llm_tokens=agent_in + agent_out,
+        agent_llm_unpriced=agent is not None and not agent.priced,
         est_cost=round(cost, 2),
     )
 
