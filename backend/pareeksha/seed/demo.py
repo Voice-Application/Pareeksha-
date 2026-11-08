@@ -1037,14 +1037,15 @@ async def _seed_price(
         )
     )
     if found is None:
+        rate = spec["rates"][spec["rate_period"]]
         session.add(
             PriceOverrides(
                 project_id=project_id,
                 kind=spec["kind"],
                 provider=spec["provider"],
                 model=spec["model"],
-                input_per_m_inr=Decimal(str(spec["input_per_m_inr"])),
-                output_per_m_inr=Decimal(str(spec["output_per_m_inr"])),
+                input_per_m_inr=Decimal(str(rate["input_per_m_inr"])),
+                output_per_m_inr=Decimal(str(rate["output_per_m_inr"])),
             )
         )
     out.count("price_overrides", found is None)

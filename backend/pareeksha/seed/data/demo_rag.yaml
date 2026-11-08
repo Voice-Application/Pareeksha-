@@ -37,17 +37,23 @@ agent:
       Context:
       {{context}}
 
-# ₹ per 1M tokens, so the report can show cost and savings: deepseek-flash at its PEAK list
-# price ($0.30 in / $1.20 out, api-docs.deepseek.com, 2026-11) at about ₹88 per $. Off-peak
-# hours cost half, but a price row is one rate for every call, so the peak rate is used and
-# the demo's costs can only err high. Edit it under Settings → Pricing (that reprices every
-# report). An existing price for the same model is never overwritten.
+# ₹ per 1M tokens, so the report can show cost and savings: deepseek-flash at DeepSeek's list
+# prices ($0.30 / $1.20 peak, $0.15 / $0.60 off-peak, api-docs.deepseek.com, 2026-11) at about
+# ₹88 per $. A price row is one rate for every call (the report does not pick by call time), so
+# the seed stores `rate_period` (peak: the demo's costs can only err high). Edit it under
+# Settings → Pricing (that reprices every report); the seed never overwrites a saved price.
 price:
   kind: llm
   provider: deepseek
   model: deepseek-flash
-  input_per_m_inr: 26
-  output_per_m_inr: 106
+  rate_period: peak
+  rates:
+    peak:
+      input_per_m_inr: 26
+      output_per_m_inr: 106
+    off_peak:
+      input_per_m_inr: 13
+      output_per_m_inr: 53
 
 persona: "Neha — switcher"
 noise_profile: clean_16k
