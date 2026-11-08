@@ -134,5 +134,5 @@ Push the new prompt, run the same scenarios, then compare the two runs in the we
 - Tools are mocked. Pareeksha does not call your real tool backends.
 - Tool arguments match by exact value (subset, numbers by value). Semantic matching comes later.
 - No retrieval (RAG) testing yet; it comes later.
-- Azure OpenAI and Bedrock are not supported yet. The pre-run estimate prices the model under test (see "Cost estimate" above); after a run, its token usage is recorded as call events and in the RAG report, not in `GET /usage`.
+- Azure OpenAI and Bedrock are not supported yet. Token usage of the model under test is recorded as call events, not in cost reports.
 - A `base_url` that points at a private, loopback or link-local address is rejected, so a tenant cannot make the API probe your network. For Ollama or any local endpoint, set `AGENT_LLM_ALLOW_PRIVATE_URLS=true` on the API and the simulator worker. Leave it off on shared deployments.
