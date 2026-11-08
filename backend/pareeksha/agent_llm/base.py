@@ -10,7 +10,7 @@ from typing import Any, Literal, Protocol
 
 import httpx
 
-from pareeksha.agent_llm.url_guard import allow_private_urls
+from pareeksha.agent_llm.url_guard import allow_private_urls, is_operator_ollama
 from pareeksha.integrations.ssrf import SSRFError, safe_request
 
 #: Largest provider response body accepted (enforced while streaming).
@@ -122,11 +122,11 @@ async def _send(
 ) -> httpx.Response:
     """The one production path to a provider: ``safe_request`` (https only, public addresses,
     connection pinned to the validated IP, no redirects, size cap). ``AGENT_LLM_ALLOW_PRIVATE_URLS``
-    is the operator's opt-in for local/self-hosted servers: plain httpx, still no redirects and
-    the same size cap."""
+    is the operator's opt-in for local/self-hosted servers, and the operator's ``OLLAMA_BASE_URL``
+    is trusted on its own: plain httpx, still no redirects and the same size cap."""
     content = json.dumps(body).encode()
     headers = {**headers, "Content-Type": "application/json"}
-    if not allow_private_urls():
+    if not (allow_private_urls() or is_operator_ollama(url)):
         return await safe_request(
             "POST",
             url,

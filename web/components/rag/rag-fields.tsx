@@ -1,6 +1,6 @@
 "use client";
 
-import { DEFAULT_RAG, EMBEDDING_PROVIDERS, METHODS, indexMatches, type KnowledgeBase, type RagConfig } from "@/lib/api/rag";
+import { DEFAULT_RAG, EMBEDDING_PROVIDERS, METHODS, embeddingEndpoint, embeddingEndpointHelp, indexMatches, type KnowledgeBase, type RagConfig } from "@/lib/api/rag";
 import { NumberField, SelectField, Switch, TextField } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Strip } from "@/components/ui/states";
@@ -34,6 +34,7 @@ export function RagConfigFields({
   const set = (p: Partial<RagConfig>) => onChange({ ...value, ...p });
   const ch = value.chunking ?? DEFAULT_RAG.chunking!;
   const em = value.embedding ?? DEFAULT_RAG.embedding!;
+  const endpoint = embeddingEndpoint(em.provider);
   const off = value.mode === "off";
   const retrieval = value.mode === "retrieval";
   const kb = kbs.find((k) => k.id === value.kb_id);
@@ -83,7 +84,7 @@ export function RagConfigFields({
 
           <fieldset className="grid gap-3 sm:grid-cols-[minmax(0,200px)_minmax(0,1fr)]" disabled={disabled}>
             <legend className="mb-1 text-sm font-medium">Embedding</legend>
-            <SelectField id={`${ids}-emb-provider`} label="Embedding provider" value={em.provider} onChange={(e) => set({ embedding: { ...em, provider: e.target.value as typeof em.provider } })}>
+            <SelectField id={`${ids}-emb-provider`} label="Embedding provider" value={em.provider} onChange={(e) => set({ embedding: { ...em, provider: e.target.value as typeof em.provider, base_url: null } })}>
               {EMBEDDING_PROVIDERS.map((p) => (
                 <option key={p} value={p}>
                   {p}
@@ -91,6 +92,22 @@ export function RagConfigFields({
               ))}
             </SelectField>
             <TextField id={`${ids}-emb-model`} label="Embedding model" className="mono" value={em.model} onChange={(e) => set({ embedding: { ...em, model: e.target.value } })} />
+            {endpoint.show && (
+              <TextField
+                id={`${ids}-emb-endpoint`}
+                label={endpoint.required ? "Embedding endpoint" : "Embedding endpoint (optional)"}
+                fieldClassName="sm:col-span-2"
+                className="mono"
+                type="url"
+                inputMode="url"
+                autoComplete="off"
+                required={endpoint.required}
+                placeholder={endpoint.placeholder}
+                value={em.base_url ?? ""}
+                onChange={(e) => set({ embedding: { ...em, base_url: e.target.value.trim() || null } })}
+                help={`${embeddingEndpointHelp(em.provider)} Use the same one as the index: questions are embedded with it.`}
+              />
+            )}
           </fieldset>
 
           <div className="grid gap-3 sm:grid-cols-3">

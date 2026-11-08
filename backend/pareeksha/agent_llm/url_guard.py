@@ -9,6 +9,8 @@ from urllib.parse import urlsplit
 from pareeksha.integrations.ssrf import is_public_ip
 
 ALLOW_PRIVATE_ENV = "AGENT_LLM_ALLOW_PRIVATE_URLS"
+OLLAMA_BASE_URL_ENV = "OLLAMA_BASE_URL"
+OLLAMA_DEFAULT_URL = "http://localhost:11434/v1"
 
 
 def allow_private_urls() -> bool:
@@ -16,17 +18,60 @@ def allow_private_urls() -> bool:
     return os.environ.get(ALLOW_PRIVATE_ENV, "").strip().lower() in ("1", "true", "yes")
 
 
+def ollama_base_url() -> str:
+    """Where Ollama is when a config gives no ``base_url``: ``OLLAMA_BASE_URL``, else localhost.
+
+    In Docker, ``localhost`` is the container itself, so compose sets this to the host
+    (``http://host.docker.internal:11434/v1``). Read per call, so tests can change it."""
+    return (os.environ.get(OLLAMA_BASE_URL_ENV) or "").strip().rstrip("/") or OLLAMA_DEFAULT_URL
+
+
+_DEFAULT_PORTS = {"http": 80, "https": 443}
+
+
+def _origin(url: str) -> tuple[str, str, int | None, str] | None:
+    """``(scheme, host, port, path)`` with the scheme's default port filled in, so
+    ``http://ollama/v1`` and ``http://ollama:80/v1`` compare equal. None if unparsable or the
+    URL carries credentials (never trusted: a stored base_url would keep them in plain text)."""
+    try:
+        p = urlsplit(url)
+        if p.username is not None or p.password is not None:
+            return None
+        scheme = p.scheme.lower()
+        port = p.port if p.port is not None else _DEFAULT_PORTS.get(scheme)
+        return scheme, (p.hostname or "").lower(), port, p.path.rstrip("/")
+    except ValueError:  # e.g. a port that is not a number
+        return None
+
+
+def is_operator_ollama(url: str | None) -> bool:
+    """True when ``url`` is on the ``OLLAMA_BASE_URL`` the operator set: same scheme, host and
+    port, under its path, with no credentials, query, fragment or ``..``. That server is trusted
+    like a local model (plain http, a private address) without ``AGENT_LLM_ALLOW_PRIVATE_URLS``,
+    which would open every private address to tenant-supplied URLs."""
+    configured = (os.environ.get(OLLAMA_BASE_URL_ENV) or "").strip()
+    if not configured or not url or "?" in url or "#" in url or ".." in url:
+        return False
+    mine, theirs = _origin(configured), _origin(url)
+    if mine is None or theirs is None or not mine[1]:
+        return False
+    return theirs[:3] == mine[:3] and (theirs[3] + "/").startswith(mine[3] + "/")
+
+
 def check_base_url(url: str, *, allow_private: bool) -> None:
     """Raise ``ValueError`` for non-https URLs (http too when ``allow_private``) and, unless
     ``allow_private``, for hosts that resolve to loopback/private/link-local/metadata addresses.
-    Mirrors what ``safe_request`` enforces at request time."""
+    Mirrors what ``safe_request`` enforces at request time. The operator's ``OLLAMA_BASE_URL``
+    (see :func:`is_operator_ollama`) is always accepted."""
+    if is_operator_ollama(url):
+        return
     parts = urlsplit(url)
     if parts.scheme not in (("http", "https") if allow_private else ("https",)):
         raise ValueError("base_url must use https (set AGENT_LLM_ALLOW_PRIVATE_URLS for http)")
     host = parts.hostname
     if not host:
         raise ValueError("base_url has no host")
-    if parts.username or parts.password:
+    if parts.username is not None or parts.password is not None:
         raise ValueError("credentials in base_url are not allowed")
     # checked on the raw string: urlsplit drops an empty "?" or "#"
     if "?" in url or "#" in url:

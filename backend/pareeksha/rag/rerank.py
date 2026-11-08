@@ -61,10 +61,14 @@ class HostedReranker:
         self._http = http
 
     async def rerank(self, query: str, docs: Sequence[str]) -> tuple[list[float], int]:
+        """Scores for ``docs`` in their input order, and the latency in ms. Every document is
+        requested back; a reply missing any of them raises ``AgentLLMError``."""
         if not docs:
             return [], 0
         headers = {"Authorization": f"Bearer {self._key}"} if self._key else {}
-        body = {"model": self._model, "query": query, "documents": list(docs)}
+        body: dict[str, Any] = {"model": self._model, "query": query, "documents": list(docs)}
+        # ask for every document back: a provider default below len(docs) would drop scores
+        body["top_k" if self._provider == "voyage" else "top_n"] = len(docs)
         data, ms = await post_json(
             self._http, _URLS[self._provider], headers, body, timeout_s=60.0, api_key=self._key
         )

@@ -35,6 +35,7 @@ _ROWS_FULL = [*_ROWS, {"index": 1, "relevance_score": 0.1}]
     ],
 )
 async def test_hosted_rerank(provider: str, url: str, reply: dict[str, Any]) -> None:
+    """Each hosted reranker: URL, key, body (asking for every document), scores in input order."""
     seen: list[httpx.Request] = []
     rr = build_reranker(provider, "rm", api_key=KEY, http=_client(reply, seen))
     scores, _ = await rr.rerank("q", ["a", "b", "c"])
@@ -45,6 +46,8 @@ async def test_hosted_rerank(provider: str, url: str, reply: dict[str, Any]) -> 
         "model": "rm",
         "query": "q",
         "documents": ["a", "b", "c"],
+        # every document back, whatever the provider's default (Voyage calls it top_k)
+        ("top_k" if provider == "voyage" else "top_n"): 3,
     }
 
 

@@ -26,6 +26,22 @@ pareeksha kb index --kb faq --strategy fixed --size 800 --overlap 0 --wait
 
 The default embedding model is `local:intfloat/multilingual-e5-large`. Pass `--embedding provider:model` to use a hosted one, and set its key with `pareeksha kb create --embedding-key-env VAR` or `pareeksha kb set-keys`. Keys are write-only: stored encrypted, never returned.
 
+**Ollama.** To embed with a model on your own Ollama server (for example `qwen3-embedding:0.6b`, 1024 dimensions, multilingual), run Pareeksha's Ollama container:
+
+```bash
+docker compose --profile ollama up -d    # starts `ollama` and pulls OLLAMA_PULL (default qwen3-embedding:0.6b)
+```
+
+It runs as its own container with its models in the `ollama-models` volume. It is not published on the host, so only the stack can reach it. Compose points `OLLAMA_BASE_URL` at it (`http://ollama:11434/v1`); for an Ollama installed on the host, set `OLLAMA_BASE_URL=http://host.docker.internal:11434/v1` in `.env` instead. Then, in the web app, choose provider `ollama` in **Build index** and enter the model name. The endpoint field can stay empty (it means `OLLAMA_BASE_URL`). On the CLI:
+
+```bash
+pareeksha kb index --kb faq --embedding ollama:qwen3-embedding:0.6b --wait
+```
+
+That one server is trusted without `AGENT_LLM_ALLOW_PRIVATE_URLS`, and it counts as local, so a local-only knowledge base may embed with it. Use the same embedding in the RAG config of the prompt version or matrix, since runs embed each question with it.
+
+**Endpoints and keys in the app.** For `openai_compatible`, `azure_openai` and `bedrock`, **Build index** and the RAG settings have an **Endpoint** field; Pareeksha checks it when you build (https on a public address, `422 base_url_not_allowed` otherwise; a private server needs `AGENT_LLM_ALLOW_PRIVATE_URLS`). API keys for hosted embedding models and rerankers go in **Provider keys** on the knowledge base page. They are write-only: stored encrypted, shown only as "keys saved", and you can replace or clear them. The key for Pareeksha's own LLM (the caller and judge, for example DeepSeek) is under **Settings → LLM**.
+
 **Chunking trade-offs.**
 
 - Small chunks (200 to 400 characters) find the exact sentence and keep the prompt short, but a fact that spans two paragraphs gets cut in half.
@@ -137,6 +153,6 @@ Over the API, `GET /pricing` returns `{prices, unpriced}` and `PUT /pricing` rep
 - The search index is built in memory per run worker. BM25 and dense search are fine up to about 50,000 chunks; beyond that move the search into the database.
 - The matrix tests the agent's active prompt version only. To test another version, activate it or pass `prompt_version`.
 - Local models download once, on first use, to `FASTEMBED_CACHE_PATH` (default `/data/models`, which is under the `./data/runtime` mount). The default embedding model is about 2.2 GB and the reranker about 0.6 GB, so the first index build or reranked run is slow and needs that disk.
-- Gemini embeddings: the per-request `taskType` is deprecated upstream but still accepted, and Pareeksha still sends it. If Google removes it, switch to another embedding model.
+- Gemini embeddings send `taskType` (`RETRIEVAL_QUERY` or `RETRIEVAL_DOCUMENT`) in `embedContentConfig`, as the current API documents.
 - A matrix holds at most four configs. Hosted embedding and reranker calls count against your provider quota.
 - Text only, like Guide 9: retrieval is tested in typed conversations, not voice calls. Hindi and Kannada questions work with the multilingual default model; keyword search (`bm25`) uses an Indic-aware tokenizer but cannot match across languages.

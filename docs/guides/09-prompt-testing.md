@@ -34,7 +34,7 @@ pareeksha prompt push --agent refund-bot --file prompt.md \
 
 `prompt.md` is your system prompt as plain text. Every push creates an immutable version and makes it active. Pushing the same content again changes nothing. `pareeksha prompt versions --agent refund-bot` lists them, `pareeksha prompt activate --agent refund-bot 1` switches back. A run pins the version that was active when it was created, so later pushes never change a run in progress or a finished one.
 
-Providers: `openai`, `openai_compatible`, `deepseek`, `groq`, `mistral`, `ollama` (all OpenAI chat-completions format), `anthropic`, `gemini`. For `openai_compatible` and `ollama` pass `--base-url`.
+Providers: `openai`, `openai_compatible`, `deepseek`, `groq`, `mistral`, `ollama` (all OpenAI chat-completions format), `anthropic`, `gemini`. For `openai_compatible` pass `--base-url`; `ollama` uses `OLLAMA_BASE_URL` (see below) unless you pass one.
 
 ## 4. Write tools with mocks
 
@@ -133,4 +133,4 @@ Push the new prompt, run the same scenarios, then compare the two runs in the we
 - Tool arguments match by exact value (subset, numbers by value). Semantic matching comes later.
 - No retrieval (RAG) testing yet; it comes later.
 - Azure OpenAI and Bedrock are not supported yet. Token usage of the model under test is recorded as call events, not in cost reports.
-- A `base_url` that points at a private, loopback or link-local address is rejected, so a tenant cannot make the API probe your network. For Ollama or any local endpoint, set `AGENT_LLM_ALLOW_PRIVATE_URLS=true` on the API and the simulator worker. Leave it off on shared deployments.
+- A `base_url` that points at a private, loopback or link-local address is rejected, so a tenant cannot make the API probe your network. The exception is the Ollama server in `OLLAMA_BASE_URL` (provider `ollama` uses it when no `--base-url` is given). For any other local endpoint, set `AGENT_LLM_ALLOW_PRIVATE_URLS=true` on the API and the simulator worker. Leave it off on shared deployments.

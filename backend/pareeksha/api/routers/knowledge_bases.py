@@ -14,6 +14,7 @@ from fastapi import APIRouter, File, Form, Query, Request, Response, UploadFile
 from fastapi.routing import APIRoute
 from sqlalchemy import func, select
 
+from pareeksha.agent_llm.url_guard import allow_private_urls, check_base_url
 from pareeksha.api.auth import ReadKey, WriteKey
 from pareeksha.api.crud import flush, get_or_404, paginate
 from pareeksha.api.deps import AUTH_ERRORS, Blobs, Db, Pagination, errors
@@ -343,6 +344,12 @@ async def delete_document(kb_id: UUID, doc_id: UUID, key: WriteKey, session: Db)
 async def create_index(
     kb_id: UUID, body: KbIndexCreate, key: WriteKey, session: Db, response: Response
 ) -> KbIndexOut:
+    """Queue a build of an index with this chunking and embedding over the current documents.
+
+    A ready index with the same settings and documents is returned instead (200). Refused
+    (422) for a hosted embedding on a local-only knowledge base, an unknown local model, or an
+    embedding endpoint that is not allowed; at least one document is required.
+    """
     kb = await get_or_404(session, KnowledgeBases, kb_id, key.project_id, "Knowledge base")
     try:
         require_local_embedding(kb.local_only, body.embedding)
@@ -352,6 +359,13 @@ async def create_index(
         require_supported_embedding(body.embedding.provider, body.embedding.model)
     except UnsupportedModelError as exc:
         raise ApiError(422, "unsupported_model", str(exc)) from exc
+    if body.embedding.base_url:
+        try:  # the same rule the worker's request applies; fail here, not in the build
+            await asyncio.to_thread(
+                check_base_url, body.embedding.base_url, allow_private=allow_private_urls()
+            )
+        except ValueError as exc:
+            raise ApiError(422, "base_url_not_allowed", str(exc)) from exc
     await session.execute(  # serialises version numbers per KB
         select(KnowledgeBases.id).where(KnowledgeBases.id == kb.id).with_for_update()
     )

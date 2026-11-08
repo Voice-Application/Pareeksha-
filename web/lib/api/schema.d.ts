@@ -204,7 +204,14 @@ export interface paths {
         /** List indexes */
         get: operations["list_indexes"];
         put?: never;
-        /** Build an index (chunk and embed the current documents) */
+        /**
+         * Build an index (chunk and embed the current documents)
+         * @description Queue a build of an index with this chunking and embedding over the current documents.
+         *
+         *     A ready index with the same settings and documents is returned instead (200). Refused
+         *     (422) for a hosted embedding on a local-only knowledge base, an unknown local model, or an
+         *     embedding endpoint that is not allowed; at least one document is required.
+         */
         post: operations["create_index"];
         delete?: never;
         options?: never;

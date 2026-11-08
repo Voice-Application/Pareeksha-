@@ -24,6 +24,45 @@ const withKb = (indexes = [readyIndex]) => (s: MockState) => {
 const promptAgent = (s: MockState) => void s.agents.push(agent(50, { adapter: "prompt", name: "Prompt Bot" }));
 
 test.describe("RAG lab", () => {
+  test("an Ollama or OpenAI-compatible endpoint and the provider keys are set in the app", async ({ page }) => {
+    const s = await open(page, `/knowledge-bases/${kbId}`, withKb([]));
+    s.rag.docs[kbId] = [{ id: uuid(520), filename: "faq.txt", mime: "text/plain", char_count: 1200, sha256: "a".repeat(64), created_at: ts }];
+    await page.reload();
+    const form = page.getByRole("form", { name: "Build index" });
+
+    // Ollama: the endpoint is optional (empty = the server's OLLAMA_BASE_URL)
+    await form.getByLabel("Provider").selectOption("ollama");
+    await form.getByLabel("Model").fill("qwen3-embedding:0.6b");
+    await expect(form.getByLabel("Endpoint (optional)")).toHaveAttribute("placeholder", "http://ollama:11434/v1");
+    await form.getByLabel("Endpoint (optional)").fill("http://ollama:11434/v1");
+    await page.getByRole("button", { name: "Build index" }).click();
+    await expect.poll(() => s.calls.filter((c) => c.method === "POST" && c.path === `/knowledge-bases/${kbId}/indexes`).length).toBe(1);
+    expect(s.calls.find((c) => c.method === "POST" && c.path.endsWith("/indexes"))?.body).toMatchObject({ embedding: { provider: "ollama", model: "qwen3-embedding:0.6b", base_url: "http://ollama:11434/v1" } });
+
+    // OpenAI-compatible: the endpoint is required and checked before anything is sent
+    await form.getByLabel("Provider").selectOption("openai_compatible");
+    await expect(form.locator("#ix-endpoint")).toHaveValue("");
+    await page.getByRole("button", { name: "Build index" }).click();
+    await expect(page.getByText("openai_compatible needs its endpoint URL.")).toBeVisible();
+    await form.locator("#ix-endpoint").fill("not a url");
+    await page.getByRole("button", { name: "Build index" }).click();
+    await expect(page.getByText("Enter a full URL")).toBeVisible();
+    expect(s.calls.filter((c) => c.method === "POST" && c.path.endsWith("/indexes"))).toHaveLength(1);
+
+    // provider keys: write-only, saved through PATCH, then only "keys saved" is shown
+    const keys = page.getByRole("form", { name: "Provider keys" });
+    await keys.getByLabel("Embedding API key").fill("sk-embed-123");
+    await keys.getByRole("button", { name: "Save keys" }).click();
+    await expect(page.getByText("Provider keys saved.")).toBeVisible();
+    const patch = s.calls.find((c) => c.method === "PATCH" && c.path === `/knowledge-bases/${kbId}`);
+    expect(patch?.body).toEqual({ secrets: { embedding_api_key: "sk-embed-123" } });
+    await expect(page.getByRole("button", { name: "Replace keys" })).toBeVisible();
+    await expect(page.getByText("sk-embed-123")).toHaveCount(0);
+    await page.getByRole("button", { name: "Clear keys" }).click();
+    await expect(page.getByText("Provider keys cleared.")).toBeVisible();
+    expect(s.calls.filter((c) => c.method === "PATCH").at(-1)?.body).toEqual({ secrets: {} });
+  });
+
   test("create a knowledge base, upload (with dedupe) and build an index that goes pending to ready", async ({ page }) => {
     const s = await open(page, "/knowledge-bases");
     await page.getByLabel("Name").fill("Loan policy");
