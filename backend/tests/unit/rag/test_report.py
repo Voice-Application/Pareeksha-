@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from decimal import Decimal
+from importlib.resources import files
 from typing import Any
 
 import pytest
+import yaml
 
 from pareeksha.rag.report import (
     CallData,
@@ -175,3 +177,24 @@ def test_recommendation_rule() -> None:
     assert recommend(tie)["label"] == "cheaper"
     tie2 = [_cand("slow", 20, 0.8, 0.9, "2", 90), _cand("fast", 20, 0.8, 0.9, "2", 10)]
     assert recommend(tie2)["label"] == "fast"
+
+
+def test_demo_selects_peak_estimate_and_reports_reprice() -> None:
+    spec = yaml.safe_load(files("pareeksha").joinpath("seed/data/demo_rag.yaml").read_text())[
+        "price"
+    ]
+    assert spec["rate_period"] == "peak"
+    tokens = {
+        "agent_input": 1_000_000,
+        "agent_output": 1_000_000,
+        "query_embedding": 0,
+        "rerank": 0,
+    }
+    key = (spec["kind"], spec["provider"], spec["model"])
+    models = EntryModels(llm=(spec["provider"], spec["model"]))
+    costs = {}
+    for period in ("peak", "off_peak"):
+        rate = spec["rates"][period]
+        prices = {key: (Decimal(rate["input_per_m_inr"]), Decimal(rate["output_per_m_inr"]))}
+        costs[period] = conversation_cost(tokens, prices, models)
+    assert costs == {"peak": Decimal(132), "off_peak": Decimal(66)}
