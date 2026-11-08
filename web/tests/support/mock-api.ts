@@ -23,6 +23,10 @@ export type RagMock = {
   matrices: S["RagMatrixOut"][];
   report: S["RagReport"] | null;
   pricing: S["PricingOut"];
+  /** What POST /knowledge-bases/{id}/questions:import answers, and the scenarios it adds to `scenarios`. */
+  questionImport: { result: S["QuestionImportResult"]; adds: Scenario[] };
+  /** Raw multipart bodies sent to questions:import, to assert on the form fields. */
+  questionImportBodies: string[];
 };
 
 export type Call = { method: string; path: string; query: URLSearchParams; body: unknown };
@@ -43,6 +47,8 @@ export type MockState = {
   /** Number of GET /scenario-drafts polls that answer "pending" before "ready". */
   draftPendingPolls: number;
   draftResult: { status: "ready" | "failed"; drafts: S["ScenarioCreate"][]; error?: string };
+  /** The `request` the draft poll echoes back (a KB question draft has kind "rag" and an unmatched count). */
+  draftRequest: Record<string, unknown>;
   calls: Call[];
   seq: number;
   rag: RagMock;
@@ -170,9 +176,10 @@ export function freshState(): MockState {
         { title: "Caller asks for a callback", caller_goal: "Ask the agent to call back tomorrow.", success_criteria: "Agent offers a time and confirms it.", tags: ["happy_path"], caller_speaks_first: false, max_turns: 8, reveal_rules: "" },
       ],
     },
+    draftRequest: { count: 10 },
     calls: [],
     seq: 1000,
-    rag: { kbs: [], docs: {}, indexes: {}, indexPendingPolls: 1, chunks: [], matrices: [], report: null, pricing: { prices: [], unpriced: [] } },
+    rag: { kbs: [], docs: {}, indexes: {}, indexPendingPolls: 1, chunks: [], matrices: [], report: null, pricing: { prices: [], unpriced: [] }, questionImport: { result: { created: 0, unmatched: [] }, adds: [] }, questionImportBodies: [] },
   };
 }
 
@@ -332,8 +339,8 @@ export async function mockApi(pg: Page, state: MockState) {
       const pending = polls <= state.draftPendingPolls;
       return send({
         json: pending
-          ? { id: uuid(800), agent_id: uuid(101), status: "pending", request: { count: 10 }, drafts: [], created_at: ts }
-          : { id: uuid(800), agent_id: uuid(101), status: state.draftResult.status, request: { count: 10 }, drafts: state.draftResult.drafts, error: state.draftResult.error ?? null, created_at: ts },
+          ? { id: uuid(800), agent_id: uuid(101), status: "pending", request: state.draftRequest, drafts: [], created_at: ts }
+          : { id: uuid(800), agent_id: uuid(101), status: state.draftResult.status, request: state.draftRequest, drafts: state.draftResult.drafts, error: state.draftResult.error ?? null, created_at: ts },
       });
     }
 
@@ -431,6 +438,20 @@ export async function mockApi(pg: Page, state: MockState) {
         const ix = (rag.indexes[kb.id] ?? []).find((i) => i.id === ixm[1]);
         if (!ix) return send(err(404, "not_found", "Index not found."));
         return send({ json: ixm[2] ? rag.chunks : ix });
+      }
+      // Like the API: refused for a local-only KB or one without documents, else a draft to poll.
+      if (sub === "/questions:generate" && method === "POST") {
+        if (kb.local_only) return send(err(409, "local_only", "Knowledge base is local-only: the platform LLM cannot read it"));
+        if (!(rag.docs[kb.id] ?? []).length) return send(err(422, "validation_error", "Upload at least one document first"));
+        polls = 0;
+        return send({ status: 202, json: { draft_id: uuid(800) } });
+      }
+      if (sub === "/questions:import" && method === "POST") {
+        const raw = req.postData() ?? "";
+        rag.questionImportBodies.push(raw);
+        if (!/name="agent_id"/.test(raw)) return send(err(400, "validation_error", "Request validation failed"));
+        state.scenarios.push(...rag.questionImport.adds);
+        return send({ json: rag.questionImport.result });
       }
     }
     if (path === "/rag-matrices" && method === "GET") return send({ json: page(rag.matrices, url.searchParams) });

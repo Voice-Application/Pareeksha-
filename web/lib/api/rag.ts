@@ -41,19 +41,76 @@ export async function buildIndex(kb_id: string, body: S["KbIndexCreate"]): Promi
   return { index, created: response.status === 201 };
 }
 
+/** POST a multipart form through the BFF proxy (openapi-fetch does not build multipart bodies); throws ApiError on any non-2xx or network failure. */
+async function postForm<T>(path: string, fd: FormData): Promise<{ body: T; status: number }> {
+  let res: Response;
+  try {
+    res = await fetch(`/api/proxy/api/v1${path}`, { method: "POST", body: fd });
+  } catch {
+    throw new ApiError(0, "network", "The API did not respond.");
+  }
+  const body = (await res.json().catch(() => null)) as { error?: { code?: string; message?: string; details?: Record<string, unknown> } } & T;
+  if (!res.ok) throw new ApiError(res.status, body?.error?.code ?? "unknown", body?.error?.message ?? res.statusText, body?.error?.details ?? {}, res.headers.get("x-request-id") ?? undefined);
+  return { body, status: res.status };
+}
+
 /** Multipart upload through the BFF proxy. 201 = stored, 200 = the same file was already in the KB. */
 export async function uploadDocument(kb_id: string, file: File): Promise<{ doc: KbDocument; created: boolean }> {
   const fd = new FormData();
   fd.append("file", file);
-  let res: Response;
-  try {
-    res = await fetch(`/api/proxy/api/v1/knowledge-bases/${kb_id}/documents`, { method: "POST", body: fd });
-  } catch {
-    throw new ApiError(0, "network", "The API did not respond.");
+  const { body, status } = await postForm<KbDocument>(`/knowledge-bases/${kb_id}/documents`, fd);
+  return { doc: body, created: status === 201 };
+}
+
+export type QuestionImportResult = S["QuestionImportResult"];
+export type QuestionUnmatched = S["QuestionUnmatched"];
+export type ScenarioDraft = S["ScenarioDraftOut"];
+/** A generated question as the draft endpoint returns it (the span comes back as number[]). */
+export type QuestionDraft = Omit<S["ScenarioCreate"], "rag_expectation"> & { rag_expectation?: ExpectationRead | null };
+
+/** The CSV header `questions:import` requires, in order (backend/pareeksha/rag/questions.py CSV_COLUMNS). */
+export const QUESTION_CSV_COLUMNS = ["question", "expected_answer", "source_document", "source_quote"] as const;
+
+/** Starts LLM generation; the answer is a draft id to poll with getScenarioDraft. Nothing is saved until saveQuestionDrafts. */
+export const generateQuestions = (kb_id: string, body: S["QuestionGenerateRequest"]) => call(api.POST("/api/v1/knowledge-bases/{kb_id}/questions:generate", { params: { path: { kb_id } }, body }));
+export const getScenarioDraft = (draft_id: string) => call(api.GET("/api/v1/scenario-drafts/{draft_id}", { params: { path: { draft_id } } }));
+/** Save reviewed question drafts as scenarios (source "generated"). */
+export const saveQuestionDrafts = (drafts: QuestionDraft[]) => call(api.POST("/api/v1/scenarios:bulk", { body: { scenarios: drafts.map((d) => ({ ...d, rag_expectation: toExpectation(d.rag_expectation) })), source: "generated" } }));
+
+/** Upload a question CSV; every matched row becomes a scenario for `agent_id`, the others come back as unmatched rows. */
+export async function importQuestions(kb_id: string, agent_id: string, file: File): Promise<QuestionImportResult> {
+  const fd = new FormData();
+  fd.append("agent_id", agent_id);
+  fd.append("file", file);
+  return (await postForm<QuestionImportResult>(`/knowledge-bases/${kb_id}/questions:import`, fd)).body;
+}
+
+/** Every scenario tagged `rag` in the project, following the cursor (the API has no knowledge-base filter, so callers match on the source document). */
+export async function listQuestionScenarios(): Promise<ScenarioRead[]> {
+  const out: ScenarioRead[] = [];
+  let cursor: string | null = null;
+  for (let pages = 0; pages < 25; pages++) {
+    const p = (await call(api.GET("/api/v1/scenarios", { params: { query: { tag: "rag", limit: 200, cursor } } }))) as { items?: ScenarioRead[]; next_cursor?: string | null };
+    out.push(...(p.items ?? []));
+    cursor = p.next_cursor ?? null;
+    if (!cursor) break;
   }
-  const body = (await res.json().catch(() => null)) as { error?: { code?: string; message?: string; details?: Record<string, unknown> } } & KbDocument;
-  if (!res.ok) throw new ApiError(res.status, body?.error?.code ?? "unknown", body?.error?.message ?? res.statusText, body?.error?.details ?? {}, res.headers.get("x-request-id") ?? undefined);
-  return { doc: body, created: res.status === 201 };
+  return out;
+}
+
+/** Plain-words reason for an unmatched CSV row. */
+export const UNMATCHED_REASONS: Record<QuestionUnmatched["reason"], string> = {
+  document_not_found: "No document in this knowledge base has the file name given in source_document.",
+  quote_not_found: "The source_quote text is not in that document. Copy it from the document exactly; case and spacing may differ.",
+  empty_question: "The question is empty.",
+};
+
+/** Question generation and import errors: the API's own message, plus what to do instead when the knowledge base is local only. */
+export function questionErrorMessage(e: unknown): string {
+  if (!(e instanceof ApiError)) return "The request failed.";
+  if (e.code === "local_only") return `${e.userMessage().replace(/\.?$/, ".")} Import your own questions from a CSV instead, or turn off Local only on the knowledge base.`;
+  if (e.code === "file_too_large") return FRIENDLY.file_too_large;
+  return e.userMessage();
 }
 
 export const listMatrices = () => call(api.GET("/api/v1/rag-matrices", { params: { query: { limit: 200 } } }));
