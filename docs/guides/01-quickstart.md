@@ -62,7 +62,8 @@ It also adds demo data, so the prompt and RAG pages are not empty on a fresh ins
 - **Demo · Sahay EMI helpdesk**: a prompt agent with tool calls. v2 shortened the prompt and broke three of four scenarios. Open its two runs in **Runs → Compare** to see the regression.
 - **Demo · Sahay Finance FAQ (EN + HI)**: a knowledge base of four FAQ documents (three English, one Hindi). It comes with 14 ground-truth questions and a finished RAG matrix on **RAG lab**, which compares three retrieval methods against no RAG and against the full knowledge base, with ₹ cost.
 - The knowledge base's index is built by the `indexer` worker. The first build downloads the local embedding model, about 2.2 GB, once.
-- The demo also adds a price for `gemini-2.5-flash` (₹26 input, ₹220 output per 1M tokens) so the report can show costs. You can edit it under **Settings → Pricing**.
+- The demo agents use DeepSeek's `deepseek-flash`. To run them for real, save your DeepSeek key on the agent (the model under test uses the agent's own key, not the platform's).
+- The demo also adds a price for `deepseek-flash` (₹13 input, ₹53 output per 1M tokens, the off-peak list price) so the report can show costs. You can edit it under **Settings → Pricing**.
 
 Restart the web app so it picks the key up:
 

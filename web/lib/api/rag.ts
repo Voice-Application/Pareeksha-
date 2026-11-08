@@ -27,6 +27,8 @@ export const toExpectation = (e: ExpectationRead | null | undefined): S["RagExpe
 export const listKnowledgeBases = () => call(api.GET("/api/v1/knowledge-bases", { params: { query: { limit: 200 } } }));
 export const getKnowledgeBase = (kb_id: string) => call(api.GET("/api/v1/knowledge-bases/{kb_id}", { params: { path: { kb_id } } }));
 export const createKnowledgeBase = (body: S["KnowledgeBaseCreate"]) => call(api.POST("/api/v1/knowledge-bases", { body }));
+/** PATCH a knowledge base; `secrets` replaces the stored provider keys (`{}` clears them). Keys are write-only. */
+export const updateKnowledgeBase = (kb_id: string, body: S["KnowledgeBaseUpdate"]) => call(api.PATCH("/api/v1/knowledge-bases/{kb_id}", { params: { path: { kb_id } }, body }));
 export const listDocuments = (kb_id: string) => call(api.GET("/api/v1/knowledge-bases/{kb_id}/documents", { params: { path: { kb_id }, query: { limit: 200 } } }));
 export const listIndexes = (kb_id: string) => call(api.GET("/api/v1/knowledge-bases/{kb_id}/indexes", { params: { path: { kb_id }, query: { limit: 200 } } }));
 export const getIndex = (kb_id: string, index_id: string) => call(api.GET("/api/v1/knowledge-bases/{kb_id}/indexes/{index_id}", { params: { path: { kb_id, index_id } } }));
@@ -137,6 +139,7 @@ const FRIENDLY: Record<string, string> = {
   file_too_large: "That file is over 10 MB. Split it or export a smaller one.",
   unsupported_document: "Pareeksha cannot read this file type. Use txt, md, html, csv, json, pdf or docx.",
   extraction_failed: "The text could not be extracted from this file. It may be encrypted, scanned images only, or damaged.",
+  base_url_not_allowed: "That endpoint is not allowed: it must be https on a public address. A private server (for example Ollama on your network) needs OLLAMA_BASE_URL or AGENT_LLM_ALLOW_PRIVATE_URLS set on the server.",
 };
 
 /** Plain sentence for the RAG error codes; other errors keep the API's own message. */
@@ -171,6 +174,29 @@ export const METHODS: { value: RagConfig["method"]; label: string }[] = [
 ];
 
 export const EMBEDDING_PROVIDERS: EmbeddingConfig["provider"][] = ["local", "gemini", "openai", "openai_compatible", "azure_openai", "cohere", "voyage", "jina", "mistral", "bedrock", "ollama"];
+
+/** Providers whose endpoint you type in: required for these, optional for Ollama (empty = the server's OLLAMA_BASE_URL). */
+const ENDPOINT_REQUIRED: EmbeddingConfig["provider"][] = ["openai_compatible", "azure_openai", "bedrock"];
+const ENDPOINT_EXAMPLE: Partial<Record<EmbeddingConfig["provider"], string>> = {
+  ollama: "http://ollama:11434/v1",
+  openai_compatible: "https://embeddings.example.com/v1",
+  azure_openai: "https://<resource>.openai.azure.com/openai/deployments/<deployment>",
+  bedrock: "https://bedrock-runtime.us-east-1.amazonaws.com",
+};
+
+/** Whether the embedding endpoint field shows for `provider`, whether it must be filled, and its placeholder. */
+export function embeddingEndpoint(provider: EmbeddingConfig["provider"]): { show: boolean; required: boolean; placeholder: string } {
+  const placeholder = ENDPOINT_EXAMPLE[provider] ?? "";
+  return { show: provider === "ollama" || ENDPOINT_REQUIRED.includes(provider), required: ENDPOINT_REQUIRED.includes(provider), placeholder };
+}
+
+/** Help text under the endpoint field. */
+export function embeddingEndpointHelp(provider: EmbeddingConfig["provider"]): string {
+  if (provider === "ollama") return "Leave empty for the Ollama server this deployment is set up with (OLLAMA_BASE_URL, by default the ollama container).";
+  if (provider === "azure_openai") return "Your resource's deployment URL. The API key goes in Provider keys on the knowledge base page.";
+  if (provider === "bedrock") return "The bedrock-runtime URL of your region. The Bedrock API key goes in Provider keys.";
+  return "The base URL; Pareeksha calls <url>/embeddings. The API key goes in Provider keys.";
+}
 
 /** Does this ready index have the chunking and embedding a config asks for? Matches the fields that decide the index key. */
 export function indexMatches(ix: KbIndex, c: Pick<RagConfig, "chunking" | "embedding">): boolean {

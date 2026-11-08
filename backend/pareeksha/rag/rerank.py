@@ -64,7 +64,9 @@ class HostedReranker:
         if not docs:
             return [], 0
         headers = {"Authorization": f"Bearer {self._key}"} if self._key else {}
-        body = {"model": self._model, "query": query, "documents": list(docs)}
+        body: dict[str, Any] = {"model": self._model, "query": query, "documents": list(docs)}
+        # ask for every document back: a provider default below len(docs) would drop scores
+        body["top_k" if self._provider == "voyage" else "top_n"] = len(docs)
         data, ms = await post_json(
             self._http, _URLS[self._provider], headers, body, timeout_s=60.0, api_key=self._key
         )

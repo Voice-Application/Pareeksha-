@@ -43,8 +43,8 @@ tools:
 
 versions:
   - note: "Baseline"
-    provider: gemini
-    model: gemini-2.5-flash
+    provider: deepseek
+    model: deepseek-flash
     temperature: 0.2
     system_prompt: |-
       You are the Sahay Finance EMI helpdesk. Reply in the customer's language (Hinglish is fine).
@@ -56,8 +56,8 @@ versions:
       4. Customer care is open 9 am to 7 pm, Monday to Saturday, on 1800-000-4455.
       Keep replies short and polite.
   - note: "Shorter prompt to cut tokens"
-    provider: gemini
-    model: gemini-2.5-flash
+    provider: deepseek
+    model: deepseek-flash
     temperature: 0.2
     system_prompt: |-
       You are the Sahay Finance EMI helpdesk. Be brief and help the customer pay their EMI.

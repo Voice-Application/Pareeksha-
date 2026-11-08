@@ -5,7 +5,7 @@ from __future__ import annotations
 import socket
 from urllib.parse import urlsplit
 
-from pareeksha.agent_llm.url_guard import allow_private_urls
+from pareeksha.agent_llm.url_guard import allow_private_urls, is_operator_ollama
 from pareeksha.integrations.ssrf import is_public_ip
 from pareeksha.schemas.rag import EmbeddingConfig
 
@@ -30,9 +30,13 @@ def _resolves_non_public(base_url: str) -> bool:
 
 
 def is_local_endpoint(provider: str, base_url: str | None) -> bool:
+    """Whether calls to ``provider`` at ``base_url`` stay on this deployment.
+
+    Local models and Ollama (the default URL or the operator's ``OLLAMA_BASE_URL``) do; other
+    private endpoints only with ``AGENT_LLM_ALLOW_PRIVATE_URLS`` and a non-public address."""
     if provider == "local":
         return True
-    if provider == "ollama" and not base_url:  # the default, http://localhost:11434
+    if provider == "ollama" and (not base_url or is_operator_ollama(base_url)):
         return True
     if provider not in ("ollama", "openai_compatible") or not base_url or not allow_private_urls():
         return False

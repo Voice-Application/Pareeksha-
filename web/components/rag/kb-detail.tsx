@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { FileUp } from "lucide-react";
-import { DEFAULT_RAG, EMBEDDING_PROVIDERS, getKnowledgeBase, listDocuments, ragErrorMessage, uploadDocument, type ChunkingConfig, type EmbeddingConfig, type KbDocument, type KbIndex } from "@/lib/api/rag";
+import { DEFAULT_RAG, EMBEDDING_PROVIDERS, embeddingEndpoint, embeddingEndpointHelp, getKnowledgeBase, listDocuments, ragErrorMessage, updateKnowledgeBase, uploadDocument, type ChunkingConfig, type EmbeddingConfig, type KbDocument, type KbIndex, type KnowledgeBase } from "@/lib/api/rag";
 import { relativeTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Chip, PageHeader, Panel } from "@/components/ui/layout";
@@ -14,6 +14,7 @@ import { ErrorPanel, PageError, Skeleton, TableSkeleton } from "@/components/ui/
 import { NumberField, SelectField, TextField } from "@/components/ui/field";
 import { IndexChip, useBuildIndex, useIndexes } from "./index-status";
 import { KbQuestions } from "./kb-questions";
+import { useToast } from "@/components/ui/toast";
 
 type FileResult = { name: string; tone: "ok" | "info" | "error"; text: string };
 
@@ -106,6 +107,23 @@ function Indexes({ kbId, hasDocs }: { kbId: string; hasDocs: boolean }) {
   const build = useBuildIndex(kbId);
   const [ch, setCh] = useState<ChunkingConfig>(DEFAULT_RAG.chunking!);
   const [em, setEm] = useState<EmbeddingConfig>(DEFAULT_RAG.embedding!);
+  const [endpointError, setEndpointError] = useState<string | null>(null);
+  const endpoint = embeddingEndpoint(em.provider);
+
+  /** The embedding config to send: the endpoint only where it applies, trimmed; null when empty. */
+  function embeddingToSend(): EmbeddingConfig | null {
+    const url = (em.base_url ?? "").trim();
+    if (endpoint.required && !url) {
+      setEndpointError(`${em.provider} needs its endpoint URL.`);
+      return null;
+    }
+    if (url && !/^https?:\/\/[^\s/]+/i.test(url)) {
+      setEndpointError("Enter a full URL, starting with https:// (or http:// for a server on your network).");
+      return null;
+    }
+    setEndpointError(null);
+    return { ...em, base_url: endpoint.show && url ? url : null };
+  }
 
   const columns: Column<KbIndex>[] = [
     {
@@ -166,7 +184,8 @@ function Indexes({ kbId, hasDocs }: { kbId: string; hasDocs: boolean }) {
         noValidate
         onSubmit={(e) => {
           e.preventDefault();
-          build.mutate({ chunking: ch, embedding: em });
+          const embedding = embeddingToSend();
+          if (embedding) build.mutate({ chunking: ch, embedding });
         }}
         className="grid gap-4"
       >
@@ -182,14 +201,31 @@ function Indexes({ kbId, hasDocs }: { kbId: string; hasDocs: boolean }) {
         </fieldset>
         <fieldset className="grid gap-3 sm:grid-cols-[minmax(0,200px)_minmax(0,1fr)]">
           <legend className="mb-1 text-sm font-medium">Embedding</legend>
-          <SelectField id="ix-provider" label="Provider" value={em.provider} onChange={(e) => setEm({ ...em, provider: e.target.value as EmbeddingConfig["provider"] })}>
+          <SelectField id="ix-provider" label="Provider" value={em.provider} onChange={(e) => setEm({ ...em, provider: e.target.value as EmbeddingConfig["provider"], base_url: null })}>
             {EMBEDDING_PROVIDERS.map((p) => (
               <option key={p} value={p}>
                 {p}
               </option>
             ))}
           </SelectField>
-          <TextField id="ix-model" label="Model" className="mono" value={em.model} onChange={(e) => setEm({ ...em, model: e.target.value })} help="The default is local and multilingual, so it covers Hindi and Kannada." />
+          <TextField id="ix-model" label="Model" className="mono" value={em.model} onChange={(e) => setEm({ ...em, model: e.target.value })} help={em.provider === "ollama" ? "A model pulled on your Ollama server, for example qwen3-embedding:0.6b." : "The default is local and multilingual, so it covers Hindi and Kannada."} />
+          {endpoint.show && (
+            <TextField
+              id="ix-endpoint"
+              label={endpoint.required ? "Endpoint" : "Endpoint (optional)"}
+              fieldClassName="sm:col-span-2"
+              className="mono"
+              type="url"
+              inputMode="url"
+              autoComplete="off"
+              required={endpoint.required}
+              placeholder={endpoint.placeholder}
+              value={em.base_url ?? ""}
+              error={endpointError}
+              onChange={(e) => setEm({ ...em, base_url: e.target.value })}
+              help={embeddingEndpointHelp(em.provider)}
+            />
+          )}
         </fieldset>
         <div className="flex flex-wrap items-center gap-3">
           <Button type="submit" variant="primary" loading={build.isPending} disabled={!hasDocs}>
@@ -203,6 +239,70 @@ function Indexes({ kbId, hasDocs }: { kbId: string; hasDocs: boolean }) {
       {indexes.isError && <ErrorPanel error={indexes.error} what="indexes" onRetry={() => void indexes.refetch()} />}
       {indexes.isSuccess && indexes.data.length === 0 && <p className="text-sm text-muted">No indexes yet. Retrieval needs a ready index.</p>}
       {indexes.isSuccess && indexes.data.length > 0 && <DataTable caption="Indexes" columns={columns} rows={indexes.data} rowKey={(i) => i.id} sort={null} onSort={() => undefined} />}
+    </Panel>
+  );
+}
+
+/**
+ * The knowledge base's provider keys (embedding, reranker): write-only. Shows whether keys are saved,
+ * replaces both on save (an empty field drops that key), or clears them all.
+ */
+function ProviderKeys({ kb }: { kb: KnowledgeBase }) {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  const [editing, setEditing] = useState(!kb.has_secrets);
+  const [embKey, setEmbKey] = useState("");
+  const [rrKey, setRrKey] = useState("");
+  const save = useMutation({
+    mutationFn: (secrets: { embedding_api_key?: string; reranker_api_key?: string }) => updateKnowledgeBase(kb.id, { secrets }),
+    onSuccess: (out, secrets) => {
+      qc.setQueryData(["knowledge-base", kb.id], out);
+      setEmbKey("");
+      setRrKey("");
+      setEditing(!out.has_secrets);
+      toast(Object.keys(secrets).length ? "Provider keys saved." : "Provider keys cleared.");
+    },
+    onError: (e) => toast(ragErrorMessage(e), { tone: "error" }),
+  });
+
+  return (
+    <Panel title="Provider keys" bodyClassName="grid gap-4">
+      <p className="text-sm text-muted">
+        For a hosted embedding model or reranker (OpenAI, Cohere, Voyage, Jina, Azure, Bedrock, an OpenAI-compatible server). Local models and Ollama need none. Keys are stored encrypted and never shown again.
+      </p>
+      {!editing ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <Chip>keys saved</Chip>
+          <Button onClick={() => setEditing(true)}>Replace keys</Button>
+          <Button variant="ghost" loading={save.isPending} onClick={() => save.mutate({})}>
+            Clear keys
+          </Button>
+        </div>
+      ) : (
+        <form
+          aria-label="Provider keys"
+          noValidate
+          className="grid gap-3 sm:grid-cols-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const secrets = { ...(embKey.trim() ? { embedding_api_key: embKey.trim() } : {}), ...(rrKey.trim() ? { reranker_api_key: rrKey.trim() } : {}) };
+            if (Object.keys(secrets).length) save.mutate(secrets);
+          }}
+        >
+          <TextField id="kb-key-emb" label="Embedding API key" type="password" autoComplete="off" value={embKey} onChange={(e) => setEmbKey(e.target.value)} />
+          <TextField id="kb-key-rr" label="Reranker API key" type="password" autoComplete="off" value={rrKey} onChange={(e) => setRrKey(e.target.value)} help={kb.has_secrets ? "Saving replaces both stored keys; leave one empty to drop it." : undefined} />
+          <div className="flex flex-wrap gap-3 sm:col-span-2">
+            <Button type="submit" variant="primary" loading={save.isPending} disabled={!embKey.trim() && !rrKey.trim()}>
+              Save keys
+            </Button>
+            {kb.has_secrets && (
+              <Button variant="ghost" onClick={() => setEditing(false)}>
+                Cancel
+              </Button>
+            )}
+          </div>
+        </form>
+      )}
     </Panel>
   );
 }
@@ -237,6 +337,7 @@ export function KbDetail({ id }: { id: string }) {
         <Documents kbId={id} />
         <Indexes kbId={id} hasDocs={(docs.data?.length ?? 0) > 0} />
         <KbQuestions kbId={id} localOnly={kb.data.local_only} />
+        <ProviderKeys kb={kb.data} />
       </div>
     </>
   );

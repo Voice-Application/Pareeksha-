@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import re
 import threading
 import time
 from collections.abc import Sequence
@@ -14,6 +15,7 @@ from urllib.parse import quote
 import httpx
 
 from pareeksha.agent_llm.base import AgentLLMError, post_json
+from pareeksha.agent_llm.url_guard import ollama_base_url
 from pareeksha.schemas.rag import EmbeddingConfig
 
 BATCH_SIZE = 64
@@ -22,13 +24,15 @@ Kind = Literal["query", "document"]
 _MODELS: dict[str, Any] = {}
 _LOCK = threading.Lock()
 
+#: Public endpoints; Ollama's comes from ``ollama_base_url()`` (``OLLAMA_BASE_URL``).
 _BASE_URLS = {
     "openai": "https://api.openai.com/v1",
     "mistral": "https://api.mistral.ai/v1",
     "jina": "https://api.jina.ai/v1",
-    "ollama": "http://localhost:11434/v1",
 }
 _GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta"
+#: Jina models with retrieval task adapters (jina-embeddings-v3 and later)
+_JINA_TASKS = re.compile(r"^jina-embeddings-v([3-9]|\d\d)")
 
 
 @dataclass(frozen=True, slots=True)
@@ -91,7 +95,8 @@ class HostedEmbedder:
         p = cfg.provider
         if p in ("openai_compatible", "azure_openai", "bedrock") and not cfg.base_url:
             raise ValueError(f"{p} embeddings require base_url")
-        self._base = (cfg.base_url or _BASE_URLS.get(p) or "").rstrip("/")
+        default = ollama_base_url() if p == "ollama" else _BASE_URLS.get(p)
+        self._base = (cfg.base_url or default or "").rstrip("/")
 
     async def _post(
         self, url: str, headers: dict[str, str], body: dict[str, Any]
@@ -132,20 +137,25 @@ class HostedEmbedder:
             tok = int(units.get("input_tokens") or _estimate_tokens(batch))
             return data["embeddings"]["float"], tok, ms
         if p == "gemini":
+            # EmbedContentRequest = {model, content, embedContentConfig}; taskType and
+            # outputDimensionality live in the config (ai.google.dev/api/embeddings, 2026-11)
             task = "RETRIEVAL_QUERY" if kind == "query" else "RETRIEVAL_DOCUMENT"
-            reqs = []
-            for t in batch:
-                r: dict[str, Any] = {
+            config: dict[str, Any] = {"taskType": task}
+            if cfg.dimensions:
+                config["outputDimensionality"] = cfg.dimensions
+            reqs = [
+                {
                     "model": f"models/{cfg.model}",
                     "content": {"parts": [{"text": t}]},
-                    "taskType": task,
+                    "embedContentConfig": config,
                 }
-                if cfg.dimensions:
-                    r["outputDimensionality"] = cfg.dimensions
-                reqs.append(r)
+                for t in batch
+            ]
             url = f"{self._base or _GEMINI_BASE}/models/{cfg.model}:batchEmbedContents"
             data, ms = await self._post(url, {"x-goog-api-key": key or ""}, {"requests": reqs})
-            return [e["values"] for e in data["embeddings"]], _estimate_tokens(batch), ms
+            usage = data.get("usageMetadata") or {}
+            tok = int(usage.get("promptTokenCount") or _estimate_tokens(batch))
+            return [e["values"] for e in data["embeddings"]], tok, ms
         if p == "bedrock":
             return await self._bedrock(batch, kind, bearer)
         # OpenAI wire (openai, mistral, jina, ollama, openai_compatible), plus Voyage and Azure.
@@ -155,11 +165,16 @@ class HostedEmbedder:
         if p == "voyage":
             url = "https://api.voyageai.com/v1/embeddings"
             body["input_type"] = kind
+        elif p == "jina" and _JINA_TASKS.match(cfg.model):
+            # v3+ pick a task adapter (api.jina.ai/v1/embeddings); older models take no task
+            body["task"] = "retrieval.query" if kind == "query" else "retrieval.passage"
         elif p == "azure_openai":
             url = f"{self._base}/embeddings?api-version=2024-10-21"
             headers = {"api-key": key or ""}
         if cfg.dimensions:
-            body["output_dimension" if p == "voyage" else "dimensions"] = cfg.dimensions
+            # Voyage and Mistral call it output_dimension; the OpenAI wire says dimensions
+            field = "output_dimension" if p in ("voyage", "mistral") else "dimensions"
+            body[field] = cfg.dimensions
         data, ms = await self._post(url, headers, body)
         usage = data.get("usage") or {}
         tok = int(usage.get("prompt_tokens") or usage.get("total_tokens") or 0)
@@ -169,22 +184,31 @@ class HostedEmbedder:
     async def _bedrock(
         self, batch: list[str], kind: Kind, headers: dict[str, str]
     ) -> tuple[list[list[float]], int, int]:
+        """InvokeModel on Bedrock: Cohere Embed (batched) or Titan (one text per call)."""
         url = f"{self._base}/model/{quote(self._cfg.model, safe='')}/invoke"
+        dims = self._cfg.dimensions
         if self._cfg.model.startswith("cohere."):
-            body = {
+            body: dict[str, Any] = {
                 "texts": batch,
                 "input_type": "search_query" if kind == "query" else "search_document",
             }
+            if dims:
+                body["output_dimension"] = dims  # Embed v4 only
             data, ms = await self._post(url, headers, body)
-            return data["embeddings"], _estimate_tokens(batch), ms
-        vecs: list[list[float]] = []
+            vecs = data["embeddings"]
+            # Embed v3 returns a list of vectors, Embed v4 {"float": [...]}
+            return (vecs["float"] if isinstance(vecs, dict) else vecs), _estimate_tokens(batch), ms
+        out: list[list[float]] = []
         tok = ms = 0
         for t in batch:  # Titan embeds one text per call
-            data, took = await self._post(url, headers, {"inputText": t})
-            vecs.append(data["embedding"])
+            titan: dict[str, Any] = {"inputText": t}
+            if dims:
+                titan["dimensions"] = dims  # Titan v2: 1024 (default), 512 or 256
+            data, took = await self._post(url, headers, titan)
+            out.append(data["embedding"])
             tok += int(data.get("inputTextTokenCount") or 0)
             ms += took
-        return vecs, tok, ms
+        return out, tok, ms
 
 
 def build_embedder(
