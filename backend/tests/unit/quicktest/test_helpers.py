@@ -23,12 +23,20 @@ def test_cut_takes_the_exact_text_between_the_markers() -> None:
     assert cut(msgs(PASTED), src) == "You are a bank bot.\nNever share balances."
 
 
-def test_cut_matches_markers_ignoring_case_and_widens_when_missing() -> None:
-    """Markers match without case; a missing one widens the cut."""
+def test_cut_matches_markers_ignoring_case_and_rejects_missing_ones() -> None:
+    """Markers match without case; a marker that is not in the message gives None."""
     assert cut(msgs(PASTED), TextSource(message=0, start="you are a BANK")) == (
         "You are a bank bot.\nNever share balances.\nthanks"
     )
-    assert cut(msgs(PASTED), TextSource(message=0, start="not there", end="nope")) == PASTED.strip()
+    assert cut(msgs(PASTED), TextSource(message=0, start="not there", end="nope")) is None
+    assert cut(msgs(PASTED), TextSource(message=0, end="nope")) is None
+
+
+def test_cut_keeps_offsets_when_lowercasing_changes_the_length() -> None:
+    """A character whose lower-case form is longer must not shift the cut."""
+    text = "\u0130\u0130 intro\nYou are a bank bot.\nBe polite.\nthanks"
+    got = cut(msgs(text), TextSource(message=0, start="you are a bank", end="be polite."))
+    assert got == "You are a bank bot.\nBe polite."
 
 
 def test_cut_refuses_assistant_turns_and_unknown_messages() -> None:
@@ -66,7 +74,7 @@ def test_agent_prompt_uses_the_placeholder_or_appends_the_record() -> None:
 
 def test_agent_model_follows_the_platform_provider(monkeypatch: pytest.MonkeyPatch) -> None:
     """The bot runs on the platform's provider and fast model."""
-    s = LLMSettings(_env_file=None, deepseek_api_key="k")  # type: ignore[call-arg]
+    s = LLMSettings(_env_file=None, deepseek_api_key="k")
     assert agent_model(s) == ("deepseek", "deepseek-flash", None, "k")
     custom = s.model_copy(
         update={"deepseek_guard_base_url": True, "deepseek_base_url": "https://llm.example/v1"}

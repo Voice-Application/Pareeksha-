@@ -102,8 +102,7 @@ async def create_quick_test(
 ) -> QuickTestCreated:
     """402 ``confirm_cost`` (details: ``estimate`` and ``plan``) above the auto-run limit: send
     the same body again with ``confirm_cost: true`` and that ``plan``."""
-    if body.plan is None:
-        QUICK_TEST_LIMIT.check(key.key_id)
+    QUICK_TEST_LIMIT.check(key.key_id)  # a confirmed plan still creates a paid run
     await _budget_left(session, key)
     async with _llm(session, key, build, factory) as (settings, client):
         return await service.create_quick_test(session, key, settings, client, body)

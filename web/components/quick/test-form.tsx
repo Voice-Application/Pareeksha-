@@ -45,6 +45,10 @@ export function QuickTestForm() {
   function submit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    if (setup.isError) {
+      setError("The documents list did not load. Try again first, so the test uses the documents you meant.");
+      return;
+    }
     if (!prompt.trim()) {
       setError("Paste your bot's system prompt first.");
       document.getElementById("qt-prompt")?.focus();
@@ -62,6 +66,16 @@ export function QuickTestForm() {
         title="Test my prompt"
         description="Paste your bot's system prompt. Pareeksha finds the rules in it, chats with your bot as normal and tricky customers, and shows which rules it keeps and the exact line where it breaks one."
       />
+      {setup.isError && (
+        <div className="mb-6" role="alert">
+          <Strip tone="warn">
+            {setup.error instanceof ApiError ? setup.error.userMessage() : "The setup details did not load."}{" "}
+            <button type="button" className={linkCls} onClick={() => void setup.refetch()}>
+              Try again
+            </button>
+          </Strip>
+        </div>
+      )}
       {!ready && (
         <div className="mb-6">
           <Strip tone="warn">

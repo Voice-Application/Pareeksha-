@@ -40,6 +40,8 @@ export function verdictLine(t: Pick<QuickTest, "status" | "progress" | "rules">)
   if (t.status === "failed") return "The test could not run";
   if (t.status === "running") return `Testing: ${t.progress.finished} of ${t.progress.total} conversations done`;
   if (t.status === "checking") return `Checking the answers: ${t.progress.checked} of ${t.progress.total} done`;
+  const untested = t.rules.filter((r) => r.status === "not_tested" || r.status === "pending").length;
+  if (!broken && untested) return `Broke none of the ${t.rules.length - untested} rules checked; ${untested} could not be checked`;
   if (!broken) return `Kept all ${t.rules.length} rules`;
   return `Broke ${broken} of ${t.rules.length} rules`;
 }

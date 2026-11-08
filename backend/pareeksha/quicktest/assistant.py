@@ -7,6 +7,7 @@ the server cuts the exact text out of the user's message, so what is tested is w
 
 from __future__ import annotations
 
+import re
 import uuid
 from typing import Any
 
@@ -53,11 +54,26 @@ PAGES = (
 )
 
 
+def _find(text: str, marker: str, *, last: bool = False) -> tuple[int, int] | None:
+    """``(start, end)`` of ``marker`` in ``text`` (exact, else ignoring case), or None.
+
+    Offsets are those of the original ``text``, so they stay right when lower-casing would
+    change the length of a character.
+    """
+    for flags in (0, re.IGNORECASE):
+        found = list(re.finditer(re.escape(marker), text, flags))
+        if found:
+            m = found[-1] if last else found[0]
+            return m.start(), m.end()
+    return None
+
+
 def cut(messages: list[Any], source: Any) -> str | None:
     """The text a ``TextSource`` points at, copied from the user's own message (None if absent).
 
-    Start / end markers are matched exactly, then ignoring case; a marker that is not found
-    widens the cut to the start / end of the message, so nothing pasted is lost.
+    Start / end markers are matched exactly, then ignoring case. A non-empty marker that is not
+    found gives None (the model is asked to point again), so text around the prompt is never
+    included by mistake.
     """
     if source is None or source.message >= len(messages):
         return None
@@ -65,20 +81,17 @@ def cut(messages: list[Any], source: Any) -> str | None:
     if msg.role != "user":
         return None
     text: str = msg.content
-    low = text.lower()
-    start = 0
+    start, end = 0, len(text)
     if source.start:
-        i = text.find(source.start)
-        i = i if i >= 0 else low.find(source.start.lower())
-        start = max(i, 0)
-    end = len(text)
+        hit = _find(text, source.start)
+        if hit is None:
+            return None
+        start = hit[0]
     if source.end:
-        j = text.rfind(source.end)
-        n = len(source.end)
-        if j < 0:
-            j = low.rfind(source.end.lower())
-        if j >= start:
-            end = j + n
+        hit = _find(text, source.end, last=True)
+        if hit is None or hit[1] <= start:
+            return None
+        end = hit[1]
     out = text[start:end].strip()
     return out or None
 
@@ -161,7 +174,10 @@ async def chat(
             if a.prompt_from is None and not a.use_default_rag_prompt:
                 return "start_quick_test needs prompt_from (or use_default_rag_prompt with kb_id)"
             if a.prompt_from is not None and cut(request.messages, a.prompt_from) is None:
-                return "prompt_from.message must be the number of a user message"
+                return (
+                    "prompt_from.message must be a user message number, and start / end must be "
+                    "copied exactly from it"
+                )
             if a.kb_id is not None and str(a.kb_id) not in kb_ids:
                 return f"kb_id must be one of {sorted(kb_ids)} or null"
             if a.use_default_rag_prompt and a.kb_id is None:

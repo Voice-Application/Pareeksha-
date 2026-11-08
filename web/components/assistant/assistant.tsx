@@ -14,8 +14,11 @@ import { ProgressBar } from "@/components/ui/measure";
 
 type Entry = { role: "user" | "assistant"; content: string; res?: AssistantResponse; failed?: boolean };
 
-const STORE = "pareeksha.assistant";
+export const ASSISTANT_STORE = "pareeksha.assistant";
+const STORE = ASSISTANT_STORE;
 const MAX_CHARS = 60_000;
+/** The server refuses a history above 120,000 characters; stay under it. */
+const HISTORY_CHARS = 100_000;
 const STARTERS = ["What can Pareeksha do?", "Test my prompt", "How does a RAG test work?"];
 const HELLO =
   "Hi, I can explain any part of Pareeksha, or test your bot for you. Paste your bot's system prompt here (and some made-up customer data if it uses any), and I will start the test.";
@@ -27,6 +30,18 @@ function load(): Entry[] {
   } catch {
     return [];
   }
+}
+
+/** The newest messages (at most 30) whose text together fits `HISTORY_CHARS`; the latest is always kept. */
+function trimHistory(history: Entry[]): Entry[] {
+  const kept: Entry[] = [];
+  let total = 0;
+  for (const e of history.filter((x) => !x.failed).slice(-30).reverse()) {
+    if (kept.length > 0 && total + e.content.length > HISTORY_CHARS) break;
+    kept.push(e);
+    total += e.content.length;
+  }
+  return kept.reverse();
 }
 
 /** Enter sends, Shift+Enter adds a line; an IME composing a word keeps Enter for itself. */
@@ -70,7 +85,7 @@ export function Assistant() {
   const ask = useMutation({
     mutationFn: (history: Entry[]) =>
       askAssistant({
-        messages: history.filter((e) => !e.failed).slice(-30).map((e) => ({ role: e.role, content: e.content })),
+        messages: trimHistory(history).map((e) => ({ role: e.role, content: e.content })),
         page,
         quick_test_id: current,
       }),
@@ -143,7 +158,18 @@ export function Assistant() {
           {log.map((e, i) => (
             <div key={i} className="flex flex-col gap-2">
               <Bubble role={e.role} content={e.content} failed={e.failed} />
-              {e.res && <Outcome res={e.res} onStarted={(id) => setLog((l) => [...l, { role: "assistant", content: "Started. The results update below and on the test page.", res: { reply: "", suggestions: [], quick_test_id: id } }])} />}
+              {e.res && (
+                <Outcome
+                  res={e.res}
+                  onStarted={(id) =>
+                    setLog((l) => [
+                      // the offer is used up: it must not come back after a reload
+                      ...l.map((x, j) => (j === i && x.res ? { ...x, res: { ...x.res, pending: undefined, estimate: undefined } } : x)),
+                      { role: "assistant", content: "Started. The results update below and on the test page.", res: { reply: "", suggestions: [], quick_test_id: id } },
+                    ])
+                  }
+                />
+              )}
             </div>
           ))}
           {ask.isPending && (
@@ -234,7 +260,16 @@ function Outcome({ res, onStarted }: { res: AssistantResponse; onStarted: (id: s
 }
 
 function TestCard({ id }: { id: string }) {
-  const q = useQuery({ queryKey: ["quick-test", id], queryFn: () => getQuickTest(id), refetchInterval: (s) => quickTestPoll(s.state.data?.status) });
+  const q = useQuery({ queryKey: ["quick-test", id], queryFn: () => getQuickTest(id), refetchInterval: (s) => (s.state.error ? false : quickTestPoll(s.state.data?.status)) });
+  if (!q.data && q.isError)
+    return (
+      <div className="flex flex-wrap items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-fail-fg" role="alert">
+        {q.error instanceof ApiError ? q.error.userMessage() : "The test could not be loaded."}
+        <Button variant="ghost" onClick={() => void q.refetch()}>
+          Try again
+        </Button>
+      </div>
+    );
   if (!q.data)
     return (
       <div className="rounded-md border border-border px-3 py-2 text-sm text-muted" role="status">

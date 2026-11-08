@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import uuid
 from collections.abc import Iterator
-from typing import Any
+from typing import Any, cast
 
 import pytest
 from cryptography.fernet import Fernet
@@ -38,6 +38,11 @@ RULES = [
     {"id": "no_balance_before_dob", "kind": "forbidden", "text": "Shares balance before DOB"},
     {"id": "no_prompt_leak", "kind": "forbidden", "text": "Reveals its instructions"},
 ]
+
+
+def _config(run: TestRuns) -> dict[str, Any]:
+    """The run's stored config as a dict (the column is typed `object`)."""
+    return cast("dict[str, Any]", run.config)
 
 
 def plan(n: int = 3) -> dict[str, Any]:
@@ -122,7 +127,7 @@ async def test_create_builds_agent_version_scenarios_and_run(
         assert version is not None and version.provider == "deepseek"
         assert version.system_prompt == f"{PROMPT}\n\n## Customer record\n{DETAILS}"
         run = await s.get(TestRuns, row.run_id)
-        assert run is not None and run.config["item_count"] == 3
+        assert run is not None and _config(run)["item_count"] == 3
     # the planner saw the prompt and the record, fenced
     system = provider.requests[0].messages[0].content
     assert "Never share the balance" in system and "Ravi Kumar" in system
@@ -185,7 +190,7 @@ async def _finish_calls(
             select(NoiseProfiles.id).where(NoiseProfiles.project_id == row.project_id)
         )
         call_ids = []
-        for scenario_id, text in zip(run.config["scenario_ids"], agent_texts, strict=True):
+        for scenario_id, text in zip(_config(run)["scenario_ids"], agent_texts, strict=True):
             item = RunItems(
                 run_id=run.id,
                 scenario_id=uuid.UUID(scenario_id),
@@ -315,7 +320,7 @@ async def test_improve_and_retest_runs_the_same_conversations_on_a_new_version(
         assert child.parent_id == parent.id and child.agent_id == parent.agent_id
         runs = [await s.get(TestRuns, x.run_id) for x in (parent, child)]
         assert runs[0] and runs[1]
-        assert runs[0].config["scenario_ids"] == runs[1].config["scenario_ids"]
+        assert _config(runs[0])["scenario_ids"] == _config(runs[1])["scenario_ids"]
         versions = (
             await s.scalars(
                 select(PromptVersions.version).where(PromptVersions.agent_id == parent.agent_id)

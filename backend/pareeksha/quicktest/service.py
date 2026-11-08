@@ -47,6 +47,7 @@ from pareeksha.llm.base import ChatMessage, LLMProviderName, LLMPurpose
 from pareeksha.llm.client import LLMClient
 from pareeksha.llm.config import LLMSettings
 from pareeksha.llm.prompts import prompt_hash, render_prompt
+from pareeksha.rag.guard import require_platform_llm_allowed
 from pareeksha.runs import service as runs
 from pareeksha.schemas.agents import AgentCreate
 from pareeksha.schemas.personas import NoiseProfileCreate, PersonaCreate
@@ -78,6 +79,8 @@ IMPROVE_PROMPT = "quick_test_improve_v1"
 
 #: Calls checked per read of a test (in parallel); the page polls, so the rest follow.
 JUDGE_BATCH = 4
+#: Longest prompt a prompt version may hold (after the customer record is put in).
+MAX_PROMPT_CHARS = 100_000
 #: Document excerpts given to the planner and the improver.
 MAX_DOCS = 8
 EXCERPT_CHARS = 1500
@@ -152,6 +155,13 @@ async def _documents(
     """``[{filename, excerpt}]`` of the knowledge base's live documents (at most ``MAX_DOCS``)."""
     if kb_id is None:
         return []
+    local_only = await session.scalar(
+        select(KnowledgeBases.local_only).where(
+            KnowledgeBases.id == kb_id, KnowledgeBases.project_id == project_id
+        )
+    )
+    if local_only:
+        require_platform_llm_allowed(True)
     rows = (
         await session.execute(
             select(KbDocuments.filename, KbDocuments.text)
@@ -259,8 +269,8 @@ async def plan_test(
     )
 
     def check(plan: QuickTestPlan) -> str | None:
-        """Every rule tested by some scenario, and roughly the asked number of scenarios."""
-        if abs(len(plan.scenarios) - body.scenario_count) > 2:
+        """Every rule tested by some scenario, and exactly the asked number of scenarios."""
+        if len(plan.scenarios) != body.scenario_count:
             return f"write {body.scenario_count} scenarios, not {len(plan.scenarios)}"
         tested = {r for s in plan.scenarios for r in s.rule_ids}
         untested = [r.id for r in plan.rules if r.id not in tested]
@@ -284,8 +294,8 @@ async def plan_test(
 
 
 async def _persona(session: AsyncSession, key: Principal, language: str) -> uuid.UUID:
-    """A simulated customer for ``language``: the preferred seed persona, else one with that
-    language, else any persona, else a new one."""
+    """A simulated customer speaking ``language``: the preferred seed persona, else one with that
+    language, else a new one (never a persona in another language)."""
     base = language.split("-")[0].lower()
     project = Personas.project_id == key.project_id
     preferred = PREFERRED_PERSONAS.get(base)
@@ -293,13 +303,18 @@ async def _persona(session: AsyncSession, key: Principal, language: str) -> uuid
         found = await session.scalar(select(Personas.id).where(project, Personas.name == preferred))
         if found:
             return found
-    for cond in (Personas.language == language, Personas.language.like(f"{base}-%"), None):
-        stmt = select(Personas.id).where(project).order_by(Personas.name).limit(1)
-        found = await session.scalar(stmt if cond is None else stmt.where(cond))
+    for cond in (Personas.language == language, Personas.language.like(f"{base}-%")):
+        found = await session.scalar(
+            select(Personas.id).where(project, cond).order_by(Personas.name).limit(1)
+        )
         if found:
             return found
+    taken = await session.scalar(
+        select(func.count()).where(project, Personas.name.like("Quick test customer%"))
+    )
+    suffix = f" {base}" if not taken else f" {base} {int(taken) + 1}"
     created = await create_persona(
-        PersonaCreate(name="Quick test customer", language=language, voice_id="Kavya"),
+        PersonaCreate(name=f"Quick test customer{suffix}", language=language, voice_id="Kavya"),
         key,
         session,
     )
@@ -325,8 +340,15 @@ def _version_body(
 ) -> PromptVersionCreate:
     """The prompt version the bot under test runs."""
     provider, model, base_url, _ = agent_model(settings)
+    if len(prompt) > MAX_PROMPT_CHARS:
+        raise ApiError(
+            422,
+            "prompt_too_long",
+            f"The prompt with the customer record added is {len(prompt):,} characters; the limit "
+            f"is {MAX_PROMPT_CHARS:,}. Shorten the prompt or the record.",
+        )
     return PromptVersionCreate(
-        system_prompt=prompt[:100_000],
+        system_prompt=prompt,
         provider=cast("Any", provider),
         model=model,
         base_url=base_url,
@@ -627,6 +649,11 @@ async def _items(session: AsyncSession, run_id: uuid.UUID) -> list[_Item]:
     return [_Item(i, t, c, scores.get(c.id) if c else None) for i, t, c in rows]
 
 
+def _squash(text: str) -> str:
+    """``text`` lower-cased with runs of whitespace made single, for comparing quotes."""
+    return " ".join(str(text or "").lower().split())
+
+
 async def _judge_call(
     client: LLMClient, row: QuickTests, scenario: str, turns: list[dict[str, Any]]
 ) -> list[dict[str, Any]]:
@@ -635,6 +662,7 @@ async def _judge_call(
     if not turns or not rules:
         return []
     agent_turns = {t["idx"] for t in turns if t["speaker"] == "agent"}
+    turn_text = {t["idx"]: _squash(t["text"]) for t in turns}
     rule_ids = {r["id"] for r in rules}
     fence = _fence()
     system = render_prompt(
@@ -655,6 +683,8 @@ async def _judge_call(
         for v in out.verdicts:
             if v.verdict == "broken" and v.turn not in agent_turns:
                 return f"rule {v.rule_id}: turn must be an agent turn index {sorted(agent_turns)}"
+            if v.verdict == "broken" and _squash(v.quote) not in turn_text.get(v.turn, ""):
+                return f"rule {v.rule_id}: quote must be copied word for word from turn {v.turn}"
         return None
 
     result = await client.generate_json(
@@ -784,7 +814,7 @@ def _conversation(row: QuickTests, item: _Item) -> Conversation:
 def _status(run: TestRuns | None, conversations: list[Conversation]) -> QuickTestStatus:
     """running until every conversation ended, checking until all are checked, then done."""
     total = len(conversations)
-    if run is not None and run.status == "failed" and total == 0:
+    if run is not None and run.status in ("failed", "cancelled") and total == 0:
         return "failed"
     expected = (
         int(cast("dict[str, Any]", run.config or {}).get("item_count", 0)) if run is not None else 0

@@ -14,7 +14,17 @@ import { Assistant } from "@/components/assistant/assistant";
 function SignOut() {
   if (!useRole()) return null;
   return (
-    <form method="post" action="/api/auth/logout">
+    <form
+      method="post"
+      action="/api/auth/logout"
+      onSubmit={() => {
+        try {
+          window.sessionStorage.removeItem("pareeksha.assistant"); // the next person must not see this chat
+        } catch {
+          /* storage blocked: nothing was kept */
+        }
+      }}
+    >
       <Button type="submit" variant="ghost" className="px-3">
         <LogOut size={16} strokeWidth={1.6} aria-hidden />
         Sign out

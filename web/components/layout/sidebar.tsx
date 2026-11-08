@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSyncExternalStore } from "react";
+import { useId, useSyncExternalStore } from "react";
 import {
   Activity,
   AudioLines,
@@ -63,15 +63,21 @@ const ICONS: Record<string, LucideIcon> = {
 
 const CHANGED = "pareeksha:nav-advanced";
 
-/** The folded section's state lives in localStorage; the server (and first paint) render it closed. */
-function readAdvanced(): boolean {
+/** What the user chose last: "1" open, "0" closed, "" nothing yet. Kept in memory when storage fails. */
+let memoryChoice = "";
+
+/** The folded section's choice lives in localStorage; the server (and first paint) render no choice. */
+function readAdvanced(): string {
   try {
-    return window.localStorage.getItem(ADVANCED_STORE) === "1";
+    const stored = window.localStorage.getItem(ADVANCED_STORE);
+    if (stored === "1" || stored === "0") return stored;
   } catch {
-    return false;
+    /* storage blocked: use the in-memory choice */
   }
+  return memoryChoice;
 }
 
+/** Subscribe to changes of the Advanced choice (this tab and other tabs). */
 function subscribe(onChange: () => void): () => void {
   window.addEventListener("storage", onChange);
   window.addEventListener(CHANGED, onChange);
@@ -81,11 +87,13 @@ function subscribe(onChange: () => void): () => void {
   };
 }
 
+/** Remember the choice in memory, and in localStorage when it works. */
 function writeAdvanced(open: boolean) {
+  memoryChoice = open ? "1" : "0";
   try {
-    window.localStorage.setItem(ADVANCED_STORE, open ? "1" : "0");
+    window.localStorage.setItem(ADVANCED_STORE, memoryChoice);
   } catch {
-    /* convenience only */
+    /* convenience only: the in-memory choice still applies */
   }
   window.dispatchEvent(new Event(CHANGED));
 }
@@ -94,10 +102,12 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const role = useRole();
   const match = activeItem(pathname);
-  const openPref = useSyncExternalStore(subscribe, readAdvanced, () => false);
-  // The section opens by itself when the current page lives in it.
+  const regionId = useId();
+  const choice = useSyncExternalStore(subscribe, readAdvanced, () => "");
+  // With no choice yet, the section opens by itself when the current page lives in it;
+  // an explicit click always wins.
   const inside = (match?.group ?? null) !== null;
-  const open = openPref || inside;
+  const open = choice === "" ? inside : choice === "1";
   const visible = (i: NavItem) => !i.adminOnly || role !== "member";
   const toggle = () => writeAdvanced(!open);
 
@@ -133,7 +143,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         <button
           type="button"
           aria-expanded={open}
-          aria-controls="nav-advanced"
+          aria-controls={regionId}
           onClick={toggle}
           className="flex h-8 items-center gap-2 rounded-sm px-3 text-left text-sm text-muted transition-colors hover:bg-hover hover:text-fg"
         >
@@ -141,7 +151,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           Advanced
         </button>
         {open && (
-          <div id="nav-advanced" className="flex flex-col gap-5">
+          <div id={regionId} className="flex flex-col gap-5">
             {ADVANCED_GROUPS.map((group) => (
               <div key={group} className="flex flex-col gap-1">
                 <p className="px-3 pb-1 text-xs text-subtle">{group}</p>

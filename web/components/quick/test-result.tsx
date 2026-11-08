@@ -232,7 +232,15 @@ function ImprovementView({ test, imp }: { test: QuickTest; imp: QuickTestImprove
   const router = useRouter();
   const [copied, setCopied] = useState(false);
   const saved = imp.prompt_chars_before ? Math.round((1 - imp.prompt_chars_after / imp.prompt_chars_before) * 100) : 0;
-  const run = useMutation({ mutationFn: () => retestQuickTest(test.id), onSuccess: (t) => router.push(`/test/${t.id}`) });
+  // Above the cost limit the API answers 402 with the estimate: show it, and run again once accepted.
+  const [asked, setAsked] = useState<number | null>(null);
+  const run = useMutation({
+    mutationFn: () => retestQuickTest(test.id, asked !== null),
+    onSuccess: (t) => router.push(`/test/${t.id}`),
+    onError: (e) => {
+      if (e instanceof ApiError && e.code === "confirm_cost") setAsked((e.details.estimate as { est_cost: number }).est_cost);
+    },
+  });
   return (
     <div className="mt-5 flex flex-col gap-4 border-t border-border pt-5">
       <p className="text-sm">{imp.summary}</p>
@@ -284,11 +292,11 @@ function ImprovementView({ test, imp }: { test: QuickTest; imp: QuickTestImprove
           </LinkButton>
         ) : (
           <Button variant="primary" loading={run.isPending} onClick={() => run.mutate()}>
-            Test this prompt
+            {asked !== null ? `Run for ${inr(asked)}` : "Test this prompt"}
           </Button>
         )}
       </div>
-      {run.isError && <Strip tone="error">{run.error instanceof ApiError ? run.error.userMessage() : "The API did not respond."}</Strip>}
+      {run.isError && asked === null && <Strip tone="error">{run.error instanceof ApiError ? run.error.userMessage() : "The API did not respond."}</Strip>}
     </div>
   );
 }
