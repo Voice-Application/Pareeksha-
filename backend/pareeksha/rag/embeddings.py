@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import re
 import threading
 import time
 from collections.abc import Sequence
@@ -30,6 +31,8 @@ _BASE_URLS = {
     "jina": "https://api.jina.ai/v1",
 }
 _GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta"
+#: Jina models with retrieval task adapters (jina-embeddings-v3 and later)
+_JINA_TASKS = re.compile(r"^jina-embeddings-v([3-9]|\d\d)")
 
 
 @dataclass(frozen=True, slots=True)
@@ -162,11 +165,16 @@ class HostedEmbedder:
         if p == "voyage":
             url = "https://api.voyageai.com/v1/embeddings"
             body["input_type"] = kind
+        elif p == "jina" and _JINA_TASKS.match(cfg.model):
+            # v3+ pick a task adapter (api.jina.ai/v1/embeddings); older models take no task
+            body["task"] = "retrieval.query" if kind == "query" else "retrieval.passage"
         elif p == "azure_openai":
             url = f"{self._base}/embeddings?api-version=2024-10-21"
             headers = {"api-key": key or ""}
         if cfg.dimensions:
-            body["output_dimension" if p == "voyage" else "dimensions"] = cfg.dimensions
+            # Voyage and Mistral call it output_dimension; the OpenAI wire says dimensions
+            field = "output_dimension" if p in ("voyage", "mistral") else "dimensions"
+            body[field] = cfg.dimensions
         data, ms = await self._post(url, headers, body)
         usage = data.get("usage") or {}
         tok = int(usage.get("prompt_tokens") or usage.get("total_tokens") or 0)
@@ -176,22 +184,31 @@ class HostedEmbedder:
     async def _bedrock(
         self, batch: list[str], kind: Kind, headers: dict[str, str]
     ) -> tuple[list[list[float]], int, int]:
+        """InvokeModel on Bedrock: Cohere Embed (batched) or Titan (one text per call)."""
         url = f"{self._base}/model/{quote(self._cfg.model, safe='')}/invoke"
+        dims = self._cfg.dimensions
         if self._cfg.model.startswith("cohere."):
-            body = {
+            body: dict[str, Any] = {
                 "texts": batch,
                 "input_type": "search_query" if kind == "query" else "search_document",
             }
+            if dims:
+                body["output_dimension"] = dims  # Embed v4 only
             data, ms = await self._post(url, headers, body)
-            return data["embeddings"], _estimate_tokens(batch), ms
-        vecs: list[list[float]] = []
+            vecs = data["embeddings"]
+            # Embed v3 returns a list of vectors, Embed v4 {"float": [...]}
+            return (vecs["float"] if isinstance(vecs, dict) else vecs), _estimate_tokens(batch), ms
+        out: list[list[float]] = []
         tok = ms = 0
         for t in batch:  # Titan embeds one text per call
-            data, took = await self._post(url, headers, {"inputText": t})
-            vecs.append(data["embedding"])
+            titan: dict[str, Any] = {"inputText": t}
+            if dims:
+                titan["dimensions"] = dims  # Titan v2: 1024 (default), 512 or 256
+            data, took = await self._post(url, headers, titan)
+            out.append(data["embedding"])
             tok += int(data.get("inputTextTokenCount") or 0)
             ms += took
-        return vecs, tok, ms
+        return out, tok, ms
 
 
 def build_embedder(

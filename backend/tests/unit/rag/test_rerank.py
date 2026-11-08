@@ -45,6 +45,8 @@ async def test_hosted_rerank(provider: str, url: str, reply: dict[str, Any]) -> 
         "model": "rm",
         "query": "q",
         "documents": ["a", "b", "c"],
+        # every document back, whatever the provider's default (Voyage calls it top_k)
+        ("top_k" if provider == "voyage" else "top_n"): 3,
     }
 
 
