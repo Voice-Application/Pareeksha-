@@ -48,7 +48,9 @@ export function Overview() {
   const url = useUrlState();
   const now = useNow();
   const agents = useQuery({ queryKey: ["agents", "overview"], queryFn: () => call(api.GET("/api/v1/agents", { params: { query: { limit: 100 } } })) });
-  const active = useMemo(() => (agents.data?.items ?? []).filter((a) => !a.archived), [agents.data]);
+  // Agents made by Test my prompt have their own panel; the hero is about the user's own agents.
+  const active = useMemo(() => (agents.data?.items ?? []).filter((a) => !a.archived && !(a.adapter_config as { quick_test_id?: string } | undefined)?.quick_test_id), [agents.data]);
+  const promptTests = useQuery({ queryKey: ["quick-tests"], queryFn: listQuickTests });
   const urlAgent = url.get("agent");
   let stored = "";
   try { stored = typeof window !== "undefined" ? (window.localStorage.getItem(STORE) ?? "") : ""; } catch { /* storage unavailable */ }
@@ -71,12 +73,17 @@ export function Overview() {
 
   if (agents.isError) return <><PageHeader eyebrow="Overview" title="Overview" /><ErrorPanel error={agents.error} what="agents" onRetry={() => void agents.refetch()} /></>;
   if (agents.isPending) return <OverviewSkeleton />;
-  if (!agent)
+  if (!agent) {
+    const tested = asList(promptTests.data).length > 0;
     return (
       <>
         <PageHeader
-          title="Test your first bot"
-          description="Paste your bot's system prompt and Pareeksha chats with it as normal and tricky customers, then shows which of its rules it keeps and where it breaks them. Voice bots on a phone line can be added as agents."
+          title={tested ? "Your prompt tests" : "Test your first bot"}
+          description={
+            tested
+              ? "Each test shows which rules in the prompt the bot kept and where it broke one. Voice bots on a phone line can be added as agents."
+              : "Paste your bot's system prompt and Pareeksha chats with it as normal and tricky customers, then shows which of its rules it keeps and where it breaks them. Voice bots on a phone line can be added as agents."
+          }
           actions={
             <>
               <LinkButton variant="primary" href="/test">Test my prompt</LinkButton>
@@ -84,9 +91,14 @@ export function Overview() {
             </>
           }
         />
-        <Panel bodyClassName="p-0"><EmptyState icon={Bot} title="Nothing tested yet" body="Your tests and their results will show up here." action={<LinkButton variant="primary" href="/test">Test my prompt</LinkButton>} /></Panel>
+        {tested ? (
+          <div className="max-w-[720px]"><PromptTests /></div>
+        ) : (
+          <Panel bodyClassName="p-0"><EmptyState icon={Bot} title="Nothing tested yet" body="Your tests and their results will show up here." action={<LinkButton variant="primary" href="/test">Test my prompt</LinkButton>} /></Panel>
+        )}
       </>
     );
+  }
 
   // While a run is in flight the server summary is empty; fill the tiles from the items scored so far.
   const scoredNow = (items.data?.items ?? []).filter((i) => i.overall_score != null);
