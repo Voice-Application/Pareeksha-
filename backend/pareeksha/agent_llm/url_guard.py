@@ -29,7 +29,11 @@ def ollama_base_url() -> str:
 def _origin(url: str) -> tuple[str, str, int | None, str] | None:
     try:
         p = urlsplit(url)
-        return p.scheme.lower(), (p.hostname or "").lower(), p.port, p.path.rstrip("/")
+        if p.username is not None or p.password is not None:
+            return None
+        scheme = p.scheme.lower()
+        port = p.port if p.port is not None else {"http": 80, "https": 443}.get(scheme)
+        return scheme, (p.hostname or "").lower(), port, p.path.rstrip("/")
     except ValueError:
         return None
 
@@ -61,7 +65,7 @@ def check_base_url(url: str, *, allow_private: bool) -> None:
     host = parts.hostname
     if not host:
         raise ValueError("base_url has no host")
-    if parts.username or parts.password:
+    if parts.username is not None or parts.password is not None:
         raise ValueError("credentials in base_url are not allowed")
     # checked on the raw string: urlsplit drops an empty "?" or "#"
     if "?" in url or "#" in url:
