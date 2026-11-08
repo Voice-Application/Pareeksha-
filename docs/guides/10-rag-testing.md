@@ -26,13 +26,21 @@ pareeksha kb index --kb faq --strategy fixed --size 800 --overlap 0 --wait
 
 The default embedding model is `local:intfloat/multilingual-e5-large`. Pass `--embedding provider:model` to use a hosted one, and set its key with `pareeksha kb create --embedding-key-env VAR` or `pareeksha kb set-keys`. Keys are write-only: stored encrypted, never returned.
 
-**Ollama.** To embed with a model on your own Ollama server (for example `qwen3-embedding:0.6b`, 1024 dimensions, multilingual), set `OLLAMA_BASE_URL` in `.env` and restart the stack. In Docker, `localhost` is the container itself, so use the host's address: `OLLAMA_BASE_URL=http://host.docker.internal:11434/v1`. Then choose provider `ollama` in the web app, or pass it on the CLI:
+**Ollama.** To embed with a model on your own Ollama server (for example `qwen3-embedding:0.6b`, 1024 dimensions, multilingual), run Pareeksha's Ollama container:
+
+```bash
+docker compose --profile ollama up -d    # starts `ollama` and pulls OLLAMA_PULL (default qwen3-embedding:0.6b)
+```
+
+It runs as its own container with its models in the `ollama-models` volume. It is not published on the host, so only the stack can reach it. Compose points `OLLAMA_BASE_URL` at it (`http://ollama:11434/v1`); for an Ollama installed on the host, set `OLLAMA_BASE_URL=http://host.docker.internal:11434/v1` in `.env` instead. Then, in the web app, choose provider `ollama` in **Build index** and enter the model name. The endpoint field can stay empty (it means `OLLAMA_BASE_URL`). On the CLI:
 
 ```bash
 pareeksha kb index --kb faq --embedding ollama:qwen3-embedding:0.6b --wait
 ```
 
 That one server is trusted without `AGENT_LLM_ALLOW_PRIVATE_URLS`, and it counts as local, so a local-only knowledge base may embed with it. Use the same embedding in the RAG config of the prompt version or matrix, since runs embed each question with it.
+
+**Endpoints and keys in the app.** For `openai_compatible`, `azure_openai` and `bedrock`, **Build index** and the RAG settings have an **Endpoint** field; Pareeksha checks it when you build (https on a public address, `422 base_url_not_allowed` otherwise; a private server needs `AGENT_LLM_ALLOW_PRIVATE_URLS`). API keys for hosted embedding models and rerankers go in **Provider keys** on the knowledge base page. They are write-only: stored encrypted, shown only as "keys saved", and you can replace or clear them. The key for Pareeksha's own LLM (the caller and judge, for example DeepSeek) is under **Settings → LLM**.
 
 **Chunking trade-offs.**
 

@@ -399,6 +399,11 @@ export async function mockApi(pg: Page, state: MockState) {
       if (!kb) return send(err(404, "not_found", "Knowledge base not found."));
       const sub = kbm[2] ?? "";
       if (sub === "" && method === "GET") return send({ json: kb });
+      if (sub === "" && method === "PATCH") {
+        const { secrets, ...rest } = b as { secrets?: Record<string, string> | null };
+        Object.assign(kb, rest, secrets !== undefined && secrets !== null ? { has_secrets: Object.keys(secrets).length > 0 } : {}, { updated_at: ts });
+        return send({ json: kb });
+      }
       if (sub === "/documents" && method === "GET") return send({ json: page(rag.docs[kb.id] ?? [], url.searchParams) });
       if (sub === "/documents" && method === "POST") {
         const name = /filename="([^"]+)"/.exec(req.postData() ?? "")?.[1] ?? "file.txt";
