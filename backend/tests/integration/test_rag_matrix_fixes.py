@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from typing import Any
 
 import pytest
 from httpx import AsyncClient
@@ -52,8 +53,11 @@ async def test_budget_estimate_excludes_the_na_baseline(
 
     prepare = service.prepare
 
-    async def priced(session: AsyncSession, project_id: uuid.UUID, req: RunCreate) -> Prepared:
-        p = await prepare(session, project_id, req)
+    async def priced(
+        session: AsyncSession, project_id: uuid.UUID, req: RunCreate, **kw: Any
+    ) -> Prepared:
+        """``prepare`` with a fixed estimate per entry (keyword args such as the version pass)."""
+        p = await prepare(session, project_id, req, **kw)
         cost = 10.0 if "Full context" in req.name else 1.0
         p.estimate = p.estimate.model_copy(update={"est_cost": cost})
         return p

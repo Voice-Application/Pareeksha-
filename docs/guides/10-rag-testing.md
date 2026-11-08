@@ -91,7 +91,7 @@ Options on top of a method:
 
 ### The `{{context}}` placeholder
 
-Put `{{context}}` in the agent's system prompt where the retrieved text should go. Without it, Pareeksha appends the text at the end under a "Retrieved context:" heading. Runs without retrieval (the No RAG baseline) replace `{{context}}` with nothing. The matrix tests the agent's **active** prompt version, so push and activate the version you want first (`prompt_version` on the API picks another).
+Put `{{context}}` in the agent's system prompt where the retrieved text should go. Without it, Pareeksha appends the text at the end under a "Retrieved context:" heading. Runs without retrieval (the No RAG baseline) replace `{{context}}` with nothing. The matrix tests the agent's **active** prompt version by default. To test another one, pass its number as `prompt_version` on `POST /rag-matrices` (or pick it in the web form): any existing version works, active or not, and every run of the matrix executes that version. The agent's active version does not change. An unknown number is `404 not_found` with `{"version": n}`.
 
 ## 5. The local-only switch
 
@@ -135,7 +135,7 @@ Over the API, `GET /pricing` returns `{prices, unpriced}` and `PUT /pricing` rep
 ## Limits
 
 - The search index is built in memory per run worker. BM25 and dense search are fine up to about 50,000 chunks; beyond that move the search into the database.
-- The matrix tests the agent's active prompt version only. To test another version, activate it or pass `prompt_version`.
+- The CLI's `pareeksha rag run` always tests the active prompt version; use the API's `prompt_version` (or the web form) for another one.
 - Local models download once, on first use, to `FASTEMBED_CACHE_PATH` (default `/data/models`, which is under the `./data/runtime` mount). The default embedding model is about 2.2 GB and the reranker about 0.6 GB, so the first index build or reranked run is slow and needs that disk.
 - Gemini embeddings: the per-request `taskType` is deprecated upstream but still accepted, and Pareeksha still sends it. If Google removes it, switch to another embedding model.
 - A matrix holds at most four configs. Hosted embedding and reranker calls count against your provider quota.
