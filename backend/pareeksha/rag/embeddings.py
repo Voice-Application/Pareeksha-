@@ -134,20 +134,25 @@ class HostedEmbedder:
             tok = int(units.get("input_tokens") or _estimate_tokens(batch))
             return data["embeddings"]["float"], tok, ms
         if p == "gemini":
+            # EmbedContentRequest = {model, content, embedContentConfig}; taskType and
+            # outputDimensionality live in the config (ai.google.dev/api/embeddings, 2026-11)
             task = "RETRIEVAL_QUERY" if kind == "query" else "RETRIEVAL_DOCUMENT"
-            reqs = []
-            for t in batch:
-                r: dict[str, Any] = {
+            config: dict[str, Any] = {"taskType": task}
+            if cfg.dimensions:
+                config["outputDimensionality"] = cfg.dimensions
+            reqs = [
+                {
                     "model": f"models/{cfg.model}",
                     "content": {"parts": [{"text": t}]},
-                    "taskType": task,
+                    "embedContentConfig": config,
                 }
-                if cfg.dimensions:
-                    r["outputDimensionality"] = cfg.dimensions
-                reqs.append(r)
+                for t in batch
+            ]
             url = f"{self._base or _GEMINI_BASE}/models/{cfg.model}:batchEmbedContents"
             data, ms = await self._post(url, {"x-goog-api-key": key or ""}, {"requests": reqs})
-            return [e["values"] for e in data["embeddings"]], _estimate_tokens(batch), ms
+            usage = data.get("usageMetadata") or {}
+            tok = int(usage.get("promptTokenCount") or _estimate_tokens(batch))
+            return [e["values"] for e in data["embeddings"]], tok, ms
         if p == "bedrock":
             return await self._bedrock(batch, kind, bearer)
         # OpenAI wire (openai, mistral, jina, ollama, openai_compatible), plus Voyage and Azure.

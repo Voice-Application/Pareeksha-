@@ -119,11 +119,37 @@ async def test_gemini() -> None:
     assert str(seen[0].url).endswith("/v1beta/models/text-embedding-004:batchEmbedContents")
     assert seen[0].headers["x-goog-api-key"] == KEY
     reqs = json.loads(seen[0].content)["requests"]
-    assert reqs[0]["taskType"] == "RETRIEVAL_QUERY"
-    assert reqs[0]["model"] == "models/text-embedding-004"
+    # taskType sits in embedContentConfig, not on the request (ai.google.dev/api/embeddings)
+    assert reqs[0] == {
+        "model": "models/text-embedding-004",
+        "content": {"parts": [{"text": "a"}]},
+        "embedContentConfig": {"taskType": "RETRIEVAL_QUERY"},
+    }
     assert reqs[1]["content"] == {"parts": [{"text": "b"}]}
+    assert res.input_tokens == 0  # no usageMetadata: estimated from 2 one-char texts
     await emb.embed(["a"], kind="document")
-    assert json.loads(seen[1].content)["requests"][0]["taskType"] == "RETRIEVAL_DOCUMENT"
+    doc = json.loads(seen[1].content)["requests"][0]
+    assert doc["embedContentConfig"] == {"taskType": "RETRIEVAL_DOCUMENT"} and "taskType" not in doc
+
+
+async def test_gemini_dimensions_and_usage_metadata() -> None:
+    seen: list[httpx.Request] = []
+
+    def reply(_: httpx.Request, body: dict[str, Any]) -> dict[str, Any]:
+        n = len(body["requests"])
+        return {"embeddings": [{"values": [1.0]}] * n, "usageMetadata": {"promptTokenCount": 42}}
+
+    cfg = EmbeddingConfig(provider="gemini", model="gemini-embedding-001", dimensions=768)
+    res = await build_embedder(cfg, api_key=KEY, http=_client(reply, seen)).embed(
+        ["a"], kind="document"
+    )
+    (req,) = json.loads(seen[0].content)["requests"]
+    assert req["embedContentConfig"] == {
+        "taskType": "RETRIEVAL_DOCUMENT",
+        "outputDimensionality": 768,
+    }
+    assert "outputDimensionality" not in req
+    assert res.input_tokens == 42
 
 
 async def test_azure_openai() -> None:
