@@ -180,9 +180,9 @@ def test_recommendation_rule() -> None:
 
 
 def test_demo_selects_peak_estimate_and_reports_reprice() -> None:
-    spec = yaml.safe_load(files("pareeksha").joinpath("seed/data/demo_rag.yaml").read_text())[
-        "price"
-    ]
+    """The demo seeds the peak rate; peak costs twice off-peak for the same tokens."""
+    text = files("pareeksha").joinpath("seed/data/demo_rag.yaml").read_text(encoding="utf-8")
+    spec = yaml.safe_load(text)["price"]
     assert spec["rate_period"] == "peak"
     tokens = {
         "agent_input": 1_000_000,
@@ -195,6 +195,8 @@ def test_demo_selects_peak_estimate_and_reports_reprice() -> None:
     costs = {}
     for period in ("peak", "off_peak"):
         rate = spec["rates"][period]
-        prices = {key: (Decimal(rate["input_per_m_inr"]), Decimal(rate["output_per_m_inr"]))}
+        prices: Prices = {
+            key: (Decimal(rate["input_per_m_inr"]), Decimal(rate["output_per_m_inr"]))
+        }
         costs[period] = conversation_cost(tokens, prices, models)
     assert costs == {"peak": Decimal(132), "off_peak": Decimal(66)}

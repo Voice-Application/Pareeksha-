@@ -39,6 +39,7 @@ def test_https_to_loopback_is_non_public() -> None:
 
 @pytest.mark.parametrize("userinfo", ["user:pass", "user", "", ":pass", ":"])
 def test_operator_url_rejects_userinfo(monkeypatch: pytest.MonkeyPatch, userinfo: str) -> None:
+    """Any userinfo, even empty, makes a URL untrusted, as the URL or as OLLAMA_BASE_URL."""
     monkeypatch.setenv("OLLAMA_BASE_URL", "https://127.0.0.1/v1")
     url = f"https://{userinfo}@127.0.0.1/v1"
     assert not is_operator_ollama(url)
@@ -54,6 +55,7 @@ def test_operator_url_rejects_userinfo(monkeypatch: pytest.MonkeyPatch, userinfo
 def test_operator_default_ports(
     monkeypatch: pytest.MonkeyPatch, scheme: str, port: int, explicit_config: bool
 ) -> None:
+    """Implicit and explicit default ports match each other; any other origin or path does not."""
     implicit = f"{scheme}://ollama/v1"
     explicit = f"{scheme}://ollama:{port}/v1"
     monkeypatch.setenv("OLLAMA_BASE_URL", explicit if explicit_config else implicit)

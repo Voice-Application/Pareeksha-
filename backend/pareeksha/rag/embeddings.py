@@ -89,6 +89,8 @@ class HostedEmbedder:
     def __init__(
         self, cfg: EmbeddingConfig, api_key: str | None, http: httpx.AsyncClient | None = None
     ):
+        """Keep the config and key; the endpoint is ``base_url``, else the provider's public URL
+        (``OLLAMA_BASE_URL`` for Ollama). Raises ``ValueError`` when a provider needs a URL."""
         self._cfg = cfg
         self._key = api_key
         self._http = http
@@ -121,6 +123,8 @@ class HostedEmbedder:
         return EmbedResult(vectors, tokens, ms)
 
     async def _batch(self, batch: list[str], kind: Kind) -> tuple[list[list[float]], int, int]:
+        """One request for ``batch`` in the provider's wire format: ``(vectors in input order,
+        input tokens (reported, else estimated), latency ms)``."""
         cfg, key, p = self._cfg, self._key, self._cfg.provider
         bearer = {"Authorization": f"Bearer {key}"} if key else {}
         if p == "cohere":

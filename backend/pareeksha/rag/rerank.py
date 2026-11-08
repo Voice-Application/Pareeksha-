@@ -61,6 +61,8 @@ class HostedReranker:
         self._http = http
 
     async def rerank(self, query: str, docs: Sequence[str]) -> tuple[list[float], int]:
+        """Scores for ``docs`` in their input order, and the latency in ms. Every document is
+        requested back; a reply missing any of them raises ``AgentLLMError``."""
         if not docs:
             return [], 0
         headers = {"Authorization": f"Bearer {self._key}"} if self._key else {}

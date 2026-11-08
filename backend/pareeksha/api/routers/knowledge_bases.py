@@ -344,6 +344,12 @@ async def delete_document(kb_id: UUID, doc_id: UUID, key: WriteKey, session: Db)
 async def create_index(
     kb_id: UUID, body: KbIndexCreate, key: WriteKey, session: Db, response: Response
 ) -> KbIndexOut:
+    """Queue a build of an index with this chunking and embedding over the current documents.
+
+    A ready index with the same settings and documents is returned instead (200). Refused
+    (422) for a hosted embedding on a local-only knowledge base, an unknown local model, or an
+    embedding endpoint that is not allowed; at least one document is required.
+    """
     kb = await get_or_404(session, KnowledgeBases, kb_id, key.project_id, "Knowledge base")
     try:
         require_local_embedding(kb.local_only, body.embedding)

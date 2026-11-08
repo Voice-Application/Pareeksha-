@@ -26,23 +26,29 @@ def ollama_base_url() -> str:
     return (os.environ.get(OLLAMA_BASE_URL_ENV) or "").strip().rstrip("/") or OLLAMA_DEFAULT_URL
 
 
+_DEFAULT_PORTS = {"http": 80, "https": 443}
+
+
 def _origin(url: str) -> tuple[str, str, int | None, str] | None:
+    """``(scheme, host, port, path)`` with the scheme's default port filled in, so
+    ``http://ollama/v1`` and ``http://ollama:80/v1`` compare equal. None if unparsable or the
+    URL carries credentials (never trusted: a stored base_url would keep them in plain text)."""
     try:
         p = urlsplit(url)
         if p.username is not None or p.password is not None:
             return None
         scheme = p.scheme.lower()
-        port = p.port if p.port is not None else {"http": 80, "https": 443}.get(scheme)
+        port = p.port if p.port is not None else _DEFAULT_PORTS.get(scheme)
         return scheme, (p.hostname or "").lower(), port, p.path.rstrip("/")
-    except ValueError:
+    except ValueError:  # e.g. a port that is not a number
         return None
 
 
 def is_operator_ollama(url: str | None) -> bool:
     """True when ``url`` is on the ``OLLAMA_BASE_URL`` the operator set: same scheme, host and
-    port, under its path, with no query, fragment or ``..``. That server is trusted like a local
-    model (plain http, a private address) without ``AGENT_LLM_ALLOW_PRIVATE_URLS``, which would
-    open every private address to tenant-supplied URLs."""
+    port, under its path, with no credentials, query, fragment or ``..``. That server is trusted
+    like a local model (plain http, a private address) without ``AGENT_LLM_ALLOW_PRIVATE_URLS``,
+    which would open every private address to tenant-supplied URLs."""
     configured = (os.environ.get(OLLAMA_BASE_URL_ENV) or "").strip()
     if not configured or not url or "?" in url or "#" in url or ".." in url:
         return False

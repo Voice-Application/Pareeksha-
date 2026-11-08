@@ -102,6 +102,7 @@ function Documents({ kbId }: { kbId: string }) {
   );
 }
 
+/** The knowledge base's indexes and the form that builds one (chunking, embedding model and, where it applies, its endpoint). */
 function Indexes({ kbId, hasDocs }: { kbId: string; hasDocs: boolean }) {
   const indexes = useIndexes(kbId);
   const build = useBuildIndex(kbId);
@@ -307,6 +308,7 @@ function ProviderKeys({ kb }: { kb: KnowledgeBase }) {
   );
 }
 
+/** A knowledge base page: documents, indexes and provider keys, with a page error when it cannot be loaded. */
 export function KbDetail({ id }: { id: string }) {
   const kb = useQuery({ queryKey: ["knowledge-base", id], queryFn: () => getKnowledgeBase(id), retry: false });
   const docs = useQuery({ queryKey: ["kb-docs", id], queryFn: () => listDocuments(id), select: (p) => p.items ?? [] });

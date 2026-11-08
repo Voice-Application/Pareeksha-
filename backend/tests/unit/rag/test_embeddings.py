@@ -39,6 +39,7 @@ def _openai_reply(_: httpx.Request, body: dict[str, Any]) -> dict[str, Any]:
     ],
 )
 async def test_openai_wire_families(provider: str, url_prefix: str) -> None:
+    """OpenAI-format providers: URL, bearer key, body (with each one's dimension field), order."""
     seen: list[httpx.Request] = []
     cfg = EmbeddingConfig(provider=provider, model="m", dimensions=256)  # type: ignore[arg-type]
     emb = build_embedder(cfg, api_key=KEY, http=_client(_openai_reply, seen))
@@ -125,6 +126,7 @@ async def test_cohere(kind: str, expected: str) -> None:
 
 
 async def test_gemini() -> None:
+    """batchEmbedContents with taskType in embedContentConfig, per query or document."""
     seen: list[httpx.Request] = []
 
     def reply(_: httpx.Request, body: dict[str, Any]) -> dict[str, Any]:
@@ -236,6 +238,7 @@ async def test_bedrock_cohere_embed_v4_float_object_and_dimensions() -> None:
     seen: list[httpx.Request] = []
 
     def reply(_: httpx.Request, body: dict[str, Any]) -> dict[str, Any]:
+        """Embed v4's response shape: vectors under embeddings.float."""
         return {"embeddings": {"float": [[2.0] for _ in body["texts"]]}}
 
     cfg = EmbeddingConfig(
