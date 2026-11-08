@@ -31,6 +31,7 @@ async def _index(api: AsyncClient, tenant: Tenant, embedding: dict[str, Any]) ->
 
 
 async def test_the_configured_ollama_endpoint_is_accepted(api: AsyncClient, tenant: Tenant) -> None:
+    """No endpoint (the default) and the configured one both queue a build (202)."""
     for base_url in (None, OLLAMA):
         r = await _index(
             api,

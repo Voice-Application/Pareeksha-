@@ -62,8 +62,10 @@ It also adds demo data, so the prompt and RAG pages are not empty on a fresh ins
 - **Demo · Sahay EMI helpdesk**: a prompt agent with tool calls. v2 shortened the prompt and broke three of four scenarios. Open its two runs in **Runs → Compare** to see the regression.
 - **Demo · Sahay Finance FAQ (EN + HI)**: a knowledge base of four FAQ documents (three English, one Hindi). It comes with 14 ground-truth questions and a finished RAG matrix on **RAG lab**, which compares three retrieval methods against no RAG and against the full knowledge base, with ₹ cost.
 - The knowledge base's index is built by the `indexer` worker. The first build downloads the local embedding model, about 2.2 GB, once.
-- The demo agents use DeepSeek's `deepseek-flash`. To run them for real, save your DeepSeek key on the agent (the model under test uses the agent's own key, not the platform's).
-- The demo also adds a price for `deepseek-flash` (₹13 input, ₹53 output per 1M tokens, the off-peak list price) so the report can show costs. You can edit it under **Settings → Pricing**.
+- The demo agents use DeepSeek's `deepseek-flash` on a fresh install. The model under test uses the agent's own key, not the platform's. To run one for real, open the agent and check the provider of its **active version** first:
+  - If it is `deepseek`, save your DeepSeek key on the agent.
+  - If it is `gemini` (a database seeded before this change keeps its demo agents, because the seed never overwrites a row), either save a Gemini key, or create a new version with provider `deepseek` and model `deepseek-flash` and make it active, and only then save the DeepSeek key. Never save a DeepSeek key on an agent whose active version is Gemini: the key would be sent to Google and rejected.
+- The demo also adds a price for `deepseek-flash` so the report can show costs: ₹26 input and ₹106 output per 1M tokens, DeepSeek's **peak** list price. Off-peak hours cost half. A price is one rate for every call, so the peak rate keeps the demo's figures on the high side. If most of your traffic is off-peak, lower it under **Settings → Pricing**; a price change reprices every report, including old ones.
 
 Restart the web app so it picks the key up:
 

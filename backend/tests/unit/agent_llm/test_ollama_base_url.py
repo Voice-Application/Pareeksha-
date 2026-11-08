@@ -47,6 +47,9 @@ def test_default_is_localhost_and_the_env_overrides_it(monkeypatch: pytest.Monke
         (f"{HOST}/../api/create", False),
         (f"{HOST}?x=1", False),
         (f"{HOST}#frag", False),
+        ("http://user:secret@host.docker.internal:11434/v1", False),  # credentials never trusted
+        ("http://user@host.docker.internal:11434/v1", False),
+        ("http://host.docker.internal:notaport/v1", False),
         (None, False),
     ],
 )
@@ -61,10 +64,12 @@ def test_only_the_configured_server_is_trusted(
 async def test_embeddings_and_chat_default_to_the_configured_server(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """With no base_url, both the embedder and the chat provider call OLLAMA_BASE_URL."""
     monkeypatch.setenv("OLLAMA_BASE_URL", HOST)
     seen: list[str] = []
 
     def reply(req: httpx.Request) -> httpx.Response:
+        """Answer /embeddings with one vector and /chat/completions with a short reply."""
         seen.append(str(req.url))
         body = json.loads(req.content)
         if req.url.path.endswith("/embeddings"):
@@ -97,12 +102,39 @@ def test_the_configured_server_counts_as_local(monkeypatch: pytest.MonkeyPatch) 
 def test_base_url_check_accepts_the_configured_server_only(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """check_base_url lets the configured server through, never another or one with credentials."""
     with pytest.raises(ValueError, match="https"):
         check_base_url(HOST, allow_private=False)
     monkeypatch.setenv("OLLAMA_BASE_URL", HOST)
     check_base_url(HOST, allow_private=False)
     with pytest.raises(ValueError, match="https"):
         check_base_url("http://host.docker.internal:8080/v1", allow_private=False)
+    # the trusted server with credentials falls back to the normal checks, which refuse it
+    with pytest.raises(ValueError, match="credentials"):
+        check_base_url("http://u:p@host.docker.internal:11434/v1", allow_private=True)
+    with pytest.raises(ValueError):
+        check_base_url("http://u:p@host.docker.internal:11434/v1", allow_private=False)
+
+
+@pytest.mark.parametrize(
+    ("configured", "url", "other_port"),
+    [
+        ("http://ollama/v1", "http://ollama:80/v1", "http://ollama:8080/v1"),
+        ("http://ollama:80/v1", "http://ollama/v1", "http://ollama:8080/v1"),
+        (
+            "https://ollama.internal/v1",
+            "https://ollama.internal:443/v1",
+            "https://ollama.internal:8443/v1",
+        ),
+    ],
+)
+def test_default_ports_compare_equal(
+    monkeypatch: pytest.MonkeyPatch, configured: str, url: str, other_port: str
+) -> None:
+    """An implicit and an explicit default port name the same server; another port does not."""
+    monkeypatch.setenv("OLLAMA_BASE_URL", configured)
+    assert is_operator_ollama(url)
+    assert not is_operator_ollama(other_port)
 
 
 async def test_send_skips_the_public_only_path_for_the_configured_server(
