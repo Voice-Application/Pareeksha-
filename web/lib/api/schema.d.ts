@@ -1395,7 +1395,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** What the Test my prompt screen needs */
+        /**
+         * What the Test my prompt screen needs
+         * @description Whether an AI key is set, the model the bot runs on, the cost limit, the documents.
+         */
         get: operations["quick_test_setup"];
         put?: never;
         post?: never;
@@ -1412,7 +1415,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** The newest prompt tests */
+        /**
+         * The newest prompt tests
+         * @description The project's 20 newest prompt tests with their rule counts.
+         */
         get: operations["list_quick_tests"];
         put?: never;
         /**
@@ -1434,7 +1440,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** A prompt test with its rule results (checks finished conversations as it reads) */
+        /**
+         * A prompt test with its rule results (checks finished conversations as it reads)
+         * @description The test as the page shows it; finished conversations are checked on the way.
+         */
         get: operations["get_quick_test"];
         put?: never;
         post?: never;
@@ -1453,7 +1462,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Rewrite the prompt from the test's results; optionally test the rewrite */
+        /**
+         * Rewrite the prompt from the test's results; optionally test the rewrite
+         * @description Rewrite the prompt from the results, and with ``retest`` test the rewrite.
+         */
         post: operations["improve_quick_test"];
         delete?: never;
         options?: never;
@@ -1470,7 +1482,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Test the test's suggested prompt on the same conversations */
+        /**
+         * Test the test's suggested prompt on the same conversations
+         * @description Test the stored improved prompt on the same conversations (409 without one).
+         */
         post: operations["retest_quick_test"];
         delete?: never;
         options?: never;
@@ -1487,7 +1502,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** One turn with the in-app assistant (stateless: send the whole history) */
+        /**
+         * One turn with the in-app assistant (stateless: send the whole history)
+         * @description One assistant turn; it may start a test, improve one or name a page to open.
+         */
         post: operations["assistant_chat"];
         delete?: never;
         options?: never;
@@ -1858,7 +1876,10 @@ export interface components {
             /** Revoked At */
             revoked_at?: string | null;
         };
-        /** AssistantMessage */
+        /**
+         * AssistantMessage
+         * @description One chat turn sent to the assistant.
+         */
         AssistantMessage: {
             /**
              * Role
@@ -1868,7 +1889,10 @@ export interface components {
             /** Content */
             content: string;
         };
-        /** AssistantRequest */
+        /**
+         * AssistantRequest
+         * @description The chat so far, the page the user is on and the test in view.
+         */
         AssistantRequest: {
             /** Messages */
             messages: components["schemas"]["AssistantMessage"][];
@@ -1884,7 +1908,10 @@ export interface components {
              */
             quick_test_id?: string | null;
         };
-        /** AssistantResponse */
+        /**
+         * AssistantResponse
+         * @description The assistant's reply and the outcome of its action.
+         */
         AssistantResponse: {
             /** Reply */
             reply: string;
@@ -2301,7 +2328,10 @@ export interface components {
                 [key: string]: unknown;
             };
         };
-        /** Conversation */
+        /**
+         * Conversation
+         * @description One test conversation's state for the results page.
+         */
         Conversation: {
             /**
              * Item Id
@@ -2329,7 +2359,10 @@ export interface components {
             /** Error */
             error?: string | null;
         };
-        /** CostEstimate */
+        /**
+         * CostEstimate
+         * @description The estimate shown when a test is above the auto-run limit.
+         */
         CostEstimate: {
             /** Conversations */
             conversations: number;
@@ -2623,7 +2656,10 @@ export interface components {
              */
             within_turns: number;
         };
-        /** DocSuggestion */
+        /**
+         * DocSuggestion
+         * @description A fix for one knowledge-base document (or a new one).
+         */
         DocSuggestion: {
             /**
              * Document
@@ -2956,7 +2992,10 @@ export interface components {
              */
             created_at: string;
         };
-        /** ImproveRequest */
+        /**
+         * ImproveRequest
+         * @description What to change in the prompt, and whether to test the result.
+         */
         ImproveRequest: {
             /**
              * Instructions
@@ -3890,7 +3929,10 @@ export interface components {
             /** Behaviour Notes */
             behaviour_notes?: string | null;
         };
-        /** PlannedRule */
+        /**
+         * PlannedRule
+         * @description One rule the planner found in the prompt.
+         */
         PlannedRule: {
             /** Id */
             id: string;
@@ -3911,7 +3953,10 @@ export interface components {
              */
             source: string;
         };
-        /** PlannedScenario */
+        /**
+         * PlannedScenario
+         * @description One test conversation, and the rules it is meant to test.
+         */
         PlannedScenario: {
             /** Title */
             title: string;
@@ -4188,7 +4233,10 @@ export interface components {
              */
             reason: "document_not_found" | "quote_not_found" | "empty_question";
         };
-        /** QuickTestCreate */
+        /**
+         * QuickTestCreate
+         * @description A prompt, test customer data and optional documents to test.
+         */
         QuickTestCreate: {
             /** System Prompt */
             system_prompt: string;
@@ -4223,7 +4271,10 @@ export interface components {
             /** @description the plan from an earlier 402 confirm_cost answer, so it is not made twice */
             plan?: components["schemas"]["QuickTestPlan"] | null;
         };
-        /** QuickTestCreated */
+        /**
+         * QuickTestCreated
+         * @description The new test, its run and the estimated cost.
+         */
         QuickTestCreated: {
             /**
              * Id
@@ -4240,7 +4291,10 @@ export interface components {
             /** Est Cost */
             est_cost: number;
         };
-        /** QuickTestImprovement */
+        /**
+         * QuickTestImprovement
+         * @description A stored rewrite: the draft plus sizes and the re-test it started.
+         */
         QuickTestImprovement: {
             /** Summary */
             summary: string;
@@ -4268,7 +4322,10 @@ export interface components {
             /** Retest Id */
             retest_id?: string | null;
         };
-        /** QuickTestListItem */
+        /**
+         * QuickTestListItem
+         * @description A prompt test in the recent list.
+         */
         QuickTestListItem: {
             /**
              * Id
@@ -4298,7 +4355,10 @@ export interface components {
             /** Finished */
             finished: number;
         };
-        /** QuickTestOut */
+        /**
+         * QuickTestOut
+         * @description A prompt test with its rules, conversations and last improvement.
+         */
         QuickTestOut: {
             /**
              * Id
@@ -4381,7 +4441,10 @@ export interface components {
             /** Tools */
             tools?: components["schemas"]["PromptTool"][];
         };
-        /** QuickTestProgress */
+        /**
+         * QuickTestProgress
+         * @description Conversations in the test, ended, checked and failed.
+         */
         QuickTestProgress: {
             /**
              * Total
@@ -4924,7 +4987,10 @@ export interface components {
              */
             notes: string;
         };
-        /** RuleEvidence */
+        /**
+         * RuleEvidence
+         * @description Where the bot broke a rule: the conversation, the turn and its words.
+         */
         RuleEvidence: {
             /**
              * Call Id
@@ -4946,7 +5012,10 @@ export interface components {
              */
             why: string;
         };
-        /** RuleResult */
+        /**
+         * RuleResult
+         * @description One rule with how many checked conversations kept or broke it.
+         */
         RuleResult: {
             /** Id */
             id: string;
@@ -5540,7 +5609,10 @@ export interface components {
             tags?: string[] | null;
             rag_expectation?: components["schemas"]["RagExpectation"] | null;
         };
-        /** SetupKb */
+        /**
+         * SetupKb
+         * @description A knowledge base the test screen can offer, and whether it is indexed.
+         */
         SetupKb: {
             /**
              * Id
