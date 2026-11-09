@@ -32,7 +32,6 @@ from pareeksha.api.routers.scenarios import create_scenario
 from pareeksha.db.models import (
     Agents,
     Calls,
-    Evaluations,
     KbDocuments,
     KbIndexes,
     KnowledgeBases,
@@ -620,11 +619,15 @@ async def require_row(
 
 
 class _Item:
-    """One conversation of the run, joined with its call and latest evaluation."""
+    """One conversation of the run, joined with its call.
 
-    def __init__(self, item: RunItems, scenario: str, call: Calls | None, score: float | None):
-        """Keep the row, the scenario title, the call (if any) and the overall score."""
-        self.item, self.scenario, self.call, self.score = item, scenario, call, score
+    A quick test's displayed score is chat-appropriate (from the rule verdicts, see
+    :func:`chat_score`), so the voice-call rubric's ``overall_score`` is deliberately not read here.
+    """
+
+    def __init__(self, item: RunItems, scenario: str, call: Calls | None):
+        """Keep the row, the scenario title and the call (if any)."""
+        self.item, self.scenario, self.call = item, scenario, call
 
     @property
     def checkable(self) -> bool:
@@ -655,7 +658,11 @@ class _Item:
 
 
 async def _items(session: AsyncSession, run_id: uuid.UUID) -> list[_Item]:
-    """The run's items, oldest first, with their calls and latest overall scores."""
+    """The run's items, oldest first, with their calls.
+
+    The displayed per-conversation score is derived from the rule verdicts (:func:`chat_score`),
+    not from the voice-call ``evaluations`` row, so this query does not read ``overall_score``.
+    """
     rows = (
         await session.execute(
             select(RunItems, Scenarios.title, Calls)
@@ -665,16 +672,7 @@ async def _items(session: AsyncSession, run_id: uuid.UUID) -> list[_Item]:
             .order_by(RunItems.created_at, RunItems.id)
         )
     ).all()
-    call_ids = [c.id for _, _, c in rows if c is not None]
-    scores: dict[uuid.UUID, float | None] = {}
-    if call_ids:
-        for ev in await session.scalars(
-            select(Evaluations)
-            .where(Evaluations.call_id.in_(call_ids))
-            .order_by(Evaluations.created_at)
-        ):
-            scores[ev.call_id] = None if ev.overall_score is None else float(ev.overall_score)
-    return [_Item(i, t, c, scores.get(c.id) if c else None) for i, t, c in rows]
+    return [_Item(i, t, c) for i, t, c in rows]
 
 
 def _squash(text: str) -> str:
@@ -820,8 +818,47 @@ def _rules(row: QuickTests, items: list[_Item], finished: bool) -> list[RuleResu
     return out
 
 
+def chat_score(verdicts: Sequence[dict[str, Any]] | None) -> float | None:
+    """A quick test's chat-appropriate 0-100 score for one conversation, from its rule verdicts.
+
+    Quick tests paste a generic chat prompt and judge it only on the rules found in that prompt
+    (kept vs broken). The voice-call rubric (``evaluation/rubric.py``) instead expects real
+    customer-service call behaviours - disclosure, company identity, read-backs,
+    escalation-to-human, call-center flow - and its pass gate can fail a call outright, so a
+    reasonable chat bot shows a low voice score it was never meant to earn. To keep the quick-test
+    page chat-appropriate, the
+    displayed score comes from the rules the test already checks, not from that voice evaluator.
+
+    The score is the share of relevant rule verdicts that were kept, as a percentage:
+
+    - ``None`` when there is nothing chat-appropriate to score yet (no verdicts, or the call had no
+      transcript so the only verdict is ``unchecked``). The page then shows no score rather than a
+      misleading one.
+    - ``100.0`` when the bot kept every rule that applied (including when no rule turned out to be
+      relevant, i.e. every verdict is ``not_relevant`` - nothing was broken).
+    - otherwise ``round(100 * kept / (kept + broken), 2)``; ``not_relevant`` verdicts do not count
+      for or against the bot.
+    """
+    if not verdicts:
+        return None
+    if any(v.get("verdict") == "unchecked" for v in verdicts):
+        return None
+    kept = sum(1 for v in verdicts if v.get("verdict") == "kept")
+    broken = sum(1 for v in verdicts if v.get("verdict") == "broken")
+    graded = kept + broken
+    if graded == 0:  # every rule was not_relevant: nothing broken, a clean chat
+        return 100.0
+    return round(100.0 * kept / graded, 2)
+
+
 def _conversation(row: QuickTests, item: _Item) -> Conversation:
-    """One conversation's state for the page."""
+    """One conversation's state for the page.
+
+    The ``score`` is the chat-appropriate score from this conversation's rule verdicts
+    (:func:`chat_score`), not the voice-call rubric's ``overall_score`` - a quick test judges a
+    pasted chat prompt only on its own rules, so a reasonable chat bot is not dragged to a low
+    voice-call score by call-center expectations it was never meant to meet.
+    """
     tests = (row.plan.get("scenario_tests") or {}).get(str(item.item.scenario_id), [])
     call_id = item.call.id if item.call is not None else None
     verdicts = row.verdicts.get(str(call_id)) if call_id else None
@@ -843,7 +880,7 @@ def _conversation(row: QuickTests, item: _Item) -> Conversation:
         tests=list(tests),
         status=cast("Any", status),
         broken_rules=[v["rule_id"] for v in verdicts or [] if v.get("verdict") == "broken"],
-        score=item.score,
+        score=chat_score(verdicts),
         error=item.error or ("The conversation had no turns to check" if empty else None),
     )
 
