@@ -142,17 +142,65 @@ test.describe("overview", () => {
     st.extra["GET /runs"] = { items: [run({ name })], next_cursor: null };
     await mockFe(page, st);
     await page.goto("/");
-    const table = page.getByRole("table", { name: "Recent runs" });
+    // exact: the trend chart's screen-reader table is "Mean score across recent runs".
+    const table = page.getByRole("table", { name: "Recent runs", exact: true });
     const link = table.getByRole("link", { name });
     await expect(link).toHaveAttribute("href", `/runs/${RUN_ID}`);
     const size = await table.evaluate((el) => ({ table: el.getBoundingClientRect().width, container: el.parentElement!.getBoundingClientRect().width }));
     expect(size.table).toBeLessThanOrEqual(size.container + 1);
   });
 
+  test("a refresh to fewer runs while a chart point is selected does not crash the charts", async ({ page }) => {
+    const st = opsState();
+    const scored = (i: number, pass: number) => run({ id: `00000000-0000-4000-8000-00000000091${i}`, name: `Run ${i}`, summary: { ...run().summary, pass_rate: pass, score_mean: 60 + i } });
+    st.extra["GET /runs"] = { items: [scored(1, 0.5), scored(2, 0.75), scored(3, 0.999)], next_cursor: null };
+    await mockFe(page, st);
+    await page.goto("/");
+    const passPanel = page.getByRole("region", { name: "Pass rate by run" });
+    // 999/1000 must not read as a perfect run.
+    await expect(passPanel.getByRole("button", { name: "Run 3: 99.9%" })).toBeVisible();
+    await passPanel.getByRole("button", { name: /^Run 1: / }).focus();
+    await expect(page.getByRole("tooltip")).toBeVisible();
+    // Escape dismisses the tooltip without moving focus off the bar.
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("tooltip")).toHaveCount(0);
+    await expect(passPanel.getByRole("button", { name: /^Run 1: / })).toBeFocused();
+    // Select the last bar, then let the overview refetch a single run: the stale index must not throw.
+    st.extra["GET /runs"] = { items: [scored(9, 0.5)], next_cursor: null };
+    await passPanel.getByRole("button", { name: "Run 3: 99.9%" }).focus();
+    await page.waitForTimeout(5_200); // past the 5s staleTime, so the focus refetch (focusManager listens on window) runs
+    await page.evaluate(() => window.dispatchEvent(new Event("visibilitychange")));
+    await expect(passPanel.getByRole("button", { name: /^Run 9: / })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Mean score by run" })).toBeVisible();
+  });
+
+  test("the token chart is project-wide, counts scenario generation, and shows a retry when usage fails", async ({ page }) => {
+    const st = opsState();
+    st.extra["GET /runs"] = { items: [run({ summary: {} })], next_cursor: null };
+    st.extra["GET /usage"] = { items: [{ provider: "openai", operation: "llm_scenario_gen", unit_type: "tokens", units: 1200 }], credits_used: 1, budget_credits: null, remaining_budget: null };
+    await mockFe(page, st);
+    await page.goto("/");
+    const tokens = page.getByRole("region", { name: "Token usage by operation, all agents" });
+    // Scenario-generation tokens are counted (grouped as "Other"), not dropped.
+    await expect(tokens.getByRole("listitem").filter({ hasText: "Other" })).toContainText("100%");
+    await expect(tokens.getByRole("cell", { name: "1200" })).toBeAttached();
+
+    const failing = opsState();
+    failing.extra["GET /runs"] = { items: [run({ summary: {} })], next_cursor: null };
+    failing.fail["GET /usage"] = 500;
+    await page.unrouteAll();
+    await mockFe(page, failing);
+    await page.reload();
+    const errored = page.getByRole("region", { name: "Token usage by operation, all agents" });
+    await expect(errored.getByRole("button", { name: "Retry" })).toBeVisible({ timeout: 10_000 });
+  });
+
   test("title from the latest run, tiles link, health and review panels", async ({ page }) => {
     await mockFe(page, opsState());
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Latest run passed");
+    // The home now leads with prompt tests; the latest-run summary is the monitoring section heading below.
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Your prompt tests");
+    await expect(page.getByRole("heading", { level: 2, name: /Latest run passed/ })).toBeVisible();
     await expect(page.getByRole("link", { name: /Open DLQ items/ })).toHaveAttribute("href", "/dlq");
     await expect(page.getByText("Lag:").first()).toBeVisible();
     await expect(page.getByRole("heading", { name: "Needs human review" })).toBeVisible();

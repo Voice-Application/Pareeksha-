@@ -12,6 +12,7 @@ export const runtime = "nodejs";
 const FORWARD_REQUEST_HEADERS = ["accept", "content-type", "content-length", "last-event-id", "if-none-match", "range"];
 const DROP_RESPONSE_HEADERS = ["set-cookie", "connection", "keep-alive", "transfer-encoding", "content-encoding", "content-length"];
 
+/** Forward one request to the backend API, passing only allow-listed headers and stripping hop-by-hop and cookie response headers. */
 async function handle(req: NextRequest, ctx: { params: Promise<{ path: string[] }> }): Promise<Response> {
   const base = process.env.PAREEKSHA_API_URL;
   if (!base) {
@@ -22,10 +23,13 @@ async function handle(req: NextRequest, ctx: { params: Promise<{ path: string[] 
     return Response.json({ error: "invalid path" }, { status: 400 });
   }
 
-  // Account endpoints are for the web server only; user management is for admins.
+  // Account endpoints are for the web server only; user management and the metrics summary are for
+  // admins. ``metrics/summary`` exposes Kafka/outbox/consumer-lag and DLQ depth, so the BFF forbids
+  // it for members even though the upstream ``read`` key would otherwise forward it. (``health`` stays
+  // open: it returns only db/kafka reachability and is the canonical liveness probe.)
   const seg = path[0] === "api" && path[1] === "v1" ? path[2] : path[0];
   if (seg === "auth") return Response.json({ error: "not found" }, { status: 404 });
-  if (seg === "users" && process.env.AUTH_DISABLED !== "1") {
+  if ((seg === "users" || seg === "metrics") && process.env.AUTH_DISABLED !== "1") {
     const secret = sessionSecret();
     const user = secret ? await verifySessionToken(secret, req.cookies.get(SESSION_COOKIE)?.value) : null;
     if (user?.role !== "admin") return Response.json({ error: "admins only" }, { status: 403 });

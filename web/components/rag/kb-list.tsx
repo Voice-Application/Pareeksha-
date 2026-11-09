@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useState, type CSSProperties, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BookOpen } from "lucide-react";
+import { BookOpen, FilePlus2, FileText } from "lucide-react";
 import { createKnowledgeBase, listKnowledgeBases, ragErrorMessage, type KnowledgeBase } from "@/lib/api/rag";
 import { relativeTime } from "@/lib/format";
 import { Chip, PageHeader, Panel } from "@/components/ui/layout";
@@ -18,9 +18,12 @@ const columns: Column<KnowledgeBase>[] = [
     key: "name",
     header: "Name",
     cell: (k) => (
-      <Link href={`/knowledge-bases/${k.id}`} className="font-medium text-accent-fg underline-offset-2 hover:underline">
-        {k.name}
-      </Link>
+      <span className="inline-flex min-w-0 items-center gap-2">
+        <FileText size={16} strokeWidth={1.6} className="shrink-0 text-subtle" aria-hidden />
+        <Link href={`/knowledge-bases/${k.id}`} className="truncate font-medium text-accent-fg underline-offset-2 hover:underline">
+          {k.name}
+        </Link>
+      </span>
     ),
   },
   { key: "desc", header: "Description", hidePhone: true, cell: (k) => (k.description ? <span className="line-clamp-2 text-muted">{k.description}</span> : <span className="text-subtle">-</span>) },
@@ -37,6 +40,7 @@ const columns: Column<KnowledgeBase>[] = [
   },
 ];
 
+/** Knowledge bases list with an inline create form. */
 export function KbList() {
   const router = useRouter();
   const qc = useQueryClient();
@@ -64,6 +68,7 @@ export function KbList() {
     onError: (e) => setServerError(ragErrorMessage(e)),
   });
 
+  /** Create the knowledge base once it has a name. */
   function submit(ev: FormEvent) {
     ev.preventDefault();
     setServerError(null);
@@ -75,7 +80,7 @@ export function KbList() {
   return (
     <>
       <PageHeader title="Documents" description="The files your bot answers from. Upload them here; Pareeksha indexes them, and you can pick them in Test my prompt. The RAG lab compares chunking and embedding settings." />
-      <div className="grid gap-6 min-[1100px]:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="stagger grid gap-6 min-[1100px]:grid-cols-[minmax(0,1fr)_380px]">
         <Panel title="Knowledge bases" bodyClassName="p-0" aux={list.isSuccess ? <span className="num">{list.data.length}</span> : null}>
           {list.isPending && <TableSkeleton rows={3} label="Loading knowledge bases" />}
           {list.isError && (
@@ -87,7 +92,7 @@ export function KbList() {
           {list.isSuccess && list.data.length > 0 && <DataTable caption="Knowledge bases" columns={columns} rows={list.data} rowKey={(k) => k.id} sort={null} onSort={() => undefined} />}
         </Panel>
 
-        <form onSubmit={submit} noValidate aria-label="New knowledge base" className="min-w-0 min-[1100px]:self-start">
+        <form onSubmit={submit} noValidate aria-label="New knowledge base" className="min-w-0 min-[1100px]:self-start" style={{ "--i": 1 } as CSSProperties}>
           <Panel title="New knowledge base" bodyClassName="grid gap-4">
             <TextField id="kb-name" label="Name" required value={name} onChange={(e) => setName(e.target.value)} error={nameError} />
             <TextAreaField id="kb-description" label="Description" rows={2} value={description} onChange={(e) => setDescription(e.target.value)} help="Optional." />
@@ -101,6 +106,7 @@ export function KbList() {
             {serverError && <Strip tone="error">Could not create the knowledge base. {serverError}</Strip>}
             <div>
               <Button type="submit" variant="primary" loading={create.isPending}>
+                {!create.isPending && <FilePlus2 size={16} strokeWidth={1.6} aria-hidden />}
                 Create knowledge base
               </Button>
             </div>

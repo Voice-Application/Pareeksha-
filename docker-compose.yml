@@ -173,7 +173,8 @@ services:
     command: ["python", "-m", "pareeksha.workers.dlq_recorder"]
 
   web:
-    build: { context: ./web }
+    build:
+      context: ./web
     environment:
       PAREEKSHA_API_URL: http://api:8000/api/v1
       PAREEKSHA_API_KEY: ${PAREEKSHA_API_KEY:-}

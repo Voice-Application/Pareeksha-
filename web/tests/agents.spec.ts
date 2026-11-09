@@ -107,6 +107,10 @@ test.describe("Agents list", () => {
   });
 
   test("row menu flips above a trigger near the viewport edge", async ({ page }) => {
+    // Pinning the trigger with position:fixed only reaches the viewport edge when no ancestor is
+    // mid-entrance (a running transform makes that ancestor the trigger's containing block). The menu
+    // itself is portalled to <body>, so this only affects the test's synthetic trigger placement.
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await open(page, "/agents");
     const trigger = page.getByRole("button", { name: "Actions for EMI Reminder Bot" });
     await trigger.evaluate((el: HTMLElement) => { el.style.position = "fixed"; el.style.bottom = "4px"; el.style.right = "4px"; });

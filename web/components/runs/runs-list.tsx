@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CircleX, Play } from "lucide-react";
+import { CircleX, FlaskConical, Play } from "lucide-react";
 import { api } from "@/lib/api/client";
 import { call, ApiError } from "@/lib/api/call";
 import type { Run } from "@/lib/api/runs";
@@ -33,6 +33,7 @@ const SORT: Sorters<Run> = {
 
 const IN_FLIGHT = new Set(["queued", "running", "draft"]);
 
+/** Loading placeholder for the results page. */
 export function RunsListSkeleton() {
   return (
     <>
@@ -44,6 +45,7 @@ export function RunsListSkeleton() {
   );
 }
 
+/** Pass-rate cell: suite verdict for regressions, a dash while in flight or failed, else the rate. */
 export function PassRateCell({ run }: { run: Run }) {
   if (run.kind === "regression" && run.summary?.suite_passed !== undefined && run.summary.suite_passed !== null)
     return <VerdictBadge verdict={run.summary.suite_passed ? "pass" : "fail"} />;
@@ -66,6 +68,7 @@ export function PassRateCell({ run }: { run: Run }) {
   );
 }
 
+/** Runs list with URL-backed filters and two-run comparison. */
 export function RunsList() {
   const url = useUrlState();
   const router = useRouter();
@@ -128,6 +131,7 @@ export function RunsList() {
 
   const toggle = (id: string) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : p.length >= 2 ? [p[1], id] : [...p, id]));
   const byId = (id: string) => list.items.find((r) => r.id === id);
+  /** Compare link for the two picked runs, older one as the base. */
   const compareHref = () => {
     const [a, b] = picked.map(byId);
     if (!a || !b) return "/runs/compare";
@@ -232,17 +236,22 @@ export function RunsList() {
           </div>
         ) : rows.length === 0 ? (
           chips.length || needle ? (
-            <EmptyState icon={Play} title="No runs match these filters" body="Try a different filter or clear them." action={<Button onClick={() => url.clear()}>Clear filters</Button>} />
+            <EmptyState icon={FlaskConical} title="No runs match these filters" body="Try a different filter or clear them." action={<Button onClick={() => url.clear()}>Clear filters</Button>} />
           ) : (
             <EmptyState
-              icon={Play}
+              icon={FlaskConical}
               title="No runs yet"
               body="A run sends synthetic callers to your agent and scores every call."
-              action={<LinkButton variant="primary" href="/runs/new">New run</LinkButton>}
+              action={
+                <LinkButton variant="primary" href="/runs/new">
+                  <Play size={14} strokeWidth={1.6} aria-hidden />
+                  New run
+                </LinkButton>
+              }
             />
           )
         ) : (
-          <>
+          <div className="stagger">
             <DataTable
               caption="Runs"
               columns={columns}
@@ -263,7 +272,7 @@ export function RunsList() {
               )}
             />
             <LoadMore hasMore={!!list.hasNextPage} loading={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()} shown={list.items.length} />
-          </>
+          </div>
         )}
       </Panel>
       <ConfirmDialog

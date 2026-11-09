@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { GeistMono } from "geist/font/mono";
 import { Familjen_Grotesk, IBM_Plex_Sans, Geologica } from "next/font/google";
 import { Providers } from "@/components/providers";
-import { AppShell } from "@/components/layout/app-shell";
+import { ToastProvider } from "@/components/ui/toast";
 import "./globals.css";
 
 // Light is Cobalt (Familjen Grotesk over IBM Plex Sans); dark is Vantage (Geologica, sharpened corners at display sizes).
@@ -19,6 +19,7 @@ export const metadata: Metadata = {
 // Runs before paint: stored choice, else the system preference. Keeps dark mode from flashing light.
 const THEME_SCRIPT = `try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.classList.toggle("dark",t==="dark")}catch(e){}`;
 
+/** Root shell: applies the stored theme before paint. */
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${GeistMono.variable} ${familjen.variable} ${plex.variable} ${geologica.variable}`} suppressHydrationWarning>
@@ -26,8 +27,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body>
-        <Providers>
-          <AppShell>{children}</AppShell>
+        <Providers authDisabled={false}>
+          <ToastProvider>{children}</ToastProvider>
         </Providers>
       </body>
     </html>

@@ -43,6 +43,7 @@ export function Field({
   );
 }
 
+/** Inline field error with an icon. */
 export function FieldError({ id, children }: { id?: string; children: ReactNode }) {
   return (
     <p id={id} className="flex items-start gap-1 text-xs text-fail-fg">
@@ -52,12 +53,14 @@ export function FieldError({ id, children }: { id?: string; children: ReactNode 
   );
 }
 
+/** aria-describedby target: the error when present, else the help text. */
 function describedBy(id: string, hasHelp: boolean, error?: string | null) {
   return error ? `${id}-error` : hasHelp ? `${id}-help` : undefined;
 }
 
 type WithField = { label: string; help?: ReactNode; error?: string | null; fieldClassName?: string };
 
+/** Labelled text input wired to its help and error text. */
 export function TextField({ label, help, error, fieldClassName, id: idProp, className, ...rest }: WithField & InputHTMLAttributes<HTMLInputElement>) {
   const auto = useId();
   const id = idProp ?? auto;
@@ -68,10 +71,12 @@ export function TextField({ label, help, error, fieldClassName, id: idProp, clas
   );
 }
 
+/** TextField for numbers, with a numeric keyboard and mono digits. */
 export function NumberField({ label, help, error, fieldClassName, id: idProp, className, ...rest }: WithField & InputHTMLAttributes<HTMLInputElement>) {
   return <TextField type="number" inputMode="numeric" className={cn("mono", className)} label={label} help={help} error={error} fieldClassName={fieldClassName} id={idProp} {...rest} />;
 }
 
+/** Labelled textarea wired to its help and error text. */
 export function TextAreaField({
   label,
   help,
@@ -96,6 +101,7 @@ export function TextAreaField({
   );
 }
 
+/** Labelled native select wired to its help and error text. */
 export function SelectField({
   label,
   help,
@@ -155,6 +161,7 @@ export function Segmented<T extends string | number>({
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
   const enabled = options.map((o, i) => (o.disabled ? -1 : i)).filter((i) => i >= 0);
 
+  /** Arrow keys move to and select the next enabled option, wrapping around. */
   function onKey(e: KeyboardEvent, idx: number) {
     const pos = enabled.indexOf(idx);
     let target: number | undefined;
@@ -172,7 +179,7 @@ export function Segmented<T extends string | number>({
       <span id={id} className={hideLabel ? "sr-only" : "text-sm font-medium"}>
         {label}
       </span>
-      <div role="radiogroup" aria-labelledby={id} className="inline-flex w-fit max-w-full flex-wrap gap-0.5 rounded-pill bg-sunken p-0.5">
+      <div role="radiogroup" aria-labelledby={id} className="inline-flex w-fit max-w-full flex-wrap gap-0.5 rounded-md bg-sunken p-0.5">
         {options.map((o, i) => {
           const selected = o.value === value;
           return (
@@ -204,6 +211,7 @@ export function Segmented<T extends string | number>({
   );
 }
 
+/** Labelled on/off switch with optional help text. */
 export function Switch({ label, checked, onChange, help, disabled }: { label: string; checked: boolean; onChange: (v: boolean) => void; help?: ReactNode; disabled?: boolean }) {
   const id = useId();
   return (
@@ -243,6 +251,7 @@ export function Switch({ label, checked, onChange, help, disabled }: { label: st
   );
 }
 
+/** Labelled range input. */
 export function SliderField({
   label,
   value,
@@ -319,6 +328,7 @@ export function TagInput({
 }) {
   const id = useId();
   const [draft, setDraft] = useState("");
+  /** Add the trimmed draft as a tag unless empty or a duplicate, then clear it. */
   function commit(raw: string) {
     const t = raw.trim();
     if (t && !value.includes(t)) onChange([...value, t]);

@@ -5,7 +5,8 @@ import { CircleAlert } from "lucide-react";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { safeNext } from "@/lib/session";
 import { backend } from "@/lib/auth-server";
-import verdictShot from "@/components/landing/shots/call-verdict.png";
+import verdictLight from "@/components/landing/shots/verdict-light.png";
+import verdictDark from "@/components/landing/shots/verdict-dark.png";
 
 export const metadata: Metadata = { title: "Sign in to Pareeksha", description: "Sign in to the Pareeksha dashboard." };
 export const dynamic = "force-dynamic";
@@ -26,6 +27,7 @@ const ERRORS: Record<string, string> = {
 const input = "h-12 w-full rounded-sm border border-border-strong bg-surface px-3 text-base text-fg transition-[border-color] duration-150 hover:border-fg aria-[invalid=true]:border-fail";
 const submit = "inline-flex h-12 items-center justify-center rounded-pill bg-accent px-6 text-base font-medium text-accent-on transition-[background-color,transform] duration-150 hover:bg-accent-hi active:translate-y-px motion-reduce:transition-none";
 
+/** A labelled required input for the login form, with an optional hint and invalid state. */
 function Field({ id, label, type = "text", autoComplete, autoFocus, invalid, hint }: { id: string; label: string; type?: string; autoComplete?: string; autoFocus?: boolean; invalid?: boolean; hint?: string }) {
   return (
     <div className="flex flex-col gap-1.5">
@@ -36,8 +38,10 @@ function Field({ id, label, type = "text", autoComplete, autoFocus, invalid, hin
   );
 }
 
+/** Sign-in page: shows first-user setup, sign-in or an unavailable notice depending on the backend auth status. */
 export default async function LoginPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
+  /** The single string value of a search param; arrays and missing keys read as undefined. */
   const one = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : undefined);
   const next = safeNext(one("next"));
   const error = ERRORS[one("error") ?? ""];
@@ -49,8 +53,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
 
   return (
     <div className="min-h-dvh bg-canvas text-fg">
-      <div className="mx-auto grid min-h-dvh w-full max-w-[1360px] items-center gap-12 px-6 py-10 min-[961px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] min-[961px]:px-16">
-        <main id="main" className="flex w-full max-w-[26rem] flex-col gap-8">
+      <div className="mx-auto grid min-h-dvh w-full max-w-[1180px] items-center gap-10 px-6 py-10 min-[961px]:grid-cols-2 min-[961px]:gap-16 min-[961px]:px-12">
+        <main id="main" className="mx-auto flex w-full max-w-[25rem] flex-col gap-8 min-[961px]:mx-0 min-[961px]:ml-auto">
           <div className="flex items-center justify-between"><Link href="/welcome" className="display w-fit text-lg">Pareeksha</Link><ThemeToggle /></div>
           <div className="flex flex-col gap-3">
             <h1 className="display text-xl">{setup ? "Create the admin account" : "Sign in to the dashboard"}</h1>
@@ -101,10 +105,11 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           </p>
         </main>
 
-        <figure className="hidden min-[961px]:block">
-          <div className="grid place-items-center rounded-lg bg-sunken p-12">
+        <figure className="hidden w-full max-w-[30rem] min-[961px]:block">
+          <div className="grid place-items-center rounded-lg bg-sunken p-7 min-[1100px]:p-9">
             <div className="w-full max-w-[408px] overflow-hidden rounded-lg" style={{ boxShadow: "var(--shadow-float)" }}>
-              <Image src={verdictShot} alt="A call's verdict: critical failure, needs human review, overall score 13.75 of 100 against a pass line of 80." sizes="408px" priority />
+              <Image className="theme-shot theme-shot--light" src={verdictLight} alt="A call's verdict: critical failure, overall score 57.5 of 100 against a pass line of 80." sizes="408px" />
+              <Image className="theme-shot theme-shot--dark" src={verdictDark} alt="A call's verdict: critical failure, overall score 57.5 of 100 against a pass line of 80." sizes="408px" />
             </div>
           </div>
           <figcaption className="mt-3 text-sm text-subtle">A call from the planted-bugs run, as the dashboard shows it.</figcaption>

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { ArrowDown, ArrowUp, ArrowUpDown, Search, X } from "lucide-react";
 import { Button } from "./button";
 import { cn } from "@/lib/utils";
@@ -26,6 +26,7 @@ export function parseSort(raw: string): { key: string; dir: "asc" | "desc" } | n
 
 export type Sorters<T> = Record<string, (row: T) => string | number | null>;
 
+/** Rows sorted by the active column's sorter; no sort or an unknown key keeps the input order. */
 export function sortRows<T>(rows: T[], sorters: Sorters<T>, sort: { key: string; dir: "asc" | "desc" } | null): T[] {
   if (!sort) return rows;
   const sv = sorters[sort.key];
@@ -41,6 +42,7 @@ export function sortRows<T>(rows: T[], sorters: Sorters<T>, sort: { key: string;
   });
 }
 
+/** Accessible table with sortable column headers. */
 export function DataTable<T>({
   caption,
   columns,
@@ -49,6 +51,7 @@ export function DataTable<T>({
   sort,
   onSort,
   actions,
+  stagger,
 }: {
   caption: string;
   columns: Column<T>[];
@@ -58,6 +61,8 @@ export function DataTable<T>({
   onSort: (next: string | null) => void;
   /** Trailing cell (row menu). */
   actions?: (row: T) => ReactNode;
+  /** Opt in to a one-shot entrance cascade: rows rise in with a staggered delay (reduced-motion safe). */
+  stagger?: boolean;
 }) {
   return (
     <div className="relative overflow-x-auto">
@@ -91,9 +96,9 @@ export function DataTable<T>({
             )}
           </tr>
         </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={rowKey(row)}>
+        <tbody className={stagger ? "stagger" : undefined}>
+          {rows.map((row, rowIndex) => (
+            <tr key={rowKey(row)} style={stagger ? ({ ["--i"]: rowIndex } as CSSProperties) : undefined}>
               {columns.map((c, i) => (
                 <td key={c.key} data-label={i === 0 ? "" : c.header} className={cn(c.mono && "num", c.className, c.hidePhone && "rt-hide-phone")}>
                   {c.cell(row)}
@@ -163,6 +168,7 @@ export function FilterBar({
   );
 }
 
+/** Footer showing how many rows are loaded, with a control for the next page. */
 export function LoadMore({ hasMore, loading, onClick, shown }: { hasMore: boolean; loading: boolean; onClick: () => void; shown: number }) {
   return (
     <div className="flex items-center justify-between gap-2 border-t border-border px-5 py-3 text-xs text-subtle">

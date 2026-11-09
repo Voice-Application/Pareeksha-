@@ -1,5 +1,6 @@
 /* Hallmark · shape: app screen · genre: modern-minimal · theme: Dusk (deal 1/3, seed testing-auditing-platform-indian-language-6ef6·92260a2a·2026-11-04·r0) · redesign: full
  * nav: the shell kept as a sidebar (15 destinations), fixed, icons per item · signature: the run as a ruled verdict line over the worst calls, scores in the kept 5-step scale · states: loading, empty, error, full · dusk: none/sky-apricot/well · palette: espresso dark, bone light, sky-blue accent (redrawn at the user's request)
+ * palette: one system across themes — espresso dark / bone light, a single blue/indigo accent (~258) in both, one radius ladder and one Familjen-over-Plex display face
  * axes: dark/grotesk-sans/cool · posture: restrained (app) · contrast: pass · v2.0.0 */
 /* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V3 · weakest: V, the shell stays a sidebar because 15 destinations earn one; the change lives in the type, the ruled tallies and the page heads */
 /* Hallmark · reworded "inline-flex h-8 items-center rounded-sm bg-accent px-3 text-sm text-accent-on" to "inline-flex h-9 items-center rounded-pill bg-accent px-4 text-sm font-medium text-accent-on hover:bg-accent-hi" · the regression empty state's Open failed calls link to /runs is kept, only its height and radius moved to the new control */
@@ -87,6 +88,12 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: var(--weight-display
 p { text-wrap: pretty; }
 .dark h1, .dark h2, .dark h3, .dark .display { font-variation-settings: "SHRP" 100; }
 
+/* Theme-matched imagery: pair a light and a dark shot and show only the one that matches the active
+   theme. Tracks the `.dark` class (the app's own toggle), not the OS `prefers-color-scheme`. */
+.theme-shot--dark { display: none; }
+.dark .theme-shot--light { display: none; }
+.dark .theme-shot--dark { display: block; }
+
 :focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
@@ -107,6 +114,30 @@ p { text-wrap: pretty; }
   .skeleton { animation: none; }
   .spinner { animation-duration: 2.4s; }
   * { transition-duration: 0ms !important; scroll-behavior: auto !important; }
+}
+
+/* Entrance motion: a short fade + rise, used on page content and panels. Staggered children via
+   --i (set inline) so rows/cards cascade in. Suppressed under reduced motion by the rule above
+   (animation is cleared here too, so content is never left invisible). */
+@keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+.rise-in { animation: rise-in var(--dur-base) var(--ease) both; }
+.fade-in { animation: fade-in var(--dur-base) var(--ease) both; }
+.stagger > * { animation: rise-in var(--dur-base) var(--ease) both; animation-delay: calc(var(--i, 0) * 45ms); }
+@media (prefers-reduced-motion: reduce) {
+  .rise-in, .fade-in, .stagger > * { animation: none; opacity: 1; transform: none; }
+}
+
+/* Chart entrance motion. Lines draw in, columns grow from the baseline, arcs fade+scale. All are
+   suppressed under reduced motion (left fully visible). Used by components/charts. */
+@keyframes chart-draw { from { stroke-dasharray: var(--len, 1000); stroke-dashoffset: var(--len, 1000); } to { stroke-dashoffset: 0; } }
+@keyframes chart-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes chart-arc { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+.chart-line-draw { animation: chart-draw var(--dur-long) var(--ease-out) both; }
+.chart-bar-grow { animation: chart-grow var(--dur-base) var(--ease-out) both; animation-delay: var(--delay, 0ms); }
+.chart-arc-in { animation: chart-arc var(--dur-base) var(--ease-out) both; }
+@media (prefers-reduced-motion: reduce) {
+  .chart-line-draw, .chart-bar-grow, .chart-arc-in { animation: none; stroke-dashoffset: 0; opacity: 1; transform: none; }
 }
 
 /* Native <dialog> sheets and dialogs. */

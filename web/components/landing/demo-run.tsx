@@ -1,0 +1,130 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { DEMO_PROMPT, DEMO_TURNS, DEMO_VERDICT } from "./demo-data";
+
+/**
+ * A self-playing demo of one run: the prompt appears, the caller and agent exchange turns, then the
+ * verdict lands. No backend — it steps through baked sample data on a timer. Honours reduced motion
+ * by showing the finished state at once, and offers play/pause/replay.
+ */
+
+// The ordered beats of the demo. Each adds one more visible piece.
+const STEPS = [
+  "prompt", // the system prompt is in
+  "turn-0", // caller asks
+  "turn-1", // agent answers (and breaks a rule)
+  "verdict", // the score lands
+] as const;
+const LAST = STEPS.length - 1;
+const BEAT_MS = 1400;
+
+const MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+/** Subscribe to reduced-motion preference changes (for useSyncExternalStore). */
+function subscribeMotion(onChange: () => void) {
+  const media = window.matchMedia(MOTION_QUERY);
+  media.addEventListener("change", onChange);
+  return () => media.removeEventListener("change", onChange);
+}
+/** Whether the user prefers reduced motion right now. */
+function getMotionSnapshot() {
+  return window.matchMedia(MOTION_QUERY).matches;
+}
+/** Unknown on the server, so the first paint reserves the completed layout. */
+function getServerMotionSnapshot() {
+  return null;
+}
+
+/** Landing-page run demo that steps through on a timer, or shows the finished state under reduced motion. */
+export function DemoRun() {
+  const [playbackStep, setStep] = useState(0);
+  const [hasStarted, setHasStarted] = useState(false);
+  const [playing, setPlaying] = useState(true);
+  const reduced = useSyncExternalStore(subscribeMotion, getMotionSnapshot, getServerMotionSnapshot);
+  // Reserve the completed layout until hydration resolves the media query.
+  const step = reduced === false ? playbackStep : LAST;
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    // Only schedule the next beat while playing and there is one left; at the end we simply stop
+    // scheduling (no setState here). The controls derive "at end" from `step`, not `playing`.
+    if (!playing || reduced !== false || step >= LAST) return;
+    timer.current = setTimeout(() => { setHasStarted(true); setStep((s) => Math.min(s + 1, LAST)); }, BEAT_MS);
+    return () => {
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, [playing, reduced, step]);
+
+  const replay = useCallback(() => {
+    if (reduced !== false) return;
+    setStep(0);
+    setPlaying(true);
+  }, [reduced]);
+
+  const atEnd = step >= LAST;
+  /** Whether playback has reached the named step. */
+  const show = (name: (typeof STEPS)[number]) => step >= STEPS.indexOf(name);
+
+  return (
+    <div className={`lp-demo ${!hasStarted ? "lp-demo--initial" : ""}`} aria-label="A sample run, played out" style={{ visibility: reduced === null ? "hidden" : undefined }}>
+      <div className="lp-demo__head">
+        <span className="lp-demo__tag">Sample run</span>
+        <div className="lp-demo__controls">
+          {atEnd ? (
+            <button type="button" className="lp-demo__btn" onClick={replay} disabled={reduced !== false}>
+              Replay
+            </button>
+          ) : (
+            <button type="button" className="lp-demo__btn" onClick={() => setPlaying((p) => !p)} aria-pressed={!playing}>
+              {playing ? "Pause" : "Play"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Prompt */}
+      <div className={`lp-demo__block ${show("prompt") ? "is-in" : ""}`}>
+        <p className="lp-demo__label">System prompt</p>
+        <p className="lp-demo__prompt">{DEMO_PROMPT}</p>
+      </div>
+
+      {/* Conversation */}
+      <div className="lp-demo__convo" aria-live="polite">
+        {DEMO_TURNS.map((t, i) => (
+          <div key={i} aria-hidden={!show(`turn-${i}` as (typeof STEPS)[number])} className={`lp-demo__turn lp-demo__turn--${t.speaker} ${show(`turn-${i}` as (typeof STEPS)[number]) ? "is-in" : ""}`}>
+            <span className="lp-demo__who">{t.speaker === "caller" ? "Caller" : "Agent"}</span>
+            <p className="lp-demo__text">{t.text}</p>
+            {t.broke && show("verdict") && (
+              <p className="lp-demo__broke" role="note">
+                Broke a rule: {t.broke}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Verdict */}
+      <div className={`lp-demo__verdict ${show("verdict") ? "is-in" : ""}`} aria-hidden={!show("verdict")}>
+        <div className="lp-demo__vtop">
+          <span className="lp-demo__badge">Critical failure</span>
+          <span className="lp-demo__rubric mono">{DEMO_VERDICT.rubric}</span>
+        </div>
+        <p className="lp-demo__label">Overall score</p>
+        <div className="lp-demo__meter" role="img" aria-label={`Overall score ${DEMO_VERDICT.score} of 100, pass line ${DEMO_VERDICT.passLine}`}>
+          <span className="lp-demo__meter-fill" style={{ width: `${DEMO_VERDICT.score}%` }} />
+          <span className="lp-demo__meter-line" style={{ left: `${DEMO_VERDICT.passLine}%` }} />
+        </div>
+        <p className="lp-demo__score">
+          <strong>{DEMO_VERDICT.score}</strong> / 100 <span className="lp-demo__passline">pass line {DEMO_VERDICT.passLine}</span>
+        </p>
+        <ul className="lp-demo__tags">
+          {DEMO_VERDICT.failureTypes.map((f) => (
+            <li key={f} className="lp-demo__ftag">
+              {f}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}

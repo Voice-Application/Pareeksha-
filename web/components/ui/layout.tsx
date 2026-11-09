@@ -1,26 +1,44 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import type { LucideIcon } from "lucide-react";
+import { iconForPath } from "@/lib/nav-icons";
 import { cn } from "@/lib/utils";
 
 /**
  * Page head: the title states the page or its finding, then one muted context line, then the
  * supporting sentence. `eyebrow` is kept as the prop name for the context line (counts, the
  * breadcrumb, the agent), but it renders under the title, never as a label above it.
+ *
+ * A section icon is shown beside the title, resolved from the current route via the same map the
+ * sidebar uses, so a page's glyph matches its nav row. Pass `icon` to override it, or `hideIcon`
+ * to drop it (e.g. a finding-style title where a section glyph would mislead).
  */
 export function PageHeader({
   eyebrow,
   title,
   description,
   actions,
+  icon,
+  hideIcon,
 }: {
   eyebrow?: ReactNode;
   title: string;
   description?: ReactNode;
   actions?: ReactNode;
+  icon?: LucideIcon;
+  hideIcon?: boolean;
 }) {
+  const pathname = usePathname();
+  const resolved = hideIcon ? undefined : (icon ?? iconForPath(pathname));
   return (
-    <header className="mb-8 flex flex-wrap items-end justify-between gap-x-6 gap-y-4 min-[860px]:flex-nowrap">
+    <header className="rise-in mb-8 flex flex-wrap items-end justify-between gap-x-6 gap-y-4 min-[860px]:flex-nowrap">
       <div className="min-w-0">
-        <h1 className={title.length > 72 ? "display max-w-[40ch] text-lg" : "display max-w-[28ch] text-xl"}>{title}</h1>
+        <div className="flex items-center gap-2.5">
+          <TitleIcon icon={resolved} />
+          <h1 className={title.length > 72 ? "display max-w-[40ch] text-lg" : "display max-w-[28ch] text-xl"}>{title}</h1>
+        </div>
         {eyebrow ? <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">{eyebrow}</div> : null}
         {description && <div className="mt-2 max-w-[68ch] text-base text-muted">{description}</div>}
       </div>
@@ -29,9 +47,20 @@ export function PageHeader({
   );
 }
 
+/** Renders the page's section icon in a tinted badge, or nothing when the route has no icon. */
+function TitleIcon({ icon: Icon }: { icon?: LucideIcon }) {
+  if (!Icon) return null;
+  return (
+    <span className="grid size-8 shrink-0 place-items-center rounded-sm bg-accent-tint text-accent-fg" aria-hidden>
+      <Icon size={18} strokeWidth={1.6} />
+    </span>
+  );
+}
+
 /** One container recipe: a surface on the canvas, a hairline edge, the head inside without a rule under it. */
 export function Panel({
   title,
+  label,
   aux,
   children,
   className,
@@ -39,6 +68,8 @@ export function Panel({
   id,
 }: {
   title?: ReactNode;
+  /** Accessible name when `title` is a ReactNode (e.g. icon + text); a string title names the section itself. */
+  label?: string;
   aux?: ReactNode;
   children: ReactNode;
   className?: string;
@@ -46,7 +77,7 @@ export function Panel({
   id?: string;
 }) {
   return (
-    <section id={id} aria-label={typeof title === "string" ? title : undefined} className={cn("relative min-w-0 rounded-md border border-border bg-surface", className)}>
+    <section id={id} aria-label={label ?? (typeof title === "string" ? title : undefined)} className={cn("rise-in relative min-w-0 rounded-md border border-border bg-surface transition-colors duration-150 hover:border-border-strong", className)}>
       {title && (
         <div className="flex min-h-14 flex-wrap items-center justify-between gap-x-3 gap-y-1 px-5 pt-3 pb-1">
           <h2 className="display text-md">{title}</h2>

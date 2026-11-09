@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Bot, CircleCheck, CircleHelp, CircleX, Play } from "lucide-react";
+import { Bot, CircleCheck, CircleHelp, CircleX, Play, SquareCheckBig } from "lucide-react";
 import { api } from "@/lib/api/client";
 import { call } from "@/lib/api/call";
 import { listRunItems, listRuns } from "@/lib/api/runs";
@@ -18,6 +18,9 @@ import { EmptyState, ErrorPanel, Skeleton } from "@/components/ui/states";
 import { FilterSelect } from "@/components/ui/field";
 import { FlagChip, Meter, ScoreChip, StatTile, StatusPill, TileRow, VerdictBadge, verdictOf } from "@/components/ui/measure";
 import { Chip } from "@/components/ui/layout";
+import { useIsAdmin } from "@/components/layout/theme-toggle";
+import { BarChart, DonutChart, LineChart } from "@/components/charts";
+import { CHART_CATEGORICAL } from "@/components/charts/shared";
 
 const STORE = "pareeksha.agent";
 
@@ -33,9 +36,11 @@ async function allAgents() {
   }
   return { ...first, items };
 }
+/** Format credits as rupees, or a dash when unknown. */
 const inr = (n: number | null | undefined) => (n == null ? "-" : `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`);
 const linkCls = "text-accent-fg underline-offset-2 hover:underline";
 
+/** Panel contents for a query: a loading skeleton, an error with retry, an empty note, else the children. */
 function PanelBody({ q, rows, empty, children }: { q: { isPending: boolean; isError: boolean; error: unknown; refetch: () => unknown }; rows: number; empty: string; children: React.ReactNode }) {
   if (q.isPending)
     return (
@@ -48,6 +53,7 @@ function PanelBody({ q, rows, empty, children }: { q: { isPending: boolean; isEr
   return <>{children}</>;
 }
 
+/** Loading placeholder for the overview header and stat tiles. */
 export function OverviewSkeleton() {
   return (
     <>
@@ -57,9 +63,16 @@ export function OverviewSkeleton() {
   );
 }
 
+
+/** The home screen: it leads with the user's prompt tests, then an agent run summary and — for admins
+ *  only — the platform-health telemetry. A non-admin (or an unknown role) never fetches that telemetry. */
 export function Overview() {
   const url = useUrlState();
   const now = useNow();
+  // Platform health is SRE telemetry; show it only to an admin. An unknown/missing role is treated as
+  // non-admin (so a member with a transient cookie gap never sees it or 403s fetching it) unless sign-in
+  // is disabled, where the open dashboard acts as admin.
+  const isAdmin = useIsAdmin();
   const agents = useQuery({ queryKey: ["agents", "overview"], queryFn: allAgents });
   // Agents made by Test my prompt have their own panel; the hero is about the user's own agents.
   const active = useMemo(() => (agents.data?.items ?? []).filter((a) => !a.archived && !(a.adapter_config as { quick_test_id?: string } | undefined)?.quick_test_id), [agents.data]);
@@ -71,6 +84,7 @@ export function Overview() {
   const newest = useQuery({ queryKey: ["runs", "overview", "newest"], queryFn: () => listRuns({ limit: 1 }) });
   const newestAgentId = newest.data?.items?.[0]?.agent_id;
   const agent = active.find((a) => a.id === urlAgent) ?? active.find((a) => a.id === stored) ?? active.find((a) => a.id === newestAgentId) ?? active[0];
+  /** Switch the overview agent and remember it for the next visit. */
   const choose = (id: string) => {
     try { window.localStorage.setItem(STORE, id); } catch { /* convenience only */ }
     url.set({ agent: id });
@@ -80,9 +94,11 @@ export function Overview() {
   const latest = runs.data?.items?.find((r) => r.status !== "draft");
   const items = useQuery({ queryKey: ["run-items", latest?.id, "overview"], enabled: !!latest, queryFn: () => listRunItems(latest!.id) });
   const review = useQuery({ queryKey: ["calls", "needs-review", agent?.id], enabled: !!agent, queryFn: () => call(api.GET("/api/v1/calls", { params: { query: { agent_id: agent!.id, needs_review: true, reviewed: false, limit: 5 } } })) });
-  const metrics = useQuery({ queryKey: ["metrics"], queryFn: () => call(api.GET("/api/v1/metrics/summary")), refetchInterval: 15000 });
+  // Platform metrics and health are SRE telemetry: fetch them only for elevated roles, so a member's
+  // browser never requests the Kafka/outbox/consumer-lag payload (hiding the panel is not enough).
+  const metrics = useQuery({ queryKey: ["metrics"], queryFn: () => call(api.GET("/api/v1/metrics/summary")), enabled: isAdmin, refetchInterval: isAdmin ? 15000 : false });
   const usage = useQuery({ queryKey: ["usage"], queryFn: () => call(api.GET("/api/v1/usage")) });
-  const health = useQuery({ queryKey: ["health"], queryFn: () => call(api.GET("/api/v1/health")), refetchInterval: 15000 });
+  const health = useQuery({ queryKey: ["health"], queryFn: () => call(api.GET("/api/v1/health")), enabled: isAdmin, refetchInterval: isAdmin ? 15000 : false });
 
   if (agents.isError) return <><PageHeader eyebrow="Overview" title="Overview" /><ErrorPanel error={agents.error} what="agents" onRetry={() => void agents.refetch()} /></>;
   if (agents.isPending) return <OverviewSkeleton />;
@@ -91,7 +107,7 @@ export function Overview() {
     if (promptTests.isError && !tested)
       return (
         <>
-          <PageHeader title="Your prompt tests" actions={<LinkButton variant="primary" href="/test">Test my prompt</LinkButton>} />
+          <PageHeader title="Your prompt tests" actions={<LinkButton variant="primary" href="/test"><SquareCheckBig size={14} strokeWidth={1.6} aria-hidden />Test my prompt</LinkButton>} />
           <ErrorPanel error={promptTests.error} what="prompt tests" onRetry={() => void promptTests.refetch()} />
         </>
       );
@@ -108,15 +124,15 @@ export function Overview() {
           }
           actions={
             <>
-              <LinkButton variant="primary" href="/test">Test my prompt</LinkButton>
-              <LinkButton href="/agents/new">Add a voice agent</LinkButton>
+              <LinkButton variant="primary" href="/test"><SquareCheckBig size={14} strokeWidth={1.6} aria-hidden />Test my prompt</LinkButton>
+              <LinkButton href="/agents/new"><Bot size={14} strokeWidth={1.6} aria-hidden />Add a voice agent</LinkButton>
             </>
           }
         />
         {tested ? (
           <div className="max-w-[720px]"><PromptTests /></div>
         ) : (
-          <Panel bodyClassName="p-0"><EmptyState icon={Bot} title="Nothing tested yet" body="Your tests and their results will show up here." action={<LinkButton variant="primary" href="/test">Test my prompt</LinkButton>} /></Panel>
+          <Panel bodyClassName="p-0"><EmptyState icon={Bot} title="Nothing tested yet" body="Your tests and their results will show up here." action={<LinkButton variant="primary" href="/test"><SquareCheckBig size={14} strokeWidth={1.6} aria-hidden />Test my prompt</LinkButton>} /></Panel>
         )}
       </>
     );
@@ -143,36 +159,60 @@ export function Overview() {
   return (
     <>
       <PageHeader
-        eyebrow={
-          <>
+        title="Your prompt tests"
+        description="Paste your bot's system prompt and Pareeksha chats with it as normal and tricky customers, then shows which of its rules it keeps and where it breaks them."
+        actions={<LinkButton variant="primary" href="/test"><SquareCheckBig size={14} strokeWidth={1.6} aria-hidden />Test my prompt</LinkButton>}
+      />
+      <div className="mb-10 grid items-start gap-6 min-[1180px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <PromptTests />
+        <Panel title="Get started" label="Get started">
+          <ol className="flex flex-col gap-4">
+            <li className="flex gap-3">
+              <span className="grid size-7 shrink-0 place-items-center rounded-pill bg-accent-tint text-sm font-medium text-accent-fg" aria-hidden>1</span>
+              <div className="min-w-0"><p className="font-medium">Paste your bot&rsquo;s prompt</p><p className="text-sm text-muted">Open Test my prompt and drop in the system prompt your bot runs on.</p></div>
+            </li>
+            <li className="flex gap-3">
+              <span className="grid size-7 shrink-0 place-items-center rounded-pill bg-accent-tint text-sm font-medium text-accent-fg" aria-hidden>2</span>
+              <div className="min-w-0"><p className="font-medium">We role-play callers</p><p className="text-sm text-muted">Pareeksha chats as normal and tricky customers, in your languages.</p></div>
+            </li>
+            <li className="flex gap-3">
+              <span className="grid size-7 shrink-0 place-items-center rounded-pill bg-accent-tint text-sm font-medium text-accent-fg" aria-hidden>3</span>
+              <div className="min-w-0"><p className="font-medium">See what broke</p><p className="text-sm text-muted">Every rule the bot kept or broke, with the line it slipped on.</p></div>
+            </li>
+          </ol>
+        </Panel>
+      </div>
+
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-t border-border pt-8">
+        <div className="min-w-0">
+          <h2 className="display text-lg">{title}</h2>
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
             <span className="inline-flex items-center gap-2">
               <Bot size={16} strokeWidth={1.6} className="text-subtle" aria-hidden />
               {agent.name}
             </span>
             {active.length > 1 && <FilterSelect label="Agent" value={agent.id} onChange={choose} options={active.map((a) => ({ value: a.id, label: a.name }))} />}
-          </>
-        }
-        title={title}
-        description={desc}
-        actions={
-          <>
-            <LinkButton variant="primary" href="/test">Test my prompt</LinkButton>
-            <LinkButton href={`/runs/new?agent=${agent.id}`}><Play size={14} strokeWidth={1.6} aria-hidden />New run</LinkButton>
-          </>
-        }
-      />
-      <TileRow cols="grid-cols-2 min-[860px]:grid-cols-4">
-        <StatTile href={latest ? `/runs/${latest.id}` : "/runs"} hero label={`Pass rate${running ? " so far" : ""}`} value={s?.pass_rate != null ? `${Math.round(s.pass_rate * 100)}%` : "-"} caption={latest ? `${latest.progress.evaluated} scored` : "no runs"} />
-        <StatTile href={latest ? `/runs/${latest.id}?verdict=critical` : "/runs"} label="Critical failures" value={s?.critical_failures ?? "-"} threshold={s?.critical_failures == null ? null : s.critical_failures > 0 ? "fail" : "ok"} caption="target 0" />
-        <StatTile href="/dlq" label="Open DLQ items" value={metrics.data?.dlq_open ?? "-"} threshold={metrics.data == null ? null : metrics.data.dlq_open > 0 ? "fail" : "ok"} caption="events that failed processing" />
-        <StatTile label="Credits used" value={inr(usage.data?.credits_used)} caption={budget != null ? <span className="inline-flex items-center gap-2">of {inr(budget)} <Meter value={Math.min(100, ((usage.data?.credits_used ?? 0) / budget) * 100)} passLine={null} label="Budget used" /></span> : "no budget set"} />
+          </div>
+          <p className="mt-2 max-w-[68ch] text-base text-muted">{desc}</p>
+        </div>
+        <LinkButton href={`/runs/new?agent=${agent.id}`}><Play size={14} strokeWidth={1.6} aria-hidden />New run</LinkButton>
+      </div>
+
+      <TileRow cols={`grid-cols-2 ${isAdmin ? "min-[860px]:grid-cols-4" : "min-[860px]:grid-cols-3"}`}>
+        <StatTile enter={0} href={latest ? `/runs/${latest.id}` : "/runs"} hero label={`Pass rate${running ? " so far" : ""}`} value={s?.pass_rate != null ? `${Math.round(s.pass_rate * 100)}%` : "-"} caption={latest ? `${latest.progress.evaluated} scored` : "no runs"} />
+        <StatTile enter={1} href={latest ? `/runs/${latest.id}?verdict=critical` : "/runs"} label="Critical failures" value={s?.critical_failures ?? "-"} threshold={s?.critical_failures == null ? null : s.critical_failures > 0 ? "fail" : "ok"} caption="target 0" />
+        {/* DLQ depth is an operational internal: only elevated roles see it (and only they fetch ``metrics``). */}
+        {isAdmin && <StatTile enter={2} href="/dlq" label="Open DLQ items" value={metrics.data?.dlq_open ?? "-"} threshold={metrics.data == null ? null : metrics.data.dlq_open > 0 ? "fail" : "ok"} caption="events that failed processing" />}
+        <StatTile enter={isAdmin ? 3 : 2} label="Credits used" value={inr(usage.data?.credits_used)} caption={budget != null ? <span className="inline-flex items-center gap-2">of {inr(budget)} <Meter value={Math.min(100, ((usage.data?.credits_used ?? 0) / budget) * 100)} passLine={null} label="Budget used" /></span> : "no budget set"} />
       </TileRow>
 
+      <OverviewCharts runs={runs.data?.items ?? []} usage={usage.data?.items ?? []} usageError={usage.isError ? usage.error : undefined} onRetryUsage={() => void usage.refetch()} />
+
       <div className="grid items-start gap-6 min-[1180px]:grid-cols-[minmax(0,1fr)_380px]">
-        <div className="flex min-w-0 flex-col gap-6">
+        <div className="stagger flex min-w-0 flex-col gap-6">
           <Panel title="Worst calls, latest run" aux={latest && <Link className={linkCls} href={`/runs/${latest.id}`}>Open run</Link>}>
             {!latest ? (
-              <EmptyState icon={Play} title="No runs yet" body="A run sends synthetic callers to your agent." action={<LinkButton variant="primary" href={`/runs/new?agent=${agent.id}`}>Create run</LinkButton>} />
+              <EmptyState icon={Play} title="No runs yet" body="A run sends synthetic callers to your agent." action={<LinkButton variant="primary" href={`/runs/new?agent=${agent.id}`}><Play size={14} strokeWidth={1.6} aria-hidden />Create run</LinkButton>} />
             ) : (
               <PanelBody q={items} rows={worst.length} empty="No scored calls in the latest run yet.">
                 <ol className="flex flex-col divide-y divide-border">
@@ -218,8 +258,7 @@ export function Overview() {
           </Panel>
         </div>
 
-        <div className="flex min-w-0 flex-col gap-6">
-          <PromptTests />
+        <div className="stagger flex min-w-0 flex-col gap-6">
           <Panel title="Needs human review" aux={<Link className={linkCls} href="/calibration">Calibration</Link>}>
             <PanelBody q={review} rows={review.data?.items?.length ?? 0} empty="No calls are waiting for review.">
               <ul className="flex flex-col divide-y divide-border">
@@ -242,6 +281,7 @@ export function Overview() {
             </PanelBody>
           </Panel>
 
+          {isAdmin && (
           <Panel title="Platform health" aux={stale ? <span className="text-warn-fg">Last updated {relativeTime(new Date(metrics.dataUpdatedAt).toISOString())}</span> : undefined}>
             <PanelBody q={metrics} rows={1} empty="">
               <dl className="grid grid-cols-[1fr_auto] gap-x-4 text-sm [&>dd]:py-1.5 [&>dt]:py-1.5">
@@ -268,12 +308,101 @@ export function Overview() {
               )}
             </PanelBody>
           </Panel>
+          )}
         </div>
       </div>
     </>
   );
 }
 
+/** The two measures a run exposes for charting, plus the identity used as the x label. */
+type ChartRun = { id: string; name?: string | null; created_at: string; summary?: { pass_rate?: number | null; score_mean?: number | null } };
+/** One usage row: tokens/characters/seconds spent per provider+operation. */
+type UsageItem = { provider: string; operation: string; unit_type: string; units: number };
+
+/** The LLM operations charted by name, in fixed caller→designer→judge order; each keeps its categorical
+ *  slot (colour follows the entity). Every other llm_* operation (scenario generation, ...) is grouped as "Other". */
+const TOKEN_OPS = ["llm_caller", "llm_designer", "llm_judge"];
+const OTHER_OP = "other";
+
+/** Pass rate (0–1) as a percent to one decimal; anything short of perfect never rounds up to 100. */
+function passPct(rate: number): number {
+  const v = Math.round(rate * 1000) / 10;
+  return rate < 1 && v >= 100 ? 99.9 : v;
+}
+
+/** Turn an operation key (llm_caller) into a short readable label (Caller). */
+function opLabel(op: string): string {
+  if (op === OTHER_OP) return "Other";
+  const m = op.replace(/^llm_/, "");
+  return m.charAt(0).toUpperCase() + m.slice(1);
+}
+
+/**
+ * The home dashboard's charts region: two run-based charts (mean-score trend and pass-rate per run,
+ * two measures of different scale kept as two charts, never a dual axis) and — when token usage is
+ * available — a token-usage-by-operation donut. Each chart is guarded so an empty data slice renders
+ * nothing rather than a broken frame; the usage donut in particular stays hidden for members whose
+ * usage payload carries no per-operation token rows. Built entirely from the plain-SVG chart module.
+ */
+function OverviewCharts({ runs, usage, usageError, onRetryUsage }: { runs: ChartRun[]; usage: UsageItem[]; usageError?: unknown; onRetryUsage: () => void }) {
+  // Runs come newest-first; a trend reads left→right in time, so reverse, and keep only scored runs.
+  const scored = useMemo(
+    () => [...runs].reverse().filter((r) => r.summary?.score_mean != null || r.summary?.pass_rate != null),
+    [runs],
+  );
+  const trend = useMemo(
+    () => scored.filter((r) => r.summary?.score_mean != null).map((r) => ({ label: r.name || r.id.slice(0, 8), value: Math.round((r.summary!.score_mean as number) * 10) / 10 })),
+    [scored],
+  );
+  const passRate = useMemo(
+    () => scored.filter((r) => r.summary?.pass_rate != null).map((r) => ({ label: r.name || r.id.slice(0, 8), value: passPct(r.summary!.pass_rate as number) })),
+    [scored],
+  );
+
+  // Token usage across every LLM operation: the named ones in fixed order, the rest grouped as "Other".
+  // Colour is pinned to the operation, not its position, so it never shifts when one is absent.
+  const tokenSlices = useMemo(() => {
+    const byOp = new Map<string, number>();
+    for (const u of usage) {
+      if (u.unit_type !== "tokens" || !u.operation.startsWith("llm_")) continue;
+      const op = TOKEN_OPS.includes(u.operation) ? u.operation : OTHER_OP;
+      byOp.set(op, (byOp.get(op) ?? 0) + u.units);
+    }
+    return [...TOKEN_OPS, OTHER_OP]
+      .map((op, i) => ({ label: opLabel(op), value: byOp.get(op) ?? 0, color: CHART_CATEGORICAL[i] }))
+      .filter((s) => s.value > 0);
+  }, [usage]);
+
+  // Nothing scored yet, no token data and no usage failure → no charts region at all.
+  if (!trend.length && !passRate.length && !tokenSlices.length && !usageError) return null;
+
+  return (
+    <div className="stagger mb-10 grid items-start gap-6 min-[900px]:grid-cols-2">
+      {trend.length > 0 && (
+        <Panel title="Mean score by run" label="Mean score by run">
+          <LineChart points={trend} title="Mean score across recent runs, 0 to 100, with the pass line at 80" passLine={80} />
+        </Panel>
+      )}
+      {passRate.length > 0 && (
+        <Panel title="Pass rate by run" label="Pass rate by run">
+          <BarChart bars={passRate} title="Pass rate per recent run, percent" valueSuffix="%" />
+        </Panel>
+      )}
+      {/* Usage is project-wide (every agent), not the selected agent's, so the title says so. */}
+      {(tokenSlices.length > 0 || usageError != null) && (
+        <Panel title="Token usage by operation, all agents" label="Token usage by operation, all agents" className="min-[900px]:col-span-2">
+          {usageError != null && <ErrorPanel error={usageError} what="usage" onRetry={onRetryUsage} />}
+          {tokenSlices.length > 0 && (
+            <DonutChart slices={tokenSlices} title="Share of tokens spent by LLM operation across all agents" centerLabel="tokens" unitLabel="tokens" />
+          )}
+        </Panel>
+      )}
+    </div>
+  );
+}
+
+/** The "Prompt tests" panel: the most recent quick tests with their rule-pass status, polled while any run. */
 function PromptTests() {
   const q = useQuery({ queryKey: ["quick-tests"], queryFn: listQuickTests, refetchInterval: (s) => listPoll(s.state.data) });
   const list = asList(q.data);
@@ -299,6 +428,7 @@ function PromptTests() {
   );
 }
 
+/** A health row's state icon + label: a check when ok, a cross when failing, else a neutral unknown mark. */
 function Status({ ok, label, fail }: { ok: boolean; label: string; fail?: boolean }) {
   const Icon = ok ? CircleCheck : fail ? CircleX : CircleHelp;
   return (

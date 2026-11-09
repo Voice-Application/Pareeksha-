@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Ellipsis } from "lucide-react";
 import { Button } from "./button";
 import { cn } from "@/lib/utils";
@@ -18,14 +19,21 @@ export function RowMenu({ label, items }: { label: string; items: MenuItem[] }) 
   useEffect(() => {
     if (!open) return;
     const first = menu.current?.querySelector<HTMLButtonElement>("button:not(:disabled)");
+    // Focusing the first item can scroll it into view; ignore scrolls until that settles so the
+    // just-opened menu is not closed by its own open (observed as flaky click-to-open in tests).
+    let armed = false;
     first?.focus();
+    const t = setTimeout(() => (armed = true), 0);
+    /** Close on a press outside both the menu and its trigger. */
     const onDown = (e: MouseEvent) => {
       if (!menu.current?.contains(e.target as Node) && !trigger.current?.contains(e.target as Node)) setOpen(false);
     };
-    const onScroll = () => setOpen(false);
+    /** Close on scroll once armed, since the portalled menu would detach from its row. */
+    const onScroll = () => { if (armed) setOpen(false); };
     document.addEventListener("mousedown", onDown);
     window.addEventListener("scroll", onScroll, true);
     return () => {
+      clearTimeout(t);
       document.removeEventListener("mousedown", onDown);
       window.removeEventListener("scroll", onScroll, true);
     };
@@ -39,11 +47,13 @@ export function RowMenu({ label, items }: { label: string; items: MenuItem[] }) 
     if (pos.top + h > window.innerHeight - 8) m.style.top = `${Math.max(8, pos.above - h - 4)}px`;
   }, [open, pos]);
 
+  /** Close the menu, returning focus to the trigger by default. */
   function close(refocus = true) {
     setOpen(false);
     if (refocus) trigger.current?.focus();
   }
 
+  /** Menu keys: Escape closes, arrows cycle items, Tab returns focus to the trigger. */
   function onMenuKey(e: React.KeyboardEvent) {
     const btns = Array.from(menu.current?.querySelectorAll<HTMLButtonElement>("button:not(:disabled)") ?? []);
     const i = btns.indexOf(document.activeElement as HTMLButtonElement);
@@ -57,7 +67,12 @@ export function RowMenu({ label, items }: { label: string; items: MenuItem[] }) 
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       btns[(i - 1 + btns.length) % btns.length]?.focus();
-    } else if (e.key === "Tab") setOpen(false);
+    } else if (e.key === "Tab") {
+      // The menu is portalled to <body>; hand focus back to the trigger so Tab's default
+      // action moves on from the row, not from the end of the document.
+      trigger.current?.focus();
+      setOpen(false);
+    }
   }
 
   return (
@@ -85,7 +100,10 @@ export function RowMenu({ label, items }: { label: string; items: MenuItem[] }) 
       >
         <Ellipsis size={16} strokeWidth={1.6} aria-hidden />
       </Button>
-      {open && pos && (
+      {/* Portalled to <body> so an ancestor's transform/opacity animation can neither become the
+          fixed menu's containing block (breaking viewport-edge flipping) nor trap its z-index
+          beneath the next panel. */}
+      {open && pos && createPortal(
         <div
           ref={menu}
           id={id}
@@ -110,7 +128,8 @@ export function RowMenu({ label, items }: { label: string; items: MenuItem[] }) 
               {it.label}
             </button>
           ))}
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );

@@ -6,7 +6,6 @@ import { LogOut, Menu, X } from "lucide-react";
 import { ThemeToggle, useRole } from "./theme-toggle";
 import { Sidebar } from "./sidebar";
 import { Button } from "@/components/ui/button";
-import { ToastProvider } from "@/components/ui/toast";
 import { activeItem } from "@/lib/nav";
 import { Assistant } from "@/components/assistant/assistant";
 
@@ -52,10 +51,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const current = activeItem(pathname);
 
   // The product and sign-in pages stand outside the working shell: no sidebar, their own chrome.
-  if (pathname === "/welcome" || pathname === "/login") return <ToastProvider>{children}</ToastProvider>;
+  if (pathname === "/welcome" || pathname === "/login") return <>{children}</>;
 
   return (
-    <ToastProvider>
+    <>
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:rounded-sm focus:bg-surface focus:p-2">
         Skip to content
       </a>
@@ -95,6 +94,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </div>
       <Assistant />
-    </ToastProvider>
+    </>
   );
 }

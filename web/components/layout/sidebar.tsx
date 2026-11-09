@@ -3,63 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useId, useSyncExternalStore } from "react";
-import {
-  Activity,
-  AudioLines,
-  BookOpen,
-  Bot,
-  ChevronRight,
-  CirclePlay,
-  Cpu,
-  FileAudio,
-  FlaskConical,
-  GitCompareArrows,
-  House,
-  IndianRupee,
-  Inbox,
-  KeyRound,
-  Languages,
-  ListChecks,
-  MessageSquareText,
-  Plug,
-  Scale,
-  ShieldCheck,
-  SquareCheckBig,
-  UserCog,
-  Users,
-  type LucideIcon,
-} from "lucide-react";
-import { ADVANCED_GROUPS, NAV_ITEMS, activeItem, type NavItem } from "@/lib/nav";
+import { ChevronRight } from "lucide-react";
+import { ADVANCED_GROUPS, NAV_ITEMS, SETTINGS_GROUP, activeItem, type NavItem, type NavSection } from "@/lib/nav";
+import { NAV_ICONS as ICONS } from "@/lib/nav-icons";
 import { cn } from "@/lib/utils";
-import { useRole } from "./theme-toggle";
+import { useIsAdmin } from "./theme-toggle";
 
 const ADVANCED_STORE = "pareeksha.nav.advanced";
-
-/** One icon per destination, all from Lucide at 16px on a 1.6 stroke. */
-const ICONS: Record<string, LucideIcon> = {
-  "/": House,
-  "/test": SquareCheckBig,
-  "/designer": MessageSquareText,
-  "/agents": Bot,
-  "/scenarios": ListChecks,
-  "/personas": Users,
-  "/noise-profiles": AudioLines,
-  "/knowledge-bases": BookOpen,
-  "/rag-lab": FlaskConical,
-  "/settings/pricing": IndianRupee,
-  "/runs": Activity,
-  "/runs/new": CirclePlay,
-  "/runs/compare": GitCompareArrows,
-  "/audits": FileAudio,
-  "/dialect": Languages,
-  "/regression": ShieldCheck,
-  "/integrations": Plug,
-  "/dlq": Inbox,
-  "/calibration": Scale,
-  "/settings/api-keys": KeyRound,
-  "/settings/llm": Cpu,
-  "/settings/users": UserCog,
-};
 
 const CHANGED = "pareeksha:nav-advanced";
 
@@ -98,19 +48,25 @@ function writeAdvanced(open: boolean) {
   window.dispatchEvent(new Event(CHANGED));
 }
 
+/** The left navigation: the core destinations, a foldable Advanced section (Build/Evaluate/Operate),
+ *  and a Settings group pinned to the bottom. Admin-only items show only for an explicit admin role. */
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
-  const role = useRole();
+  const isAdmin = useIsAdmin();
   const match = activeItem(pathname);
   const regionId = useId();
   const choice = useSyncExternalStore(subscribe, readAdvanced, () => "");
-  // With no choice yet, the section opens by itself when the current page lives in it;
-  // an explicit click always wins.
-  const inside = (match?.group ?? null) !== null;
+  // With no choice yet, the section opens by itself only when the current page lives in Advanced —
+  // the Settings group (and the ungrouped core items) must not auto-open it.
+  const inside = match?.group != null && (ADVANCED_GROUPS as NavSection[]).includes(match.group);
   const open = choice === "" ? inside : choice === "1";
-  const visible = (i: NavItem) => !i.adminOnly || role !== "member";
+  // Admin-only items show only for an admin; an unknown/missing role is treated as non-admin (open
+  // dashboard mode aside), so a member with a transient cookie gap never sees admin-only links.
+  const visible = (i: NavItem) => !i.adminOnly || isAdmin;
+  /** Open or close the advanced nav groups and remember the choice. */
   const toggle = () => writeAdvanced(!open);
 
+  /** One nav link with its icon, marked current when it matches the route. */
   const item = (it: NavItem) => {
     const active = match?.href === it.href;
     const Icon = ICONS[it.href];
@@ -160,6 +116,10 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             ))}
           </div>
         )}
+      </div>
+      <div className="mt-auto flex flex-col gap-1 border-t border-border pt-4">
+        <p className="px-3 pb-1 text-xs text-subtle">{SETTINGS_GROUP}</p>
+        <ul className="flex flex-col gap-px">{NAV_ITEMS.filter((i) => i.group === SETTINGS_GROUP && visible(i)).map(item)}</ul>
       </div>
     </nav>
   );

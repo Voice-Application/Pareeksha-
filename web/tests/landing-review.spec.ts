@@ -1,27 +1,45 @@
 import { test, expect } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 
-test("replay line selection, detail resets and failure labels", async ({ page }) => {
+/**
+ * The redesigned landing leads with the product's job and a single call to action, and shares the
+ * app's design tokens (no separate marketing palette). It no longer embeds the interactive
+ * run-replay widget, so this spec checks the hero, the primary CTA, the "How it works" section,
+ * the product visual's accessible name, and that the page is accessible.
+ */
+test("landing leads with the job and sends you to the test page", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/welcome");
-  const replay = page.locator(".lp-rp");
-  const phone = replay.getByRole("radio", { name: "Phone line" });
-  const office = replay.getByRole("radio", { name: "Office babble" });
-  await expect(phone).toHaveAttribute("tabindex", "0");
-  await expect(office).toHaveAttribute("tabindex", "-1");
-  await replay.getByRole("button", { name: /Asks for a human, Manju:/ }).focus();
-  await expect(replay.locator(".lp-rp__detail")).toContainText("Manju");
-  await phone.focus();
-  await phone.press("ArrowRight");
-  await expect(office).toBeFocused();
-  await expect(office).toHaveAttribute("aria-checked", "true");
-  await expect(replay.locator(".lp-rp__detail")).toContainText("Point at a score");
-  await replay.getByRole("button", { name: /Asks for a human, Manju:/ }).focus();
-  await replay.getByRole("button", { name: "Replay" }).click();
-  await expect(replay.locator(".lp-rp__detail")).toContainText("Point at a score");
-  await expect(replay.getByRole("button", { name: /not scored yet/ }).first()).toBeVisible();
-  await page.reload();
-  const tags = replay.getByRole("group", { name: "Highlight calls with this failure" });
-  await tags.getByRole("button", { name: /wrong_fact/ }).click();
-  await expect(replay.getByRole("button", { name: /Asks for a human, Manju:/ })).toHaveAccessibleName(/matches wrong_fact/);
-  await expect(replay.getByRole("button", { name: /Asks for a human, Sunita:/ })).toHaveAccessibleName(/does not match wrong_fact/);
+
+  // Hero states the value proposition as the single level-1 heading.
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Find the bugs in your bot");
+
+  // Every primary CTA points at the one-screen prompt test.
+  const ctas = page.getByRole("link", { name: "Test my prompt" });
+  await expect(ctas.first()).toBeVisible();
+  for (const cta of await ctas.all()) {
+    await expect(cta).toHaveAttribute("href", "/test");
+  }
+
+  // The "How it works" section is reachable from the in-page anchor.
+  await expect(page.getByRole("heading", { name: /How it works/i })).toBeVisible();
+
+  // The product visual (the demo score meter) carries a descriptive accessible name, not a decorative placeholder.
+  await expect(page.getByRole("img").first()).toHaveAccessibleName(/score/i);
+
+  const results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations).toEqual([]);
+});
+
+test("sample-output tabs are reachable with the arrow keys", async ({ page }) => {
+  await page.goto("/welcome");
+  const first = page.getByRole("tab", { name: "Judged transcript" });
+  await first.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(page.getByRole("tab", { name: "Dialect gaps" })).toBeFocused();
+  await expect(page.getByRole("tab", { name: "Dialect gaps" })).toHaveAttribute("aria-selected", "true");
+  await page.keyboard.press("End");
+  await expect(page.getByRole("tab", { name: "RAG compare" })).toBeFocused();
+  await page.keyboard.press("ArrowRight");
+  await expect(first).toBeFocused();
 });
