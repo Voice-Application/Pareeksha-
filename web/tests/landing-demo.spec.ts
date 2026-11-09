@@ -52,6 +52,12 @@ test("tabs support arrow navigation, wraparound and keyboard activation", async 
     await expect(tabs.nth(index)).toHaveAttribute("aria-selected", "true");
     await expect(page.getByRole("tabpanel")).toHaveAttribute("aria-labelledby", await tabs.nth(index).getAttribute("id") as string);
   }
+  await page.keyboard.press("Home");
+  await expect(tabs.nth(0)).toBeFocused();
+  await expect(tabs.nth(0)).toHaveAttribute("aria-selected", "true");
+  await page.keyboard.press("End");
+  await expect(tabs.nth(2)).toBeFocused();
+  await expect(tabs.nth(2)).toHaveAttribute("aria-selected", "true");
   await page.keyboard.press("Tab");
   await expect(tabs.nth(2)).not.toBeFocused();
 });

@@ -10,7 +10,7 @@ export default defineConfig({
     launchOptions: { executablePath: process.env.PW_CHROMIUM_PATH || undefined },
   },
   webServer: {
-    command: "npm run build && npx next start -p 3100 -H 127.0.0.1",
+    command: "AUTH_DISABLED=0 npm run build && npx next start -p 3100 -H 127.0.0.1",
     url: "http://127.0.0.1:3100",
     // PW_REUSE=1 lets a developer keep one `next start` running between local test runs; CI always builds fresh.
     reuseExistingServer: !!process.env.PW_REUSE,
@@ -19,8 +19,6 @@ export default defineConfig({
       PAREEKSHA_API_URL: "http://127.0.0.1:3199/api/v1",
       PAREEKSHA_API_KEY: "pk_test_fe01_secret",
       AUTH_DISABLED: "1",
-      // Client-visible mirror of AUTH_DISABLED so the open dashboard treats a missing role as admin.
-      NEXT_PUBLIC_AUTH_DISABLED: "1",
     },
   },
 });

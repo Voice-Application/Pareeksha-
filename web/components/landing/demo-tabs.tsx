@@ -16,6 +16,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: "rag", label: "RAG compare" },
 ];
 
+/** The landing's sample-output tabs; keyboard follows the WAI-ARIA tabs pattern. */
 export function DemoTabs() {
   const [tab, setTab] = useState<TabKey>("transcript");
   const base = useId();
@@ -36,9 +37,12 @@ export function DemoTabs() {
             className={`lp-tabs__tab ${tab === t.key ? "is-active" : ""}`}
             onClick={() => setTab(t.key)}
             onKeyDown={(event) => {
-              if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+              const nextIndex = event.key === "ArrowRight" ? (index + 1) % TABS.length
+                : event.key === "ArrowLeft" ? (index - 1 + TABS.length) % TABS.length
+                : event.key === "Home" ? 0
+                : event.key === "End" ? TABS.length - 1 : -1;
+              if (nextIndex < 0) return;
               event.preventDefault();
-              const nextIndex = (index + (event.key === "ArrowRight" ? 1 : -1) + TABS.length) % TABS.length;
               setTab(TABS[nextIndex].key);
               tabRefs.current[nextIndex]?.focus();
             }}
