@@ -18,6 +18,7 @@ import { EmptyState, ErrorPanel, Skeleton } from "@/components/ui/states";
 import { FilterSelect } from "@/components/ui/field";
 import { FlagChip, Meter, ScoreChip, StatTile, StatusPill, TileRow, VerdictBadge, verdictOf } from "@/components/ui/measure";
 import { Chip } from "@/components/ui/layout";
+import { useRole } from "@/components/layout/theme-toggle";
 
 const STORE = "pareeksha.agent";
 
@@ -60,6 +61,8 @@ export function OverviewSkeleton() {
 export function Overview() {
   const url = useUrlState();
   const now = useNow();
+  // Platform health is SRE telemetry; show it only to elevated roles. Members never see it on home.
+  const isAdmin = useRole() !== "member";
   const agents = useQuery({ queryKey: ["agents", "overview"], queryFn: allAgents });
   // Agents made by Test my prompt have their own panel; the hero is about the user's own agents.
   const active = useMemo(() => (agents.data?.items ?? []).filter((a) => !a.archived && !(a.adapter_config as { quick_test_id?: string } | undefined)?.quick_test_id), [agents.data]);
@@ -143,24 +146,27 @@ export function Overview() {
   return (
     <>
       <PageHeader
-        eyebrow={
-          <>
+        title="Your prompt tests"
+        description="Paste your bot's system prompt and Pareeksha chats with it as normal and tricky customers, then shows which of its rules it keeps and where it breaks them."
+        actions={<LinkButton variant="primary" href="/test">Test my prompt</LinkButton>}
+      />
+      <div className="mb-10 max-w-[760px]"><PromptTests /></div>
+
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-t border-border pt-8">
+        <div className="min-w-0">
+          <h2 className="display text-lg">{title}</h2>
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
             <span className="inline-flex items-center gap-2">
               <Bot size={16} strokeWidth={1.6} className="text-subtle" aria-hidden />
               {agent.name}
             </span>
             {active.length > 1 && <FilterSelect label="Agent" value={agent.id} onChange={choose} options={active.map((a) => ({ value: a.id, label: a.name }))} />}
-          </>
-        }
-        title={title}
-        description={desc}
-        actions={
-          <>
-            <LinkButton variant="primary" href="/test">Test my prompt</LinkButton>
-            <LinkButton href={`/runs/new?agent=${agent.id}`}><Play size={14} strokeWidth={1.6} aria-hidden />New run</LinkButton>
-          </>
-        }
-      />
+          </div>
+          <p className="mt-2 max-w-[68ch] text-base text-muted">{desc}</p>
+        </div>
+        <LinkButton href={`/runs/new?agent=${agent.id}`}><Play size={14} strokeWidth={1.6} aria-hidden />New run</LinkButton>
+      </div>
+
       <TileRow cols="grid-cols-2 min-[860px]:grid-cols-4">
         <StatTile href={latest ? `/runs/${latest.id}` : "/runs"} hero label={`Pass rate${running ? " so far" : ""}`} value={s?.pass_rate != null ? `${Math.round(s.pass_rate * 100)}%` : "-"} caption={latest ? `${latest.progress.evaluated} scored` : "no runs"} />
         <StatTile href={latest ? `/runs/${latest.id}?verdict=critical` : "/runs"} label="Critical failures" value={s?.critical_failures ?? "-"} threshold={s?.critical_failures == null ? null : s.critical_failures > 0 ? "fail" : "ok"} caption="target 0" />
@@ -219,7 +225,6 @@ export function Overview() {
         </div>
 
         <div className="flex min-w-0 flex-col gap-6">
-          <PromptTests />
           <Panel title="Needs human review" aux={<Link className={linkCls} href="/calibration">Calibration</Link>}>
             <PanelBody q={review} rows={review.data?.items?.length ?? 0} empty="No calls are waiting for review.">
               <ul className="flex flex-col divide-y divide-border">
@@ -242,6 +247,7 @@ export function Overview() {
             </PanelBody>
           </Panel>
 
+          {isAdmin && (
           <Panel title="Platform health" aux={stale ? <span className="text-warn-fg">Last updated {relativeTime(new Date(metrics.dataUpdatedAt).toISOString())}</span> : undefined}>
             <PanelBody q={metrics} rows={1} empty="">
               <dl className="grid grid-cols-[1fr_auto] gap-x-4 text-sm [&>dd]:py-1.5 [&>dt]:py-1.5">
@@ -268,6 +274,7 @@ export function Overview() {
               )}
             </PanelBody>
           </Panel>
+          )}
         </div>
       </div>
     </>
