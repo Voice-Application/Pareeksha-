@@ -128,6 +128,18 @@ p { text-wrap: pretty; }
   .rise-in, .fade-in, .stagger > * { animation: none; opacity: 1; transform: none; }
 }
 
+/* Chart entrance motion. Lines draw in, columns grow from the baseline, arcs fade+scale. All are
+   suppressed under reduced motion (left fully visible). Used by components/charts. */
+@keyframes chart-draw { from { stroke-dasharray: var(--len, 1000); stroke-dashoffset: var(--len, 1000); } to { stroke-dashoffset: 0; } }
+@keyframes chart-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes chart-arc { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+.chart-line-draw { animation: chart-draw var(--dur-long) var(--ease-out) both; }
+.chart-bar-grow { animation: chart-grow var(--dur-base) var(--ease-out) both; animation-delay: var(--delay, 0ms); }
+.chart-arc-in { animation: chart-arc var(--dur-base) var(--ease-out) both; }
+@media (prefers-reduced-motion: reduce) {
+  .chart-line-draw, .chart-bar-grow, .chart-arc-in { animation: none; stroke-dashoffset: 0; opacity: 1; transform: none; }
+}
+
 /* Native <dialog> sheets and dialogs. */
 dialog.sheet { margin: 0 0 0 auto; height: 100dvh; max-height: 100dvh; width: min(520px, 100%); max-width: 100%; padding: 0; border: 0; background: var(--bg-surface); color: var(--fg); box-shadow: var(--shadow-float); }
 dialog.dialog { margin: auto; width: min(480px, calc(100% - var(--space-8))); padding: 0; border: 0; border-radius: var(--radius-lg); background: var(--bg-surface); color: var(--fg); box-shadow: var(--shadow-float); }

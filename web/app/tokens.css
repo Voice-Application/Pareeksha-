@@ -60,6 +60,13 @@
   --series-4: oklch(60% 0.015 265);
   --grid: oklch(90% 0.009 252);
 
+  /* ---------- chart categorical hues: a 3-step theme (indigo / teal / violet), validated for CVD
+   * and normal-vision separation and for surface contrast in BOTH modes. Assigned in this fixed
+   * order per entity, never cycled; never reuse the reserved verdict (pass/fail/warn) hues here. ---------- */
+  --chart-cat-1: #4B4DD6;   /* indigo */
+  --chart-cat-2: #1F8F7A;   /* teal */
+  --chart-cat-3: #9A4DD6;   /* violet */
+
   /* ---------- elevation: borders first, shadow only for things that float ---------- */
   --shadow-float: 0 1px 2px oklch(21% 0.016 268 / 0.06), 0 16px 40px -12px oklch(21% 0.016 268 / 0.22);
   --overlay: oklch(21% 0.016 268 / 0.42);
@@ -93,10 +100,10 @@
   --control-h: 36px;         /* buttons, inputs */
 
   /* ---------- radius: one per nesting level ---------- */
-  --radius-xs: 6px;          /* badges, chips, heatmap cells */
-  --radius-sm: 8px;          /* inputs, menus */
-  --radius-md: 10px;         /* panels */
-  --radius-lg: 14px;         /* dialogs */
+  --radius-xs: 8px;          /* badges, chips, heatmap cells */
+  --radius-sm: 11px;         /* inputs, menus */
+  --radius-md: 16px;         /* panels, cards */
+  --radius-lg: 20px;         /* dialogs */
   --radius-pill: 999px;      /* buttons: genuinely pill-shaped in both themes */
 
   /* ---------- motion ---------- */
@@ -157,6 +164,12 @@
   --series-3: oklch(72% 0.09 300);
   --series-4: oklch(62% 0.014 65);
   --grid: oklch(27% 0.014 235);
+
+  /* ---------- chart categorical hues, dark: deliberate steps (lighter, on graphite), not an
+   * automatic flip of the light values. Same fixed order; validated in dark mode. ---------- */
+  --chart-cat-1: #7275E0;   /* indigo */
+  --chart-cat-2: #2FA98F;   /* teal */
+  --chart-cat-3: #A96FE0;   /* violet */
 
   --shadow-float: 0 1px 0 oklch(100% 0 0 / 0.05) inset, 0 24px 48px -16px oklch(6% 0.01 60 / 0.75);
   --overlay: oklch(6% 0.01 60 / 0.66);
