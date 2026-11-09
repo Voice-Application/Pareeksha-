@@ -7,10 +7,16 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List agents */
+        /**
+         * List agents
+         * @description List agents.
+         */
         get: operations["list_agents"];
         put?: never;
-        /** Register an agent under test */
+        /**
+         * Register an agent under test
+         * @description Create agent.
+         */
         post: operations["create_agent"];
         delete?: never;
         options?: never;
@@ -25,14 +31,20 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get an agent */
+        /**
+         * Get an agent
+         * @description Get agent.
+         */
         get: operations["get_agent"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        /** Update an agent */
+        /**
+         * Update an agent
+         * @description Update agent.
+         */
         patch: operations["update_agent"];
         trace?: never;
     };
@@ -45,7 +57,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Archive an agent */
+        /**
+         * Archive an agent
+         * @description Archive agent.
+         */
         post: operations["archive_agent"];
         delete?: never;
         options?: never;
@@ -62,7 +77,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Open the socket, send 1 s of silence, wait up to 10 s for agent audio */
+        /**
+         * Open the socket, send 1 s of silence, wait up to 10 s for agent audio
+         * @description Test agent connection.
+         */
         post: operations["test_agent_connection"];
         delete?: never;
         options?: never;
