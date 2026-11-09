@@ -30,3 +30,16 @@ test("landing leads with the job and sends you to the test page", async ({ page 
   const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations).toEqual([]);
 });
+
+test("sample-output tabs are reachable with the arrow keys", async ({ page }) => {
+  await page.goto("/welcome");
+  const first = page.getByRole("tab", { name: "Judged transcript" });
+  await first.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(page.getByRole("tab", { name: "Dialect gaps" })).toBeFocused();
+  await expect(page.getByRole("tab", { name: "Dialect gaps" })).toHaveAttribute("aria-selected", "true");
+  await page.keyboard.press("End");
+  await expect(page.getByRole("tab", { name: "RAG compare" })).toBeFocused();
+  await page.keyboard.press("ArrowRight");
+  await expect(first).toBeFocused();
+});
