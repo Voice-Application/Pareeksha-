@@ -134,10 +134,6 @@
   box-shadow: var(--shadow-float);
 }
 .lp-panel img { display: block; width: 100%; height: auto; }
-/* Show only the shot that matches the active theme (both are static imports; one is hidden). */
-.lp-shot--dark { display: none; }
-.dark .lp-shot--light { display: none; }
-.dark .lp-shot--dark { display: block; }
 .lp-caption {
   margin-top: var(--space-3);
   font-size: var(--text-xs);

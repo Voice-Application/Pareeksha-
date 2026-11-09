@@ -88,6 +88,12 @@ h1, h2, h3 { font-family: var(--font-display); font-weight: var(--weight-display
 p { text-wrap: pretty; }
 .dark h1, .dark h2, .dark h3, .dark .display { font-variation-settings: "SHRP" 100; }
 
+/* Theme-matched imagery: pair a light and a dark shot and show only the one that matches the active
+   theme. Tracks the `.dark` class (the app's own toggle), not the OS `prefers-color-scheme`. */
+.theme-shot--dark { display: none; }
+.dark .theme-shot--light { display: none; }
+.dark .theme-shot--dark { display: block; }
+
 :focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;

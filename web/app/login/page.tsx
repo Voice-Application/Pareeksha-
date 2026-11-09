@@ -5,7 +5,8 @@ import { CircleAlert } from "lucide-react";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { safeNext } from "@/lib/session";
 import { backend } from "@/lib/auth-server";
-import verdictShot from "@/components/landing/shots/call-verdict.png";
+import verdictLight from "@/components/landing/shots/verdict-light.png";
+import verdictDark from "@/components/landing/shots/verdict-dark.png";
 
 export const metadata: Metadata = { title: "Sign in to Pareeksha", description: "Sign in to the Pareeksha dashboard." };
 export const dynamic = "force-dynamic";
@@ -104,7 +105,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <figure className="hidden min-[961px]:block">
           <div className="grid place-items-center rounded-lg bg-sunken p-12">
             <div className="w-full max-w-[408px] overflow-hidden rounded-lg" style={{ boxShadow: "var(--shadow-float)" }}>
-              <Image src={verdictShot} alt="A call's verdict: critical failure, needs human review, overall score 13.75 of 100 against a pass line of 80." sizes="408px" priority />
+              <Image className="theme-shot theme-shot--light" src={verdictLight} alt="A call's verdict: critical failure, overall score 57.5 of 100 against a pass line of 80." sizes="408px" priority />
+              <Image className="theme-shot theme-shot--dark" src={verdictDark} alt="A call's verdict: critical failure, overall score 57.5 of 100 against a pass line of 80." sizes="408px" priority />
             </div>
           </div>
           <figcaption className="mt-3 text-sm text-subtle">A call from the planted-bugs run, as the dashboard shows it.</figcaption>

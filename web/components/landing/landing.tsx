@@ -71,14 +71,14 @@ export function Landing() {
                   so the image never sits as a dark block on a light page (or vice versa). */}
               <div className="lp-panel">
                 <Image
-                  className="lp-shot lp-shot--light"
+                  className="theme-shot theme-shot--light"
                   src={verdictLight}
                   alt="A scored verdict for one call: critical failure, an overall score of 57.5 out of 100 against a pass line of 80, and a button to override the judge's score."
                   sizes="(min-width: 60rem) 420px, 100vw"
                   placeholder="blur"
                 />
                 <Image
-                  className="lp-shot lp-shot--dark"
+                  className="theme-shot theme-shot--dark"
                   src={verdictDark}
                   alt="A scored verdict for one call: critical failure, an overall score of 57.5 out of 100 against a pass line of 80, and a button to override the judge's score."
                   sizes="(min-width: 60rem) 420px, 100vw"
