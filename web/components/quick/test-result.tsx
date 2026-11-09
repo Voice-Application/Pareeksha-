@@ -18,6 +18,7 @@ import { RuleBadge } from "./status";
 
 const linkCls = "text-accent-fg underline-offset-2 hover:underline";
 
+/** Loading placeholder for a prompt test result. */
 export function QuickTestResultSkeleton() {
   return (
     <div role="status" aria-label="Loading the test" aria-busy="true" className="flex flex-col gap-6">
@@ -94,8 +95,10 @@ export function QuickTestResult({ id }: { id: string }) {
 }
 
 const ORDER: Record<RuleResult["status"], number> = { broken: 0, pending: 1, kept: 2, not_tested: 3 };
+/** Sort rules broken first, then pending, kept and not tested. */
 const byStatus = (a: RuleResult, b: RuleResult) => ORDER[a.status] - ORDER[b.status];
 
+/** One rule with its kept/broken counts and the evidence where it broke. */
 function RuleRow({ rule, index = 0 }: { rule: RuleResult; index?: number }) {
   const evidence = rule.evidence ?? [];
   const checked = rule.broken + rule.kept;
@@ -136,6 +139,7 @@ function RuleRow({ rule, index = 0 }: { rule: RuleResult; index?: number }) {
 
 const CONV_COPY: Record<QuickTest["conversations"][number]["status"], string> = { waiting: "queued", running: "running", checking: "evaluating", done: "completed", error: "error" };
 
+/** The test's conversations and their status. */
 function Conversations({ test }: { test: QuickTest }) {
   const rules = new Map(test.rules.map((r) => [r.id, r.text]));
   return (
@@ -180,6 +184,7 @@ function Conversations({ test }: { test: QuickTest }) {
   );
 }
 
+/** Form to ask for an improved prompt, optionally re-testing it. */
 function Improve({ test }: { test: QuickTest }) {
   const qc = useQueryClient();
   const router = useRouter();
@@ -197,6 +202,7 @@ function Improve({ test }: { test: QuickTest }) {
     onError: (e) => setError(e instanceof ApiError ? e.userMessage() : "The API did not respond."),
   });
 
+  /** Request the improvement. */
   function submit(e: FormEvent) {
     e.preventDefault();
     setError(null);
@@ -228,6 +234,7 @@ function Improve({ test }: { test: QuickTest }) {
   );
 }
 
+/** An improved prompt with its size change, a copy action and a cost-confirmed re-run. */
 function ImprovementView({ test, imp }: { test: QuickTest; imp: QuickTestImprovement }) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
@@ -301,6 +308,7 @@ function ImprovementView({ test, imp }: { test: QuickTest; imp: QuickTestImprove
   );
 }
 
+/** The system prompt that was tested, collapsed by default. */
 function PromptPanel({ test }: { test: QuickTest }) {
   return (
     <Panel title="What was tested">

@@ -62,6 +62,7 @@ export function DemoTabs() {
   );
 }
 
+/** Demo transcript, opened on the turn that broke a rule. */
 function TranscriptTab() {
   // Default to the turn that broke a rule so the point is visible immediately.
   const brokeIdx = DEMO_TURNS.findIndex((t) => t.broke);
@@ -111,6 +112,7 @@ function TranscriptTab() {
   );
 }
 
+/** Demo word error rate per dialect, scaled to the worst one. */
 function DialectTab() {
   const max = Math.max(...DEMO_DIALECT.map((d) => d.wer));
   return (
@@ -131,6 +133,7 @@ function DialectTab() {
   );
 }
 
+/** Demo comparison of retrieval setups, with the last (best) row highlighted. */
 function RagTab() {
   return (
     <div className="lp-rag">

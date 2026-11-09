@@ -15,6 +15,7 @@ import { DataTable, Tooltip, useChartSelection, scaleLinear, useChartId, type Pl
 
 export type Bar = { label: string; value: number };
 
+/** Single-series column chart with per-bar hover/focus tooltips and a hidden table fallback. */
 export function BarChart({
   bars,
   title,
@@ -41,7 +42,9 @@ export function BarChart({
   // Cap thickness and never fill the slot: the leftover slot width is the air (>= 2px gap) between bars.
   const barW = Math.max(8, Math.min(24, slot - 12));
   const baseY = plot.y + plot.h;
+  /** Left edge of bar `i`, centred in its slot. */
   const bx = (i: number) => plot.x + i * slot + (slot - barW) / 2;
+  /** Bar height in pixels for value `v` on the 0..yMax scale. */
   const bh = (v: number) => baseY - scaleLinear(v, 0, yMax, baseY, plot.y);
 
   const yTicks = [0, yMax / 2, yMax];

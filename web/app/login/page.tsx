@@ -27,6 +27,7 @@ const ERRORS: Record<string, string> = {
 const input = "h-12 w-full rounded-sm border border-border-strong bg-surface px-3 text-base text-fg transition-[border-color] duration-150 hover:border-fg aria-[invalid=true]:border-fail";
 const submit = "inline-flex h-12 items-center justify-center rounded-pill bg-accent px-6 text-base font-medium text-accent-on transition-[background-color,transform] duration-150 hover:bg-accent-hi active:translate-y-px motion-reduce:transition-none";
 
+/** A labelled required input for the login form, with an optional hint and invalid state. */
 function Field({ id, label, type = "text", autoComplete, autoFocus, invalid, hint }: { id: string; label: string; type?: string; autoComplete?: string; autoFocus?: boolean; invalid?: boolean; hint?: string }) {
   return (
     <div className="flex flex-col gap-1.5">
@@ -37,8 +38,10 @@ function Field({ id, label, type = "text", autoComplete, autoFocus, invalid, hin
   );
 }
 
+/** Sign-in page: shows first-user setup, sign-in or an unavailable notice depending on the backend auth status. */
 export default async function LoginPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
+  /** The single string value of a search param; arrays and missing keys read as undefined. */
   const one = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : undefined);
   const next = safeNext(one("next"));
   const error = ERRORS[one("error") ?? ""];

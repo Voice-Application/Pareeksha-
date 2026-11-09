@@ -16,6 +16,7 @@ import { DataTable, Tooltip, useChartSelection, scaleLinear, useChartId, type Pl
 
 export type LinePoint = { label: string; value: number };
 
+/** Single-series trend line with a snapping crosshair, keyboard stepping and a hidden table fallback. */
 export function LineChart({
   points,
   title,
@@ -45,7 +46,9 @@ export function LineChart({
   const plot: Plot = { x: 44, y: 12, w: W - 44 - 12, h: H - 12 - 28 };
   const n = points.length;
 
+  /** Plot x for point `i`; a single point sits in the middle of the plot. */
   const px = (i: number) => (n <= 1 ? plot.x + plot.w / 2 : scaleLinear(i, 0, n - 1, plot.x, plot.x + plot.w));
+  /** Plot y for value `v`, inverted so larger values sit higher. */
   const py = (v: number) => scaleLinear(v, yMin, yMax, plot.y + plot.h, plot.y);
 
   const path = points.map((p, i) => `${i === 0 ? "M" : "L"}${px(i).toFixed(1)},${py(p.value).toFixed(1)}`).join(" ");
@@ -163,7 +166,7 @@ export function LineChart({
             aria-label={`${title}. Use arrow keys to inspect points.`}
             aria-valuemin={0}
             aria-valuemax={n - 1}
-            aria-valuenow={active ?? 0}
+            aria-valuenow={ap ? active! : 0}
             aria-valuetext={ap ? `${ap.label}: ${ap.value}${valueSuffix}` : undefined}
             onFocus={() => setActive((a) => a ?? 0)}
             onBlur={() => setActive(null)}

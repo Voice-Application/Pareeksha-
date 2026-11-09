@@ -63,8 +63,10 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   // Admin-only items show only for an admin; an unknown/missing role is treated as non-admin (open
   // dashboard mode aside), so a member with a transient cookie gap never sees admin-only links.
   const visible = (i: NavItem) => !i.adminOnly || isAdmin;
+  /** Open or close the advanced nav groups and remember the choice. */
   const toggle = () => writeAdvanced(!open);
 
+  /** One nav link with its icon, marked current when it matches the route. */
   const item = (it: NavItem) => {
     const active = match?.href === it.href;
     const Icon = ICONS[it.href];

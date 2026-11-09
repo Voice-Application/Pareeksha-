@@ -33,6 +33,7 @@ function arcPath(cx: number, cy: number, rOuter: number, rInner: number, a0: num
   return `M${o0.x},${o0.y} A${rOuter},${rOuter} 0 ${large} 1 ${o1.x},${o1.y} L${i1.x},${i1.y} A${rInner},${rInner} 0 ${large} 0 ${i0.x},${i0.y} Z`;
 }
 
+/** Part-of-a-whole donut with per-arc tooltips, a legend, direct share labels and a hidden table fallback. */
 export function DonutChart({
   slices,
   title,
@@ -67,6 +68,7 @@ export function DonutChart({
     return acc;
   }, []);
 
+  /** Format a unit count with thousands separators. */
   const fmt = (n: number) => n.toLocaleString("en-US");
 
   return (

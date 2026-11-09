@@ -36,6 +36,7 @@ async function allAgents() {
   }
   return { ...first, items };
 }
+/** Format credits as rupees, or a dash when unknown. */
 const inr = (n: number | null | undefined) => (n == null ? "-" : `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`);
 const linkCls = "text-accent-fg underline-offset-2 hover:underline";
 
@@ -52,6 +53,7 @@ function PanelBody({ q, rows, empty, children }: { q: { isPending: boolean; isEr
   return <>{children}</>;
 }
 
+/** Loading placeholder for the overview header and stat tiles. */
 export function OverviewSkeleton() {
   return (
     <>
@@ -82,6 +84,7 @@ export function Overview() {
   const newest = useQuery({ queryKey: ["runs", "overview", "newest"], queryFn: () => listRuns({ limit: 1 }) });
   const newestAgentId = newest.data?.items?.[0]?.agent_id;
   const agent = active.find((a) => a.id === urlAgent) ?? active.find((a) => a.id === stored) ?? active.find((a) => a.id === newestAgentId) ?? active[0];
+  /** Switch the overview agent and remember it for the next visit. */
   const choose = (id: string) => {
     try { window.localStorage.setItem(STORE, id); } catch { /* convenience only */ }
     url.set({ agent: id });

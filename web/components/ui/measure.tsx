@@ -15,12 +15,14 @@ export function overallStep(score: number): Step {
 export function dimensionStep(score: number): Step {
   return (Math.max(0, Math.min(4, Math.round(score))) + 1) as Step;
 }
+/** Background and text colours for a score step; null uses the not-available swatch. */
 export function stepStyle(step: Step | null): CSSProperties {
   return step === null
     ? { background: "var(--score-na)", color: "var(--score-na-on)" }
     : { background: `var(--score-${step})`, color: `var(--score-${step}-on)` };
 }
 
+/** Score to at most two decimals without trailing zeros, or a dash when missing. */
 export function fmtScore(score: number | null | undefined): string {
   if (score === null || score === undefined) return "-";
   return String(Number(score.toFixed(2)));
@@ -38,6 +40,7 @@ export function ScoreChip({ score, kind = "overall", className }: { score: numbe
 }
 
 export type Verdict = "pass" | "fail" | "critical";
+/** Pass/fail/critical for a scored item; critical wins, and an unscored item has no verdict unless critical. */
 export function verdictOf(e: { passed?: boolean | null; critical_failure?: boolean | null } | null | undefined): Verdict | null {
   if (!e || e.passed === null || e.passed === undefined) return e?.critical_failure ? "critical" : null;
   return e.critical_failure ? "critical" : e.passed ? "pass" : "fail";
@@ -108,6 +111,7 @@ const STATUS_COPY: Record<string, string> = {
 const ACTIVE = new Set(["running", "in_progress", "connecting", "transcribing", "evaluating"]);
 const DONE = new Set(["completed", "evaluated", "partial"]);
 
+/** A run status as a compact label, styled by whether it is active, done or failed. */
 export function StatusPill({ status }: { status: string }) {
   const label = STATUS_COPY[status] ?? status;
   const base = "inline-flex h-5 items-center gap-1.5 rounded-xs text-xs";
@@ -171,6 +175,7 @@ export function Pips({ score }: { score: number }) {
   );
 }
 
+/** Thin progress bar for done out of total. */
 export function ProgressBar({ done, total, label }: { done: number; total: number; label: string }) {
   const pct = total ? Math.min(100, (done / total) * 100) : 0;
   return (

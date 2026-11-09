@@ -24,9 +24,11 @@ export function RowMenu({ label, items }: { label: string; items: MenuItem[] }) 
     let armed = false;
     first?.focus();
     const t = setTimeout(() => (armed = true), 0);
+    /** Close on a press outside both the menu and its trigger. */
     const onDown = (e: MouseEvent) => {
       if (!menu.current?.contains(e.target as Node) && !trigger.current?.contains(e.target as Node)) setOpen(false);
     };
+    /** Close on scroll once armed, since the portalled menu would detach from its row. */
     const onScroll = () => { if (armed) setOpen(false); };
     document.addEventListener("mousedown", onDown);
     window.addEventListener("scroll", onScroll, true);
@@ -45,11 +47,13 @@ export function RowMenu({ label, items }: { label: string; items: MenuItem[] }) 
     if (pos.top + h > window.innerHeight - 8) m.style.top = `${Math.max(8, pos.above - h - 4)}px`;
   }, [open, pos]);
 
+  /** Close the menu, returning focus to the trigger by default. */
   function close(refocus = true) {
     setOpen(false);
     if (refocus) trigger.current?.focus();
   }
 
+  /** Menu keys: Escape closes, arrows cycle items, Tab returns focus to the trigger. */
   function onMenuKey(e: React.KeyboardEvent) {
     const btns = Array.from(menu.current?.querySelectorAll<HTMLButtonElement>("button:not(:disabled)") ?? []);
     const i = btns.indexOf(document.activeElement as HTMLButtonElement);

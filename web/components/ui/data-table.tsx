@@ -26,6 +26,7 @@ export function parseSort(raw: string): { key: string; dir: "asc" | "desc" } | n
 
 export type Sorters<T> = Record<string, (row: T) => string | number | null>;
 
+/** Rows sorted by the active column's sorter; no sort or an unknown key keeps the input order. */
 export function sortRows<T>(rows: T[], sorters: Sorters<T>, sort: { key: string; dir: "asc" | "desc" } | null): T[] {
   if (!sort) return rows;
   const sv = sorters[sort.key];
@@ -41,6 +42,7 @@ export function sortRows<T>(rows: T[], sorters: Sorters<T>, sort: { key: string;
   });
 }
 
+/** Accessible table with sortable column headers. */
 export function DataTable<T>({
   caption,
   columns,
@@ -166,6 +168,7 @@ export function FilterBar({
   );
 }
 
+/** Footer showing how many rows are loaded, with a control for the next page. */
 export function LoadMore({ hasMore, loading, onClick, shown }: { hasMore: boolean; loading: boolean; onClick: () => void; shown: number }) {
   return (
     <div className="flex items-center justify-between gap-2 border-t border-border px-5 py-3 text-xs text-subtle">

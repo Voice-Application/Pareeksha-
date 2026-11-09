@@ -40,6 +40,7 @@ const columns: Column<KnowledgeBase>[] = [
   },
 ];
 
+/** Knowledge bases list with an inline create form. */
 export function KbList() {
   const router = useRouter();
   const qc = useQueryClient();
@@ -67,6 +68,7 @@ export function KbList() {
     onError: (e) => setServerError(ragErrorMessage(e)),
   });
 
+  /** Create the knowledge base once it has a name. */
   function submit(ev: FormEvent) {
     ev.preventDefault();
     setServerError(null);

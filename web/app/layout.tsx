@@ -20,6 +20,7 @@ export const metadata: Metadata = {
 // Runs before paint: stored choice, else the system preference. Keeps dark mode from flashing light.
 const THEME_SCRIPT = `try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.classList.toggle("dark",t==="dark")}catch(e){}`;
 
+/** Root shell: applies the stored theme before paint and passes the per-request auth-disabled setting to client providers. */
 export default async function RootLayout({ children }: { children: ReactNode }) {
   // Read deployment settings per request so an existing image can run in open-dashboard mode.
   await connection();

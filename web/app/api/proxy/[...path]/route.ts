@@ -12,6 +12,7 @@ export const runtime = "nodejs";
 const FORWARD_REQUEST_HEADERS = ["accept", "content-type", "content-length", "last-event-id", "if-none-match", "range"];
 const DROP_RESPONSE_HEADERS = ["set-cookie", "connection", "keep-alive", "transfer-encoding", "content-encoding", "content-length"];
 
+/** Forward one request to the backend API, passing only allow-listed headers and stripping hop-by-hop and cookie response headers. */
 async function handle(req: NextRequest, ctx: { params: Promise<{ path: string[] }> }): Promise<Response> {
   const base = process.env.PAREEKSHA_API_URL;
   if (!base) {

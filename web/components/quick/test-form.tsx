@@ -54,6 +54,7 @@ export function QuickTestForm() {
     },
   });
 
+  /** Validate the form and start the test; refuses while the documents list failed to load. */
   function submit(e: FormEvent) {
     e.preventDefault();
     setError(null);
@@ -191,6 +192,7 @@ export function QuickTestForm() {
   );
 }
 
+/** The user's recent prompt tests, polled while any is still running. */
 function RecentTests() {
   const q = useQuery({ queryKey: ["quick-tests"], queryFn: listQuickTests, refetchInterval: (s) => listPoll(s.state.data) });
   const list = asList(q.data);

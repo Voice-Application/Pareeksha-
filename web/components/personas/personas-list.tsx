@@ -19,6 +19,7 @@ import { RowPlayButton } from "@/components/ui/audio";
 import { useToast } from "@/components/ui/toast";
 import { PersonaEditor, type Persona } from "./persona-editor";
 
+/** Loading placeholder for the personas page. */
 export function PersonasListSkeleton() {
   return (
     <>
@@ -55,6 +56,7 @@ function Pips({ level }: { level: number }) {
   );
 }
 
+/** Persona library with URL-backed filters and sort, plus the persona editor. */
 export function PersonasList() {
   const url = useUrlState();
   const { toast } = useToast();
@@ -171,6 +173,7 @@ export function PersonasList() {
     ...(interrupts ? [{ label: `Interrupts: ${interrupts}`, remove: () => url.set({ interrupts: null }) }] : []),
   ];
 
+  /** Close the editor, asking first when it has unsaved changes. */
   function requestClose() {
     if (dirty) setConfirmClose(true);
     else url.set({ edit: null });

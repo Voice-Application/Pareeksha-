@@ -85,6 +85,7 @@ export function useChartSelection() {
   const [active, setActive] = useState<number | null>(null);
   useEffect(() => {
     if (active == null) return;
+    /** Clear the selection on Escape; focus stays where it is. */
     const dismiss = (event: KeyboardEvent) => {
       if (event.key === "Escape") setActive(null);
     };

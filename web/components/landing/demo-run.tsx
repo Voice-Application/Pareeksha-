@@ -20,18 +20,22 @@ const LAST = STEPS.length - 1;
 const BEAT_MS = 1400;
 
 const MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+/** Subscribe to reduced-motion preference changes (for useSyncExternalStore). */
 function subscribeMotion(onChange: () => void) {
   const media = window.matchMedia(MOTION_QUERY);
   media.addEventListener("change", onChange);
   return () => media.removeEventListener("change", onChange);
 }
+/** Whether the user prefers reduced motion right now. */
 function getMotionSnapshot() {
   return window.matchMedia(MOTION_QUERY).matches;
 }
+/** Unknown on the server, so the first paint reserves the completed layout. */
 function getServerMotionSnapshot() {
   return null;
 }
 
+/** Landing-page run demo that steps through on a timer, or shows the finished state under reduced motion. */
 export function DemoRun() {
   const [playbackStep, setStep] = useState(0);
   const [playing, setPlaying] = useState(true);
@@ -57,6 +61,7 @@ export function DemoRun() {
   }, [reduced]);
 
   const atEnd = step >= LAST;
+  /** Whether playback has reached the named step. */
   const show = (name: (typeof STEPS)[number]) => step >= STEPS.indexOf(name);
 
   return (

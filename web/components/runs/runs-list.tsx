@@ -33,6 +33,7 @@ const SORT: Sorters<Run> = {
 
 const IN_FLIGHT = new Set(["queued", "running", "draft"]);
 
+/** Loading placeholder for the results page. */
 export function RunsListSkeleton() {
   return (
     <>
@@ -44,6 +45,7 @@ export function RunsListSkeleton() {
   );
 }
 
+/** Pass-rate cell: suite verdict for regressions, a dash while in flight or failed, else the rate. */
 export function PassRateCell({ run }: { run: Run }) {
   if (run.kind === "regression" && run.summary?.suite_passed !== undefined && run.summary.suite_passed !== null)
     return <VerdictBadge verdict={run.summary.suite_passed ? "pass" : "fail"} />;
@@ -66,6 +68,7 @@ export function PassRateCell({ run }: { run: Run }) {
   );
 }
 
+/** Runs list with URL-backed filters and two-run comparison. */
 export function RunsList() {
   const url = useUrlState();
   const router = useRouter();
@@ -128,6 +131,7 @@ export function RunsList() {
 
   const toggle = (id: string) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : p.length >= 2 ? [p[1], id] : [...p, id]));
   const byId = (id: string) => list.items.find((r) => r.id === id);
+  /** Compare link for the two picked runs, older one as the base. */
   const compareHref = () => {
     const [a, b] = picked.map(byId);
     if (!a || !b) return "/runs/compare";
