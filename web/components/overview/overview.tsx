@@ -83,9 +83,11 @@ export function Overview() {
   const latest = runs.data?.items?.find((r) => r.status !== "draft");
   const items = useQuery({ queryKey: ["run-items", latest?.id, "overview"], enabled: !!latest, queryFn: () => listRunItems(latest!.id) });
   const review = useQuery({ queryKey: ["calls", "needs-review", agent?.id], enabled: !!agent, queryFn: () => call(api.GET("/api/v1/calls", { params: { query: { agent_id: agent!.id, needs_review: true, reviewed: false, limit: 5 } } })) });
-  const metrics = useQuery({ queryKey: ["metrics"], queryFn: () => call(api.GET("/api/v1/metrics/summary")), refetchInterval: 15000 });
+  // Platform metrics and health are SRE telemetry: fetch them only for elevated roles, so a member's
+  // browser never requests the Kafka/outbox/consumer-lag payload (hiding the panel is not enough).
+  const metrics = useQuery({ queryKey: ["metrics"], queryFn: () => call(api.GET("/api/v1/metrics/summary")), enabled: isAdmin, refetchInterval: isAdmin ? 15000 : false });
   const usage = useQuery({ queryKey: ["usage"], queryFn: () => call(api.GET("/api/v1/usage")) });
-  const health = useQuery({ queryKey: ["health"], queryFn: () => call(api.GET("/api/v1/health")), refetchInterval: 15000 });
+  const health = useQuery({ queryKey: ["health"], queryFn: () => call(api.GET("/api/v1/health")), enabled: isAdmin, refetchInterval: isAdmin ? 15000 : false });
 
   if (agents.isError) return <><PageHeader eyebrow="Overview" title="Overview" /><ErrorPanel error={agents.error} what="agents" onRetry={() => void agents.refetch()} /></>;
   if (agents.isPending) return <OverviewSkeleton />;
@@ -167,10 +169,11 @@ export function Overview() {
         <LinkButton href={`/runs/new?agent=${agent.id}`}><Play size={14} strokeWidth={1.6} aria-hidden />New run</LinkButton>
       </div>
 
-      <TileRow cols="grid-cols-2 min-[860px]:grid-cols-4">
+      <TileRow cols={`grid-cols-2 ${isAdmin ? "min-[860px]:grid-cols-4" : "min-[860px]:grid-cols-3"}`}>
         <StatTile href={latest ? `/runs/${latest.id}` : "/runs"} hero label={`Pass rate${running ? " so far" : ""}`} value={s?.pass_rate != null ? `${Math.round(s.pass_rate * 100)}%` : "-"} caption={latest ? `${latest.progress.evaluated} scored` : "no runs"} />
         <StatTile href={latest ? `/runs/${latest.id}?verdict=critical` : "/runs"} label="Critical failures" value={s?.critical_failures ?? "-"} threshold={s?.critical_failures == null ? null : s.critical_failures > 0 ? "fail" : "ok"} caption="target 0" />
-        <StatTile href="/dlq" label="Open DLQ items" value={metrics.data?.dlq_open ?? "-"} threshold={metrics.data == null ? null : metrics.data.dlq_open > 0 ? "fail" : "ok"} caption="events that failed processing" />
+        {/* DLQ depth is an operational internal: only elevated roles see it (and only they fetch ``metrics``). */}
+        {isAdmin && <StatTile href="/dlq" label="Open DLQ items" value={metrics.data?.dlq_open ?? "-"} threshold={metrics.data == null ? null : metrics.data.dlq_open > 0 ? "fail" : "ok"} caption="events that failed processing" />}
         <StatTile label="Credits used" value={inr(usage.data?.credits_used)} caption={budget != null ? <span className="inline-flex items-center gap-2">of {inr(budget)} <Meter value={Math.min(100, ((usage.data?.credits_used ?? 0) / budget) * 100)} passLine={null} label="Budget used" /></span> : "no budget set"} />
       </TileRow>
 
