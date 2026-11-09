@@ -116,6 +116,18 @@ p { text-wrap: pretty; }
   * { transition-duration: 0ms !important; scroll-behavior: auto !important; }
 }
 
+/* Entrance motion: a short fade + rise, used on page content and panels. Staggered children via
+   --i (set inline) so rows/cards cascade in. Suppressed under reduced motion by the rule above
+   (animation is cleared here too, so content is never left invisible). */
+@keyframes rise-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+.rise-in { animation: rise-in var(--dur-base) var(--ease) both; }
+.fade-in { animation: fade-in var(--dur-base) var(--ease) both; }
+.stagger > * { animation: rise-in var(--dur-base) var(--ease) both; animation-delay: calc(var(--i, 0) * 45ms); }
+@media (prefers-reduced-motion: reduce) {
+  .rise-in, .fade-in, .stagger > * { animation: none; opacity: 1; transform: none; }
+}
+
 /* Native <dialog> sheets and dialogs. */
 dialog.sheet { margin: 0 0 0 auto; height: 100dvh; max-height: 100dvh; width: min(520px, 100%); max-width: 100%; padding: 0; border: 0; background: var(--bg-surface); color: var(--fg); box-shadow: var(--shadow-float); }
 dialog.dialog { margin: auto; width: min(480px, calc(100% - var(--space-8))); padding: 0; border: 0; border-radius: var(--radius-lg); background: var(--bg-surface); color: var(--fg); box-shadow: var(--shadow-float); }

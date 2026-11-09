@@ -191,7 +191,7 @@ export function StatTile({ label, value, caption, threshold = null, hero = false
   const Icon = threshold === "ok" ? CircleCheck : threshold === "warn" ? TriangleAlert : threshold === "fail" ? CircleX : null;
   const tone = threshold === "ok" ? "text-pass-fg" : threshold === "warn" ? "text-warn-fg" : threshold === "fail" ? "text-fail-fg" : "";
   return (
-    <div className={cn("group relative flex min-w-0 flex-col gap-1 px-5 py-4", href && "hover:bg-hover")}>
+    <div className={cn("group relative flex min-w-0 flex-col gap-1 px-5 py-4 transition-colors duration-150", href && "hover:bg-hover")}>
       <dt className="label truncate">{href ? <Link href={href} className="after:absolute after:inset-0 group-hover:text-fg">{label}</Link> : label}</dt>
       <dd className="flex min-w-0 flex-col gap-1">
         <span className={cn("display num flex min-w-0 items-center gap-2 truncate", hero ? "text-2xl" : "text-xl", tone)}>

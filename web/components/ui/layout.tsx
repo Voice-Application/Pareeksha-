@@ -33,7 +33,7 @@ export function PageHeader({
   const pathname = usePathname();
   const resolved = hideIcon ? undefined : (icon ?? iconForPath(pathname));
   return (
-    <header className="mb-8 flex flex-wrap items-end justify-between gap-x-6 gap-y-4 min-[860px]:flex-nowrap">
+    <header className="rise-in mb-8 flex flex-wrap items-end justify-between gap-x-6 gap-y-4 min-[860px]:flex-nowrap">
       <div className="min-w-0">
         <div className="flex items-center gap-2.5">
           <TitleIcon icon={resolved} />
@@ -74,7 +74,7 @@ export function Panel({
   id?: string;
 }) {
   return (
-    <section id={id} aria-label={typeof title === "string" ? title : undefined} className={cn("relative min-w-0 rounded-md border border-border bg-surface", className)}>
+    <section id={id} aria-label={typeof title === "string" ? title : undefined} className={cn("rise-in relative min-w-0 rounded-md border border-border bg-surface transition-colors duration-150 hover:border-border-strong", className)}>
       {title && (
         <div className="flex min-h-14 flex-wrap items-center justify-between gap-x-3 gap-y-1 px-5 pt-3 pb-1">
           <h2 className="display text-md">{title}</h2>
