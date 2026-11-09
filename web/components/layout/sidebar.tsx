@@ -3,63 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useId, useSyncExternalStore } from "react";
-import {
-  Activity,
-  AudioLines,
-  BookOpen,
-  Bot,
-  ChevronRight,
-  CirclePlay,
-  Cpu,
-  FileAudio,
-  FlaskConical,
-  GitCompareArrows,
-  House,
-  IndianRupee,
-  Inbox,
-  KeyRound,
-  Languages,
-  ListChecks,
-  MessageSquareText,
-  Plug,
-  Scale,
-  ShieldCheck,
-  SquareCheckBig,
-  UserCog,
-  Users,
-  type LucideIcon,
-} from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { ADVANCED_GROUPS, NAV_ITEMS, SETTINGS_GROUP, activeItem, type NavItem, type NavSection } from "@/lib/nav";
+import { NAV_ICONS as ICONS } from "@/lib/nav-icons";
 import { cn } from "@/lib/utils";
 import { useIsAdmin } from "./theme-toggle";
 
 const ADVANCED_STORE = "pareeksha.nav.advanced";
-
-/** One icon per destination, all from Lucide at 16px on a 1.6 stroke. */
-const ICONS: Record<string, LucideIcon> = {
-  "/": House,
-  "/test": SquareCheckBig,
-  "/designer": MessageSquareText,
-  "/agents": Bot,
-  "/scenarios": ListChecks,
-  "/personas": Users,
-  "/noise-profiles": AudioLines,
-  "/knowledge-bases": BookOpen,
-  "/rag-lab": FlaskConical,
-  "/settings/pricing": IndianRupee,
-  "/runs": Activity,
-  "/runs/new": CirclePlay,
-  "/runs/compare": GitCompareArrows,
-  "/audits": FileAudio,
-  "/dialect": Languages,
-  "/regression": ShieldCheck,
-  "/integrations": Plug,
-  "/dlq": Inbox,
-  "/calibration": Scale,
-  "/settings/api-keys": KeyRound,
-  "/settings/llm": Cpu,
-  "/settings/users": UserCog,
-};
 
 const CHANGED = "pareeksha:nav-advanced";
 
