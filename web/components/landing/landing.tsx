@@ -2,8 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import "./landing.css";
-import verdictShot from "./shots/call-verdict.png";
-import transcriptShot from "./shots/call-transcript-light.png";
+import verdictLight from "./shots/verdict-light.png";
+import verdictDark from "./shots/verdict-dark.png";
 
 const REPO = "https://github.com/voice-application/pareeksha-";
 
@@ -72,20 +72,20 @@ export function Landing() {
               <div className="lp-panel">
                 <Image
                   className="lp-shot lp-shot--light"
-                  src={transcriptShot}
-                  alt="A tested conversation: the caller's messages, the bot's replies, and the rule each reply kept or broke."
+                  src={verdictLight}
+                  alt="A scored verdict for one call: critical failure, an overall score of 57.5 out of 100 against a pass line of 80, and a button to override the judge's score."
                   sizes="(min-width: 60rem) 420px, 100vw"
                   placeholder="blur"
                 />
                 <Image
                   className="lp-shot lp-shot--dark"
-                  src={verdictShot}
-                  alt="A scored verdict for one call: critical failure, needs human review, an overall score of 13.75 out of 100 against a pass line of 80, the failure codes it broke, and a button to override the judge's score."
+                  src={verdictDark}
+                  alt="A scored verdict for one call: critical failure, an overall score of 57.5 out of 100 against a pass line of 80, and a button to override the judge's score."
                   sizes="(min-width: 60rem) 420px, 100vw"
                   placeholder="blur"
                 />
               </div>
-              <figcaption className="lp-caption">A tested conversation and the rule behind each reply &mdash; the score, the broken rules, and the line each came from.</figcaption>
+              <figcaption className="lp-caption">One call&rsquo;s verdict: the score against the pass line, and the rules it broke.</figcaption>
             </figure>
           </div>
         </section>
