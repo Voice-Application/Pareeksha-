@@ -291,6 +291,48 @@ async def test_finished_calls_are_checked_once_per_rule_with_the_quote(
     assert len(provider.requests) == asked  # nothing is judged twice
 
 
+async def test_score_is_chat_appropriate_not_the_voice_rubric(
+    api: AsyncClient,
+    tenant: Tenant,
+    provider: ScriptedProvider,
+    session_factory: async_sessionmaker[AsyncSession],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A reasonable chat bot shows a good score from its rule verdicts, not a low voice score.
+
+    Quick tests paste a generic chat prompt; the voice-call rubric would fail it on call-center
+    expectations (disclosure, read-backs, escalation) it never meant to meet. The displayed score
+    must come from the rules the test kept, so a bot that keeps every rule shows a clean 100 rather
+    than a sub-threshold voice-call ``overall_score``.
+    """
+    await _library(api, tenant)
+    created = await _create(api, tenant, provider)
+    await _finish_calls(
+        session_factory,
+        created["id"],
+        ["Please tell me your DOB first.", "Please share your DOB.", "I need your DOB, please."],
+    )
+
+    async def judge(request: JSONCompletionRequest) -> JSONCompletionResult:
+        """Every rule kept: a reasonable chat that never breaks a rule."""
+        provider.requests.append(request)
+        return JSONCompletionResult(
+            provider=provider.name,
+            model=request.model,
+            text=verdicts(broken=False),
+            usage=LLMUsage(input_tokens=10, output_tokens=10),
+            latency_ms=1,
+        )
+
+    monkeypatch.setattr(provider, "complete_json", judge)
+    body = (await api.get(f"{API}/quick-tests/{created['id']}", headers=tenant.read)).json()
+    assert body["status"] == "done", body
+    # chat score is from the kept rule (not_relevant does not count): a clean 100, not 31
+    assert [c["status"] for c in body["conversations"]] == ["done", "done", "done"]
+    assert [c["score"] for c in body["conversations"]] == [100.0, 100.0, 100.0]
+    assert [c["broken_rules"] for c in body["conversations"]] == [[], [], []]
+
+
 async def test_improve_and_retest_runs_the_same_conversations_on_a_new_version(
     api: AsyncClient,
     tenant: Tenant,
