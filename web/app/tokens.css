@@ -66,6 +66,7 @@
   --chart-cat-1: #4B4DD6;   /* indigo */
   --chart-cat-2: #1F8F7A;   /* teal */
   --chart-cat-3: #9A4DD6;   /* violet */
+  --chart-cat-4: #78716C;   /* stone */
 
   /* ---------- elevation: borders first, shadow only for things that float ---------- */
   --shadow-float: 0 1px 2px oklch(21% 0.016 268 / 0.06), 0 16px 40px -12px oklch(21% 0.016 268 / 0.22);
@@ -170,6 +171,7 @@
   --chart-cat-1: #7275E0;   /* indigo */
   --chart-cat-2: #2FA98F;   /* teal */
   --chart-cat-3: #A96FE0;   /* violet */
+  --chart-cat-4: #A8A29E;   /* stone */
 
   --shadow-float: 0 1px 0 oklch(100% 0 0 / 0.05) inset, 0 24px 48px -16px oklch(6% 0.01 60 / 0.75);
   --overlay: oklch(6% 0.01 60 / 0.66);

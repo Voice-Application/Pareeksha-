@@ -97,7 +97,7 @@ export function QuickTestForm() {
       )}
       <div className="grid items-start gap-6 min-[1180px]:grid-cols-[minmax(0,1fr)_380px]">
         <form onSubmit={submit} noValidate aria-label="Test my prompt" className="flex min-w-0 flex-col gap-6">
-          <Panel title={<SectionTitle icon={Bot}>Your bot</SectionTitle>} bodyClassName="flex flex-col gap-5">
+          <Panel title={<SectionTitle icon={Bot}>Your bot</SectionTitle>} label="Your bot" bodyClassName="flex flex-col gap-5">
             <TextAreaField
               id="qt-prompt"
               label="System prompt"
@@ -119,7 +119,7 @@ export function QuickTestForm() {
               help="What the bot knows about the customer it talks to. Use made-up values. It is added to the prompt as the customer record, or put where you wrote {{user_details}}. Pareeksha then checks the bot does not give it away."
             />
           </Panel>
-          <Panel title={<SectionTitle icon={SlidersHorizontal}>Options</SectionTitle>} bodyClassName="grid gap-5 min-[720px]:grid-cols-2">
+          <Panel title={<SectionTitle icon={SlidersHorizontal}>Options</SectionTitle>} label="Options" bodyClassName="grid gap-5 min-[720px]:grid-cols-2">
             <SelectField
               id="qt-kb"
               label="Documents the bot answers from (optional)"
@@ -195,7 +195,7 @@ function RecentTests() {
   const q = useQuery({ queryKey: ["quick-tests"], queryFn: listQuickTests, refetchInterval: (s) => listPoll(s.state.data) });
   const list = asList(q.data);
   return (
-    <Panel title={<SectionTitle icon={History}>Recent tests</SectionTitle>} bodyClassName="p-0 pb-2">
+    <Panel title={<SectionTitle icon={History}>Recent tests</SectionTitle>} label="Recent tests" bodyClassName="p-0 pb-2">
       {q.isPending && <TableSkeleton rows={3} label="Loading tests" />}
       {q.isError && (
         <div className="px-5 pb-4">

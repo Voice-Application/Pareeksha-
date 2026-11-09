@@ -10,8 +10,8 @@
  * suppressed under prefers-reduced-motion by the global rule in globals.css.
  */
 
-import { useState, type CSSProperties } from "react";
-import { DataTable, Tooltip, scaleLinear, useChartId, type Plot } from "./shared";
+import { type CSSProperties } from "react";
+import { DataTable, Tooltip, useChartSelection, scaleLinear, useChartId, type Plot } from "./shared";
 
 export type Bar = { label: string; value: number };
 
@@ -30,7 +30,7 @@ export function BarChart({
   height?: number;
 }) {
   const id = useChartId("bar");
-  const [active, setActive] = useState<number | null>(null);
+  const [active, setActive] = useChartSelection();
 
   const W = 640;
   const H = height;
@@ -47,8 +47,8 @@ export function BarChart({
   const yTicks = [0, yMax / 2, yMax];
 
   const ab = active != null ? bars[active] : null;
-  const tipLeftPct = active != null ? ((bx(active) + barW / 2) / W) * 100 : 0;
-  const tipTop = active != null ? ((baseY - Math.max(0, bh(bars[active].value))) / H) * height : 0;
+  const tipLeftPct = ab && active != null ? ((bx(active) + barW / 2) / W) * 100 : 0;
+  const tipTop = ab ? ((baseY - Math.max(0, bh(ab.value))) / H) * height : 0;
 
   return (
     <figure className="m-0">

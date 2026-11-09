@@ -6,15 +6,15 @@
  * marks, spacers, reduced-motion behaviour and the table-view fallback consistent across charts.
  *
  * Colour comes from tokens only: single-series charts use the accent hue (`var(--accent)`); the
- * categorical theme is `--chart-cat-1..3` (indigo/teal/violet), set per mode in app/tokens.css. The
+ * categorical theme is `--chart-cat-1..4` (indigo/teal/violet/stone), set per mode in app/tokens.css. The
  * reserved verdict tokens (`--pass`/`--fail`/`--warn`) are used only for status meaning, never as a
  * categorical series.
  */
 
-import { useId, type ReactNode } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
 
 /** The fixed categorical order — colour follows the entity, never its rank, and is never cycled. */
-export const CHART_CATEGORICAL = ["var(--chart-cat-1)", "var(--chart-cat-2)", "var(--chart-cat-3)"] as const;
+export const CHART_CATEGORICAL = ["var(--chart-cat-1)", "var(--chart-cat-2)", "var(--chart-cat-3)", "var(--chart-cat-4)"] as const;
 
 /** A measured-out plot box inside an SVG viewBox: the area where marks are drawn, minus the axes gutter. */
 export type Plot = { x: number; y: number; w: number; h: number };
@@ -77,4 +77,18 @@ export function Tooltip({ leftPct, top, children }: { leftPct: number; top: numb
 export function useChartId(prefix: string) {
   const id = useId();
   return `${prefix}-${id.replace(/:/g, "")}`;
+}
+
+/** Dismiss the active chart tooltip with Escape while keeping the current mark focused. */
+export function useChartSelection() {
+  const [active, setActive] = useState<number | null>(null);
+  useEffect(() => {
+    if (active == null) return;
+    const dismiss = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setActive(null);
+    };
+    document.addEventListener("keydown", dismiss);
+    return () => document.removeEventListener("keydown", dismiss);
+  }, [active]);
+  return [active, setActive] as const;
 }

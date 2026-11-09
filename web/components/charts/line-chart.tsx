@@ -11,8 +11,8 @@
  * short line-draw, suppressed under prefers-reduced-motion by the global rule in globals.css.
  */
 
-import { useState, type CSSProperties } from "react";
-import { DataTable, Tooltip, scaleLinear, useChartId, type Plot } from "./shared";
+import { type CSSProperties } from "react";
+import { DataTable, Tooltip, useChartSelection, scaleLinear, useChartId, type Plot } from "./shared";
 
 export type LinePoint = { label: string; value: number };
 
@@ -37,7 +37,7 @@ export function LineChart({
   height?: number;
 }) {
   const id = useChartId("line");
-  const [active, setActive] = useState<number | null>(null);
+  const [active, setActive] = useChartSelection();
 
   const W = 640;
   const H = height;
@@ -54,7 +54,7 @@ export function LineChart({
   // Snap the crosshair to the nearest point by pointer x.
   const onMove = (e: React.PointerEvent<SVGRectElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const rx = ((e.clientX - rect.left) / rect.width) * W;
+    const rx = plot.x + ((e.clientX - rect.left) / rect.width) * plot.w;
     let best = 0;
     let bestD = Infinity;
     for (let i = 0; i < n; i++) {
@@ -69,8 +69,8 @@ export function LineChart({
 
   const ap = active != null ? points[active] : null;
   // Tooltip position: x as a % of container width (SVG is width-100%), y scaled to the rendered height.
-  const tipLeftPct = active != null ? (px(active) / W) * 100 : 0;
-  const tipTop = active != null ? (py(points[active].value) / H) * height : 0;
+  const tipLeftPct = ap && active != null ? (px(active) / W) * 100 : 0;
+  const tipTop = ap ? (py(ap.value) / H) * height : 0;
 
   return (
     <figure className="m-0">
