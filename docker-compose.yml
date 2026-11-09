@@ -137,6 +137,11 @@ services:
     profiles: ["workers"]
     command: ["python", "-m", "pareeksha.workers.reconciler"]
 
+  judge:                    # judges finished quick-test calls so verdicts land without a reader
+    <<: *backend
+    profiles: ["workers"]   # set JUDGE_WORKER_ENABLED=1 to turn it on
+    command: ["python", "-m", "pareeksha.workers.judge"]
+
   integrations:
     <<: *backend
     profiles: ["workers"]   # implemented in INT-01
