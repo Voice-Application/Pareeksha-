@@ -60,6 +60,7 @@ function TitleIcon({ icon: Icon }: { icon?: LucideIcon }) {
 /** One container recipe: a surface on the canvas, a hairline edge, the head inside without a rule under it. */
 export function Panel({
   title,
+  label,
   aux,
   children,
   className,
@@ -67,6 +68,8 @@ export function Panel({
   id,
 }: {
   title?: ReactNode;
+  /** Accessible name when `title` is a ReactNode (e.g. icon + text); a string title names the section itself. */
+  label?: string;
   aux?: ReactNode;
   children: ReactNode;
   className?: string;
@@ -74,7 +77,7 @@ export function Panel({
   id?: string;
 }) {
   return (
-    <section id={id} aria-label={typeof title === "string" ? title : undefined} className={cn("rise-in relative min-w-0 rounded-md border border-border bg-surface transition-colors duration-150 hover:border-border-strong", className)}>
+    <section id={id} aria-label={label ?? (typeof title === "string" ? title : undefined)} className={cn("rise-in relative min-w-0 rounded-md border border-border bg-surface transition-colors duration-150 hover:border-border-strong", className)}>
       {title && (
         <div className="flex min-h-14 flex-wrap items-center justify-between gap-x-3 gap-y-1 px-5 pt-3 pb-1">
           <h2 className="display text-md">{title}</h2>
