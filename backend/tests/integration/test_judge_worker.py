@@ -60,9 +60,7 @@ def provider(monkeypatch: pytest.MonkeyPatch, tmp_path: Any) -> Iterator[Scripte
     app.dependency_overrides.pop(get_client_builder, None)
 
 
-def _worker(
-    factory: async_sessionmaker[AsyncSession], provider: ScriptedProvider
-) -> JudgeWorker:
+def _worker(factory: async_sessionmaker[AsyncSession], provider: ScriptedProvider) -> JudgeWorker:
     """A worker that builds its judge client from the scripted provider (no real network)."""
     return JudgeWorker(
         factory,
