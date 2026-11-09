@@ -171,6 +171,36 @@
 .lp-step__title { margin: 0; }
 .lp-step__body { color: var(--fg-muted); max-width: 32ch; }
 
+/* Features: the fuller product, as a calm card grid. Cards are whole-surface links into each tool. */
+.lp-features { padding-block: var(--space-12); border-top: 1px solid var(--border); }
+.lp-features__head { margin-bottom: var(--space-3); }
+.lp-features__lead { color: var(--fg-muted); max-width: 56ch; margin-bottom: var(--space-10); }
+.lp-features__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lp-feature { min-width: 0; }
+.lp-feature__link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  height: 100%;
+  padding: var(--space-6);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color var(--dur-base) var(--ease), background-color var(--dur-base) var(--ease);
+}
+.lp-feature__link:hover { border-color: var(--border-strong); background: var(--bg-sunken); }
+.lp-feature__title { margin: 0; font-size: var(--text-md); }
+.lp-feature__body { margin: 0; color: var(--fg-muted); }
+
 /* Closing call to action: one statement, one button. */
 .lp-cta { padding-block: var(--space-16); border-top: 1px solid var(--border); }
 .lp-cta__row {
@@ -209,10 +239,12 @@
   .lp-hero { padding-block: var(--space-12) var(--space-12); }
   .lp-hero__grid { grid-template-columns: minmax(0, 1fr); gap: var(--space-10); }
   .lp-steps { grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+  .lp-features__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .lp-nav__repo { display: none; }
 }
 @media (max-width: 40rem) {
-  .lp-nav__links a[href="#how"] { display: none; }
+  .lp-nav__links a[href="#how"], .lp-nav__links a[href="#features"] { display: none; }
+  .lp-features__grid { grid-template-columns: minmax(0, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) {
   .lp-btn { transition: none; }

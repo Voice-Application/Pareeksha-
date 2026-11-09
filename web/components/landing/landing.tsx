@@ -15,6 +15,43 @@ const STEPS = [
 ];
 
 /**
+ * What the platform does beyond the one-screen test. Each line is grounded in a real feature page
+ * so the copy stays honest; the href deep-links into that tool.
+ */
+const FEATURES = [
+  {
+    title: "Synthetic callers & personas",
+    body: "Build callers with their own language, code-mix, voice, mood and habits, and scenarios that say what the caller is trying to do.",
+    href: "/personas",
+  },
+  {
+    title: "Noisy phone lines",
+    body: "Put a call on a real line: codec, band-limit, background noise, SNR and packet loss — not just a clean studio mic.",
+    href: "/noise-profiles",
+  },
+  {
+    title: "Dialect & accent gaps",
+    body: "Measure how the speech recogniser performs per dialect and phone line, with sample sizes and 95% confidence intervals.",
+    href: "/dialect",
+  },
+  {
+    title: "RAG lab",
+    body: "Compare chunking, embedding and retrieval setups against no-RAG and full-context baselines on the same scenarios.",
+    href: "/rag-lab",
+  },
+  {
+    title: "Regression & audits",
+    body: "Promote a failed call into a test future runs must not fail, and score real recorded calls with the same rubric.",
+    href: "/regression",
+  },
+  {
+    title: "Integrations",
+    body: "Receive recordings from your telephony with a signed webhook, and send evaluated calls on to your CRM.",
+    href: "/integrations",
+  },
+];
+
+/**
  * The marketing landing page for Pareeksha, rendered outside the app shell at /welcome.
  * Leads with the product's job in plain words and consumes the shared app design tokens,
  * so clicking into the dashboard is continuous rather than a visual cliff.
@@ -36,6 +73,7 @@ export function Landing() {
           </Link>
           <nav aria-label="Product" className="lp-nav__links">
             <a href="#how">How it works</a>
+            <a href="#features">Features</a>
             <a className="lp-nav__repo" href={REPO}>
               Repository
             </a>
@@ -106,6 +144,27 @@ export function Landing() {
                 </li>
               ))}
             </ol>
+          </div>
+        </section>
+
+        <section id="features" className="lp-features" aria-labelledby="features-head">
+          <div className="lp-container">
+            <h2 id="features-head" className="lp-features__head">
+              More than one test
+            </h2>
+            <p className="lp-features__lead">
+              The quick test is the front door. Underneath, Pareeksha is a full QA suite for voice and chat bots.
+            </p>
+            <ul className="lp-features__grid">
+              {FEATURES.map((f) => (
+                <li key={f.href} className="lp-feature">
+                  <Link href={f.href} className="lp-feature__link">
+                    <h3 className="lp-feature__title">{f.title}</h3>
+                    <p className="lp-feature__body">{f.body}</p>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 
