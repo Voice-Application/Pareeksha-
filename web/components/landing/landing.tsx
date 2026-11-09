@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AudioLines, FlaskConical, Languages, Plug, ShieldCheck, Users, type LucideIcon } from "lucide-react";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import "./landing.css";
 import { DemoRun } from "./demo-run";
@@ -17,36 +18,42 @@ const STEPS = [
  * What the platform does beyond the one-screen test. Each line is grounded in a real feature page
  * so the copy stays honest; the href deep-links into that tool.
  */
-const FEATURES = [
+const FEATURES: { title: string; body: string; href: string; icon: LucideIcon }[] = [
   {
     title: "Synthetic callers & personas",
     body: "Build callers with their own language, code-mix, voice, mood and habits, and scenarios that say what the caller is trying to do.",
     href: "/personas",
+    icon: Users,
   },
   {
     title: "Noisy phone lines",
     body: "Put a call on a real line: codec, band-limit, background noise, SNR and packet loss — not just a clean studio mic.",
     href: "/noise-profiles",
+    icon: AudioLines,
   },
   {
     title: "Dialect & accent gaps",
     body: "Measure how the speech recogniser performs per dialect and phone line, with sample sizes and 95% confidence intervals.",
     href: "/dialect",
+    icon: Languages,
   },
   {
     title: "RAG lab",
     body: "Compare chunking, embedding and retrieval setups against no-RAG and full-context baselines on the same scenarios.",
     href: "/rag-lab",
+    icon: FlaskConical,
   },
   {
     title: "Regression & audits",
     body: "Promote a failed call into a test future runs must not fail, and score real recorded calls with the same rubric.",
     href: "/regression",
+    icon: ShieldCheck,
   },
   {
     title: "Integrations",
     body: "Receive recordings from your telephony with a signed webhook, and send evaluated calls on to your CRM.",
     href: "/integrations",
+    icon: Plug,
   },
 ];
 
@@ -139,14 +146,20 @@ export function Landing() {
               The quick test is the front door. Underneath, Pareeksha is a full QA suite for voice and chat bots.
             </p>
             <ul className="lp-features__grid">
-              {FEATURES.map((f) => (
-                <li key={f.href} className="lp-feature">
-                  <Link href={f.href} className="lp-feature__link">
-                    <h3 className="lp-feature__title">{f.title}</h3>
-                    <p className="lp-feature__body">{f.body}</p>
-                  </Link>
-                </li>
-              ))}
+              {FEATURES.map((f) => {
+                const Icon = f.icon;
+                return (
+                  <li key={f.href} className="lp-feature">
+                    <Link href={f.href} className="lp-feature__link">
+                      <span className="lp-feature__icon" aria-hidden="true">
+                        <Icon size={20} strokeWidth={1.6} />
+                      </span>
+                      <h3 className="lp-feature__title">{f.title}</h3>
+                      <p className="lp-feature__body">{f.body}</p>
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
 
             <div className="lp-showcase">

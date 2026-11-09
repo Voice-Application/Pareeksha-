@@ -334,6 +334,17 @@
   transition: border-color var(--dur-base) var(--ease), background-color var(--dur-base) var(--ease);
 }
 .lp-feature__link:hover { border-color: var(--border-strong); background: var(--bg-sunken); }
+.lp-feature__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--accent-tint);
+  color: var(--accent-fg);
+}
 .lp-feature__title { margin: 0; font-size: var(--text-md); }
 .lp-feature__body { margin: 0; color: var(--fg-muted); }
 
