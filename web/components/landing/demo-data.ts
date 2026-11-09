@@ -59,3 +59,73 @@ export const DEMO_DIALECT: { dialect: string; wer: number; n: number }[] = [
   { dialect: "Kannada · mobile, noisy", wer: 0.23, n: 94 },
   { dialect: "Tamil · code-mixed", wer: 0.19, n: 88 },
 ];
+
+/**
+ * A test caller's opening line in Kannada script, copied from the persona voice preview
+ * (backend/pareeksha/api/speech.py SAMPLE_LINES["kn-IN"]); `gloss` is that file's English line.
+ */
+export const DEMO_CALLER_LINE = {
+  lang: "kn",
+  language: "Kannada",
+  text: "ನಮಸ್ಕಾರ, ನನ್ನ ಇಎಂಐ ಬಗ್ಗೆ ಒಂದು ಪ್ರಶ್ನೆ ಇತ್ತು.",
+  gloss: "Hello, I had a question about my EMI payment.",
+} as const;
+
+export type DemoCatch = {
+  /** The prompt rule the answer broke, in the prompt's own words (see DEMO_PROMPT). */
+  rule: string;
+  question: string;
+  questionLang: "en" | "hi";
+  /** What the bot said (a planted wrong answer from the seeded demo). */
+  said: string;
+  saidLang: "en" | "hi";
+  /** The document line it contradicts. */
+  doc: string;
+  quote: string;
+  quoteLang: "en" | "hi";
+  /** English meaning of any Hindi line, for readers who don't read Devanagari. */
+  gloss?: { question?: string; said?: string; quote?: string };
+};
+
+/**
+ * Wrong answers caught in the seeded RAG demo (backend/pareeksha/seed/data/demo_rag.yaml), each
+ * next to the document line it contradicts. Sample data, not a customer's calls.
+ */
+export const DEMO_CATCHES: DemoCatch[] = [
+  {
+    rule: "Never invent rates, fees or timelines.",
+    question: "How many times can I change my EMI date, and what does it cost?",
+    questionLang: "en",
+    said: "You can change the EMI date twice a year, free of charge.",
+    saidLang: "en",
+    doc: "emi_sahayata_hi.md",
+    quote: "EMI की तारीख पूरे लोन के दौरान केवल एक बार बदली जा सकती है। तारीख बदलने का शुल्क ₹250 है",
+    quoteLang: "hi",
+    gloss: { quote: "The EMI date can be changed only once during the loan. The fee to change it is ₹250." },
+  },
+  {
+    rule: "Never invent rates, fees or timelines.",
+    question: "मेरी नौकरी छूट गई है, क्या मैं कुछ महीनों के लिए EMI टाल सकता हूँ?",
+    questionLang: "hi",
+    said: "जी हाँ, आप 6 महीने तक बिना ब्याज के EMI टाल सकते हैं।",
+    saidLang: "hi",
+    doc: "emi_sahayata_hi.md",
+    quote: "राहत के तहत अधिकतम 3 महीने तक EMI टाली जा सकती है, लेकिन इस अवधि का ब्याज जुड़ता रहता है।",
+    quoteLang: "hi",
+    gloss: {
+      question: "I lost my job. Can I put off my EMI for a few months?",
+      said: "Yes, you can put off your EMI for up to 6 months, with no interest.",
+      quote: "Relief lets you defer EMI for at most 3 months, but interest keeps adding up for that period.",
+    },
+  },
+  {
+    rule: "Answer only from the provided documents.",
+    question: "Can I change my registered mobile number online?",
+    questionLang: "en",
+    said: "Yes, you can change it in the app under Profile > Edit.",
+    saidLang: "en",
+    doc: "account_and_kyc.md",
+    quote: "online changes are not allowed for security reasons",
+    quoteLang: "en",
+  },
+];
