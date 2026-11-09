@@ -30,3 +30,13 @@ htmlcov/
 
 # Launch video output
 brag-output/
+
+# Local agent/tooling scratch dirs (not part of the project)
+.codex/
+.cursor/
+.gemini/
+.serena/
+.hallmark/
+
+# Local-only prod compose override
+docker-compose.prod.yml
