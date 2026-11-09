@@ -29,7 +29,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { ADVANCED_GROUPS, NAV_ITEMS, activeItem, type NavItem } from "@/lib/nav";
+import { ADVANCED_GROUPS, NAV_ITEMS, SETTINGS_GROUP, activeItem, type NavItem } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { useRole } from "./theme-toggle";
 
@@ -160,6 +160,10 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             ))}
           </div>
         )}
+      </div>
+      <div className="mt-auto flex flex-col gap-1 border-t border-border pt-4">
+        <p className="px-3 pb-1 text-xs text-subtle">{SETTINGS_GROUP}</p>
+        <ul className="flex flex-col gap-px">{NAV_ITEMS.filter((i) => i.group === SETTINGS_GROUP && visible(i)).map(item)}</ul>
       </div>
     </nav>
   );
