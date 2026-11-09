@@ -13,7 +13,8 @@
 
 import { useEffect, useId, useState, type ReactNode } from "react";
 
-/** The fixed categorical order — colour follows the entity, never its rank, and is never cycled. */
+/** The fixed categorical order — colour follows the entity, never its rank, and is never cycled.
+ * The fourth slot is a neutral for grouped Other operations. */
 export const CHART_CATEGORICAL = ["var(--chart-cat-1)", "var(--chart-cat-2)", "var(--chart-cat-3)", "var(--chart-cat-4)"] as const;
 
 /** A measured-out plot box inside an SVG viewBox: the area where marks are drawn, minus the axes gutter. */

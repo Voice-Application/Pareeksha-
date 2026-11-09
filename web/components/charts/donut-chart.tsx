@@ -12,7 +12,10 @@
 
 import { CHART_CATEGORICAL, DataTable, Tooltip, useChartSelection, useChartId } from "./shared";
 
-export type Slice = { label: string; value: number; colorIndex?: number };
+export type Slice = { label: string; value: number; colorIndex?: number; color?: string };
+
+/** Explicit entity colors take priority; otherwise use the stable slot, never cycle the palette. */
+const sliceColor = (slice: Slice, index: number) => slice.color ?? CHART_CATEGORICAL[Math.min(slice.colorIndex ?? index, CHART_CATEGORICAL.length - 1)];
 
 /** Point on a circle at `deg` degrees (0 = 12 o'clock, clockwise), radius `r`, centered at (cx,cy). */
 function polar(cx: number, cy: number, r: number, deg: number) {
@@ -73,8 +76,8 @@ export function DonutChart({
           <title id={`${id}-title`}>{title}</title>
           {segs.map((s) => {
             if (s.frac <= 0) return null;
-            // Keep at least half of even the narrowest segment visible.
-            const gap = Math.min(GAP, (s.a1 - s.a0) / 2);
+            // Keep at least 70% of even the narrowest segment visible.
+            const gap = Math.min(GAP, (s.a1 - s.a0) * 0.3);
             return (
               <g
                 key={s.i}
@@ -89,7 +92,7 @@ export function DonutChart({
               >
                 <path
                   d={arcPath(cx, cy, rOuter, rInner, s.a0 + gap / 2, s.a1 - gap / 2)}
-                  fill={CHART_CATEGORICAL[s.colorIndex]}
+                  fill={sliceColor(slices[s.i], s.i)}
                   opacity={active == null || active === s.i ? 1 : 0.45}
                   className="chart-arc-in"
                   style={{ transformBox: "fill-box", transformOrigin: "center" }}
@@ -131,7 +134,7 @@ export function DonutChart({
       <ul className="flex min-w-0 flex-col gap-2 text-sm">
         {segs.map((s) => (
           <li key={s.i} className="flex min-w-0 items-center gap-2.5">
-            <span className="h-2.5 w-2.5 shrink-0 rounded-xs" style={{ background: CHART_CATEGORICAL[s.colorIndex] }} aria-hidden />
+            <span className="h-2.5 w-2.5 shrink-0 rounded-xs" style={{ background: sliceColor(slices[s.i], s.i) }} aria-hidden />
             <span className="min-w-0 flex-1 truncate text-muted">{s.label}</span>
             <span className="num shrink-0 tabular-nums text-fg">{Math.round(s.frac * 100)}%</span>
           </li>

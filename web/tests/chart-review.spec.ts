@@ -12,7 +12,7 @@ test("project token colors survive filtering and narrow slices support pointer a
   await mockFe(page, state);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  const panel = page.getByRole("region", { name: "Project token usage by operation" });
+  const panel = page.getByRole("region", { name: "Token usage by operation, all agents" });
   const marks = panel.locator('svg g[role="button"]');
   await expect(marks).toHaveCount(4);
   const colors = await marks.locator("path:first-child").evaluateAll((paths) => paths.map((p) => p.getAttribute("fill")));
@@ -52,8 +52,8 @@ test("usage failure without scored runs offers retry; empty success hides charts
   state.fail["GET /usage"] = 500;
   await mockFe(page, state);
   await page.goto("/");
-  const panel = page.getByRole("region", { name: "Project token usage by operation" });
-  await expect(panel.getByRole("alert")).toContainText("Could not load token usage");
+  const panel = page.getByRole("region", { name: "Token usage by operation, all agents" });
+  await expect(panel.getByRole("alert")).toContainText("Could not load usage");
   delete state.fail["GET /usage"];
   await panel.getByRole("button", { name: "Retry" }).click();
   await expect(panel).toHaveCount(0);

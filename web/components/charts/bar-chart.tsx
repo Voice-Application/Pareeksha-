@@ -46,7 +46,7 @@ export function BarChart({
 
   const yTicks = [0, yMax / 2, yMax];
 
-  const ab = active != null ? bars[active] : null;
+  const ab = active != null ? (bars[active] ?? null) : null;
   const tipLeftPct = ab && active != null ? ((bx(active) + barW / 2) / W) * 100 : 0;
   const tipTop = ab ? ((baseY - Math.max(0, bh(ab.value))) / H) * height : 0;
 

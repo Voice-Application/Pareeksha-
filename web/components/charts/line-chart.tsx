@@ -67,7 +67,7 @@ export function LineChart({
     setActive(best);
   };
 
-  const ap = active != null ? points[active] : null;
+  const ap = active != null ? (points[active] ?? null) : null;
   // Tooltip position: x as a % of container width (SVG is width-100%), y scaled to the rendered height.
   const tipLeftPct = ap && active != null ? (px(active) / W) * 100 : 0;
   const tipTop = ap ? (py(ap.value) / H) * height : 0;
