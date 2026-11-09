@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import { ADVANCED_GROUPS, NAV_ITEMS, SETTINGS_GROUP, activeItem, type NavItem, type NavSection } from "@/lib/nav";
 import { cn } from "@/lib/utils";
-import { useRole } from "./theme-toggle";
+import { useIsAdmin } from "./theme-toggle";
 
 const ADVANCED_STORE = "pareeksha.nav.advanced";
 
@@ -102,7 +102,7 @@ function writeAdvanced(open: boolean) {
  *  and a Settings group pinned to the bottom. Admin-only items show only for an explicit admin role. */
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
-  const role = useRole();
+  const isAdmin = useIsAdmin();
   const match = activeItem(pathname);
   const regionId = useId();
   const choice = useSyncExternalStore(subscribe, readAdvanced, () => "");
@@ -110,8 +110,9 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   // the Settings group (and the ungrouped core items) must not auto-open it.
   const inside = match?.group != null && (ADVANCED_GROUPS as NavSection[]).includes(match.group);
   const open = choice === "" ? inside : choice === "1";
-  // Admin-only items show only for an explicit admin; an unknown/missing role is treated as non-admin.
-  const visible = (i: NavItem) => !i.adminOnly || role === "admin";
+  // Admin-only items show only for an admin; an unknown/missing role is treated as non-admin (open
+  // dashboard mode aside), so a member with a transient cookie gap never sees admin-only links.
+  const visible = (i: NavItem) => !i.adminOnly || isAdmin;
   const toggle = () => writeAdvanced(!open);
 
   const item = (it: NavItem) => {

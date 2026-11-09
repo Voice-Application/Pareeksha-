@@ -47,3 +47,16 @@ export function useRole(): string | null {
     () => null,
   );
 }
+
+/** True when sign-in is turned off for this build (NEXT_PUBLIC_AUTH_DISABLED=1); then the open dashboard acts as admin. */
+export const AUTH_DISABLED = process.env.NEXT_PUBLIC_AUTH_DISABLED === "1";
+
+/**
+ * Whether to show admin-only controls. Admin only for an EXPLICIT "admin" role, so a member whose readable
+ * cookie is briefly missing is never treated as admin. When sign-in is disabled the dashboard is open, so a
+ * missing role (no login) acts as admin — but an explicit "member" cookie (e.g. in tests) still stays a member.
+ */
+export function useIsAdmin(): boolean {
+  const role = useRole();
+  return role === "admin" || (role === null && AUTH_DISABLED);
+}

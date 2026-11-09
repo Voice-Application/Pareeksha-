@@ -19,6 +19,8 @@ export default defineConfig({
       PAREEKSHA_API_URL: "http://127.0.0.1:3199/api/v1",
       PAREEKSHA_API_KEY: "pk_test_fe01_secret",
       AUTH_DISABLED: "1",
+      // Client-visible mirror of AUTH_DISABLED so the open dashboard treats a missing role as admin.
+      NEXT_PUBLIC_AUTH_DISABLED: "1",
     },
   },
 });

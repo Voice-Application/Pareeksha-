@@ -18,7 +18,7 @@ import { EmptyState, ErrorPanel, Skeleton } from "@/components/ui/states";
 import { FilterSelect } from "@/components/ui/field";
 import { FlagChip, Meter, ScoreChip, StatTile, StatusPill, TileRow, VerdictBadge, verdictOf } from "@/components/ui/measure";
 import { Chip } from "@/components/ui/layout";
-import { useRole } from "@/components/layout/theme-toggle";
+import { useIsAdmin } from "@/components/layout/theme-toggle";
 
 const STORE = "pareeksha.agent";
 
@@ -64,9 +64,10 @@ export function OverviewSkeleton() {
 export function Overview() {
   const url = useUrlState();
   const now = useNow();
-  // Platform health is SRE telemetry; show it only to an explicit admin. An unknown/missing role is
-  // treated as non-admin so a member with a transient cookie gap never sees it (or 403s fetching it).
-  const isAdmin = useRole() === "admin";
+  // Platform health is SRE telemetry; show it only to an admin. An unknown/missing role is treated as
+  // non-admin (so a member with a transient cookie gap never sees it or 403s fetching it) unless sign-in
+  // is disabled, where the open dashboard acts as admin.
+  const isAdmin = useIsAdmin();
   const agents = useQuery({ queryKey: ["agents", "overview"], queryFn: allAgents });
   // Agents made by Test my prompt have their own panel; the hero is about the user's own agents.
   const active = useMemo(() => (agents.data?.items ?? []).filter((a) => !a.archived && !(a.adapter_config as { quick_test_id?: string } | undefined)?.quick_test_id), [agents.data]);
