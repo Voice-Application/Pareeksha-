@@ -29,7 +29,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { ADVANCED_GROUPS, NAV_ITEMS, SETTINGS_GROUP, activeItem, type NavItem } from "@/lib/nav";
+import { ADVANCED_GROUPS, NAV_ITEMS, SETTINGS_GROUP, activeItem, type NavItem, type NavSection } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { useRole } from "./theme-toggle";
 
@@ -98,17 +98,20 @@ function writeAdvanced(open: boolean) {
   window.dispatchEvent(new Event(CHANGED));
 }
 
+/** The left navigation: the core destinations, a foldable Advanced section (Build/Evaluate/Operate),
+ *  and a Settings group pinned to the bottom. Admin-only items show only for an explicit admin role. */
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const role = useRole();
   const match = activeItem(pathname);
   const regionId = useId();
   const choice = useSyncExternalStore(subscribe, readAdvanced, () => "");
-  // With no choice yet, the section opens by itself when the current page lives in it;
-  // an explicit click always wins.
-  const inside = (match?.group ?? null) !== null;
+  // With no choice yet, the section opens by itself only when the current page lives in Advanced —
+  // the Settings group (and the ungrouped core items) must not auto-open it.
+  const inside = match?.group != null && (ADVANCED_GROUPS as NavSection[]).includes(match.group);
   const open = choice === "" ? inside : choice === "1";
-  const visible = (i: NavItem) => !i.adminOnly || role !== "member";
+  // Admin-only items show only for an explicit admin; an unknown/missing role is treated as non-admin.
+  const visible = (i: NavItem) => !i.adminOnly || role === "admin";
   const toggle = () => writeAdvanced(!open);
 
   const item = (it: NavItem) => {

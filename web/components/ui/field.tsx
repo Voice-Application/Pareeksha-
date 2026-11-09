@@ -172,7 +172,7 @@ export function Segmented<T extends string | number>({
       <span id={id} className={hideLabel ? "sr-only" : "text-sm font-medium"}>
         {label}
       </span>
-      <div role="radiogroup" aria-labelledby={id} className="inline-flex w-fit max-w-full flex-wrap gap-0.5 rounded-pill bg-sunken p-0.5">
+      <div role="radiogroup" aria-labelledby={id} className="inline-flex w-fit max-w-full flex-wrap gap-0.5 rounded-md bg-sunken p-0.5">
         {options.map((o, i) => {
           const selected = o.value === value;
           return (

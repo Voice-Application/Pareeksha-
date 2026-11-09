@@ -37,6 +37,7 @@ async function allAgents() {
 const inr = (n: number | null | undefined) => (n == null ? "-" : `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`);
 const linkCls = "text-accent-fg underline-offset-2 hover:underline";
 
+/** Panel contents for a query: a loading skeleton, an error with retry, an empty note, else the children. */
 function PanelBody({ q, rows, empty, children }: { q: { isPending: boolean; isError: boolean; error: unknown; refetch: () => unknown }; rows: number; empty: string; children: React.ReactNode }) {
   if (q.isPending)
     return (
@@ -58,11 +59,14 @@ export function OverviewSkeleton() {
   );
 }
 
+/** The home screen: it leads with the user's prompt tests, then an agent run summary and — for admins
+ *  only — the platform-health telemetry. A non-admin (or an unknown role) never fetches that telemetry. */
 export function Overview() {
   const url = useUrlState();
   const now = useNow();
-  // Platform health is SRE telemetry; show it only to elevated roles. Members never see it on home.
-  const isAdmin = useRole() !== "member";
+  // Platform health is SRE telemetry; show it only to an explicit admin. An unknown/missing role is
+  // treated as non-admin so a member with a transient cookie gap never sees it (or 403s fetching it).
+  const isAdmin = useRole() === "admin";
   const agents = useQuery({ queryKey: ["agents", "overview"], queryFn: allAgents });
   // Agents made by Test my prompt have their own panel; the hero is about the user's own agents.
   const active = useMemo(() => (agents.data?.items ?? []).filter((a) => !a.archived && !(a.adapter_config as { quick_test_id?: string } | undefined)?.quick_test_id), [agents.data]);
@@ -284,6 +288,7 @@ export function Overview() {
   );
 }
 
+/** The "Prompt tests" panel: the most recent quick tests with their rule-pass status, polled while any run. */
 function PromptTests() {
   const q = useQuery({ queryKey: ["quick-tests"], queryFn: listQuickTests, refetchInterval: (s) => listPoll(s.state.data) });
   const list = asList(q.data);
@@ -309,6 +314,7 @@ function PromptTests() {
   );
 }
 
+/** A health row's state icon + label: a check when ok, a cross when failing, else a neutral unknown mark. */
 function Status({ ok, label, fail }: { ok: boolean; label: string; fail?: boolean }) {
   const Icon = ok ? CircleCheck : fail ? CircleX : CircleHelp;
   return (
