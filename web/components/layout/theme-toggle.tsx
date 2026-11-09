@@ -41,10 +41,25 @@ export function ThemeToggle() {
   );
 }
 
+function subscribeRole(cb: () => void) {
+  // Cookie changes can come from another tab or an HTTP response. Older browsers need polling.
+  const store = "cookieStore" in window ? window.cookieStore : undefined;
+  store?.addEventListener("change", cb);
+  const timer = store ? undefined : window.setInterval(cb, 1000);
+  window.addEventListener("focus", cb);
+  document.addEventListener("visibilitychange", cb);
+  return () => {
+    store?.removeEventListener("change", cb);
+    window.clearInterval(timer);
+    window.removeEventListener("focus", cb);
+    document.removeEventListener("visibilitychange", cb);
+  };
+}
+
 /** The signed-in role from the readable cookie, for showing or hiding links only. Access is enforced by the server. */
 export function useRole(): string | null {
   return useSyncExternalStore(
-    () => () => {},
+    subscribeRole,
     () => document.cookie.split("; ").find((c) => c.startsWith(`${SIGNED_IN_COOKIE}=`))?.split("=")[1] ?? null,
     () => null,
   );

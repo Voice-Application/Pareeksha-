@@ -11,8 +11,8 @@
  * short line-draw, suppressed under prefers-reduced-motion by the global rule in globals.css.
  */
 
-import { useState, type CSSProperties } from "react";
-import { DataTable, Tooltip, scaleLinear, useChartId, type Plot } from "./shared";
+import { type CSSProperties } from "react";
+import { DataTable, Tooltip, useChartSelection, scaleLinear, useChartId, type Plot } from "./shared";
 
 export type LinePoint = { label: string; value: number };
 
@@ -37,7 +37,7 @@ export function LineChart({
   height?: number;
 }) {
   const id = useChartId("line");
-  const [active, setActive] = useState<number | null>(null);
+  const [active, setActive] = useChartSelection();
 
   const W = 640;
   const H = height;
@@ -54,7 +54,6 @@ export function LineChart({
   // Snap the crosshair to the nearest point by pointer x.
   const onMove = (e: React.PointerEvent<SVGRectElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    // The hit rect spans only the plot box, so map into plot coordinates (the same space as px).
     const rx = plot.x + ((e.clientX - rect.left) / rect.width) * plot.w;
     let best = 0;
     let bestD = Infinity;
@@ -68,10 +67,9 @@ export function LineChart({
     setActive(best);
   };
 
-  // A refresh can shorten the series while a point is selected; treat an out-of-range index as no selection.
   const ap = active != null ? (points[active] ?? null) : null;
   // Tooltip position: x as a % of container width (SVG is width-100%), y scaled to the rendered height.
-  const tipLeftPct = ap ? (px(active!) / W) * 100 : 0;
+  const tipLeftPct = ap && active != null ? (px(active) / W) * 100 : 0;
   const tipTop = ap ? (py(ap.value) / H) * height : 0;
 
   return (
@@ -170,8 +168,7 @@ export function LineChart({
             onFocus={() => setActive((a) => a ?? 0)}
             onBlur={() => setActive(null)}
             onKeyDown={(e) => {
-              if (e.key === "Escape") setActive(null);
-              else if (e.key === "ArrowRight") setActive((a) => Math.min(n - 1, (a ?? -1) + 1));
+              if (e.key === "ArrowRight") setActive((a) => Math.min(n - 1, (a ?? -1) + 1));
               else if (e.key === "ArrowLeft") setActive((a) => Math.max(0, (a ?? n) - 1));
             }}
             className="outline-none"

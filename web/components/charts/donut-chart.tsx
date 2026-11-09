@@ -3,22 +3,19 @@
 /**
  * DonutChart — composition of one whole across a small, fixed set of categories (e.g. token usage by
  * operation: llm_caller / llm_designer / llm_judge). Form: part-of-a-whole with few slices → a donut.
- * Colour is categorical and assigned in the fixed theme order (`--chart-cat-1..3`), per entity and
+ * Colour is categorical and assigned in the fixed theme order (`--chart-cat-1..4`), per entity and
  * never cycled; the reserved verdict hues are never used here. Identity is never colour-alone: a
  * legend is always present AND (≤ 4 slices) each slice is direct-labelled with its name + share.
  * Each arc is its own hit target with a per-arc tooltip. A visually-hidden table carries raw units.
  * The center prints the total as a quiet hero. Entrance is suppressed under prefers-reduced-motion.
  */
 
-import { useState } from "react";
-import { CHART_CATEGORICAL, DataTable, Tooltip, useChartId } from "./shared";
+import { CHART_CATEGORICAL, DataTable, Tooltip, useChartSelection, useChartId } from "./shared";
 
-/** `color` pins the slice to its entity's colour (so it doesn't shift when other slices are absent);
- *  without it the slice takes its position's slot. */
-export type Slice = { label: string; value: number; color?: string };
+export type Slice = { label: string; value: number; colorIndex?: number; color?: string };
 
-/** A slice's colour: its pinned entity colour, else its position's categorical slot (never cycled). */
-const sliceColor = (s: Slice | undefined, i: number) => s?.color ?? CHART_CATEGORICAL[Math.min(i, CHART_CATEGORICAL.length - 1)];
+/** Explicit entity colors take priority; otherwise use the stable slot, never cycle the palette. */
+const sliceColor = (slice: Slice, index: number) => slice.color ?? CHART_CATEGORICAL[Math.min(slice.colorIndex ?? index, CHART_CATEGORICAL.length - 1)];
 
 /** Point on a circle at `deg` degrees (0 = 12 o'clock, clockwise), radius `r`, centered at (cx,cy). */
 function polar(cx: number, cy: number, r: number, deg: number) {
@@ -42,7 +39,7 @@ export function DonutChart({
   centerLabel,
   unitLabel = "units",
 }: {
-  /** Categories in fixed entity order; colour slot = index into the categorical theme. */
+  /** Categories may supply a stable colorIndex to preserve identity when filtered or reordered. */
   slices: Slice[];
   /** Accessible chart name; visible context lives in the surrounding Panel title. */
   title: string;
@@ -51,7 +48,7 @@ export function DonutChart({
   unitLabel?: string;
 }) {
   const id = useChartId("donut");
-  const [active, setActive] = useState<number | null>(null);
+  const [active, setActive] = useChartSelection();
 
   const total = slices.reduce((s, x) => s + x.value, 0);
   const W = 260;
@@ -63,10 +60,10 @@ export function DonutChart({
   const GAP = 2.2; // degrees of surface gap between neighbouring arcs
 
   // Build cumulative angles without mutating a closure variable; a zero-value slice draws nothing.
-  const segs = slices.reduce<{ label: string; value: number; i: number; frac: number; a0: number; a1: number }[]>((acc, s, i) => {
+  const segs = slices.reduce<{ label: string; value: number; i: number; frac: number; a0: number; a1: number; colorIndex: number }[]>((acc, s, i) => {
     const frac = total > 0 ? s.value / total : 0;
     const a0 = acc.length ? acc[acc.length - 1].a1 : 0;
-    acc.push({ label: s.label, value: s.value, i, frac, a0, a1: a0 + frac * 360 });
+    acc.push({ colorIndex: s.colorIndex ?? i, label: s.label, value: s.value, i, frac, a0, a1: a0 + frac * 360 });
     return acc;
   }, []);
 
@@ -77,13 +74,13 @@ export function DonutChart({
       <div className="relative shrink-0">
         <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} role="group" aria-labelledby={`${id}-title`} className="block max-w-full">
           <title id={`${id}-title`}>{title}</title>
-          {segs.map((s) =>
-            s.frac <= 0 ? null : (
-              <path
+          {segs.map((s) => {
+            if (s.frac <= 0) return null;
+            // Keep at least 70% of even the narrowest segment visible.
+            const gap = Math.min(GAP, (s.a1 - s.a0) * 0.3);
+            return (
+              <g
                 key={s.i}
-                d={arcPath(cx, cy, rOuter, rInner, s.a0 + Math.min(GAP, (s.a1 - s.a0) * 0.3) / 2, s.a1 - Math.min(GAP, (s.a1 - s.a0) * 0.3) / 2)}
-                fill={sliceColor(slices[s.i], s.i)}
-                opacity={active == null || active === s.i ? 1 : 0.45}
                 tabIndex={0}
                 role="button"
                 aria-label={`${s.label}: ${fmt(s.value)} ${unitLabel}, ${Math.round(s.frac * 100)}%`}
@@ -91,12 +88,27 @@ export function DonutChart({
                 onPointerLeave={() => setActive((a) => (a === s.i ? null : a))}
                 onFocus={() => setActive(s.i)}
                 onBlur={() => setActive((a) => (a === s.i ? null : a))}
-                onKeyDown={(e) => { if (e.key === "Escape") setActive(null); }}
-                className="chart-arc-in outline-none"
-                style={{ transformBox: "fill-box", transformOrigin: "center" }}
-              />
-            ),
-          )}
+                className="outline-none"
+              >
+                <path
+                  d={arcPath(cx, cy, rOuter, rInner, s.a0 + gap / 2, s.a1 - gap / 2)}
+                  fill={sliceColor(slices[s.i], s.i)}
+                  opacity={active == null || active === s.i ? 1 : 0.45}
+                  className="chart-arc-in"
+                  style={{ transformBox: "fill-box", transformOrigin: "center" }}
+                />
+                {/* Cover the untrimmed arc, with a minimum target for very narrow slices. */}
+                <path d={arcPath(cx, cy, rOuter, rInner, s.a0, s.a1)} fill="transparent" />
+              </g>
+            );
+          })}
+          {/* Narrow-slice targets sit above every arc so neighbours cannot cover them. */}
+          {segs.filter((s) => s.frac > 0 && s.a1 - s.a0 < 12).map((s) => {
+            const target = polar(cx, cy, (rOuter + rInner) / 2, (s.a0 + s.a1) / 2);
+            return <circle key={s.i} cx={target.x} cy={target.y} r={10} fill="transparent" aria-hidden
+              onPointerEnter={() => setActive(s.i)}
+              onPointerLeave={() => setActive((a) => a === s.i ? null : a)} />;
+          })}
           {/* center: total as a quiet hero */}
           <text x={cx} y={cy - 2} textAnchor="middle" dominantBaseline="middle" fontSize={22} fontWeight={600} fill="var(--fg)" className="num">
             {total >= 1000 ? `${(total / 1000).toFixed(total >= 10000 ? 0 : 1)}K` : fmt(total)}
