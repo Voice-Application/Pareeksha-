@@ -59,13 +59,13 @@ export function QuickTestResult({ id }: { id: string }) {
         actions={<LinkButton href="/test">New test</LinkButton>}
       />
       {live && (
-        <div className="mb-6 max-w-[560px]" aria-live="polite">
+        <div className="fade-in mb-6 max-w-[560px]" aria-live="polite">
           <ProgressBar done={t.status === "running" ? t.progress.finished : t.progress.checked} total={t.progress.total} label={t.status === "running" ? "Conversations finished" : "Conversations checked"} />
           <p className="mt-2 text-sm text-muted">This page updates by itself. You can leave it and come back; the test keeps running.</p>
         </div>
       )}
       {t.status === "failed" && (
-        <div className="mb-6">
+        <div className="fade-in mb-6">
           <Strip tone="error">
             None of the conversations could run. {t.conversations.find((c) => c.error)?.error ?? "Check the AI key under Settings, LLM, and try again."}
           </Strip>
@@ -76,9 +76,9 @@ export function QuickTestResult({ id }: { id: string }) {
       <div className="grid items-start gap-6 min-[1180px]:grid-cols-[minmax(0,1fr)_400px]">
         <div className="flex min-w-0 flex-col gap-6">
           <Panel title="Rules in your prompt" aux={<span>{broken.length ? `${broken.length} broken` : live ? "checking as conversations finish" : "none broken"}</span>} bodyClassName="p-0">
-            <ul className="flex flex-col divide-y divide-border">
-              {[...t.rules].sort(byStatus).map((r) => (
-                <RuleRow key={r.id} rule={r} />
+            <ul className="stagger flex flex-col divide-y divide-border">
+              {[...t.rules].sort(byStatus).map((r, i) => (
+                <RuleRow key={r.id} rule={r} index={i} />
               ))}
             </ul>
           </Panel>
@@ -96,11 +96,11 @@ export function QuickTestResult({ id }: { id: string }) {
 const ORDER: Record<RuleResult["status"], number> = { broken: 0, pending: 1, kept: 2, not_tested: 3 };
 const byStatus = (a: RuleResult, b: RuleResult) => ORDER[a.status] - ORDER[b.status];
 
-function RuleRow({ rule }: { rule: RuleResult }) {
+function RuleRow({ rule, index = 0 }: { rule: RuleResult; index?: number }) {
   const evidence = rule.evidence ?? [];
   const checked = rule.broken + rule.kept;
   return (
-    <li className="flex flex-col gap-3 px-5 py-4">
+    <li style={{ ["--i" as string]: index }} className="flex flex-col gap-3 px-5 py-4">
       <div className="flex items-start gap-3">
         <RuleBadge status={rule.status} />
         <div className="min-w-0 flex-1">
