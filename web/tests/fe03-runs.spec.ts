@@ -152,7 +152,9 @@ test.describe("overview", () => {
   test("title from the latest run, tiles link, health and review panels", async ({ page }) => {
     await mockFe(page, opsState());
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Latest run passed");
+    // The home now leads with prompt tests; the latest-run summary is the monitoring section heading below.
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Your prompt tests");
+    await expect(page.getByRole("heading", { level: 2, name: /Latest run passed/ })).toBeVisible();
     await expect(page.getByRole("link", { name: /Open DLQ items/ })).toHaveAttribute("href", "/dlq");
     await expect(page.getByText("Lag:").first()).toBeVisible();
     await expect(page.getByRole("heading", { name: "Needs human review" })).toBeVisible();

@@ -15,7 +15,9 @@
   line-height: var(--lh-base);
 }
 .lp ::selection { background: var(--accent-tint); color: var(--fg); }
-.lp a { color: inherit; }
+/* Plain links inherit the surrounding text color; the button sets its own on-accent color (below),
+   so it must be excluded here or `.lp a` would out-rank `.lp-btn` and drop its contrast. */
+.lp a:not(.lp-btn) { color: inherit; }
 .lp :focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 3px; border-radius: var(--radius-xs); }
 .lp h1, .lp h2, .lp h3 {
   margin: 0;
