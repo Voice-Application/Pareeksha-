@@ -73,9 +73,9 @@
   --text-xs:  13px;  --lh-xs:  18px;   /* captions, timestamps, badges */
   --text-sm:  14px;  --lh-sm:  20px;   /* tables, dense UI */
   --text-base:16px;  --lh-base:24px;   /* default body, transcript */
-  --text-md:  17px;  --lh-md:  24px;   /* panel titles */
+  --text-md:  18px;  --lh-md:  26px;   /* panel titles */
   --text-lg:  20px;  --lh-lg:  28px;   /* section titles, secondary figures */
-  --text-xl:  30px;  --lh-xl:  34px;   /* page titles */
+  --text-xl:  33px;  --lh-xl:  38px;   /* page titles */
   --text-2xl: 46px;  --lh-2xl: 48px;   /* the one figure a page leads with */
   --tracking-display: -0.028em;
   --weight-regular: 400;
