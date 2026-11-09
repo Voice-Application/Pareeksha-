@@ -169,7 +169,25 @@ export function Overview() {
         description="Paste your bot's system prompt and Pareeksha chats with it as normal and tricky customers, then shows which of its rules it keeps and where it breaks them."
         actions={<LinkButton variant="primary" href="/test"><SquareCheckBig size={14} strokeWidth={1.6} aria-hidden />Test my prompt</LinkButton>}
       />
-      <div className="mb-10 max-w-[760px]"><PromptTests /></div>
+      <div className="mb-10 grid items-start gap-6 min-[1180px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <PromptTests />
+        <Panel title="Get started" label="Get started">
+          <ol className="flex flex-col gap-4">
+            <li className="flex gap-3">
+              <span className="grid size-7 shrink-0 place-items-center rounded-pill bg-accent-tint text-sm font-medium text-accent-fg" aria-hidden>1</span>
+              <div className="min-w-0"><p className="font-medium">Paste your bot&rsquo;s prompt</p><p className="text-sm text-muted">Open Test my prompt and drop in the system prompt your bot runs on.</p></div>
+            </li>
+            <li className="flex gap-3">
+              <span className="grid size-7 shrink-0 place-items-center rounded-pill bg-accent-tint text-sm font-medium text-accent-fg" aria-hidden>2</span>
+              <div className="min-w-0"><p className="font-medium">We role-play callers</p><p className="text-sm text-muted">Pareeksha chats as normal and tricky customers, in your languages.</p></div>
+            </li>
+            <li className="flex gap-3">
+              <span className="grid size-7 shrink-0 place-items-center rounded-pill bg-accent-tint text-sm font-medium text-accent-fg" aria-hidden>3</span>
+              <div className="min-w-0"><p className="font-medium">See what broke</p><p className="text-sm text-muted">Every rule the bot kept or broke, with the line it slipped on.</p></div>
+            </li>
+          </ol>
+        </Panel>
+      </div>
 
       <div className="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-t border-border pt-8">
         <div className="min-w-0">
