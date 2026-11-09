@@ -5,7 +5,7 @@ import { useState, type FormEvent, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowRight, Check, Copy, FileText, PenLine } from "lucide-react";
 import { ApiError } from "@/lib/api/call";
-import { getQuickTest, improveQuickTest, inr, quickTestRefetch, retestQuickTest, verdictLine, type QuickTest, type QuickTestImprovement, type RuleResult } from "@/lib/api/quick-tests";
+import { getQuickTest, improveQuickTest, inr, quickTestRefetch, retestQuickTest, verdictLine, type CostEstimate, type QuickTest, type QuickTestImprovement, type RuleResult } from "@/lib/api/quick-tests";
 import { relativeTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Chip, PageHeader, Panel } from "@/components/ui/layout";
@@ -15,6 +15,7 @@ import { ScoreChip, ProgressBar, StatusPill } from "@/components/ui/measure";
 import { PageError, Skeleton, Strip } from "@/components/ui/states";
 import { useRouter } from "next/navigation";
 import { RuleBadge } from "./status";
+import { CostConfirmDialog } from "./cost-confirm";
 
 const linkCls = "text-accent-fg underline-offset-2 hover:underline";
 
@@ -297,13 +298,21 @@ function ImprovementView({ test, imp }: { test: QuickTest; imp: QuickTestImprove
   const router = useRouter();
   const [copied, setCopied] = useState(false);
   const saved = imp.prompt_chars_before ? Math.round((1 - imp.prompt_chars_after / imp.prompt_chars_before) * 100) : 0;
-  // Above the cost limit the API answers 402 with the estimate: show it, and run again once accepted.
-  const [asked, setAsked] = useState<number | null>(null);
+  // Above the cost limit the API answers 402 with the estimate: ask in the shared dialog, then run confirmed.
+  const [asked, setAsked] = useState<CostEstimate | null>(null);
+  const [runError, setRunError] = useState<string | null>(null);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
   const run = useMutation({
-    mutationFn: () => retestQuickTest(test.id, asked !== null),
+    mutationFn: (confirmed: boolean) => retestQuickTest(test.id, confirmed),
     onSuccess: (t) => router.push(`/test/${t.id}`),
-    onError: (e) => {
-      if (e instanceof ApiError && e.code === "confirm_cost") setAsked((e.details.estimate as { est_cost: number }).est_cost);
+    onError: (e, confirmed) => {
+      if (e instanceof ApiError && e.code === "confirm_cost" && !confirmed) {
+        setAsked(e.details.estimate as CostEstimate);
+        return;
+      }
+      const message = e instanceof ApiError ? e.userMessage() : "The API did not respond.";
+      if (confirmed) setConfirmError(message);
+      else setRunError(message);
     },
   });
   return (
@@ -358,12 +367,32 @@ function ImprovementView({ test, imp }: { test: QuickTest; imp: QuickTestImprove
             See its test <ArrowRight size={14} strokeWidth={1.6} aria-hidden />
           </LinkButton>
         ) : (
-          <Button variant="primary" loading={run.isPending} onClick={() => run.mutate()}>
-            {asked !== null ? `Run for ${inr(asked)}` : "Test this prompt"}
+          <Button
+            variant="primary"
+            loading={run.isPending && !asked}
+            onClick={() => {
+              setRunError(null);
+              run.mutate(false);
+            }}
+          >
+            Test this prompt
           </Button>
         )}
       </div>
-      {run.isError && asked === null && <Strip tone="error">{run.error instanceof ApiError ? run.error.userMessage() : "The API did not respond."}</Strip>}
+      {runError && <Strip tone="error">{runError}</Strip>}
+      <CostConfirmDialog
+        estimate={asked}
+        running={run.isPending}
+        error={confirmError}
+        onClose={() => {
+          setAsked(null);
+          setConfirmError(null);
+        }}
+        onRun={() => {
+          setConfirmError(null);
+          run.mutate(true);
+        }}
+      />
     </div>
   );
 }
