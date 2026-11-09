@@ -1,9 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import "./landing.css";
-import verdictLight from "./shots/verdict-light.png";
-import verdictDark from "./shots/verdict-dark.png";
+import { DemoRun } from "./demo-run";
+import { DemoTabs } from "./demo-tabs";
 
 const REPO = "https://github.com/voice-application/pareeksha-";
 
@@ -105,25 +104,9 @@ export function Landing() {
             </div>
 
             <figure className="lp-hero__fig">
-              {/* Theme-matched product shot: a light screenshot in light mode, a dark one in dark mode,
-                  so the image never sits as a dark block on a light page (or vice versa). */}
-              <div className="lp-panel">
-                <Image
-                  className="theme-shot theme-shot--light"
-                  src={verdictLight}
-                  alt="A scored verdict for one call: critical failure, an overall score of 57.5 out of 100 against a pass line of 80, and a button to override the judge's score."
-                  sizes="(min-width: 60rem) 420px, 100vw"
-                  placeholder="blur"
-                />
-                <Image
-                  className="theme-shot theme-shot--dark"
-                  src={verdictDark}
-                  alt="A scored verdict for one call: critical failure, an overall score of 57.5 out of 100 against a pass line of 80, and a button to override the judge's score."
-                  sizes="(min-width: 60rem) 420px, 100vw"
-                  placeholder="blur"
-                />
-              </div>
-              <figcaption className="lp-caption">One call&rsquo;s verdict: the score against the pass line, and the rules it broke.</figcaption>
+              {/* A self-playing sample run (prompt -> conversation -> verdict), not a static shot. */}
+              <DemoRun />
+              <figcaption className="lp-caption">A sample run: the prompt, the call, and the rules it broke &mdash; scored against the pass line.</figcaption>
             </figure>
           </div>
         </section>
@@ -165,6 +148,11 @@ export function Landing() {
                 </li>
               ))}
             </ul>
+
+            <div className="lp-showcase">
+              <h3 className="lp-showcase__head">See the output</h3>
+              <DemoTabs />
+            </div>
           </div>
         </section>
 
