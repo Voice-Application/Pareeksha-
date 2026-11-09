@@ -1,5 +1,6 @@
 /* Hallmark · shape: app screen · genre: modern-minimal · theme: Dusk (deal 1/3, seed testing-auditing-platform-indian-language-6ef6·92260a2a·2026-11-04·r0) · redesign: full
  * nav: the shell kept as a sidebar (15 destinations), fixed, icons per item · signature: the run as a ruled verdict line over the worst calls, scores in the kept 5-step scale · states: loading, empty, error, full · dusk: none/sky-apricot/well · palette: espresso dark, bone light, sky-blue accent (redrawn at the user's request)
+ * palette: one system across themes — espresso dark / bone light, a single blue/indigo accent (~258) in both, one radius ladder and one Familjen-over-Plex display face
  * axes: dark/grotesk-sans/cool · posture: restrained (app) · contrast: pass · v2.0.0 */
 /* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V3 · weakest: V, the shell stays a sidebar because 15 destinations earn one; the change lives in the type, the ruled tallies and the page heads */
 /* Hallmark · reworded "inline-flex h-8 items-center rounded-sm bg-accent px-3 text-sm text-accent-on" to "inline-flex h-9 items-center rounded-pill bg-accent px-4 text-sm font-medium text-accent-on hover:bg-accent-hi" · the regression empty state's Open failed calls link to /runs is kept, only its height and radius moved to the new control */

@@ -1,7 +1,11 @@
 /*
- * Pareeksha design tokens: Cobalt (light) and Vantage (dark) from Hallmark, by request.
- * Cobalt: cool near-white paper, blue-grey ink, one electric blue, 6-8px corners, Familjen Grotesk over IBM Plex Sans.
- * Vantage: blue-black ground, pale steel ink, one lime signal, 4px corners, Geologica.
+ * Pareeksha design tokens: one system across light (Cobalt) and dark (Vantage).
+ * Shared across both themes: a single blue/indigo accent hue (~258, matching the ink),
+ *   one radius ladder (6/8/10/14px, pill = 999px), and one display face
+ *   (Familjen Grotesk display over IBM Plex Sans body) at weight 600.
+ * Light is cool near-white paper with blue-grey ink; dark is a blue-black ground with pale
+ *   steel ink. The accent runs darker-blue-on-light in light and lighter-blue-on-dark in dark,
+ *   each -on/text pairing kept at >= 4.5:1.
  * Verdict and score colours are kept as DES-01 validated them (proof/DES-01/validate_palette.py).
  */
 
@@ -89,11 +93,11 @@
   --control-h: 36px;         /* buttons, inputs */
 
   /* ---------- radius: one per nesting level ---------- */
-  --radius-xs: 4px;          /* badges, chips, heatmap cells */
-  --radius-sm: 6px;          /* inputs, menus */
-  --radius-md: 8px;         /* panels */
-  --radius-lg: 10px;         /* dialogs */
-  --radius-pill: 6px;      /* buttons */
+  --radius-xs: 6px;          /* badges, chips, heatmap cells */
+  --radius-sm: 8px;          /* inputs, menus */
+  --radius-md: 10px;         /* panels */
+  --radius-lg: 14px;         /* dialogs */
+  --radius-pill: 999px;      /* buttons: genuinely pill-shaped in both themes */
 
   /* ---------- motion ---------- */
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -115,7 +119,7 @@
   --bg-surface:  oklch(17% 0.014 235);
   --bg-sunken:   oklch(11.5% 0.012 235);
   --bg-hover:    oklch(21% 0.016 235);
-  --bg-selected: oklch(26% 0.05 126);
+  --bg-selected: oklch(26% 0.05 258);
 
   --border:        oklch(27% 0.014 235);
   --border-strong: oklch(52% 0.016 235);
@@ -124,12 +128,12 @@
   --fg-muted:  oklch(82% 0.012 230);
   --fg-subtle: oklch(70% 0.016 230);
 
-  --accent:      oklch(89% 0.19 126);
-  --accent-hi:   oklch(93% 0.17 126);
-  --accent-fg:   oklch(89% 0.19 126);
-  --accent-on:   oklch(19% 0.04 126);
-  --accent-tint: oklch(25% 0.06 126);
-  --focus-ring:  oklch(89% 0.19 126);
+  --accent:      oklch(72% 0.14 258);
+  --accent-hi:   oklch(78% 0.15 258);
+  --accent-fg:   oklch(78% 0.13 258);      /* accent as text or icon on dark surfaces */
+  --accent-on:   oklch(20% 0.04 258);      /* dark text on light-blue accent: >= 4.5:1 */
+  --accent-tint: oklch(26% 0.06 258);
+  --focus-ring:  oklch(72% 0.14 258);
 
   /* ---------- verdict: same three states, tints that sit on graphite instead of glowing on it ---------- */
   --pass:        oklch(72% 0.11 170);   --pass-fg: oklch(82% 0.10 170);   --pass-tint: oklch(25% 0.035 170);
@@ -146,9 +150,9 @@
   --score-5: oklch(62% 0.090 185);  --score-5-on: oklch(14% 0.03 185);
   --score-na: oklch(30% 0.012 65); --score-na-on: oklch(82% 0.012 70);
 
-  --speaker-agent:  oklch(89% 0.19 126);
+  --speaker-agent:  oklch(72% 0.14 258);
   --speaker-caller: oklch(78% 0.06 70);
-  --series-1: oklch(89% 0.19 126);
+  --series-1: oklch(72% 0.14 258);
   --series-2: oklch(78% 0.06 70);
   --series-3: oklch(72% 0.09 300);
   --series-4: oklch(62% 0.014 65);
@@ -157,8 +161,5 @@
   --shadow-float: 0 1px 0 oklch(100% 0 0 / 0.05) inset, 0 24px 48px -16px oklch(6% 0.01 60 / 0.75);
   --overlay: oklch(6% 0.01 60 / 0.66);
 
-  --radius-xs: 2px; --radius-sm: 4px; --radius-md: 4px; --radius-lg: 6px; --radius-pill: 999px;
-  --font-display: var(--font-geologica), "Noto Sans Kannada", "Noto Sans Devanagari", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-geologica), "Noto Sans Kannada", "Noto Sans Devanagari", ui-sans-serif, system-ui, sans-serif;
-  --weight-display: 300; --tracking-display: -0.035em;
+  /* radius ladder, display/sans families and display weight are shared with :root (one ladder, one display face) */
 }
