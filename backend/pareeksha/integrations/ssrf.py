@@ -35,6 +35,7 @@ class SSRFError(Exception):
 
 
 async def system_resolver(host: str, port: int) -> list[str]:
+    """System resolver."""
     loop = asyncio.get_running_loop()
     try:
         infos = await loop.getaddrinfo(host, port, type=socket.SOCK_STREAM)
@@ -44,6 +45,7 @@ async def system_resolver(host: str, port: int) -> list[str]:
 
 
 def is_public_ip(value: str) -> bool:
+    """Is public ip."""
     try:
         ip = ipaddress.ip_address(value.split("%", 1)[0])
     except ValueError:
@@ -54,6 +56,7 @@ def is_public_ip(value: str) -> bool:
 
 
 def _is_ip_literal(host: str) -> bool:
+    """Is ip literal."""
     try:
         ipaddress.ip_address(host)
     except ValueError:
@@ -108,6 +111,7 @@ def buffered_response(response: httpx.Response, content: bytes) -> httpx.Respons
 
 
 def _pinned_url(url: str, ip: str, port: int) -> str:
+    """Pinned url."""
     parts = urlsplit(url)
     netloc = f"[{ip}]:{port}" if ":" in ip else f"{ip}:{port}"
     return urlunsplit((parts.scheme, netloc, parts.path or "/", parts.query, ""))

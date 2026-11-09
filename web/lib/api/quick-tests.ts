@@ -29,6 +29,15 @@ export const askAssistant = (body: AssistantRequest) => call(api.POST("/api/v1/a
 /** Poll every 3 s until every conversation has ended and been checked. */
 export const quickTestPoll = (status: QuickTest["status"] | undefined) => (status === "done" || status === "failed" ? false : 3000);
 
+/** Like ``quickTestPoll``, but after `done` keeps reading (up to 60 reads) until every checked conversation has its score. */
+export function quickTestRefetch(s: { data?: QuickTest; dataUpdateCount: number; error: unknown }): number | false {
+  if (s.error) return false;
+  const base = quickTestPoll(s.data?.status);
+  if (base !== false) return base;
+  const unscored = s.data?.status === "done" && s.data.conversations.some((c) => c.status === "done" && c.score == null);
+  return unscored && s.dataUpdateCount < 60 ? 3000 : false;
+}
+
 /** The list as an array (an unexpected body counts as empty instead of crashing the page). */
 export const asList = (data: unknown): QuickTestListItem[] => (Array.isArray(data) ? (data as QuickTestListItem[]) : []);
 /** Poll the list every 4 s while any test in it is still running. */

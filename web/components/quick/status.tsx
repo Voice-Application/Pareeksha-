@@ -3,7 +3,7 @@ import type { QuickTest, RuleResult } from "@/lib/api/quick-tests";
 import { cn } from "@/lib/utils";
 
 /** A test's state in a few words: live while it runs, then how many rules broke. */
-export function QuickStatus({ status, broken, total }: { status: QuickTest["status"]; broken: number; total: number }) {
+export function QuickStatus({ status, broken, total, untested = 0 }: { status: QuickTest["status"]; broken: number; total: number; untested?: number }) {
   const base = "inline-flex items-center gap-1.5 text-sm";
   if (status === "running" || status === "checking")
     return (
@@ -24,6 +24,13 @@ export function QuickStatus({ status, broken, total }: { status: QuickTest["stat
       <span className={cn(base, "text-fail-fg")}>
         <CircleX size={14} strokeWidth={1.6} aria-hidden />
         {broken} of {total} rules broken
+      </span>
+    );
+  if (untested)
+    return (
+      <span className={cn(base, "text-muted")}>
+        <Minus size={14} strokeWidth={1.6} aria-hidden />
+        {untested} of {total} rules not checked
       </span>
     );
   return (

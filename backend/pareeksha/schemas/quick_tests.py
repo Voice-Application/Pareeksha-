@@ -256,6 +256,8 @@ class QuickTestOut(BaseModel):
 class QuickTestListItem(BaseModel):
     """A prompt test in the recent list."""
 
+    rules_untested: int = 0
+
     id: UUID
     name: str
     status: QuickTestStatus

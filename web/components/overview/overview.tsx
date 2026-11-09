@@ -20,6 +20,19 @@ import { FlagChip, Meter, ScoreChip, StatTile, StatusPill, TileRow, VerdictBadge
 import { Chip } from "@/components/ui/layout";
 
 const STORE = "pareeksha.agent";
+
+/** Every agent, page by page (at most 5 pages of 100), so many prompt-test agents cannot hide the user's own. */
+async function allAgents() {
+  const first = await call(api.GET("/api/v1/agents", { params: { query: { limit: 100 } } }));
+  let items = first.items;
+  let cursor = first.next_cursor;
+  for (let page = 1; cursor && page < 5; page++) {
+    const more = await call(api.GET("/api/v1/agents", { params: { query: { limit: 100, cursor } } }));
+    items = [...items, ...more.items];
+    cursor = more.next_cursor;
+  }
+  return { ...first, items };
+}
 const inr = (n: number | null | undefined) => (n == null ? "-" : `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`);
 const linkCls = "text-accent-fg underline-offset-2 hover:underline";
 
@@ -47,7 +60,7 @@ export function OverviewSkeleton() {
 export function Overview() {
   const url = useUrlState();
   const now = useNow();
-  const agents = useQuery({ queryKey: ["agents", "overview"], queryFn: () => call(api.GET("/api/v1/agents", { params: { query: { limit: 100 } } })) });
+  const agents = useQuery({ queryKey: ["agents", "overview"], queryFn: allAgents });
   // Agents made by Test my prompt have their own panel; the hero is about the user's own agents.
   const active = useMemo(() => (agents.data?.items ?? []).filter((a) => !a.archived && !(a.adapter_config as { quick_test_id?: string } | undefined)?.quick_test_id), [agents.data]);
   const promptTests = useQuery({ queryKey: ["quick-tests"], queryFn: listQuickTests });
@@ -75,6 +88,15 @@ export function Overview() {
   if (agents.isPending) return <OverviewSkeleton />;
   if (!agent) {
     const tested = asList(promptTests.data).length > 0;
+    if (promptTests.isError && !tested)
+      return (
+        <>
+          <PageHeader title="Your prompt tests" actions={<LinkButton variant="primary" href="/test">Test my prompt</LinkButton>} />
+          <ErrorPanel error={promptTests.error} what="prompt tests" onRetry={() => void promptTests.refetch()} />
+        </>
+      );
+    if (promptTests.isPending)
+      return <OverviewSkeleton />;
     return (
       <>
         <PageHeader
@@ -266,7 +288,7 @@ function PromptTests() {
                 {t.parent_id ? " (improved)" : ""}
               </Link>
               <span className="flex flex-wrap items-center gap-x-3 text-sm text-muted">
-                <QuickStatus status={t.status} broken={t.rules_broken} total={t.rules_total} />
+                <QuickStatus status={t.status} broken={t.rules_broken} total={t.rules_total} untested={t.rules_untested} />
                 <time dateTime={t.created_at} className="text-subtle">{relativeTime(t.created_at)}</time>
               </span>
             </li>

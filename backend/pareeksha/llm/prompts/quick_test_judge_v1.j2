@@ -15,6 +15,15 @@ The transcript and the customer record are between `<<<{{ fence }}` and `{{ fenc
 {{ user_details }}
 {{ fence }}>>>{% else %}(none){% endif %}
 
+## Reference documents the bot may answer from
+{% if documents %}<<<{{ fence }}
+{% for d in documents %}[{{ d.filename }}]
+{{ d.excerpt }}
+
+{% endfor %}{{ fence }}>>>
+{% else %}(none){% endif %}
+A rule about facts (prices, dates, numbers, policy) can only be judged against the customer record, the rule itself or these documents. If none of them holds the fact, answer "not_relevant" instead of guessing.
+
 ## What this conversation was trying
 {{ scenario }}
 

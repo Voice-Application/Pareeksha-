@@ -1417,7 +1417,8 @@ export interface paths {
         };
         /**
          * The newest prompt tests
-         * @description The project's 20 newest prompt tests with their rule counts.
+         * @description The project's 20 newest prompt tests with their rule counts; tests that are still
+         *     checking get a batch of checks, so lists alone also move them forward.
          */
         get: operations["list_quick_tests"];
         put?: never;
@@ -4327,6 +4328,11 @@ export interface components {
          * @description A prompt test in the recent list.
          */
         QuickTestListItem: {
+            /**
+             * Rules Untested
+             * @default 0
+             */
+            rules_untested: number;
             /**
              * Id
              * Format: uuid

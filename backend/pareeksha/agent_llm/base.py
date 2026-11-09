@@ -65,6 +65,7 @@ class AgentLLMError(Exception):
         retryable: bool = False,
         provider_message: str = "",
     ):
+        """Init."""
         super().__init__(message)
         self.status = status
         self.retryable = retryable
@@ -80,7 +81,9 @@ class ChatProvider(Protocol):
         model: str,
         temperature: float,
         timeout_s: float = 60.0,
-    ) -> ChatReply: ...
+    ) -> ChatReply:
+        """Send the messages and return the model's reply."""
+        ...
 
 
 def parse_args(raw: str) -> dict[str, Any]:

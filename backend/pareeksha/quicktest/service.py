@@ -24,12 +24,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from pareeksha.api.auth import Principal
 from pareeksha.api.errors import ApiError
-from pareeksha.api.routers.agents import create_agent
+from pareeksha.api.routers.agents import _encrypt, create_agent
 from pareeksha.api.routers.noise_profiles import create_noise_profile
 from pareeksha.api.routers.personas import create_persona
 from pareeksha.api.routers.prompt_versions import create_prompt_version
 from pareeksha.api.routers.scenarios import create_scenario
 from pareeksha.db.models import (
+    Agents,
     Calls,
     Evaluations,
     KbDocuments,
@@ -79,6 +80,23 @@ IMPROVE_PROMPT = "quick_test_improve_v1"
 
 #: Calls checked per read of a test (in parallel); the page polls, so the rest follow.
 JUDGE_BATCH = 4
+
+
+#: Rupees the planner and the rule checks cost, per conversation and once per test; they are
+#: added to the run estimate (override with QUICK_TEST_LLM_COST / QUICK_TEST_PLAN_COST).
+def llm_overhead(conversations: int) -> float:
+    """Rupees the quick test's own model calls (plan, rule checks) add to a run."""
+
+    def _rs(name: str, default: float) -> float:
+        """The non-negative number in env var ``name``, else ``default``."""
+        try:
+            return max(0.0, float(os.environ.get(name, default)))
+        except ValueError:
+            return default
+
+    return _rs("QUICK_TEST_PLAN_COST", 1.0) + conversations * _rs("QUICK_TEST_LLM_COST", 0.5)
+
+
 #: Longest prompt a prompt version may hold (after the customer record is put in).
 MAX_PROMPT_CHARS = 100_000
 #: Document excerpts given to the planner and the improver.
@@ -93,6 +111,8 @@ PREFERRED_PERSONAS = {
     "kn": "Kiran - IT employee",
 }
 #: ``calls.end_reason`` values that mean the bot never answered (nothing to check).
+#: Stored instead of verdicts when a call has no transcript to check.
+UNCHECKED = {"rule_id": "", "verdict": "unchecked"}
 NO_CONVERSATION = ("connect_failed", "infra_error", "cancelled")
 FINISHED_ITEM = ("completed", "evaluating", "evaluated", "judge_error")
 ERROR_ITEM = ("error", "cancelled", "skipped_budget")
@@ -382,23 +402,28 @@ async def _start_run(
     )
     estimate = await runs.estimate(session, key.project_id, body)
     limit = auto_run_limit()
-    if estimate.estimate.est_cost > limit and not confirm_cost:
+    total = estimate.estimate.est_cost + llm_overhead(estimate.item_count)
+    if total > limit and not confirm_cost:
         raise ApiError(
             402,
             "confirm_cost",
-            f"This test is estimated at Rs {estimate.estimate.est_cost:.2f}, above the auto-run "
+            f"This test is estimated at Rs {total:.2f}, above the auto-run "
             f"limit of Rs {limit:.2f}. Confirm to run it.",
             {
                 "estimate": CostEstimate(
                     conversations=estimate.item_count,
-                    est_cost=estimate.estimate.est_cost,
+                    est_cost=total,
                     limit=limit,
                 ).model_dump(),
                 "plan": plan.model_dump(mode="json"),
             },
         )
     created = await runs.create_run(session, key.project_id, body)
-    return created.id, created.item_count, created.estimate.est_cost
+    return (
+        created.id,
+        created.item_count,
+        created.estimate.est_cost + llm_overhead(created.item_count),
+    )
 
 
 async def create_quick_test(
@@ -521,6 +546,9 @@ async def retest(
         raise ApiError(422, "llm_not_configured", "Add an AI key under Settings > LLM first.")
     plan = QuickTestPlan.model_validate(_plan_fields(parent.plan))
     rag = await _rag_config(session, key.project_id, parent.kb_id)
+    agent = await session.get(Agents, parent.agent_id)
+    if agent is not None:  # the provider may have changed: the new version needs its key
+        agent.adapter_secrets_encrypted = _encrypt({"api_key": api_key})
     await create_prompt_version(
         parent.agent_id,
         _version_body(
@@ -655,11 +683,17 @@ def _squash(text: str) -> str:
 
 
 async def _judge_call(
-    client: LLMClient, row: QuickTests, scenario: str, turns: list[dict[str, Any]]
+    client: LLMClient,
+    row: QuickTests,
+    scenario: str,
+    turns: list[dict[str, Any]],
+    documents: Sequence[dict[str, str]] = (),
 ) -> list[dict[str, Any]]:
     """The rule verdicts for one transcript (validated against the rules and the turns)."""
     rules = row.plan.get("rules") or []
-    if not turns or not rules:
+    if not turns:  # nobody spoke: this is not a pass
+        return [dict(UNCHECKED)]
+    if not rules:
         return []
     agent_turns = {t["idx"] for t in turns if t["speaker"] == "agent"}
     turn_text = {t["idx"]: _squash(t["text"]) for t in turns}
@@ -670,6 +704,7 @@ async def _judge_call(
         fence=fence,
         summary=row.plan.get("summary", ""),
         user_details=row.user_details.strip(),
+        documents=list(documents),
         scenario=scenario,
         rules=rules,
         turns=turns,
@@ -716,6 +751,7 @@ async def check_finished_calls(
     if row is None:
         return
     done = set(row.verdicts)
+    documents = await _documents(session, project_id, row.kb_id)
     todo = [i for i in await _items(session, row.run_id) if i.checkable]
     todo = [i for i in todo if str(i.call.id) not in done][:JUDGE_BATCH]  # type: ignore[union-attr]
     if not todo:
@@ -727,7 +763,7 @@ async def check_finished_calls(
     ):
         transcripts[t.call_id].append({"idx": t.idx, "speaker": t.speaker, "text": t.text_})
     results = await asyncio.gather(
-        *(_judge_call(client, row, i.scenario, transcripts[i.call.id]) for i in todo),  # type: ignore[union-attr]
+        *(_judge_call(client, row, i.scenario, transcripts[i.call.id], documents) for i in todo),  # type: ignore[union-attr]
         return_exceptions=True,
     )
     verdicts = dict(row.verdicts)
@@ -789,7 +825,8 @@ def _conversation(row: QuickTests, item: _Item) -> Conversation:
     tests = (row.plan.get("scenario_tests") or {}).get(str(item.item.scenario_id), [])
     call_id = item.call.id if item.call is not None else None
     verdicts = row.verdicts.get(str(call_id)) if call_id else None
-    if item.failed:
+    empty = bool(verdicts) and any(v.get("verdict") == "unchecked" for v in verdicts or [])
+    if item.failed or empty:
         status = "error"
     elif verdicts is not None:
         status = "done"
@@ -807,7 +844,7 @@ def _conversation(row: QuickTests, item: _Item) -> Conversation:
         status=cast("Any", status),
         broken_rules=[v["rule_id"] for v in verdicts or [] if v.get("verdict") == "broken"],
         score=item.score,
-        error=item.error,
+        error=item.error or ("The conversation had no turns to check" if empty else None),
     )
 
 
@@ -896,6 +933,7 @@ async def list_tests(
                 parent_id=row.parent_id,
                 rules_total=len(full.rules),
                 rules_broken=sum(1 for r in full.rules if r.status == "broken"),
+                rules_untested=sum(1 for r in full.rules if r.status in ("not_tested", "pending")),
                 conversations=full.progress.total,
                 finished=full.progress.finished,
             )
@@ -911,6 +949,12 @@ async def improve(
 ) -> QuickTestImprovement:
     """A rewritten prompt (and document fixes) from the test's results; stored on the row."""
     out = await build_out(session, row)
+    if out.status in ("running", "checking") and not instructions.strip():
+        raise ApiError(
+            409,
+            "test_not_finished",
+            "Wait for the test to finish checking, so the rewrite can fix what broke.",
+        )
     evidence = [
         {"rule": r.id, "scenario": e.scenario, "quote": e.quote, "why": e.why}
         for r in out.rules

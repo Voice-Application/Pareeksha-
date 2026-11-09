@@ -165,6 +165,7 @@ def _normalise(path: str) -> str:
 
 @pytest.fixture(scope="module")
 def openapi() -> dict[str, Any]:
+    """Helper: openapi."""
     response = TestClient(app).get("/openapi.json")
     assert response.status_code == 200
     document: dict[str, Any] = response.json()
@@ -172,6 +173,7 @@ def openapi() -> dict[str, Any]:
 
 
 def _documented(openapi: dict[str, Any]) -> set[tuple[str, str]]:
+    """Helper: documented."""
     found: set[tuple[str, str]] = set()
     for path, item in openapi["paths"].items():
         assert path.startswith(PREFIX), path
@@ -181,22 +183,26 @@ def _documented(openapi: dict[str, Any]) -> set[tuple[str, str]]:
 
 
 def test_openapi_document_shape(openapi: dict[str, Any]) -> None:
+    """Check: test openapi document shape."""
     assert openapi["openapi"].startswith("3.")
     assert openapi["info"]["title"] == "Pareeksha API"
     assert "ApiKey" in openapi["components"]["securitySchemes"]
 
 
 def test_every_spec_route_is_in_openapi(openapi: dict[str, Any]) -> None:
+    """Check: test every spec route is in openapi."""
     missing = {(m, _normalise(p)) for m, p in EXPECTED} - _documented(openapi)
     assert not missing, f"routes missing from /openapi.json: {sorted(missing)}"
 
 
 def test_openapi_has_no_undeclared_routes(openapi: dict[str, Any]) -> None:
+    """Check: test openapi has no undeclared routes."""
     extra = _documented(openapi) - {(m, _normalise(p)) for m, p in EXPECTED | ADDITIONS}
     assert not extra, f"routes in /openapi.json but not in the reviewed list: {sorted(extra)}"
 
 
 def test_additions_are_served(openapi: dict[str, Any]) -> None:
+    """Check: test additions are served."""
     missing = {(m, _normalise(p)) for m, p in ADDITIONS} - _documented(openapi)
     assert not missing, sorted(missing)
 
@@ -220,13 +226,17 @@ def test_routes_parsed_from_the_spec_document_are_covered(openapi: dict[str, Any
 
 
 def test_operation_ids_are_unique_and_named(openapi: dict[str, Any]) -> None:
+    """Check: test operation ids are unique and named."""
     ids = [op["operationId"] for item in openapi["paths"].values() for op in item.values()]
     assert len(ids) == len(set(ids))
     assert "create_run" in ids and "create_agent" in ids
 
 
 def test_status_codes_follow_the_spec(openapi: dict[str, Any]) -> None:
+    """Check: test status codes follow the spec."""
+
     def codes(method: str, path: str) -> set[str]:
+        """Helper: codes."""
         return set(openapi["paths"][PREFIX + path][method.lower()]["responses"])
 
     assert "201" in codes("POST", "/agents")
@@ -246,6 +256,7 @@ def test_status_codes_follow_the_spec(openapi: dict[str, Any]) -> None:
 
 
 def test_validation_errors_are_400_not_422(openapi: dict[str, Any]) -> None:
+    """Check: test validation errors are 400 not 422."""
     assert "HTTPValidationError" not in openapi["components"]["schemas"]
     op = openapi["paths"][PREFIX + "/agents"]["post"]["responses"]
     assert "400" in op and "422" not in op
@@ -254,6 +265,7 @@ def test_validation_errors_are_400_not_422(openapi: dict[str, Any]) -> None:
 
 
 def test_security_requirements(openapi: dict[str, Any]) -> None:
+    """Check: test security requirements."""
     paths = openapi["paths"]
     assert paths[PREFIX + "/runs"]["post"]["security"] == [{"ApiKey": ["runs:write"]}]
     assert paths[PREFIX + "/runs"]["get"]["security"] == [{"ApiKey": ["read"]}]
@@ -264,6 +276,7 @@ def test_security_requirements(openapi: dict[str, Any]) -> None:
 
 
 def test_sse_and_binary_media_types(openapi: dict[str, Any]) -> None:
+    """Check: test sse and binary media types."""
     paths = openapi["paths"]
     sse = paths[PREFIX + "/runs/{run_id}/events"]["get"]["responses"]["200"]["content"]
     assert "text/event-stream" in sse
@@ -277,6 +290,7 @@ def test_sse_and_binary_media_types(openapi: dict[str, Any]) -> None:
 
 
 def test_multipart_endpoints(openapi: dict[str, Any]) -> None:
+    """Check: test multipart endpoints."""
     audit = openapi["paths"][PREFIX + "/audits"]["post"]["requestBody"]["content"]
     assert "multipart/form-data" in audit
     samples = openapi["paths"][PREFIX + "/dialect-datasets/{dataset_id}/samples"]["post"]
@@ -284,6 +298,7 @@ def test_multipart_endpoints(openapi: dict[str, Any]) -> None:
 
 
 def test_list_endpoints_paginate(openapi: dict[str, Any]) -> None:
+    """Check: test list endpoints paginate."""
     op = openapi["paths"][PREFIX + "/agents"]["get"]
     params = {p["name"]: p for p in op["parameters"]}
     assert params["limit"]["schema"]["maximum"] == 200
@@ -295,5 +310,6 @@ def test_list_endpoints_paginate(openapi: dict[str, Any]) -> None:
 
 
 def test_docs_endpoints_exist() -> None:
+    """Check: test docs endpoints exist."""
     client = TestClient(app)
     assert client.get("/docs").status_code == 200

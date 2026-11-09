@@ -200,7 +200,7 @@ function RecentTests() {
                 {t.parent_id ? " (improved)" : ""}
               </Link>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
-                <QuickStatus status={t.status} broken={t.rules_broken} total={t.rules_total} />
+                <QuickStatus status={t.status} broken={t.rules_broken} total={t.rules_total} untested={t.rules_untested} />
                 <time dateTime={t.created_at} className="text-subtle">{relativeTime(t.created_at)}</time>
               </div>
             </li>

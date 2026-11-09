@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowRight, MessageCircle, RotateCcw, Send, X } from "lucide-react";
 import { ApiError } from "@/lib/api/call";
-import { askAssistant, createQuickTest, getQuickTest, inr, quickTestPoll, UUID_RE, verdictLine, type AssistantResponse } from "@/lib/api/quick-tests";
+import { askAssistant, createQuickTest, getQuickTest, inr, quickTestRefetch, UUID_RE, verdictLine, type AssistantResponse } from "@/lib/api/quick-tests";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { controlClass } from "@/components/ui/field";
@@ -260,7 +260,7 @@ function Outcome({ res, onStarted }: { res: AssistantResponse; onStarted: (id: s
 }
 
 function TestCard({ id }: { id: string }) {
-  const q = useQuery({ queryKey: ["quick-test", id], queryFn: () => getQuickTest(id), refetchInterval: (s) => (s.state.error ? false : quickTestPoll(s.state.data?.status)) });
+  const q = useQuery({ queryKey: ["quick-test", id], queryFn: () => getQuickTest(id), refetchInterval: (s) => quickTestRefetch(s.state) });
   if (!q.data && q.isError)
     return (
       <div className="flex flex-wrap items-center gap-2 rounded-md border border-border px-3 py-2 text-sm text-fail-fg" role="alert">

@@ -10,7 +10,7 @@ from typing import Any, cast
 import pytest
 from cryptography.fernet import Fernet
 from httpx import AsyncClient
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from pareeksha.api.llm_deps import get_client_builder
@@ -408,3 +408,57 @@ async def test_tests_of_another_project_are_404(
     r = await api.get(f"{API}/quick-tests/{created['id']}", headers=other_tenant.read)
     assert r.status_code == 404
     assert (await api.get(f"{API}/quick-tests", headers=other_tenant.read)).json() == []
+
+
+async def test_improving_before_the_checks_finish_asks_to_wait(
+    api: AsyncClient, tenant: Tenant, provider: ScriptedProvider
+) -> None:
+    """A results-based rewrite waits for the test; an explicit instruction does not."""
+    await _library(api, tenant)
+    created = await _create(api, tenant, provider)
+    url = f"{API}/quick-tests/{created['id']}/improve"
+    waiting = await api.post(url, json={"instructions": "", "retest": False}, headers=tenant.admin)
+    assert waiting.status_code == 409 and waiting.json()["error"]["code"] == "test_not_finished"
+    provider.outputs.append(
+        json.dumps({"summary": "Short", "improved_prompt": "Be short.", "changes": []})
+    )
+    early = await api.post(
+        url, json={"instructions": "make it shorter", "retest": False}, headers=tenant.admin
+    )
+    assert early.status_code == 200, early.text
+
+
+async def test_a_call_without_turns_is_an_error_not_a_pass(
+    api: AsyncClient,
+    tenant: Tenant,
+    provider: ScriptedProvider,
+    session_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    """A finished call with no turns must not count as checked and kept."""
+    await _library(api, tenant)
+    created = await _create(api, tenant, provider)
+    await _finish_calls(session_factory, created["id"], ["a", "b", "c"])
+    async with session_factory() as s:
+        row = await s.get(QuickTests, uuid.UUID(created["id"]))
+        assert row is not None
+        call_ids = select(Calls.id).join(RunItems, RunItems.id == Calls.run_item_id)
+        call_ids = call_ids.where(RunItems.run_id == row.run_id)
+        await s.execute(delete(Turns).where(Turns.call_id.in_(call_ids)))
+        await s.commit()
+    body = (await api.get(f"{API}/quick-tests/{created['id']}", headers=tenant.read)).json()
+    assert {c["status"] for c in body["conversations"]} == {"error"}
+    assert body["status"] == "failed"
+
+
+async def test_patching_a_test_agent_keeps_its_quick_test_marker(
+    api: AsyncClient, tenant: Tenant, provider: ScriptedProvider
+) -> None:
+    """``adapter_config: {}`` on the agent must not turn it into an ordinary agent."""
+    await _library(api, tenant)
+    created = await _create(api, tenant, provider)
+    test = (await api.get(f"{API}/quick-tests/{created['id']}", headers=tenant.read)).json()
+    r = await api.patch(
+        f"{API}/agents/{test['agent_id']}", json={"adapter_config": {}}, headers=tenant.admin
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["adapter_config"]["quick_test_id"] == created["id"]

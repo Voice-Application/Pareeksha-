@@ -109,9 +109,23 @@ async def create_quick_test(
 
 
 @router.get("/quick-tests", summary="The newest prompt tests")
-async def list_quick_tests(key: ReadKey, session: Db) -> list[QuickTestListItem]:
-    """The project's 20 newest prompt tests with their rule counts."""
-    return await service.list_tests(session, key.project_id)
+async def list_quick_tests(
+    key: ReadKey, session: Db, build: LlmBuilder, factory: Factory
+) -> list[QuickTestListItem]:
+    """The project's 20 newest prompt tests with their rule counts; tests that are still
+    checking get a batch of checks, so lists alone also move them forward."""
+    items = await service.list_tests(session, key.project_id)
+    waiting = [t.id for t in items if t.status == "checking"][:3]
+    remaining = await remaining_budget(session, key.project_id) if waiting else None
+    if waiting and (remaining is None or remaining > 0):
+        try:
+            async with _llm(session, key, build, factory) as (_, client):
+                for test_id in waiting:
+                    await service.check_finished_calls(session, key.project_id, test_id, client)
+        except ApiError:
+            pass  # tried again on the next read
+        items = await service.list_tests(session, key.project_id)
+    return items
 
 
 @router.get(

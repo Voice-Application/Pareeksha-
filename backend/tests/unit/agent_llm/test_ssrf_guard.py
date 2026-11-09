@@ -24,6 +24,7 @@ URL = "https://llm.example.test/v1"
 
 @pytest.fixture(autouse=True)
 def _no_private(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Helper: no private."""
     monkeypatch.delenv("AGENT_LLM_ALLOW_PRIVATE_URLS", raising=False)
 
 
@@ -36,10 +37,12 @@ def _wire(
     seen: list[httpx.Request] = []
 
     def record(req: httpx.Request) -> httpx.Response:
+        """Helper: record."""
         seen.append(req)
         return handler(req)
 
     async def resolver(host: str, port: int) -> list[str]:
+        """Helper: resolver."""
         return [ip]
 
     monkeypatch.setattr(
@@ -51,6 +54,7 @@ def _wire(
 
 
 async def _chat(base_url: str | None = URL, provider: Any = "openai_compatible") -> Any:
+    """Helper: chat."""
     p = build_chat_provider(provider, api_key=KEY, base_url=base_url)
     return await p.chat(MSGS, [], model="m", temperature=0.1)
 
@@ -126,10 +130,12 @@ async def test_redirects_are_not_followed(monkeypatch: pytest.MonkeyPatch) -> No
 def _wire_plain(
     monkeypatch: pytest.MonkeyPatch, handler: Callable[[httpx.Request], httpx.Response]
 ) -> list[httpx.Request]:
+    """Helper: wire plain."""
     monkeypatch.setenv("AGENT_LLM_ALLOW_PRIVATE_URLS", "1")
     seen: list[httpx.Request] = []
 
     def record(req: httpx.Request) -> httpx.Response:
+        """Helper: record."""
         seen.append(req)
         return handler(req)
 
@@ -199,6 +205,7 @@ async def test_other_400s_are_not_retried() -> None:
     calls: list[int] = []
 
     def handler(req: httpx.Request) -> httpx.Response:
+        """Helper: handler."""
         calls.append(1)
         return httpx.Response(400, json={"error": {"message": "bad model"}})
 

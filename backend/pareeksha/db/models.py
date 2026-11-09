@@ -1418,20 +1418,24 @@ class PromptVersions(Base):
 
 
 def _fk(col: str, target: str, table: str) -> ForeignKeyConstraint:
+    """Fk."""
     return ForeignKeyConstraint(
         [col], [f"{target}.id"], ondelete="CASCADE", name=f"{table}_{col}_fkey"
     )
 
 
 def _pk_uuid() -> Mapped[uuid.UUID]:
+    """Pk uuid."""
     return mapped_column(Uuid, primary_key=True, server_default=text("gen_random_uuid()"))
 
 
 def _created() -> Mapped[datetime.datetime]:
+    """Created."""
     return mapped_column(DateTime(True), nullable=False, server_default=text("now()"))
 
 
 def _json(default: str) -> Mapped[Any]:
+    """Json."""
     return mapped_column(JSONB, nullable=False, server_default=text(f"'{default}'"))
 
 

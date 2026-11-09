@@ -5,7 +5,7 @@ import { useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowRight, Check, Copy, FileText, PenLine } from "lucide-react";
 import { ApiError } from "@/lib/api/call";
-import { getQuickTest, improveQuickTest, inr, quickTestPoll, retestQuickTest, verdictLine, type QuickTest, type QuickTestImprovement, type RuleResult } from "@/lib/api/quick-tests";
+import { getQuickTest, improveQuickTest, inr, quickTestRefetch, retestQuickTest, verdictLine, type QuickTest, type QuickTestImprovement, type RuleResult } from "@/lib/api/quick-tests";
 import { relativeTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Chip, PageHeader, Panel } from "@/components/ui/layout";
@@ -30,7 +30,7 @@ export function QuickTestResultSkeleton() {
 
 /** One test, live: rules kept or broken with the bot's own words, the conversations, and Improve. */
 export function QuickTestResult({ id }: { id: string }) {
-  const q = useQuery({ queryKey: ["quick-test", id], queryFn: () => getQuickTest(id), refetchInterval: (s) => quickTestPoll(s.state.data?.status) });
+  const q = useQuery({ queryKey: ["quick-test", id], queryFn: () => getQuickTest(id), refetchInterval: (s) => quickTestRefetch(s.state) });
   if (q.isError) return <PageError error={q.error} onRetry={() => void q.refetch()} backHref="/test" backLabel="Back to Test my prompt" />;
   if (!q.data) return <QuickTestResultSkeleton />;
   const t = q.data;

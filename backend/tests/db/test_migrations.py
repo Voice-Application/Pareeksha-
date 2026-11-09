@@ -38,15 +38,18 @@ POST_V02_TABLES = {
 
 
 def _documented_tables() -> set[str]:
+    """Helper: documented tables."""
     return set(re.findall(r"^CREATE TABLE (\w+)", SCHEMA_SQL.read_text(), flags=re.MULTILINE))
 
 
 def _documented_indexes() -> set[str]:
+    """Helper: documented indexes."""
     text = SCHEMA_SQL.read_text()
     return set(re.findall(r"^CREATE (?:UNIQUE )?INDEX (\w+)", text, flags=re.MULTILINE))
 
 
 def _live(conn: Connection) -> tuple[set[str], dict[str, set[str]], set[str]]:
+    """Helper: live."""
     insp = inspect(conn)
     tables = set(insp.get_table_names()) - {"alembic_version"}
     columns = {t: {c["name"] for c in insp.get_columns(t)} for t in tables}
@@ -55,6 +58,7 @@ def _live(conn: Connection) -> tuple[set[str], dict[str, set[str]], set[str]]:
 
 
 def test_migration_sql_is_a_copy_of_the_documented_schema() -> None:
+    """Check: test migration sql is a copy of the documented schema."""
     assert MIGRATION_SQL.read_bytes() == SCHEMA_SQL.read_bytes()
 
 
@@ -72,6 +76,7 @@ async def test_tables_columns_and_indexes_match_schema_sql(engine: AsyncEngine) 
 
 
 async def test_partial_unique_index_and_checks_are_enforced(engine: AsyncEngine) -> None:
+    """Check: test partial unique index and checks are enforced."""
     async with engine.connect() as conn:
         rows = await conn.exec_driver_sql(
             "select indexname, indexdef from pg_indexes where schemaname = 'public'"
@@ -82,6 +87,7 @@ async def test_partial_unique_index_and_checks_are_enforced(engine: AsyncEngine)
 
 
 def test_downgrade_then_upgrade_round_trips(database_url: str) -> None:
+    """Check: test downgrade then upgrade round trips."""
     cfg = alembic_config(database_url)
     sync_url = database_url.replace("+psycopg", "")
     command.downgrade(cfg, "base")
@@ -132,6 +138,7 @@ def test_downgrade_0004_keeps_prompt_agents_and_drops_new_checks() -> None:
 
 @pytest.mark.parametrize("run", [1, 2])
 def test_migrate_script_is_idempotent(database_url: str, run: int) -> None:
+    """Check: test migrate script is idempotent."""
     result = subprocess.run(
         ["sh", str(BACKEND / "alembic_migrate.sh")],
         cwd=BACKEND,
