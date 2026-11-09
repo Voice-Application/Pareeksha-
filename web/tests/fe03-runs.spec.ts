@@ -201,8 +201,11 @@ test.describe("overview", () => {
     // The home now leads with prompt tests; the latest-run summary is the monitoring section heading below.
     await expect(page.getByRole("heading", { level: 1 })).toContainText("Your prompt tests");
     await expect(page.getByRole("heading", { level: 2, name: /Latest run passed/ })).toBeVisible();
-    await expect(page.getByRole("link", { name: /Open DLQ items/ })).toHaveAttribute("href", "/dlq");
-    await expect(page.getByText("Lag:").first()).toBeVisible();
+    // Ops telemetry sits in its own admin section, not in the run summary.
+    const platform = page.getByRole("region", { name: "Platform (admins only)" });
+    await expect(platform.getByRole("link", { name: /Open DLQ items/ })).toHaveAttribute("href", "/dlq");
+    await expect(platform.getByRole("heading", { name: "Platform health", exact: true })).toBeVisible();
+    await expect(platform.getByText("Lag:").first()).toBeVisible();
     await expect(page.getByRole("heading", { name: "Needs human review" })).toBeVisible();
     await axeClean(page);
   });
