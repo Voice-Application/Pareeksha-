@@ -84,7 +84,7 @@ function TranscriptTab() {
           {DEMO_DIMENSIONS.map((d) => (
             <li key={d.key} className="lp-dim">
               <span className="lp-dim__label">{d.label}</span>
-              <span className="lp-dim__pips" aria-label={`${d.score} of 5`}>
+              <span className="lp-dim__pips" role="img" aria-label={`${d.score} of 5`}>
                 {Array.from({ length: 5 }, (_, i) => (
                   <span key={i} className={`lp-dim__pip ${i < d.score ? "is-on" : ""} ${d.score <= 1 ? "is-bad" : ""}`} />
                 ))}

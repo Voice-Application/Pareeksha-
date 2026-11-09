@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { CSSProperties } from "react";
 import { Bot, CircleCheck, CircleHelp, CircleX, Play, SquareCheckBig } from "lucide-react";
 import { api } from "@/lib/api/client";
 import { call } from "@/lib/api/call";
@@ -61,15 +60,6 @@ export function OverviewSkeleton() {
   );
 }
 
-/** Stat-tile cell: a hairline grid cell (border comes from TileRow) that cascades its tile in on load,
- *  `i` staggering the delay. StatTile takes no style, so the entrance lives on this wrapper, not the tile. */
-function Tile({ i, children }: { i: number; children: React.ReactNode }) {
-  return (
-    <div className="rise-in flex min-w-0 flex-col" style={{ animationDelay: `${i * 45}ms` } as CSSProperties}>
-      {children}
-    </div>
-  );
-}
 
 /** The home screen: it leads with the user's prompt tests, then an agent run summary and — for admins
  *  only — the platform-health telemetry. A non-admin (or an unknown role) never fetches that telemetry. */
@@ -205,11 +195,11 @@ export function Overview() {
       </div>
 
       <TileRow cols={`grid-cols-2 ${isAdmin ? "min-[860px]:grid-cols-4" : "min-[860px]:grid-cols-3"}`}>
-        <Tile i={0}><StatTile href={latest ? `/runs/${latest.id}` : "/runs"} hero label={`Pass rate${running ? " so far" : ""}`} value={s?.pass_rate != null ? `${Math.round(s.pass_rate * 100)}%` : "-"} caption={latest ? `${latest.progress.evaluated} scored` : "no runs"} /></Tile>
-        <Tile i={1}><StatTile href={latest ? `/runs/${latest.id}?verdict=critical` : "/runs"} label="Critical failures" value={s?.critical_failures ?? "-"} threshold={s?.critical_failures == null ? null : s.critical_failures > 0 ? "fail" : "ok"} caption="target 0" /></Tile>
+        <StatTile enter={0} href={latest ? `/runs/${latest.id}` : "/runs"} hero label={`Pass rate${running ? " so far" : ""}`} value={s?.pass_rate != null ? `${Math.round(s.pass_rate * 100)}%` : "-"} caption={latest ? `${latest.progress.evaluated} scored` : "no runs"} />
+        <StatTile enter={1} href={latest ? `/runs/${latest.id}?verdict=critical` : "/runs"} label="Critical failures" value={s?.critical_failures ?? "-"} threshold={s?.critical_failures == null ? null : s.critical_failures > 0 ? "fail" : "ok"} caption="target 0" />
         {/* DLQ depth is an operational internal: only elevated roles see it (and only they fetch ``metrics``). */}
-        {isAdmin && <Tile i={2}><StatTile href="/dlq" label="Open DLQ items" value={metrics.data?.dlq_open ?? "-"} threshold={metrics.data == null ? null : metrics.data.dlq_open > 0 ? "fail" : "ok"} caption="events that failed processing" /></Tile>}
-        <Tile i={isAdmin ? 3 : 2}><StatTile label="Credits used" value={inr(usage.data?.credits_used)} caption={budget != null ? <span className="inline-flex items-center gap-2">of {inr(budget)} <Meter value={Math.min(100, ((usage.data?.credits_used ?? 0) / budget) * 100)} passLine={null} label="Budget used" /></span> : "no budget set"} /></Tile>
+        {isAdmin && <StatTile enter={2} href="/dlq" label="Open DLQ items" value={metrics.data?.dlq_open ?? "-"} threshold={metrics.data == null ? null : metrics.data.dlq_open > 0 ? "fail" : "ok"} caption="events that failed processing" />}
+        <StatTile enter={isAdmin ? 3 : 2} label="Credits used" value={inr(usage.data?.credits_used)} caption={budget != null ? <span className="inline-flex items-center gap-2">of {inr(budget)} <Meter value={Math.min(100, ((usage.data?.credits_used ?? 0) / budget) * 100)} passLine={null} label="Budget used" /></span> : "no budget set"} />
       </TileRow>
 
       <OverviewCharts runs={runs.data?.items ?? []} usage={usage.data?.items ?? []} />

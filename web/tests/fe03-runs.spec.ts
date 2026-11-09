@@ -142,7 +142,8 @@ test.describe("overview", () => {
     st.extra["GET /runs"] = { items: [run({ name })], next_cursor: null };
     await mockFe(page, st);
     await page.goto("/");
-    const table = page.getByRole("table", { name: "Recent runs" });
+    // exact: the trend chart's screen-reader table is "Mean score across recent runs".
+    const table = page.getByRole("table", { name: "Recent runs", exact: true });
     const link = table.getByRole("link", { name });
     await expect(link).toHaveAttribute("href", `/runs/${RUN_ID}`);
     const size = await table.evaluate((el) => ({ table: el.getBoundingClientRect().width, container: el.parentElement!.getBoundingClientRect().width }));

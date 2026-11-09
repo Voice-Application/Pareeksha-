@@ -187,11 +187,13 @@ export function ProgressBar({ done, total, label }: { done: number; total: numbe
 
 export type Threshold = "ok" | "warn" | "fail" | null;
 /** One figure in a ruled tally: the label above in the body face, the figure in the display face, a muted caption. */
-export function StatTile({ label, value, caption, threshold = null, hero = false, href }: { label: string; value: ReactNode; caption?: ReactNode; threshold?: Threshold; hero?: boolean; href?: string }) {
+/** `enter` (a cascade index) opts the tile into the rise-in entrance; it lives on the tile itself so a
+ *  TileRow's <dl> keeps only dt/dd groups as children. */
+export function StatTile({ label, value, caption, threshold = null, hero = false, href, enter }: { label: string; value: ReactNode; caption?: ReactNode; threshold?: Threshold; hero?: boolean; href?: string; enter?: number }) {
   const Icon = threshold === "ok" ? CircleCheck : threshold === "warn" ? TriangleAlert : threshold === "fail" ? CircleX : null;
   const tone = threshold === "ok" ? "text-pass-fg" : threshold === "warn" ? "text-warn-fg" : threshold === "fail" ? "text-fail-fg" : "";
   return (
-    <div className={cn("group relative flex min-w-0 flex-col gap-1 px-5 py-4 transition-colors duration-150", href && "hover:bg-hover")}>
+    <div className={cn("group relative flex min-w-0 flex-col gap-1 px-5 py-4 transition-colors duration-150", href && "hover:bg-hover", enter != null && "rise-in")} style={enter != null ? { animationDelay: `${enter * 45}ms` } : undefined}>
       <dt className="label truncate">{href ? <Link href={href} className="after:absolute after:inset-0 group-hover:text-fg">{label}</Link> : label}</dt>
       <dd className="flex min-w-0 flex-col gap-1">
         <span className={cn("display num flex min-w-0 items-center gap-2 truncate", hero ? "text-2xl" : "text-xl", tone)}>

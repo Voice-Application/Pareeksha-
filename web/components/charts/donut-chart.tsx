@@ -70,7 +70,7 @@ export function DonutChart({
   return (
     <figure className="m-0 flex flex-col gap-4 min-[420px]:flex-row min-[420px]:items-center">
       <div className="relative shrink-0">
-        <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} role="img" aria-labelledby={`${id}-title`} className="block max-w-full">
+        <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} role="group" aria-labelledby={`${id}-title`} className="block max-w-full">
           <title id={`${id}-title`}>{title}</title>
           {segs.map((s) =>
             s.frac <= 0 ? null : (

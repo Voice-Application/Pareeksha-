@@ -79,7 +79,7 @@ export function LineChart({
           viewBox={`0 0 ${W} ${H}`}
           width="100%"
           height={H}
-          role="img"
+          role="group"
           aria-labelledby={`${id}-title`}
           className="block overflow-visible"
           preserveAspectRatio="none"

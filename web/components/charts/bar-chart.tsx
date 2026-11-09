@@ -53,7 +53,7 @@ export function BarChart({
   return (
     <figure className="m-0">
       <div className="relative">
-        <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} role="img" aria-labelledby={`${id}-title`} className="block overflow-visible" preserveAspectRatio="none">
+        <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} role="group" aria-labelledby={`${id}-title`} className="block overflow-visible" preserveAspectRatio="none">
           <title id={`${id}-title`}>{title}</title>
 
           {yTicks.map((t) => (
@@ -71,24 +71,27 @@ export function BarChart({
             const y = baseY - h;
             const on = active === i;
             const grow = { transformOrigin: `${x + barW / 2}px ${baseY}px`, "--delay": `${i * 40}ms` } as CSSProperties;
+            // The focusable bar holds only shapes; its value and axis label sit beside it so the
+            // accessible name ("label: value") is not contradicted by truncated visible text.
             return (
-              <g
-                key={i}
-                tabIndex={0}
-                role="button"
-                aria-label={`${b.label}: ${b.value}${valueSuffix}`}
-                onPointerEnter={() => setActive(i)}
-                onPointerLeave={() => setActive((a) => (a === i ? null : a))}
-                onFocus={() => setActive(i)}
-                onBlur={() => setActive((a) => (a === i ? null : a))}
-                className="outline-none"
-              >
-                {/* widened transparent hit target over the whole slot */}
-                <rect x={plot.x + i * slot} y={plot.y} width={slot} height={plot.h} fill="transparent" />
-                {/* the column: 4px rounded cap */}
-                <rect x={x} y={y} width={barW} height={h} rx={4} fill="var(--accent)" opacity={on ? 1 : 0.9} className="chart-bar-grow" style={grow} />
-                {/* square the base: fill the rounded bottom corners back in */}
-                {h > 4 && <rect x={x} y={baseY - 4} width={barW} height={4} fill="var(--accent)" opacity={on ? 1 : 0.9} className="chart-bar-grow" style={grow} />}
+              <g key={i}>
+                <g
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`${b.label}: ${b.value}${valueSuffix}`}
+                  onPointerEnter={() => setActive(i)}
+                  onPointerLeave={() => setActive((a) => (a === i ? null : a))}
+                  onFocus={() => setActive(i)}
+                  onBlur={() => setActive((a) => (a === i ? null : a))}
+                  className="outline-none"
+                >
+                  {/* widened transparent hit target over the whole slot */}
+                  <rect x={plot.x + i * slot} y={plot.y} width={slot} height={plot.h} fill="transparent" />
+                  {/* the column: 4px rounded cap */}
+                  <rect x={x} y={y} width={barW} height={h} rx={4} fill="var(--accent)" opacity={on ? 1 : 0.9} className="chart-bar-grow" style={grow} />
+                  {/* square the base: fill the rounded bottom corners back in */}
+                  {h > 4 && <rect x={x} y={baseY - 4} width={barW} height={4} fill="var(--accent)" opacity={on ? 1 : 0.9} className="chart-bar-grow" style={grow} />}
+                </g>
                 {/* value on the cap */}
                 <text x={x + barW / 2} y={y - 6} textAnchor="middle" fontSize={11} fill="var(--fg)" className="num">
                   {b.value}
