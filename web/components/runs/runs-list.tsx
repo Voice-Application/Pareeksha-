@@ -36,7 +36,7 @@ const IN_FLIGHT = new Set(["queued", "running", "draft"]);
 export function RunsListSkeleton() {
   return (
     <>
-      <PageHeader title="Runs" actions={<LinkButton variant="primary" href="/runs/new">New run</LinkButton>} />
+      <PageHeader title="Results" actions={<LinkButton variant="primary" href="/runs/new">New run</LinkButton>} />
       <Panel bodyClassName="p-0">
         <TableSkeleton rows={8} />
       </Panel>
@@ -200,7 +200,7 @@ export function RunsList() {
     <>
       <PageHeader
         eyebrow={list.isSuccess ? `${list.items.length} run${list.items.length === 1 ? "" : "s"}${agent ? ` for ${agentName(agent)}` : ""}` : ""}
-        title="Runs"
+        title="Results"
         actions={
           <>
             <Button disabled={picked.length !== 2} title={picked.length === 2 ? undefined : "Select two runs"} onClick={() => router.push(compareHref())}>

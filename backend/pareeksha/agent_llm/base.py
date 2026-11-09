@@ -11,7 +11,7 @@ from typing import Any, Literal, Protocol
 import httpx
 
 from pareeksha.agent_llm.url_guard import allow_private_urls, is_operator_ollama
-from pareeksha.integrations.ssrf import SSRFError, safe_request
+from pareeksha.integrations.ssrf import SSRFError, buffered_response, safe_request
 
 #: Largest provider response body accepted (enforced while streaming).
 MAX_RESPONSE_BYTES = 10 * 1024 * 1024
@@ -65,6 +65,7 @@ class AgentLLMError(Exception):
         retryable: bool = False,
         provider_message: str = "",
     ):
+        """Init."""
         super().__init__(message)
         self.status = status
         self.retryable = retryable
@@ -80,7 +81,9 @@ class ChatProvider(Protocol):
         model: str,
         temperature: float,
         timeout_s: float = 60.0,
-    ) -> ChatReply: ...
+    ) -> ChatReply:
+        """Send the messages and return the model's reply."""
+        ...
 
 
 def parse_args(raw: str) -> dict[str, Any]:
@@ -146,12 +149,7 @@ async def _send(
             if total > MAX_RESPONSE_BYTES:
                 raise SSRFError(f"response larger than {MAX_RESPONSE_BYTES} bytes")
             chunks.append(chunk)
-        return httpx.Response(
-            response.status_code,
-            headers=response.headers,
-            content=b"".join(chunks),
-            request=response.request,
-        )
+        return buffered_response(response, b"".join(chunks))
 
 
 async def post_json(

@@ -35,6 +35,7 @@ class SSRFError(Exception):
 
 
 async def system_resolver(host: str, port: int) -> list[str]:
+    """System resolver."""
     loop = asyncio.get_running_loop()
     try:
         infos = await loop.getaddrinfo(host, port, type=socket.SOCK_STREAM)
@@ -44,6 +45,7 @@ async def system_resolver(host: str, port: int) -> list[str]:
 
 
 def is_public_ip(value: str) -> bool:
+    """Is public ip."""
     try:
         ip = ipaddress.ip_address(value.split("%", 1)[0])
     except ValueError:
@@ -54,6 +56,7 @@ def is_public_ip(value: str) -> bool:
 
 
 def _is_ip_literal(host: str) -> bool:
+    """Is ip literal."""
     try:
         ipaddress.ip_address(host)
     except ValueError:
@@ -91,7 +94,24 @@ async def resolve_public(
     return host, addresses[0], port
 
 
+#: Headers that describe the wire body; they no longer apply once the body is read and decoded.
+_WIRE_HEADERS = ("content-encoding", "content-length", "transfer-encoding")
+
+
+def buffered_response(response: httpx.Response, content: bytes) -> httpx.Response:
+    """A complete response holding ``content``, the already *decoded* body of ``response``.
+
+    ``aiter_bytes`` undoes gzip / br / zstd, so the wire headers are dropped: keeping
+    ``Content-Encoding`` would make httpx decode the plain body again (``DecodingError``).
+    """
+    headers = [(k, v) for k, v in response.headers.multi_items() if k.lower() not in _WIRE_HEADERS]
+    return httpx.Response(
+        response.status_code, headers=headers, content=content, request=response.request
+    )
+
+
 def _pinned_url(url: str, ip: str, port: int) -> str:
+    """Pinned url."""
     parts = urlsplit(url)
     netloc = f"[{ip}]:{port}" if ":" in ip else f"{ip}:{port}"
     return urlunsplit((parts.scheme, netloc, parts.path or "/", parts.query, ""))
@@ -146,9 +166,4 @@ async def safe_request(
             if total > max_bytes:
                 raise SSRFError(f"response larger than {max_bytes} bytes")
             chunks.append(chunk)
-        return httpx.Response(
-            response.status_code,
-            headers=response.headers,
-            content=b"".join(chunks),
-            request=response.request,
-        )
+        return buffered_response(response, b"".join(chunks))

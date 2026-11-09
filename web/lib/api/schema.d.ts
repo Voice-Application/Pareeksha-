@@ -7,10 +7,16 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List agents */
+        /**
+         * List agents
+         * @description List agents.
+         */
         get: operations["list_agents"];
         put?: never;
-        /** Register an agent under test */
+        /**
+         * Register an agent under test
+         * @description Create agent.
+         */
         post: operations["create_agent"];
         delete?: never;
         options?: never;
@@ -25,14 +31,20 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get an agent */
+        /**
+         * Get an agent
+         * @description Get agent.
+         */
         get: operations["get_agent"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        /** Update an agent */
+        /**
+         * Update an agent
+         * @description Update agent.
+         */
         patch: operations["update_agent"];
         trace?: never;
     };
@@ -45,7 +57,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Archive an agent */
+        /**
+         * Archive an agent
+         * @description Archive agent.
+         */
         post: operations["archive_agent"];
         delete?: never;
         options?: never;
@@ -62,7 +77,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Open the socket, send 1 s of silence, wait up to 10 s for agent audio */
+        /**
+         * Open the socket, send 1 s of silence, wait up to 10 s for agent audio
+         * @description Test agent connection.
+         */
         post: operations["test_agent_connection"];
         delete?: never;
         options?: never;
@@ -1388,6 +1406,132 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/quick-tests/setup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * What the Test my prompt screen needs
+         * @description Whether an AI key is set, the model the bot runs on, the cost limit, the documents.
+         */
+        get: operations["quick_test_setup"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quick-tests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The newest prompt tests
+         * @description The project's 20 newest prompt tests with their rule counts; tests that are still
+         *     checking get a batch of checks, so lists alone also move them forward.
+         */
+        get: operations["list_quick_tests"];
+        put?: never;
+        /**
+         * Test a system prompt: find its rules, write conversations, run them
+         * @description 402 ``confirm_cost`` (details: ``estimate`` and ``plan``) above the auto-run limit: send
+         *     the same body again with ``confirm_cost: true`` and that ``plan``.
+         */
+        post: operations["create_quick_test"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quick-tests/{test_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A prompt test with its rule results (checks finished conversations as it reads)
+         * @description The test as the page shows it; finished conversations are checked on the way.
+         */
+        get: operations["get_quick_test"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quick-tests/{test_id}/improve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rewrite the prompt from the test's results; optionally test the rewrite
+         * @description Rewrite the prompt from the results, and with ``retest`` test the rewrite.
+         */
+        post: operations["improve_quick_test"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/quick-tests/{test_id}/retest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Test the test's suggested prompt on the same conversations
+         * @description Test the stored improved prompt on the same conversations (409 without one).
+         */
+        post: operations["retest_quick_test"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assistant/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * One turn with the in-app assistant (stateless: send the whole history)
+         * @description One assistant turn; it may start a test, improve one or name a page to open.
+         */
+        post: operations["assistant_chat"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -1750,6 +1894,60 @@ export interface components {
             last_used_at?: string | null;
             /** Revoked At */
             revoked_at?: string | null;
+        };
+        /**
+         * AssistantMessage
+         * @description One chat turn sent to the assistant.
+         */
+        AssistantMessage: {
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "user" | "assistant";
+            /** Content */
+            content: string;
+        };
+        /**
+         * AssistantRequest
+         * @description The chat so far, the page the user is on and the test in view.
+         */
+        AssistantRequest: {
+            /** Messages */
+            messages: components["schemas"]["AssistantMessage"][];
+            /**
+             * Page
+             * @description the page the user is on
+             * @default
+             */
+            page: string;
+            /**
+             * Quick Test Id
+             * @description the test the user is looking at
+             */
+            quick_test_id?: string | null;
+        };
+        /**
+         * AssistantResponse
+         * @description The assistant's reply and the outcome of its action.
+         */
+        AssistantResponse: {
+            /** Reply */
+            reply: string;
+            /** Suggestions */
+            suggestions?: string[];
+            /** Action */
+            action?: ("start_quick_test" | "improve_quick_test" | "open_page") | null;
+            /** Quick Test Id */
+            quick_test_id?: string | null;
+            improvement?: components["schemas"]["QuickTestImprovement"] | null;
+            /** Open Path */
+            open_path?: string | null;
+            /** @description a test waiting for the user to accept its cost */
+            pending?: components["schemas"]["QuickTestCreate"] | null;
+            estimate?: components["schemas"]["CostEstimate"] | null;
+            /** Error */
+            error?: string | null;
         };
         /** AuthStatus */
         AuthStatus: {
@@ -2149,6 +2347,49 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        /**
+         * Conversation
+         * @description One test conversation's state for the results page.
+         */
+        Conversation: {
+            /**
+             * Item Id
+             * Format: uuid
+             */
+            item_id: string;
+            /** Call Id */
+            call_id?: string | null;
+            /** Scenario */
+            scenario: string;
+            /**
+             * Tests
+             * @description rule ids it was written for
+             */
+            tests?: string[];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "waiting" | "running" | "checking" | "done" | "error";
+            /** Broken Rules */
+            broken_rules?: string[];
+            /** Score */
+            score?: number | null;
+            /** Error */
+            error?: string | null;
+        };
+        /**
+         * CostEstimate
+         * @description The estimate shown when a test is above the auto-run limit.
+         */
+        CostEstimate: {
+            /** Conversations */
+            conversations: number;
+            /** Est Cost */
+            est_cost: number;
+            /** Limit */
+            limit: number;
+        };
         /** DatasetCreate */
         DatasetCreate: {
             /**
@@ -2433,6 +2674,24 @@ export interface components {
              * @default 2
              */
             within_turns: number;
+        };
+        /**
+         * DocSuggestion
+         * @description A fix for one knowledge-base document (or a new one).
+         */
+        DocSuggestion: {
+            /**
+             * Document
+             * @description file name, or 'new document'
+             */
+            document: string;
+            /** Problem */
+            problem: string;
+            /**
+             * Suggestion
+             * @description text to add or the corrected text
+             */
+            suggestion: string;
         };
         /** DraftAccepted */
         DraftAccepted: {
@@ -2751,6 +3010,24 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+        };
+        /**
+         * ImproveRequest
+         * @description What to change in the prompt, and whether to test the result.
+         */
+        ImproveRequest: {
+            /**
+             * Instructions
+             * @default
+             * @example Make the prompt shorter and stop it sharing the balance
+             */
+            instructions: string;
+            /**
+             * Retest
+             * @description also test the improved prompt right away
+             * @default false
+             */
+            retest: boolean;
         };
         /** InboundAccepted */
         InboundAccepted: {
@@ -3671,6 +3948,64 @@ export interface components {
             /** Behaviour Notes */
             behaviour_notes?: string | null;
         };
+        /**
+         * PlannedRule
+         * @description One rule the planner found in the prompt.
+         */
+        PlannedRule: {
+            /** Id */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "forbidden" | "required";
+            /**
+             * Text
+             * @description the rule in plain words
+             */
+            text: string;
+            /**
+             * Source
+             * @description the prompt line it comes from, or 'built-in'
+             * @default
+             */
+            source: string;
+        };
+        /**
+         * PlannedScenario
+         * @description One test conversation, and the rules it is meant to test.
+         */
+        PlannedScenario: {
+            /** Title */
+            title: string;
+            /** Caller Goal */
+            caller_goal: string;
+            /** Fixtures */
+            fixtures?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Reveal Rules
+             * @default
+             */
+            reveal_rules: string;
+            /** Success Criteria */
+            success_criteria: string;
+            /** Must Say */
+            must_say?: string[];
+            /** Must Not Say */
+            must_not_say?: string[];
+            /**
+             * Max Turns
+             * @default 10
+             */
+            max_turns: number;
+            /** Tags */
+            tags?: string[];
+            /** Rule Ids */
+            rule_ids?: string[];
+        };
         /** PriceIn */
         PriceIn: {
             /**
@@ -3916,6 +4251,261 @@ export interface components {
              * @enum {string}
              */
             reason: "document_not_found" | "quote_not_found" | "empty_question";
+        };
+        /**
+         * QuickTestCreate
+         * @description A prompt, test customer data and optional documents to test.
+         */
+        QuickTestCreate: {
+            /** System Prompt */
+            system_prompt: string;
+            /**
+             * User Details
+             * @description test data about the customer the bot talks to (name, account, balance...); added to the prompt as the customer record, or in place of {{user_details}}
+             * @default
+             */
+            user_details: string;
+            /**
+             * Kb Id
+             * @description documents the bot answers from (RAG)
+             */
+            kb_id?: string | null;
+            /**
+             * Scenario Count
+             * @default 8
+             */
+            scenario_count: number;
+            /**
+             * Instructions
+             * @description what to focus on
+             * @default
+             */
+            instructions: string;
+            /**
+             * Confirm Cost
+             * @description run even when the estimate is above the auto-run limit
+             * @default false
+             */
+            confirm_cost: boolean;
+            /** @description the plan from an earlier 402 confirm_cost answer, so it is not made twice */
+            plan?: components["schemas"]["QuickTestPlan"] | null;
+        };
+        /**
+         * QuickTestCreated
+         * @description The new test, its run and the estimated cost.
+         */
+        QuickTestCreated: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Run Id
+             * Format: uuid
+             */
+            run_id: string;
+            /** Conversations */
+            conversations: number;
+            /** Est Cost */
+            est_cost: number;
+        };
+        /**
+         * QuickTestImprovement
+         * @description A stored rewrite: the draft plus sizes and the re-test it started.
+         */
+        QuickTestImprovement: {
+            /** Summary */
+            summary: string;
+            /** Improved Prompt */
+            improved_prompt: string;
+            /** Changes */
+            changes?: string[];
+            /** Doc Suggestions */
+            doc_suggestions?: components["schemas"]["DocSuggestion"][];
+            /**
+             * Instructions
+             * @default
+             */
+            instructions: string;
+            /**
+             * Prompt Chars Before
+             * @default 0
+             */
+            prompt_chars_before: number;
+            /**
+             * Prompt Chars After
+             * @default 0
+             */
+            prompt_chars_after: number;
+            /** Retest Id */
+            retest_id?: string | null;
+        };
+        /**
+         * QuickTestListItem
+         * @description A prompt test in the recent list.
+         */
+        QuickTestListItem: {
+            /**
+             * Rules Untested
+             * @default 0
+             */
+            rules_untested: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "running" | "checking" | "done" | "failed";
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Parent Id */
+            parent_id?: string | null;
+            /** Rules Total */
+            rules_total: number;
+            /** Rules Broken */
+            rules_broken: number;
+            /** Conversations */
+            conversations: number;
+            /** Finished */
+            finished: number;
+        };
+        /**
+         * QuickTestOut
+         * @description A prompt test with its rules, conversations and last improvement.
+         */
+        QuickTestOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "running" | "checking" | "done" | "failed";
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Agent Id
+             * Format: uuid
+             */
+            agent_id: string;
+            /**
+             * Run Id
+             * Format: uuid
+             */
+            run_id: string;
+            /** Parent Id */
+            parent_id?: string | null;
+            /** Kb Id */
+            kb_id?: string | null;
+            /**
+             * Summary
+             * @default
+             */
+            summary: string;
+            /**
+             * Language
+             * @default
+             */
+            language: string;
+            /** System Prompt */
+            system_prompt: string;
+            /** User Details */
+            user_details: string;
+            /** Prompt Chars */
+            prompt_chars: number;
+            /** Est Cost */
+            est_cost?: number | null;
+            progress: components["schemas"]["QuickTestProgress"];
+            /** Rules */
+            rules: components["schemas"]["RuleResult"][];
+            /** Conversations */
+            conversations: components["schemas"]["Conversation"][];
+            improvement?: components["schemas"]["QuickTestImprovement"] | null;
+        };
+        /**
+         * QuickTestPlan
+         * @description The rules found in the prompt and the conversations that test them.
+         */
+        QuickTestPlan: {
+            /** Agent Name */
+            agent_name: string;
+            /**
+             * Summary
+             * @description what the bot does
+             * @default
+             */
+            summary: string;
+            /**
+             * Language
+             * @default en-IN
+             */
+            language: string;
+            /** Rules */
+            rules: components["schemas"]["PlannedRule"][];
+            /** Scenarios */
+            scenarios: components["schemas"]["PlannedScenario"][];
+            /** Tools */
+            tools?: components["schemas"]["PromptTool"][];
+        };
+        /**
+         * QuickTestProgress
+         * @description Conversations in the test, ended, checked and failed.
+         */
+        QuickTestProgress: {
+            /**
+             * Total
+             * @default 0
+             */
+            total: number;
+            /**
+             * Finished
+             * @default 0
+             */
+            finished: number;
+            /**
+             * Checked
+             * @default 0
+             */
+            checked: number;
+            /**
+             * Errors
+             * @default 0
+             */
+            errors: number;
+        };
+        /**
+         * QuickTestSetup
+         * @description What the "Test my prompt" screen needs before the first test.
+         */
+        QuickTestSetup: {
+            /** Llm Ready */
+            llm_ready: boolean;
+            /** Llm Provider */
+            llm_provider: string;
+            /** Agent Model */
+            agent_model: string;
+            /** Auto Run Limit */
+            auto_run_limit: number;
+            /** Knowledge Bases */
+            knowledge_bases: components["schemas"]["SetupKb"][];
         };
         /** RagConfig */
         RagConfig: {
@@ -4420,6 +5010,68 @@ export interface components {
              * @default
              */
             notes: string;
+        };
+        /**
+         * RuleEvidence
+         * @description Where the bot broke a rule: the conversation, the turn and its words.
+         */
+        RuleEvidence: {
+            /**
+             * Call Id
+             * Format: uuid
+             */
+            call_id: string;
+            /** Scenario */
+            scenario: string;
+            /** Turn */
+            turn?: number | null;
+            /**
+             * Quote
+             * @default
+             */
+            quote: string;
+            /**
+             * Why
+             * @default
+             */
+            why: string;
+        };
+        /**
+         * RuleResult
+         * @description One rule with how many checked conversations kept or broke it.
+         */
+        RuleResult: {
+            /** Id */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "forbidden" | "required";
+            /** Text */
+            text: string;
+            /**
+             * Source
+             * @default
+             */
+            source: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "kept" | "broken" | "not_tested";
+            /**
+             * Broken
+             * @default 0
+             */
+            broken: number;
+            /**
+             * Kept
+             * @default 0
+             */
+            kept: number;
+            /** Evidence */
+            evidence?: components["schemas"]["RuleEvidence"][];
         };
         /** RunCompareCell */
         RunCompareCell: {
@@ -4980,6 +5632,23 @@ export interface components {
             /** Tags */
             tags?: string[] | null;
             rag_expectation?: components["schemas"]["RagExpectation"] | null;
+        };
+        /**
+         * SetupKb
+         * @description A knowledge base the test screen can offer, and whether it is indexed.
+         */
+        SetupKb: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Documents */
+            documents: number;
+            /** Ready */
+            ready: boolean;
         };
         /**
          * SpeechProviderName
@@ -12054,6 +12723,544 @@ export interface operations {
             };
             /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    quick_test_setup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuickTestSetup"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    list_quick_tests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuickTestListItem"][];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    create_quick_test: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuickTestCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuickTestCreated"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description budget_exceeded: estimate above remaining budget */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description rate_limited: too many requests, see Retry-After */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description upstream_error: Gnani/LLM failed after retries */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    get_quick_test: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                test_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuickTestOut"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    improve_quick_test: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                test_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImproveRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuickTestImprovement"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description budget_exceeded: estimate above remaining budget */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description rate_limited: too many requests, see Retry-After */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description upstream_error: Gnani/LLM failed after retries */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    retest_quick_test: {
+        parameters: {
+            query?: {
+                confirm_cost?: boolean;
+            };
+            header?: never;
+            path: {
+                test_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuickTestCreated"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description budget_exceeded: estimate above remaining budget */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description not_found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    assistant_chat: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssistantRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantResponse"];
+                };
+            };
+            /** @description validation_error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unauthorized: missing or invalid API key */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description budget_exceeded: estimate above remaining budget */
+            402: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description forbidden: key lacks the required scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description unsupported_audio / unsafe_url / base_url_not_allowed / prompt_agent_has_no_version */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description rate_limited: too many requests, see Retry-After */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description upstream_error: Gnani/LLM failed after retries */
+            502: {
                 headers: {
                     [name: string]: unknown;
                 };

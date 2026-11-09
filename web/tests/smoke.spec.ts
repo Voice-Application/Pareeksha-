@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { createServer, type Server, type IncomingHttpHeaders } from "node:http";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
@@ -32,6 +32,14 @@ test.afterAll(async () => {
 /** Pages whose h1 states the current finding ("Latest run passed 7 of 12 calls") instead of the nav label (00-shared 3). */
 const SENTENCE_TITLES = new Set(["/", "/dlq", "/audits", "/dialect", "/regression", "/calibration", "/integrations", "/runs/compare"]);
 
+/** Open the folded "Advanced" sidebar section when the link sits inside it. */
+async function navLink(page: Page, item: (typeof NAV_ITEMS)[number]) {
+  const nav = page.getByRole("navigation", { name: "Primary" });
+  const toggle = nav.getByRole("button", { name: "Advanced" });
+  if (item.group && (await toggle.getAttribute("aria-expanded")) !== "true") await toggle.click();
+  return nav.getByRole("link", { name: item.label, exact: true });
+}
+
 for (const item of NAV_ITEMS) {
   test(`page ${item.href} renders inside layout with sidebar`, async ({ page }) => {
     const res = await page.goto(item.href);
@@ -47,9 +55,21 @@ for (const item of NAV_ITEMS) {
 test("sidebar links navigate client-side to every route", async ({ page }) => {
   await page.goto("/");
   for (const item of NAV_ITEMS) {
-    await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: item.label, exact: true }).click();
+    await (await navLink(page, item)).click();
     await expect(page).toHaveURL(new RegExp(`${item.href === "/" ? "/$" : item.href + "$"}`));
   }
+});
+
+test("the sidebar shows the main pages and folds the rest under Advanced", async ({ page }) => {
+  await page.goto("/");
+  const nav = page.getByRole("navigation", { name: "Primary" });
+  for (const label of ["Home", "Test my prompt", "Documents", "Results"]) await expect(nav.getByRole("link", { name: label, exact: true })).toBeVisible();
+  await expect(nav.getByRole("link", { name: "RAG lab", exact: true })).toHaveCount(0);
+  await nav.getByRole("button", { name: "Advanced" }).click();
+  await expect(nav.getByRole("link", { name: "RAG lab", exact: true })).toBeVisible();
+  // a page inside Advanced keeps the section open
+  await page.goto("/rag-lab");
+  await expect(nav.getByRole("button", { name: "Advanced" })).toHaveAttribute("aria-expanded", "true");
 });
 
 test("proxy adds API key server-side and strips set-cookie", async ({ request }) => {

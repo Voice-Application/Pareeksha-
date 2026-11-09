@@ -19,10 +19,12 @@ class TokenBucket:
     def __init__(
         self, rate: int, per_s: float = 60.0, clock: Callable[[], float] = time.monotonic
     ) -> None:
+        """Init."""
         self.rate, self.per_s, self._clock = rate, per_s, clock
         self._state: dict[UUID, tuple[float, float]] = {}  # key -> (tokens, last refill)
 
     def check(self, key: UUID) -> None:
+        """Check."""
         now = self._clock()
         tokens, last = self._state.get(key, (float(self.rate), now))
         tokens = min(float(self.rate), tokens + (now - last) * self.rate / self.per_s)
@@ -40,3 +42,7 @@ class TokenBucket:
 
 #: POST /designer/chat: one LLM call (plus a repair retry) per request.
 DESIGNER_CHAT_LIMIT = TokenBucket(20)
+#: POST /assistant/chat: one LLM call, sometimes a test plan or a prompt rewrite as well.
+ASSISTANT_LIMIT = TokenBucket(30)
+#: POST /quick-tests and /improve: a plan or rewrite call, then a run of conversations.
+QUICK_TEST_LIMIT = TokenBucket(10)

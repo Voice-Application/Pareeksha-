@@ -242,6 +242,7 @@ export async function mockApi(pg: Page, state: MockState) {
     const send = (r: { status?: number; json?: unknown }) => route.fulfill({ status: r.status ?? 200, json: r.json, headers: { "x-request-id": "req_test_0001" } });
 
     // runs (last run column)
+    if (method === "GET" && path === "/quick-tests") return send({ json: [] });
     if (method === "GET" && path === "/runs") {
       const r = state.runsByAgent[url.searchParams.get("agent_id") ?? ""];
       return send({ json: { items: r ? [{ id: r.id, agent_id: "x", name: "run", kind: "matrix", status: "completed", progress: {}, created_at: r.created_at }] : [], next_cursor: null } });

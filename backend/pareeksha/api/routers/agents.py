@@ -35,9 +35,13 @@ _DUPLICATE = "An agent with this name already exists"
 
 
 def _out(row: Agents) -> AgentOut:
+    """Out."""
     out = AgentOut.model_validate(row, from_attributes=True)
     out.has_adapter_secrets = bool(row.adapter_secrets_encrypted)
     return out
+
+
+QUICK_TEST_KEY = "quick_test_id"
 
 
 def _client_config(config: dict[str, Any], current: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -46,6 +50,8 @@ def _client_config(config: dict[str, Any], current: dict[str, Any] | None = None
     out = {k: v for k, v in config.items() if k != ACTIVE_VERSION_KEY}
     if current and current.get(ACTIVE_VERSION_KEY):
         out[ACTIVE_VERSION_KEY] = current[ACTIVE_VERSION_KEY]
+    if current and current.get(QUICK_TEST_KEY):  # the marker that keeps a test's agent off Home
+        out[QUICK_TEST_KEY] = current[QUICK_TEST_KEY]
     return out
 
 
@@ -61,6 +67,7 @@ def _encrypt(secrets: dict[str, str]) -> bytes | None:
     summary="Register an agent under test",
 )
 async def create_agent(body: AgentCreate, key: WriteKey, session: Db) -> AgentOut:
+    """Create agent."""
     agent_id = uuid.uuid4()
     data = body.model_dump(mode="json")
     data["adapter_config"] = _client_config(data["adapter_config"])
@@ -81,6 +88,7 @@ async def create_agent(body: AgentCreate, key: WriteKey, session: Db) -> AgentOu
 async def list_agents(
     key: ReadKey, session: Db, page: Pagination, include_archived: bool = False
 ) -> Page[AgentOut]:
+    """List agents."""
     conditions = [Agents.project_id == key.project_id]
     if not include_archived:
         conditions.append(Agents.archived.is_(False))
@@ -90,11 +98,13 @@ async def list_agents(
 
 @router.get("/agents/{agent_id}", responses=errors(404), summary="Get an agent")
 async def get_agent(agent_id: UUID, key: ReadKey, session: Db) -> AgentOut:
+    """Get agent."""
     return _out(await get_or_404(session, Agents, agent_id, key.project_id, "Agent"))
 
 
 @router.patch("/agents/{agent_id}", responses=errors(404, 409), summary="Update an agent")
 async def update_agent(agent_id: UUID, body: AgentUpdate, key: WriteKey, session: Db) -> AgentOut:
+    """Update agent."""
     row = await get_or_404(session, Agents, agent_id, key.project_id, "Agent")
     data = body.model_dump(mode="json", exclude_none=True)
     if "adapter_config" in data:
@@ -114,6 +124,7 @@ async def update_agent(agent_id: UUID, body: AgentUpdate, key: WriteKey, session
 
 @router.post("/agents/{agent_id}/archive", responses=errors(404), summary="Archive an agent")
 async def archive_agent(agent_id: UUID, key: WriteKey, session: Db) -> AgentOut:
+    """Archive agent."""
     row = await get_or_404(session, Agents, agent_id, key.project_id, "Agent")
     if not row.archived:
         row.archived = True
@@ -128,6 +139,7 @@ async def archive_agent(agent_id: UUID, key: WriteKey, session: Db) -> AgentOut:
     summary="Open the socket, send 1 s of silence, wait up to 10 s for agent audio",
 )
 async def test_agent_connection(agent_id: UUID, key: WriteKey, session: Db) -> TestConnectionResult:
+    """Test agent connection."""
     row = await get_or_404(session, Agents, agent_id, key.project_id, "Agent")
     if row.adapter == "prompt":
         return await _check_prompt_agent(session, row)

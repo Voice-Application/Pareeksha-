@@ -7,6 +7,8 @@ import { Bot, CircleCheck, CircleHelp, CircleX, Play } from "lucide-react";
 import { api } from "@/lib/api/client";
 import { call } from "@/lib/api/call";
 import { listRunItems, listRuns } from "@/lib/api/runs";
+import { asList, listPoll, listQuickTests } from "@/lib/api/quick-tests";
+import { QuickStatus } from "@/components/quick/status";
 import { useUrlState } from "@/lib/hooks/use-url-state";
 import { useNow } from "@/lib/hooks/use-now";
 import { relativeTime } from "@/lib/format";
@@ -18,6 +20,19 @@ import { FlagChip, Meter, ScoreChip, StatTile, StatusPill, TileRow, VerdictBadge
 import { Chip } from "@/components/ui/layout";
 
 const STORE = "pareeksha.agent";
+
+/** Every agent, page by page (at most 5 pages of 100), so many prompt-test agents cannot hide the user's own. */
+async function allAgents() {
+  const first = await call(api.GET("/api/v1/agents", { params: { query: { limit: 100 } } }));
+  let items = first.items;
+  let cursor = first.next_cursor;
+  for (let page = 1; cursor && page < 5; page++) {
+    const more = await call(api.GET("/api/v1/agents", { params: { query: { limit: 100, cursor } } }));
+    items = [...items, ...more.items];
+    cursor = more.next_cursor;
+  }
+  return { ...first, items };
+}
 const inr = (n: number | null | undefined) => (n == null ? "-" : `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`);
 const linkCls = "text-accent-fg underline-offset-2 hover:underline";
 
@@ -45,8 +60,10 @@ export function OverviewSkeleton() {
 export function Overview() {
   const url = useUrlState();
   const now = useNow();
-  const agents = useQuery({ queryKey: ["agents", "overview"], queryFn: () => call(api.GET("/api/v1/agents", { params: { query: { limit: 100 } } })) });
-  const active = useMemo(() => (agents.data?.items ?? []).filter((a) => !a.archived), [agents.data]);
+  const agents = useQuery({ queryKey: ["agents", "overview"], queryFn: allAgents });
+  // Agents made by Test my prompt have their own panel; the hero is about the user's own agents.
+  const active = useMemo(() => (agents.data?.items ?? []).filter((a) => !a.archived && !(a.adapter_config as { quick_test_id?: string } | undefined)?.quick_test_id), [agents.data]);
+  const promptTests = useQuery({ queryKey: ["quick-tests"], queryFn: listQuickTests });
   const urlAgent = url.get("agent");
   let stored = "";
   try { stored = typeof window !== "undefined" ? (window.localStorage.getItem(STORE) ?? "") : ""; } catch { /* storage unavailable */ }
@@ -69,13 +86,41 @@ export function Overview() {
 
   if (agents.isError) return <><PageHeader eyebrow="Overview" title="Overview" /><ErrorPanel error={agents.error} what="agents" onRetry={() => void agents.refetch()} /></>;
   if (agents.isPending) return <OverviewSkeleton />;
-  if (!agent)
+  if (!agent) {
+    const tested = asList(promptTests.data).length > 0;
+    if (promptTests.isError && !tested)
+      return (
+        <>
+          <PageHeader title="Your prompt tests" actions={<LinkButton variant="primary" href="/test">Test my prompt</LinkButton>} />
+          <ErrorPanel error={promptTests.error} what="prompt tests" onRetry={() => void promptTests.refetch()} />
+        </>
+      );
+    if (promptTests.isPending)
+      return <OverviewSkeleton />;
     return (
       <>
-        <PageHeader eyebrow="Overview" title="Add your first agent" description="An agent is the voice bot you want to test. Add one and run synthetic callers against it." actions={<LinkButton variant="primary" href="/agents/new">Add agent</LinkButton>} />
-        <Panel bodyClassName="p-0"><EmptyState icon={Bot} title="No agents yet" body="Pareeksha scores calls to an agent, so start by adding yours." /></Panel>
+        <PageHeader
+          title={tested ? "Your prompt tests" : "Test your first bot"}
+          description={
+            tested
+              ? "Each test shows which rules in the prompt the bot kept and where it broke one. Voice bots on a phone line can be added as agents."
+              : "Paste your bot's system prompt and Pareeksha chats with it as normal and tricky customers, then shows which of its rules it keeps and where it breaks them. Voice bots on a phone line can be added as agents."
+          }
+          actions={
+            <>
+              <LinkButton variant="primary" href="/test">Test my prompt</LinkButton>
+              <LinkButton href="/agents/new">Add a voice agent</LinkButton>
+            </>
+          }
+        />
+        {tested ? (
+          <div className="max-w-[720px]"><PromptTests /></div>
+        ) : (
+          <Panel bodyClassName="p-0"><EmptyState icon={Bot} title="Nothing tested yet" body="Your tests and their results will show up here." action={<LinkButton variant="primary" href="/test">Test my prompt</LinkButton>} /></Panel>
+        )}
       </>
     );
+  }
 
   // While a run is in flight the server summary is empty; fill the tiles from the items scored so far.
   const scoredNow = (items.data?.items ?? []).filter((i) => i.overall_score != null);
@@ -109,7 +154,12 @@ export function Overview() {
         }
         title={title}
         description={desc}
-        actions={<LinkButton variant="primary" href={`/runs/new?agent=${agent.id}`}><Play size={14} strokeWidth={1.6} aria-hidden />New run</LinkButton>}
+        actions={
+          <>
+            <LinkButton variant="primary" href="/test">Test my prompt</LinkButton>
+            <LinkButton href={`/runs/new?agent=${agent.id}`}><Play size={14} strokeWidth={1.6} aria-hidden />New run</LinkButton>
+          </>
+        }
       />
       <TileRow cols="grid-cols-2 min-[860px]:grid-cols-4">
         <StatTile href={latest ? `/runs/${latest.id}` : "/runs"} hero label={`Pass rate${running ? " so far" : ""}`} value={s?.pass_rate != null ? `${Math.round(s.pass_rate * 100)}%` : "-"} caption={latest ? `${latest.progress.evaluated} scored` : "no runs"} />
@@ -169,6 +219,7 @@ export function Overview() {
         </div>
 
         <div className="flex min-w-0 flex-col gap-6">
+          <PromptTests />
           <Panel title="Needs human review" aux={<Link className={linkCls} href="/calibration">Calibration</Link>}>
             <PanelBody q={review} rows={review.data?.items?.length ?? 0} empty="No calls are waiting for review.">
               <ul className="flex flex-col divide-y divide-border">
@@ -220,6 +271,31 @@ export function Overview() {
         </div>
       </div>
     </>
+  );
+}
+
+function PromptTests() {
+  const q = useQuery({ queryKey: ["quick-tests"], queryFn: listQuickTests, refetchInterval: (s) => listPoll(s.state.data) });
+  const list = asList(q.data);
+  return (
+    <Panel title="Prompt tests" aux={<Link className={linkCls} href="/test">Test a prompt</Link>}>
+      <PanelBody q={q} rows={list.length} empty="No prompt tests yet. Paste a prompt in Test my prompt to start one.">
+        <ul className="flex flex-col divide-y divide-border">
+          {list.slice(0, 4).map((t) => (
+            <li key={t.id} className="relative flex flex-col gap-1 py-3 first:pt-1 last:pb-0">
+              <Link href={`/test/${t.id}`} className="truncate font-medium underline-offset-2 after:absolute after:inset-0 hover:underline">
+                {t.name}
+                {t.parent_id ? " (improved)" : ""}
+              </Link>
+              <span className="flex flex-wrap items-center gap-x-3 text-sm text-muted">
+                <QuickStatus status={t.status} broken={t.rules_broken} total={t.rules_total} untested={t.rules_untested} />
+                <time dateTime={t.created_at} className="text-subtle">{relativeTime(t.created_at)}</time>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </PanelBody>
+    </Panel>
   );
 }
 

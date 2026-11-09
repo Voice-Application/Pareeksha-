@@ -118,6 +118,7 @@ export async function mockFe(pg: Page, st: OpsState, opts: { runStatus?: string;
     if (path === "/personas") return send(page([persona(1), persona(2)]));
     if (path === "/noise-profiles") return send(page([noise(1), noise(2)]));
     if (path === "/usage") return send({ items: [], credits_used: 12.5, budget_credits: 500, remaining_budget: 487.5 });
+    if (path === "/quick-tests") return send([]);
     if (path === "/metrics/summary") return send({ consumer_lag: { evaluator: 0, planner: 2 }, outbox_backlog: 0, dlq_open: st.dlq.filter((d) => d.status === "open").length, credits_used: 12.5 });
     if (path === "/health") return send({ db: "ok", kafka: "ok" });
     if (path === "/runs:estimate") return send({ item_count: 4, estimate: { tts_seconds: 120, stt_seconds: 240, judge_calls: 4, caller_llm_calls: 20, est_cost: 31.5 }, remaining_budget: 487.5, over_budget: false });

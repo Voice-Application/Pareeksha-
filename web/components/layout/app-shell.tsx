@@ -7,13 +7,24 @@ import { ThemeToggle, useRole } from "./theme-toggle";
 import { Sidebar } from "./sidebar";
 import { Button } from "@/components/ui/button";
 import { ToastProvider } from "@/components/ui/toast";
-import { NAV_ITEMS } from "@/lib/nav";
+import { activeItem } from "@/lib/nav";
+import { Assistant } from "@/components/assistant/assistant";
 
 /** Shown only after a password sign-in. The form posts, so signing out works without script too. */
 function SignOut() {
   if (!useRole()) return null;
   return (
-    <form method="post" action="/api/auth/logout">
+    <form
+      method="post"
+      action="/api/auth/logout"
+      onSubmit={() => {
+        try {
+          window.sessionStorage.removeItem("pareeksha.assistant"); // the next person must not see this chat
+        } catch {
+          /* storage blocked: nothing was kept */
+        }
+      }}
+    >
       <Button type="submit" variant="ghost" className="px-3">
         <LogOut size={16} strokeWidth={1.6} aria-hidden />
         Sign out
@@ -38,9 +49,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     if (!open && d.open) d.close();
   }, [open]);
 
-  const current = NAV_ITEMS.filter((i) => i.href !== "/" && (pathname.startsWith("/calls/") ? i.href === "/runs" : pathname === i.href || pathname.startsWith(i.href + "/"))).sort(
-    (a, b) => b.href.length - a.href.length,
-  )[0];
+  const current = activeItem(pathname);
 
   // The product and sign-in pages stand outside the working shell: no sidebar, their own chrome.
   if (pathname === "/welcome" || pathname === "/login") return <ToastProvider>{children}</ToastProvider>;
@@ -74,7 +83,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Button variant="ghost" icon aria-label="Open navigation" className="min-[861px]:hidden" onClick={() => setOpen(true)}>
               <Menu size={16} strokeWidth={1.6} aria-hidden />
             </Button>
-            <p className="truncate text-sm text-muted">{current?.label ?? (pathname === "/" ? "Overview" : "")}</p>
+            <p className="truncate text-sm text-muted">{current?.label ?? ""}</p>
             <div className="ml-auto flex items-center gap-1">
               <SignOut />
               <ThemeToggle />
@@ -85,6 +94,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </main>
         </div>
       </div>
+      <Assistant />
     </ToastProvider>
   );
 }

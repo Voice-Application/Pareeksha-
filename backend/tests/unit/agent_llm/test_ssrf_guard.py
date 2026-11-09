@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import functools
+import gzip
 import json
 from collections.abc import Callable
 from typing import Any
@@ -23,6 +24,7 @@ URL = "https://llm.example.test/v1"
 
 @pytest.fixture(autouse=True)
 def _no_private(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Helper: no private."""
     monkeypatch.delenv("AGENT_LLM_ALLOW_PRIVATE_URLS", raising=False)
 
 
@@ -35,10 +37,12 @@ def _wire(
     seen: list[httpx.Request] = []
 
     def record(req: httpx.Request) -> httpx.Response:
+        """Helper: record."""
         seen.append(req)
         return handler(req)
 
     async def resolver(host: str, port: int) -> list[str]:
+        """Helper: resolver."""
         return [ip]
 
     monkeypatch.setattr(
@@ -50,6 +54,7 @@ def _wire(
 
 
 async def _chat(base_url: str | None = URL, provider: Any = "openai_compatible") -> Any:
+    """Helper: chat."""
     p = build_chat_provider(provider, api_key=KEY, base_url=base_url)
     return await p.chat(MSGS, [], model="m", temperature=0.1)
 
@@ -86,10 +91,26 @@ async def test_ollama_default_is_blocked_without_the_private_flag(
 
 
 async def test_oversized_response_is_rejected(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A body over the size cap is refused."""
     big = b"x" * (MAX_RESPONSE_BYTES + 1)
     _wire(monkeypatch, lambda r: httpx.Response(200, content=big))
     with pytest.raises(AgentLLMError, match="larger than"):
         await _chat()
+
+
+async def test_gzip_response_is_decoded_once(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A gzip body (DeepSeek's default) parses; the decoded body is not decoded a second time."""
+    packed = gzip.compress(json.dumps(OK).encode())
+    _wire(
+        monkeypatch,
+        lambda r: httpx.Response(
+            200,
+            headers={"content-encoding": "gzip", "content-type": "application/json"},
+            content=packed,
+        ),
+    )
+    reply = await _chat()
+    assert reply.text == "hi"
 
 
 async def test_redirects_are_not_followed(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -109,10 +130,12 @@ async def test_redirects_are_not_followed(monkeypatch: pytest.MonkeyPatch) -> No
 def _wire_plain(
     monkeypatch: pytest.MonkeyPatch, handler: Callable[[httpx.Request], httpx.Response]
 ) -> list[httpx.Request]:
+    """Helper: wire plain."""
     monkeypatch.setenv("AGENT_LLM_ALLOW_PRIVATE_URLS", "1")
     seen: list[httpx.Request] = []
 
     def record(req: httpx.Request) -> httpx.Response:
+        """Helper: record."""
         seen.append(req)
         return handler(req)
 
@@ -146,6 +169,16 @@ async def test_private_opt_in_still_rejects_redirects_and_big_bodies(
         await _chat("http://localhost:1/v1")
 
 
+async def test_private_opt_in_decodes_gzip_once(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The plain-httpx path also returns the decoded body without decoding it twice."""
+    packed = gzip.compress(json.dumps(OK).encode())
+    _wire_plain(
+        monkeypatch,
+        lambda r: httpx.Response(200, headers={"content-encoding": "gzip"}, content=packed),
+    )
+    assert (await _chat("http://localhost:1/v1")).text == "hi"
+
+
 # -- reasoning models reject a non-default temperature ---------------------------------------
 
 
@@ -172,6 +205,7 @@ async def test_other_400s_are_not_retried() -> None:
     calls: list[int] = []
 
     def handler(req: httpx.Request) -> httpx.Response:
+        """Helper: handler."""
         calls.append(1)
         return httpx.Response(400, json={"error": {"message": "bad model"}})
 

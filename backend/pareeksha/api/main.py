@@ -27,6 +27,7 @@ from pareeksha.api.routers import (
     noise_profiles,
     personas,
     prompt_versions,
+    quick_tests,
     rag_matrices,
     regression,
     runs,
@@ -68,6 +69,7 @@ ROUTERS = (
     users.router,
     settings.router,
     designer.router,
+    quick_tests.router,
     system.router,
     system.authed,
 )
@@ -111,6 +113,7 @@ class PareekshaApp(FastAPI):
     """FastAPI app whose OpenAPI document follows the Pareeksha conventions."""
 
     def openapi(self) -> dict[str, Any]:
+        """Openapi."""
         if self.openapi_schema is None:
             schema = get_openapi(
                 title=self.title,
@@ -125,6 +128,7 @@ class PareekshaApp(FastAPI):
 
 
 def create_app() -> FastAPI:
+    """Create app."""
     app = PareekshaApp(
         title="Pareeksha API",
         version=API_VERSION,

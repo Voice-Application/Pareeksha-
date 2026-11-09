@@ -192,7 +192,7 @@ export function LlmSettingsPage() {
   const q = useQuery({ queryKey: KEY, queryFn: () => call(api.GET("/api/v1/settings/llm")) });
   return (
     <div className="max-w-[640px]">
-      <PageHeader title="LLM" description="The model provider the judge, the simulated caller and the designer use for this project." />
+      <PageHeader title="AI settings" description="The AI key and models Pareeksha uses to run your prompts, play the customers and check the answers." />
       {q.isPending ? (
         <FormSkeleton sections={1} />
       ) : q.isError ? (
