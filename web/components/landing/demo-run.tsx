@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { DEMO_PROMPT, DEMO_TURNS, DEMO_VERDICT } from "./demo-data";
 
 /**
@@ -19,49 +19,53 @@ const STEPS = [
 const LAST = STEPS.length - 1;
 const BEAT_MS = 1400;
 
-function prefersReducedMotion() {
-  return typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+const MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+function subscribeMotion(onChange: () => void) {
+  const media = window.matchMedia(MOTION_QUERY);
+  media.addEventListener("change", onChange);
+  return () => media.removeEventListener("change", onChange);
+}
+function getMotionSnapshot() {
+  return window.matchMedia(MOTION_QUERY).matches;
+}
+function getServerMotionSnapshot() {
+  return null;
 }
 
 export function DemoRun() {
-  const [step, setStep] = useState(0);
+  const [playbackStep, setStep] = useState(0);
   const [playing, setPlaying] = useState(true);
-  const reduced = useRef(false);
+  const reduced = useSyncExternalStore(subscribeMotion, getMotionSnapshot, getServerMotionSnapshot);
+  // Reserve the completed layout until hydration resolves the media query.
+  const step = reduced === false ? playbackStep : LAST;
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    reduced.current = prefersReducedMotion();
-    if (reduced.current) {
-      setStep(LAST);
-      setPlaying(false);
-    }
-  }, []);
 
   useEffect(() => {
     // Only schedule the next beat while playing and there is one left; at the end we simply stop
     // scheduling (no setState here). The controls derive "at end" from `step`, not `playing`.
-    if (!playing || reduced.current || step >= LAST) return;
+    if (!playing || reduced !== false || step >= LAST) return;
     timer.current = setTimeout(() => setStep((s) => Math.min(s + 1, LAST)), BEAT_MS);
     return () => {
       if (timer.current) clearTimeout(timer.current);
     };
-  }, [playing, step]);
+  }, [playing, reduced, step]);
 
   const replay = useCallback(() => {
+    if (reduced !== false) return;
     setStep(0);
     setPlaying(true);
-  }, []);
+  }, [reduced]);
 
   const atEnd = step >= LAST;
   const show = (name: (typeof STEPS)[number]) => step >= STEPS.indexOf(name);
 
   return (
-    <div className="lp-demo" aria-label="A sample run, played out">
+    <div className="lp-demo" aria-label="A sample run, played out" style={{ visibility: reduced === null ? "hidden" : undefined }}>
       <div className="lp-demo__head">
         <span className="lp-demo__tag">Sample run</span>
         <div className="lp-demo__controls">
           {atEnd ? (
-            <button type="button" className="lp-demo__btn" onClick={replay}>
+            <button type="button" className="lp-demo__btn" onClick={replay} disabled={reduced !== false}>
               Replay
             </button>
           ) : (
@@ -81,7 +85,7 @@ export function DemoRun() {
       {/* Conversation */}
       <div className="lp-demo__convo" aria-live="polite">
         {DEMO_TURNS.map((t, i) => (
-          <div key={i} className={`lp-demo__turn lp-demo__turn--${t.speaker} ${show(`turn-${i}` as (typeof STEPS)[number]) ? "is-in" : ""}`}>
+          <div key={i} aria-hidden={!show(`turn-${i}` as (typeof STEPS)[number])} className={`lp-demo__turn lp-demo__turn--${t.speaker} ${show(`turn-${i}` as (typeof STEPS)[number]) ? "is-in" : ""}`}>
             <span className="lp-demo__who">{t.speaker === "caller" ? "Caller" : "Agent"}</span>
             <p className="lp-demo__text">{t.text}</p>
             {t.broke && show("verdict") && (

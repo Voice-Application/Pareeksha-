@@ -105,8 +105,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         <figure className="hidden w-full max-w-[30rem] min-[961px]:block">
           <div className="grid place-items-center rounded-lg bg-sunken p-7 min-[1100px]:p-9">
             <div className="w-full max-w-[408px] overflow-hidden rounded-lg" style={{ boxShadow: "var(--shadow-float)" }}>
-              <Image className="theme-shot theme-shot--light" src={verdictLight} alt="A call's verdict: critical failure, overall score 57.5 of 100 against a pass line of 80." sizes="408px" priority />
-              <Image className="theme-shot theme-shot--dark" src={verdictDark} alt="A call's verdict: critical failure, overall score 57.5 of 100 against a pass line of 80." sizes="408px" priority />
+              <Image className="theme-shot theme-shot--light" src={verdictLight} alt="A call's verdict: critical failure, overall score 57.5 of 100 against a pass line of 80." sizes="408px" />
+              <Image className="theme-shot theme-shot--dark" src={verdictDark} alt="A call's verdict: critical failure, overall score 57.5 of 100 against a pass line of 80." sizes="408px" />
             </div>
           </div>
           <figcaption className="mt-3 text-sm text-subtle">A call from the planted-bugs run, as the dashboard shows it.</figcaption>

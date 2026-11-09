@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { DEMO_DIALECT, DEMO_DIMENSIONS, DEMO_RAG, DEMO_TURNS } from "./demo-data";
 
 /**
@@ -19,12 +19,15 @@ const TABS: { key: TabKey; label: string }[] = [
 export function DemoTabs() {
   const [tab, setTab] = useState<TabKey>("transcript");
   const base = useId();
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   return (
     <div className="lp-tabs">
       <div className="lp-tabs__list" role="tablist" aria-label="Sample output">
-        {TABS.map((t) => (
+        {TABS.map((t, index) => (
           <button
             key={t.key}
+            type="button"
+            ref={(node) => { tabRefs.current[index] = node; }}
             role="tab"
             id={`${base}-tab-${t.key}`}
             aria-selected={tab === t.key}
@@ -32,6 +35,13 @@ export function DemoTabs() {
             tabIndex={tab === t.key ? 0 : -1}
             className={`lp-tabs__tab ${tab === t.key ? "is-active" : ""}`}
             onClick={() => setTab(t.key)}
+            onKeyDown={(event) => {
+              if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+              event.preventDefault();
+              const nextIndex = (index + (event.key === "ArrowRight" ? 1 : -1) + TABS.length) % TABS.length;
+              setTab(TABS[nextIndex].key);
+              tabRefs.current[nextIndex]?.focus();
+            }}
           >
             {t.label}
           </button>
