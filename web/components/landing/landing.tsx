@@ -4,6 +4,8 @@ import { ThemeToggle } from "@/components/layout/theme-toggle";
 import "./landing.css";
 import { DemoRun } from "./demo-run";
 import { DemoTabs } from "./demo-tabs";
+import { BarChart } from "@/components/charts";
+import { DEMO_RAG } from "./demo-data";
 
 const REPO = "https://github.com/voice-application/pareeksha-";
 
@@ -165,6 +167,23 @@ export function Landing() {
             <div className="lp-showcase">
               <h3 className="lp-showcase__head">See the output</h3>
               <DemoTabs />
+            </div>
+
+            {/* One calm chart: how pass-rate climbs across retrieval setups in the RAG lab. Sample data
+                (demo-data.ts), not a live call; a single accent series, pass line at 80 implied by the scale. */}
+            <div className="lp-showcase">
+              <h3 className="lp-showcase__head">RAG setups, compared</h3>
+              <p className="lp-features__lead">
+                Pass rate per retrieval setup on the same scenarios &mdash; from a plain BM25 baseline to hybrid retrieval with a
+                reranker. Sample data.
+              </p>
+              <div className="lp-rag-chart">
+                <BarChart
+                  bars={DEMO_RAG.map((r) => ({ label: r.setup, value: Math.round(r.passRate * 100) }))}
+                  title="Pass rate per retrieval setup, percent"
+                  valueSuffix="%"
+                />
+              </div>
             </div>
           </div>
         </section>

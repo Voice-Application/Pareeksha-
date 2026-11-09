@@ -200,6 +200,8 @@
 /* Interactive output showcase inside the features section. */
 .lp-showcase { margin-top: var(--space-12); }
 .lp-showcase__head { margin-bottom: var(--space-5); }
+/* The RAG-compare chart sits in the same surface card as the rest of the showcase. */
+.lp-rag-chart { border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-surface); padding: var(--space-5) var(--space-5) var(--space-4); max-width: 640px; }
 .lp-tabs { border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg-surface); overflow: hidden; }
 .lp-tabs__list { display: flex; gap: var(--space-1); padding: var(--space-2); border-bottom: 1px solid var(--border); background: var(--bg-sunken); overflow-x: auto; }
 .lp-tabs__tab {
