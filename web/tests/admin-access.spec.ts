@@ -1,31 +1,15 @@
 import { test, expect } from "@playwright/test";
 import { freshState, mockApi } from "./support/mock-api";
-import { spawn, type ChildProcess } from "node:child_process";
 import { createSessionToken, SESSION_COOKIE, SIGNED_IN_COOKIE, type Role } from "../lib/session";
+import { signInEnabledServer } from "./support/enabled-server";
 
 // The shared build was made with sign-in enabled; exercise that same build in both runtime modes.
 const secret = "admin-access-test-session-secret";
-const enabledUrl = "http://127.0.0.1:3101";
-let enabledServer: ChildProcess;
+const enabled = signInEnabledServer(3101, secret);
+const enabledUrl = enabled.url;
 
-test.beforeAll(async () => {
-  enabledServer = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "-p", "3101", "-H", "127.0.0.1"], {
-    env: { ...process.env, AUTH_DISABLED: "0", SESSION_SECRET: secret },
-    stdio: "ignore",
-  });
-  await expect.poll(async () => {
-    try { return (await fetch(`${enabledUrl}/login`)).status; } catch { return 0; }
-  }, { timeout: 30_000 }).toBe(200);
-});
-
-test.afterAll(async () => {
-  if (enabledServer && enabledServer.exitCode === null) {
-    await new Promise<void>((resolve) => {
-      enabledServer.once("exit", () => resolve());
-      enabledServer.kill();
-    });
-  }
-});
+test.beforeAll(() => enabled.start());
+test.afterAll(() => enabled.stop());
 
 test.beforeEach(async ({ page }) => {
   await mockApi(page, freshState());
