@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import type { ReactNode } from "react";
 import { GeistMono } from "geist/font/mono";
 import { Familjen_Grotesk, IBM_Plex_Sans, Geologica } from "next/font/google";
@@ -19,14 +20,17 @@ export const metadata: Metadata = {
 // Runs before paint: stored choice, else the system preference. Keeps dark mode from flashing light.
 const THEME_SCRIPT = `try{var t=localStorage.getItem("theme");if(t!=="light"&&t!=="dark"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}document.documentElement.classList.toggle("dark",t==="dark")}catch(e){}`;
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  // Read deployment settings per request so an existing image can run in open-dashboard mode.
+  await connection();
+  const authDisabled = process.env.AUTH_DISABLED === "1";
   return (
     <html lang="en" className={`${GeistMono.variable} ${familjen.variable} ${plex.variable} ${geologica.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body>
-        <Providers>
+        <Providers authDisabled={authDisabled}>
           <AppShell>{children}</AppShell>
         </Providers>
       </body>
