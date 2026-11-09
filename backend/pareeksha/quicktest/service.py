@@ -78,6 +78,39 @@ PLAN_PROMPT = "quick_test_plan_v1"
 JUDGE_PROMPT = "quick_test_judge_v1"
 IMPROVE_PROMPT = "quick_test_improve_v1"
 
+# When the user asks for a shorter prompt, the rewrite must be at most this fraction of the
+# original length (and strictly shorter). 0.9 leaves room for a genuine trim while rejecting a
+# rewrite that is the same size or longer than what it replaced.
+SHORTER_PROMPT_MAX_FRACTION = 0.9
+
+# Words that, when they appear in the user's improve instructions, mean "make the prompt shorter".
+# Kept as an explicit, documented set rather than NLP so the behaviour is predictable; matched
+# case-insensitively as substrings. Includes a couple of common Hindi/Hinglish equivalents.
+_SHORTER_KEYWORDS = (
+    "shorten",
+    "shorter",
+    "concise",
+    "brief",
+    "trim",
+    "cut down",
+    "too long",
+    "chota",  # Hinglish: "small"
+    "chhota",  # Hinglish: "small" (alternate spelling)
+    "sankshipt",  # Hindi (romanised): "concise"
+)
+
+
+def wants_shorter_prompt(instructions: str) -> bool:
+    """Whether the user's improve instructions ask for a shorter prompt.
+
+    Looks for any keyword in ``_SHORTER_KEYWORDS`` (case-insensitive substring match), e.g.
+    "make it shorter", "too long", "be more concise". Deliberately a simple keyword check rather
+    than NLP so the enforcement in :func:`improve` is predictable and easy to reason about.
+    """
+    lowered = instructions.lower()
+    return any(keyword in lowered for keyword in _SHORTER_KEYWORDS)
+
+
 #: Calls checked per read of a test (in parallel); the page polls, so the rest follow.
 JUDGE_BATCH = 4
 
@@ -971,6 +1004,29 @@ async def improve(
         documents=await _documents(session, row.project_id, row.kb_id),
         instructions=instructions.strip(),
     )
+    # When the user asks for a shorter prompt, enforce a length limit by rejecting an over-length
+    # draft through generate_json's semantic_check: the client then re-asks the model with the
+    # feedback (same mechanism as the planner's check()). We never truncate the text ourselves,
+    # which would corrupt the prompt. A normal improve passes semantic_check=None and is unchanged.
+    shorter = wants_shorter_prompt(instructions)
+    before = len(row.system_prompt)
+    max_chars = int(before * SHORTER_PROMPT_MAX_FRACTION)
+
+    def check(draft: ImprovementDraft) -> str | None:
+        """Reject a rewrite that is not shorter than the original (only when a trim was asked).
+
+        The rewrite must be strictly shorter than the original and at most
+        ``SHORTER_PROMPT_MAX_FRACTION`` of it; otherwise returns feedback telling the model the
+        character budget, which triggers one re-ask with that message.
+        """
+        new = len(draft.improved_prompt)
+        if new >= before or new > max_chars:
+            return (
+                f"the rewritten prompt must be <= {max_chars} characters "
+                f"(it was {new}); make it shorter"
+            )
+        return None
+
     result = await client.generate_json(
         purpose=LLMPurpose.DESIGNER,
         messages=[
@@ -981,6 +1037,7 @@ async def improve(
         prompt_hash=prompt_hash(IMPROVE_PROMPT),
         max_output_tokens=min(16000, 3000 + len(row.system_prompt) // 3),
         timeout_s=240.0,
+        semantic_check=check if shorter else None,
     )
     draft = result.parsed
     improvement = QuickTestImprovement(

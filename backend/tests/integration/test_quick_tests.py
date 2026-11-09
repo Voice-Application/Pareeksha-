@@ -329,6 +329,63 @@ async def test_improve_and_retest_runs_the_same_conversations_on_a_new_version(
         assert sorted(versions) == [1, 2]
 
 
+async def test_shorter_improve_reasks_when_the_draft_is_longer(
+    api: AsyncClient,
+    tenant: Tenant,
+    provider: ScriptedProvider,
+) -> None:
+    """A "make it shorter" improve rejects a longer draft and re-asks for a shorter one."""
+    await _library(api, tenant)
+    created = await _create(api, tenant, provider)
+    longer = PROMPT + " Always confirm the account number and repeat it back to the caller twice."
+    shorter = "You are the Sahay helpdesk. Ask for the DOB before any detail."
+    assert len(longer) > len(PROMPT) and len(shorter) < len(PROMPT)
+    # first draft is LONGER (rejected), the re-ask returns a SHORTER one (accepted)
+    provider.outputs.append(
+        json.dumps({"summary": "Oops longer", "improved_prompt": longer, "changes": []})
+    )
+    provider.outputs.append(
+        json.dumps({"summary": "Shorter", "improved_prompt": shorter, "changes": ["trimmed"]})
+    )
+    before = len(provider.requests)
+    r = await api.post(
+        f"{API}/quick-tests/{created['id']}/improve",
+        json={"instructions": "make it shorter", "retest": False},
+        headers=tenant.admin,
+    )
+    assert r.status_code == 200, r.text
+    improvement = r.json()
+    assert improvement["prompt_chars_after"] < improvement["prompt_chars_before"]
+    assert improvement["prompt_chars_after"] == len(shorter)
+    # the model was asked more than once: the first (longer) draft was rejected and re-asked
+    assert len(provider.requests) - before >= 2
+
+
+async def test_normal_improve_is_one_call_even_if_not_shorter(
+    api: AsyncClient,
+    tenant: Tenant,
+    provider: ScriptedProvider,
+) -> None:
+    """Without a shorten request, a longer rewrite is accepted in a single model call."""
+    await _library(api, tenant)
+    created = await _create(api, tenant, provider)
+    longer = PROMPT + " Also greet the caller by name and offer the latest loan schemes."
+    assert len(longer) > len(PROMPT)
+    provider.outputs.append(
+        json.dumps({"summary": "Clearer", "improved_prompt": longer, "changes": ["added a step"]})
+    )
+    before = len(provider.requests)
+    r = await api.post(
+        f"{API}/quick-tests/{created['id']}/improve",
+        json={"instructions": "make the rules clearer", "retest": False},
+        headers=tenant.admin,
+    )
+    assert r.status_code == 200, r.text
+    improvement = r.json()
+    assert improvement["prompt_chars_after"] == len(longer)
+    assert len(provider.requests) - before == 1  # no re-ask: single call
+
+
 async def test_assistant_starts_a_test_on_the_exact_pasted_prompt(
     api: AsyncClient,
     tenant: Tenant,
