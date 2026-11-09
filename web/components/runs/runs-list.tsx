@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CircleX, Play } from "lucide-react";
+import { CircleX, FlaskConical, Play } from "lucide-react";
 import { api } from "@/lib/api/client";
 import { call, ApiError } from "@/lib/api/call";
 import type { Run } from "@/lib/api/runs";
@@ -232,17 +232,22 @@ export function RunsList() {
           </div>
         ) : rows.length === 0 ? (
           chips.length || needle ? (
-            <EmptyState icon={Play} title="No runs match these filters" body="Try a different filter or clear them." action={<Button onClick={() => url.clear()}>Clear filters</Button>} />
+            <EmptyState icon={FlaskConical} title="No runs match these filters" body="Try a different filter or clear them." action={<Button onClick={() => url.clear()}>Clear filters</Button>} />
           ) : (
             <EmptyState
-              icon={Play}
+              icon={FlaskConical}
               title="No runs yet"
               body="A run sends synthetic callers to your agent and scores every call."
-              action={<LinkButton variant="primary" href="/runs/new">New run</LinkButton>}
+              action={
+                <LinkButton variant="primary" href="/runs/new">
+                  <Play size={14} strokeWidth={1.6} aria-hidden />
+                  New run
+                </LinkButton>
+              }
             />
           )
         ) : (
-          <>
+          <div className="stagger">
             <DataTable
               caption="Runs"
               columns={columns}
@@ -263,7 +268,7 @@ export function RunsList() {
               )}
             />
             <LoadMore hasMore={!!list.hasNextPage} loading={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()} shown={list.items.length} />
-          </>
+          </div>
         )}
       </Panel>
       <ConfirmDialog
