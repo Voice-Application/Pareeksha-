@@ -14,7 +14,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/knowledge-bases", label: "Documents", group: null },
   { href: "/runs", label: "Results", group: null },
   { href: "/designer", label: "Test designer", group: "Build" },
-  { href: "/agents", label: "Agents", group: "Build" },
+  { href: "/agents", label: "Voice agents", group: "Build" },
   { href: "/scenarios", label: "Scenarios", group: "Build" },
   { href: "/personas", label: "Personas", group: "Build" },
   { href: "/noise-profiles", label: "Noise profiles", group: "Build" },
