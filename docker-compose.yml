@@ -168,7 +168,12 @@ services:
     command: ["python", "-m", "pareeksha.workers.dlq_recorder"]
 
   web:
-    build: { context: ./web }
+    build:
+      context: ./web
+      # Client mirror of AUTH_DISABLED, inlined into the bundle at build time so the open dashboard
+      # treats a missing role as admin. Rebuild the web image after changing AUTH_DISABLED.
+      args:
+        NEXT_PUBLIC_AUTH_DISABLED: ${AUTH_DISABLED:-}
     environment:
       PAREEKSHA_API_URL: http://api:8000/api/v1
       PAREEKSHA_API_KEY: ${PAREEKSHA_API_KEY:-}
