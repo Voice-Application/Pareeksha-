@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { UserRound, Plus } from "lucide-react";
+import { UserRound, Plus, Languages, Blend, Smile, Mic } from "lucide-react";
 import { api } from "@/lib/api/client";
 import { call, fetchAudio } from "@/lib/api/call";
 import { usePagedList } from "@/lib/hooks/use-paged-list";
@@ -99,12 +99,54 @@ export function PersonasList() {
         </span>
       ),
     },
-    { key: "language", header: "Lang", mono: true, sortable: true, cell: (p) => p.language },
-    { key: "mix", header: "Mix", sortable: true, cell: (p) => p.code_mix_style },
-    { key: "emotion", header: "Emotion", sortable: true, cell: (p) => p.emotion },
+    {
+      key: "language",
+      header: "Lang",
+      mono: true,
+      sortable: true,
+      cell: (p) => (
+        <span className="inline-flex items-center gap-1.5">
+          <Languages size={16} strokeWidth={1.6} className="shrink-0 text-subtle" aria-hidden />
+          {p.language}
+        </span>
+      ),
+    },
+    {
+      key: "mix",
+      header: "Mix",
+      sortable: true,
+      cell: (p) => (
+        <span className="inline-flex items-center gap-1.5">
+          <Blend size={16} strokeWidth={1.6} className="shrink-0 text-subtle" aria-hidden />
+          {p.code_mix_style}
+        </span>
+      ),
+    },
+    {
+      key: "emotion",
+      header: "Emotion",
+      sortable: true,
+      cell: (p) => (
+        <span className="inline-flex items-center gap-1.5">
+          <Smile size={16} strokeWidth={1.6} className="shrink-0 text-subtle" aria-hidden />
+          {p.emotion}
+        </span>
+      ),
+    },
     { key: "speed", header: "Speed", mono: true, hidePhone: true, sortable: true, cell: (p) => `${p.speed.toFixed(2).replace(/0$/, "")}x` },
     { key: "interrupts", header: "Interrupts", hidePhone: true, sortable: true, cell: (p) => <Pips level={p.interruption_level} /> },
-    { key: "voice", header: "Voice", hidePhone: true, sortable: true, cell: (p) => p.voice_id },
+    {
+      key: "voice",
+      header: "Voice",
+      hidePhone: true,
+      sortable: true,
+      cell: (p) => (
+        <span className="inline-flex items-center gap-1.5">
+          <Mic size={16} strokeWidth={1.6} className="shrink-0 text-subtle" aria-hidden />
+          {p.voice_id}
+        </span>
+      ),
+    },
   ];
 
   const filtered = useMemo(() => {
@@ -171,6 +213,7 @@ export function PersonasList() {
             }
             action={
               <Button variant="primary" onClick={() => url.set({ edit: "new" })}>
+                <Plus size={16} strokeWidth={1.6} aria-hidden />
                 New persona
               </Button>
             }
@@ -180,7 +223,7 @@ export function PersonasList() {
           <EmptyState icon={UserRound} title="No personas match these filters" body="Change or clear the filters to see more." action={<Button onClick={() => url.set({ lang: null, mix: null, emotion: null, interrupts: null, q: null })}>Clear filters</Button>} />
         )}
         {list.isSuccess && filtered.length > 0 && (
-          <>
+          <div className="fade-in">
             <DataTable
               caption="Personas"
               columns={columns}
@@ -191,7 +234,7 @@ export function PersonasList() {
               actions={(p) => <RowMenu label={`Actions for ${p.name}`} items={[{ label: "Edit", onSelect: () => url.set({ edit: p.id }) }]} />}
             />
             <LoadMore hasMore={!!list.hasNextPage} loading={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()} shown={list.items.length} />
-          </>
+          </div>
         )}
       </Panel>
 
