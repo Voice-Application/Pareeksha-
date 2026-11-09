@@ -19,6 +19,7 @@ test("demo exposes turns at their beats and preserves pause and replay", async (
   const turns = demo.locator(".lp-demo__turn");
   await expect(turns.nth(0)).toHaveAttribute("aria-hidden", "true");
   await expect(turns.nth(1)).toHaveAttribute("aria-hidden", "true");
+  expect(await turns.first().evaluate((el) => getComputedStyle(el).transitionDuration)).toBe("0s");
   await page.clock.fastForward(1400);
   await expect(turns.nth(0)).toHaveAttribute("aria-hidden", "false");
   await expect(turns.nth(1)).toHaveAttribute("aria-hidden", "true");
@@ -30,6 +31,7 @@ test("demo exposes turns at their beats and preserves pause and replay", async (
   await expect(turns.nth(1)).toHaveAttribute("aria-hidden", "false");
   await page.clock.fastForward(1400);
   await demo.getByRole("button", { name: "Replay" }).click();
+  expect(await turns.first().evaluate((el) => getComputedStyle(el).transitionDuration)).not.toBe("0s");
   await expect(turns.nth(0)).toHaveAttribute("aria-hidden", "true");
   await page.clock.fastForward(1400);
   await expect(turns.nth(0)).toHaveAttribute("aria-hidden", "false");

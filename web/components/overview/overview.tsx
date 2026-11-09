@@ -392,10 +392,9 @@ function OverviewCharts({ runs, usage, usageError, onRetryUsage }: { runs: Chart
       {/* Usage is project-wide (every agent), not the selected agent's, so the title says so. */}
       {(tokenSlices.length > 0 || usageError != null) && (
         <Panel title="Token usage by operation, all agents" label="Token usage by operation, all agents" className="min-[900px]:col-span-2">
-          {tokenSlices.length > 0 ? (
+          {usageError != null && <ErrorPanel error={usageError} what="usage" onRetry={onRetryUsage} />}
+          {tokenSlices.length > 0 && (
             <DonutChart slices={tokenSlices} title="Share of tokens spent by LLM operation across all agents" centerLabel="tokens" unitLabel="tokens" />
-          ) : (
-            <ErrorPanel error={usageError} what="usage" onRetry={onRetryUsage} />
           )}
         </Panel>
       )}

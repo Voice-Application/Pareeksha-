@@ -398,3 +398,7 @@
 @media (prefers-reduced-motion: reduce) {
   .lp-btn { transition: none; }
 }
+
+/* Hide the hydration reset immediately; playback and replay keep their transitions. */
+.lp-demo--initial .lp-demo__turn:not(.is-in),
+.lp-demo--initial .lp-demo__verdict:not(.is-in) { transition: none; }

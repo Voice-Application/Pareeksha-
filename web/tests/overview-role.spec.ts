@@ -8,7 +8,10 @@ const secret = "overview-role-test-session-secret";
 const enabled = signInEnabledServer(3102, secret);
 const url = enabled.url;
 
-test.beforeAll(() => enabled.start());
+test.beforeAll(async () => {
+  test.setTimeout(240_000); // A reused server may leave this checkout needing its production build.
+  await enabled.start();
+});
 test.afterAll(() => enabled.stop());
 
 // The signed session lets pages past the gate; the readable role cookie is the client-side hint the UI follows.

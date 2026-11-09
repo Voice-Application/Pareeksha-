@@ -45,6 +45,7 @@ export function LineChart({
   // Axis gutters: room for y ticks on the left and x labels at the bottom.
   const plot: Plot = { x: 44, y: 12, w: W - 44 - 12, h: H - 12 - 28 };
   const n = points.length;
+  const selection = n > 0 && active != null ? Math.max(0, Math.min(active, n - 1)) : null;
 
   /** Plot x for point `i`; a single point sits in the middle of the plot. */
   const px = (i: number) => (n <= 1 ? plot.x + plot.w / 2 : scaleLinear(i, 0, n - 1, plot.x, plot.x + plot.w));
@@ -58,6 +59,7 @@ export function LineChart({
   const onMove = (e: React.PointerEvent<SVGRectElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const rx = plot.x + ((e.clientX - rect.left) / rect.width) * plot.w;
+    if (!n) { setActive(null); return; }
     let best = 0;
     let bestD = Infinity;
     for (let i = 0; i < n; i++) {
@@ -70,9 +72,9 @@ export function LineChart({
     setActive(best);
   };
 
-  const ap = active != null ? (points[active] ?? null) : null;
+  const ap = selection != null ? points[selection] : null;
   // Tooltip position: x as a % of container width (SVG is width-100%), y scaled to the rendered height.
-  const tipLeftPct = ap && active != null ? (px(active) / W) * 100 : 0;
+  const tipLeftPct = ap && selection != null ? (px(selection) / W) * 100 : 0;
   const tipTop = ap ? (py(ap.value) / H) * height : 0;
 
   return (
@@ -147,8 +149,8 @@ export function LineChart({
           {/* crosshair + active dot */}
           {ap && (
             <g aria-hidden>
-              <line x1={px(active!)} y1={plot.y} x2={px(active!)} y2={plot.y + plot.h} stroke="var(--border-strong)" strokeWidth={1} />
-              <circle cx={px(active!)} cy={py(ap.value)} r={4.5} fill="var(--accent)" stroke="var(--bg-surface)" strokeWidth={2} />
+              <line x1={px(selection!)} y1={plot.y} x2={px(selection!)} y2={plot.y + plot.h} stroke="var(--border-strong)" strokeWidth={1} />
+              <circle cx={px(selection!)} cy={py(ap.value)} r={4.5} fill="var(--accent)" stroke="var(--bg-surface)" strokeWidth={2} />
             </g>
           )}
 
@@ -165,14 +167,16 @@ export function LineChart({
             role="slider"
             aria-label={`${title}. Use arrow keys to inspect points.`}
             aria-valuemin={0}
-            aria-valuemax={n - 1}
-            aria-valuenow={ap ? active! : 0}
+            aria-valuemax={Math.max(0, n - 1)}
+            aria-disabled={n === 0}
+            aria-valuenow={ap ? selection! : 0}
             aria-valuetext={ap ? `${ap.label}: ${ap.value}${valueSuffix}` : undefined}
-            onFocus={() => setActive((a) => a ?? 0)}
+            onFocus={() => setActive(n ? selection ?? 0 : null)}
             onBlur={() => setActive(null)}
             onKeyDown={(e) => {
-              if (e.key === "ArrowRight") setActive((a) => Math.min(n - 1, (a ?? -1) + 1));
-              else if (e.key === "ArrowLeft") setActive((a) => Math.max(0, (a ?? n) - 1));
+              if (!n) return;
+              if (e.key === "ArrowRight") { e.preventDefault(); setActive(Math.min(n - 1, (selection ?? -1) + 1)); }
+              else if (e.key === "ArrowLeft") { e.preventDefault(); setActive(Math.max(0, (selection ?? n) - 1)); }
             }}
             className="outline-none"
           />

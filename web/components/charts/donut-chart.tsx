@@ -99,17 +99,10 @@ export function DonutChart({
                   className="chart-arc-in"
                   style={{ transformBox: "fill-box", transformOrigin: "center" }}
                 />
-                {/* Cover the untrimmed arc, with a minimum target for very narrow slices. */}
+                {/* Cover the untrimmed arc; separate legend rows also target arbitrarily small slices. */}
                 <path d={arcPath(cx, cy, rOuter, rInner, s.a0, s.a1)} fill="transparent" />
               </g>
             );
-          })}
-          {/* Narrow-slice targets sit above every arc so neighbours cannot cover them. */}
-          {segs.filter((s) => s.frac > 0 && s.a1 - s.a0 < 12).map((s) => {
-            const target = polar(cx, cy, (rOuter + rInner) / 2, (s.a0 + s.a1) / 2);
-            return <circle key={s.i} cx={target.x} cy={target.y} r={10} fill="transparent" aria-hidden
-              onPointerEnter={() => setActive(s.i)}
-              onPointerLeave={() => setActive((a) => a === s.i ? null : a)} />;
           })}
           {/* center: total as a quiet hero */}
           <text x={cx} y={cy - 2} textAnchor="middle" dominantBaseline="middle" fontSize={22} fontWeight={600} fill="var(--fg)" className="num">
@@ -135,7 +128,10 @@ export function DonutChart({
       {/* legend (always present for ≥ 2 series) + direct name/share labels (≤ 4 slices) */}
       <ul className="flex min-w-0 flex-col gap-2 text-sm">
         {segs.map((s) => (
-          <li key={s.i} className="flex min-w-0 items-center gap-2.5">
+          <li key={s.i} className="flex min-h-6 min-w-0 items-center gap-2.5"
+            onPointerEnter={() => setActive(s.i)}
+            onPointerLeave={() => setActive((a) => a === s.i ? null : a)}
+          >
             <span className="h-2.5 w-2.5 shrink-0 rounded-xs" style={{ background: sliceColor(slices[s.i], s.i) }} aria-hidden />
             <span className="min-w-0 flex-1 truncate text-muted">{s.label}</span>
             <span className="num shrink-0 tabular-nums text-fg">{Math.round(s.frac * 100)}%</span>

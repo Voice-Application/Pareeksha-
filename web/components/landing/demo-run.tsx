@@ -38,6 +38,7 @@ function getServerMotionSnapshot() {
 /** Landing-page run demo that steps through on a timer, or shows the finished state under reduced motion. */
 export function DemoRun() {
   const [playbackStep, setStep] = useState(0);
+  const [hasStarted, setHasStarted] = useState(false);
   const [playing, setPlaying] = useState(true);
   const reduced = useSyncExternalStore(subscribeMotion, getMotionSnapshot, getServerMotionSnapshot);
   // Reserve the completed layout until hydration resolves the media query.
@@ -48,7 +49,7 @@ export function DemoRun() {
     // Only schedule the next beat while playing and there is one left; at the end we simply stop
     // scheduling (no setState here). The controls derive "at end" from `step`, not `playing`.
     if (!playing || reduced !== false || step >= LAST) return;
-    timer.current = setTimeout(() => setStep((s) => Math.min(s + 1, LAST)), BEAT_MS);
+    timer.current = setTimeout(() => { setHasStarted(true); setStep((s) => Math.min(s + 1, LAST)); }, BEAT_MS);
     return () => {
       if (timer.current) clearTimeout(timer.current);
     };
@@ -65,7 +66,7 @@ export function DemoRun() {
   const show = (name: (typeof STEPS)[number]) => step >= STEPS.indexOf(name);
 
   return (
-    <div className="lp-demo" aria-label="A sample run, played out" style={{ visibility: reduced === null ? "hidden" : undefined }}>
+    <div className={`lp-demo ${!hasStarted ? "lp-demo--initial" : ""}`} aria-label="A sample run, played out" style={{ visibility: reduced === null ? "hidden" : undefined }}>
       <div className="lp-demo__head">
         <span className="lp-demo__tag">Sample run</span>
         <div className="lp-demo__controls">

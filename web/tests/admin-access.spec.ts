@@ -8,7 +8,10 @@ const secret = "admin-access-test-session-secret";
 const enabled = signInEnabledServer(3101, secret);
 const enabledUrl = enabled.url;
 
-test.beforeAll(() => enabled.start());
+test.beforeAll(async () => {
+  test.setTimeout(240_000); // A reused server may leave this checkout needing its production build.
+  await enabled.start();
+});
 test.afterAll(() => enabled.stop());
 
 test.beforeEach(async ({ page }) => {

@@ -21,7 +21,7 @@ test("project token colors survive filtering and narrow slices support pointer a
   expect(swatches).toEqual(colors);
   const narrow = marks.first();
   expect(await narrow.locator("path").first().getAttribute("d")).not.toContain("NaN");
-  await panel.locator("svg > circle").hover();
+  await panel.locator("li").first().hover();
   await expect(panel.getByRole("tooltip")).toContainText("Caller");
   await narrow.focus();
   await page.keyboard.press("Escape");
@@ -78,4 +78,58 @@ test("line pointer uses plot bounds and Escape retains plot focus", async ({ pag
   await page.keyboard.press("Escape");
   await expect(panel.getByRole("tooltip")).toHaveCount(0);
   await expect(plot).toBeFocused();
+});
+
+test("adjacent tiny slices have separate pointer targets", async ({ page }) => {
+  const state = opsState();
+  state.extra["GET /usage"] = usage([["llm_caller", 1e-20], ["llm_designer", 1e-20], ["llm_judge", 1000]]);
+  await mockFe(page, state);
+  await page.goto("/");
+  const panel = page.getByRole("region", { name: "Token usage by operation, all agents" });
+  for (const [index, label] of ["Caller", "Designer", "Judge"].entries()) {
+    await panel.locator("li").nth(index).hover();
+    await expect(panel.getByRole("tooltip")).toContainText(label);
+  }
+});
+
+test("cached token chart survives a failed background refresh and offers retry", async ({ page }) => {
+  const state = opsState();
+  state.extra["GET /usage"] = usage([["llm_caller", 123]]);
+  await mockFe(page, state);
+  await page.clock.install();
+  await page.goto("/");
+  const panel = page.getByRole("region", { name: "Token usage by operation, all agents" });
+  await expect(panel.getByRole("table")).toContainText("123");
+  state.fail["GET /usage"] = 500;
+  await page.clock.fastForward(6000);
+  await page.evaluate(() => window.dispatchEvent(new Event("visibilitychange")));
+  await page.clock.resume();
+  await expect(panel.getByRole("alert")).toContainText("Could not load usage");
+  await expect(panel.getByRole("table")).toContainText("123");
+  delete state.fail["GET /usage"];
+  await panel.getByRole("button", { name: "Retry" }).click();
+  await expect(panel.getByRole("alert")).toHaveCount(0);
+});
+
+test("line selection clamps when refreshed points shrink", async ({ page }) => {
+  const state = opsState();
+  state.extra["GET /runs"] = { items: [run({ id: "new", name: "Newest" }), run({ id: "mid", name: "Middle" }), run({ id: "old", name: "Oldest" })] };
+  await mockFe(page, state);
+  await page.clock.install();
+  await page.goto("/");
+  const panel = page.getByRole("region", { name: "Mean score by run" });
+  const plot = panel.getByRole("slider");
+  await plot.focus();
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("ArrowRight");
+  await expect(plot).toHaveAttribute("aria-valuenow", "2");
+  state.extra["GET /runs"] = { items: [run({ id: "new", name: "Newest" })] };
+  await page.clock.fastForward(6000);
+  await page.evaluate(() => window.dispatchEvent(new Event("visibilitychange")));
+  await page.clock.resume();
+  await expect(plot).toHaveAttribute("aria-valuemax", "0");
+  await expect(plot).toHaveAttribute("aria-valuenow", "0");
+  await expect(panel.getByRole("tooltip")).toContainText("Newest");
+  await page.keyboard.press("ArrowLeft");
+  await expect(plot).toHaveAttribute("aria-valuenow", "0");
 });
