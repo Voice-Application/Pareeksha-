@@ -97,7 +97,7 @@ export function ConnectionTest({ agentId, settingsKey, autoRun }: { agentId: str
               <dd className="mono">{state.result.first_audio_ms} ms</dd>
               <dt className="text-muted">Protocol</dt>
               <dd className="mono">{state.result.protocol ?? "-"}</dd>
-              <dt className="text-muted">Glass-box messages</dt>
+              <dt className="text-muted">Transcript messages</dt>
               <dd>{state.result.glass_box_messages_seen == null ? "-" : state.result.glass_box_messages_seen ? "seen" : "not seen"}</dd>
             </dl>
           </div>
