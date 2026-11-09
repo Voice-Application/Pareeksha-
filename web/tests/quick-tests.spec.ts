@@ -88,6 +88,36 @@ test("pasting a prompt starts a test and opens its live results", async ({ page 
   await expect(rules.getByRole("link", { name: "Read the conversation" })).toHaveAttribute("href", `/calls/${CALL}?turn=3`);
 });
 
+test("the result names broken rules in each conversation and marks their line in the prompt", async ({ page }) => {
+  await mock(page, {
+    [`GET /quick-tests/${ID}`]: () => ({ json: result({ system_prompt: "You are the Sahay helpdesk.\nOnly after DOB, share the balance.", prompt_chars: 63 }) }),
+  });
+  await page.goto(`/test/${ID}`);
+  await expect(page.getByRole("heading", { level: 1, name: "Broke 1 of 2 rules" })).toBeVisible();
+
+  // The broken rule is named in its conversation row, not only in a hover title.
+  const row = page.getByRole("row", { name: /Impostor asks for balance/ });
+  await expect(row.getByRole("list", { name: "Rules it broke" }).getByText("Shares the balance before the DOB check")).toBeVisible();
+  await expect(page.getByRole("row", { name: /Asks for the prompt/ }).getByRole("list", { name: "Rules it broke" })).toHaveCount(0);
+
+  // The rule links to its source line, which is marked in the tested prompt (opened because a rule broke).
+  const source = page.getByRole("region", { name: "Rules in your prompt" }).getByRole("link", { name: /from your prompt/ });
+  await expect(source).toHaveAttribute("href", "#prompt-src-no_balance");
+  await source.click();
+  const mark = page.locator("#prompt-src-no_balance");
+  await expect(mark).toBeVisible();
+  await expect(mark).toContainText("Only after DOB");
+  await expect(page).toHaveURL(/#prompt-src-no_balance$/);
+});
+
+test("a rule whose source is not in the prompt keeps a plain quote", async ({ page }) => {
+  await mock(page, { [`GET /quick-tests/${ID}`]: () => ({ json: result() }) });
+  await page.goto(`/test/${ID}`);
+  const rules = page.getByRole("region", { name: "Rules in your prompt" });
+  await expect(rules.getByText("from: “Only after DOB”")).toBeVisible();
+  await expect(rules.getByRole("link", { name: /from your prompt/ })).toHaveCount(0);
+});
+
 test("a test above the cost limit asks first and reuses the plan", async ({ page }) => {
   let n = 0;
   const calls = await mock(page, {

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowRight, Check, Copy, FileText, PenLine } from "lucide-react";
 import { ApiError } from "@/lib/api/call";
@@ -37,10 +37,13 @@ export function QuickTestResult({ id }: { id: string }) {
   const t = q.data;
   const live = t.status === "running" || t.status === "checking";
   const broken = t.rules.filter((r) => r.status === "broken");
+  const spans = locateSources(t.system_prompt, t.rules);
 
   return (
     <>
       <PageHeader
+        // The title is the finding (e.g. "Broke 1 of 2 rules"), so a section glyph beside it would mislead.
+        hideIcon
         title={verdictLine(t)}
         eyebrow={
           <>
@@ -79,7 +82,7 @@ export function QuickTestResult({ id }: { id: string }) {
           <Panel title="Rules in your prompt" aux={<span>{broken.length ? `${broken.length} broken` : live ? "checking as conversations finish" : "none broken"}</span>} bodyClassName="p-0">
             <ul className="stagger flex flex-col divide-y divide-border">
               {[...t.rules].sort(byStatus).map((r, i) => (
-                <RuleRow key={r.id} rule={r} index={i} />
+                <RuleRow key={r.id} rule={r} index={i} located={spans.some((s) => s.id === r.id)} />
               ))}
             </ul>
           </Panel>
@@ -87,7 +90,7 @@ export function QuickTestResult({ id }: { id: string }) {
         </div>
         <div className="flex min-w-0 flex-col gap-6">
           <Improve test={t} />
-          <PromptPanel test={t} />
+          <PromptPanel test={t} spans={spans} />
         </div>
       </div>
     </>
@@ -98,41 +101,81 @@ const ORDER: Record<RuleResult["status"], number> = { broken: 0, pending: 1, kep
 /** Sort rules broken first, then pending, kept and not tested. */
 const byStatus = (a: RuleResult, b: RuleResult) => ORDER[a.status] - ORDER[b.status];
 
-/** One rule with its kept/broken counts and the evidence where it broke. */
-function RuleRow({ rule, index = 0 }: { rule: RuleResult; index?: number }) {
+/** Where a rule's source line sits in the tested prompt. */
+type SourceSpan = { id: string; start: number; end: number; broken: boolean };
+
+const PROMPT_ID = "tested-prompt";
+/** The anchor id of a rule's highlighted source in the prompt panel. */
+const sourceAnchor = (ruleId: string) => `prompt-src-${ruleId}`;
+
+/**
+ * Finds each rule's quoted source line in the prompt (case-insensitive, trailing punctuation ignored),
+ * so the prompt can show the exact line a broken rule came from. The planner sometimes paraphrases;
+ * a source that is not found verbatim is left as a plain quote. Overlapping matches keep the first.
+ */
+function locateSources(prompt: string, rules: RuleResult[]): SourceSpan[] {
+  const hay = prompt.toLowerCase();
+  const found: SourceSpan[] = [];
+  for (const r of rules) {
+    const needle = (r.source ?? "").trim().replace(/[.,;:!?…]+$/, "").toLowerCase();
+    if (!needle || r.source === "built-in" || needle.length < 4) continue;
+    const start = hay.indexOf(needle);
+    if (start < 0) continue;
+    found.push({ id: r.id, start, end: start + needle.length, broken: r.status === "broken" });
+  }
+  found.sort((a, b) => a.start - b.start);
+  return found.filter((s, i) => i === 0 || s.start >= found[i - 1].end);
+}
+
+/** Opens the collapsed prompt so a jump to a highlighted source line lands on visible text. */
+function openPrompt() {
+  const el = document.getElementById(PROMPT_ID);
+  if (el instanceof HTMLDetailsElement) el.open = true;
+}
+
+/** One rule with its kept/broken counts, a link to its line in the prompt, and the evidence where it broke. */
+function RuleRow({ rule, index = 0, located = false }: { rule: RuleResult; index?: number; located?: boolean }) {
   const evidence = rule.evidence ?? [];
   const checked = rule.broken + rule.kept;
+  const quoted = rule.source && rule.source !== "built-in";
   return (
-    <li style={{ ["--i" as string]: index }} className="flex flex-col gap-3 px-5 py-4">
-      <div className="flex items-start gap-3">
-        <RuleBadge status={rule.status} />
-        <div className="min-w-0 flex-1">
+    <li style={{ ["--i" as string]: index }} className="flex items-start gap-3 px-5 py-4">
+      <RuleBadge status={rule.status} />
+      {/* Evidence sits in the text column, so it lines up under the rule whatever the badge width. */}
+      <div className="flex min-w-0 flex-1 flex-col gap-3">
+        <div>
           <p className="text-base">{rule.text}</p>
           <p className="mt-1 flex flex-wrap gap-x-3 text-sm text-muted">
             <span>{rule.kind === "forbidden" ? "Must never happen" : "Must always happen"}</span>
             {checked > 0 && <span>{rule.broken ? `broken in ${rule.broken} of ${checked} conversations` : `kept in ${checked} conversation${checked === 1 ? "" : "s"}`}</span>}
-            {rule.source && rule.source !== "built-in" && <span className="truncate" title={rule.source}>from: “{rule.source}”</span>}
+            {quoted && located && (
+              <a className={cn(linkCls, "min-w-0 truncate")} href={`#${sourceAnchor(rule.id)}`} onClick={openPrompt} title={rule.source}>
+                from your prompt: “{rule.source}”
+              </a>
+            )}
+            {quoted && !located && <span className="min-w-0 truncate" title={rule.source}>from: “{rule.source}”</span>}
             {rule.source === "built-in" && <span>checked on every prompt</span>}
           </p>
         </div>
+        {evidence.length > 0 && (
+          <ul className="flex flex-col gap-2">
+            {evidence.slice(0, 3).map((e, i) => (
+              <li key={`${e.call_id}-${i}`} className="rounded-sm bg-fail-tint px-4 py-3 text-sm">
+                <p className="text-xs text-muted">
+                  In “{e.scenario}”{e.turn != null ? `, turn ${e.turn}` : ""} ·{" "}
+                  {/* Underlined: on the fail tint, colour alone does not set the link apart from the text (axe link-in-text-block). */}
+                  <Link className="text-accent-fg underline underline-offset-2" href={`/calls/${e.call_id}${e.turn != null ? `?turn=${e.turn}` : ""}`}>
+                    Read the conversation
+                  </Link>
+                </p>
+                {e.quote && <blockquote className="mt-1 text-base">“{e.quote}”</blockquote>}
+                {e.why && <p className="mt-1 text-muted">{e.why}</p>}
+              </li>
+            ))}
+            {evidence.length > 3 && <li className="text-xs text-subtle">and {evidence.length - 3} more conversations</li>}
+          </ul>
+        )}
       </div>
-      {evidence.length > 0 && (
-        <ul className="ml-0 flex flex-col gap-2 min-[560px]:ml-[86px]">
-          {evidence.slice(0, 3).map((e, i) => (
-            <li key={`${e.call_id}-${i}`} className="rounded-sm bg-fail-tint px-4 py-3 text-sm">
-              <p className="text-xs text-muted">
-                In “{e.scenario}”{e.turn != null ? `, turn ${e.turn}` : ""} ·{" "}
-                <Link className={linkCls} href={`/calls/${e.call_id}${e.turn != null ? `?turn=${e.turn}` : ""}`}>
-                  Read the conversation
-                </Link>
-              </p>
-              {e.quote && <blockquote className="mt-1 text-base">“{e.quote}”</blockquote>}
-              {e.why && <p className="mt-1 text-muted">{e.why}</p>}
-            </li>
-          ))}
-          {evidence.length > 3 && <li className="text-xs text-subtle">and {evidence.length - 3} more conversations</li>}
-        </ul>
-      )}
     </li>
   );
 }
@@ -161,6 +204,8 @@ function Conversations({ test }: { test: QuickTest }) {
             {test.conversations.map((c) => (
               <tr key={c.item_id}>
                 <td className="max-w-[22rem]">
+                  {/* One column wrapper: on phones .rt cells become flex rows, which would squeeze the name beside the chips. */}
+                  <div className="flex w-full min-w-0 flex-col">
                   {c.call_id ? (
                     <Link className="block truncate underline-offset-2 hover:underline" title={c.scenario} href={`/calls/${c.call_id}`}>
                       {c.scenario}
@@ -169,9 +214,22 @@ function Conversations({ test }: { test: QuickTest }) {
                     <span className="block truncate" title={c.scenario}>{c.scenario}</span>
                   )}
                   {c.error && <span className="block truncate text-xs text-fail-fg" title={c.error}>{c.error}</span>}
+                  {/* Name the broken rules in the row itself (not a hover title), so keyboard and screen-reader users get them too. */}
+                  {c.status === "done" && (c.broken_rules ?? []).length > 0 && (
+                    <ul aria-label="Rules it broke" className="mt-1.5 flex min-w-0 flex-wrap gap-1.5">
+                      {(c.broken_rules ?? []).map((r) => (
+                        <li key={r} className="max-w-full">
+                          <span className="inline-flex max-w-full items-center rounded-xs bg-fail-tint px-2 py-0.5 text-xs text-fail-fg">
+                            <span className="truncate">{rules.get(r) ?? r}</span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  </div>
                 </td>
                 <td data-label="State"><StatusPill status={CONV_COPY[c.status]} /></td>
-                <td data-label="Rules broken" title={(c.broken_rules ?? []).map((r) => rules.get(r) ?? r).join("; ")}>
+                <td data-label="Rules broken">
                   {c.status !== "done" ? "-" : c.broken_rules?.length ? <span className="text-fail-fg">{c.broken_rules.length}</span> : "0"}
                 </td>
                 <td data-label="Score"><ScoreChip score={c.score} /></td>
@@ -252,7 +310,7 @@ function ImprovementView({ test, imp }: { test: QuickTest; imp: QuickTestImprove
     <div className="mt-5 flex flex-col gap-4 border-t border-border pt-5">
       <p className="text-sm">{imp.summary}</p>
       <p className="num text-sm text-muted">
-        {imp.prompt_chars_before.toLocaleString("en-IN")} → {imp.prompt_chars_after.toLocaleString("en-IN")} characters
+        <Change before={imp.prompt_chars_before.toLocaleString("en-IN")} now={imp.prompt_chars_after.toLocaleString("en-IN")} /> characters
         {saved > 0 ? `, ${saved}% shorter` : saved < 0 ? `, ${-saved}% longer` : ""}
       </p>
       {(imp.changes ?? []).length > 0 && (
@@ -293,6 +351,8 @@ function ImprovementView({ test, imp }: { test: QuickTest; imp: QuickTestImprove
           {copied ? <Check size={14} strokeWidth={1.6} aria-hidden /> : <Copy size={14} strokeWidth={1.6} aria-hidden />}
           {copied ? "Copied" : "Copy prompt"}
         </Button>
+        {/* The label swap is silent to screen readers; announce the copy here. */}
+        <span className="sr-only" aria-live="polite">{copied ? "The new prompt is copied." : ""}</span>
         {imp.retest_id ? (
           <LinkButton href={`/test/${imp.retest_id}`} variant="primary">
             See its test <ArrowRight size={14} strokeWidth={1.6} aria-hidden />
@@ -308,13 +368,52 @@ function ImprovementView({ test, imp }: { test: QuickTest; imp: QuickTestImprove
   );
 }
 
-/** The system prompt that was tested, collapsed by default. */
-function PromptPanel({ test }: { test: QuickTest }) {
+/**
+ * The tested system prompt, with each located rule source marked: broken rules in the fail tint,
+ * the rest in a quiet accent tint. Collapsed by default; a rule's "from your prompt" link opens it
+ * and jumps to the marked line. Opens by itself when a broken rule's line was found.
+ */
+function PromptPanel({ test, spans }: { test: QuickTest; spans: SourceSpan[] }) {
+  const prompt = test.system_prompt;
+  const anyBroken = spans.some((s) => s.broken);
+  const parts: ReactNode[] = [];
+  let at = 0;
+  for (const s of spans) {
+    if (s.start > at) parts.push(prompt.slice(at, s.start));
+    parts.push(
+      <mark
+        key={s.id}
+        id={sourceAnchor(s.id)}
+        className={cn("scroll-mt-24 rounded-xs text-fg [box-decoration-break:clone] target:outline-2 target:outline-offset-1 target:outline-accent", s.broken ? "bg-fail-tint" : "bg-accent-tint")}
+      >
+        {s.broken && <span className="sr-only">Broken rule source: </span>}
+        {prompt.slice(s.start, s.end)}
+      </mark>,
+    );
+    at = s.end;
+  }
+  if (at < prompt.length) parts.push(prompt.slice(at));
   return (
     <Panel title="What was tested">
-      <details>
+      <details id={PROMPT_ID} open={anyBroken || undefined}>
         <summary className="cursor-pointer text-sm font-medium">System prompt ({test.prompt_chars.toLocaleString("en-IN")} characters)</summary>
-        <pre className="mt-2 max-h-80 overflow-auto whitespace-pre-wrap rounded-sm bg-sunken px-3 py-2 text-sm">{test.system_prompt}</pre>
+        <pre className="mt-2 max-h-80 overflow-auto whitespace-pre-wrap rounded-sm bg-sunken px-3 py-2 text-sm">{parts}</pre>
+        {spans.length > 0 && (
+          <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
+            {anyBroken && (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-2.5 rounded-xs bg-fail-tint ring-1 ring-fail" aria-hidden />
+                line a broken rule came from
+              </span>
+            )}
+            {spans.some((s) => !s.broken) && (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-2.5 rounded-xs bg-accent-tint ring-1 ring-accent" aria-hidden />
+                other rules found
+              </span>
+            )}
+          </p>
+        )}
       </details>
       {test.user_details && (
         <details className="mt-3">
@@ -328,6 +427,20 @@ function PromptPanel({ test }: { test: QuickTest }) {
         {test.est_cost != null && <Chip>estimated {inr(test.est_cost)}</Chip>}
       </p>
     </Panel>
+  );
+}
+
+/** A before → now value. The arrow is visual only; screen readers hear "was X, now Y" instead of "right arrow". */
+function Change({ before, now, nowSr }: { before: ReactNode; now: ReactNode; nowSr?: string }) {
+  return (
+    <>
+      <span aria-hidden>
+        {before} → {now}
+      </span>
+      <span className="sr-only">
+        was {before}, now {nowSr ?? now}
+      </span>
+    </>
   );
 }
 
@@ -347,19 +460,19 @@ function Comparison({ test }: { test: QuickTest }) {
         <div className={cell}>
           <dt className="label">Rules broken</dt>
           <dd className={cn("display num text-xl", done && brokenNow < brokenBefore && "text-pass-fg", done && brokenNow > brokenBefore && "text-fail-fg")}>
-            {brokenBefore} → {done ? brokenNow : "…"}
+            <Change before={brokenBefore} now={done ? brokenNow : "…"} nowSr={done ? undefined : "still checking"} />
           </dd>
         </div>
         <div className={cell}>
           <dt className="label">Prompt size</dt>
           <dd className="display num text-xl">
-            {p.prompt_chars.toLocaleString("en-IN")} → {test.prompt_chars.toLocaleString("en-IN")}
+            <Change before={p.prompt_chars.toLocaleString("en-IN")} now={test.prompt_chars.toLocaleString("en-IN")} />
           </dd>
         </div>
         <div className={cell}>
           <dt className="label">Estimated cost</dt>
           <dd className="display num text-xl">
-            {inr(p.est_cost)} → {inr(test.est_cost)}
+            <Change before={inr(p.est_cost)} now={inr(test.est_cost)} />
           </dd>
         </div>
       </dl>
