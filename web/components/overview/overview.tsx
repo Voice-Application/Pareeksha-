@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Bot, CircleCheck, CircleHelp, CircleX, Play } from "lucide-react";
+import type { CSSProperties } from "react";
+import { Bot, CircleCheck, CircleHelp, CircleX, Play, SquareCheckBig } from "lucide-react";
 import { api } from "@/lib/api/client";
 import { call } from "@/lib/api/call";
 import { listRunItems, listRuns } from "@/lib/api/runs";
@@ -59,6 +60,16 @@ export function OverviewSkeleton() {
   );
 }
 
+/** Stat-tile cell: a hairline grid cell (border comes from TileRow) that cascades its tile in on load,
+ *  `i` staggering the delay. StatTile takes no style, so the entrance lives on this wrapper, not the tile. */
+function Tile({ i, children }: { i: number; children: React.ReactNode }) {
+  return (
+    <div className="rise-in flex min-w-0 flex-col" style={{ animationDelay: `${i * 45}ms` } as CSSProperties}>
+      {children}
+    </div>
+  );
+}
+
 /** The home screen: it leads with the user's prompt tests, then an agent run summary and — for admins
  *  only — the platform-health telemetry. A non-admin (or an unknown role) never fetches that telemetry. */
 export function Overview() {
@@ -101,7 +112,7 @@ export function Overview() {
     if (promptTests.isError && !tested)
       return (
         <>
-          <PageHeader title="Your prompt tests" actions={<LinkButton variant="primary" href="/test">Test my prompt</LinkButton>} />
+          <PageHeader title="Your prompt tests" actions={<LinkButton variant="primary" href="/test"><SquareCheckBig size={14} strokeWidth={1.6} aria-hidden />Test my prompt</LinkButton>} />
           <ErrorPanel error={promptTests.error} what="prompt tests" onRetry={() => void promptTests.refetch()} />
         </>
       );
@@ -118,15 +129,15 @@ export function Overview() {
           }
           actions={
             <>
-              <LinkButton variant="primary" href="/test">Test my prompt</LinkButton>
-              <LinkButton href="/agents/new">Add a voice agent</LinkButton>
+              <LinkButton variant="primary" href="/test"><SquareCheckBig size={14} strokeWidth={1.6} aria-hidden />Test my prompt</LinkButton>
+              <LinkButton href="/agents/new"><Bot size={14} strokeWidth={1.6} aria-hidden />Add a voice agent</LinkButton>
             </>
           }
         />
         {tested ? (
           <div className="max-w-[720px]"><PromptTests /></div>
         ) : (
-          <Panel bodyClassName="p-0"><EmptyState icon={Bot} title="Nothing tested yet" body="Your tests and their results will show up here." action={<LinkButton variant="primary" href="/test">Test my prompt</LinkButton>} /></Panel>
+          <Panel bodyClassName="p-0"><EmptyState icon={Bot} title="Nothing tested yet" body="Your tests and their results will show up here." action={<LinkButton variant="primary" href="/test"><SquareCheckBig size={14} strokeWidth={1.6} aria-hidden />Test my prompt</LinkButton>} /></Panel>
         )}
       </>
     );
@@ -155,7 +166,7 @@ export function Overview() {
       <PageHeader
         title="Your prompt tests"
         description="Paste your bot's system prompt and Pareeksha chats with it as normal and tricky customers, then shows which of its rules it keeps and where it breaks them."
-        actions={<LinkButton variant="primary" href="/test">Test my prompt</LinkButton>}
+        actions={<LinkButton variant="primary" href="/test"><SquareCheckBig size={14} strokeWidth={1.6} aria-hidden />Test my prompt</LinkButton>}
       />
       <div className="mb-10 max-w-[760px]"><PromptTests /></div>
 
@@ -175,18 +186,18 @@ export function Overview() {
       </div>
 
       <TileRow cols={`grid-cols-2 ${isAdmin ? "min-[860px]:grid-cols-4" : "min-[860px]:grid-cols-3"}`}>
-        <StatTile href={latest ? `/runs/${latest.id}` : "/runs"} hero label={`Pass rate${running ? " so far" : ""}`} value={s?.pass_rate != null ? `${Math.round(s.pass_rate * 100)}%` : "-"} caption={latest ? `${latest.progress.evaluated} scored` : "no runs"} />
-        <StatTile href={latest ? `/runs/${latest.id}?verdict=critical` : "/runs"} label="Critical failures" value={s?.critical_failures ?? "-"} threshold={s?.critical_failures == null ? null : s.critical_failures > 0 ? "fail" : "ok"} caption="target 0" />
+        <Tile i={0}><StatTile href={latest ? `/runs/${latest.id}` : "/runs"} hero label={`Pass rate${running ? " so far" : ""}`} value={s?.pass_rate != null ? `${Math.round(s.pass_rate * 100)}%` : "-"} caption={latest ? `${latest.progress.evaluated} scored` : "no runs"} /></Tile>
+        <Tile i={1}><StatTile href={latest ? `/runs/${latest.id}?verdict=critical` : "/runs"} label="Critical failures" value={s?.critical_failures ?? "-"} threshold={s?.critical_failures == null ? null : s.critical_failures > 0 ? "fail" : "ok"} caption="target 0" /></Tile>
         {/* DLQ depth is an operational internal: only elevated roles see it (and only they fetch ``metrics``). */}
-        {isAdmin && <StatTile href="/dlq" label="Open DLQ items" value={metrics.data?.dlq_open ?? "-"} threshold={metrics.data == null ? null : metrics.data.dlq_open > 0 ? "fail" : "ok"} caption="events that failed processing" />}
-        <StatTile label="Credits used" value={inr(usage.data?.credits_used)} caption={budget != null ? <span className="inline-flex items-center gap-2">of {inr(budget)} <Meter value={Math.min(100, ((usage.data?.credits_used ?? 0) / budget) * 100)} passLine={null} label="Budget used" /></span> : "no budget set"} />
+        {isAdmin && <Tile i={2}><StatTile href="/dlq" label="Open DLQ items" value={metrics.data?.dlq_open ?? "-"} threshold={metrics.data == null ? null : metrics.data.dlq_open > 0 ? "fail" : "ok"} caption="events that failed processing" /></Tile>}
+        <Tile i={isAdmin ? 3 : 2}><StatTile label="Credits used" value={inr(usage.data?.credits_used)} caption={budget != null ? <span className="inline-flex items-center gap-2">of {inr(budget)} <Meter value={Math.min(100, ((usage.data?.credits_used ?? 0) / budget) * 100)} passLine={null} label="Budget used" /></span> : "no budget set"} /></Tile>
       </TileRow>
 
       <div className="grid items-start gap-6 min-[1180px]:grid-cols-[minmax(0,1fr)_380px]">
-        <div className="flex min-w-0 flex-col gap-6">
+        <div className="stagger flex min-w-0 flex-col gap-6">
           <Panel title="Worst calls, latest run" aux={latest && <Link className={linkCls} href={`/runs/${latest.id}`}>Open run</Link>}>
             {!latest ? (
-              <EmptyState icon={Play} title="No runs yet" body="A run sends synthetic callers to your agent." action={<LinkButton variant="primary" href={`/runs/new?agent=${agent.id}`}>Create run</LinkButton>} />
+              <EmptyState icon={Play} title="No runs yet" body="A run sends synthetic callers to your agent." action={<LinkButton variant="primary" href={`/runs/new?agent=${agent.id}`}><Play size={14} strokeWidth={1.6} aria-hidden />Create run</LinkButton>} />
             ) : (
               <PanelBody q={items} rows={worst.length} empty="No scored calls in the latest run yet.">
                 <ol className="flex flex-col divide-y divide-border">
@@ -232,7 +243,7 @@ export function Overview() {
           </Panel>
         </div>
 
-        <div className="flex min-w-0 flex-col gap-6">
+        <div className="stagger flex min-w-0 flex-col gap-6">
           <Panel title="Needs human review" aux={<Link className={linkCls} href="/calibration">Calibration</Link>}>
             <PanelBody q={review} rows={review.data?.items?.length ?? 0} empty="No calls are waiting for review.">
               <ul className="flex flex-col divide-y divide-border">
