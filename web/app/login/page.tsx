@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
-import { CircleAlert } from "lucide-react";
+import { CircleAlert, FileSearch, Languages, ListChecks } from "lucide-react";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { safeNext } from "@/lib/session";
 import { backend } from "@/lib/auth-server";
-import verdictLight from "@/components/landing/shots/verdict-light.png";
-import verdictDark from "@/components/landing/shots/verdict-dark.png";
+// The live landing demo replaces a static screenshot that drifted from the current design.
+import "@/components/landing/landing.css";
+import { DemoRun } from "@/components/landing/demo-run";
+
+/** What the dashboard does, in the product's own terms; shown beside the sign-in form. */
+const FEATURES = [
+  { icon: ListChecks, title: "Every rule in your prompt, checked", body: "Pareeksha finds the rules in a system prompt and shows which ones the bot kept or broke." },
+  { icon: FileSearch, title: "The exact line it slipped on", body: "Each broken rule comes with the bot's own words and the conversation it happened in." },
+  { icon: Languages, title: "Callers in Kannada and Hindi", body: "Test callers speak your customers' languages, not just English." },
+];
 
 export const metadata: Metadata = { title: "Sign in to Pareeksha", description: "Sign in to the Pareeksha dashboard." };
 export const dynamic = "force-dynamic";
@@ -105,15 +112,26 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           </p>
         </main>
 
-        <figure className="hidden w-full max-w-[30rem] min-[961px]:block">
-          <div className="grid place-items-center rounded-lg bg-sunken p-7 min-[1100px]:p-9">
-            <div className="w-full max-w-[408px] overflow-hidden rounded-lg" style={{ boxShadow: "var(--shadow-float)" }}>
-              <Image className="theme-shot theme-shot--light" src={verdictLight} alt="A call's verdict: critical failure, overall score 57.5 of 100 against a pass line of 80." sizes="408px" />
-              <Image className="theme-shot theme-shot--dark" src={verdictDark} alt="A call's verdict: critical failure, overall score 57.5 of 100 against a pass line of 80." sizes="408px" />
-            </div>
-          </div>
-          <figcaption className="mt-3 text-sm text-subtle">A call from the planted-bugs run, as the dashboard shows it.</figcaption>
-        </figure>
+        <aside aria-label="What Pareeksha does" className="hidden w-full max-w-[30rem] flex-col gap-6 min-[961px]:flex">
+          {/* The same self-playing sample run as the landing page: the real component, so it always matches the app. */}
+          <figure className="m-0 flex flex-col gap-3">
+            <DemoRun />
+            <figcaption className="text-sm text-subtle">Sample data. A prompt, a call, and the rule the bot broke, scored against the pass line.</figcaption>
+          </figure>
+          <ul className="flex flex-col gap-4">
+            {FEATURES.map(({ icon: Icon, title, body }) => (
+              <li key={title} className="flex gap-3">
+                <span className="grid size-8 shrink-0 place-items-center rounded-sm bg-accent-tint text-accent-fg" aria-hidden>
+                  <Icon size={16} strokeWidth={1.6} />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-medium">{title}</p>
+                  <p className="text-sm text-muted">{body}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </aside>
       </div>
     </div>
   );
