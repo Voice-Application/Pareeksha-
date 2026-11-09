@@ -20,6 +20,7 @@ import { FlagChip, Meter, ScoreChip, StatTile, StatusPill, TileRow, VerdictBadge
 import { Chip } from "@/components/ui/layout";
 import { useIsAdmin } from "@/components/layout/theme-toggle";
 import { BarChart, DonutChart, LineChart } from "@/components/charts";
+import { CHART_CATEGORICAL } from "@/components/charts/shared";
 
 const STORE = "pareeksha.agent";
 
@@ -202,7 +203,7 @@ export function Overview() {
         <StatTile enter={isAdmin ? 3 : 2} label="Credits used" value={inr(usage.data?.credits_used)} caption={budget != null ? <span className="inline-flex items-center gap-2">of {inr(budget)} <Meter value={Math.min(100, ((usage.data?.credits_used ?? 0) / budget) * 100)} passLine={null} label="Budget used" /></span> : "no budget set"} />
       </TileRow>
 
-      <OverviewCharts runs={runs.data?.items ?? []} usage={usage.data?.items ?? []} />
+      <OverviewCharts runs={runs.data?.items ?? []} usage={usage.data?.items ?? []} usageError={usage.isError ? usage.error : undefined} onRetryUsage={() => void usage.refetch()} />
 
       <div className="grid items-start gap-6 min-[1180px]:grid-cols-[minmax(0,1fr)_380px]">
         <div className="stagger flex min-w-0 flex-col gap-6">
@@ -316,11 +317,20 @@ type ChartRun = { id: string; name?: string | null; created_at: string; summary?
 /** One usage row: tokens/characters/seconds spent per provider+operation. */
 type UsageItem = { provider: string; operation: string; unit_type: string; units: number };
 
-/** The three LLM operations charted, in fixed caller→designer→judge order (colour follows the entity). */
+/** The LLM operations charted by name, in fixed caller→designer→judge order; each keeps its categorical
+ *  slot (colour follows the entity). Every other llm_* operation (scenario generation, ...) is grouped as "Other". */
 const TOKEN_OPS = ["llm_caller", "llm_designer", "llm_judge"];
+const OTHER_OP = "other";
+
+/** Pass rate (0–1) as a percent to one decimal; anything short of perfect never rounds up to 100. */
+function passPct(rate: number): number {
+  const v = Math.round(rate * 1000) / 10;
+  return rate < 1 && v >= 100 ? 99.9 : v;
+}
 
 /** Turn an operation key (llm_caller) into a short readable label (Caller). */
 function opLabel(op: string): string {
+  if (op === OTHER_OP) return "Other";
   const m = op.replace(/^llm_/, "");
   return m.charAt(0).toUpperCase() + m.slice(1);
 }
@@ -332,7 +342,7 @@ function opLabel(op: string): string {
  * nothing rather than a broken frame; the usage donut in particular stays hidden for members whose
  * usage payload carries no per-operation token rows. Built entirely from the plain-SVG chart module.
  */
-function OverviewCharts({ runs, usage }: { runs: ChartRun[]; usage: UsageItem[] }) {
+function OverviewCharts({ runs, usage, usageError, onRetryUsage }: { runs: ChartRun[]; usage: UsageItem[]; usageError?: unknown; onRetryUsage: () => void }) {
   // Runs come newest-first; a trend reads left→right in time, so reverse, and keep only scored runs.
   const scored = useMemo(
     () => [...runs].reverse().filter((r) => r.summary?.score_mean != null || r.summary?.pass_rate != null),
@@ -343,19 +353,26 @@ function OverviewCharts({ runs, usage }: { runs: ChartRun[]; usage: UsageItem[] 
     [scored],
   );
   const passRate = useMemo(
-    () => scored.filter((r) => r.summary?.pass_rate != null).map((r) => ({ label: r.name || r.id.slice(0, 8), value: Math.round((r.summary!.pass_rate as number) * 100) })),
+    () => scored.filter((r) => r.summary?.pass_rate != null).map((r) => ({ label: r.name || r.id.slice(0, 8), value: passPct(r.summary!.pass_rate as number) })),
     [scored],
   );
 
-  // Token usage by the three LLM operations, in the fixed caller→designer→judge order (colour by entity).
+  // Token usage across every LLM operation: the named ones in fixed order, the rest grouped as "Other".
+  // Colour is pinned to the operation, not its position, so it never shifts when one is absent.
   const tokenSlices = useMemo(() => {
     const byOp = new Map<string, number>();
-    for (const u of usage) if (u.unit_type === "tokens" && TOKEN_OPS.includes(u.operation)) byOp.set(u.operation, (byOp.get(u.operation) ?? 0) + u.units);
-    return TOKEN_OPS.filter((op) => (byOp.get(op) ?? 0) > 0).map((op) => ({ label: opLabel(op), value: byOp.get(op) as number }));
+    for (const u of usage) {
+      if (u.unit_type !== "tokens" || !u.operation.startsWith("llm_")) continue;
+      const op = TOKEN_OPS.includes(u.operation) ? u.operation : OTHER_OP;
+      byOp.set(op, (byOp.get(op) ?? 0) + u.units);
+    }
+    return [...TOKEN_OPS, OTHER_OP]
+      .map((op, i) => ({ label: opLabel(op), value: byOp.get(op) ?? 0, color: CHART_CATEGORICAL[i] }))
+      .filter((s) => s.value > 0);
   }, [usage]);
 
-  // Nothing scored yet and no token data → no charts region at all (the tiles and panels still tell the story).
-  if (!trend.length && !passRate.length && !tokenSlices.length) return null;
+  // Nothing scored yet, no token data and no usage failure → no charts region at all.
+  if (!trend.length && !passRate.length && !tokenSlices.length && !usageError) return null;
 
   return (
     <div className="stagger mb-10 grid items-start gap-6 min-[900px]:grid-cols-2">
@@ -369,9 +386,14 @@ function OverviewCharts({ runs, usage }: { runs: ChartRun[]; usage: UsageItem[] 
           <BarChart bars={passRate} title="Pass rate per recent run, percent" valueSuffix="%" />
         </Panel>
       )}
-      {tokenSlices.length > 0 && (
-        <Panel title="Token usage by operation" label="Token usage by operation" className="min-[900px]:col-span-2">
-          <DonutChart slices={tokenSlices} title="Share of tokens spent by LLM operation" centerLabel="tokens" unitLabel="tokens" />
+      {/* Usage is project-wide (every agent), not the selected agent's, so the title says so. */}
+      {(tokenSlices.length > 0 || usageError != null) && (
+        <Panel title="Token usage by operation, all agents" label="Token usage by operation, all agents" className="min-[900px]:col-span-2">
+          {tokenSlices.length > 0 ? (
+            <DonutChart slices={tokenSlices} title="Share of tokens spent by LLM operation across all agents" centerLabel="tokens" unitLabel="tokens" />
+          ) : (
+            <ErrorPanel error={usageError} what="usage" onRetry={onRetryUsage} />
+          )}
         </Panel>
       )}
     </div>

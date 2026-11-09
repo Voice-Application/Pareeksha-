@@ -54,7 +54,8 @@ export function LineChart({
   // Snap the crosshair to the nearest point by pointer x.
   const onMove = (e: React.PointerEvent<SVGRectElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const rx = ((e.clientX - rect.left) / rect.width) * W;
+    // The hit rect spans only the plot box, so map into plot coordinates (the same space as px).
+    const rx = plot.x + ((e.clientX - rect.left) / rect.width) * plot.w;
     let best = 0;
     let bestD = Infinity;
     for (let i = 0; i < n; i++) {
@@ -67,10 +68,11 @@ export function LineChart({
     setActive(best);
   };
 
-  const ap = active != null ? points[active] : null;
+  // A refresh can shorten the series while a point is selected; treat an out-of-range index as no selection.
+  const ap = active != null ? (points[active] ?? null) : null;
   // Tooltip position: x as a % of container width (SVG is width-100%), y scaled to the rendered height.
-  const tipLeftPct = active != null ? (px(active) / W) * 100 : 0;
-  const tipTop = active != null ? (py(points[active].value) / H) * height : 0;
+  const tipLeftPct = ap ? (px(active!) / W) * 100 : 0;
+  const tipTop = ap ? (py(ap.value) / H) * height : 0;
 
   return (
     <figure className="m-0">
@@ -168,7 +170,8 @@ export function LineChart({
             onFocus={() => setActive((a) => a ?? 0)}
             onBlur={() => setActive(null)}
             onKeyDown={(e) => {
-              if (e.key === "ArrowRight") setActive((a) => Math.min(n - 1, (a ?? -1) + 1));
+              if (e.key === "Escape") setActive(null);
+              else if (e.key === "ArrowRight") setActive((a) => Math.min(n - 1, (a ?? -1) + 1));
               else if (e.key === "ArrowLeft") setActive((a) => Math.max(0, (a ?? n) - 1));
             }}
             className="outline-none"

@@ -46,9 +46,10 @@ export function BarChart({
 
   const yTicks = [0, yMax / 2, yMax];
 
-  const ab = active != null ? bars[active] : null;
-  const tipLeftPct = active != null ? ((bx(active) + barW / 2) / W) * 100 : 0;
-  const tipTop = active != null ? ((baseY - Math.max(0, bh(bars[active].value))) / H) * height : 0;
+  // A refresh can shorten the bars while one is selected; treat an out-of-range index as no selection.
+  const ab = active != null ? (bars[active] ?? null) : null;
+  const tipLeftPct = ab ? ((bx(active!) + barW / 2) / W) * 100 : 0;
+  const tipTop = ab ? ((baseY - Math.max(0, bh(ab.value))) / H) * height : 0;
 
   return (
     <figure className="m-0">
@@ -83,6 +84,7 @@ export function BarChart({
                   onPointerLeave={() => setActive((a) => (a === i ? null : a))}
                   onFocus={() => setActive(i)}
                   onBlur={() => setActive((a) => (a === i ? null : a))}
+                onKeyDown={(e) => { if (e.key === "Escape") setActive(null); }}
                   className="outline-none"
                 >
                   {/* widened transparent hit target over the whole slot */}

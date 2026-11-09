@@ -13,7 +13,12 @@
 import { useState } from "react";
 import { CHART_CATEGORICAL, DataTable, Tooltip, useChartId } from "./shared";
 
-export type Slice = { label: string; value: number };
+/** `color` pins the slice to its entity's colour (so it doesn't shift when other slices are absent);
+ *  without it the slice takes its position's slot. */
+export type Slice = { label: string; value: number; color?: string };
+
+/** A slice's colour: its pinned entity colour, else its position's categorical slot (never cycled). */
+const sliceColor = (s: Slice | undefined, i: number) => s?.color ?? CHART_CATEGORICAL[Math.min(i, CHART_CATEGORICAL.length - 1)];
 
 /** Point on a circle at `deg` degrees (0 = 12 o'clock, clockwise), radius `r`, centered at (cx,cy). */
 function polar(cx: number, cy: number, r: number, deg: number) {
@@ -76,8 +81,8 @@ export function DonutChart({
             s.frac <= 0 ? null : (
               <path
                 key={s.i}
-                d={arcPath(cx, cy, rOuter, rInner, s.a0 + GAP / 2, Math.max(s.a0 + GAP / 2, s.a1 - GAP / 2))}
-                fill={CHART_CATEGORICAL[s.i % CHART_CATEGORICAL.length]}
+                d={arcPath(cx, cy, rOuter, rInner, s.a0 + Math.min(GAP, (s.a1 - s.a0) * 0.3) / 2, s.a1 - Math.min(GAP, (s.a1 - s.a0) * 0.3) / 2)}
+                fill={sliceColor(slices[s.i], s.i)}
                 opacity={active == null || active === s.i ? 1 : 0.45}
                 tabIndex={0}
                 role="button"
@@ -86,6 +91,7 @@ export function DonutChart({
                 onPointerLeave={() => setActive((a) => (a === s.i ? null : a))}
                 onFocus={() => setActive(s.i)}
                 onBlur={() => setActive((a) => (a === s.i ? null : a))}
+                onKeyDown={(e) => { if (e.key === "Escape") setActive(null); }}
                 className="chart-arc-in outline-none"
                 style={{ transformBox: "fill-box", transformOrigin: "center" }}
               />
@@ -116,7 +122,7 @@ export function DonutChart({
       <ul className="flex min-w-0 flex-col gap-2 text-sm">
         {segs.map((s) => (
           <li key={s.i} className="flex min-w-0 items-center gap-2.5">
-            <span className="h-2.5 w-2.5 shrink-0 rounded-xs" style={{ background: CHART_CATEGORICAL[s.i % CHART_CATEGORICAL.length] }} aria-hidden />
+            <span className="h-2.5 w-2.5 shrink-0 rounded-xs" style={{ background: sliceColor(slices[s.i], s.i) }} aria-hidden />
             <span className="min-w-0 flex-1 truncate text-muted">{s.label}</span>
             <span className="num shrink-0 tabular-nums text-fg">{Math.round(s.frac * 100)}%</span>
           </li>
