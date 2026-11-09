@@ -20,6 +20,7 @@ import { FilterSelect } from "@/components/ui/field";
 import { FlagChip, Meter, ScoreChip, StatTile, StatusPill, TileRow, VerdictBadge, verdictOf } from "@/components/ui/measure";
 import { Chip } from "@/components/ui/layout";
 import { useIsAdmin } from "@/components/layout/theme-toggle";
+import { BarChart, DonutChart, LineChart } from "@/components/charts";
 
 const STORE = "pareeksha.agent";
 
@@ -193,6 +194,8 @@ export function Overview() {
         <Tile i={isAdmin ? 3 : 2}><StatTile label="Credits used" value={inr(usage.data?.credits_used)} caption={budget != null ? <span className="inline-flex items-center gap-2">of {inr(budget)} <Meter value={Math.min(100, ((usage.data?.credits_used ?? 0) / budget) * 100)} passLine={null} label="Budget used" /></span> : "no budget set"} /></Tile>
       </TileRow>
 
+      <OverviewCharts runs={runs.data?.items ?? []} usage={usage.data?.items ?? []} />
+
       <div className="grid items-start gap-6 min-[1180px]:grid-cols-[minmax(0,1fr)_380px]">
         <div className="stagger flex min-w-0 flex-col gap-6">
           <Panel title="Worst calls, latest run" aux={latest && <Link className={linkCls} href={`/runs/${latest.id}`}>Open run</Link>}>
@@ -297,6 +300,73 @@ export function Overview() {
         </div>
       </div>
     </>
+  );
+}
+
+/** The two measures a run exposes for charting, plus the identity used as the x label. */
+type ChartRun = { id: string; name?: string | null; created_at: string; summary?: { pass_rate?: number | null; score_mean?: number | null } };
+/** One usage row: tokens/characters/seconds spent per provider+operation. */
+type UsageItem = { provider: string; operation: string; unit_type: string; units: number };
+
+/** The three LLM operations charted, in fixed caller→designer→judge order (colour follows the entity). */
+const TOKEN_OPS = ["llm_caller", "llm_designer", "llm_judge"];
+
+/** Turn an operation key (llm_caller) into a short readable label (Caller). */
+function opLabel(op: string): string {
+  const m = op.replace(/^llm_/, "");
+  return m.charAt(0).toUpperCase() + m.slice(1);
+}
+
+/**
+ * The home dashboard's charts region: two run-based charts (mean-score trend and pass-rate per run,
+ * two measures of different scale kept as two charts, never a dual axis) and — when token usage is
+ * available — a token-usage-by-operation donut. Each chart is guarded so an empty data slice renders
+ * nothing rather than a broken frame; the usage donut in particular stays hidden for members whose
+ * usage payload carries no per-operation token rows. Built entirely from the plain-SVG chart module.
+ */
+function OverviewCharts({ runs, usage }: { runs: ChartRun[]; usage: UsageItem[] }) {
+  // Runs come newest-first; a trend reads left→right in time, so reverse, and keep only scored runs.
+  const scored = useMemo(
+    () => [...runs].reverse().filter((r) => r.summary?.score_mean != null || r.summary?.pass_rate != null),
+    [runs],
+  );
+  const trend = useMemo(
+    () => scored.filter((r) => r.summary?.score_mean != null).map((r) => ({ label: r.name || r.id.slice(0, 8), value: Math.round((r.summary!.score_mean as number) * 10) / 10 })),
+    [scored],
+  );
+  const passRate = useMemo(
+    () => scored.filter((r) => r.summary?.pass_rate != null).map((r) => ({ label: r.name || r.id.slice(0, 8), value: Math.round((r.summary!.pass_rate as number) * 100) })),
+    [scored],
+  );
+
+  // Token usage by the three LLM operations, in the fixed caller→designer→judge order (colour by entity).
+  const tokenSlices = useMemo(() => {
+    const byOp = new Map<string, number>();
+    for (const u of usage) if (u.unit_type === "tokens" && TOKEN_OPS.includes(u.operation)) byOp.set(u.operation, (byOp.get(u.operation) ?? 0) + u.units);
+    return TOKEN_OPS.filter((op) => (byOp.get(op) ?? 0) > 0).map((op) => ({ label: opLabel(op), value: byOp.get(op) as number }));
+  }, [usage]);
+
+  // Nothing scored yet and no token data → no charts region at all (the tiles and panels still tell the story).
+  if (!trend.length && !passRate.length && !tokenSlices.length) return null;
+
+  return (
+    <div className="stagger mb-10 grid items-start gap-6 min-[900px]:grid-cols-2">
+      {trend.length > 0 && (
+        <Panel title="Mean score by run" label="Mean score by run">
+          <LineChart points={trend} title="Mean score across recent runs, 0 to 100, with the pass line at 80" passLine={80} />
+        </Panel>
+      )}
+      {passRate.length > 0 && (
+        <Panel title="Pass rate by run" label="Pass rate by run">
+          <BarChart bars={passRate} title="Pass rate per recent run, percent" valueSuffix="%" />
+        </Panel>
+      )}
+      {tokenSlices.length > 0 && (
+        <Panel title="Token usage by operation" label="Token usage by operation" className="min-[900px]:col-span-2">
+          <DonutChart slices={tokenSlices} title="Share of tokens spent by LLM operation" centerLabel="tokens" unitLabel="tokens" />
+        </Panel>
+      )}
+    </div>
   );
 }
 
