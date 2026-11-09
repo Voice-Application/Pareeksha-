@@ -81,7 +81,12 @@ function TranscriptTab() {
             >
               <span className="lp-trans__who">{t.speaker === "caller" ? "Caller" : "Agent"}</span>
               <span className="lp-trans__text">{t.text}</span>
-              {t.broke && <span className="lp-trans__flag" aria-label="broke a rule" />}
+              {t.broke && (
+                <>
+                  <span className="lp-trans__flag" aria-hidden="true" />
+                  <span className="sr-only">Broke a rule</span>
+                </>
+              )}
             </button>
           </li>
         ))}

@@ -1,12 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { VerdictBadge } from "@/components/ui/measure";
 import { DEMO_PROMPT, DEMO_TURNS, DEMO_VERDICT } from "./demo-data";
 
 /**
  * A self-playing demo of one run: the prompt appears, the caller and agent exchange turns, then the
  * verdict lands. No backend — it steps through baked sample data on a timer. Honours reduced motion
- * by showing the finished state at once, and offers play/pause/replay.
+ * by showing the finished state at once, and offers play/pause/replay. Screen readers hear each beat
+ * once, through a separate visually hidden live region that holds only the latest revealed line.
  */
 
 // The ordered beats of the demo. Each adds one more visible piece.
@@ -35,6 +37,20 @@ function getServerMotionSnapshot() {
   return null;
 }
 
+/** What the live region says when playback reaches `step` (empty for the prompt beat). */
+function announcementFor(step: number): string {
+  const name = STEPS[step];
+  if (name === "verdict") {
+    const broke = DEMO_TURNS.find((t) => t.broke)?.broke;
+    return `Critical failure. Overall score ${DEMO_VERDICT.score} of 100, pass line ${DEMO_VERDICT.passLine}.${broke ? ` Broke a rule: ${broke}` : ""}`;
+  }
+  if (name.startsWith("turn-")) {
+    const turn = DEMO_TURNS[Number(name.slice(5))];
+    return `${turn.speaker === "caller" ? "Caller" : "Agent"}: ${turn.text}`;
+  }
+  return "";
+}
+
 /** Landing-page run demo that steps through on a timer, or shows the finished state under reduced motion. */
 export function DemoRun() {
   const [playbackStep, setStep] = useState(0);
@@ -61,11 +77,13 @@ export function DemoRun() {
   }, [reduced]);
 
   const atEnd = step >= LAST;
+  // Only announce beats revealed by playback; under reduced motion everything is already on screen.
+  const announcement = reduced === false ? announcementFor(step) : "";
   /** Whether playback has reached the named step. */
   const show = (name: (typeof STEPS)[number]) => step >= STEPS.indexOf(name);
 
   return (
-    <div className="lp-demo" aria-label="A sample run, played out" style={{ visibility: reduced === null ? "hidden" : undefined }}>
+    <div className="lp-demo" role="region" aria-label="A sample run, played out" style={{ visibility: reduced === null ? "hidden" : undefined }}>
       <div className="lp-demo__head">
         <span className="lp-demo__tag">Sample run</span>
         <div className="lp-demo__controls">
@@ -74,12 +92,17 @@ export function DemoRun() {
               Replay
             </button>
           ) : (
-            <button type="button" className="lp-demo__btn" onClick={() => setPlaying((p) => !p)} aria-pressed={!playing}>
+            <button type="button" className="lp-demo__btn" onClick={() => setPlaying((p) => !p)}>
               {playing ? "Pause" : "Play"}
             </button>
           )}
         </div>
       </div>
+
+      {/* The only live region: the latest revealed line, so each beat is announced once. */}
+      <p className="sr-only lp-demo__live" aria-live="polite" aria-atomic="true">
+        {announcement}
+      </p>
 
       {/* Prompt */}
       <div className={`lp-demo__block ${show("prompt") ? "is-in" : ""}`}>
@@ -88,7 +111,7 @@ export function DemoRun() {
       </div>
 
       {/* Conversation */}
-      <div className="lp-demo__convo" aria-live="polite">
+      <div className="lp-demo__convo">
         {DEMO_TURNS.map((t, i) => (
           <div key={i} aria-hidden={!show(`turn-${i}` as (typeof STEPS)[number])} className={`lp-demo__turn lp-demo__turn--${t.speaker} ${show(`turn-${i}` as (typeof STEPS)[number]) ? "is-in" : ""}`}>
             <span className="lp-demo__who">{t.speaker === "caller" ? "Caller" : "Agent"}</span>
@@ -105,7 +128,7 @@ export function DemoRun() {
       {/* Verdict */}
       <div className={`lp-demo__verdict ${show("verdict") ? "is-in" : ""}`} aria-hidden={!show("verdict")}>
         <div className="lp-demo__vtop">
-          <span className="lp-demo__badge">Critical failure</span>
+          <VerdictBadge verdict="critical" size="md" />
           <span className="lp-demo__rubric mono">{DEMO_VERDICT.rubric}</span>
         </div>
         <p className="lp-demo__label">Overall score</p>
