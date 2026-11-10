@@ -35,10 +35,10 @@ Pre-run (so the 60 s needs no waiting; each takes 3 to 6 minutes because Gnani a
 | t (s) | Screen and exact action | Voice-over (about 2 words per second) |
 |---|---|---|
 | 0 to 6 | Terminal: `pareeksha run --agent "EMI Reminder Bot" --tags promise_to_pay --persona "Manju — auto driver" --noise pstn_8k_alaw --wait` (sped up, cut to the result line) | "Voice bots fail on Indian lines. Pareeksha crash-tests them before launch." |
-| 6 to 14 | Browser `http://localhost:3000`, sidebar **Runs**, click the pre-run, show the pass rate tile and the score heatmap | "Forty synthetic callers: Kannada, Hindi, Kanglish, noisy 8 kHz." |
+| 6 to 14 | Browser `http://localhost:3000`, sidebar **Results**, click the pre-run, show the pass rate tile and the score heatmap | "Forty synthetic callers: Kannada, Hindi, Kanglish, noisy 8 kHz." |
 | 14 to 24 | In the heatmap click the red cell, which opens the call page. Click the highlighted evidence turn (the transcript scrolls and the waveform seeks), press play | "A critical failure: the caller said four thousand, the bot confirmed forty thousand. The judge cites the exact turn." |
 | 24 to 30 | Call page, button **Promote to regression**, confirm in the dialog | "One click turns it into a permanent regression test." |
-| 30 to 36 | Sidebar **Runs**, open the re-run, **Compare** with the failing run (Run compare page), the cell flips red to green | "Fix the prompt, re-run, it passes." |
+| 30 to 36 | Sidebar **Results**, open the re-run, **Compare** with the failing run (Run compare page), the cell flips red to green | "Fix the prompt, re-run, it passes." |
 | 36 to 43 | Sidebar **Dialect**, open the latest report, point at the lowest-entity-accuracy cell (low-n cells are hatched) | "The dialect report shows where accuracy drops, with sample sizes." |
 | 43 to 50 | Sidebar **Audits**, **Upload recording**, choose `~/demo/call.wav`, submit, cut to the finished audit: score plus the missing-disclosure flag | "Upload a real recording: same rubric, flags the missing disclosure." |
 | 50 to 55 | HubSpot tab: the test contact, Activity, the note "Pareeksha call audit" (HubSpot note appears within 3 minutes of the audit) | "The note lands on the HubSpot contact by itself." |
