@@ -32,7 +32,7 @@ The body:
 }
 ```
 
-Sign it Stripe-style: `X-Pareeksha-Timestamp` = unix seconds, `X-Pareeksha-Signature: v1=<hex(hmac_sha256(secret, f"{timestamp}.{raw_body}"))>`. Receivers reject timestamps older than 5 minutes (HTTP 408). A small sender:
+Sign it Stripe-style: `X-Pareeksha-Timestamp` = unix seconds, `X-Pareeksha-Signature: v1=<hex(hmac_sha256(secret, f"{timestamp}.{raw_body}"))>`. The endpoint rejects timestamps more than 5 minutes from server time (HTTP 408); `language` is required, `metadata` values must be strings, and bodies over 1 MiB get `413`. Several comma-separated `v1=` values are accepted, and an optional `previous_signing_secret` keeps the old secret valid during rotation. A small sender:
 
 ```python
 # send_call.py  ·  usage: python send_call.py <api_inbound_url> <signing_secret> <recording_url> <external_id>
@@ -47,9 +47,9 @@ req = urllib.request.Request(url, body, {"Content-Type": "application/json",
 print(urllib.request.urlopen(req).read().decode())     # {"call_id":"...","duplicate":false}
 ```
 
-Answers: `202 {"call_id":"...","duplicate":false}`; sending the same `external_id` again returns `duplicate:true` with the same `call_id` and creates nothing. `401 invalid_signature`, `408 timestamp_out_of_window`, `422 unsafe_url` / `unknown_agent`.
+Answers: `202 {"call_id":"...","duplicate":false}`; sending the same `external_id` again returns `duplicate:true` with the same `call_id` and creates nothing. `401 invalid_signature`, `408 timestamp_out_of_window`, `400 validation_error`, `422 unsafe_url` / `unknown_agent`.
 
-**Recording URL rules (SSRF guard):** `https` only, no credentials in the URL, the hostname must resolve to a public address (loopback, private and link-local are refused), at most 10 MB, `Content-Type: audio/*`, WAV or MP3.
+**Recording URL rules (SSRF guard):** `https` only, no credentials in the URL, the hostname must resolve to a public address (loopback, private and link-local are refused), at most 10 MB, `Content-Type: audio/*` (or `application/octet-stream`), WAV or MP3 content, no redirects.
 
 ## 3. Watch it being judged
 
@@ -97,4 +97,4 @@ Then use `https://host.docker.internal:8443/call.wav` as `recording_url` (any WA
 
 ## 5. Receive the results (sink side)
 
-When the call is judged, the integration POSTs `evaluation.completed` to `config.url`, signed with the same scheme (verify the signature and the 5-minute window on your side, constant-time compare). Payload: `event_id`, `type`, `occurred_at`, and `data` with `call_id`, `agent`, `overall_score`, `passed`, `critical_failure`, `failure_types`, `summary`, `link`, `metadata`. No transcript or audio is sent. Deliveries (status, HTTP code, response excerpt) are listed by `GET /integrations/{id}/deliveries`; failures retry, then land in the DLQ ([Guide 8](08-operating-kafka.md)).
+When the call is judged, the integration POSTs `evaluation.completed` to `config.url`, signed with the same scheme (verify the signature and the 5-minute window on your side, constant-time compare). Headers also carry a stable `X-Pareeksha-Event-Id` (dedupe on it). Payload: `event_id`, `type`, `occurred_at`, and `data` with `call_id`, `agent` (`id`, `name`), `source`, `external_id`, `scenario`, `persona`, `language`, `duration_ms`, `overall_score`, `passed`, `critical_failure`, `failure_types`, `summary`, `top_failing_dimensions`, `link`, `metadata`. `config.events` may also include `run.completed`, `config.only_failed` limits the sink to failing calls, and `POST /integrations/{id}/test` sends a signed `{"type":"ping"}`. No transcript or audio is sent. Deliveries (status, HTTP code, response excerpt) are listed by `GET /integrations/{id}/deliveries`; failures retry, then land in the DLQ ([Guide 8](08-operating-kafka.md)).

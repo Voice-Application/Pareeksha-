@@ -13,6 +13,25 @@ Owner decision applied: the default LLM (caller brain, judge, scenario generator
 - Test locations are planned paths from `docs/07-file-structure.md` (`backend/tests/{unit,contract,kafka,connectors,judge,e2e,integration}`, `web/tests`, `sdk/python/tests`, `scripts/verify`). "(built)" marks tests that already exist from EVAL-02 and VOICE-02 under their current paths. A builder who places a test elsewhere updates this table in the same change.
 - FR-DI-5, FR-DX-8 and FR-DX-9 are Could/Should items with no scheduled acceptance criterion in SCOPE.md. They stay mapped so no ID is orphaned and are reported "not built" (not failed) if cut with Preetham's written approval (AGENTS section 10).
 
+### Current test layout (updated 10 Nov 2026)
+
+The "Planned test location" column keeps the QA-01 plan as written. Many builders placed tests elsewhere, so a planned path that does not exist is not a missing test. The suites that exist today:
+
+- `backend/tests/unit/` (subfolders `agent_llm`, `audio`, `audit`, `dialect`, `evaluation`, `gnani`, `integrations`, `llm`, `mock_agent`, `quicktest`, `rag`, `simulation`, `speech`, plus top-level files): no network.
+- `backend/tests/integration/`: API and workers against real Postgres (agents, runs, audits, calibration, designer, RAG lab, quick tests, prompt versions, LLM settings, inbound webhook, integrations, DLQ, metrics).
+- `backend/tests/kafka/`: `test_duplicate_and_crash.py`, `test_kafka_down_outbox.py`, `test_retry_dlq_throttle.py`, `test_scale_consumers.py`.
+- `backend/tests/evaluation/`: `test_checks.py`, `test_metrics.py`, `test_numbers.py`, `test_pii.py`.
+- `backend/tests/judge/`: `test_scenario_generator.py` (scripted LLM).
+- `backend/tests/contract/`: adapter, event schemas, OpenAPI routes, `schema.d.ts` freshness, secret scan and logs, stub routes, topics, web admin routes.
+- `backend/tests/e2e/test_mock_agent_connect.py`.
+- `sdk/python/tests/`: apply, cli, client, config, prompt versions, rag.
+- `web/tests/*.spec.ts` (Playwright; `web/tests/real/` holds specs that run against real data).
+- CI: `.github/workflows/ci.yml`, `kafka-suite.yml`, `pareeksha-regression.yml`, `release.yml`.
+
+`scripts/check_test_plan_coverage.py` checks that every FR/NFR, GOAL item and metric row is mapped in this plan, not that the planned files exist. It passes on the current plan (99 requirements, 11/11 GOAL items, 9/9 metric rows).
+
+Features added after QA-01 (prompt agents and quick prompt tests, RAG lab, test designer, per-project LLM settings, users and roles) have no FR/NFR IDs in this plan. They are covered by `backend/tests/integration/test_quick_tests.py`, `test_prompt_*.py`, `test_rag_*.py`, `test_designer_commit.py`, `test_llm_settings_api.py` and `web/tests/{quick-tests,rag-lab,rag-questions,designer,llm-settings,prompt-agents,admin-access}.spec.ts`.
+
 ## 2. Requirement to test map (99 IDs: 81 FR, 18 NFR)
 
 | Req ID | Pri | Test ID | Level | Planned test location | Test owner task | Feature task(s) | What the test proves |
