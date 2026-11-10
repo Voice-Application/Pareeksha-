@@ -2,7 +2,15 @@
 
 Kept current by the Orchestrator and PJM. Every agent updates its row when it starts, blocks or finishes a task. Task details: `docs/AGENTS.md §7`.
 
-**Today:** Day 1 · Sat 24 Oct 2026 · Critical path: H-01 → VOICE-01 · Parallel chain: TL-01 → INFRA-02 → API-03 → VOICE-05
+**Last refreshed:** 10 Nov 2026 (build window 24–28 Oct 2026; post-release work summarised under "Current state"). The 24 Oct critical-path line that used to sit here is obsolete.
+
+## Current state (10 Nov 2026)
+
+- **Release:** v1.0.0 tagged on `b1df0d1` (2 Nov 2026); the code has moved on with post-release work (see `CHANGELOG.md`, entry of 10 Nov 2026): rubric v3 active, prompt testing, RAG lab, users and roles, UI redesign, security and Compose hardening, run-item watchdog. Alembic migrations `0001`–`0007` exist.
+- **Defaults:** DeepSeek is the default LLM; Gemini and OpenAI-compatible endpoints are per-project options (Settings, AI settings). Gnani Timbre (TTS) and Prisma (STT). Pipecat and `audio_v1` adapters are built; LiveKit and Vapi were cut by the owner.
+- **Verification:** `proof/FINAL_REPORT.md` (generated 2026-11-04 on `b5454b6`) is the last full `make verify` report: PASS V2, V4, V6, V7, V10; PENDING V5, V8 (owner inputs); FAIL V1, V9, V11; V3 NOT RUN. Its V9 failure is κ = 0.1892 on the 30 EVAL-06 labels; later v3 figures are in `proof/EVAL-08/proof.md`. The post-release commits above were not covered by a new `make verify` run.
+- **Owner-pending:** demo video, launch post, consented real recording (V5), passing PR check for the regression gate (V8).
+- Rows and sections below record the 24–28 Oct build and are kept as history.
 
 State values: todo / doing / blocked / review / done. Verified = QA sign-off (`yes` / `no`).
 
@@ -61,7 +69,7 @@ Ready now (no dependencies): H-01, PM-01, INFRA-01, VOICE-02, FE-01, DOC-01, EVA
 - TL-01 scope widened: includes DeepSeek LLM provider interface, plus pyproject + mypy.
 - VOICE-02: noise synthesized in code, not data/noise clips (TRD §6) — licence check under PJM-01; profiles in audio/profiles.py, API-02 seed must load these (rubric §7 names YAML).
 - Decision 2026-10-23 (Preetham): DeepSeek default LLM, Gemini optional.
-- No type checker configured yet — TL-01 adds mypy.
+- mypy was added by TL-01 and is pinned and clean since FIX-03.
 
 ## Escalations
 - None.
@@ -71,13 +79,7 @@ Ready now (no dependencies): H-01, PM-01, INFRA-01, VOICE-02, FE-01, DOC-01, EVA
 - Used today / total: 0 / 0. `COST_*` values not yet measured (VOICE-01).
 
 ## Open STUBs
-| Marker | Owner | Replace by task |
-|---|---|---|
-| `STUB(TL-01)` `backend/pareeksha/api/main.py` | TL | TL-01 |
-| `STUB(VOICE-03)` `mock_agent/server.py` | VOICE | VOICE-03 |
-| `STUB(FE-01)` `web/Dockerfile` | FE | FE-01 |
-| `STUB(API-01)` `backend/alembic_migrate.sh` | BE-API | API-01 |
-Open STUBs note: TL-01 will introduce STUB(<owner-task>) markers on API route bodies, removed by owning tasks.
+None. A grep for `STUB(` over `backend/pareeksha`, `mock_agent`, `web/Dockerfile` and `backend/alembic_migrate.sh` finds no markers as of 10 Nov 2026 (the build-fail grep in `make verify` V1 also rejects them). The four rows that were listed here at the start of the build (TL-01 api main, VOICE-03 mock agent, FE-01 Dockerfile, API-01 migration script) were replaced by their tasks.
 
 ## Cuts (need owner approval)
 Proposed cut order from `docs/AGENTS.md §10`, not yet approved by Preetham. Nothing is cut.
@@ -129,7 +131,7 @@ Never cut: mock agent with planted bugs, judge with evidence, Kafka outbox + ide
 - DIALECT-02 (Vaani, 5 groups × 22 clips × 3 conditions, 330/330) — verified qa/DIALECT-02 b248279; merged 2026-11-02 (owner: "merge dialect", spot-check waived).
 - EVAL-06 interim: n=10 owner labels, κ=1.0 pass/fail, critical κ=0.14; rubric gap noted (no anchor for non-responsive replies) — task/EVAL-06 e21c46f.
 - Released v1.0.0: https://github.com/Voice-Application/Pareeksha-/releases/tag/v1.0.0 (tag on b1df0d1).
-- EVAL-06 final (n=30): kappa 0.19, below 0.6; rubric v2 proposed, not applied (task/EVAL-06 7d347ba).
+- EVAL-06 final (n=30): kappa 0.19, below 0.6; rubric v2 proposed (task/EVAL-06 7d347ba); later applied as EVAL-07 (`rubric-2026-10-v2`) and EVAL-08 (`rubric-2026-11-v3`, active), see `proof/EVAL-07`, `proof/EVAL-08`.
 - Records reconciled 2026-11-04: `proof/FINAL_REPORT.md` regenerated from the evidence files; what was and was not re-run is in `proof/verify/REPORT_NOTES.md`.
 - Owner-pending: demo video, launch post, live demo approval, a consented real recording for GOAL 5 (V5 PENDING; live runs used TTS), a passing PR check for GOAL 8 (V8 PENDING; run 2 was a manual dispatch).
 

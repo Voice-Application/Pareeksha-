@@ -22,7 +22,7 @@ The framework does the rest: validates config/secrets, encrypts secrets, writes 
 
 ## 2. The file
 
-`examples/connector-slack/pareeksha_connector_slack.py` is the whole connector (about 70 lines): the two schemas, `SlackConnector.test`, and `SlackConnector.handle`, which skips passing calls, builds a message from the summary and POSTs it with `httpx`, mapping 429/5xx to `ConnectorRetryableError` and other 4xx to `ConnectorPermanentError`. Copy it as a template.
+`examples/connector-slack/pareeksha_connector_slack.py` is the whole connector (about 70 lines): the two schemas, `SlackConnector.test`, and `SlackConnector.handle`, which skips passing calls (and, with the default `only_critical: true`, non-critical failures), builds a message from the summary and POSTs it with `httpx`, mapping 429/5xx to `ConnectorRetryableError` and other 4xx to `ConnectorPermanentError`. Copy it as a template.
 
 ## 3. The entry point
 

@@ -4,6 +4,7 @@ Every requirement has an ID, a priority (**M**ust / **S**hould / **C**ould) and 
 
 **v0.2 changes:** queueing requirements now target Kafka (§1.5, NFR-4); the dashboard is a Next.js web app (§1.10); new §1.13 Integrations and §1.14 Developer experience.
 
+**Implementation status (10 Nov 2026):** per-requirement status is tracked in `STATUS.md` and `proof/`. Known not built: FR-DX-8 (LiveKit) and FR-DX-9 (Vapi), both cut by the owner. Since v0.2 the product also gained prompt testing, the RAG lab, the test designer, per-project LLM settings, users and roles, and rubric v3; these have no FR IDs here (see `01-PRD.md` F31–F37 and `CHANGELOG.md`). Judge agreement (FR-EV calibration target κ ≥ 0.6) was not met: κ = 0.19 on 30 labels (`proof/FINAL_REPORT.md` V9).
 ---
 
 ## 1. Functional requirements
@@ -22,7 +23,7 @@ Every requirement has an ID, a priority (**M**ust / **S**hould / **C**ould) and 
 | ID | Requirement | Pri | Acceptance criteria |
 |---|---|---|---|
 | FR-SC-1 | User can create a scenario with: title, caller goal, background facts (fixtures), success criteria (plain language), expected tool calls (optional), must-say / must-not-say rules, tags, max turns. | M | Saved and editable. |
-| FR-SC-2 | Platform can generate N scenarios from an agent's description using Gemini, covering happy path, edge cases and adversarial cases. | M | Given an agent, generating 10 scenarios returns 10 valid scenario objects that pass schema validation; user reviews before saving. |
+| FR-SC-2 | Platform can generate N scenarios from an agent's description using the configured LLM (DeepSeek by default), covering happy path, edge cases and adversarial cases. | M | Given an agent, generating 10 scenarios returns 10 valid scenario objects that pass schema validation; user reviews before saving. |
 | FR-SC-3 | Scenarios are language-independent; the persona decides the language. | M | Same scenario runs with a Kannada and a Hindi persona without edits. |
 | FR-SC-4 | Scenario has a `source` field: `manual`, `generated`, or `promoted` (from a call). | M | Promoted scenarios link to their source call. |
 
@@ -65,7 +66,7 @@ Every requirement has an ID, a priority (**M**ust / **S**hould / **C**ould) and 
 |---|---|---|---|
 | FR-EV-1 | Compute deterministic metrics per call: response latency p50/p90/p95, first-greeting latency, barge-in attempts/honoured, agent stop time after interruption, silence gaps > 2 s, turns count, talk ratio, repeated-utterance count. | M | Values stored in `call_metrics`. |
 | FR-EV-2 | Deterministic checks: mandatory disclosure present (regex/fuzzy), forbidden phrase absent, expected tool calls present and ordered (glass-box), language match (agent replies in caller's language family). | M | Each check stored with pass/fail + evidence turn. |
-| FR-EV-3 | Gemini judge scores the 7 rubric dimensions (0–4) with evidence turn indices and a short reason each, plus `critical_failure`, `needs_human_review`, and `failure_types`. | M | Output validates against the JSON schema; invalid output retried once, then marked `judge_error`. |
+| FR-EV-3 | The LLM judge (DeepSeek by default; rubric `rubric-2026-11-v3` is active, see `08-evaluation-rubric.md`) scores the 7 rubric dimensions (0–4) with evidence turn indices and a short reason each, plus `critical_failure`, `needs_human_review`, and `failure_types`. | M | Output validates against the JSON schema; invalid output retried once, then marked `judge_error`. |
 | FR-EV-4 | Overall score = weighted sum normalised to 0–100. Pass = score ≥ 80 and no critical failure and all must-pass deterministic checks pass. | M | Unit test on formula. |
 | FR-EV-5 | Every evaluation stores rubric version, prompt hash, model ID, temperature, tokens, latency. | M | Fields non-null. |
 | FR-EV-6 | Critical failure or failed mandatory disclosure ⇒ `needs_human_review = true` regardless of judge output. | M | Rule enforced in code, not prompt. |
@@ -118,7 +119,7 @@ Every requirement has an ID, a priority (**M**ust / **S**hould / **C**ould) and 
 
 | ID | Requirement | Pri | Acceptance criteria |
 |---|---|---|---|
-| FR-MK-1 | Pipecat bot "EMI Reminder Bot": Prisma STT → Gemini → Timbre TTS, served over the platform WebSocket protocol, Kannada/Hindi/English. | M | Responds to the test-connection check. |
+| FR-MK-1 | Mock agent "EMI Reminder Bot" (as built: a scripted dialog using Gnani Prisma STT and Timbre TTS, no LLM; `mock_agent/llm_dialog.py` has an unwired DeepSeek-driven variant), served over the platform WebSocket protocol (`pareeksha-audio-v1`), Kannada/Hindi/English. | M | Responds to the test-connection check. |
 | FR-MK-2 | Supports glass-box mode (sends transcripts and tool calls). | M | Control messages received by platform. |
 | FR-MK-3 | Has 5 switchable planted bugs: (1) skips the recording disclosure, (2) doesn't confirm amounts, (3) replies in English to Kannada callers, (4) ignores interruptions (VAD off), (5) promises a waiver it can't give. | M | Each bug toggled via env/config; run detects ≥ 4. |
 
@@ -151,12 +152,12 @@ Every requirement has an ID, a priority (**M**ust / **S**hould / **C**ould) and 
 | FR-DX-1 | `docker compose up` starts the full stack; `make demo` seeds data, creates an API key, registers the mock agent and runs a 10-call demo. | M | Fresh clone on a laptop shows an evaluated call in < 20 min. |
 | FR-DX-2 | API keys with scopes (`read`, `runs:write`, `audits:write`, `admin`); stored hashed; shown once on creation. | M | Wrong scope → 403. |
 | FR-DX-3 | `pareeksha-sdk` Python client (sync + async) covering agents, runs (create/wait), audits, regression, DLQ. | M | SDK example in README runs against the demo stack. |
-| FR-DX-4 | CLI: `login`, `apply`, `run`, `regress`, `audit`, `dlq list/replay`, `doctor`; non-zero exit on failed threshold. | M | `pareeksha run --fail-under 101` exits 1. |
+| FR-DX-4 | CLI: `login`, `apply`, `run`, `regress`, `audit`, `dlq list/replay`, `doctor` (plus `prompt push/versions/activate/set-key` and `kb create/set-keys/upload/index` added later); non-zero exit on failed threshold. | M | `pareeksha run --fail-under 101` exits 1. |
 | FR-DX-5 | `pareeksha.yaml` config-as-code applied idempotently by name. | S | Applying twice changes nothing. |
 | FR-DX-6 | GitHub Action runs a suite and writes a job summary; fails the check on regression. | S | Example workflow fails on a PR that enables a mock-agent bug. |
 | FR-DX-7 | Agent adapters: `audio_v1` and Pipecat (with `PareekshaFrameSerializer`) with runnable examples. | M | Both examples pass a contract test. |
-| FR-DX-8 | LiveKit adapter with example. | S | — |
-| FR-DX-9 | Vapi adapter with example. | C | — |
+| FR-DX-8 | LiveKit adapter with example. | S | — (not built: cut by the owner, 28 Oct 2026) |
+| FR-DX-9 | Vapi adapter with example. | C | — (not built: cut by the owner, 28 Oct 2026) |
 | FR-DX-10 | Docs: quick start, connect Pipecat bot, connect any bot, webhook in, HubSpot out, GitHub Action, write a connector, operate Kafka. | M | Each guide followed once from a clean clone by QA. |
 
 ---
@@ -190,7 +191,7 @@ Every requirement has an ID, a priority (**M**ust / **S**hould / **C**ould) and 
 
 - **C-1** Must use Gnani Prisma (STT) and Timbre (TTS) for speech. The judge and caller brain use the configured LLM (DeepSeek by default, Gemini optional); speech providers are pluggable (Gnani default).
 - **C-2** Built by a multi-agent AI team under an orchestrator in 5 days (Sat 24 – Wed 28 Oct 2026), with Preetham as human owner; see `AGENTS.md`.
-- **C-3** Python 3.11 (not 3.13: `audioop` was removed in 3.13; if you must use 3.13, install `audioop-lts`).
+- **C-3** Python >= 3.11 (`requires-python`; the backend image uses 3.12; not 3.13: `audioop` was removed in 3.13; if you must use 3.13, install `audioop-lts`).
 - **A-1** Agents under test can be reached over WebSocket using the platform's audio protocol (§ API spec) or Pipecat's serializer.
 - **A-2** Gnani API behaviour matches docs; verified on Day 1.
 - **A-3** Dialect clips (≥ 20 per dialect) can be collected from friends/family with consent.
