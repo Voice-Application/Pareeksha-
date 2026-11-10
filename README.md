@@ -22,8 +22,11 @@ Release `v1.0.0` is tagged. Read [Limitations](#limitations) before relying on a
 | **Test my prompt** | Test a prompt with typed conversations before there is a voice bot, and see what a prompt change fixed or broke. |
 | **Documents**, **RAG lab** | Upload documents, generate questions with known answers, and compare retrieval setups on hit rate, hallucinations, latency and cost. |
 | **Integrations**, **DLQ**, **Calibration** | Send scores to HubSpot or a webhook, replay failed events, and measure the judge against human labels. |
+| **Settings** | AI settings (per-project LLM provider, models and key, overriding `.env`), API keys, model pricing, and users. |
 
-The same operations are available from the Python SDK and CLI (`pareeksha run`, `regress`, `audit`, `apply`, `doctor`) and from a GitHub Action that fails a pull request when a regression suite fails.
+An in-app assistant (the chat button on every page) answers questions and can start a prompt test for you.
+
+The same operations are available from the Python SDK and CLI (`pareeksha login`, `apply`, `run`, `regress`, `audit`, `doctor`, `dlq`, `prompt`, `kb` and `rag`; see the [SDK reference](docs/guides/sdk-reference.md)) and from a GitHub Action that fails a pull request when a regression suite fails.
 
 A bundled mock agent (an EMI reminder bot) has five bugs you can switch on with `MOCK_BUGS` (`no_disclosure`, `no_amount_confirm`, `english_to_kannada`, `ignore_interrupt`, `false_waiver`) to watch the judge catch them.
 
@@ -54,6 +57,8 @@ pareeksha run --agent "EMI Reminder Bot" --tags promise_to_pay \
 
 One call takes about two minutes, because Gnani allows one active request per key.
 
+Without `make demo`, start the stack with `docker compose --profile workers up -d --build` (the workers sit behind the `workers` profile) and seed it with `docker compose run --rm api python -m pareeksha.seed`.
+
 ## Configuration
 
 Every setting is in [`.env.example`](.env.example). The ones you are most likely to change:
@@ -68,6 +73,9 @@ Every setting is in [`.env.example`](.env.example). The ones you are most likely
 | `AGENT_ALLOW_PRIVATE_ENDPOINTS` | `true` | Lets agents live on `localhost` or the bundled mock agent. Set `false` when hosting Pareeksha for others. Cloud metadata addresses are always refused. |
 | `RUN_ITEM_STALE_AFTER_S` | `15060` | A call with no progress for this long is ended as an infrastructure error and its slot released. |
 | `SIMULATOR_REPLICAS` | `3` | Use `1` with a single Gnani key. |
+| `API_HOST_PORT`, `WEB_HOST_PORT` | `8000`, `3000` | Host ports for the API and the web app. |
+| `JUDGE_WORKER_ENABLED` | off | Set `1` so the `judge` worker scores finished prompt tests in the background instead of when a page reads them. |
+| `OLLAMA_BASE_URL`, `OLLAMA_PULL` | bundled `ollama` container, `qwen3-embedding:0.6b` | Self-hosted embeddings or prompt-agent models. Start it with `docker compose --profile ollama up -d`. |
 
 Recordings, the speech cache and downloaded models live in the `runtime-data` Docker volume. Containers run as a non-root user.
 
@@ -88,7 +96,7 @@ flowchart LR
     SRC[[Recording sources]] -->|signed webhook| API
     API -->|rows + outbox| PG[(Postgres)]
     PG -->|outbox relay| K[(Kafka)]
-    K <--> W[Workers: planner, simulator, auditor,<br/>evaluator, finalizer, integrations, dialect]
+    K <--> W[Workers: planner, simulator, auditor,<br/>evaluator, finalizer, integrations, dialect,<br/>generator, indexer, judge, retrier, dlq-recorder, reconciler]
     W --> PG
     W <-->|pareeksha-audio-v1 / Pipecat| BOT[[Voice agent under test]]
     W -->|STT, TTS| SP[(Speech provider<br/>Gnani default)]
@@ -96,7 +104,7 @@ flowchart LR
     W -->|scores| CRM[[HubSpot, webhooks]]
 ```
 
-Postgres is the system of record. Events go through a transactional outbox to Kafka. Consumers are idempotent, with retry topics and a dead-letter queue. A reconciler ends calls that failed for good and releases their concurrency slots. Details: [docs/04-system-design.md](docs/04-system-design.md).
+Postgres is the system of record. Events go through a transactional outbox to Kafka. Consumers are idempotent, with retry topics and a dead-letter queue. A reconciler ends calls that failed for good and releases their concurrency slots. The `generator` drafts scenarios for human review, and the `indexer` chunks and embeds documents for the RAG lab. Details: [docs/04-system-design.md](docs/04-system-design.md).
 
 ## Repository layout
 
@@ -139,7 +147,7 @@ CI runs lint, types, the backend and SDK tests, the Postgres migration and end-t
 
 ## Limitations
 
-- **The judge disagrees with human labels too often.** Cohen's kappa against the owner's pass/fail labels on 30 calls is 0.19 (95% CI -0.14 to 0.52), against a 0.6 target, measured with `rubric-2026-10-v1` ([calibration report](proof/EVAL-06/calibration.md)). It most often passes calls where the agent dodged the caller's question. Treat a single score as a signal and read the cited evidence.
+- **The judge disagrees with human labels too often.** The release acceptance check measured Cohen's kappa 0.19 against the owner's pass/fail labels on 30 calls (95% CI -0.14 to 0.52; target 0.6) with `rubric-2026-10-v1` ([calibration report](proof/EVAL-06/calibration.md)); it most often passed calls where the agent dodged the caller's question. The current build judges with `rubric-2026-11-v3`, which reached 0.595 on a 15-call confirmation batch after an owner label correction (0.167 before it): still below the target and the 30-call minimum ([report](proof/EVAL-08/confirm_calibration.md)). Treat a single score as a signal and read the cited evidence.
 - **Calls are slow.** Gnani allows one active request per key, so simulated calls run in real time and one after another; a 12-call run takes tens of minutes.
 - **Speech providers.** Gnani is the only provider used in full evaluated runs. ElevenLabs and Deepgram passed a live smoke test only. Google and Azure have not been run against the live services.
 - **Not built.** LiveKit and Vapi adapters, and Salesforce, Zoho, LeadSquared, Freshdesk, Exotel and Slack connectors ([Guide 7](docs/guides/07-write-a-connector.md) shows how to add one).
