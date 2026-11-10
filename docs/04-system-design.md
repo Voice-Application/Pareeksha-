@@ -4,6 +4,8 @@ Diagrams use Mermaid (GitHub, VS Code, most Markdown viewers render them).
 
 **v0.2:** Kafka event backbone, Next.js web app, connectors (HubSpot, webhook), SDK/CLI/GitHub Action.
 
+**Since v0.2:** DeepSeek is the default LLM (Gemini and OpenAI-compatible selectable; `llm/`), speech providers beyond Gnani (`speech/`), prompt agents tested over text (`agent_llm/`, `simulation/text_runner.py`), quick tests, the RAG lab (knowledge bases, `indexer`), designer, user accounts, per-project settings and pricing.
+
 ---
 
 ## 1. System context
@@ -14,8 +16,8 @@ flowchart LR
     DEV([Developer code / CI]) -->|SDK, CLI, GitHub Action| API
     WEB -->|server-side proxy| API[Pareeksha Platform]
     API <-->|audio over WebSocket / adapters| AUT[[Voice agent under test<br/>own protocol, Pipecat, LiveKit, Vapi]]
-    API -->|STT, TTS| GN[(Gnani Prisma + Timbre)]
-    API -->|caller brain, judge| GM[(Gemini)]
+    API -->|STT, TTS| GN[(Speech providers<br/>Gnani default; Deepgram, ElevenLabs, Azure, Google)]
+    API -->|caller brain, judge, designer| GM[(LLM provider<br/>DeepSeek default; Gemini, OpenAI-compatible, Ollama)]
     SRC[[Call recording sources<br/>telephony / CRM / any system]] -->|signed webhook| API
     API -->|scores, failures, links| CRM[[HubSpot · generic webhook<br/>later: Salesforce, Zoho, Freshdesk, Slack]]
 ```
@@ -37,6 +39,9 @@ flowchart TB
             INT[integrations]
             DIA[dialect]
             GEN[generator]
+            IDX[indexer]
+            REC[reconciler]
+            JDG[judge]
             RET[retrier]
             DLQR[dlq-recorder]
         end
@@ -55,8 +60,8 @@ flowchart TB
     API -->|SSE reads progress topic| K
     SIM <-->|audio| MOCK
     SIM <-->|audio| EXT[[external agent]]
-    workers --> GN[(Gnani)]
-    workers --> GM[(Gemini)]
+    workers --> GN[(Speech providers)]
+    workers --> GM[(LLM provider)]
     INT --> CRM[[HubSpot / webhooks]]
 ```
 
@@ -83,6 +88,7 @@ flowchart LR
     INT --> OWH[[outbound webhook]]
     API -->|dialect.clip.requested × N| DIA[dialect]
     API -->|scenario.generate.requested| GEN[generator]
+    API -->|kb.index.requested| IDX[indexer]
     SIM & AUD & EVA & FIN -.->|progress| SSE[[api SSE → web]]
     SIM & EVA & INT -.->|retryable error| R30[(retry.30s)] -.-> RET[retrier]
     RET -.->|back to target topic| SIM
@@ -117,11 +123,11 @@ sequenceDiagram
     P->>K: call.requested × N (key = run_item_id)
     K->>S: call.requested
     S->>DB: take run slot (active_calls < max)
-    S->>AG: connect via adapter, simulate call (Gnani STT/TTS, Gemini caller, line simulator)
+    S->>AG: connect via adapter, simulate call (speech STT/TTS, LLM caller, line simulator; prompt agents run as text)
     S->>DB: save call, turns, recordings; release slot; processed_events
     S->>K: call.completed, progress
     K->>E: call.completed
-    E->>E: metrics, checks, PII mask, Gemini judge, scoring in code
+    E->>E: metrics, checks, PII mask, LLM judge, scoring in code
     E->>DB: save evaluation; processed_events
     E->>K: evaluation.completed, progress
     K->>F: evaluation.completed
@@ -139,7 +145,7 @@ sequenceDiagram
     participant A as API
     participant K as Kafka
     participant AU as auditor
-    participant G as Gnani batch STT
+    participant G as Batch STT
     participant E as evaluator
     participant I as integrations
     participant H as HubSpot
@@ -149,7 +155,7 @@ sequenceDiagram
     A->>A: dedupe on external_refs(integration, external_id)
     A->>K: audit.requested (via outbox)
     K->>AU: audit.requested
-    AU->>G: transcribe (diarize 2, denoise)
+    AU->>G: transcribe (diarize 2, denoise; configured STT provider)
     AU->>K: call.completed
     K->>E: evaluate (same rubric as simulations)
     E->>K: evaluation.completed
@@ -168,7 +174,7 @@ sequenceDiagram
     participant R as retrier
     participant D as dlq-recorder
     K->>C: message (attempt 1)
-    C--xC: retryable error (e.g. Gnani 503)
+    C--xC: retryable error (e.g. provider 503)
     C->>K: copy → retry.30s (attempt 2, not_before = now+30s); commit offset
     K->>R: retry.30s message
     R->>R: wait until not_before
@@ -211,22 +217,22 @@ Integration delivery: `pending → succeeded | failed | skipped`.
 | Data | Where | Retention |
 |---|---|---|
 | Config, runs, calls, turns, scores, integrations | Postgres | permanent |
-| Events | Kafka | 7 days (progress 1 day) |
+| Events | Kafka | 7 days (progress 1 day, DLQ 30 days) |
 | Outbox rows | Postgres | published rows pruned after 3 days |
-| `processed_events` | Postgres | pruned after 14 days (> Kafka retention) |
-| Audio, raw STT JSON | `DATA_DIR` behind `BlobStore` | `AUDIO_RETENTION_DAYS` (30) |
+| `processed_events`, `dead_letters` | Postgres | not pruned automatically |
+| Audio, raw STT JSON | `DATA_DIR` behind `BlobStore` | kept (no retention job) |
 | Reports | `DATA_DIR/reports` | permanent |
 
 ## 7. Scaling path
 
 | Pressure | v1 (one machine) | Later |
 |---|---|---|
-| More simulated calls | 3 simulator instances, 6 partitions | More instances + partitions; workers on several machines; per-agent rate limits |
+| More simulated calls | 3 simulator instances (`SIMULATOR_REPLICAS`), 6 partitions on work topics | More instances + partitions; workers on several machines; per-agent rate limits |
 | Kafka | 1 broker, RF 1 | 3 brokers / managed Kafka, RF 3 |
 | Real phone path | WebSocket adapters | LiveKit SIP / Exotel trunk adapter (same `call.requested` event) |
 | Live production monitoring | Webhook import after call ends | Streaming audio topic per live call; real-time alerts consumer |
 | Storage | Local disk | S3/MinIO, signed URLs |
-| Multi-tenant | Single project, API keys | Auth, org/workspace, `project_id` already on every table |
+| Multi-tenant | Single project, API keys + user accounts (admin/member) | Org/workspace; `project_id` already on most tables |
 | Event contracts | Pydantic + version field | Schema registry (Avro/Protobuf) |
 
 ## 8. Design trade-offs
