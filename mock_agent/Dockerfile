@@ -8,5 +8,7 @@ RUN --mount=type=secret,id=ca,required=false \
 COPY backend/pareeksha /app/pareeksha
 COPY mock_agent /app/mock_agent
 ENV PYTHONPATH=/app PYTHONUNBUFFERED=1 MOCK_AGENT_TTS_CACHE=/tmp/mock_agent_tts
+RUN useradd --system --uid 10001 --create-home app
+USER app
 EXPOSE 8765
 CMD ["python", "-m", "mock_agent.server"]

@@ -21,6 +21,7 @@ ensure() {
 }
 ensure SECRET_KEY "$(python3 -c 'import base64,os; print(base64.urlsafe_b64encode(os.urandom(32)).decode())')"
 ensure PAREEKSHA_API_KEY "pk_live_$(python3 -c 'import secrets; print(secrets.token_hex(24))')"
+ensure SESSION_SECRET "$(openssl rand -hex 32 2>/dev/null || python3 -c 'import secrets; print(secrets.token_hex(32))')"
 ensure SIMULATOR_REPLICAS 1
 for var in GNANI_API_KEY DEEPSEEK_API_KEY; do
   grep -Eq "^${var}=.+" .env || { echo "ERROR: ${var} is empty in .env; set it and re-run" >&2; exit 1; }

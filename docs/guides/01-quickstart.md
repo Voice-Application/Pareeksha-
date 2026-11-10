@@ -19,18 +19,24 @@ Edit `.env` and set:
 | `DEEPSEEK_API_KEY` | your DeepSeek key (`LLM_PROVIDER=deepseek` is the default) |
 | `SECRET_KEY` | a Fernet key, generate one with the command below |
 | `PAREEKSHA_API_KEY` | the admin API key the seed will create, generate one with the command below |
+| `SESSION_SECRET` | signs web sign-in cookies, 16+ characters, no default (the web app shows "SESSION_SECRET is not set" until you set it); generate one with the command below |
 | `SIMULATOR_REPLICAS` | `1` while you use a single Gnani key (it allows one active request at a time) |
 
 ```bash
 echo "SECRET_KEY=$(openssl rand -base64 32 | tr '+/' '-_')"      # paste into .env
 echo "PAREEKSHA_API_KEY=pk_live_$(openssl rand -hex 24)"         # paste into .env
+echo "SESSION_SECRET=$(openssl rand -hex 32)"                    # paste into .env
 ```
 
-Later lines in `.env` win, so you can also append both lines instead of editing.
+Later lines in `.env` win, so you can also append the lines instead of editing.
 
 **Choosing providers (all in `.env`):**
 - LLM: `LLM_PROVIDER=deepseek` (default; needs `DEEPSEEK_API_KEY`) or `LLM_PROVIDER=gemini` (needs `GEMINI_API_KEY`, `GEMINI_JUDGE_MODEL`, `GEMINI_CALLER_MODEL`).
 - Speech: `STT_PROVIDER` / `TTS_PROVIDER` = `gnani` (default) | `google` | `azure` | `elevenlabs` | `deepgram`. Gnani is the only one used in full evaluated runs. ElevenLabs and Deepgram passed a live smoke test only (`proof/VOICE-07/verified-live.md`); Google and Azure are implemented and unit-tested but have not been run against the real services. Each provider's variables are in `.env.example`.
+
+**Network exposure:** published ports (web, API, Postgres, Kafka, mock agent, Kafka UI) bind to `127.0.0.1` only, so other machines cannot reach them. Set `BIND_HOST=0.0.0.0` in `.env` to expose them deliberately, only behind a firewall or reverse proxy, and change `POSTGRES_PASSWORD` first (and `KAFKA_ADVERTISED_HOST` for remote Kafka clients).
+
+**Runtime data:** recordings, the TTS cache and downloaded models live in the `runtime-data` Docker volume (mounted at `/data`; containers run as a non-root user), not in `./data/runtime`. Existing files in `./data/runtime` are not picked up automatically.
 
 **Port clashes:** if 3000, 5432, 8000, 8765 or 9094 are taken, set `WEB_HOST_PORT`, `POSTGRES_HOST_PORT`, `API_HOST_PORT`, `MOCK_AGENT_HOST_PORT` or `KAFKA_HOST_PORT` in `.env`. Use `COMPOSE_PROJECT_NAME=<name>` to keep a second copy apart.
 

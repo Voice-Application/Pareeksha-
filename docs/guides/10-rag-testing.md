@@ -154,7 +154,7 @@ Over the API, `GET /pricing` returns `{prices, unpriced}` and `PUT /pricing` rep
 
 - The search index is built in memory per run worker. BM25 and dense search are fine up to about 50,000 chunks; beyond that move the search into the database.
 - The CLI's `pareeksha rag run` always tests the active prompt version; use the API's `prompt_version` (or the web form) for another one.
-- Local models download once, on first use, to `FASTEMBED_CACHE_PATH` (default `/data/models`, which is under the `./data/runtime` mount). The default embedding model is about 2.2 GB and the reranker about 0.6 GB, so the first index build or reranked run is slow and needs that disk.
+- Local models download once, on first use, to `FASTEMBED_CACHE_PATH` (default `/data/models`, which is in the `runtime-data` volume). The default embedding model is about 2.2 GB and the reranker about 0.6 GB, so the first index build or reranked run is slow and needs that disk.
 - Gemini embeddings send `taskType` (`RETRIEVAL_QUERY` or `RETRIEVAL_DOCUMENT`) in `embedContentConfig`, as the current API documents.
 - A matrix holds at most four configs. Hosted embedding and reranker calls count against your provider quota.
 - Text only, like Guide 9: retrieval is tested in typed conversations, not voice calls. Hindi and Kannada questions work with the multilingual default model; keyword search (`bm25`) uses an Indic-aware tokenizer but cannot match across languages.

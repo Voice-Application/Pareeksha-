@@ -14,3 +14,9 @@ RUN --mount=type=secret,id=ca,required=false \
     if [ -f /run/secrets/ca ]; then export PIP_CERT=/run/secrets/ca; fi; \
     pip install --no-cache-dir --no-deps /app
 ENV PYTHONPATH=/app PYTHONUNBUFFERED=1
+# Run unprivileged. /data is created here so a fresh named volume mounted on it inherits this ownership.
+RUN useradd --system --uid 10001 --create-home --home-dir /home/app app \
+    && mkdir -p /data/models \
+    && chown -R app:app /data /home/app
+ENV HOME=/home/app
+USER app
