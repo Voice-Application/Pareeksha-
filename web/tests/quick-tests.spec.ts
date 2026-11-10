@@ -110,6 +110,39 @@ test("the result names broken rules in each conversation and marks their line in
   await expect(page).toHaveURL(/#prompt-src-no_balance$/);
 });
 
+test("a rule source that overlaps an earlier one falls back to a plain quote, not a corrupted mark", async ({ page }) => {
+  // "manager approval today" (the second rule's source) overlaps "...manager approval" from the first
+  // rule's source, even though a dropped span sits between them once sorted by position.
+  const prompt = "Never offer a loan discount without manager approval today for Sahay customers.";
+  await mock(page, {
+    [`GET /quick-tests/${ID}`]: () => ({
+      json: result({
+        system_prompt: prompt,
+        prompt_chars: prompt.length,
+        rules: [
+          { id: "no_discount", kind: "forbidden", text: "Offers a discount without approval", source: "offer a loan discount without manager approval", status: "broken", broken: 1, kept: 0, evidence: [] },
+          // Nested inside no_discount's source, so it is dropped before needs_approval is checked — the
+          // span that matters for the overlap check below is no_discount's, not this dropped one.
+          { id: "no_undisclosed", kind: "forbidden", text: "Mentions discount terms", source: "loan discount without", status: "kept", broken: 0, kept: 1, evidence: [] },
+          { id: "needs_approval", kind: "always", text: "Gets timely approval", source: "manager approval today", status: "kept", broken: 0, kept: 1, evidence: [] },
+        ],
+      }),
+    }),
+  });
+  await page.goto(`/test/${ID}`);
+  const rules = page.getByRole("region", { name: "Rules in your prompt" });
+  // The first rule's source is marked and linked.
+  await expect(rules.getByRole("link", { name: "from your prompt: “offer a loan discount without manager approval”" })).toHaveAttribute("href", "#prompt-src-no_discount");
+  // The overlapping second rule falls back to a plain quote instead of its own (corrupting) mark.
+  await expect(rules.getByText("from: “manager approval today”")).toBeVisible();
+  await expect(page.locator("#prompt-src-needs_approval")).toHaveCount(0);
+  // The prompt renders once, uncorrupted: the marked words appear a single time, not duplicated
+  // by a stray second mark starting inside the first.
+  const promptPre = page.locator("#tested-prompt pre");
+  await expect(promptPre).toHaveText(`Never Broken rule source: offer a loan discount without manager approval today for Sahay customers.`);
+  await expect(page.locator("#prompt-src-no_discount")).toContainText("offer a loan discount without manager approval");
+});
+
 test("a rule whose source is not in the prompt keeps a plain quote", async ({ page }) => {
   await mock(page, { [`GET /quick-tests/${ID}`]: () => ({ json: result() }) });
   await page.goto(`/test/${ID}`);

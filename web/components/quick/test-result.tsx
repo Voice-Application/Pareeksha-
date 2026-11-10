@@ -125,7 +125,16 @@ function locateSources(prompt: string, rules: RuleResult[]): SourceSpan[] {
     found.push({ id: r.id, start, end: start + needle.length, broken: r.status === "broken" });
   }
   found.sort((a, b) => a.start - b.start);
-  return found.filter((s, i) => i === 0 || s.start >= found[i - 1].end);
+  // Compare with the last kept span, not the previous sorted one, which may itself have been dropped.
+  const kept: SourceSpan[] = [];
+  let lastEnd = -1;
+  for (const s of found) {
+    if (s.start >= lastEnd) {
+      kept.push(s);
+      lastEnd = s.end;
+    }
+  }
+  return kept;
 }
 
 /** Opens the collapsed prompt so a jump to a highlighted source line lands on visible text. */
