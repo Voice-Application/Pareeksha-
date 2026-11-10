@@ -41,18 +41,21 @@ runs:
   using: composite
   steps:
     - name: Set up Python
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
       with:
         python-version: "3.12"
     - name: Install pareeksha-sdk
       shell: bash
-      run: python -m pip install --quiet "${{ inputs.sdk-package }}"
+      env:
+        INPUT_SDK_PACKAGE: ${{ inputs.sdk-package }}
+      run: python -m pip install --quiet "$INPUT_SDK_PACKAGE"
     - name: Apply config
       shell: bash
       env:
         PAREEKSHA_URL: ${{ inputs.api-url }}
         PAREEKSHA_KEY: ${{ inputs.api-key }}
-      run: pareeksha apply -f "${{ inputs.config }}"
+        INPUT_CONFIG: ${{ inputs.config }}
+      run: pareeksha apply -f "$INPUT_CONFIG"
     - name: Run suite
       shell: bash
       env:
@@ -60,8 +63,11 @@ runs:
         PAREEKSHA_KEY: ${{ inputs.api-key }}
         PAREEKSHA_WEB_URL: ${{ inputs.web-url }}
         FAIL_UNDER: ${{ inputs.fail-under }}
+        INPUT_SUITE: ${{ inputs.suite }}
+        INPUT_CONFIG: ${{ inputs.config }}
+        INPUT_TIMEOUT: ${{ inputs.timeout }}
       run: |
-        args=(run --suite "${{ inputs.suite }}" -f "${{ inputs.config }}" --wait --timeout "${{ inputs.timeout }}")
+        args=(run --suite "$INPUT_SUITE" -f "$INPUT_CONFIG" --wait --timeout "$INPUT_TIMEOUT")
         if [ -n "$FAIL_UNDER" ]; then args+=(--fail-under "$FAIL_UNDER"); fi
         pareeksha "${args[@]}"
     - name: Regression suite
@@ -71,6 +77,8 @@ runs:
         PAREEKSHA_URL: ${{ inputs.api-url }}
         PAREEKSHA_KEY: ${{ inputs.api-key }}
         PAREEKSHA_WEB_URL: ${{ inputs.web-url }}
+        INPUT_CONFIG: ${{ inputs.config }}
+        INPUT_TIMEOUT: ${{ inputs.timeout }}
       run: |
-        agent=$(python -c "import yaml,sys; print(yaml.safe_load(open(sys.argv[1]))['agent']['name'])" "${{ inputs.config }}")
-        pareeksha regress --agent "$agent" --wait --timeout "${{ inputs.timeout }}"
+        agent=$(python -c "import yaml,sys; print(yaml.safe_load(open(sys.argv[1]))['agent']['name'])" "$INPUT_CONFIG")
+        pareeksha regress --agent "$agent" --wait --timeout "$INPUT_TIMEOUT"

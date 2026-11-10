@@ -9,7 +9,7 @@ Target: first evaluated call in under 20 minutes. Needs Docker (Compose v2), Pyt
 
 ```bash
 git clone https://github.com/voice-application/pareeksha- pareeksha && cd pareeksha
-cp .env.example .env     # set GNANI_API_KEY, DEEPSEEK_API_KEY, SIMULATOR_REPLICAS=1; append SECRET_KEY and PAREEKSHA_API_KEY (see the guide)
+cp .env.example .env     # set GNANI_API_KEY, DEEPSEEK_API_KEY, SIMULATOR_REPLICAS=1; append SECRET_KEY, PAREEKSHA_API_KEY and SESSION_SECRET (see the guide)
 docker compose --profile workers up -d --build
 docker compose run --rm api python -m pareeksha.seed      # personas, noise profiles, rubric, mock EMI agent, API key, precomputed prompt/RAG demo
 pip install ./sdk/python

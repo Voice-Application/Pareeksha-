@@ -17,12 +17,15 @@ concurrency:
   group: pareeksha-regression
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
   suite:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
 
       - name: Configure the stack
         env:
@@ -38,6 +41,7 @@ jobs:
             echo "DEEPSEEK_API_KEY=$DEEPSEEK_API_KEY"
             echo "SECRET_KEY=$(python3 -c 'import base64,os; print(base64.urlsafe_b64encode(os.urandom(32)).decode())')"
             echo "PAREEKSHA_API_KEY=pk_live_$(python3 -c 'import secrets; print(secrets.token_hex(24))')"
+            echo "SESSION_SECRET=$(python3 -c 'import secrets; print(secrets.token_hex(32))')"
             echo "MOCK_BUGS=$bugs"
             echo "SIMULATOR_REPLICAS=1"
           } >> .env
