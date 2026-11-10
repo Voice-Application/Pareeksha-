@@ -7,7 +7,17 @@ name: kafka-suite
 #   backend/tests/integration  INFRA-02 framework tests (including the real 30 s / 5 min delays)
 on:
   push:
+    branches: [main]
+    paths-ignore: ["**/*.md", "docs/**", "proof/**", "labelling/**"]
   pull_request:
+    paths-ignore: ["**/*.md", "docs/**", "proof/**", "labelling/**"]
+  workflow_dispatch:
+
+# A new push to the same PR or branch cancels the run it supersedes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 
 permissions:
   contents: read

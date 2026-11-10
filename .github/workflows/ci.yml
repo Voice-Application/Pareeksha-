@@ -4,7 +4,17 @@ name: ci
 # acceptance (Gnani, DeepSeek, HubSpot) is `make verify`, run by a person with keys, never in this workflow.
 on:
   push:
+    branches: [main]
+    paths-ignore: ["**/*.md", "docs/**", "proof/**", "labelling/**"]
   pull_request:
+    paths-ignore: ["**/*.md", "docs/**", "proof/**", "labelling/**"]
+  workflow_dispatch:
+
+# A new push to the same PR or branch cancels the run it supersedes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 
 permissions:
   contents: read
