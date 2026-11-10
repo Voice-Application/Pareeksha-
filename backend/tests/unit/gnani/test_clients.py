@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import io
+import os
 import struct
 import wave
 from pathlib import Path
@@ -325,3 +326,65 @@ def test_retryable_failures_back_off_with_jitter_within_a_time_budget(
 def test_broken_pipe_is_retryable() -> None:
     assert is_retryable(requests.exceptions.ChunkedEncodingError("Connection broken"))
     assert is_retryable(BrokenPipeError(32, "Broken pipe"))
+
+
+def test_cache_write_is_atomic_and_concurrent_writers_leave_a_valid_file(tmp_path: Path) -> None:
+    import threading
+
+    path = tmp_path / "sub" / "k.wav"
+    blobs = [make_wav(1.0 + i) for i in range(8)]
+    errors: list[BaseException] = []
+
+    def write(b: bytes) -> None:
+        try:
+            clients._write_atomic(path, b)
+        except BaseException as exc:  # pragma: no cover
+            errors.append(exc)
+
+    threads = [threading.Thread(target=write, args=(b,)) for b in blobs]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    assert not errors
+    assert path.read_bytes() in blobs
+    assert [p.name for p in path.parent.iterdir()] == ["k.wav"]
+
+
+def test_failed_cache_write_leaves_no_final_or_temp_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def boom(*a: Any, **kw: Any) -> None:
+        raise OSError("killed")
+
+    monkeypatch.setattr(os, "replace", boom)
+    path = tmp_path / "k.wav"
+    with pytest.raises(OSError):
+        clients._write_atomic(path, make_wav())
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_failed_cache_write_keeps_existing_entry(tmp_path: Path) -> None:
+    path = tmp_path / "k.wav"
+    good = make_wav()
+    path.write_bytes(good)
+
+    class Explodes:
+        def __len__(self) -> int:
+            raise RuntimeError("mid-write")
+
+    with pytest.raises(TypeError):
+        clients._write_atomic(path, Explodes())  # type: ignore[arg-type]
+    assert path.read_bytes() == good
+    assert [p.name for p in tmp_path.iterdir()] == ["k.wav"]
+
+
+def test_existing_complete_cache_entry_is_served(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(clients, "GnaniTTSClient", FakeTTS)
+    key = cache_key("timbre-v3.0", "V", "hi-IN", 1.0, 16000, "linear_pcm", "hey")
+    (tmp_path / f"{key}.wav").write_bytes(make_wav(2.0))
+    res = GnaniSpeech("k", cache_dir=tmp_path, retry_delay=0).synthesize("hey", "V", "hi-IN")
+    assert res.cached and res.seconds == pytest.approx(2.0)
+    assert FakeTTS.calls == []

@@ -10,7 +10,9 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import io
+import os
 import random
+import tempfile
 import time
 import wave
 from collections.abc import Callable, Iterable
@@ -123,6 +125,20 @@ def cache_key(
 ) -> str:
     raw = "|".join([model, voice, language, f"{speed:.3f}", str(rate), encoding, text])
     return hashlib.sha256(raw.encode()).hexdigest()
+
+
+def _write_atomic(path: Path, data: bytes) -> None:
+    """Write via a unique temp file and ``os.replace`` so readers never see a partial entry."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "wb") as f:
+            f.write(data)
+            f.flush()
+        os.replace(tmp, path)
+    except BaseException:
+        Path(tmp).unlink(missing_ok=True)
+        raise
 
 
 def is_retryable(exc: BaseException) -> bool:
@@ -246,8 +262,7 @@ class GnaniSpeech:
             )
         )
         if path is not None:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_bytes(audio)
+            _write_atomic(path, audio)
         return TTSResult(audio, sample_rate, secs, False)
 
     # -- STT REST --------------------------------------------------------
