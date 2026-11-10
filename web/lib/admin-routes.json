@@ -1,0 +1,24 @@
+{
+  "comment": "Backend routes that need an admin-scoped API key (AdminKey): METHOD and path below /api/v1, {name} for a path parameter. backend/tests/contract/test_web_admin_routes.py keeps this in sync with the OpenAPI.",
+  "routes": [
+    ["GET", "/api-keys"],
+    ["POST", "/api-keys"],
+    ["DELETE", "/api-keys/{api_key_id}"],
+    ["GET", "/auth/status"],
+    ["POST", "/auth/bootstrap"],
+    ["POST", "/auth/login"],
+    ["POST", "/dlq/{dead_letter_id}/replay"],
+    ["POST", "/dlq/{dead_letter_id}/discard"],
+    ["POST", "/integrations"],
+    ["PATCH", "/integrations/{integration_id}"],
+    ["DELETE", "/integrations/{integration_id}"],
+    ["POST", "/integrations/{integration_id}/test"],
+    ["POST", "/integrations/{integration_id}/deliveries/{delivery_id}/redeliver"],
+    ["PUT", "/settings/llm"],
+    ["DELETE", "/settings/llm"],
+    ["POST", "/settings/llm/test"],
+    ["GET", "/users"],
+    ["POST", "/users"],
+    ["PATCH", "/users/{user_id}"]
+  ]
+}

@@ -19,6 +19,7 @@ import { CircleCheck, CircleX, Clock, Minus, Plug } from "lucide-react";
 import { CodeBlock } from "@/components/ops/code-block";
 import { JsonSchemaForm } from "./json-schema-form";
 import { Health } from "./integrations-page";
+import { useIsAdmin } from "@/components/layout/theme-toggle";
 
 type Delivery = components["schemas"]["DeliveryOut"];
 
@@ -30,6 +31,7 @@ function DeliveryStatus({ s }: { s: Delivery["status"] }) {
 function Deliveries({ id }: { id: string }) {
   const { toast } = useToast();
   const qc = useQueryClient();
+  const isAdmin = useIsAdmin();
   const [status, setStatus] = useState("");
   const [open, setOpen] = useState<Delivery | null>(null);
   const [confirm, setConfirm] = useState<Delivery | null>(null);
@@ -55,7 +57,7 @@ function Deliveries({ id }: { id: string }) {
       <div className="border-b border-border p-3"><FilterSelect label="Status" value={status} onChange={setStatus} options={[{ value: "", label: "All statuses" }, ...["succeeded", "failed", "skipped", "pending"].map((s) => ({ value: s, label: s }))]} /></div>
       {list.isPending ? <TableSkeleton rows={4} /> : rows.length === 0 ? <EmptyState icon={Plug} title="No deliveries yet" body="Deliveries appear here when a matching event is sent or received." /> : (
         <>
-          <DataTable caption="Deliveries" columns={columns} rows={rows} rowKey={(d) => d.id} sort={null} onSort={() => undefined} actions={(d) => (d.status === "failed" ? <Button className="h-6 px-2" onClick={() => setConfirm(d)}>Redeliver</Button> : null)} />
+          <DataTable caption="Deliveries" columns={columns} rows={rows} rowKey={(d) => d.id} sort={null} onSort={() => undefined} actions={(d) => (isAdmin && d.status === "failed" ? <Button className="h-6 px-2" onClick={() => setConfirm(d)}>Redeliver</Button> : null)} />
           <LoadMore hasMore={!!list.hasNextPage} loading={list.isFetchingNextPage} onClick={() => void list.fetchNextPage()} shown={rows.length} />
         </>
       )}
@@ -75,6 +77,7 @@ function Deliveries({ id }: { id: string }) {
 export function IntegrationDetail({ id }: { id: string }) {
   const router = useRouter();
   const qc = useQueryClient();
+  const isAdmin = useIsAdmin();
   const { toast } = useToast();
   const [tab, setTab] = useState<"settings" | "deliveries">("settings");
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -119,10 +122,10 @@ export function IntegrationDetail({ id }: { id: string }) {
               {info && <JsonSchemaForm schema={info.config_schema} values={config ?? (i.config as Record<string, unknown>)} onChange={setConfig} />}
               {info && secretKeys.length > 0 && <JsonSchemaForm schema={info.secrets_schema} values={secrets} onChange={setSecrets} secret setKeys={i.secrets_set ? secretKeys : []} />}
               {i.inbound_url && <div><p className="mb-1 text-sm font-medium">Inbound URL</p><code className="mono block break-all rounded-sm bg-sunken p-2 text-xs">{i.inbound_url}</code></div>}
-              <div><Button variant="primary" loading={save.isPending} onClick={() => save.mutate()}>Save</Button></div>
+              {isAdmin && <div><Button variant="primary" loading={save.isPending} onClick={() => save.mutate()}>Save</Button></div>}
             </div>
           </Panel>
-          <div className="flex flex-col gap-6">
+          {isAdmin && <div className="flex flex-col gap-6">
             <Panel title="Test connection">
               {test.isError && <Strip tone="error">{isNotImplemented(test.error) ? "Testing is not available in this build yet." : test.error instanceof ApiError ? test.error.userMessage() : "The request failed."}</Strip>}
               {test.data && <Strip tone={test.data.ok ? "warn" : "error"}>{test.data.ok ? "Connected. " : "Failed. "}{test.data.detail}</Strip>}
@@ -132,7 +135,7 @@ export function IntegrationDetail({ id }: { id: string }) {
               <p className="mb-3 text-sm text-muted">Deleting keeps past deliveries for audit.</p>
               <Button variant="destructive" onClick={() => setConfirmDelete(true)}>Delete integration</Button>
             </Panel>
-          </div>
+          </div>}
         </div>
       )}
       <ConfirmDialog open={confirmDelete} onClose={() => setConfirmDelete(false)} title="Delete integration" body={`Delete "${i.name}"? Deliveries are kept for audit.`} confirmLabel="Delete" busy={del.isPending} onConfirm={() => del.mutate()} />

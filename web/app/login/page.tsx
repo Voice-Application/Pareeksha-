@@ -17,7 +17,7 @@ const ERRORS: Record<string, string> = {
   locked: "Too many failed attempts. Try again in ten minutes.",
   disabled: "This account is disabled. Ask an admin to turn it back on.",
   down: "The API did not answer. Check that it is running, then try again.",
-  config: "SESSION_SECRET is not set on the server (16 characters or more).",
+  config: "SESSION_SECRET is not set on the server (16 characters or more, not the published default).",
   mismatch: "The two passwords are not the same.",
   short: "Use at least 10 characters for the password.",
   invalid: "Check the email address and password length (10 to 200 characters).",

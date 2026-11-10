@@ -6,7 +6,7 @@ import { access } from "node:fs/promises";
  * The main test server on :3100 runs with AUTH_DISABLED=1, where every visitor is an admin; specs that need
  * the role to matter run against one of these instead. Each spec file uses its own port.
  */
-export function signInEnabledServer(port: number, secret: string) {
+export function signInEnabledServer(port: number, secret: string, env: Record<string, string> = {}) {
   const url = `http://127.0.0.1:${port}`;
   let server: ChildProcess | undefined;
 
@@ -30,7 +30,7 @@ export function signInEnabledServer(port: number, secret: string) {
     let output = "";
     let startupError: Error | undefined;
     server = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "-p", String(port), "-H", "127.0.0.1"], {
-      env: { ...process.env, AUTH_DISABLED: "0", SESSION_SECRET: secret },
+      env: { ...process.env, ...env, AUTH_DISABLED: "0", SESSION_SECRET: secret },
       stdio: ["ignore", "pipe", "pipe"],
     });
     const child = server;

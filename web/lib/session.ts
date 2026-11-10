@@ -19,10 +19,13 @@ const dec = new TextDecoder();
 const toB64u = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes)).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
 const fromB64u = (s: string) => Uint8Array.from(atob(s.replaceAll("-", "+").replaceAll("_", "/")), (c) => c.charCodeAt(0));
 
-/** SESSION_SECRET, or null when it is missing or too short to be a secret. */
+/** Published defaults (the old docker-compose fallback): anyone could sign an admin cookie with these. */
+export const KNOWN_DEFAULT_SECRETS = ["pareeksha-dev-session-secret-change-me"];
+
+/** SESSION_SECRET, or null when it is missing, too short to be a secret, or a published default. */
 export function sessionSecret(): string | null {
   const s = process.env.SESSION_SECRET;
-  return s && s.length >= 16 ? s : null;
+  return s && s.length >= 16 && !KNOWN_DEFAULT_SECRETS.includes(s) ? s : null;
 }
 
 async function hmac(secret: string, message: string): Promise<string> {
@@ -59,8 +62,21 @@ export async function verifySessionToken(secret: string, token: string | undefin
   }
 }
 
-/** Only same-site paths are allowed as a post-login destination. */
+const DUMMY_ORIGIN = "http://x";
+
+/**
+ * Only same-site paths are allowed as a post-login destination. URL parsing drops tab/CR/LF and reads `\`
+ * as `/`, so `/\t/evil.example` would become `//evil.example`: such characters are refused outright, and
+ * the value must still resolve to a local path against a fixed origin.
+ */
 export function safeNext(next: string | null | undefined): string {
-  if (!next || !next.startsWith("/") || next.startsWith("//") || next.startsWith("/\\") || next.startsWith("/login")) return "/";
-  return next;
+  if (!next || !next.startsWith("/") || /[\u0000-\u001f\u007f-\u009f\\]/.test(next)) return "/";
+  let url: URL;
+  try {
+    url = new URL(next, DUMMY_ORIGIN);
+  } catch {
+    return "/";
+  }
+  if (url.origin !== DUMMY_ORIGIN || url.pathname.startsWith("//") || url.pathname.startsWith("/login")) return "/";
+  return url.pathname + url.search + url.hash;
 }

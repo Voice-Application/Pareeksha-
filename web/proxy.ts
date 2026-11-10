@@ -16,11 +16,12 @@ export async function proxy(req: NextRequest) {
   if (OPEN_PATHS.includes(pathname)) return NextResponse.next();
 
   const secret = sessionSecret();
-  if (!secret) return new NextResponse("SESSION_SECRET is not set (16 characters or more). Sign-in is unavailable.", { status: 503 });
+  if (!secret) return new NextResponse("SESSION_SECRET is not set (16 characters or more, not the published default). Sign-in is unavailable.", { status: 503 });
 
   const user = await verifySessionToken(secret, req.cookies.get(SESSION_COOKIE)?.value);
   if (user) {
-    if (pathname.startsWith("/settings/users") && user.role !== "admin") return NextResponse.redirect(new URL("/", req.url), 303);
+    // Every API route behind these pages needs the admin scope.
+    if ((pathname.startsWith("/settings/users") || pathname.startsWith("/settings/api-keys")) && user.role !== "admin") return NextResponse.redirect(new URL("/", req.url), 303);
     return NextResponse.next();
   }
 

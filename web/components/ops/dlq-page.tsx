@@ -17,6 +17,7 @@ import { FilterSelect } from "@/components/ui/field";
 import { ConfirmDialog, Sheet } from "@/components/ui/overlay";
 import { useToast } from "@/components/ui/toast";
 import { CodeBlock } from "./code-block";
+import { useIsAdmin } from "@/components/layout/theme-toggle";
 
 type DL = components["schemas"]["DeadLetterOut"];
 
@@ -33,6 +34,7 @@ function DlStatus({ s }: { s: DL["status"] }) {
 const SORT: Sorters<DL> = { failed: (d) => d.failed_at, topic: (d) => d.original_topic, group: (d) => d.consumer_group, attempts: (d) => d.attempts };
 
 export function DlqPage() {
+  const isAdmin = useIsAdmin();
   const url = useUrlState();
   const qc = useQueryClient();
   const { toast } = useToast();
@@ -86,9 +88,11 @@ export function DlqPage() {
         title={title}
         description="Events that failed three times land here. Replaying re-publishes the event from the start; discarding drops it."
         actions={
-          <Button disabled={status !== "open" || openRows.length === 0} onClick={() => setConfirm("all")}>
-            Replay all open
-          </Button>
+          isAdmin && (
+            <Button disabled={status !== "open" || openRows.length === 0} onClick={() => setConfirm("all")}>
+              Replay all open
+            </Button>
+          )
         }
       />
       <Panel bodyClassName="p-0">
@@ -124,8 +128,8 @@ export function DlqPage() {
           open && (
             <div className="flex flex-wrap justify-end gap-2">
               <Button onClick={() => void navigator.clipboard?.writeText(open.event_id)}>Copy event id</Button>
-              <Button variant="destructive" disabled={open.status !== "open"} onClick={() => setConfirm("discard")}>Discard</Button>
-              <Button variant="primary" disabled={open.status !== "open"} loading={act.isPending && act.variables?.kind === "replay"} onClick={() => act.mutate({ d: open, kind: "replay" })}>Replay</Button>
+              {isAdmin && <Button variant="destructive" disabled={open.status !== "open"} onClick={() => setConfirm("discard")}>Discard</Button>}
+              {isAdmin && <Button variant="primary" disabled={open.status !== "open"} loading={act.isPending && act.variables?.kind === "replay"} onClick={() => act.mutate({ d: open, kind: "replay" })}>Replay</Button>}
             </div>
           )
         }
