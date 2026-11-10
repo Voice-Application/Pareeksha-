@@ -18,6 +18,11 @@ A duplicate delivery finds its ``processed_events`` row and re-produces the same
 ``call.completed`` without calling the agent again. A call that ends ``infra_error`` /
 ``connect_failed`` is saved with status ``error``, the item becomes ``error`` and nothing is
 sent to the evaluator (there is nothing to judge).
+
+A failure that sends the message to the DLQ (permanent, or the last attempt) gives the item up
+first (``store.give_up_item``: ``error``, an ``infra_error`` call, the slot released), so the run
+can finish; a retried failure keeps the slot for the redelivery to resume. A worker whose item
+was given up while its call ran (by the reconciler) discards its result.
 """
 
 from __future__ import annotations
@@ -30,11 +35,20 @@ from typing import Any
 
 from pareeksha.agent_llm import build_chat_provider
 from pareeksha.agent_llm.url_guard import allow_private_urls, check_base_url
-from pareeksha.events.consumer import Ctx, Outgoing, PermanentError, Throttled, consumer, run_worker
+from pareeksha.events.consumer import (
+    Ctx,
+    Disposition,
+    Outgoing,
+    PermanentError,
+    Throttled,
+    classify,
+    consumer,
+    run_worker,
+)
 from pareeksha.events.runtime import Database
 from pareeksha.events.schemas import CallCompleted, CallRequested, Envelope
 from pareeksha.events.settings import EventSettings
-from pareeksha.events.topics import ConsumerGroups, Topics
+from pareeksha.events.topics import MAX_ATTEMPTS, ConsumerGroups, Topics
 from pareeksha.llm.caller import CallerBrain
 from pareeksha.llm.factory import build_client
 from pareeksha.llm.project_settings import ProjectLLMClients
@@ -302,9 +316,29 @@ async def on_call_requested(env: Envelope[CallRequested], ctx: Ctx) -> Sequence[
         log.info("skipping run item %s (cancelled, finished or unknown)", req.run_item_id)
         return []
     try:
+        # a savepoint: if save_call fails, its row locks are gone before _give_up takes them
+        async with ctx.tx.transaction():
+            return await _simulate(req, ctx, conn)
+    except Exception as exc:
+        # mirrors ConsumerRunner._route_failure: this delivery is the last one
+        if classify(exc) is Disposition.PERMANENT or ctx.attempt >= MAX_ATTEMPTS:
+            await _give_up(conn, req, exc)
+        raise
+
+
+async def _give_up(conn: Any, req: CallRequested, exc: BaseException) -> None:
+    """The message is going to the DLQ: end the item and free its slot now (best effort; the
+    reconciler's dead-letter pass retries what fails here)."""
+    try:
+        await store.give_up_item(conn, req.run_item_id, f"infra: {type(exc).__name__}: {exc}")
+    except Exception:
+        log.exception("could not give up run item %s", req.run_item_id)
+
+
+async def _simulate(req: CallRequested, ctx: Ctx, conn: Any) -> Sequence[Outgoing]:
+    try:
         spec, project_id = await store.read_spec(conn, req)
     except store.SpecNotFoundError as exc:
-        await store.fail_item(conn, req.run_id, req.run_item_id, str(exc))
         raise PermanentError(str(exc)) from exc
     await store.open_call(conn, req=req, project_id=project_id, spec=spec)
     await store.mark_in_progress(conn, req.run_item_id)
@@ -319,9 +353,14 @@ async def on_call_requested(env: Envelope[CallRequested], ctx: Ctx) -> Sequence[
         keys = {name: f"{prefix}/{name}.wav" for name in audio}
         for name, data in audio.items():
             await _blob_store().put(keys[name], data)
-    await store.save_call(
+    saved = await store.save_call(
         ctx.tx, req=req, project_id=project_id, spec=spec, result=result, recording_keys=keys
     )
+    if not saved:
+        log.warning(
+            "run item %s was given up while its call ran; result discarded", req.run_item_id
+        )
+        return []
     if result.end_reason in ("infra_error", "connect_failed"):
         return []
     return [_completed(req, spec, result)]

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import os
 import uuid
+from datetime import datetime
 from typing import Any
 
 import psycopg
@@ -19,10 +20,11 @@ from psycopg.types.json import Jsonb
 from pareeksha.adapters.base import AgentTarget
 from pareeksha.audio.profiles import LineProfile
 from pareeksha.evaluation.pii import mask_pii
-from pareeksha.events.schemas import CallRequested
+from pareeksha.events.outbox import enqueue
+from pareeksha.events.schemas import CallRequested, ProgressEvent, make_envelope
 from pareeksha.integrations.crypto import SecretBox, SecretDecryptError
 from pareeksha.rag.retriever import LoadedIndex, build_loaded_index, get_or_load
-from pareeksha.runs.slots import release_slot
+from pareeksha.runs.slots import ACTIVE_ITEM_STATUSES, release_slot
 from pareeksha.schemas.personas import PersonaCreate
 from pareeksha.schemas.prompts import PromptVersionOut
 from pareeksha.schemas.rag import RagConfig, index_key
@@ -285,15 +287,97 @@ async def mark_in_progress(conn: Conn, run_item_id: uuid.UUID) -> None:
     )
 
 
-async def fail_item(conn: Conn, run_id: uuid.UUID, run_item_id: uuid.UUID, message: str) -> None:
-    """Give up on an item that cannot be simulated: ``error`` + the slot it took, atomically."""
+#: Where ``give_up_item`` moves an item from each status it accepts. Before or during the call
+#: the failure is the platform's (``error``, with an ``infra_error`` call); after it, the call
+#: exists and only its evaluation was lost (``judge_error``).
+_GIVE_UP_TO = {
+    "queued": "error",
+    "connecting": "error",
+    "in_progress": "error",
+    "completed": "judge_error",
+    "evaluating": "judge_error",
+}
+#: Statuses that hold one of the run's concurrency slots (``runs.slots.ACTIVE_ITEM_STATUSES``).
+SLOT_STATUSES = frozenset(ACTIVE_ITEM_STATUSES)
+
+
+async def give_up_item(
+    conn: Conn,
+    run_item_id: uuid.UUID,
+    reason: str,
+    *,
+    statuses: frozenset[str] = SLOT_STATUSES,
+    stale_before: datetime | None = None,
+) -> str | None:
+    """End a run item nothing will move on any more; returns its new status, or ``None``.
+
+    One transaction on ``conn`` (autocommit, or a savepoint inside an open transaction). Locks the
+    run, then the item (the order of ``start_item`` and ``save_call``), and only acts while the
+    item is still in one of ``statuses``, so of two racing callers (the simulator, the
+    reconciler, a late worker saving its call) exactly one wins and the slot is released once.
+    An ``error`` item gets an ``infra_error`` call so it counts as an infrastructure failure,
+    not as an agent failure. With ``stale_before``, an item whose call started at or after it is
+    left alone (it was resumed or opened since the caller looked).
+    """
+    reason = reason[:500]
     async with conn.transaction():
-        await conn.execute(
-            "UPDATE run_items SET status = 'error', last_error = %s "
-            "WHERE id = %s AND status IN ('connecting', 'in_progress')",
-            (message[:500], run_item_id),
+        cur = await conn.execute("SELECT run_id FROM run_items WHERE id = %s", (run_item_id,))
+        found = await cur.fetchone()
+        if found is None:
+            return None
+        run_id = found[0]
+        cur = await conn.execute(
+            "SELECT project_id, agent_id FROM test_runs WHERE id = %s FOR UPDATE", (run_id,)
         )
-        await release_slot(conn, run_id)
+        run = await cur.fetchone()
+        cur = await conn.execute(
+            "SELECT status FROM run_items WHERE id = %s FOR UPDATE", (run_item_id,)
+        )
+        item = await cur.fetchone()
+        if run is None or item is None or item[0] not in statuses or item[0] not in _GIVE_UP_TO:
+            return None
+        if stale_before is not None:
+            cur = await conn.execute(
+                "SELECT started_at FROM calls WHERE run_item_id = %s", (run_item_id,)
+            )
+            call = await cur.fetchone()
+            if call is not None and call[0] >= stale_before:
+                return None
+        new_status = _GIVE_UP_TO[item[0]]
+        await conn.execute(
+            "UPDATE run_items SET status = %s, last_error = %s WHERE id = %s",
+            (new_status, reason, run_item_id),
+        )
+        if new_status == "error":
+            # the row a late worker's open_call would create is created here instead
+            await conn.execute(
+                "INSERT INTO calls (id, project_id, source, status, agent_id, run_item_id, "
+                "end_reason, error, metadata, ended_at) "
+                "VALUES (%s, %s, 'simulation', 'error', %s, %s, 'infra_error', %s, %s, now()) "
+                "ON CONFLICT (id) DO UPDATE SET status = 'error', end_reason = 'infra_error', "
+                "error = EXCLUDED.error, ended_at = now() WHERE calls.status = 'in_progress'",
+                (
+                    call_id_for(run_item_id),
+                    run[0],
+                    run[1],
+                    run_item_id,
+                    reason,
+                    Jsonb({"run_id": str(run_id)}),
+                ),
+            )
+        if item[0] in SLOT_STATUSES:
+            await release_slot(conn, run_id)
+        await enqueue(
+            conn,
+            make_envelope(
+                ProgressEvent(
+                    kind="item.status", run_id=run_id, run_item_id=run_item_id, status=new_status
+                ),
+                producer="run-items",
+                correlation_id=str(run_id),
+            ),
+        )
+        return new_status
 
 
 async def open_call(
@@ -339,10 +423,24 @@ async def save_call(
     spec: CallSpec,
     result: CallResult,
     recording_keys: dict[str, str] | None,
-) -> None:
-    """Write the finished call, its turns, tool calls and usage; finish the item; free the slot."""
+) -> bool:
+    """Write the finished call, its turns, tool calls and usage; finish the item; free the slot.
+
+    Returns ``False``, writing nothing, when the item no longer holds its slot: it was given up on
+    (``give_up_item``) while this call ran, so the late result is discarded and the slot, already
+    released, is not released again.
+    """
     call_id = spec.call_id
     status = "error" if result.end_reason in ("infra_error", "connect_failed") else "completed"
+    # run, then item: the lock order of start_item and give_up_item
+    await tx.execute("SELECT 1 FROM test_runs WHERE id = %s FOR UPDATE", (req.run_id,))
+    cur = await tx.execute(
+        "UPDATE run_items SET status = %s, last_error = %s "
+        "WHERE id = %s AND status IN ('connecting', 'in_progress') RETURNING id",
+        ("error" if status == "error" else "completed", result.error, req.run_item_id),
+    )
+    if await cur.fetchone() is None:
+        return False
     await tx.execute(
         "UPDATE calls SET status = %s, metadata = metadata || %s, event_log = %s, "
         "end_reason = %s, duration_ms = %s, recording_caller = %s, recording_agent = %s, "
@@ -438,9 +536,5 @@ async def save_call(
                 if u.kind in ("stt", "tts")
             ],
         )
-    await tx.execute(
-        "UPDATE run_items SET status = %s, last_error = %s "
-        "WHERE id = %s AND status IN ('connecting', 'in_progress')",
-        ("error" if status == "error" else "completed", result.error, req.run_item_id),
-    )
     await release_slot(tx, req.run_id)
+    return True
