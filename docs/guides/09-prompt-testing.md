@@ -2,7 +2,13 @@
 
 Goal: test a system prompt, a model and its tools as typed conversations, with no voice bot and no audio. You define a **prompt agent**, push a version, run scenarios against it, read the tool-call checks, and compare two versions.
 
-**Prerequisite:** the stack from [Guide 1](01-quickstart.md), the CLI (`pip install -e sdk/python`) with `PAREEKSHA_API_KEY` set, and an API key for the model provider you want to test. `SECRET_KEY` must be set on the API (it encrypts the provider key).
+**Prerequisite:** the stack from [Guide 1](01-quickstart.md), the CLI (`pip install -e sdk/python`) logged in (`pareeksha login`, or `PAREEKSHA_URL` and `PAREEKSHA_KEY`; the `curl` examples below read the same key from a shell variable `PAREEKSHA_API_KEY`), and an API key for the model provider you want to test. `SECRET_KEY` must be set on the API (it encrypts the provider key).
+
+## Fastest path: "Test my prompt"
+
+The web app's **Test my prompt** page (`/test`) does steps 1 to 6 for you. Paste a system prompt, optionally some test customer details and a knowledge base (this makes it a RAG test, see [Guide 10](10-rag-testing.md)). Pareeksha finds the "must never" / "must always" rules in the prompt, writes 3 to 12 conversations for them (`scenario_count`, default 8), runs them, and reports per rule whether it was kept or broken, with the conversation turn as evidence. The AI key comes from **Settings, LLM**. Over the auto-run cost limit (`QUICK_TEST_COST_LIMIT`, default ₹50) the API answers `402 confirm_cost` and you confirm the estimate. **Improve** rewrites the prompt from the results (`POST /quick-tests/{id}/improve`) and **Re-test** runs the rewrite on the same conversations (`POST /quick-tests/{id}/retest`), which shows as v1 to v2 in Run compare. Rule checks run lazily as the page is read; set `JUDGE_WORKER_ENABLED=1` and start the optional `judge` worker (profile `workers`) to have them land without anyone watching. API: `POST /quick-tests`, `GET /quick-tests`, `GET /quick-tests/{id}`.
+
+The sections below are the step-by-step CLI/API route.
 
 ## 1. Create a prompt agent
 
@@ -29,7 +35,7 @@ Without the env var the CLI asks for the key with a hidden prompt. The key is wr
 
 ```bash
 pareeksha prompt push --agent refund-bot --file prompt.md \
-  --provider openai --model gpt-4o-mini --tools tools.json --note "first draft"
+  --provider openai --model gpt-4o-mini --tools tools.json --note "first draft"   # optional: --temperature, --base-url
 ```
 
 `prompt.md` is your system prompt as plain text. Every push creates an immutable version and makes it active. Pushing the same content again changes nothing. `pareeksha prompt versions --agent refund-bot` lists them, `pareeksha prompt activate --agent refund-bot 1` switches back. A run pins the version that was active when it was created, so later pushes never change a run in progress or a finished one.
@@ -133,6 +139,6 @@ Push the new prompt, run the same scenarios, then compare the two runs in the we
 - Text only. Call (voice) mode for prompt agents is not available yet; the voice adapters are unchanged.
 - Tools are mocked. Pareeksha does not call your real tool backends.
 - Tool arguments match by exact value (subset, numbers by value). Semantic matching comes later.
-- No retrieval (RAG) testing yet; it comes later.
+- Retrieval (RAG) testing is a separate flow: see [Guide 10](10-rag-testing.md).
 - Azure OpenAI and Bedrock are not supported yet. Token usage of the model under test is recorded as call events, not in cost reports.
 - A `base_url` that points at a private, loopback or link-local address is rejected, so a tenant cannot make the API probe your network. The exception is the Ollama server in `OLLAMA_BASE_URL` (provider `ollama` uses it when no `--base-url` is given). For any other local endpoint, set `AGENT_LLM_ALLOW_PRIVATE_URLS=true` on the API and the simulator worker. Leave it off on shared deployments.
