@@ -189,12 +189,3 @@ class CallClock:
 
     def now_ms(self) -> int:
         return int((time.monotonic() - self._t0) * 1000)
-
-    def now_s(self) -> float:
-        return time.monotonic() - self._t0
-
-    def to_monotonic(self, t_ms: float) -> float:
-        return self._t0 + t_ms / 1000
-
-    def since_monotonic(self, stamp: float) -> int:
-        return int((stamp - self._t0) * 1000)

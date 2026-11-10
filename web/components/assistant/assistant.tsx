@@ -14,7 +14,7 @@ import { ProgressBar } from "@/components/ui/measure";
 
 type Entry = { role: "user" | "assistant"; content: string; res?: AssistantResponse; failed?: boolean };
 
-export const ASSISTANT_STORE = "pareeksha.assistant";
+const ASSISTANT_STORE = "pareeksha.assistant";
 const STORE = ASSISTANT_STORE;
 const MAX_CHARS = 60_000;
 /** The server refuses a history above 120,000 characters; stay under it. */

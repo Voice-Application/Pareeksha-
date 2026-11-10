@@ -20,7 +20,7 @@ import { useAudioPreview } from "@/lib/hooks/use-audio-preview";
 export type NoiseProfile = components["schemas"]["NoiseProfileOut"];
 type NoiseCreate = components["schemas"]["NoiseProfileCreate"];
 
-export const BACKGROUNDS = ["office_babble", "street_traffic", "market_crowd", "bus_interior", "auto_rickshaw"];
+const BACKGROUNDS = ["office_babble", "street_traffic", "market_crowd", "bus_interior", "auto_rickshaw"];
 
 type Form = {
   name: string;

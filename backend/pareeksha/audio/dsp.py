@@ -48,12 +48,6 @@ def active_mask(x: np.ndarray, rate: int) -> np.ndarray:
     return mask
 
 
-def active_power(x: np.ndarray, rate: int) -> float:
-    """Mean power over speech-active samples only (0.0 when there are none)."""
-    mask = active_mask(x, rate)
-    return power(x[mask]) if mask.any() else 0.0
-
-
 def noise_gain(speech_power: float, noise_power: float, snr_db: float) -> float:
     """Gain g such that 10*log10(Ps / (g^2 * Pn)) == snr_db."""
     return float(np.sqrt(speech_power / (noise_power * 10 ** (snr_db / 10.0))))

@@ -71,7 +71,7 @@ const EXAMPLE_TOOL: PromptTool = {
 const isObj = (x: unknown): x is Record<string, unknown> => !!x && typeof x === "object" && !Array.isArray(x);
 
 /** Client-side check of the PromptTool shape, so most mistakes show before the API answers 400. */
-export function parseTools(text: string): { tools: PromptTool[] | null; issues: string[] } {
+function parseTools(text: string): { tools: PromptTool[] | null; issues: string[] } {
   let raw: unknown;
   try {
     raw = JSON.parse(text.trim() || "[]");

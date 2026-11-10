@@ -18,7 +18,7 @@ export type ChunkingConfig = S["ChunkingConfig"];
 export type EmbeddingConfig = S["EmbeddingConfig"];
 
 /** Response types carry the span as number[]; requests want a pair. */
-export const toSpan = (x: readonly number[] | null | undefined): [number, number] | null => (x && x.length === 2 ? [x[0], x[1]] : null);
+const toSpan = (x: readonly number[] | null | undefined): [number, number] | null => (x && x.length === 2 ? [x[0], x[1]] : null);
 
 type ExpectationRead = { source_document_id?: string | null; source_span?: number[] | null; reference_answer: string; answerable: boolean };
 export type ScenarioRead = Omit<S["ScenarioOut"], "rag_expectation"> & { rag_expectation?: ExpectationRead | null };
@@ -116,7 +116,6 @@ export function questionErrorMessage(e: unknown): string {
 }
 
 export const listMatrices = () => call(api.GET("/api/v1/rag-matrices", { params: { query: { limit: 200 } } }));
-export const getMatrix = (id: string) => call(api.GET("/api/v1/rag-matrices/{id}", { params: { path: { id } } }));
 export const getReport = (id: string, monthly_conversations: number) => call(api.GET("/api/v1/rag-matrices/{id}/report", { params: { path: { id }, query: { monthly_conversations } } }));
 export const createMatrix = (body: RagMatrixCreate) => call(api.POST("/api/v1/rag-matrices", { body }));
 export const getPricing = () => call(api.GET("/api/v1/pricing"));
