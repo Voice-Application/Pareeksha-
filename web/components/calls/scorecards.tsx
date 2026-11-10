@@ -128,7 +128,7 @@ export function DimensionsPanel({ ev, onEvidence }: { ev: CallEvaluation; onEvid
   );
 }
 
-export const evLabel = (turns: number[]) => (turns.length > 1 ? `#${Math.min(...turns)}-${Math.max(...turns)}` : `#${turns[0]}`);
+const evLabel = (turns: number[]) => (turns.length > 1 ? `#${Math.min(...turns)}-${Math.max(...turns)}` : `#${turns[0]}`);
 
 export function ChecksPanel({ checks, onEvidence }: { checks: NonNullable<CallDetailData["checks"]>; onEvidence: (turns: number[], label: string) => void }) {
   const rank = (c: (typeof checks)[number]) => (c.passed === false && c.must_pass ? 0 : c.passed === false ? 1 : c.passed === null || c.passed === undefined ? 3 : 2);

@@ -6,7 +6,7 @@ import { Chip } from "@/components/ui/layout";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 
-export const isActive = (s: string) => s === "pending" || s === "building";
+const isActive = (s: string) => s === "pending" || s === "building";
 
 /** Indexes of one KB. Polls every 3 s while any is pending or building; react-query stops the timer on unmount. */
 export function useIndexes(kbId: string, enabled = true) {

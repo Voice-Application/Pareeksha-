@@ -105,7 +105,7 @@ services:
 
   outbox-relay:
     <<: *backend
-    profiles: ["workers"]   # implemented in INFRA-02
+    profiles: ["workers"]
     command: ["python", "-m", "pareeksha.workers.outbox_relay"]
 
   planner:
@@ -115,13 +115,13 @@ services:
 
   simulator:
     <<: *backend
-    profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
+    profiles: ["workers"]
     command: ["python", "-m", "pareeksha.workers.simulator"]
     deploy: { replicas: "${SIMULATOR_REPLICAS:-3}" }
 
   auditor:
     <<: *backend
-    profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
+    profiles: ["workers"]
     command: ["python", "-m", "pareeksha.workers.auditor"]
 
   evaluator:
@@ -147,17 +147,17 @@ services:
 
   integrations:
     <<: *backend
-    profiles: ["workers"]   # implemented in INT-01
+    profiles: ["workers"]
     command: ["python", "-m", "pareeksha.workers.integrations"]
 
   dialect:
     <<: *backend
-    profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
+    profiles: ["workers"]
     command: ["python", "-m", "pareeksha.workers.dialect"]
 
   generator:
     <<: *backend
-    profiles: ["workers"]   # enabled once the worker module exists (INFRA-02+)
+    profiles: ["workers"]
     command: ["python", "-m", "pareeksha.workers.generator"]
 
   indexer:
@@ -167,12 +167,12 @@ services:
 
   retrier:
     <<: *backend
-    profiles: ["workers"]   # implemented in INFRA-02
+    profiles: ["workers"]
     command: ["python", "-m", "pareeksha.workers.retrier"]
 
   dlq-recorder:
     <<: *backend
-    profiles: ["workers"]   # implemented in INFRA-02
+    profiles: ["workers"]
     command: ["python", "-m", "pareeksha.workers.dlq_recorder"]
 
   web:

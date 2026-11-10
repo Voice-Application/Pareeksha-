@@ -78,4 +78,4 @@ Replaying the first answers `409 ... not a valid event envelope and cannot be re
 | Many DLQ entries after an outage | fix the dependency, then replay each with `pareeksha dlq replay` |
 | Full reset of a dev box | `docker compose --profile workers down -v` (deletes Kafka and Postgres volumes) |
 
-For a managed Kafka set `KAFKA_BOOTSTRAP_SERVERS`, `KAFKA_SECURITY_PROTOCOL=SASL_SSL`, `KAFKA_SASL_*` in `.env` and create the topics once with `infra/kafka/create-topics.sh`.
+For a managed Kafka set `KAFKA_BOOTSTRAP_SERVERS` in `.env` and create the topics once with `infra/kafka/create-topics.sh`. The clients connect over plaintext only: SASL/TLS is not implemented, so a broker that requires authentication is not supported yet.
