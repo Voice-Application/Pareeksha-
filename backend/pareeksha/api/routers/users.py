@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from datetime import UTC, datetime
 from typing import Annotated, Literal
 from uuid import UUID
@@ -15,7 +14,14 @@ from sqlalchemy.exc import IntegrityError
 from pareeksha.api.auth import AdminKey
 from pareeksha.api.deps import AUTH_ERRORS, Db, errors
 from pareeksha.api.errors import ApiError
-from pareeksha.api.passwords import MAX_LENGTH, MIN_LENGTH, hash_password, verify_password
+from pareeksha.api.passwords import (
+    MAX_LENGTH,
+    MIN_LENGTH,
+    hash_password,
+    hash_password_async,
+    verify_password_async,
+)
+from pareeksha.api.ratelimit import LOGIN_LIMIT
 from pareeksha.db.models import Users
 
 router = APIRouter(tags=["users"], responses=AUTH_ERRORS)
@@ -102,7 +108,7 @@ async def _insert(session: Db, body: BootstrapIn, role: Role) -> Users:
     row = Users(
         email=_norm(body.email),
         name=body.name.strip(),
-        password_hash=await asyncio.to_thread(hash_password, body.password),
+        password_hash=await hash_password_async(body.password),
         role=role,
     )
     session.add(row)
@@ -135,15 +141,18 @@ async def bootstrap(body: BootstrapIn, key: AdminKey, session: Db) -> UserOut:
 
 @router.post(
     "/auth/login",
-    responses=errors(401, 403),
+    responses=errors(401, 403, 429),
     summary="Verify credentials; the web tier creates the session",
 )
 async def login(body: LoginIn, key: AdminKey, session: Db) -> UserOut:
-    row = await session.scalar(select(Users).where(Users.email == _norm(body.email)))
+    email = _norm(body.email)
+    LOGIN_LIMIT.begin(email)  # unknown emails count too, so the limit does not reveal accounts
+    row = await session.scalar(select(Users).where(Users.email == email))
     stored = row.password_hash if row else _DUMMY_HASH
-    ok = await asyncio.to_thread(verify_password, body.password, stored)
+    ok = await verify_password_async(body.password, stored)
     if row is None or not ok:
         raise ApiError(401, "invalid_credentials", "Invalid email or password")
+    LOGIN_LIMIT.succeed(email)
     if row.disabled_at is not None:
         raise ApiError(403, "account_disabled", "This account is disabled")
     row.last_login_at = datetime.now(UTC)
@@ -184,7 +193,7 @@ async def update_user(user_id: UUID, body: UserPatch, key: AdminKey, session: Db
             raise ApiError(409, "last_admin", "Cannot remove or disable the last active admin")
     if body.password is not None:
         _check_password(body.password)
-        row.password_hash = await asyncio.to_thread(hash_password, body.password)
+        row.password_hash = await hash_password_async(body.password)
     if body.name is not None:
         row.name = body.name.strip()
     row.role = new_role

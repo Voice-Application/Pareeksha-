@@ -6,6 +6,7 @@ from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
+from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -160,7 +161,16 @@ async def designer_commit(
 
     # The agent / scenario / persona routes' own create functions: same defaults, same 409s,
     # all in this request's transaction (any error rolls everything back).
-    agent = await create_agent(AgentCreate(**draft.agent.model_dump(mode="json")), key, session)
+    try:
+        agent_body = AgentCreate(**draft.agent.model_dump(mode="json"))
+    except ValidationError as exc:
+        raise ApiError(
+            422,
+            "validation_error",
+            exc.errors()[0]["msg"].removeprefix("Value error, "),
+            {"field": "draft.agent.endpoint_url"},
+        ) from exc
+    agent = await create_agent(agent_body, key, session)
     scenario_ids = [
         (
             await create_scenario(

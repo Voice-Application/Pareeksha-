@@ -32,6 +32,7 @@ from pareeksha.events.runtime import (
 )
 from pareeksha.events.settings import EventSettings
 from pareeksha.events.topics import HEADER_ERROR, HEADER_TARGET_TOPIC, ConsumerGroups, Topics
+from pareeksha.integrations.redact import redact_text
 
 log = logging.getLogger(__name__)
 
@@ -96,7 +97,7 @@ def to_dead_letter(
         parsed = json.loads(raw)
         envelope = parsed if isinstance(parsed, dict) else {"raw": parsed}
     except ValueError:
-        envelope = {"raw": raw.decode("utf-8", errors="replace")}
+        envelope = {"raw": redact_text(raw.decode("utf-8", errors="replace"))}
     try:
         event_id = uuid.UUID(str(envelope["event_id"]))
     except (KeyError, ValueError):
@@ -108,7 +109,7 @@ def to_dead_letter(
         key=(key or b"").decode("utf-8", errors="replace"),
         consumer_group=headers.get(HEADER_CONSUMER_GROUP, "unknown"),
         envelope=envelope,
-        error=headers.get(HEADER_ERROR, "unknown error"),
+        error=redact_text(headers.get(HEADER_ERROR, "unknown error")),
         attempts=attempt if isinstance(attempt, int) and attempt >= 1 else 1,
         project_hints=_project_hints(envelope),
     )

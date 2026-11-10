@@ -1155,7 +1155,7 @@ export interface paths {
         put?: never;
         /**
          * Receive a call recording from a source (HMAC-signed, deduped by external_id)
-         * @description Headers `X-Pareeksha-Timestamp` and `X-Pareeksha-Signature: v1=<hex hmac_sha256(secret, "{ts}.{raw_body}")>`. Timestamps older than 5 minutes are rejected (408). The recording URL must be https and resolve to a public address (422 unsafe_url).
+         * @description Headers `X-Pareeksha-Timestamp` and `X-Pareeksha-Signature: v1=<hex hmac_sha256(secret, "{ts}.{raw_body}")>`. Timestamps older than 5 minutes are rejected (408). The recording URL must be https and resolve to a public address (422 unsafe_url). Bodies over 1 MiB are refused (413) before the signature is checked.
          */
         post: operations["receive_inbound_webhook"];
         delete?: never;
@@ -3038,41 +3038,6 @@ export interface components {
             call_id: string;
             /** Duplicate */
             duplicate: boolean;
-        };
-        /**
-         * InboundCallPayload
-         * @description Body of ``POST /webhooks/inbound/{integration_id}`` (HMAC-signed, no API key).
-         */
-        InboundCallPayload: {
-            /**
-             * External Id
-             * @example exotel-CA123
-             */
-            external_id: string;
-            /**
-             * Recording Url
-             * @example https://recordings.example.com/CA123.mp3
-             */
-            recording_url: string;
-            /**
-             * Agent Name
-             * @example EMI Reminder Bot
-             */
-            agent_name?: string | null;
-            /**
-             * Language
-             * @example kn-IN
-             */
-            language: string;
-            /** Metadata */
-            metadata?: {
-                [key: string]: string;
-            };
-            /**
-             * Tool Calls
-             * @description tool calls the bot made, if known
-             */
-            tool_calls?: components["schemas"]["ReportedToolCall"][] | null;
         };
         /** IndexOneTime */
         IndexOneTime: {
@@ -11597,11 +11562,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["InboundCallPayload"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             202: {
@@ -11641,6 +11602,15 @@ export interface operations {
             };
             /** @description timestamp_out_of_window */
             408: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description file_too_large */
+            413: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -12163,6 +12133,15 @@ export interface operations {
             };
             /** @description forbidden: key lacks the required scope */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description rate_limited: too many requests, see Retry-After */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
