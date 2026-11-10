@@ -36,7 +36,7 @@ Later lines in `.env` win, so you can also append the lines instead of editing.
 
 **Network exposure:** published ports (web, API, Postgres, Kafka, mock agent, Kafka UI) bind to `127.0.0.1` only, so other machines cannot reach them. Set `BIND_HOST=0.0.0.0` in `.env` to expose them deliberately, only behind a firewall or reverse proxy, and change `POSTGRES_PASSWORD` first (and `KAFKA_ADVERTISED_HOST` for remote Kafka clients).
 
-**Runtime data:** recordings, the TTS cache and downloaded models live in the `runtime-data` Docker volume (mounted at `/data`; containers run as a non-root user), not in `./data/runtime`. Existing files in `./data/runtime` are not picked up automatically.
+**Runtime data:** recordings, the TTS cache and downloaded models live in the `runtime-data` Docker volume (mounted at `/data`; containers run as a non-root user), not in `./data/runtime`. Existing files in `./data/runtime` are not picked up automatically. To carry them over, start the stack once, then copy them in and hand them to the container user (without the `chown` the workers cannot write next to the copied files): `docker compose cp ./data/runtime/. api:/data/ && docker compose exec --user root api chown -R app:app /data`.
 
 **Port clashes:** if 3000, 5432, 8000, 8765 or 9094 are taken, set `WEB_HOST_PORT`, `POSTGRES_HOST_PORT`, `API_HOST_PORT`, `MOCK_AGENT_HOST_PORT` or `KAFKA_HOST_PORT` in `.env`. Use `COMPOSE_PROJECT_NAME=<name>` to keep a second copy apart.
 
