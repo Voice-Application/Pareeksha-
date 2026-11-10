@@ -47,6 +47,7 @@ dev = [
     "respx>=0.21",
     "pytest-asyncio>=0.23",
     "pytest-cov>=5",
+    "pytest-xdist>=3.6",
     "ruff==0.17.3",
     "types-PyYAML==6.0.12.20261030",
     "types-jsonschema==4.26.0.20261006",

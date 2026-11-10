@@ -21,4 +21,4 @@ lint:
 	cd web && npm run lint && npx tsc --noEmit
 
 test:
-	cd backend && python3 -m pytest tests/unit tests/evaluation tests/judge tests/contract -q
+	cd backend && python3 -m pytest tests/unit tests/evaluation tests/judge tests/contract -q -n auto

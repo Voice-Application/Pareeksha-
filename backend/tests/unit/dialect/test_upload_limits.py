@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import io
-import uuid
 import wave
 import zipfile
 from collections.abc import AsyncIterator
@@ -91,12 +90,19 @@ def test_open_zip_accepts_a_file_object() -> None:
     assert archive.namelist() == ["a.wav"]
 
 
+# Fixed, not uuid4(): pytest-xdist workers must collect identical test ids.
+_ID = "00000000-0000-4000-8000-000000000001"
+
+
 @pytest.mark.parametrize(
     ("path", "limit"),
     [
-        (f"/api/v1/dialect-datasets/{uuid.uuid4()}/samples", 202 * 1024 * 1024),
+        (
+            f"/api/v1/dialect-datasets/{_ID}/samples",
+            202 * 1024 * 1024,
+        ),
         ("/api/v1/audits", 10 * 1024 * 1024),
-        (f"/api/v1/noise-profiles/{uuid.uuid4()}/preview", 10 * 1024 * 1024),
+        (f"/api/v1/noise-profiles/{_ID}/preview", 10 * 1024 * 1024),
     ],
 )
 async def test_multipart_routes_refuse_oversized_bodies_before_parsing(
