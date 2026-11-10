@@ -1,6 +1,6 @@
 """The LLM judge: renders the active rubric's prompt (``judge_v3.j2``), calls the provider at
-temperature 0 with the pinned judge model, and validates evidence against the transcript (one repair
-retry on failure)."""
+temperature 0 with the pinned judge model, and validates evidence against the transcript (up to two
+repair retries on failure)."""
 
 from __future__ import annotations
 
@@ -95,7 +95,7 @@ def render_judge_prompt(data: JudgeInput) -> str:
 
 async def run_judge(client: LLMClient, data: JudgeInput) -> GenerationResult[JudgeOutput]:
     """Judge one call. Raises ``JSONGenerationError`` if the output stays invalid after the repair
-    retry (the evaluator stores that as ``judge_error``)."""
+    retries (the evaluator stores that as ``judge_error``)."""
     valid = {t.idx for t in data.turns}
     agent = {t.idx for t in data.turns if t.speaker == "agent"}
     return await client.generate_json(
