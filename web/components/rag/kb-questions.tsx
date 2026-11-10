@@ -37,7 +37,7 @@ function csvCell(v: string): string {
 }
 
 /** A two-row example of the import format: one answerable question (from `docName` when the KB has a document) and one the KB does not answer. */
-export function exampleCsv(docName?: string): string {
+function exampleCsv(docName?: string): string {
   const rows = [
     [...QUESTION_CSV_COLUMNS],
     ["What is the late fee for a missed EMI?", "2 percent of the EMI amount.", docName ?? "loan-policy.pdf", "The late fee is 2 percent of the EMI amount."],

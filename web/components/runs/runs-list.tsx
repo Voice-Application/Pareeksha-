@@ -46,7 +46,7 @@ export function RunsListSkeleton() {
 }
 
 /** Pass-rate cell: suite verdict for regressions, a dash while in flight or failed, else the rate. */
-export function PassRateCell({ run }: { run: Run }) {
+function PassRateCell({ run }: { run: Run }) {
   if (run.kind === "regression" && run.summary?.suite_passed !== undefined && run.summary.suite_passed !== null)
     return <VerdictBadge verdict={run.summary.suite_passed ? "pass" : "fail"} />;
   if (IN_FLIGHT.has(run.status) || run.status === "failed")

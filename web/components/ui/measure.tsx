@@ -12,7 +12,7 @@ export function overallStep(score: number): Step {
   return score < 40 ? 1 : score < 60 ? 2 : score < 80 ? 3 : score < 90 ? 4 : 5;
 }
 /** Dimension 0-4 to step 1-5. */
-export function dimensionStep(score: number): Step {
+function dimensionStep(score: number): Step {
   return (Math.max(0, Math.min(4, Math.round(score))) + 1) as Step;
 }
 /** Background and text colours for a score step; null uses the not-available swatch. */

@@ -27,7 +27,7 @@ export const retestQuickTest = (test_id: string, confirm_cost = false) =>
 export const askAssistant = (body: AssistantRequest) => call(api.POST("/api/v1/assistant/chat", { body }));
 
 /** Poll every 3 s until every conversation has ended and been checked. */
-export const quickTestPoll = (status: QuickTest["status"] | undefined) => (status === "done" || status === "failed" ? false : 3000);
+const quickTestPoll = (status: QuickTest["status"] | undefined) => (status === "done" || status === "failed" ? false : 3000);
 
 /** Like ``quickTestPoll``, but after `done` keeps reading (up to 60 reads) until every checked conversation has its score. */
 export function quickTestRefetch(s: { data?: QuickTest; dataUpdateCount: number; error: unknown }): number | false {

@@ -14,7 +14,7 @@ const variants: Record<Variant, string> = {
   destructive: "border-fail bg-surface text-fail-fg hover:bg-fail-tint",
 };
 
-export function buttonClass(variant: Variant = "secondary", icon = false, className?: string) {
+function buttonClass(variant: Variant = "secondary", icon = false, className?: string) {
   return cn(base, variants[variant], icon ? "w-9 px-0" : "px-4", className);
 }
 

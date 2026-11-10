@@ -20,7 +20,7 @@ import { CostConfirmDialog } from "./cost-confirm";
 const linkCls = "text-accent-fg underline-offset-2 hover:underline";
 
 /** Loading placeholder for a prompt test result. */
-export function QuickTestResultSkeleton() {
+function QuickTestResultSkeleton() {
   return (
     <div role="status" aria-label="Loading the test" aria-busy="true" className="flex flex-col gap-6">
       <Skeleton className="h-9 w-96 max-w-full" />

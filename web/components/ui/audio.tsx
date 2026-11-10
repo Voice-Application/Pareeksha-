@@ -74,7 +74,7 @@ export function PreviewBar({
   );
 }
 
-export const MAX_UPLOAD = 10 * 1024 * 1024;
+const MAX_UPLOAD = 10 * 1024 * 1024;
 
 /** Dashed drop area. Accepts a WAV or MP3 up to 10 MB and shows name, size and a remove button. */
 export function FileDropzone({ file, onFile, error, onError }: { file: File | null; onFile: (f: File | null) => void; error?: string | null; onError: (m: string | null) => void }) {
