@@ -34,6 +34,7 @@ pip install -r requirements.txt
 GNANI_API_KEY=... DEEPSEEK_API_KEY=... PYTHONPATH=../../backend:. python bot.py   # ws://localhost:8766/ws
 ```
 
+The port is `PIPECAT_BOT_PORT` (default 8766); `DEEPSEEK_BASE_URL` overrides the LLM endpoint.
 Register an agent in Pareeksha with adapter `pipecat` and endpoint `ws://<host>:8766/ws`.
 `speech_services.py` wraps `pareeksha.speech` providers because `pipecat-gnani` 0.5.12 does not
 import against `gnani-vachana` 0.8.2; swap in your own STT/TTS services freely.
