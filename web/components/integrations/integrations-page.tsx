@@ -18,6 +18,7 @@ import { Sheet } from "@/components/ui/overlay";
 import { useToast } from "@/components/ui/toast";
 import { CopyField } from "@/components/ops/code-block";
 import { JsonSchemaForm } from "./json-schema-form";
+import { useIsAdmin } from "@/components/layout/theme-toggle";
 
 export type Integration = components["schemas"]["IntegrationOut"];
 const PLANNED = ["Salesforce", "Zoho", "LeadSquared", "Freshdesk", "Exotel", "Slack"];
@@ -122,6 +123,7 @@ function AddSheet({ open, onClose, connectors }: { open: boolean; onClose: () =>
 }
 
 export function IntegrationsPage() {
+  const isAdmin = useIsAdmin();
   const [adding, setAdding] = useState(false);
   const connectors = useQuery({ queryKey: ["connectors"], queryFn: () => call(api.GET("/api/v1/integrations/connectors")) });
   const list = usePagedList<Integration>(["integrations"], (cursor) => call(api.GET("/api/v1/integrations", { params: { query: { limit: 50, cursor } } })));
@@ -137,14 +139,14 @@ export function IntegrationsPage() {
   ];
   return (
     <>
-      <PageHeader eyebrow={list.isSuccess ? `${list.items.length} connected` : ""} title="Integrations" description="Send evaluated calls to your CRM, or receive recordings from your telephony with a signed webhook." actions={<Button variant="primary" disabled={cs.length === 0} title={cs.length === 0 ? "No connectors are registered on the API" : undefined} onClick={() => setAdding(true)}>Add integration</Button>} />
+      <PageHeader eyebrow={list.isSuccess ? `${list.items.length} connected` : ""} title="Integrations" description="Send evaluated calls to your CRM, or receive recordings from your telephony with a signed webhook." actions={isAdmin ? <Button variant="primary" disabled={cs.length === 0} title={cs.length === 0 ? "No connectors are registered on the API" : undefined} onClick={() => setAdding(true)}>Add integration</Button> : undefined} />
       <Panel bodyClassName="p-0">
         {list.isPending ? (
           <TableSkeleton rows={3} label="Loading integrations" />
         ) : list.isError ? (
           <div className="p-4"><ErrorPanel error={list.error} what="integrations" onRetry={() => void list.refetch()} /></div>
         ) : list.items.length === 0 ? (
-          <EmptyState icon={Plug} title="No integrations yet" body="An integration sends evaluation results to a CRM, or brings recorded calls in through a webhook." action={<Button variant="primary" disabled={cs.length === 0} onClick={() => setAdding(true)}>Add integration</Button>} />
+          <EmptyState icon={Plug} title="No integrations yet" body="An integration sends evaluation results to a CRM, or brings recorded calls in through a webhook." action={isAdmin ? <Button variant="primary" disabled={cs.length === 0} onClick={() => setAdding(true)}>Add integration</Button> : undefined} />
         ) : (
           <>
             <DataTable caption="Integrations" columns={columns} rows={list.items} rowKey={(i) => i.id} sort={null} onSort={() => undefined} />

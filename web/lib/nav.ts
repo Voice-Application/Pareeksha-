@@ -28,7 +28,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/dlq", label: "DLQ", group: "Operate" },
   { href: "/calibration", label: "Calibration", group: "Operate" },
   { href: "/settings/llm", label: "AI settings", group: "Settings", adminOnly: true },
-  { href: "/settings/api-keys", label: "API keys", group: "Settings" },
+  { href: "/settings/api-keys", label: "API keys", group: "Settings", adminOnly: true },
   { href: "/settings/pricing", label: "Pricing", group: "Settings" },
   { href: "/settings/users", label: "Users", group: "Settings", adminOnly: true },
 ];

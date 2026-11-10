@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_COOKIE, SESSION_MAX_AGE_S, SIGNED_IN_COOKIE, createSessionToken, sessionSecret, type SessionUser } from "@/lib/session";
+import { isCrossSiteRequest } from "@/lib/request-origin";
 
 /** The account endpoints of the backend, called with the server's own API key. Browsers never reach them. */
 export async function backend(path: string, init: { method?: string; body?: unknown } = {}): Promise<{ status: number; data: unknown }> {
@@ -18,11 +19,20 @@ export async function backend(path: string, init: { method?: string; body?: unkn
   }
 }
 
-/** The public origin the browser used. req.url carries the container bind address (0.0.0.0) behind Docker. */
+/** The public host the browser used. req.url carries the container bind address (0.0.0.0) behind Docker. */
+export function requestHost(req: NextRequest): string {
+  return (req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? req.nextUrl.host).split(",")[0].trim();
+}
+
+/** The public origin the browser used. */
 export function origin(req: NextRequest): string {
-  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host") ?? req.nextUrl.host;
   const proto = req.headers.get("x-forwarded-proto") ?? req.nextUrl.protocol.replace(":", "");
-  return `${proto}://${host}`;
+  return `${proto}://${requestHost(req)}`;
+}
+
+/** A 403 for a state-changing request sent from another site's page, else null. */
+export function refuseCrossSite(req: NextRequest): Response | null {
+  return isCrossSiteRequest(req.method, req.headers, requestHost(req)) ? Response.json({ error: "cross-site request refused" }, { status: 403 }) : null;
 }
 
 export function loginRedirect(req: NextRequest, params: Record<string, string>): NextResponse {
@@ -46,19 +56,4 @@ export async function signIn(req: NextRequest, user: SessionUser, next: string):
 export function toSessionUser(data: unknown): SessionUser | null {
   const u = data as Partial<SessionUser> | null;
   return u && typeof u.id === "string" && typeof u.email === "string" && (u.role === "admin" || u.role === "member") ? { id: u.id, name: String(u.name ?? ""), email: u.email, role: u.role } : null;
-}
-
-/** In-memory sign-in throttle: 5 failures per client and email in 10 minutes lock that pair out. One server process only. */
-const fails = new Map<string, { n: number; until: number }>();
-export function throttled(key: string): boolean {
-  const f = fails.get(key);
-  return !!f && f.n >= 5 && f.until > Date.now();
-}
-export function noteFailure(key: string): void {
-  const f = fails.get(key);
-  const now = Date.now();
-  fails.set(key, f && f.until > now ? { n: f.n + 1, until: now + 10 * 60_000 } : { n: 1, until: now + 10 * 60_000 });
-}
-export function clearFailures(key: string): void {
-  fails.delete(key);
 }

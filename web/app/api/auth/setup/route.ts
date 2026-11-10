@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { backend, loginRedirect, signIn, toSessionUser } from "@/lib/auth-server";
+import { backend, loginRedirect, refuseCrossSite, signIn, toSessionUser } from "@/lib/auth-server";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -8,6 +8,8 @@ const field = (f: FormData | null, k: string) => (typeof f?.get(k) === "string" 
 
 /** Creates the first account, an admin. The backend refuses once any account exists. */
 export async function POST(req: NextRequest) {
+  const refused = refuseCrossSite(req);
+  if (refused) return refused;
   const form = await req.formData().catch(() => null);
   const name = field(form, "name").trim();
   const email = field(form, "email").trim().toLowerCase();

@@ -1,5 +1,7 @@
 import type { NextRequest } from "next/server";
 import { SESSION_COOKIE, sessionSecret, verifySessionToken } from "@/lib/session";
+import { normalisePath, requiresAdmin } from "@/lib/admin-routes";
+import { refuseCrossSite } from "@/lib/auth-server";
 
 /**
  * BFF proxy (TRD 11, FR-DB-5): the browser calls /api/proxy/<path>; this handler forwards to the origin of
@@ -18,18 +20,18 @@ async function handle(req: NextRequest, ctx: { params: Promise<{ path: string[] 
   if (!base) {
     return Response.json({ error: "PAREEKSHA_API_URL is not configured" }, { status: 500 });
   }
+  const refused = refuseCrossSite(req);
+  if (refused) return refused;
   const { path } = await ctx.params;
   if (path.some((seg) => seg === ".." || seg === "." || seg.includes("\\"))) {
     return Response.json({ error: "invalid path" }, { status: 400 });
   }
 
-  // Account endpoints are for the web server only; user management and the metrics summary are for
-  // admins. ``metrics/summary`` exposes Kafka/outbox/consumer-lag and DLQ depth, so the BFF forbids
-  // it for members even though the upstream ``read`` key would otherwise forward it. (``health`` stays
-  // open: it returns only db/kafka reachability and is the canonical liveness probe.)
-  const seg = path[0] === "api" && path[1] === "v1" ? path[2] : path[0];
-  if (seg === "auth") return Response.json({ error: "not found" }, { status: 404 });
-  if ((seg === "users" || seg === "metrics") && process.env.AUTH_DISABLED !== "1") {
+  // Account endpoints are for the web server only. Every request goes upstream with the admin key, so
+  // admin-scoped routes, plus the BFF-only admin paths (see admin-routes.ts), need an admin session.
+  // (``health`` stays open: it returns only db/kafka reachability and is the canonical liveness probe.)
+  if (normalisePath(path)[0] === "auth") return Response.json({ error: "not found" }, { status: 404 });
+  if (process.env.AUTH_DISABLED !== "1" && requiresAdmin(req.method, path)) {
     const secret = sessionSecret();
     const user = secret ? await verifySessionToken(secret, req.cookies.get(SESSION_COOKIE)?.value) : null;
     if (user?.role !== "admin") return Response.json({ error: "admins only" }, { status: 403 });
