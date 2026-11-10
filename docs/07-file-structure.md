@@ -4,141 +4,143 @@ Monorepo with four deliverables: the **backend** (Python package + workers), the
 
 ```
 pareeksha/                                   ← repo root
-├── README.md                                # pitch, demo GIF, quick start, architecture, limitations
-├── AGENTS.md                                # multi-agent build playbook (roles, contracts, 5-day task board)
-├── STATUS.md                                # live task board (orchestrator/PJM keep it current)
+├── README.md                                # pitch, quick start, architecture, limitations
+├── STATUS.md  NOTES.md                      # live task board; vendor/probe findings
 ├── CHANGELOG.md                             # contract changes + releases
-├── docker-compose.yml                       # kafka, kafka-init, postgres, api, outbox-relay, workers, web, mock-agent
-├── Makefile                                 # up, down, seed, demo, test, e2e, lint, gen-api
+├── docker-compose.yml                       # kafka, kafka-init, postgres, migrate, api, outbox-relay, planner, simulator,
+│                                            #   auditor, evaluator, finalizer, integrations, dialect, generator, indexer,
+│                                            #   retrier, dlq-recorder, web, mock-agent, kafka-ui, ollama
+├── docker-compose.proxy.yml                 # compose override for proxy setups
+├── Makefile                                 # demo, verify, verify-step, lint, test
+├── requirements.txt                         # root dependency list (lower bounds)
 ├── .env.example
-├── .github/workflows/ci.yml                 # lint, unit, contract, kafka integration, playwright smoke
+├── .github/workflows/                       # ci.yml, kafka-suite.yml, pareeksha-regression.yml, release.yml
 │
-├── docs/                                    # this documentation pack
+├── docs/                                    # this documentation pack (+ guides/, design/, starter/, orchestration/)
 │
 ├── infra/
-│   ├── kafka/create-topics.sh               # idempotent topic creation (used by kafka-init)
-│   ├── kafka/topics.yaml                    # topic list = single source of truth (mirrors events/topics.py)
-│   └── postgres/init.sql                    # creates db/user (schema comes from Alembic)
+│   └── kafka/create-topics.sh               # idempotent topic creation (used by kafka-init)
+│                                            # (no postgres/ dir: db/user come from compose env, schema from Alembic)
 │
 ├── backend/
-│   ├── pyproject.toml                       # package "pareeksha", entry points incl. pareeksha.connectors
+│   ├── pyproject.toml                       # package "pareeksha"; entry-point group pareeksha.connectors (webhook, hubspot)
+│   ├── requirements-dev.txt  requirements.lock
 │   ├── Dockerfile                           # one image for api + every worker
-│   ├── alembic.ini
+│   ├── alembic.ini  alembic_migrate.sh
+│   ├── alembic/versions/                    # 0001_initial … 0007_repair_project_columns
 │   ├── pareeksha/
-│   │   ├── config.py  logging.py  clock.py  crypto.py   # crypto = Fernet helpers
-│   │   │
 │   │   ├── db/
-│   │   │   ├── engine.py  models.py  enums.py
-│   │   │   ├── repo/                         # agents, runs, calls, evaluations, dialect, integrations, usage
-│   │   │   └── migrations/versions/0001_initial.py   # = docs/schema.sql
+│   │   │   ├── models.py                     # all SQLAlchemy models
+│   │   │   ├── session.py                    # engine / session
+│   │   │   └── queries.py
 │   │   │
 │   │   ├── events/                          # ★ Kafka layer — owned by BE-INFRA
-│   │   │   ├── topics.py                     # Topics enum, partitions, retention
-│   │   │   ├── schemas.py                    # Envelope[T] + one Pydantic payload per event type
-│   │   │   ├── producer.py                   # aiokafka producer (acks=all, idempotence)
-│   │   │   ├── consumer.py                   # @consumer decorator: idempotency, tx, retry/DLQ, shutdown
-│   │   │   ├── outbox.py                     # add_outbox_event(session, topic, key, payload)
-│   │   │   ├── retry.py                      # classify errors, route to retry.30s / retry.5m / dlq
-│   │   │   └── ids.py                        # deterministic output event ids (uuid5)
+│   │   │   ├── topics.py                     # topic names, partitions, retention
+│   │   │   ├── schemas.py                    # Envelope + one Pydantic payload per event type
+│   │   │   ├── producer.py                   # aiokafka producer
+│   │   │   ├── consumer.py                   # consumer framework: idempotency, tx, retry/DLQ, shutdown
+│   │   │   ├── outbox.py                     # outbox writes
+│   │   │   └── runtime.py  settings.py       # worker runtime + Kafka settings
 │   │   │
 │   │   ├── workers/                         # one module per consumer group (thin: wire handler → framework)
-│   │   │   ├── outbox_relay.py  planner.py  simulator.py  auditor.py  evaluator.py
-│   │   │   ├── finalizer.py  integrations.py  dialect.py  generator.py
-│   │   │   └── retrier.py  dlq_recorder.py
+│   │   │   ├── outbox_relay.py  planner.py  simulator.py  auditor.py  evaluator.py  judge.py
+│   │   │   ├── finalizer.py  integrations.py  dialect.py  generator.py  indexer.py
+│   │   │   └── retrier.py  dlq_recorder.py  reconciler.py  _outgoing.py
 │   │   │
 │   │   ├── api/
-│   │   │   ├── main.py  deps.py  auth.py      # auth = API keys + scopes
-│   │   │   ├── sse.py                         # progress topic → per-run SSE streams
+│   │   │   ├── main.py  deps.py  auth.py  passwords.py   # API keys + user sessions
+│   │   │   ├── crud.py  errors.py  health.py  ratelimit.py  body_limit.py  outbox.py
+│   │   │   ├── connectors.py  speech.py  llm_deps.py
 │   │   │   └── routers/
-│   │   │       ├── agents.py  scenarios.py  personas.py  noise_profiles.py
-│   │   │       ├── runs.py  calls.py  audits.py  dialect.py  regression.py
-│   │   │       ├── integrations.py  webhooks.py  dlq.py  api_keys.py  system.py
+│   │   │       ├── agents.py  scenarios.py  personas.py  noise_profiles.py  prompt_versions.py
+│   │   │       ├── runs.py  calls.py  audits.py  dialect.py  regression.py  quick_tests.py
+│   │   │       ├── knowledge_bases.py  rag_matrices.py  designer.py
+│   │   │       └── integrations.py  webhooks.py  dlq.py  api_keys.py  users.py  settings.py  system.py
 │   │   │
 │   │   ├── schemas/                          # API + LLM Pydantic models
-│   │   ├── gnani/                            # wrappers over gnani-vachana (+ cache, usage logging)
-│   │   ├── llm/                              # GeminiClient + prompts/*.j2
-│   │   ├── audio/                            # DSP + LineSimulator (no network)
+│   │   ├── gnani/                            # clients over gnani-vachana
+│   │   ├── speech/                           # provider-neutral STT/TTS: base, registry, config, providers/
+│   │   │                                     #   (gnani, deepgram, elevenlabs, azure, google)
+│   │   ├── llm/                              # LLM client + providers (deepseek, gemini), usage_db, project_settings, prompts/*.j2
+│   │   ├── agent_llm/                        # LLM backends for prompt-based agents under test (openai_compat, anthropic, gemini)
+│   │   ├── audio/                            # DSP, noise, profiles, LineSimulator, previews (no network)
 │   │   ├── adapters/                        # ★ agent adapters
-│   │   │   ├── base.py                       # AudioSession interface
-│   │   │   ├── audio_v1.py  pipecat.py  livekit.py  vapi.py
-│   │   │   └── pipecat_serializer.py         # PareekshaFrameSerializer (also exported via SDK)
-│   │   ├── simulation/                       # Pipecat caller pipeline + processors (uses adapters/)
-│   │   ├── evaluation/                       # metrics, checks, numbers, pii, judge, scoring, calibration
+│   │   │   ├── base.py  registry.py          # AudioSession interface; adapter registry
+│   │   │   ├── audio_v1.py  pipecat_adapter.py  connection_check.py
+│   │   │   └── pipecat_serializer.py         # PareekshaFrameSerializer
+│   │   ├── simulation/                       # caller pipeline, runner, text_runner, processors, VAD, barge-in, recorder
+│   │   ├── evaluation/                       # metrics, checks, numbers, pii, judge, rubric, scoring, calibration, completion reconciler
 │   │   ├── audit/                            # ingest, batch STT pipeline, role detection
-│   │   ├── dialect/                          # textnorm, asr_eval, aggregate, report
-│   │   ├── regression/                       # promote, suite
-│   │   ├── runs/                             # matrix, estimate, finalize, slots (active_calls)
+│   │   ├── dialect/                          # normalize, intent, metrics, stats, pipeline, report (+ loanwords.yaml)
+│   │   ├── regression/                       # promote, verdict, outcomes, estimate
+│   │   ├── runs/                             # service, matrix, estimate, slots, stream (SSE), watchdog, compare, report
+│   │   ├── calls/                            # call service + audio access
+│   │   ├── quicktest/                        # prompt quick tests (service + assistant)
+│   │   ├── rag/                              # knowledge bases: extract, chunking, embeddings, BM25, rerank, retriever, matrix, questions, report
+│   │   ├── designer/                         # designer service
+│   │   ├── scenario_gen/                     # LLM scenario generation
+│   │   ├── ops/                              # dlq, metrics
 │   │   ├── integrations/                    # ★ connector framework
-│   │   │   ├── base.py                       # Connector protocol, TestResult, AuditRequest, EvaluationSummary
-│   │   │   ├── registry.py                   # entry-point discovery
-│   │   │   ├── signing.py                    # HMAC sign/verify, timestamp window
-│   │   │   ├── ssrf.py                       # safe URL fetch for recordings
-│   │   │   ├── webhook/connector.py          # generic webhook source + sink
-│   │   │   └── hubspot/connector.py          # HubSpot sink
+│   │   │   ├── base.py  registry.py          # Connector protocol; entry-point discovery
+│   │   │   ├── signing.py  crypto.py         # HMAC sign/verify; Fernet secrets
+│   │   │   ├── ssrf.py  redact.py            # safe URL fetch; secret redaction
+│   │   │   ├── dispatch.py  delivery.py  sql_store.py
+│   │   │   ├── webhook.py                    # generic webhook source + sink
+│   │   │   └── hubspot.py                    # HubSpot sink
 │   │   ├── storage/blob.py
-│   │   └── reports/templates/                # run + dialect HTML
+│   │   └── seed/                             # seed runner + data/ (personas, scenarios, rubrics v1–v3, demo agent/KB/prompt/RAG)
 │   └── tests/
-│       ├── unit/  contract/  kafka/  connectors/  judge/  e2e/
+│       ├── unit/  contract/  db/  evaluation/  integration/  judge/  kafka/  e2e/
 │       └── fixtures/
 │
 ├── web/                                     # ★ Next.js 16 app — owned by FE
 │   ├── package.json  next.config.ts  tsconfig.json  components.json (shadcn)
-│   ├── middleware.ts                         # optional WEB_PASSWORD gate
+│   ├── proxy.ts                              # Next 16 "proxy" (ex-middleware): signed-session account gate
 │   ├── app/
-│   │   ├── layout.tsx  page.tsx               # overview
+│   │   ├── layout.tsx  login/  welcome/       # sign-in; public landing page
 │   │   ├── api/proxy/[...path]/route.ts       # BFF proxy to FastAPI (adds API key, streams SSE)
-│   │   ├── agents/  agents/[id]/
-│   │   ├── scenarios/  personas/  noise-profiles/
-│   │   ├── runs/  runs/new/  runs/[id]/  runs/compare/
-│   │   ├── calls/[id]/
-│   │   ├── audits/
-│   │   ├── dialect/  dialect/[id]/
-│   │   ├── regression/
-│   │   ├── integrations/  integrations/[id]/
-│   │   ├── dlq/
-│   │   ├── calibration/
-│   │   └── settings/api-keys/
-│   ├── components/
-│   │   ├── ui/                                # shadcn primitives
-│   │   ├── call/ (Waveform, Transcript, EvidenceTurn, DimensionScores, ChecksList, PromoteDialog)
-│   │   ├── run/ (MatrixHeatmap, ProgressBar, LatencyChart, RunWizard)
-│   │   ├── dialect/ (DialectHeatmap, WorstClips)
-│   │   └── integrations/ (ConnectorForm, DeliveryLog)
+│   │   ├── api/auth/{login,logout,setup}/     # session endpoints
+│   │   └── (dashboard)/
+│   │       ├── page.tsx                       # overview
+│   │       ├── agents/  scenarios/  personas/  noise-profiles/  designer/
+│   │       ├── runs/ (new, [id], compare)  calls/[id]  test/ (quick tests)
+│   │       ├── audits/  dialect/  regression/  calibration/
+│   │       ├── knowledge-bases/  rag-lab/
+│   │       ├── integrations/  dlq/
+│   │       └── settings/{api-keys,llm,pricing,users}/
+│   ├── components/                            # feature folders (agents, runs, calls, rag, quick, designer, …) + ui/ (shadcn)
 │   ├── lib/
 │   │   ├── api/schema.d.ts                    # generated by openapi-typescript (do not edit)
-│   │   ├── api/client.ts  api/hooks.ts        # openapi-fetch + TanStack Query hooks
-│   │   ├── sse.ts                              # EventSource wrapper with polling fallback
-│   │   └── score.ts                            # score → colour scale (from DES tokens)
-│   └── tests/ (Playwright)
+│   │   ├── api/client.ts  + per-area modules  # openapi-fetch clients
+│   │   ├── hooks/                             # shared React hooks
+│   │   └── session.ts  auth-server.ts  nav.ts  admin-routes.ts  …
+│   └── tests/ (Playwright; real/ = against a live stack)
 │
 ├── sdk/python/                              # ★ pareeksha-sdk + CLI — owned by INT
 │   ├── pyproject.toml                        # console_scripts: pareeksha = pareeksha_sdk.cli:app
-│   ├── pareeksha_sdk/
-│   │   ├── client.py  models.py (generated)  runs.py  audits.py  agents.py
-│   │   ├── config_file.py                     # pareeksha.yaml loader + apply
-│   │   ├── agent_server.py                    # helper to expose any bot via pareeksha-audio-v1
+│   ├── pareeksha.example.yaml
+│   ├── src/pareeksha_sdk/
+│   │   ├── client.py  models.py (generated)  _calls.py  errors.py
+│   │   ├── config.py  apply.py                # pareeksha.yaml loader + apply
+│   │   ├── summary.py                         # run summary (Markdown)
 │   │   └── cli.py
 │   └── tests/
 │
-├── action/                                  # ★ GitHub Action — owned by INT
-│   ├── action.yml
-│   └── summary.py                            # writes $GITHUB_STEP_SUMMARY
+├── action/
+│   └── action.yml                            # GitHub Action (applies config, runs suite, writes job summary via the SDK)
 │
-├── mock_agent/                              # demo bot with 5 planted bugs — owned by VOICE
-│   ├── server.py  bot.py  prompt.j2  tools.py  bugs.py  Dockerfile
+├── mock_agent/                              # demo bot with planted bugs — owned by VOICE
+│   └── server.py  policy.py  bugs.py  llm_dialog.py  speech.py  vad.py  Dockerfile  README.md
 │
 ├── examples/
 │   ├── pipecat-bot/                          # minimal Pipecat bot + PareekshaFrameSerializer
-│   ├── custom-bot-audio-v1/                  # any bot via agent_server helper
-│   ├── livekit-bot/                          # (Should)
-│   ├── pareeksha.yaml                        # config-as-code example
-│   └── github-workflow.yml
+│   ├── connector-slack/                      # third-party connector example (entry point)
+│   └── ci/pareeksha.yaml                     # config-as-code example for CI
 │
+├── scripts/                                 # smoke/demo/verification helpers (calibration/, ci/, data/, demo/, verify/)
+├── labelling/  proof/                       # human-label packets; per-task evidence
 └── data/
-    ├── seeds/ personas.yaml  noise_profiles.yaml  scenarios_emi.yaml  rubric-2026-10-v1.yaml
-    ├── noise/<category>/*.wav  + LICENSES.md
-    ├── dialect/                              # consented clips + manifest.csv (git-ignored)
-    └── runtime/                              # DATA_DIR (git-ignored)
+    └── dialect/                              # dialect clips (vaani)
 ```
 
 ## Ownership (matches AGENTS.md roles)
@@ -147,7 +149,7 @@ pareeksha/                                   ← repo root
 |---|---|
 | `backend/pareeksha/events/`, `workers/` framework, `infra/`, `docker-compose.yml`, CI | BE-INFRA |
 | `backend/pareeksha/api/`, `db/`, `runs/`, `regression/`, `schemas/` | BE-API |
-| `backend/pareeksha/gnani/`, `audio/`, `adapters/`, `simulation/`, `mock_agent/`, `examples/*-bot` | VOICE |
+| `backend/pareeksha/gnani/`, `speech/`, `audio/`, `adapters/`, `simulation/`, `mock_agent/`, `examples/pipecat-bot` | VOICE |
 | `backend/pareeksha/llm/`, `evaluation/`, `audit/`, `dialect/` | EVAL |
 | `backend/pareeksha/integrations/`, `sdk/`, `action/` | INT |
 | `web/` | FE (specs from DES) |
@@ -160,9 +162,9 @@ pareeksha/                                   ← repo root
 ```
 web ──HTTP──► api          sdk/action ──HTTP──► api          (no Python imports from web or sdk into backend)
 api ──► db, events.outbox, schemas, integrations.signing
-workers ──► simulation, audit, evaluation, dialect, integrations, runs ──► audio, gnani, llm, adapters, storage, db, events
+workers ──► simulation, audit, evaluation, dialect, rag, quicktest, integrations, runs ──► audio, gnani/speech, llm, adapters, storage, db, events
 audio ──► nothing (pure functions)
 ```
-- Only `gnani/`, `llm/`, `adapters/` and `integrations/*/connector.py` touch the network (plus `events/` for Kafka).
-- The API never calls Gnani, Gemini or CRMs directly — it writes outbox events. Exception: persona/noise previews.
-- `web/lib/api/schema.d.ts` and `sdk/python/pareeksha_sdk/models.py` are generated; CI fails if stale.
+- Network access is confined to `gnani/`, `speech/`, `llm/`, `agent_llm/`, `adapters/`, `rag/` (embeddings/rerank), `integrations/` connectors (plus `events/` for Kafka).
+- The API does not call speech providers, the LLM or CRMs for run/audit work — it writes outbox events. Exceptions: persona/noise previews, agent connection tests, and interactive designer/quick-test/speech endpoints.
+- `web/lib/api/schema.d.ts` and `sdk/python/src/pareeksha_sdk/models.py` are generated; CI fails if stale (`backend/tests/contract/test_schema_dts_fresh.py`).
