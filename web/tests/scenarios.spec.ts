@@ -96,9 +96,12 @@ test.describe("Scenarios list", () => {
 test.describe("Scenario editor", () => {
   test("validation: required fields are flagged on blur and on save", async ({ page }) => {
     await open(page, "/scenarios/new");
-    await page.locator("#sc-title").focus();
-    await page.locator("#sc-title").blur();
-    await expect(page.getByText("Enter a title.")).toBeVisible();
+    // A blur before hydration has no handler yet, so retry until the form reacts (flaky under 4 CI workers).
+    await expect(async () => {
+      await page.locator("#sc-title").focus();
+      await page.locator("#sc-title").blur();
+      await expect(page.getByText("Enter a title.")).toBeVisible({ timeout: 1000 });
+    }).toPass();
     await page.getByRole("button", { name: "Create scenario" }).click();
     await expect(page.getByRole("alert").filter({ hasText: "Fix 3 fields before saving." })).toBeVisible();
     await expect(page.locator("#sc-title")).toBeFocused();
