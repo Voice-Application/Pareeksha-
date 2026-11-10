@@ -38,7 +38,8 @@ test.describe("overview home", () => {
 
   test("the API health row follows the health request, not the database", async ({ page }) => {
     const st = opsState();
-    st.extra["GET /health"] = { db: "down", kafka: "ok" };
+    // A down dependency is reported with 503 and the same body.
+    st.extra["GET /health"] = [503, { db: "down", kafka: "ok" }];
     await mockFe(page, st);
     await page.goto("/");
     await expect(page.getByRole("heading", { name: "Platform (admins only)" })).toBeVisible();

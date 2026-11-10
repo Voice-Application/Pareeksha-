@@ -76,7 +76,14 @@ function subscribeConn(onChange: () => void): () => void {
 function parseConn(raw: string): Record<string, StoredConn> {
   try {
     const v: unknown = JSON.parse(raw);
-    return v && typeof v === "object" ? (v as Record<string, StoredConn>) : {};
+    if (!v || typeof v !== "object" || Array.isArray(v)) return {};
+    // Storage is writable by anything on the origin: keep only entries with the shape the list renders.
+    const out: Record<string, StoredConn> = {};
+    for (const [id, e] of Object.entries(v)) {
+      const s = e as Partial<StoredConn> | null;
+      if (s && typeof s === "object" && typeof s.at === "string" && s.result && typeof s.result === "object" && typeof s.result.ok === "boolean") out[id] = s as StoredConn;
+    }
+    return out;
   } catch {
     return {};
   }

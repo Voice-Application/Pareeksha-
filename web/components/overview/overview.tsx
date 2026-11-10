@@ -40,6 +40,14 @@ async function allAgents() {
 const inr = (n: number | null | undefined) => (n == null ? "-" : `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`);
 const linkCls = "text-accent-fg underline-offset-2 hover:underline";
 
+/** The health endpoint answers 503 with the same body when a dependency is down: still an answer, not an error. */
+async function fetchHealth() {
+  const p = api.GET("/api/v1/health");
+  const r = await p.catch(() => null);
+  if (r?.response.status === 503 && r.error && typeof r.error.db === "string" && typeof r.error.kafka === "string") return r.error;
+  return call(p);
+}
+
 /** Panel contents for a query: a loading skeleton, an error with retry, an empty note, else the children. */
 function PanelBody({ q, rows, empty, children }: { q: { isPending: boolean; isError: boolean; error: unknown; refetch: () => unknown }; rows: number; empty: string; children: React.ReactNode }) {
   if (q.isPending)
@@ -99,7 +107,7 @@ export function Overview() {
   // browser never requests the Kafka/outbox/consumer-lag payload (hiding the panel is not enough).
   const metrics = useQuery({ queryKey: ["metrics"], queryFn: () => call(api.GET("/api/v1/metrics/summary")), enabled: isAdmin, refetchInterval: isAdmin ? 15000 : false });
   const usage = useQuery({ queryKey: ["usage"], queryFn: () => call(api.GET("/api/v1/usage")) });
-  const health = useQuery({ queryKey: ["health"], queryFn: () => call(api.GET("/api/v1/health")), enabled: isAdmin, refetchInterval: isAdmin ? 15000 : false });
+  const health = useQuery({ queryKey: ["health"], queryFn: fetchHealth, enabled: isAdmin, refetchInterval: isAdmin ? 15000 : false });
 
   if (agents.isError) return <><PageHeader eyebrow="Overview" title="Overview" /><ErrorPanel error={agents.error} what="agents" onRetry={() => void agents.refetch()} /></>;
   if (agents.isPending) return <OverviewSkeleton />;

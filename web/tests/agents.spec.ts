@@ -158,6 +158,15 @@ test.describe("Agents list", () => {
     await expect(page.getByRole("row", { name: /Collections Bot/ })).toContainText("not tested yet");
   });
 
+  test("a malformed stored connection result is ignored, not rendered", async ({ page }) => {
+    // An entry for a listed agent with no result object would throw while rendering the row.
+    const bad = JSON.stringify({ [uuid(101)]: { at: "2026-10-24T10:00:00Z" }, [uuid(102)]: null });
+    await page.addInitScript((v) => window.localStorage.setItem("pareeksha.agents.connection.v1", v), bad);
+    await open(page, "/agents");
+    await expect(page.getByRole("row", { name: /EMI Reminder Bot/ })).toContainText("not tested yet");
+    await expect(page.getByRole("row", { name: /Collections Bot/ })).toContainText("not tested yet");
+  });
+
   test("archive asks to confirm, names the agent, then removes it", async ({ page }) => {
     const s = await open(page, "/agents");
     await page.getByRole("button", { name: "Actions for Collections Bot" }).click();
