@@ -22,7 +22,7 @@ is pre-run and the recording only clicks through finished results.
 | t (s) | Screen and action | Voice-over |
 |---|---|---|
 | 0 to 12 | Title card, then **Home** | "Voice bots sound perfect in a demo. Then a real Indian caller rings from a noisy street, mixing Kannada and English, and the bot breaks. Pareeksha finds that before launch." |
-| 12 to 24 | **Agents**, open "EMI Reminder Bot" | "Connect any voice agent: a Pipecat bot, or anything that speaks our open audio protocol. This one is a loan reminder bot." |
+| 12 to 24 | **Voice agents**, open "EMI Reminder Bot" | "Connect any voice agent: a Pipecat bot, or anything that speaks our open audio protocol. This one is a loan reminder bot." |
 | 24 to 38 | **Personas**, then **Noise profiles**, play one noisy sample | "Then pick who calls it. Twenty Indian personas, like Manju, an auto driver who speaks Kannada. And real line conditions: 8 kHz phone audio, office babble, street and market noise." |
 | 38 to 50 | **Scenarios**, then **Test designer** | "Scenarios describe what the caller wants. Write them by hand, or build the test in a chat with the test designer." |
 | 50 to 64 | **New run** wizard, then **Results**, open the failing run, show pass rate and heatmap | "Start a run. Every caller voice is Gnani Timbre text to speech, and the call is transcribed by Gnani Prisma speech to text. Here is the result, call by call." |

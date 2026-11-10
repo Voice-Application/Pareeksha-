@@ -41,7 +41,7 @@ Today, teams test by **manually calling their own bot** a few times. Global test
 
 ### Goals (v1)
 1. Run a **matrix of synthetic test calls** (persona × scenario × noise condition) against a voice agent over WebSocket, in Kannada, Hindi and code-mixed speech.
-2. **Score every call** with deterministic checks plus a Gemini judge on a fixed, versioned rubric with evidence.
+2. **Score every call** with deterministic checks plus an LLM judge (DeepSeek by default; Gemini or an OpenAI-compatible endpoint per project) on a fixed, versioned rubric with evidence.
 3. **Audit uploaded real call recordings** with the same rubric.
 4. Produce a **dialect / line-condition ASR gap report** from real native-speaker clips.
 5. **Promote failed calls into regression tests** and re-run them on demand.
@@ -53,7 +53,7 @@ Today, teams test by **manually calling their own bot** a few times. Global test
 ### Non-goals (v1)
 - Real PSTN/SIP calls (Exotel, Twilio, LiveKit SIP) — v2.
 - Live streaming monitoring of production calls — v2.
-- Multi-tenant SaaS: login, teams, billing — v2 (API keys exist in v1 for programmatic access).
+- Multi-tenant SaaS: teams, billing, SSO — v2. (As built: API keys for programmatic access, plus web sign-in with `admin` and `member` roles inside a project.)
 - Building every CRM connector — v1 builds HubSpot + Generic Webhook; Salesforce, Zoho, LeadSquared, Freshdesk, Exotel and Slack are designed for, not built.
 - High concurrency (more than ~5 simultaneous simulated calls).
 - Languages beyond Kannada, Hindi, Indian English and their code-mixes (the design keeps this extensible).
@@ -113,7 +113,7 @@ Today, teams test by **manually calling their own bot** a few times. Global test
 | F6 | Run orchestration on Kafka (matrix expansion, consumer groups, retry topics, DLQ, concurrency cap) | Must |
 | F7 | Call recording (separate caller/agent tracks + mixed) | Must |
 | F8 | Deterministic metrics (latency, barge-in, silence, disclosures, loops) | Must |
-| F9 | Gemini judge with versioned rubric, structured JSON, evidence | Must |
+| F9 | LLM judge (DeepSeek default; Gemini or OpenAI-compatible optional) with versioned rubric, structured JSON, evidence | Must |
 | F10 | Post-call audit of uploaded recordings | Must |
 | F11 | Dialect ASR gap report | Must |
 | F12 | Next.js web app (runs, live progress, call drill-down, dialect heatmap, integrations, DLQ) | Must |
@@ -130,11 +130,25 @@ Today, teams test by **manually calling their own bot** a few times. Global test
 | F23 | Generic Webhook connector (signed source + sink) | Must |
 | F24 | HubSpot sink connector | Must |
 | F25 | Python SDK + CLI (`pareeksha run/audit/regress/apply/dlq`) | Must |
-| F26 | Agent adapters: `pareeksha-audio-v1` + Pipecat (Must), LiveKit (Should), Vapi (Could) | Must/Should/Could |
+| F26 | Agent adapters: `pareeksha-audio-v1` + Pipecat (Must), LiveKit (Should), Vapi (Could) | Must/Should/Could. As built: `audio_v1` and Pipecat; LiveKit and Vapi were cut by the owner (28 Oct 2026) |
 | F27 | Config-as-code `pareeksha.yaml` | Should |
 | F28 | API keys with scopes | Must |
 | F29 | Dead-letter viewer + replay | Should |
 | F30 | Salesforce, Zoho, LeadSquared, Freshdesk, Exotel, Slack connectors | Won't (v1, designed for) |
+
+### Added after v0.2 (built, 2–10 Nov 2026; not in the original priority list)
+
+| ID | Feature | Status |
+|---|---|---|
+| F31 | Prompt testing: prompt agents with versions, "Test my prompt" quick tests judged against the rules in the prompt, improve-prompt suggestion | Built |
+| F32 | RAG lab: knowledge bases, indexing, ground-truth questions, RAG matrix (chunking/embedding/reranker) with hit-rate and hallucination judging, cost estimate | Built |
+| F33 | Test designer: chat that proposes an agent, scenarios and personas, committed in one step | Built |
+| F34 | Per-project LLM settings (DeepSeek, Gemini, OpenAI-compatible; write-only encrypted keys) and pricing settings | Built |
+| F35 | Web sign-in with `admin` / `member` roles; admin-only API keys, LLM settings, integration writes, user management | Built |
+| F36 | Tool-call reporting after a call (`PUT /calls/{id}/tool-calls`, webhook `tool_calls`) | Built |
+| F37 | Rubric versions: `rubric-2026-11-v3` active (pass gate, advisory checks); v1 and v2 kept | Built |
+
+Implementation status of F1–F30 is tracked in `STATUS.md`; F21 and F30 remain not built. F19 is built as `GET /runs/{id}/report` (HTML). The dialect dataset is 110 Vaani clips (CC-BY-4.0), not self-recorded clips. Judge agreement (F16 target κ ≥ 0.6) was not met: κ = 0.19 on the 30 EVAL-06 labels (`proof/FINAL_REPORT.md`, V9).
 
 ## 8. Success metrics
 
