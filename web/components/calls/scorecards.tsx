@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronRight, CircleCheck, CircleX, Scale, TriangleAlert } from "lucide-react";
-import { RUBRIC, type CallDetailData, type CallEvaluation } from "@/lib/api/calls";
+import { CHECK_LABEL, RUBRIC, type CallDetailData, type CallEvaluation } from "@/lib/api/calls";
 import { Panel, Chip } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
 import { Strip } from "@/components/ui/states";
@@ -148,7 +148,7 @@ export function ChecksPanel({ checks, onEvidence }: { checks: NonNullable<CallDe
                 <Icon size={16} strokeWidth={1.6} className={cn("mt-0.5", c.passed === false ? "text-fail-fg" : c.passed ? "text-pass-fg" : "text-subtle")} aria-hidden />
                 <div className="min-w-0">
                   <p className="flex flex-wrap items-center gap-2">
-                    <span className="mono text-sm">{c.check_key}</span>
+                    <span className="mono text-sm">{CHECK_LABEL[c.check_key] ?? c.check_key}</span>
                     {c.must_pass && <Chip>must pass</Chip>}
                     {(c.evidence_turns ?? []).map((n) => (
                       <EvidenceRef key={n} turn={n} onSeek={() => onEvidence(c.evidence_turns ?? [], `Evidence ${evLabel(c.evidence_turns ?? [n])}`)} />
