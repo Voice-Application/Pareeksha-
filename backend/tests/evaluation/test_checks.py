@@ -6,19 +6,21 @@ from pareeksha.evaluation.checks import (
     check_forbidden,
     check_language,
     check_no_loop,
+    check_responsive,
     check_tool_calls,
     run_checks,
 )
 from pareeksha.evaluation.types import Turn
 
 
-def T(idx, speaker, text, lang=None):
+def T(idx, speaker, text, lang=None, gt=None):
     return Turn(
         idx=idx,
         speaker=speaker,
         start_ms=idx * 1000,
         end_ms=idx * 1000 + 800,
         text=text,
+        ground_truth_text=gt,
         language_detected=lang,
     )
 
@@ -123,6 +125,88 @@ def test_no_loop():
     assert check_no_loop([T(0, "caller", "hi")]).passed is None
 
 
+def test_responsive_flags_repeated_answer_to_a_question():
+    turns = [
+        T(0, "agent", "Your EMI of four thousand rupees is due on Friday."),
+        T(1, "caller", "What is the due date for the payment?"),
+        T(2, "agent", "Your EMI of four thousand rupees is due on Friday."),
+    ]
+    r = check_responsive(turns)
+    assert r.passed is False
+    assert r.evidence_turns == (1, 2)
+    assert "1 caller question" in r.detail
+    assert r.check_type == "responsive" and r.check_key == "repeats_after_question"
+    assert r.must_pass is False
+
+
+def test_responsive_flags_repeated_answer_in_hindi_and_kannada():
+    hi = [
+        T(0, "agent", "aapki kist char hazaar rupaye hai"),
+        T(1, "caller", "kitna amount dena hai?", gt="kitna amount dena hai?"),
+        T(2, "agent", "aapki kist char hazaar rupaye hai"),
+    ]
+    assert check_responsive(hi).passed is False
+
+    kn = [
+        T(0, "agent", "ನಿಮ್ಮ ಕಂತು ನಾಲ್ಕು ಸಾವಿರ ರೂಪಾಯಿ"),
+        T(1, "caller", "ಎಷ್ಟು ಕಟ್ಟಬೇಕು"),
+        T(2, "agent", "ನಿಮ್ಮ ಕಂತು ನಾಲ್ಕು ಸಾವಿರ ರೂಪಾಯಿ"),
+    ]
+    assert check_responsive(kn).passed is False
+
+
+def test_responsive_passes_when_agent_gives_a_new_answer():
+    turns = [
+        T(0, "agent", "Your EMI of four thousand rupees is due on Friday."),
+        T(1, "caller", "What is the due date for the payment?"),
+        T(2, "agent", "It is due on the fifth of next month, sir."),
+    ]
+    assert check_responsive(turns).passed is True
+
+
+def test_responsive_exempts_repeated_answer_to_a_repeated_question():
+    turns = [
+        T(0, "agent", "Your EMI of four thousand rupees is due on Friday."),
+        T(1, "caller", "What is the due date for the payment?"),
+        T(2, "agent", "Your EMI of four thousand rupees is due on Friday."),
+        T(3, "caller", "Sorry, what is the due date for the payment?"),
+        T(4, "agent", "Your EMI of four thousand rupees is due on Friday."),
+    ]
+    # turn 2 is flagged (first question, no earlier repeat exemption); turn 4 is exempt
+    # because the caller re-asked the same question (turn 3 repeats turn 1).
+    r = check_responsive(turns)
+    assert r.passed is False
+    assert r.evidence_turns == (1, 2)
+
+
+def test_responsive_ignores_short_acknowledgements():
+    turns = [
+        T(0, "agent", "ok"),
+        T(1, "caller", "Can you repeat that?"),
+        T(2, "agent", "ok"),
+    ]
+    assert check_responsive(turns).passed is True
+
+
+def test_responsive_none_when_no_caller_questions():
+    turns = [
+        T(0, "agent", "Hello, this is a reminder call."),
+        T(1, "caller", "I will pay on Friday."),
+        T(2, "agent", "Thank you, noted."),
+    ]
+    assert check_responsive(turns).passed is None
+
+
+def test_responsive_does_not_treat_can_could_statements_as_questions():
+    # "can"/"could" were removed from _QUESTION_WORDS: they also open plain statements.
+    turns = [
+        T(0, "agent", "Please confirm the amount."),
+        T(1, "caller", "I can pay on Friday."),
+        T(2, "agent", "Please confirm the amount."),
+    ]
+    assert check_responsive(turns).passed is None
+
+
 def test_tool_calls_expected():
     expected = [
         {
@@ -223,11 +307,19 @@ def test_run_checks_integration():
         ("forbidden_absent", "threat"): False,
         ("language_match", "en-IN"): True,
         ("no_loop", "agent_repeats"): True,
+        ("responsive", "repeats_after_question"): None,
         ("tool_calls_expected", "record_ptp"): False,
         ("no_unexpected_tool", "no_unexpected_tool"): True,
         ("amount_confirmed", "emi"): False,
     }
     assert res[0].to_dict()["check_type"] == "disclosure_present"
+
+
+def test_run_checks_includes_exactly_one_responsive_result():
+    turns = [T(0, "agent", "Hello."), T(1, "caller", "Okay."), T(2, "agent", "Bye.")]
+    res = run_checks(turns)
+    responsive = [r for r in res if r.check_type == "responsive"]
+    assert len(responsive) == 1
 
 
 def _emi_call(readback: bool):

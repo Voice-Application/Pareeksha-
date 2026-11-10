@@ -46,6 +46,12 @@ export const CHECK_TAG: Record<string, string> = {
   tool_calls_expected: "tool_selection",
 };
 
+/** Friendly label for a check_key, where the raw key is not self-explanatory. Advisory checks
+ * (e.g. `responsive`) fall back to the raw check_key when not listed here. */
+export const CHECK_LABEL: Record<string, string> = {
+  repeats_after_question: "Responds to questions",
+};
+
 export function mmss(ms: number): string {
   const s = Math.max(0, Math.floor(ms / 1000));
   return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;

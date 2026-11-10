@@ -27,7 +27,7 @@ from typing import Any
 import yaml
 from rapidfuzz import fuzz
 
-from .metrics import find_repeats, normalize_text
+from .metrics import find_repeats, is_near_repeat, normalize_text
 from .numbers import ParsedNumber, extract_numbers, parse_number
 from .types import CheckResult, Disclosure, ForbiddenPhrase, ToolCall, Turn, as_turns
 
@@ -247,6 +247,118 @@ def check_no_loop(
         must_pass,
         tuple(sorted(worst)),
         "No repeated utterance loop",
+    )
+
+
+# -- responsive ----------------------------------------------------------------------------
+
+# Question words covering English, romanised Hindi/Hinglish, Devanagari and Kannada. "can"/"could"
+# are excluded: they also open plain statements ("I can pay Friday"), so those rely on '?' instead.
+_QUESTION_WORDS = {
+    "what",
+    "when",
+    "why",
+    "how",
+    "which",
+    "who",
+    "where",
+    "kya",
+    "kab",
+    "kyun",
+    "kyon",
+    "kaise",
+    "kitna",
+    "kitne",
+    "kaun",
+    "kahan",
+    "क्या",
+    "कब",
+    "क्यों",
+    "कैसे",
+    "कितना",
+    "कितने",
+    "कौन",
+    "कहाँ",
+    "कहां",
+    "ಏನು",
+    "ಯಾವಾಗ",
+    "ಯಾಕೆ",
+    "ಏಕೆ",
+    "ಹೇಗೆ",
+    "ಎಷ್ಟು",
+    "ಯಾರು",
+    "ಎಲ್ಲಿ",
+}
+
+
+def _caller_text(t: Turn) -> str:
+    """Prefer the simulated caller's ground-truth line over the (possibly noisy) STT text."""
+    return t.ground_truth_text if t.ground_truth_text else t.text
+
+
+def _is_question(text: str) -> bool:
+    if "?" in text or "？" in text:
+        return True
+    return any(w in _QUESTION_WORDS for w in normalize_text(text).split())
+
+
+def check_responsive(turns: Iterable, must_pass: bool = False) -> CheckResult:
+    """Fail when the agent answers a caller question by repeating an earlier line of its own.
+
+    A caller turn counts as a question when it contains '?'/'？' or a whole-token question word
+    (see `_QUESTION_WORDS`). For each caller question immediately followed by an agent turn, the
+    reply is non-responsive when it is a near-repeat (same threshold as `check_no_loop`) of an
+    earlier agent turn, unless: the reply is under 4 normalised words (acknowledgements repeat
+    naturally), or the caller's question is itself a near-repeat of an earlier caller turn (the
+    caller asked the same thing again, so the same answer back is correct).
+    """
+    ts = as_turns(turns)
+    agent_repeats = find_repeats(ts, min_words=4)  # agent idx -> idx of earlier turn it repeats
+    seen_caller: list[str] = []
+    checked: list[int] = []
+    flagged: list[int] = []
+    for i, t in enumerate(ts):
+        if t.speaker != "caller":
+            continue
+        text = _caller_text(t)
+        norm = normalize_text(text)
+        caller_repeat = any(is_near_repeat(norm, prev) for prev in seen_caller)
+        seen_caller.append(norm)
+        if not _is_question(text):
+            continue
+        nxt = ts[i + 1] if i + 1 < len(ts) else None
+        if nxt is None or nxt.speaker != "agent":
+            continue
+        checked.append(t.idx)
+        if caller_repeat:
+            continue
+        if nxt.idx in agent_repeats:
+            flagged += [t.idx, nxt.idx]
+    if not checked:
+        return CheckResult(
+            "responsive",
+            "repeats_after_question",
+            None,
+            must_pass,
+            (),
+            "No caller question followed by an agent turn",
+        )
+    if flagged:
+        return CheckResult(
+            "responsive",
+            "repeats_after_question",
+            False,
+            must_pass,
+            tuple(sorted(set(flagged))),
+            f"Agent repeated an earlier line in reply to {len(flagged) // 2} caller question(s)",
+        )
+    return CheckResult(
+        "responsive",
+        "repeats_after_question",
+        True,
+        must_pass,
+        (),
+        "Agent responded to caller questions without repeating itself",
     )
 
 
@@ -576,6 +688,7 @@ def run_checks(
     if expected_language:
         out.append(check_language(ts, expected_language, allowed_languages))
     out.append(check_no_loop(ts))
+    out.append(check_responsive(ts))
     out += check_tool_calls(expected_tool_calls, tool_calls)
     out += check_no_unexpected_tool(expected_tool_calls, tool_calls)
     if expected_amounts:
