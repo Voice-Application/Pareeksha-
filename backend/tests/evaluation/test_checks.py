@@ -6,19 +6,21 @@ from pareeksha.evaluation.checks import (
     check_forbidden,
     check_language,
     check_no_loop,
+    check_responsive,
     check_tool_calls,
     run_checks,
 )
 from pareeksha.evaluation.types import Turn
 
 
-def T(idx, speaker, text, lang=None):
+def T(idx, speaker, text, lang=None, gt=None):
     return Turn(
         idx=idx,
         speaker=speaker,
         start_ms=idx * 1000,
         end_ms=idx * 1000 + 800,
         text=text,
+        ground_truth_text=gt,
         language_detected=lang,
     )
 
@@ -121,6 +123,78 @@ def test_no_loop():
     once = looping[:3]
     assert check_no_loop(once).passed is True  # one repeat is friction, not a loop
     assert check_no_loop([T(0, "caller", "hi")]).passed is None
+
+
+def test_responsive_flags_repeated_answer_to_a_question():
+    turns = [
+        T(0, "agent", "Your EMI of four thousand rupees is due on Friday."),
+        T(1, "caller", "What is the due date for the payment?"),
+        T(2, "agent", "Your EMI of four thousand rupees is due on Friday."),
+    ]
+    r = check_responsive(turns)
+    assert r.passed is False
+    assert r.evidence_turns == (1, 2)
+    assert "1 caller question" in r.detail
+    assert r.check_type == "responsive" and r.check_key == "repeats_after_question"
+    assert r.must_pass is False
+
+
+def test_responsive_flags_repeated_answer_in_hindi_and_kannada():
+    hi = [
+        T(0, "agent", "aapki kist char hazaar rupaye hai"),
+        T(1, "caller", "kitna amount dena hai?", gt="kitna amount dena hai?"),
+        T(2, "agent", "aapki kist char hazaar rupaye hai"),
+    ]
+    assert check_responsive(hi).passed is False
+
+    kn = [
+        T(0, "agent", "ನಿಮ್ಮ ಕಂತು ನಾಲ್ಕು ಸಾವಿರ ರೂಪಾಯಿ"),
+        T(1, "caller", "ಎಷ್ಟು ಕಟ್ಟಬೇಕು"),
+        T(2, "agent", "ನಿಮ್ಮ ಕಂತು ನಾಲ್ಕು ಸಾವಿರ ರೂಪಾಯಿ"),
+    ]
+    assert check_responsive(kn).passed is False
+
+
+def test_responsive_passes_when_agent_gives_a_new_answer():
+    turns = [
+        T(0, "agent", "Your EMI of four thousand rupees is due on Friday."),
+        T(1, "caller", "What is the due date for the payment?"),
+        T(2, "agent", "It is due on the fifth of next month, sir."),
+    ]
+    assert check_responsive(turns).passed is True
+
+
+def test_responsive_exempts_repeated_answer_to_a_repeated_question():
+    turns = [
+        T(0, "agent", "Your EMI of four thousand rupees is due on Friday."),
+        T(1, "caller", "What is the due date for the payment?"),
+        T(2, "agent", "Your EMI of four thousand rupees is due on Friday."),
+        T(3, "caller", "Sorry, what is the due date for the payment?"),
+        T(4, "agent", "Your EMI of four thousand rupees is due on Friday."),
+    ]
+    # turn 2 is flagged (first question, no earlier repeat exemption); turn 4 is exempt
+    # because the caller re-asked the same question (turn 3 repeats turn 1).
+    r = check_responsive(turns)
+    assert r.passed is False
+    assert r.evidence_turns == (1, 2)
+
+
+def test_responsive_ignores_short_acknowledgements():
+    turns = [
+        T(0, "agent", "ok"),
+        T(1, "caller", "Can you repeat that?"),
+        T(2, "agent", "ok"),
+    ]
+    assert check_responsive(turns).passed is True
+
+
+def test_responsive_none_when_no_caller_questions():
+    turns = [
+        T(0, "agent", "Hello, this is a reminder call."),
+        T(1, "caller", "I will pay on Friday."),
+        T(2, "agent", "Thank you, noted."),
+    ]
+    assert check_responsive(turns).passed is None
 
 
 def test_tool_calls_expected():
