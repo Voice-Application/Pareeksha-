@@ -142,6 +142,11 @@ def talk_ratio(turns: Sequence[Turn]) -> float | None:
     return None if a + c == 0 else a / (a + c)
 
 
+def is_near_repeat(a: str, b: str, threshold: float = REPEAT_SIMILARITY) -> bool:
+    """Whether two already-normalised strings are near-duplicates (same test as find_repeats)."""
+    return fuzz.ratio(a, b) / 100.0 >= threshold
+
+
 def find_repeats(
     turns: Sequence[Turn], threshold: float = REPEAT_SIMILARITY, min_words: int = 3
 ) -> dict[int, int]:
@@ -155,7 +160,7 @@ def find_repeats(
         if len(norm.split()) < min_words:
             continue
         for idx, prev in seen:
-            if fuzz.ratio(norm, prev) / 100.0 >= threshold:
+            if is_near_repeat(norm, prev, threshold):
                 repeats[t.idx] = idx
                 break
         else:
