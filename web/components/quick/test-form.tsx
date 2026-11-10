@@ -11,7 +11,7 @@ import { relativeTime } from "@/lib/format";
 import { PageHeader, Panel } from "@/components/ui/layout";
 import { Button } from "@/components/ui/button";
 import { Segmented, SelectField, TextAreaField, TextField } from "@/components/ui/field";
-import { Dialog } from "@/components/ui/overlay";
+import { CostConfirmDialog } from "./cost-confirm";
 import { EmptyState, ErrorPanel, Strip, TableSkeleton } from "@/components/ui/states";
 import { QuickStatus } from "./status";
 
@@ -41,16 +41,20 @@ export function QuickTestForm() {
   const [count, setCount] = useState(8);
   const [error, setError] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<{ body: QuickTestCreate; estimate: CostEstimate } | null>(null);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
 
   const start = useMutation({
     mutationFn: createQuickTest,
     onSuccess: (t) => router.push(`/test/${t.id}`),
     onError: (e, body) => {
-      if (e instanceof ApiError && e.code === "confirm_cost") {
+      if (e instanceof ApiError && e.code === "confirm_cost" && !body.confirm_cost) {
         setConfirm({ body: { ...body, plan: e.details.plan as QuickTestCreate["plan"], confirm_cost: true }, estimate: e.details.estimate as CostEstimate });
         return;
       }
-      setError(e instanceof ApiError ? e.userMessage() : "The API did not respond.");
+      const message = e instanceof ApiError ? e.userMessage() : "The API did not respond.";
+      // A confirmed run that fails reports inside the still-open dialog, next to the button that sent it.
+      if (body.confirm_cost) setConfirmError(message);
+      else setError(message);
     },
   });
 
@@ -164,30 +168,20 @@ export function QuickTestForm() {
         </form>
         <RecentTests />
       </div>
-      <Dialog
-        open={!!confirm}
-        onClose={() => setConfirm(null)}
-        title="Run this test?"
-        footer={
-          <>
-            <Button onClick={() => setConfirm(null)}>Not now</Button>
-            <Button
-              variant="primary"
-              loading={start.isPending}
-              onClick={() => {
-                if (confirm) start.mutate(confirm.body);
-                setConfirm(null);
-              }}
-            >
-              Run for {inr(confirm?.estimate.est_cost)}
-            </Button>
-          </>
-        }
-      >
-        <p className="text-sm">
-          {confirm?.estimate.conversations} conversations are estimated at {inr(confirm?.estimate.est_cost)}, above the {inr(confirm?.estimate.limit)} that runs without asking. The estimate assumes every conversation runs to its longest, so the real cost is usually lower.
-        </p>
-      </Dialog>
+      <CostConfirmDialog
+        estimate={confirm?.estimate ?? null}
+        running={start.isPending}
+        error={confirmError}
+        onClose={() => {
+          setConfirm(null);
+          setConfirmError(null);
+        }}
+        onRun={() => {
+          if (!confirm) return;
+          setConfirmError(null);
+          start.mutate(confirm.body);
+        }}
+      />
     </>
   );
 }

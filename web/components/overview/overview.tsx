@@ -16,7 +16,7 @@ import { PageHeader, Panel } from "@/components/ui/layout";
 import { LinkButton } from "@/components/ui/button";
 import { EmptyState, ErrorPanel, Skeleton } from "@/components/ui/states";
 import { FilterSelect } from "@/components/ui/field";
-import { FlagChip, Meter, ScoreChip, StatTile, StatusPill, TileRow, VerdictBadge, verdictOf } from "@/components/ui/measure";
+import { FlagChip, Meter, ScoreChip, StatTile, StatusPill, TileRow, VerdictBadge, fmtScore, verdictOf } from "@/components/ui/measure";
 import { Chip } from "@/components/ui/layout";
 import { useIsAdmin } from "@/components/layout/theme-toggle";
 import { BarChart, DonutChart, LineChart } from "@/components/charts";
@@ -40,6 +40,14 @@ async function allAgents() {
 const inr = (n: number | null | undefined) => (n == null ? "-" : `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`);
 const linkCls = "text-accent-fg underline-offset-2 hover:underline";
 
+/** The health endpoint answers 503 with the same body when a dependency is down: still an answer, not an error. */
+async function fetchHealth() {
+  const p = api.GET("/api/v1/health");
+  const r = await p.catch(() => null);
+  if (r?.response.status === 503 && r.error && typeof r.error.db === "string" && typeof r.error.kafka === "string") return r.error;
+  return call(p);
+}
+
 /** Panel contents for a query: a loading skeleton, an error with retry, an empty note, else the children. */
 function PanelBody({ q, rows, empty, children }: { q: { isPending: boolean; isError: boolean; error: unknown; refetch: () => unknown }; rows: number; empty: string; children: React.ReactNode }) {
   if (q.isPending)
@@ -58,14 +66,15 @@ export function OverviewSkeleton() {
   return (
     <>
       <PageHeader eyebrow="Overview" title="" description={<Skeleton className="h-4 w-72" />} />
-      <TileRow cols="grid-cols-2 min-[860px]:grid-cols-4">{Array.from({ length: 4 }, (_, i) => <div key={i} className="px-5 py-4"><Skeleton className="h-3 w-20" /><Skeleton className="mt-3 h-8 w-16" /></div>)}</TileRow>
+      <TileRow cols="grid-cols-2 min-[860px]:grid-cols-3">{Array.from({ length: 3 }, (_, i) => <div key={i} className="px-5 py-4"><Skeleton className="h-3 w-20" /><Skeleton className="mt-3 h-8 w-16" /></div>)}</TileRow>
     </>
   );
 }
 
 
-/** The home screen: it leads with the user's prompt tests, then an agent run summary and — for admins
- *  only — the platform-health telemetry. A non-admin (or an unknown role) never fetches that telemetry. */
+/** The home screen: it leads with the user's prompt tests (plus a "Get started" guide until one has finished),
+ *  then the selected agent's run summary. Admins also get a separate "Platform" section at the bottom with
+ *  the DLQ tile and platform-health telemetry; a non-admin (or an unknown role) never sees or fetches it. */
 export function Overview() {
   const url = useUrlState();
   const now = useNow();
@@ -98,7 +107,7 @@ export function Overview() {
   // browser never requests the Kafka/outbox/consumer-lag payload (hiding the panel is not enough).
   const metrics = useQuery({ queryKey: ["metrics"], queryFn: () => call(api.GET("/api/v1/metrics/summary")), enabled: isAdmin, refetchInterval: isAdmin ? 15000 : false });
   const usage = useQuery({ queryKey: ["usage"], queryFn: () => call(api.GET("/api/v1/usage")) });
-  const health = useQuery({ queryKey: ["health"], queryFn: () => call(api.GET("/api/v1/health")), enabled: isAdmin, refetchInterval: isAdmin ? 15000 : false });
+  const health = useQuery({ queryKey: ["health"], queryFn: fetchHealth, enabled: isAdmin, refetchInterval: isAdmin ? 15000 : false });
 
   if (agents.isError) return <><PageHeader eyebrow="Overview" title="Overview" /><ErrorPanel error={agents.error} what="agents" onRetry={() => void agents.refetch()} /></>;
   if (agents.isPending) return <OverviewSkeleton />;
@@ -155,6 +164,9 @@ export function Overview() {
   const lagHidden = lagAll.length - lagRows.length;
   const stale = metrics.dataUpdatedAt && now && now - metrics.dataUpdatedAt > 45000;
   const budget = usage.data?.budget_credits;
+  const budgetPct = budget ? Math.min(100, ((usage.data?.credits_used ?? 0) / budget) * 100) : 0;
+  // The guide is for first-timers: hide it once any prompt test has finished (and while the list loads).
+  const showGetStarted = !promptTests.isPending && !asList(promptTests.data).some((t) => t.status === "done");
 
   return (
     <>
@@ -163,8 +175,9 @@ export function Overview() {
         description="Paste your bot's system prompt and Pareeksha chats with it as normal and tricky customers, then shows which of its rules it keeps and where it breaks them."
         actions={<LinkButton variant="primary" href="/test"><SquareCheckBig size={14} strokeWidth={1.6} aria-hidden />Test my prompt</LinkButton>}
       />
-      <div className="mb-10 grid items-start gap-6 min-[1180px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <div className={showGetStarted ? "mb-10 grid items-start gap-6 min-[1180px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" : "mb-10"}>
         <PromptTests />
+        {showGetStarted && (
         <Panel title="Get started" label="Get started">
           <ol className="flex flex-col gap-4">
             <li className="flex gap-3">
@@ -181,6 +194,7 @@ export function Overview() {
             </li>
           </ol>
         </Panel>
+        )}
       </div>
 
       <div className="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-t border-border pt-8">
@@ -198,12 +212,10 @@ export function Overview() {
         <LinkButton href={`/runs/new?agent=${agent.id}`}><Play size={14} strokeWidth={1.6} aria-hidden />New run</LinkButton>
       </div>
 
-      <TileRow cols={`grid-cols-2 ${isAdmin ? "min-[860px]:grid-cols-4" : "min-[860px]:grid-cols-3"}`}>
+      <TileRow cols="grid-cols-2 min-[860px]:grid-cols-3">
         <StatTile enter={0} href={latest ? `/runs/${latest.id}` : "/runs"} hero label={`Pass rate${running ? " so far" : ""}`} value={s?.pass_rate != null ? `${Math.round(s.pass_rate * 100)}%` : "-"} caption={latest ? `${latest.progress.evaluated} scored` : "no runs"} />
         <StatTile enter={1} href={latest ? `/runs/${latest.id}?verdict=critical` : "/runs"} label="Critical failures" value={s?.critical_failures ?? "-"} threshold={s?.critical_failures == null ? null : s.critical_failures > 0 ? "fail" : "ok"} caption="target 0" />
-        {/* DLQ depth is an operational internal: only elevated roles see it (and only they fetch ``metrics``). */}
-        {isAdmin && <StatTile enter={2} href="/dlq" label="Open DLQ items" value={metrics.data?.dlq_open ?? "-"} threshold={metrics.data == null ? null : metrics.data.dlq_open > 0 ? "fail" : "ok"} caption="events that failed processing" />}
-        <StatTile enter={isAdmin ? 3 : 2} label="Credits used" value={inr(usage.data?.credits_used)} caption={budget != null ? <span className="inline-flex items-center gap-2">of {inr(budget)} <Meter value={Math.min(100, ((usage.data?.credits_used ?? 0) / budget) * 100)} passLine={null} label="Budget used" /></span> : "no budget set"} />
+        <StatTile enter={2} label="Credits used" value={inr(usage.data?.credits_used)} caption={budget != null ? <span className="inline-flex items-center gap-2">of {inr(budget)} <Meter value={budgetPct} passLine={null} label={`Budget used: ${Math.round(budgetPct)}%, ${inr(usage.data?.credits_used ?? 0)} of ${inr(budget)}`} /></span> : "no budget set"} />
       </TileRow>
 
       <OverviewCharts runs={runs.data?.items ?? []} usage={usage.data?.items ?? []} usageError={usage.isError ? usage.error : undefined} onRetryUsage={() => void usage.refetch()} />
@@ -223,7 +235,7 @@ export function Overview() {
                         <p className="truncate text-base">{i.call_id ? <Link className="underline-offset-2 hover:underline" href={`/calls/${i.call_id}`}>{i.scenario}</Link> : i.scenario}</p>
                         <p className="flex min-w-0 flex-wrap gap-x-4 text-sm text-muted">
                           <span className="truncate">{i.persona}</span>
-                          <span className="mono truncate text-xs leading-5 text-subtle">{i.noise_profile}</span>
+                          {i.noise_profile && <span className="truncate text-xs leading-5 text-subtle">line: <span className="mono">{i.noise_profile}</span></span>}
                         </p>
                       </div>
                       <VerdictBadge verdict={verdictOf(i)} />
@@ -266,7 +278,7 @@ export function Overview() {
                   <li key={c.id} className="flex flex-col gap-2 py-3 first:pt-1 last:pb-0">
                     <div className="flex items-center gap-3">
                       <ScoreChip score={c.overall_score} />
-                      <Link className="mono text-sm underline-offset-2 hover:underline" href={`/calls/${c.id}`}>{c.id.slice(0, 8)}</Link>
+                      <Link className="mono text-sm underline-offset-2 hover:underline" href={`/calls/${c.id}`} aria-label={`Review call ${c.id.slice(0, 8)}${c.overall_score != null ? `, score ${fmtScore(c.overall_score)}` : ""}`}>{c.id.slice(0, 8)}</Link>
                       <span className="ml-auto"><FlagChip iconOnly reasons={c.review_reasons} /></span>
                     </div>
                     {(c.review_reasons ?? []).length > 0 && (
@@ -280,37 +292,47 @@ export function Overview() {
               </ul>
             </PanelBody>
           </Panel>
-
-          {isAdmin && (
-          <Panel title="Platform health" aux={stale ? <span className="text-warn-fg">Last updated {relativeTime(new Date(metrics.dataUpdatedAt).toISOString())}</span> : undefined}>
-            <PanelBody q={metrics} rows={1} empty="">
-              <dl className="grid grid-cols-[1fr_auto] gap-x-4 text-sm [&>dd]:py-1.5 [&>dt]:py-1.5">
-                <dt className="text-muted">API</dt>
-                <dd><Status ok={health.data?.db === "ok"} label={health.data ? "ok" : "unknown"} /></dd>
-                <dt className="text-muted">Database</dt>
-                <dd><Status ok={health.data?.db === "ok"} label={health.data?.db ?? "unknown"} /></dd>
-                <dt className="text-muted">Kafka</dt>
-                <dd><Status ok={health.data?.kafka === "ok"} fail={health.data?.kafka !== "ok" && !!health.data} label={health.data?.kafka ?? "unknown"} /></dd>
-                <dt className="text-muted">Outbox backlog</dt>
-                <dd className="num text-right">{metrics.data?.outbox_backlog ?? "-"}</dd>
-              </dl>
-              {lagRows.length > 0 && (
-                <dl className="mt-3 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto] gap-x-3 border-t border-border pt-3 text-sm [&>div>dd]:py-1 [&>div>dt]:truncate [&>div>dt]:py-1 max-[420px]:grid-cols-[minmax(0,1fr)_auto]">
-                  {lagRows.map(([k, v]) => (
-                    <div key={k} className="contents">
-                      <dt className="text-muted">Lag: <span className="mono text-xs">{k}</span></dt>
-                      <dd className={v > 20 ? "num text-right text-warn-fg" : "num text-right"}>{v}</dd>
-                    </div>
-                  ))}
-                  {lagHidden > 0 && <p className="col-span-full pt-1 text-xs text-subtle">and {lagHidden} more consumer group{lagHidden === 1 ? "" : "s"}</p>}
-                  {lag > 20 && <p className="col-span-full pt-1 text-xs text-warn-fg">A consumer is more than 20 events behind.</p>}
-                </dl>
-              )}
-            </PanelBody>
-          </Panel>
-          )}
         </div>
       </div>
+
+      {/* Operational internals live apart from the run summary, and only elevated roles see (or fetch) them. */}
+      {isAdmin && (
+        <section aria-labelledby="overview-platform" className="mt-10 border-t border-border pt-8">
+          <h2 id="overview-platform" className="label mb-4">Platform (admins only)</h2>
+          <div className="max-w-[720px]">
+            <TileRow cols="grid-cols-1">
+              <StatTile href="/dlq" label="Open DLQ items" value={metrics.data?.dlq_open ?? "-"} threshold={metrics.data == null ? null : metrics.data.dlq_open > 0 ? "fail" : "ok"} caption="events that failed processing" />
+            </TileRow>
+            <Panel title="Platform health" aux={stale ? <span className="text-warn-fg">Last updated {relativeTime(new Date(metrics.dataUpdatedAt).toISOString())}</span> : undefined}>
+              <PanelBody q={metrics} rows={1} empty="">
+                <dl className="grid grid-cols-[1fr_auto] gap-x-4 text-sm [&>dd]:py-1.5 [&>dt]:py-1.5">
+                  <dt className="text-muted">API</dt>
+                  {/* The API row reports whether the health request itself got an answer; the database has its own row. */}
+                  <dd><Status ok={health.isSuccess} fail={health.isError} label={health.isSuccess ? "ok" : health.isError ? "unreachable" : "unknown"} /></dd>
+                  <dt className="text-muted">Database</dt>
+                  <dd><Status ok={health.data?.db === "ok"} label={health.data?.db ?? "unknown"} /></dd>
+                  <dt className="text-muted">Kafka</dt>
+                  <dd><Status ok={health.data?.kafka === "ok"} fail={health.data?.kafka !== "ok" && !!health.data} label={health.data?.kafka ?? "unknown"} /></dd>
+                  <dt className="text-muted">Outbox backlog</dt>
+                  <dd className="num text-right">{metrics.data?.outbox_backlog ?? "-"}</dd>
+                </dl>
+                {lagRows.length > 0 && (
+                  <dl className="mt-3 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto] gap-x-3 border-t border-border pt-3 text-sm [&>div>dd]:py-1 [&>div>dt]:truncate [&>div>dt]:py-1 max-[420px]:grid-cols-[minmax(0,1fr)_auto]">
+                    {lagRows.map(([k, v]) => (
+                      <div key={k} className="contents">
+                        <dt className="text-muted">Lag: <span className="mono text-xs">{k}</span></dt>
+                        <dd className={v > 20 ? "num text-right text-warn-fg" : "num text-right"}>{v}</dd>
+                      </div>
+                    ))}
+                    {lagHidden > 0 && <p className="col-span-full pt-1 text-xs text-subtle">and {lagHidden} more consumer group{lagHidden === 1 ? "" : "s"}</p>}
+                    {lag > 20 && <p className="col-span-full pt-1 text-xs text-warn-fg">A consumer is more than 20 events behind.</p>}
+                  </dl>
+                )}
+              </PanelBody>
+            </Panel>
+          </div>
+        </section>
+      )}
     </>
   );
 }
@@ -407,7 +429,7 @@ function PromptTests() {
   const q = useQuery({ queryKey: ["quick-tests"], queryFn: listQuickTests, refetchInterval: (s) => listPoll(s.state.data) });
   const list = asList(q.data);
   return (
-    <Panel title="Prompt tests" aux={<Link className={linkCls} href="/test">Test a prompt</Link>}>
+    <Panel title="Prompt tests" aux={<Link className={linkCls} href="/test">Test my prompt</Link>}>
       <PanelBody q={q} rows={list.length} empty="No prompt tests yet. Paste a prompt in Test my prompt to start one.">
         <ul className="flex flex-col divide-y divide-border">
           {list.slice(0, 4).map((t) => (

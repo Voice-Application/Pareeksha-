@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bot, Check, CircleX, Plus } from "lucide-react";
+import { Bot, Check, CircleX, Plug, Plus } from "lucide-react";
 import { api } from "@/lib/api/client";
 import { call, ApiError } from "@/lib/api/call";
 import type { components } from "@/lib/api/schema";
@@ -23,15 +23,94 @@ import { useToast } from "@/components/ui/toast";
 type Agent = components["schemas"]["AgentOut"];
 type ConnResult = components["schemas"]["TestConnectionResult"];
 
+/** Plain labels for the adapter keys in the API schema; the raw key stays visible as a muted chip and title. */
+const ADAPTER_LABEL: Record<Agent["adapter"], string> = {
+  audio_v1: "Audio stream (WebSocket)",
+  pipecat: "Pipecat",
+  livekit: "LiveKit",
+  vapi: "Vapi",
+  prompt: "Prompt only (no audio)",
+};
+const ADAPTER_KEYS = Object.keys(ADAPTER_LABEL) as Agent["adapter"][];
+
+/** Plain label for an adapter key, falling back to the raw key for one this build does not know. */
+function adapterLabel(key: string): string {
+  return ADAPTER_LABEL[key as Agent["adapter"]] ?? key;
+}
+
 const AGENT_SORT: Sorters<Agent> = {
   name: (a) => a.name.toLowerCase(),
-  adapter: (a) => a.adapter,
+  adapter: (a) => adapterLabel(a.adapter).toLowerCase(),
 };
+
+/*
+ * Last connection result per agent id. The API does not persist test-connection results on the
+ * agent, so the list keeps them in localStorage (in memory when storage is blocked) and a reload
+ * does not reset every row to "not tested yet".
+ */
+type StoredConn = { result: ConnResult; at: string };
+const CONN_STORE = "pareeksha.agents.connection.v1";
+const CONN_CHANGED = "pareeksha:agents-connection";
+let memoryConn = "{}";
+
+/** Raw stored JSON, or the in-memory copy when storage is blocked or empty. */
+function readConnRaw(): string {
+  try {
+    return window.localStorage.getItem(CONN_STORE) ?? memoryConn;
+  } catch {
+    /* storage blocked: use the in-memory copy */
+    return memoryConn;
+  }
+}
+
+/** Subscribe to stored-result changes (this tab and other tabs). */
+function subscribeConn(onChange: () => void): () => void {
+  window.addEventListener("storage", onChange);
+  window.addEventListener(CONN_CHANGED, onChange);
+  return () => {
+    window.removeEventListener("storage", onChange);
+    window.removeEventListener(CONN_CHANGED, onChange);
+  };
+}
+
+function parseConn(raw: string): Record<string, StoredConn> {
+  try {
+    const v: unknown = JSON.parse(raw);
+    if (!v || typeof v !== "object" || Array.isArray(v)) return {};
+    // Storage is writable by anything on the origin: keep only entries with the shape the list renders.
+    const out: Record<string, StoredConn> = {};
+    for (const [id, e] of Object.entries(v)) {
+      const s = e as Partial<StoredConn> | null;
+      if (s && typeof s === "object" && typeof s.at === "string" && s.result && typeof s.result === "object" && typeof s.result.ok === "boolean") out[id] = s as StoredConn;
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+/** Remember one agent's latest result, with the time it ran. */
+function writeConn(agentId: string, result: ConnResult) {
+  const next = { ...parseConn(readConnRaw()), [agentId]: { result, at: new Date().toISOString() } };
+  memoryConn = JSON.stringify(next);
+  try {
+    window.localStorage.setItem(CONN_STORE, memoryConn);
+  } catch {
+    /* convenience only: the in-memory copy still applies */
+  }
+  window.dispatchEvent(new Event(CONN_CHANGED));
+}
+
+/** Stored connection results; the server and first paint see none. */
+function useStoredConn(): Record<string, StoredConn> {
+  const raw = useSyncExternalStore(subscribeConn, readConnRaw, () => "{}");
+  return useMemo(() => parseConn(raw), [raw]);
+}
 
 export function AgentsListSkeleton() {
   return (
     <>
-      <PageHeader eyebrow="" title="Agents" actions={<LinkButton variant="primary" href="/agents/new">Add agent</LinkButton>} />
+      <PageHeader eyebrow="" title="Voice agents" actions={<LinkButton variant="primary" href="/agents/new">Add agent</LinkButton>} />
       <Panel bodyClassName="p-0">
         <TableSkeleton rows={5} />
       </Panel>
@@ -58,20 +137,51 @@ function LastRun({ agentId }: { agentId: string }) {
   );
 }
 
-function Connection({ result, testing }: { result?: ConnResult; testing: boolean }) {
+/** Latest result from this browser, with how long ago it ran: "ok 820 ms, 5 minutes ago". */
+function ConnStatus({ stored, testing }: { stored?: StoredConn; testing: boolean }) {
   if (testing) return <span className="inline-flex items-center gap-1 text-muted"><span className="spinner" aria-hidden />Testing</span>;
-  if (!result) return <span className="text-subtle" title="Not tested in this session">never tested</span>;
+  if (!stored) return <span className="text-subtle" title="No connection test from this browser yet">not tested yet</span>;
+  const { result, at } = stored;
+  const when = (
+    <span className="text-muted">
+      ,{" "}
+      <time dateTime={at} title={at}>
+        {relativeTime(at)}
+      </time>
+    </span>
+  );
   if (result.ok)
     return (
       <span className="inline-flex items-center gap-1 text-pass-fg">
         <Check size={14} strokeWidth={1.6} aria-hidden />
-        ok <span className="mono">{result.first_audio_ms ?? "-"} ms</span>
+        <span>
+          ok <span className="mono">{result.first_audio_ms ?? "-"} ms</span>
+          {when}
+        </span>
       </span>
     );
   return (
     <span className="inline-flex items-center gap-1 text-fail-fg" title={result.detail ?? undefined}>
       <CircleX size={14} strokeWidth={1.6} aria-hidden />
-      <span className="mono">{result.error ?? "failed"}</span>
+      <span>
+        <span className="mono">{result.error ?? "failed"}</span>
+        {when}
+      </span>
+    </span>
+  );
+}
+
+/** Connection cell: the latest result plus an inline Test button (the row menu keeps the same action). */
+function Connection({ agent, stored, testing, onTest }: { agent: Agent; stored?: StoredConn; testing: boolean; onTest: () => void }) {
+  return (
+    <span className="inline-flex flex-wrap items-center gap-2">
+      <ConnStatus stored={stored} testing={testing} />
+      {!agent.archived && (
+        <Button variant="ghost" className="h-7 gap-1 px-2 text-xs" disabled={testing} onClick={onTest} aria-label={`Test connection for ${agent.name}`}>
+          <Plug size={14} strokeWidth={1.6} aria-hidden />
+          Test
+        </Button>
+      )}
     </span>
   );
 }
@@ -94,7 +204,7 @@ export function AgentsList() {
     call(api.GET("/api/v1/agents", { params: { query: { include_archived: showArchived, limit: 50, cursor } } })),
   );
 
-  const [conn, setConn] = useState<Record<string, ConnResult>>({});
+  const conn = useStoredConn();
   const [testing, setTesting] = useState<Set<string>>(new Set());
   const [toArchive, setToArchive] = useState<Agent | null>(null);
 
@@ -102,7 +212,7 @@ export function AgentsList() {
     mutationFn: (a: Agent) => call(api.POST("/api/v1/agents/{agent_id}/test-connection", { params: { path: { agent_id: a.id } } })),
     onMutate: (a) => setTesting((s) => new Set(s).add(a.id)),
     onSuccess: (res, a) => {
-      setConn((c) => ({ ...c, [a.id]: res }));
+      writeConn(a.id, res);
       toast(res.ok ? `${a.name}: connected, first audio in ${res.first_audio_ms} ms.` : `${a.name}: connection failed (${res.error ?? "unknown"}).`, { tone: res.ok ? "info" : "error" });
     },
     onError: (e, a) => toast(`Could not test ${a.name}: ${e instanceof ApiError ? e.userMessage() : "request failed"}`, { tone: "error", action: { label: "Retry", run: () => testConn.mutate(a) } }),
@@ -141,16 +251,35 @@ export function AgentsList() {
         </span>
       ),
     },
-    { key: "adapter", header: "Adapter", mono: true, sortable: true, cell: (a) => a.adapter },
+    {
+      key: "adapter",
+      header: "Adapter",
+      sortable: true,
+      cell: (a) => (
+        <span className="inline-flex flex-wrap items-center gap-2" title={`Adapter key: ${a.adapter}`}>
+          {adapterLabel(a.adapter)}
+          <span className="mono text-xs text-subtle">{a.adapter}</span>
+        </span>
+      ),
+    },
     { key: "languages", header: "Languages", mono: true, hidePhone: true, cell: (a) => (a.languages?.length ? a.languages.map((l) => l.split("-")[0]).join(" ") : <span className="text-subtle">-</span>) },
     {
+      // glass_box: the agent sends its own transcript and tool calls over the socket, stored per turn.
       key: "glass_box",
-      header: "Glass-box",
+      header: "Shares transcript",
       hidePhone: true,
-      cell: (a) => (a.glass_box ? <span className="inline-flex items-center gap-1"><Check size={14} strokeWidth={1.6} aria-hidden />yes</span> : <span className="text-subtle" title="Not declared">-</span>),
+      cell: (a) =>
+        a.glass_box ? (
+          <span className="inline-flex items-center gap-1" title="Sends its transcript and tool calls during the call">
+            <Check size={14} strokeWidth={1.6} aria-hidden />
+            yes
+          </span>
+        ) : (
+          <span className="text-subtle" title="Does not send its transcript or tool calls">-</span>
+        ),
     },
     { key: "last_run", header: "Last run", cell: (a) => <LastRun agentId={a.id} /> },
-    { key: "connection", header: "Connection", cell: (a) => <Connection result={conn[a.id]} testing={testing.has(a.id)} /> },
+    { key: "connection", header: "Connection", cell: (a) => <Connection agent={a} stored={conn[a.id]} testing={testing.has(a.id)} onTest={() => testConn.mutate(a)} /> },
   ];
 
   const filtered = useMemo(() => {
@@ -169,7 +298,7 @@ export function AgentsList() {
   const filtering = !!(search || adapter || language);
 
   const chips = [
-    ...(adapter ? [{ label: `Adapter: ${adapter}`, remove: () => url.set({ adapter: null }) }] : []),
+    ...(adapter ? [{ label: `Adapter: ${adapterLabel(adapter)}`, remove: () => url.set({ adapter: null }) }] : []),
     ...(language ? [{ label: `Language: ${language}`, remove: () => url.set({ lang: null }) }] : []),
   ];
 
@@ -177,7 +306,7 @@ export function AgentsList() {
     <>
       <PageHeader
         eyebrow={eyebrow}
-        title="Agents"
+        title="Voice agents"
         actions={
           <LinkButton variant="primary" href="/agents/new">
             <Plus size={16} strokeWidth={1.6} aria-hidden />
@@ -187,7 +316,7 @@ export function AgentsList() {
       />
       <Panel bodyClassName="p-0">
         <FilterBar search={search} onSearch={(v) => url.set({ q: v })} placeholder="Search agents" chips={chips} onClear={url.clear}>
-          <FilterSelect label="Adapter" value={adapter} onChange={(v) => url.set({ adapter: v })} options={["audio_v1", "pipecat", "prompt", "livekit", "vapi"].map((v) => ({ value: v, label: v }))} />
+          <FilterSelect label="Adapter" value={adapter} onChange={(v) => url.set({ adapter: v })} options={ADAPTER_KEYS.map((v) => ({ value: v, label: adapterLabel(v) }))} />
           <FilterSelect label="Language" value={language} onChange={(v) => url.set({ lang: v })} options={LANGUAGES.map((v) => ({ value: v, label: v }))} />
           <Switch label="Show archived" checked={showArchived} onChange={(v) => url.set({ archived: v ? "1" : null })} />
         </FilterBar>
@@ -202,16 +331,19 @@ export function AgentsList() {
           <EmptyState
             icon={Bot}
             title="No agents yet"
-            body="An agent is the voice bot you want to test."
+            body="Add the voice agent you want to test. You will need the address it listens on."
             action={
               <LinkButton variant="primary" href="/agents/new">
                 Add agent
               </LinkButton>
             }
             secondary={
-              <>
-                Run <code className="mono">make demo</code> to create a mock agent with planted bugs.
-              </>
+              // Developer hint only: people using a deployed build have no repo to run make in.
+              process.env.NODE_ENV !== "production" ? (
+                <>
+                  Run <code className="mono">make demo</code> to create a mock agent with planted bugs.
+                </>
+              ) : undefined
             }
           />
         )}
@@ -221,7 +353,7 @@ export function AgentsList() {
         {list.isSuccess && filtered.length > 0 && (
           <>
             <DataTable
-              caption="Agents"
+              caption="Voice agents"
               columns={columns}
               rows={filtered}
               rowKey={(a) => a.id}

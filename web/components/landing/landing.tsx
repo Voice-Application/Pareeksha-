@@ -1,68 +1,44 @@
 import Link from "next/link";
-import { AudioLines, FlaskConical, Languages, Plug, ShieldCheck, Users, type LucideIcon } from "lucide-react";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import "./landing.css";
 import { DemoRun } from "./demo-run";
 import { DemoTabs } from "./demo-tabs";
-import { BarChart } from "@/components/charts";
-import { DEMO_RAG } from "./demo-data";
+import { DEMO_CALLER_LINE, DEMO_CATCHES } from "./demo-data";
 
 const REPO = "https://github.com/voice-application/pareeksha-";
 
 /** The three steps of a run, in the order the product performs them. */
 const STEPS = [
-  { n: "1", title: "Paste your prompt", body: "Drop in the system prompt that drives your voice or chat bot." },
-  { n: "2", title: "We role-play callers", body: "Pareeksha runs normal and tricky callers against it, the way real people phone in." },
-  { n: "3", title: "You see what broke", body: "Every rule the bot broke, scored and cited back to the exact line it came from." },
+  { n: "1", title: "Paste your prompt", body: "The system prompt behind your voice or chat bot." },
+  { n: "2", title: "We role-play callers", body: "Normal and tricky ones, including Hindi and Kannada speakers." },
+  { n: "3", title: "You see what broke", body: "Each broken rule, scored, with the line it came from." },
 ];
 
-/**
- * What the platform does beyond the one-screen test. Each line is grounded in a real feature page
- * so the copy stays honest; the href deep-links into that tool.
- */
-const FEATURES: { title: string; body: string; href: string; icon: LucideIcon }[] = [
-  {
-    title: "Synthetic callers & personas",
-    body: "Build callers with their own language, code-mix, voice, mood and habits, and scenarios that say what the caller is trying to do.",
-    href: "/personas",
-    icon: Users,
-  },
-  {
-    title: "Noisy phone lines",
-    body: "Put a call on a real line: codec, band-limit, background noise, SNR and packet loss — not just a clean studio mic.",
-    href: "/noise-profiles",
-    icon: AudioLines,
-  },
-  {
-    title: "Dialect & accent gaps",
-    body: "Measure how the speech recogniser performs per dialect and phone line, with sample sizes and 95% confidence intervals.",
-    href: "/dialect",
-    icon: Languages,
-  },
-  {
-    title: "RAG lab",
-    body: "Compare chunking, embedding and retrieval setups against no-RAG and full-context baselines on the same scenarios.",
-    href: "/rag-lab",
-    icon: FlaskConical,
-  },
-  {
-    title: "Regression & audits",
-    body: "Promote a failed call into a test future runs must not fail, and score real recorded calls with the same rubric.",
-    href: "/regression",
-    icon: ShieldCheck,
-  },
-  {
-    title: "Integrations",
-    body: "Receive recordings from your telephony with a signed webhook, and send evaluated calls on to your CRM.",
-    href: "/integrations",
-    icon: Plug,
-  },
+/** The rest of the suite, one link each into the tool (replaces the old icon card grid). */
+const SUITE: { label: string; href: string }[] = [
+  { label: "Personas", href: "/personas" },
+  { label: "Noisy phone lines", href: "/noise-profiles" },
+  { label: "Dialect gaps", href: "/dialect" },
+  { label: "RAG lab", href: "/rag-lab" },
+  { label: "Regression", href: "/regression" },
+  { label: "Integrations", href: "/integrations" },
 ];
+
+/** One line of sample speech, tagged with its language, with an English gloss under any Hindi line. */
+function SampleLine({ text, lang, gloss }: { text: string; lang: "en" | "hi"; gloss?: string }) {
+  return (
+    <>
+      <span lang={lang}>{text}</span>
+      {gloss && <span className="lp-catch__gloss">{gloss}</span>}
+    </>
+  );
+}
 
 /**
  * The marketing landing page for Pareeksha, rendered outside the app shell at /welcome.
  * Leads with the product's job in plain words and consumes the shared app design tokens,
- * so clicking into the dashboard is continuous rather than a visual cliff.
+ * so clicking into the dashboard is continuous rather than a visual cliff. The middle of the
+ * page shows real output from the seeded demo (demo-data.ts) instead of a feature grid.
  */
 export function Landing() {
   return (
@@ -81,7 +57,7 @@ export function Landing() {
           </Link>
           <nav aria-label="Product" className="lp-nav__links">
             <a href="#how">How it works</a>
-            <a href="#features">Features</a>
+            <a href="#features">What it catches</a>
             <a className="lp-nav__repo" href={REPO}>
               Repository
             </a>
@@ -102,6 +78,16 @@ export function Landing() {
                 Paste a system prompt. Pareeksha role-plays normal and tricky callers, then shows you every rule the bot
                 broke, with the exact line.
               </p>
+              {/* The dialect story in one concrete line: a test caller speaking Kannada in its own script. */}
+              <p className="lp-hero__caller">
+                <span className="lp-hero__caller-who">Test caller, in {DEMO_CALLER_LINE.language}</span>
+                <span className="lp-hero__caller-text" lang={DEMO_CALLER_LINE.lang}>
+                  {DEMO_CALLER_LINE.text}
+                </span>
+                <span className="lp-hero__caller-gloss">
+                  &ldquo;{DEMO_CALLER_LINE.gloss}&rdquo; Test callers can speak Kannada or Hindi, not just English.
+                </span>
+              </p>
               <div className="lp-hero__actions">
                 <Link className="lp-btn" href="/test">
                   Test my prompt
@@ -115,7 +101,9 @@ export function Landing() {
             <figure className="lp-hero__fig">
               {/* A self-playing sample run (prompt -> conversation -> verdict), not a static shot. */}
               <DemoRun />
-              <figcaption className="lp-caption">A sample run: the prompt, the call, and the rules it broke &mdash; scored against the pass line.</figcaption>
+              <figcaption className="lp-caption">
+                Sample data. The prompt, the call, and the rule it broke, scored against the pass line.
+              </figcaption>
             </figure>
           </div>
         </section>
@@ -142,49 +130,58 @@ export function Landing() {
         <section id="features" className="lp-features" aria-labelledby="features-head">
           <div className="lp-container">
             <h2 id="features-head" className="lp-features__head">
-              More than one test
+              What it catches
             </h2>
             <p className="lp-features__lead">
-              The quick test is the front door. Underneath, Pareeksha is a full QA suite for voice and chat bots.
+              Wrong answers from a sample bank bot, each beside the prompt rule it broke and the document line that says
+              otherwise. Sample data.
             </p>
-            <ul className="lp-features__grid">
-              {FEATURES.map((f) => {
-                const Icon = f.icon;
-                return (
-                  <li key={f.href} className="lp-feature">
-                    <Link href={f.href} className="lp-feature__link">
-                      <span className="lp-feature__icon" aria-hidden="true">
-                        <Icon size={20} strokeWidth={1.6} />
-                      </span>
-                      <h3 className="lp-feature__title">{f.title}</h3>
-                      <p className="lp-feature__body">{f.body}</p>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+            <ol className="lp-catches">
+              {DEMO_CATCHES.map((c) => (
+                <li key={c.question} className="lp-catch">
+                  <p className="lp-catch__rule">
+                    <span className="lp-catch__k">Prompt rule</span>
+                    <q>{c.rule}</q>
+                  </p>
+                  <dl className="lp-catch__lines">
+                    <div className="lp-catch__row">
+                      <dt>Caller asked</dt>
+                      <dd>
+                        <SampleLine text={c.question} lang={c.questionLang} gloss={c.gloss?.question} />
+                      </dd>
+                    </div>
+                    <div className="lp-catch__row lp-catch__row--said">
+                      <dt>Bot said</dt>
+                      <dd>
+                        <SampleLine text={c.said} lang={c.saidLang} gloss={c.gloss?.said} />
+                      </dd>
+                    </div>
+                    <div className="lp-catch__row">
+                      <dt>
+                        Document <span className="mono">{c.doc}</span>
+                      </dt>
+                      <dd>
+                        <SampleLine text={c.quote} lang={c.quoteLang} gloss={c.gloss?.quote} />
+                      </dd>
+                    </div>
+                  </dl>
+                </li>
+              ))}
+            </ol>
 
             <div className="lp-showcase">
-              <h3 className="lp-showcase__head">See the output</h3>
+              <h3 className="lp-showcase__head">See the full output</h3>
               <DemoTabs />
             </div>
 
-            {/* One calm chart: how pass-rate climbs across retrieval setups in the RAG lab. Sample data
-                (demo-data.ts), not a live call; a single accent series, pass line at 80 implied by the scale. */}
-            <div className="lp-showcase">
-              <h3 className="lp-showcase__head">RAG setups, compared</h3>
-              <p className="lp-features__lead">
-                Pass rate per retrieval setup on the same scenarios &mdash; from a plain BM25 baseline to hybrid retrieval with a
-                reranker. Sample data.
-              </p>
-              <div className="lp-rag-chart">
-                <BarChart
-                  bars={DEMO_RAG.map((r) => ({ label: r.setup, value: Math.round(r.passRate * 100) }))}
-                  title="Pass rate per retrieval setup, percent"
-                  valueSuffix="%"
-                />
-              </div>
-            </div>
+            <p className="lp-suite">
+              <span className="lp-suite__k">Also in the suite</span>
+              {SUITE.map((item) => (
+                <Link key={item.href} href={item.href} className="lp-link">
+                  {item.label}
+                </Link>
+              ))}
+            </p>
           </div>
         </section>
 
@@ -205,19 +202,19 @@ export function Landing() {
         <div className="lp-container lp-foot__row">
           <ul className="lp-foot__links">
             <li>
-              <Link href="/test">Test a prompt</Link>
-            </li>
-            <li>
               <Link href="/runs">Runs</Link>
             </li>
             <li>
-              <Link href="/agents">Agents</Link>
+              <Link href="/agents">Voice agents</Link>
             </li>
             <li>
               <a href={REPO}>Repository</a>
             </li>
           </ul>
-          <p className="lp-foot__line">Fixtures are synthetic. Voice and dialect clips need consent.</p>
+          <p className="lp-foot__line">
+            Every call on this page is sample data, not a real customer. Real voice and dialect recordings need the
+            speaker&rsquo;s consent.
+          </p>
         </div>
       </footer>
     </div>

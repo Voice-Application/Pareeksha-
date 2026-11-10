@@ -1,11 +1,30 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Locator } from "@playwright/test";
+
+/** Background colour of `badge` and of a probe painted with the app's --critical token, resolved in the page. */
+async function criticalColours(badge: Locator) {
+  return badge.evaluate((el) => {
+    const probe = document.createElement("span");
+    probe.style.background = "var(--critical)";
+    el.parentElement!.appendChild(probe);
+    const want = getComputedStyle(probe).backgroundColor;
+    probe.remove();
+    return { got: getComputedStyle(el).backgroundColor, want };
+  });
+}
 
 test("reduced motion shows a finished demo and prevents replay", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/welcome");
-  const demo = page.locator(".lp-demo");
+  const demo = page.getByRole("region", { name: "A sample run, played out" });
   await expect(demo).toBeVisible();
   await expect(demo.getByRole("button", { name: "Replay" })).toBeDisabled();
+  // Nothing is "revealed" under reduced motion, so the live region stays quiet.
+  await expect(demo.locator(".lp-demo__live")).toHaveText("");
+  // Critical is the only solid badge in the product; the demo uses the same one.
+  const badge = demo.getByText("Critical failure");
+  await expect(badge).toBeVisible();
+  const { got, want } = await criticalColours(badge);
+  expect(got).toBe(want);
   await expect(demo.locator(".lp-demo__verdict")).toHaveAttribute("aria-hidden", "false");
   await expect(demo.locator('.lp-demo__turn[aria-hidden="true"]')).toHaveCount(0);
 });
@@ -14,8 +33,14 @@ test("demo exposes turns at their beats and preserves pause and replay", async (
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.clock.install();
   await page.goto("/welcome");
-  const demo = page.locator(".lp-demo");
+  const demo = page.getByRole("region", { name: "A sample run, played out" });
+  const live = demo.locator(".lp-demo__live");
   await expect(demo.getByRole("button", { name: "Pause" })).toBeVisible();
+  // The label swaps between Pause and Play, so the button is not also a toggle.
+  await expect(demo.getByRole("button", { name: "Pause" })).not.toHaveAttribute("aria-pressed", /.*/);
+  // Only the hidden announcer is live; the visible list is not.
+  await expect(demo.locator("[aria-live]")).toHaveCount(1);
+  await expect(live).toHaveAttribute("aria-live", "polite");
   const turns = demo.locator(".lp-demo__turn");
   await expect(turns.nth(0)).toHaveAttribute("aria-hidden", "true");
   await expect(turns.nth(1)).toHaveAttribute("aria-hidden", "true");
@@ -23,13 +48,17 @@ test("demo exposes turns at their beats and preserves pause and replay", async (
   await page.clock.fastForward(1400);
   await expect(turns.nth(0)).toHaveAttribute("aria-hidden", "false");
   await expect(turns.nth(1)).toHaveAttribute("aria-hidden", "true");
+  // The announcer holds only the line just revealed.
+  await expect(live).toHaveText("Caller: Do you offer gold loans?");
   await demo.getByRole("button", { name: "Pause" }).click();
   await page.clock.fastForward(2800);
   await expect(turns.nth(1)).toHaveAttribute("aria-hidden", "true");
   await demo.getByRole("button", { name: "Play", exact: true }).click();
   await page.clock.fastForward(1400);
   await expect(turns.nth(1)).toHaveAttribute("aria-hidden", "false");
+  await expect(live).toHaveText(/^Agent: Yes, we offer gold loans/);
   await page.clock.fastForward(1400);
+  await expect(live).toHaveText(/^Critical failure\. Overall score 57\.5 of 100/);
   await demo.getByRole("button", { name: "Replay" }).click();
   expect(await turns.first().evaluate((el) => getComputedStyle(el).transitionDuration)).not.toBe("0s");
   await expect(turns.nth(0)).toHaveAttribute("aria-hidden", "true");

@@ -207,10 +207,11 @@ function RegexField({ idBase, value, onChange, error, label }: { idBase: string;
 }
 
 const ADAPTERS: { value: AgentCreate["adapter"]; label: string; disabled?: boolean; hint?: string }[] = [
-  { value: "audio_v1", label: "audio_v1" },
-  { value: "pipecat", label: "pipecat" },
-  { value: "livekit", label: "livekit", disabled: true, hint: "LiveKit is not supported in this build." },
-  { value: "vapi", label: "vapi", disabled: true, hint: "Vapi is not supported in this build." },
+  // Plain labels, matching the Voice agents list; the raw key is the stored value.
+  { value: "audio_v1", label: "Audio stream (WebSocket)" },
+  { value: "pipecat", label: "Pipecat" },
+  { value: "livekit", label: "LiveKit", disabled: true, hint: "LiveKit is not supported in this build." },
+  { value: "vapi", label: "Vapi", disabled: true, hint: "Vapi is not supported in this build." },
 ];
 
 /**
@@ -310,14 +311,14 @@ export function AgentForm({ agentId }: { agentId?: string }) {
 
   const breadcrumb = (
     <Link href="/agents" className="text-sm text-accent-fg underline underline-offset-2">
-      Agents
+      Voice agents
     </Link>
   );
 
   if (agentId && agent.isPending) {
     return (
       <>
-        <PageHeader eyebrow="Agents" title="Edit agent" />
+        <PageHeader eyebrow="Voice agents" title="Edit agent" />
         <FormSkeleton sections={3} />
       </>
     );
@@ -325,8 +326,8 @@ export function AgentForm({ agentId }: { agentId?: string }) {
   if (agentId && agent.isError) {
     return (
       <>
-        <PageHeader eyebrow="Agents" title="Edit agent" />
-        <PageError error={agent.error} onRetry={() => void agent.refetch()} backHref="/agents" backLabel="Back to agents" />
+        <PageHeader eyebrow="Voice agents" title="Edit agent" />
+        <PageError error={agent.error} onRetry={() => void agent.refetch()} backHref="/agents" backLabel="Back to voice agents" />
       </>
     );
   }
@@ -435,7 +436,7 @@ export function AgentForm({ agentId }: { agentId?: string }) {
               <TextField id="agent-endpoint" label="Endpoint URL" required className="mono" placeholder="ws://host:8765/ws" value={form.endpoint_url} onChange={(e) => patch({ endpoint_url: e.target.value })} error={errors["agent-endpoint"]} />
             )}
             {!isPrompt && <TextAreaField id="agent-config" label="Adapter config (JSON)" className="mono" rows={3} spellCheck={false} value={form.adapter_config} onChange={(e) => patch({ adapter_config: e.target.value })} error={errors["agent-config"]} help="Extra settings for the adapter. Leave {} if unsure." />}
-            {!isPrompt && <Switch label="Glass-box" checked={form.glass_box} onChange={(v) => patch({ glass_box: v })} help="The agent sends its transcript and tool calls over the socket, and Pareeksha stores them per turn." />}
+            {!isPrompt && <Switch label="Shares transcript" checked={form.glass_box} onChange={(v) => patch({ glass_box: v })} help="The agent sends its transcript and tool calls over the socket, and Pareeksha stores them per turn." />}
             <NumberField id="agent-max-seconds" label="Max call seconds" min={10} max={1800} value={form.max_call_seconds} onChange={(e) => patch({ max_call_seconds: e.target.value })} error={errors["agent-max-seconds"]} fieldClassName="max-w-[200px]" />
           </Panel>
 
