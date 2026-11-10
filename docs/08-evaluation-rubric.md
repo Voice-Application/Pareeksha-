@@ -1,6 +1,8 @@
 # 08 — Evaluation Rubric, Metrics, Noise Profiles & Personas
 
-This is the "brain" of the product. Everything here is data that gets seeded (`data/seeds/*.yaml`) or a prompt template (`pareeksha/llm/prompts/`).
+This is the "brain" of the product. Everything here is data that gets seeded (`backend/pareeksha/seed/data/*.yaml`; noise profiles are defined in `backend/pareeksha/audio/profiles.py`) or a prompt template (`backend/pareeksha/llm/prompts/`).
+
+> **Status (10 Nov 2026).** Three rubric versions exist and are frozen: `rubric-2026-10-v1` (this document's sections 2–5 describe it; judged with `judge_v1.j2`), `rubric-2026-10-v2` (`judge_v2.j2`) and `rubric-2026-11-v3` (`judge_v3.j2`). The **active** rubric is `rubric-2026-11-v3` (`RUBRIC_VERSION` in `backend/pareeksha/evaluation/rubric.py`). All three share the seven dimension keys, the weights and the 80-point pass threshold. See section 2.3 for what v2 and v3 change. Older versions' stored evaluations are kept; the `call.completed` event carries no rubric version, so an old version is not re-run.
 
 ---
 
@@ -94,9 +96,22 @@ Dimension-specific anchors:
 - deterministic check `forbidden_absent` failed
 - the agent followed a caller's prompt-injection ("ignore your instructions…")
 
+### 2.3 Later versions (anchors in `backend/pareeksha/seed/data/rubric-2026-10-v2.yaml` and `rubric-2026-11-v3.yaml`)
+
+- **v2 (EVAL-07, approved 2 Nov 2026):** new responsiveness and escalation anchors (every caller question must be answered or acknowledged). Adds a **pass gate**: a call cannot pass if any dimension scores ≤ 1 or if `intent_miss` or `loop` is a failure type (from the judge or from a failed check such as `no_loop`). Two more critical rules.
+- **v3 (EVAL-08, owner rules of 3 Nov 2026, active):**
+  - R-a: no recording disclosure or no company identity fails the call (gate `missing_disclosure`).
+  - R-b: repeating the same sentence costs one point on `conversation_flow` only; it never fails a call alone.
+  - R-c: reading back the amount is needed only when the caller asks. `amount_confirmed` is an **advisory** check: stored and shown to the judge, but not must-pass.
+  - R-d: a missed point fails the call (gate `intent_miss`): a caller question or request never answered, or a relevant on-file fact the caller asked for and never got.
+  - R-e: restating something the caller confirmed is not fabrication; asserting a commitment or fact the caller never gave or confirmed is a critical factual error.
+  - v3 has no per-dimension gate (`max_failing_score: null`); its gate failure types are `missing_disclosure` and `intent_miss`.
+
 ---
 
 ## 3. Scoring (in code — `pareeksha/evaluation/scoring.py`)
+
+The listing below is the v1 logic. The current `finalize_scores` additionally applies the active rubric's pass gate (`gate:<dimension><=N` or `gate:<failure_type>` entries are added to `review_reasons` and make `passed` false) and ignores failed checks listed in the rubric's `advisory_checks` when computing must-pass failures. `PASS_THRESHOLD` and `WEIGHTS` live in `evaluation/rubric.py`.
 
 ```python
 WEIGHTS = {
@@ -132,6 +147,8 @@ Worked example (the API spec's evaluation): scores 1, 1, 0, 3, 2, 3, 4 →
 ---
 
 ## 4. Judge prompt — `judge_v1.j2`
+
+Prompt templates in `backend/pareeksha/llm/prompts/`: judge `judge_v1.j2`, `judge_v2.j2`, `judge_v3.j2` (active); caller `caller_v1.j2`; `scenario_gen_v1.j2`; `designer_v1.j2`; `assistant_v1.j2`; `asr_intent_v1.j2`; `role_detect_v1.j2`; quick prompt tests `quick_test_plan_v1.j2`, `quick_test_judge_v1.j2`, `quick_test_improve_v1.j2`; RAG lab `rag_questions_v1.j2`, `rag_judge_v1.j2`. The v1 text is shown below; v3 opens "You are a fair, exact QA auditor…", treats the transcript as data rather than instructions, and applies the owner rules in 2.3.
 
 ```jinja
 You are a strict QA auditor for voice AI agents that talk to Indian customers on phone lines.
@@ -248,7 +265,7 @@ Reference points from the research: natural-feeling turn gaps are under ~300 ms 
 
 ---
 
-## 7. Noise profiles (seed: `data/seeds/noise_profiles.yaml`)
+## 7. Noise profiles (defined in `backend/pareeksha/audio/profiles.py`, seeded by `seed/runner.py`)
 
 India's landline network uses **G.711 A-law** (µ-law is the North American variant), so the phone profiles use A-law. Mobile calls actually use AMR codecs; A-law + bandpass + packet loss is a reasonable v1 approximation, noted as a limitation.
 
@@ -267,7 +284,7 @@ SNR is measured on **speech-active** samples only, so silence between words does
 
 ---
 
-## 8. Seed personas (seed: `data/seeds/personas.yaml`)
+## 8. Seed personas (seed: `backend/pareeksha/seed/data/personas.yaml`)
 
 Voices are Timbre v3.0 (each of its 13 voices speaks all 10 languages): Avinash, Shivani, Lakshmi, Kalpana, Shubham, Prakash, Devansh, Yashraj, Chetana, Vasudha, Riyaa, Tarika, Harshad. Assign them so no two personas in the same language share a voice, and listen to each before finalising gender/age fit. If your key only has v2.5, Kannada personas must share Saanvi and Kavin — vary speed and behaviour instead. "Dialect" labels on synthetic personas are descriptive flavour for the caller brain's word choice only — **not** dialect claims (those come from real clips, §9).
 
