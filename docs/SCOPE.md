@@ -2,6 +2,10 @@
 
 Confirmed against `01-PRD.md` §7 on 24 Oct 2026. Requirement IDs refer to `02-requirements.md`; "PRD §8" metrics are the release gate. QA verifies each task against its criteria below. Anything not listed here is rejected as scope creep unless the PM adds it with criteria.
 
+## Status update (10 Nov 2026)
+
+The text below is the v0.2 scope as agreed on 24 Oct and is kept as the plan, with a few inline "as built" notes. Outcomes: LiveKit (Should) and Vapi (Could) were cut by the owner on 28 Oct 2026; the dialect data came from Vaani (DIALECT-02); EVAL-06 missed its target (κ = 0.19 vs 0.6) and the rubric was later bumped to `rubric-2026-10-v2` and `rubric-2026-11-v3` (EVAL-07/08, active v3). v1.0.0 was tagged on 2 Nov 2026. After release, work outside this list was built: prompt testing, RAG lab, test designer, per-project LLM settings, users and roles (web sign-in, so "multi-tenant auth" under Won't v1 is partly superseded by single-project admin/member roles), pricing settings and a UI redesign. See `STATUS.md` and `CHANGELOG.md`.
+
 ## 1. Must / Should / Could / Won't (PRD §7, unchanged)
 
 | Priority | Features |
@@ -41,7 +45,7 @@ Every task also needs AGENTS §4.5 (tests pass, ruff/eslint/tsc clean, docs upda
 - **API-03**: `POST /runs` writes run and outbox row in one transaction; planner expands the matrix with `call.requested` keyed by run_item_id; run slots never exceed the per-run cap and the reconciler repairs a leaked slot. (FR-RN-1, FR-RN-3, NFR-4b)
 - **VOICE-03**: mock agent speaks `pareeksha-audio-v1`, sends glass-box messages, and each of the 5 bugs in FR-MK-3 toggles independently. (FR-MK-1..3)
 - **VOICE-04**: adapter and caller pipeline produce caller, agent and mixed recordings (16 kHz mono tracks, stereo mix), per-turn records, barge-in at 0.8-2.5 s and all end conditions; loopback overhead <= 50 ms. (FR-RN-4..8, FR-DX-7 audio_v1, NFR-2)
-- **EVAL-01**: Gemini client returns schema-valid JSON, does one repair retry and logs usage; `caller_v1.j2` produces persona-language utterances; first utterance reproducible for the same seed. (NFR-5, FR-CO-1)
+- **EVAL-01**: LLM client (DeepSeek default, Gemini optional) returns schema-valid JSON, does one repair retry and logs usage; `caller_v1.j2` produces persona-language utterances; first utterance reproducible for the same seed. (NFR-5, FR-CO-1)
 - **EVAL-02**: unit tests for latency/barge-in/silence/talk-ratio metrics, disclosure and forbidden-phrase checks, Indian numeral parser (e.g. "naal-ku saavira" = 4000), PII masking of phone/Aadhaar/PAN; coverage >= 70% on `evaluation/`. (FR-EV-1/2/9, NFR-9, NFR-12)
 - **INT-01**: connectors discovered by entry point; secrets Fernet-encrypted and never returned; HMAC verify rejects bad signature and stale timestamp; SSRF guard blocks private ranges; webhook sink logs deliveries and is idempotent per (integration, event). (FR-IN-1/2/5/6/9, NFR-15)
 - **FE-02**: four list+form pages work against the generated client with all three states; no key in the bundle. (FR-DB-1, FR-DB-5)
@@ -58,9 +62,9 @@ Every task also needs AGENTS §4.5 (tests pass, ruff/eslint/tsc clean, docs upda
 - **QA-03**: with all 5 bugs on, the run flags >= 4 of 5 (PRD §8); with bugs off the pass rate is high. (FR-MK-3)
 
 ### Day 4
-- **H-02**: >= 20 clips each for >= 3 Kannada dialect groups, Hindi and code-mixed, all with consent flag and reference text. (PRD §8, NFR-9)
+- **H-02**: >= 20 clips each for >= 3 Kannada dialect groups, Hindi and code-mixed, all with consent flag and reference text. (As built: replaced by owner decision of 30 Oct 2026 with 110 Vaani CC-BY-4.0 clips, 5 groups x 22, see DIALECT-02.) (PRD §8, NFR-9)
 - **EVAL-05**: manifest import, three conditions (clean 16k, PSTN 8k A-law, PSTN + noise), normalised WER/CER, entity accuracy, intent, speaker-grouped bootstrap CI, bias_list suggestions, HTML report; consent flag enforced. (FR-DI-1..4, FR-DI-6)
-- **VOICE-06**: Pipecat adapter with `PareekshaFrameSerializer` and `examples/pipecat-bot` completes a test call (Must); LiveKit example (Should, cut first). (FR-DX-7, FR-DX-8)
+- **VOICE-06**: Pipecat adapter with `PareekshaFrameSerializer` and `examples/pipecat-bot` completes a test call (Must); LiveKit example (Should, cut first; as built: cut by the owner, not built). (FR-DX-7, FR-DX-8)
 - **INT-04**: SDK (sync + async) and CLI (`login, apply, run, regress, audit, dlq, doctor`) exit non-zero on failure; `apply` twice changes nothing; GitHub Action writes a job summary and fails the check on regression. (FR-DX-3..6, FR-RG-4)
 - **API-05**: promote creates a `blocking` regression test from a failed call; suite run fails if any blocking test fails; calibration returns kappa and Spearman; `generator` yields N valid scenario drafts. (FR-RG-1/2, FR-AU-5, FR-EV-8, FR-SC-2)
 - **FE-04**: waveform with regions, transcript synced to audio, evidence turns seek, dimension scores, checks, promote dialog, human review form. (FR-DB-3, FR-EV-7)
