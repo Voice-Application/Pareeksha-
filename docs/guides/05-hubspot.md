@@ -27,24 +27,24 @@ Test it (authenticates against HubSpot, no side effects):
 
 ```bash
 curl -s -X POST "$API/integrations/<id>/test" -H "Authorization: Bearer $PAREEKSHA_API_KEY"
-# {"ok":true,"detail":"..."}
+# {"ok":true,"detail":"HubSpot token accepted"}
 ```
 
 The same form exists in the web app under Integrations.
 
 ## 3. What it posts
 
-For each matching `evaluation.completed` the connector finds the contact (CRM v3 search by `phone`/`mobilephone` or `email`), then creates a **note** (`POST /crm/v3/objects/notes`) associated with the contact (association type 202, note to contact). No match is recorded as a `skipped` delivery with the reason, not an error. The note body is rendered from a Jinja template (`note_template`); the default:
+For each matching `evaluation.completed` the connector finds the contact (CRM v3 search by `phone`/`mobilephone` or `email`), then creates a **note** (`POST /crm/v3/objects/notes`) associated with the contact (association type 202, note to contact). No match is recorded as a `skipped` delivery with the reason, not an error. The note body is rendered from a sandboxed Jinja template (`note_template`; variables `verdict`, `score`, `critical`, `agent`, `language`, `duration`, `issues`, `summary`, `link`) and ends with a `[pareeksha event <id>]` marker. The default:
 
 ```
-Pareeksha call audit — FAIL (40/100) ⚠ critical
-Agent: EMI Reminder Bot · Kannada · 1m 24s
+Pareeksha call audit - FAIL (40/100) CRITICAL
+Agent: EMI Reminder Bot - kn-IN - 1m 24s
 Issues: asr_misrecognition, wrong_fact
 Summary: Misheard 4,000 as 40,000 and confirmed it.
 Details: <public_base_url>/calls/<id>
 ```
 
-It is idempotent: a delivery row (`UNIQUE (integration, event, outbound)`) is checked before the note is created, and a redelivered event finds the already-created note rather than adding a second. HubSpot `429` honours `Retry-After` through the retry topics; after 3 attempts the event lands in the DLQ.
+It is idempotent: the delivery row for (integration, event, direction) is claimed before the connector runs, so a redelivered event returns the stored note id without calling HubSpot; after a crash the connector also looks for a note on the contact that already carries the event marker. A HubSpot `401`/`403` is a permanent failure (bad token or missing scopes). HubSpot `429` honours `Retry-After` through the retry topics; after 3 attempts the event lands in the DLQ.
 
 ## 4. See the deliveries
 
@@ -52,7 +52,7 @@ It is idempotent: a delivery row (`UNIQUE (integration, event, outbound)`) is ch
 curl -s "$API/integrations/<id>/deliveries" -H "Authorization: Bearer $PAREEKSHA_API_KEY" | python3 -m json.tool
 ```
 
-Each row has `status` (`succeeded`, `failed`, `skipped`), `http_status`, `external_id` (the HubSpot note id) and the number of attempts.
+Each row has `direction`, `status` (`pending`, `succeeded`, `failed`, `skipped`), `http_status`, `external_id` (the HubSpot note id) and the number of attempts.
 
 ## 5. End-to-end check
 
@@ -62,6 +62,6 @@ Each row has `status` (`succeeded`, `failed`, `skipped`), `http_status`, `extern
 
 ## Notes and limits
 
-- The HubSpot code is covered by mocked-API tests (21 tests): `docker compose run --rm --no-deps -v "$PWD/backend/tests:/app/tests:ro" api sh -c "pip install -q pytest pytest-asyncio respx && python -m pytest tests/unit/integrations/test_hubspot_sink.py -q"`; exercise it once against a free HubSpot developer account before you rely on it.
+- The HubSpot code is covered by mocked-API tests: `docker compose run --rm --no-deps -v "$PWD/backend/tests:/app/tests:ro" api sh -c "pip install -q pytest pytest-asyncio respx && python -m pytest tests/unit/integrations/test_hubspot_sink.py -q"`; exercise it once against a free HubSpot developer account before you rely on it.
 - Only `evaluation.completed` is subscribed. Transcripts are never sent.
 - Other CRMs (Salesforce, Zoho, LeadSquared, Freshdesk, Slack) are designed for but not built: see [Guide 7](07-write-a-connector.md).

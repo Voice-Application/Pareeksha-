@@ -2,7 +2,7 @@
 
 Goal: find out which retrieval setup (chunking, embedding model, search method) makes your prompt agent answer correctly from your own documents, and what it costs. You upload documents to a **knowledge base**, build **indexes**, add questions with known answers, and run a **matrix**: several retrieval configs plus two baselines on the same questions. The report shows hit rate, hallucination rate, latency and cost side by side.
 
-**Prerequisite:** [Guide 9](09-prompt-testing.md) (a prompt agent with a pushed version), the CLI with `PAREEKSHA_API_KEY` set, and the stack running with the `indexer` worker (it is part of `docker compose up`).
+**Prerequisite:** [Guide 9](09-prompt-testing.md) (a prompt agent with a pushed version), the CLI logged in (`pareeksha login`, or `PAREEKSHA_URL` and `PAREEKSHA_KEY`), and the stack running with the `indexer` worker (it is part of `docker compose up`).
 
 ## 1. Create a knowledge base and upload documents
 
@@ -84,7 +84,7 @@ Write a config file, a list of up to four retrieval configs:
 pareeksha rag run --agent refund-bot --kb faq --config configs.json --wait
 ```
 
-This prints the matrix id. Every config needs a ready index with the same chunking and embedding; if one is missing the API answers `409 rag_index_missing` and lists which, and nothing is created. Unless you pass `--no-baselines`, two baselines run on the same questions:
+This prints the matrix id. The CLI fills in each config's `kb_id` from `--kb`, selects scenarios tagged `rag` (override with `--tags`), and also accepts `--persona`, `--noise`, `--repeats` and `--confirm-over-budget`. In the web app the same flow is **RAG lab** (`/rag-lab`); documents live under **Documents** (`/knowledge-bases`), and **Test my prompt** (Guide 9) can attach a knowledge base to a quick RAG test. Every config needs a ready index with the same chunking and embedding; if one is missing the API answers `409 rag_index_missing` and lists which, and nothing is created. Unless you pass `--no-baselines`, two baselines run on the same questions:
 
 - **No RAG**: the agent answers from its prompt alone. It shows how much retrieval helps and how often the model makes things up unaided.
 - **Full context**: the whole knowledge base is put in the prompt. It is the accuracy ceiling and the cost ceiling. If the knowledge base is longer than the config's `context_char_limit` (default 400,000 characters) this row says `n/a` instead of running.
