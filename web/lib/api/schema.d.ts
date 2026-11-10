@@ -2232,7 +2232,7 @@ export interface components {
              * Check Type
              * @enum {string}
              */
-            check_type: "disclosure_present" | "forbidden_absent" | "language_match" | "tool_calls_expected" | "no_unexpected_tool" | "no_loop" | "amount_confirmed";
+            check_type: "disclosure_present" | "forbidden_absent" | "language_match" | "tool_calls_expected" | "no_unexpected_tool" | "no_loop" | "amount_confirmed" | "responsive";
             /** Check Key */
             check_key: string;
             /**

@@ -594,7 +594,7 @@ class DeterministicChecks(Base):
     __tablename__ = "deterministic_checks"
     __table_args__ = (
         CheckConstraint(
-            "check_type = ANY (ARRAY['disclosure_present'::text, 'forbidden_absent'::text, 'language_match'::text, 'tool_calls_expected'::text, 'no_loop'::text, 'amount_confirmed'::text, 'no_unexpected_tool'::text])",
+            "check_type = ANY (ARRAY['disclosure_present'::text, 'forbidden_absent'::text, 'language_match'::text, 'tool_calls_expected'::text, 'no_loop'::text, 'amount_confirmed'::text, 'no_unexpected_tool'::text, 'responsive'::text])",
             name="deterministic_checks_check_type_check",
         ),
         ForeignKeyConstraint(

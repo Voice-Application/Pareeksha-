@@ -35,6 +35,7 @@ CheckType = Literal[
     "no_unexpected_tool",
     "no_loop",
     "amount_confirmed",
+    "responsive",
 ]
 FailureType = Literal[
     "intent_miss",
