@@ -5,14 +5,12 @@
 
 # --- Speech: Gnani ---------------------------------------------------------
 gnani-vachana>=0.8.2           # official Gnani SDK: GnaniSTTClient, GnaniSTTStreamClient, batch, GnaniTTSClient
-pipecat-gnani>=0.5.12          # Pipecat services: GnaniSTTService, GnaniTTSService (import pipecat_gnani)
 
 # --- Real-time audio framework ----------------------------------------------
-pipecat-ai[silero,websocket,google]>=1.13.0   # NOTE: there is no [gnani] extra; use pipecat-gnani above
+pipecat-ai[silero,websocket,google]>=1.13.0
 
 # --- LLM ---------------------------------------------------------------------
 google-auth>=2.30              # service-account tokens for the Google Cloud speech adapter
-google-genai>=2.33.0          # Gemini SDK (the older google-generativeai package is deprecated)
 
 # --- Event backbone ---------------------------------------------------------------
 aiokafka>=0.14.0               # asyncio Kafka client (producer/consumer, manual commits)
@@ -27,7 +25,7 @@ sqlalchemy[asyncio]>=2.0.30
 psycopg[binary]>=3.2
 alembic>=1.13
 httpx>=0.27
-websockets>=12.0,<16.0         # range required by pipecat-gnani
+websockets>=12.0,<16.0         # same range as backend/pyproject.toml
 
 # --- Audio DSP -------------------------------------------------------------------
 numpy>=1.26
@@ -36,8 +34,6 @@ soundfile>=0.12
 audioop-lts>=0.2.2; python_version >= "3.13"   # audioop was removed from the stdlib in 3.13
 
 # --- Text metrics / evaluation ----------------------------------------------------
-jiwer>=4.0
-indic-nlp-library>=0.92
 rapidfuzz>=3.9                 # fuzzy disclosure matching, repeat detection
 
 # --- RAG lab ------------------------------------------------------------------------
@@ -48,10 +44,6 @@ pypdf>=7.0.0                   # PDF text extraction for knowledge-base uploads
 jinja2>=3.1
 pyyaml>=6.0
 cryptography>=46               # Fernet encryption for connector secrets
-sse-starlette>=2.1             # Server-Sent Events for live run progress
-
-# --- Ops ------------------------------------------------------------------------------
-structlog>=24.1
 
 # --- Dev (backend/requirements-dev.txt) -----------------------------------------------
 # pytest>=8  pytest-asyncio>=0.23  respx>=0.21  ruff>=0.5  testcontainers[kafka,postgres]>=4
