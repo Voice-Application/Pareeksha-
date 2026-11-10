@@ -3,6 +3,7 @@
 pytest>=8
 pytest-asyncio>=0.23
 pytest-cov>=5
+pytest-xdist>=3.6   # make test / CI run the fast suites with -n auto
 respx>=0.21
 ruff==0.17.3
 mypy==2.4.1

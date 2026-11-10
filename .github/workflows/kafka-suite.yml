@@ -7,7 +7,19 @@ name: kafka-suite
 #   backend/tests/integration  INFRA-02 framework tests (including the real 30 s / 5 min delays)
 on:
   push:
+    branches: [main]
+    paths-ignore: ["*.md", "docs/guides/**", "docs/design/**", "docs/superpowers/**", "proof/**", "labelling/**"]
   pull_request:
+    paths-ignore: ["*.md", "docs/guides/**", "docs/design/**", "docs/superpowers/**", "proof/**", "labelling/**"]
+  workflow_dispatch:
+  schedule:
+    - cron: "30 2 * * *"   # nightly full run, including the real retry delays
+
+# Contract tests read docs/*.md and docs/schema.sql, so only docs nothing reads are ignored.
+# A new push to a PR cancels the run it supersedes; main runs always finish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -40,8 +52,10 @@ jobs:
           # which only exists once the package is installed (as it is in the Docker image).
           pip install --no-deps -e backend
 
+      # test_real_delays waits the real 30 s + 5 min retry delays (about 5.5 min). The retry chain is
+      # covered with short delays elsewhere, so PRs skip it; main, nightly and manual runs keep it.
       - name: Kafka suite
-        run: scripts/ci/kafka_suite.sh
+        run: scripts/ci/kafka_suite.sh ${{ github.event_name == 'pull_request' && '--deselect tests/integration/test_real_delays.py' || '' }}
 
       - name: Broker and database logs on failure
         if: failure()

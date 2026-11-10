@@ -4,7 +4,17 @@ name: ci
 # acceptance (Gnani, DeepSeek, HubSpot) is `make verify`, run by a person with keys, never in this workflow.
 on:
   push:
+    branches: [main]
+    paths-ignore: ["*.md", "docs/guides/**", "docs/design/**", "docs/superpowers/**", "proof/**", "labelling/**"]
   pull_request:
+    paths-ignore: ["*.md", "docs/guides/**", "docs/design/**", "docs/superpowers/**", "proof/**", "labelling/**"]
+  workflow_dispatch:
+
+# Contract tests read docs/*.md and docs/schema.sql, so only docs nothing reads are ignored.
+# A new push to a PR cancels the run it supersedes; main runs always finish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -40,7 +50,7 @@ jobs:
         run: mypy   # files = pareeksha, tests, ../mock_agent (pyproject.toml)
       - name: Unit, evaluation, judge and contract tests (no external services)
         working-directory: backend
-        run: python -m pytest tests/unit tests/evaluation tests/judge tests/contract -q -p no:cacheprovider
+        run: python -m pytest tests/unit tests/evaluation tests/judge tests/contract -q -p no:cacheprovider -n auto
 
   web:
     runs-on: ubuntu-24.04
@@ -58,9 +68,18 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npx tsc --noEmit
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('web/package-lock.json') }}
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: web/.next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('web/package-lock.json') }}-${{ hashFiles('web/app/**', 'web/components/**', 'web/lib/**') }}
+          restore-keys: nextjs-${{ runner.os }}-${{ hashFiles('web/package-lock.json') }}-
       - run: npx playwright install --with-deps chromium
       - name: Page smoke and bundle scan (mocked API upstream, built app)
-        run: npx playwright test
+        run: npx playwright test --workers=4   # runners have 4 vCPUs; the default is half
 
   sdk:
     runs-on: ubuntu-24.04
