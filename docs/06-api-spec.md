@@ -4,7 +4,9 @@ Base URL (local): `http://localhost:8000/api/v1`. JSON everywhere except file up
 
 **Auth:** every request needs `Authorization: Bearer pk_live_…` (an API key from `/api-keys`; `make demo` creates one). Scopes: `read`, `runs:write`, `audits:write`, `admin`. The Next.js app calls the API only from its server-side proxy, so the key never reaches the browser. Exceptions: `/health` and `/webhooks/inbound/{integration_id}` (HMAC-signed instead).
 
-**v0.2:** async work is event-driven on Kafka, so `202` responses return the resource id to poll or stream (no job ids). New: SSE progress (§3), integrations + webhooks (§8), DLQ (§9), API keys (§10); agents use `adapter`.
+A missing, unknown or revoked key is `401 unauthorized`; a key without the route's scope is `403 forbidden` (`details.required`, `details.granted`; `admin` implies every scope). Each operation's scope is published in the OpenAPI `security` requirement. Web sign-in accounts (roles `admin` / `member`) are handled by the Next.js server: it verifies credentials through `/auth/*` with an `admin` key and keeps its own session cookie, so the API itself only knows API keys (§10).
+
+**v0.2:** async work is event-driven on Kafka, so `202` responses return the resource id to poll or stream (no job ids). New: SSE progress (§3), integrations + webhooks (§8), DLQ (§9), API keys and users (§10); agents use `adapter`. Later additions: LLM settings (§12), test designer (§13), page-data additions (§14), knowledge bases and the RAG lab (§15), quick tests and the assistant (§16).
 
 **Conventions**
 - IDs are UUIDs. Timestamps are ISO-8601 UTC.
@@ -16,6 +18,8 @@ Base URL (local): `http://localhost:8000/api/v1`. JSON everywhere except file up
 | 400 | `validation_error` |
 | 404 | `not_found` |
 | 409 | `conflict` (duplicate name, run already finished) |
+| 401 / 403 | `unauthorized` / `forbidden` (see Auth) |
+| 429 | `rate_limited` (login, designer, assistant, quick tests; `Retry-After`) |
 | 402 | `budget_exceeded` (estimate above remaining budget) |
 | 413 | `file_too_large` |
 | 422 | `unsupported_audio` |
@@ -169,7 +173,7 @@ Standard `GET` (list/one), `PATCH`, `DELETE` exist for all three resources. Dele
   "estimate": { "tts_seconds": 240, "stt_seconds": 480, "judge_calls": 8, "caller_llm_calls": 64, "est_cost": 31.5 }
 }
 ```
-`402 budget_exceeded` if `est_cost` > remaining budget. Add `"confirm_over_budget": true` to force.
+`402 budget_exceeded` if `est_cost` > remaining budget. Add `"confirm_over_budget": true` to force. `kind` is `matrix` (default) or `dry_run`; `config.rag` optionally pins a RAG configuration (§15). The estimate also carries `agent_llm_calls`, `agent_llm_tokens` and `agent_llm_unpriced` for prompt agents.
 
 The run row and its `run.requested` event are written in one transaction; the planner then creates the items. `item_count` is computed up front so the UI can show it immediately.
 
@@ -366,7 +370,7 @@ Implementation notes (API-04): `consumer_lag[group]` is the sum over the group's
 
 ## 7. Agent audio protocol — `pareeksha-audio-v1`
 
-This is what an agent under test must speak over WebSocket when its adapter is `audio_v1` (the mock agent implements it). The `pipecat`, `livekit` and `vapi` adapters translate their own transports to the same internal session, so the rest of the platform only sees this protocol's semantics (see `10-integrations-and-dx.md §4`).
+This is what an agent under test must speak over WebSocket when its adapter is `audio_v1` (the mock agent implements it). The `pipecat` adapter translates Pipecat's own transport to the same internal session (`PareekshaFrameSerializer` in `backend/pareeksha/adapters/pipecat_serializer.py`), so the rest of the platform only sees this protocol's semantics. `livekit` and `vapi` are accepted values of `adapter` but have no adapter in this build (`adapters/registry.py` lists only `audio_v1` and `pipecat`) (see `10-integrations-and-dx.md §4`).
 
 **Transport:** one WebSocket per call. The platform is the **client**; the agent is the server.
 
@@ -406,6 +410,8 @@ async def handler(ws):
 ---
 
 ## 8. Integrations & webhooks
+
+Reads (`GET /integrations`, `/connectors`, one integration, its deliveries) need scope `read`; create, update, delete, test and redeliver need `admin`.
 
 ### `GET /integrations/connectors`
 Installed connectors (built-in + entry-point plugins) with their JSON schemas so the web app can render forms:
@@ -454,6 +460,8 @@ Outbound webhook payloads and signing: `10-integrations-and-dx.md §2.1`.
 
 ## 9. Dead letters
 
+`GET /dlq` needs scope `read`; replay and discard need `admin`.
+
 | Method & path | Returns |
 |---|---|
 | `GET /dlq?status=open` | `{ "items": [ { "id", "event_id", "original_topic", "consumer_group", "error", "attempts", "failed_at", "envelope" } ] }` |
@@ -476,7 +484,7 @@ Web sign-in accounts (called only by the Next.js server with an `admin` key, whi
 
 Kafka topics, keys and the envelope are specified in `03-TRD.md §10`. The Pydantic models in `backend/pareeksha/events/schemas.py` are the source of truth; `GET /events/schemas` returns their JSON Schemas so external consumers (e.g. a data team reading `evaluation.completed`) can validate messages.
 
-## 13. LLM settings (per project)
+## 12. LLM settings (per project)
 
 The `llm_settings` row of a project overrides the environment (`LLM_PROVIDER`, `DEEPSEEK_*`, `GEMINI_*`) for that project's judge, caller, scenario generation, role detection and designer calls. DeepSeek stays the default when there is no row.
 
@@ -492,7 +500,7 @@ Removes the row; the environment applies again.
 ### `POST /settings/llm/test` (scope `admin`) → `{ ok, provider, model, latency_ms, error }`
 One tiny JSON completion with the effective settings. A provider failure is `ok=false` with a short message (never a `500`, never the key).
 
-## 14. Test designer
+## 13. Test designer
 
 ### `POST /designer/chat` (scope `runs:write`) → `DesignerChatResponse`
 Stateless: send the whole history each time. Body `{ messages: [{ role: user|assistant, content }], draft: DesignerDraft | null }` (1 to 40 messages, each at most 20 000 characters, at most 60 000 in total). Response `{ reply, questions: [{ id, text, options }] (0 to 5), draft: DesignerDraft | null, ready }`. The assistant (prompt `designer_v1`, project LLM settings, purpose `designer`) reads the bot prompt the user pastes, asks only what it cannot infer, then returns a draft and `ready=true` (also needs `agent.endpoint_url`); on later turns it revises `draft`. The pasted prompt is fenced as data and is never treated as instructions. Persona and noise profile ids that are not in the project are dropped (the `reply` says so); scenario tool calls must name tools of `agent.expected_tools`; regexes must compile. Invalid model output is retried once, then `502 designer_invalid_output`; provider failures are `502 upstream_error` (status code only, never the provider's text); `402 budget_exceeded` when the project budget is used up; `429 rate_limited` (20 requests per minute per key, per API process; `Retry-After`); regexes in the draft are at most 200 characters with no nested quantifiers; usage is recorded even when the call fails; no key configured is `422 llm_not_configured`.
@@ -502,7 +510,7 @@ Stateless: send the whole history each time. Body `{ messages: [{ role: user|ass
 ### `POST /designer/commit` (scope `runs:write`) → `201`
 Body `{ draft }`. In one transaction: creates the agent (`422` naming `draft.agent.endpoint_url` if missing, `409` on a name clash), its scenarios and the `new` personas; `existing_id` personas and noise profiles must belong to the project (`404`). Returns `{ agent_id, scenario_ids, persona_ids, noise_profile_ids, calls, run_wizard_path }` where `calls = scenarios x personas x noise profiles` and `run_wizard_path` is `/runs/new?agent=<id>&s=<ids>&p=<ids>&l=<ids>&step=review` (comma-separated ids; the run wizard reads exactly these parameters).
 
-## 12. Additions frozen by TL-01 (page data gaps)
+## 14. Additions frozen by TL-01 (page data gaps)
 
 Added on 23 Oct 2026 after DES-01 listed API data gaps for the FR-DB-1 pages (see CHANGELOG.md). Request/response models are in the OpenAPI document; only the shape of each addition is summarised here. Auth scopes follow the same rules (reads `read`, writes `runs:write`).
 
@@ -521,7 +529,7 @@ Added on 23 Oct 2026 after DES-01 listed API data gaps for the FR-DB-1 pages (se
 
 Field additions: `RunSummary.score_distribution` (10 buckets, FR-DB-2); `run_id` and `run_item_id` on the call object.
 
-## 13. Knowledge bases and the RAG lab
+## 15. Knowledge bases and the RAG lab
 
 Added with the RAG lab (see [Guide 10](guides/10-rag-testing.md)). Reads need scope `read`, writes `runs:write`. Request and response models are in the OpenAPI document; the shape of each route is summarised here. Provider keys (`secrets`) are write-only and never returned; the knowledge base shows `has_secrets`.
 
@@ -549,3 +557,19 @@ Added with the RAG lab (see [Guide 10](guides/10-rag-testing.md)). Reads need sc
 | `PUT /pricing` | Set prices: a list of `{ kind: llm\|embedding\|rerank, provider, model, input_per_m_inr, output_per_m_inr? }`. `400` for a `local` embedding or reranker (local always costs 0) | `{ prices, unpriced }` |
 
 Any two matrix entries compare with the existing `GET /runs/compare`.
+
+## 16. Quick tests and the assistant
+
+"Test my prompt" in the web app: paste a system prompt, the platform plans rules and scenarios, runs simulated conversations against it and reports rule results. Reads need scope `read`, writes `runs:write`. LLM-backed routes use the project's LLM settings (§12) and are rate limited per key and per API process (`429 rate_limited`, `Retry-After`): `POST /quick-tests` and `/improve` 10 per minute, `POST /assistant/chat` 30 per minute. `402 budget_exceeded` when the project budget is used up.
+
+| Method & path | Purpose | Returns |
+|---|---|---|
+| `GET /quick-tests/setup` | Readiness for the form | `{ llm_ready, llm_provider, agent_model, auto_run_limit, knowledge_bases }` |
+| `POST /quick-tests` | Create `{ system_prompt, user_details?, kb_id?, scenario_count (3–12, default 8), instructions?, confirm_cost }`. An estimate above `auto_run_limit` needs `confirm_cost: true` | `201 { id, run_id, conversations, est_cost }` |
+| `GET /quick-tests` | The 20 newest tests; may advance tests still checking | list |
+| `GET /quick-tests/{id}` | One test with rule results (evidence per call and turn) | the test |
+| `POST /quick-tests/{id}/improve` | `{ instructions?, retest }`: draft a rewritten prompt, optionally test it at once | the improvement |
+| `POST /quick-tests/{id}/retest` | Test the stored improved prompt on the same conversations; `409` if there is no improvement | `201` |
+| `POST /assistant/chat` | Stateless assistant turn: `{ messages (1–30), page?, quick_test_id? }` | `{ reply, suggestions, action: start_quick_test \| improve_quick_test \| open_page \| null, quick_test_id, improvement, open_path, pending, estimate, error }` |
+
+LLM failures: unusable output `502 invalid_output`, no usable LLM configuration `422 llm_not_configured`, provider error `502 upstream_error`.
