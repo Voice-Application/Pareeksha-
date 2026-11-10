@@ -5,7 +5,10 @@ Synthetic "Suraksha Finance" collections agent speaking `pareeksha-audio-v1` (PC
 messages. STT/TTS go through `pareeksha.gnani` (needs `GNANI_API_KEY`); the dialog is scripted, so no
 LLM is used. `GET /health` serves the compose healthcheck; any other path is a call socket.
 
-Run: `python -m mock_agent.server` (port `MOCK_AGENT_PORT`, default 8765).
+Run: `python -m mock_agent.server` (port `MOCK_AGENT_PORT`, default 8765), or `docker compose up mock-agent`
+(host port `MOCK_AGENT_HOST_PORT`, default 8765; `MOCK_BUGS` is passed through). TTS audio is cached in
+`MOCK_AGENT_TTS_CACHE` (default `/tmp/mock_agent_tts`). `llm_dialog.py` (a DeepSeek-backed `LLMDialog`) exists but
+`server.py` does not use it: the served agent is always the scripted `Dialog`.
 
 Planted bugs (FR-MK-3), toggled with `MOCK_BUGS=a,b` or per call with `start.metadata.mock_bugs`:
 
