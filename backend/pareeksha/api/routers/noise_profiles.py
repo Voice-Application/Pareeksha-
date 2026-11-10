@@ -9,6 +9,7 @@ from uuid import UUID
 from fastapi import APIRouter, File, Response, UploadFile
 
 from pareeksha.api.auth import ReadKey, WriteKey
+from pareeksha.api.body_limit import body_capped_route
 from pareeksha.api.crud import delete_row, flush, get_or_404, paginate
 from pareeksha.api.deps import AUTH_ERRORS, Db, Pagination, binary_response, errors
 from pareeksha.api.errors import ApiError
@@ -19,7 +20,12 @@ from pareeksha.db.models import NoiseProfiles
 from pareeksha.schemas.common import Page
 from pareeksha.schemas.personas import NoiseProfileCreate, NoiseProfileOut, NoiseProfileUpdate
 
-router = APIRouter(tags=["noise-profiles"], responses=AUTH_ERRORS)
+_BodyCappedRoute = body_capped_route(
+    lambda: preview.MAX_UPLOAD_BYTES,
+    f"Clip is larger than {preview.MAX_UPLOAD_BYTES // (1024 * 1024)} MB",
+)
+
+router = APIRouter(tags=["noise-profiles"], responses=AUTH_ERRORS, route_class=_BodyCappedRoute)
 
 _DUPLICATE = "A noise profile with this name already exists"
 _IN_USE = "Noise profile is referenced by a run and cannot be deleted"

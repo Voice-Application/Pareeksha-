@@ -11,6 +11,7 @@ from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
+from pareeksha.api.body_limit import body_capped_route
 from pareeksha.api.deps import Db, errors
 from pareeksha.api.errors import ApiError
 from pareeksha.api.routers.audits import _clean_languages
@@ -26,7 +27,18 @@ from pareeksha.integrations.webhook import InboundRejectedError
 from pareeksha.schemas.common import ErrorResponse
 from pareeksha.schemas.integrations import InboundAccepted, InboundCallPayload
 
-router = APIRouter(tags=["webhooks"])
+#: A webhook payload is one small JSON object (recording URL, metadata, tool calls).
+MAX_WEBHOOK_BODY_BYTES = 1024 * 1024
+
+router = APIRouter(
+    tags=["webhooks"],
+    route_class=body_capped_route(
+        MAX_WEBHOOK_BODY_BYTES,
+        "Webhook body is larger than 1 MiB",
+        slack=0,
+        code="payload_too_large",
+    ),
+)
 
 SIGNING_SECRET = "signing_secret"
 PREVIOUS_SIGNING_SECRET = "previous_signing_secret"
@@ -99,7 +111,7 @@ async def _existing_call(session: Db, integration_id: UUID, external_id: str) ->
     "/webhooks/inbound/{integration_id}",
     status_code=202,
     responses={
-        **errors(400, 404, 408, 422),
+        **errors(400, 404, 408, 413, 422),
         401: {
             "model": ErrorResponse,
             "description": "invalid_signature: bad HMAC (or missing signature headers)",
@@ -109,12 +121,12 @@ async def _existing_call(session: Db, integration_id: UUID, external_id: str) ->
     description=(
         "Headers `X-Pareeksha-Timestamp` and `X-Pareeksha-Signature: v1=<hex hmac_sha256(secret, "
         '"{ts}.{raw_body}")>`. Timestamps older than 5 minutes are rejected (408). The recording '
-        "URL must be https and resolve to a public address (422 unsafe_url)."
+        "URL must be https and resolve to a public address (422 unsafe_url). Bodies over 1 MiB are "
+        "refused (413) before the signature is checked."
     ),
 )
 async def receive_inbound_webhook(
     integration_id: UUID,
-    body: InboundCallPayload,
     request: Request,
     session: Db,
     x_pareeksha_timestamp: Annotated[str, Header(alias="X-Pareeksha-Timestamp")],
@@ -130,6 +142,15 @@ async def receive_inbound_webhook(
         },
         raw,
     )
+    try:  # parsed only once the signature over the raw bytes has passed
+        body = InboundCallPayload.model_validate_json(raw)
+    except ValidationError as exc:
+        raise ApiError(
+            400,
+            "validation_error",
+            "Request validation failed",
+            {"errors": exc.errors(include_input=False, include_context=False, include_url=False)},
+        ) from exc
 
     duplicate = await _existing_call(session, integration_id, body.external_id)
     if duplicate is not None:  # a replayed delivery: nothing is created, nothing is fetched

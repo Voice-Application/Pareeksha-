@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+from collections import OrderedDict
 from collections.abc import Callable
 from uuid import UUID
 
@@ -39,6 +40,61 @@ class TokenBucket:
             )
         self._state[key] = (tokens - 1, now)
 
+
+class AttemptLimiter:
+    """At most ``max_attempts`` sign-in attempts per ``window_s`` seconds per account key.
+
+    An attempt is counted when it starts, so a burst of parallel guesses cannot all slip under the
+    limit before the first one fails; a success clears the key. State is bounded: past
+    ``max_keys`` the least recently used keys are forgotten (an attacker flooding fresh keys can
+    therefore reset an old one, at the price of the memory bound).
+
+    ponytail: in-process, like ``TokenBucket``; move to the database if the API scales out.
+    """
+
+    def __init__(
+        self,
+        max_attempts: int = 5,
+        window_s: float = 300.0,
+        max_keys: int = 10_000,
+        clock: Callable[[], float] = time.monotonic,
+    ) -> None:
+        self.max_attempts, self.window_s, self.max_keys, self._clock = (
+            max_attempts,
+            window_s,
+            max_keys,
+            clock,
+        )
+        self._attempts: OrderedDict[str, list[float]] = OrderedDict()
+
+    def begin(self, key: str) -> None:
+        """Count one attempt, or raise 429 with ``Retry-After`` when the key is used up."""
+        now = self._clock()
+        recent = [t for t in self._attempts.get(key, []) if now - t < self.window_s]
+        if len(recent) >= self.max_attempts:
+            wait = max(1, int(recent[0] + self.window_s - now) + 1)
+            self._attempts[key] = recent
+            self._attempts.move_to_end(key)
+            raise ApiError(
+                429,
+                "rate_limited",
+                "Too many sign-in attempts for this account; try again later",
+                {"retry_after_s": wait},
+                headers={"Retry-After": str(wait)},
+            )
+        recent.append(now)
+        self._attempts[key] = recent
+        self._attempts.move_to_end(key)
+        while len(self._attempts) > self.max_keys:
+            self._attempts.popitem(last=False)
+
+    def succeed(self, key: str) -> None:
+        """A correct password: forget the key's earlier attempts."""
+        self._attempts.pop(key, None)
+
+
+#: POST /auth/login, keyed by normalised email: a handful of guesses per five minutes.
+LOGIN_LIMIT = AttemptLimiter()
 
 #: POST /designer/chat: one LLM call (plus a repair retry) per request.
 DESIGNER_CHAT_LIMIT = TokenBucket(20)

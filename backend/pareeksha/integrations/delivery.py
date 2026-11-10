@@ -29,6 +29,7 @@ from pareeksha.integrations.base import (
     EvaluationSummary,
 )
 from pareeksha.integrations.crypto import SecretBox, SecretDecryptError
+from pareeksha.integrations.redact import redact_text
 
 Direction = Literal["inbound", "outbound"]
 TERMINAL = ("succeeded", "skipped")
@@ -138,7 +139,7 @@ class DeliveryService:
         except ConnectorRetryableError as exc:
             # the last attempt has no retry left: the log must not claim it is still pending
             record.status = "failed" if final_attempt else "pending"
-            record.response_excerpt = str(exc)[:2000]
+            record.response_excerpt = redact_text(str(exc))[:2000]
             await self.store.save(record)
             raise
         except (
@@ -147,7 +148,7 @@ class DeliveryService:
             ValueError,
         ) as exc:  # ValueError: pydantic
             record.status = "failed"
-            record.response_excerpt = str(exc)[:2000]
+            record.response_excerpt = redact_text(str(exc))[:2000]
             await self.store.save(record)
             return record
         _apply(record, outcome)
@@ -159,4 +160,5 @@ def _apply(record: DeliveryRecord, outcome: DeliveryOutcome) -> None:
     record.status = outcome.status
     record.http_status = outcome.http_status
     record.external_id = outcome.external_id
-    record.response_excerpt = outcome.response_excerpt or outcome.detail or None
+    excerpt = outcome.response_excerpt or outcome.detail
+    record.response_excerpt = redact_text(excerpt) if excerpt else None

@@ -21,6 +21,7 @@ from pareeksha.api.deps import PageParams
 from pareeksha.api.errors import ApiError
 from pareeksha.db.models import DeadLetters, OutboxEvents
 from pareeksha.events.schemas import parse_envelope
+from pareeksha.integrations.redact import redact_json, redact_text
 from pareeksha.schemas.common import Page
 from pareeksha.schemas.system import DeadLetterOut
 
@@ -31,11 +32,12 @@ def _out(row: DeadLetters) -> DeadLetterOut:
         event_id=row.event_id,
         original_topic=row.original_topic,
         consumer_group=row.consumer_group,
-        error=row.error,
+        error=redact_text(row.error),
         attempts=row.attempts,
         status=cast("Any", row.status),
         failed_at=row.failed_at,
-        envelope=cast("dict[str, Any]", row.envelope),
+        # masked for display only; replay below uses the stored envelope untouched
+        envelope=cast("dict[str, Any]", redact_json(row.envelope)),
     )
 
 
@@ -87,7 +89,7 @@ async def replay(
             409,
             "conflict",
             "The stored message is not a valid event envelope and cannot be replayed",
-            {"reason": str(exc)[:300]},
+            {"reason": redact_text(str(exc))[:300]},
         ) from exc
     session.add(
         OutboxEvents(

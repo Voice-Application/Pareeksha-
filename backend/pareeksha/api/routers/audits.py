@@ -11,6 +11,7 @@ from uuid import UUID
 from fastapi import APIRouter, File, Form, UploadFile
 
 from pareeksha.api.auth import WriteAuditKey
+from pareeksha.api.body_limit import body_capped_route
 from pareeksha.api.crud import get_or_404
 from pareeksha.api.deps import AUTH_ERRORS, Blobs, Db, errors
 from pareeksha.api.errors import ApiError
@@ -26,7 +27,9 @@ from pareeksha.events.outbox import enqueue_session
 from pareeksha.events.schemas import AuditRequested, make_envelope
 from pareeksha.schemas.common import CallRef
 
-router = APIRouter(tags=["audits"], responses=AUTH_ERRORS)
+_BodyCappedRoute = body_capped_route(MAX_UPLOAD_BYTES, "Recording is larger than 10 MB")
+
+router = APIRouter(tags=["audits"], responses=AUTH_ERRORS, route_class=_BodyCappedRoute)
 
 #: ``kn-IN`` or ``kn-IN,en-IN`` (BCP-47 language-region tags, comma separated).
 _LANGUAGES = re.compile(r"^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*(,[a-z]{2,3}(-[A-Za-z0-9]{2,8})*)*$")

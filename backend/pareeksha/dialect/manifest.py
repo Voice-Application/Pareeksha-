@@ -14,6 +14,7 @@ import posixpath
 import wave
 import zipfile
 from dataclasses import dataclass
+from typing import IO
 
 from pareeksha.api.errors import ApiError
 
@@ -29,6 +30,12 @@ MAX_MANIFEST_BYTES = 2 * 1024 * 1024
 MAX_ZIP_BYTES = 200 * 1024 * 1024
 MAX_CLIP_BYTES = 10 * 1024 * 1024
 MAX_CLIP_SECONDS = 60.0
+#: The largest documented dataset (DIALECT-02) is 110 clips; ten times that leaves headroom.
+MAX_MANIFEST_ROWS = 1000
+#: Declared uncompressed size of the whole ZIP (read from its directory, so a decompression bomb
+#: is refused before any member is inflated), and the number of members it may list.
+MAX_ZIP_UNCOMPRESSED_BYTES = 512 * 1024 * 1024
+MAX_ZIP_MEMBERS = 5000
 _TRUE = {"true", "yes", "y", "1"}
 _LANGUAGE = (
     "kn-IN",
@@ -105,10 +112,17 @@ def parse_manifest(csv_bytes: bytes) -> list[tuple[int, dict[str, str]]]:
             400, "validation_error", f"Manifest header is missing columns: {', '.join(missing)}"
         )
     reader.fieldnames = header
-    return [
-        (n, {k: (v or "").strip() for k, v in row.items() if k})
-        for n, row in enumerate(reader, start=1)
-    ]
+    parsed: list[tuple[int, dict[str, str]]] = []
+    for n, row in enumerate(reader, start=1):
+        if n > MAX_MANIFEST_ROWS:
+            raise ApiError(
+                413,
+                "file_too_large",
+                f"Manifest has more than {MAX_MANIFEST_ROWS} rows",
+                {"max_rows": MAX_MANIFEST_ROWS},
+            )
+        parsed.append((n, {k: (v or "").strip() for k, v in row.items() if k}))
+    return parsed
 
 
 def validate_row(fields: dict[str, str]) -> ManifestRow | str:
@@ -130,13 +144,29 @@ def validate_row(fields: dict[str, str]) -> ManifestRow | str:
     )
 
 
-def open_zip(zip_bytes: bytes) -> zipfile.ZipFile:
-    if len(zip_bytes) > MAX_ZIP_BYTES:
+def open_zip(source: bytes | IO[bytes]) -> zipfile.ZipFile:
+    """Open the clips ZIP (bytes or a seekable file) after checking its size and, from the
+    directory, how much it declares to expand to."""
+    fileobj = io.BytesIO(source) if isinstance(source, bytes) else source
+    size = fileobj.seek(0, io.SEEK_END)
+    fileobj.seek(0)
+    if size > MAX_ZIP_BYTES:
         raise ApiError(413, "file_too_large", "Clips ZIP is larger than 200 MB")
     try:
-        return zipfile.ZipFile(io.BytesIO(zip_bytes))
+        archive = zipfile.ZipFile(fileobj)
     except zipfile.BadZipFile as exc:
         raise ApiError(400, "validation_error", "clips must be a ZIP archive") from exc
+    infos = archive.infolist()
+    if len(infos) > MAX_ZIP_MEMBERS or sum(i.file_size for i in infos) > (
+        MAX_ZIP_UNCOMPRESSED_BYTES
+    ):
+        archive.close()
+        raise ApiError(
+            413,
+            "file_too_large",
+            "Clips ZIP expands to more than 512 MB or lists too many files",
+        )
+    return archive
 
 
 def _find_member(archive: zipfile.ZipFile, name: str) -> str | None:
@@ -158,29 +188,33 @@ def collect_clips(
     """Validate every row and read its clip from the archive."""
     clips: list[Clip] = []
     rejected: list[RowRejection] = []
-    seen: set[str] = set()
+    seen: set[str] = set()  # ZIP members already read: one member is read once
     for number, fields in rows:
         parsed = validate_row(fields)
         if isinstance(parsed, str):
             rejected.append(RowRejection(number, parsed))
             continue
-        if parsed.file in seen:
-            rejected.append(RowRejection(number, f"duplicate file {parsed.file}"))
-            continue
         member = _find_member(archive, parsed.file)
         if member is None:
             rejected.append(RowRejection(number, f"file {parsed.file} not found in the ZIP"))
+            continue
+        if member in seen or parsed.file in seen:  # also "a.wav" vs "./a.wav" vs "clips/a.wav"
+            rejected.append(RowRejection(number, f"duplicate file {parsed.file}"))
             continue
         info = archive.getinfo(member)
         if info.file_size > MAX_CLIP_BYTES:
             rejected.append(RowRejection(number, "clip is larger than 10 MB"))
             continue
-        data = archive.read(member)
+        with archive.open(member) as handle:
+            data = handle.read(MAX_CLIP_BYTES + 1)
+        if len(data) > MAX_CLIP_BYTES:
+            rejected.append(RowRejection(number, "clip is larger than 10 MB"))
+            continue
         try:
             duration = clip_duration_ms(data)
         except ValueError as exc:
             rejected.append(RowRejection(number, str(exc)))
             continue
-        seen.add(parsed.file)
+        seen.update((member, parsed.file))
         clips.append(Clip(parsed, data, duration))
     return clips, rejected

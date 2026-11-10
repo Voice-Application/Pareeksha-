@@ -12,12 +12,13 @@ import asyncio
 import contextlib
 import json
 import logging
+import ssl
 from collections.abc import AsyncIterator
 from typing import ClassVar
 
 from pydantic import ValidationError
 from websockets.asyncio.client import ClientConnection, connect
-from websockets.exceptions import ConnectionClosed, WebSocketException
+from websockets.exceptions import ConnectionClosed, InvalidStatus, WebSocketException
 
 from pareeksha.adapters.base import (
     Adapter,
@@ -36,6 +37,7 @@ from pareeksha.adapters.base import (
     message_to_event,
     parse_agent_message,
 )
+from pareeksha.integrations.ssrf import SSRFError, resolve_agent_endpoint
 
 log = logging.getLogger(__name__)
 
@@ -160,9 +162,48 @@ class AudioV1Session(AudioSession):
             self._events.put_nowait(None)
 
 
+def _connect_category(exc: BaseException) -> str:
+    """A short, non-revealing reason for a failed connect."""
+    if isinstance(exc, TimeoutError):
+        return "timed out"
+    if isinstance(exc, ssl.SSLError):
+        return "TLS error"
+    if isinstance(exc, InvalidStatus | ValueError):
+        return "unexpected response"
+    if isinstance(exc, OSError):
+        return "could not connect"
+    return "unexpected response"
+
+
 class AudioV1Adapter(Adapter):
     name: ClassVar[AdapterName] = "audio_v1"
     session_class: ClassVar[type[AudioV1Session]] = AudioV1Session
+
+    @staticmethod
+    async def _open(
+        url: str, addresses: list[str], port: int, timeout_s: float
+    ) -> ClientConnection:
+        """Connect to a pre-validated address, not the name, so DNS cannot change the target
+        after the check. The URL keeps the original host for the Host header and TLS name; the
+        proxy is disabled because a proxy would resolve the name itself."""
+        last: OSError | None = None
+        for address in addresses:
+            try:
+                return await connect(
+                    url,
+                    host=address,
+                    port=port,
+                    proxy=None,
+                    open_timeout=timeout_s,
+                    max_size=MAX_MESSAGE_BYTES,
+                    compression=None,
+                    ping_interval=20,
+                )
+            except OSError as exc:  # SSLError is an OSError too: do not retry another address
+                if isinstance(exc, ssl.SSLError):
+                    raise
+                last = exc
+        raise last or OSError("no address")
 
     async def connect(self, agent: AgentTarget, call_ctx: CallContext) -> AudioSession:
         start = StartMessage(
@@ -171,22 +212,23 @@ class AudioV1Adapter(Adapter):
             metadata=dict(call_ctx.metadata),
         )
         try:
+            host, addresses, port = await resolve_agent_endpoint(agent.endpoint_url)
+        except SSRFError as exc:
+            log.warning("agent endpoint refused: %s", exc)
+            raise AgentConnectError("cannot connect to agent: blocked address") from exc
+        try:
             ws = await asyncio.wait_for(
-                connect(
-                    agent.endpoint_url,
-                    open_timeout=call_ctx.connect_timeout_s,
-                    max_size=MAX_MESSAGE_BYTES,
-                    compression=None,
-                    ping_interval=20,
-                ),
+                self._open(agent.endpoint_url, addresses, port, call_ctx.connect_timeout_s),
                 timeout=call_ctx.connect_timeout_s + 1,
             )
         except (OSError, TimeoutError, WebSocketException, ValueError) as exc:
-            raise AgentConnectError(
-                f"cannot connect to {agent.endpoint_url}: {type(exc).__name__}: {exc}"
-            ) from exc
+            # Detail stays in the log: the category is all an API caller (or a stored call
+            # result) sees, so internal hosts and ports cannot be mapped through it.
+            log.warning("cannot connect to agent %s: %s: %s", host, type(exc).__name__, exc)
+            raise AgentConnectError(f"cannot connect to agent: {_connect_category(exc)}") from exc
         try:
             await ws.send(start.model_dump_json(exclude_none=True))
         except (ConnectionClosed, OSError) as exc:
-            raise AgentConnectError(f"agent closed during start: {exc}") from exc
+            log.warning("agent closed during start: %s", exc)
+            raise AgentConnectError("agent closed during start") from exc
         return self.session_class(ws)

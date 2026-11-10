@@ -7,6 +7,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from pareeksha.integrations.ssrf import check_agent_endpoint_syntax
 from pareeksha.schemas.common import (
     AdapterType,
     Disclosure,
@@ -57,6 +58,8 @@ class AgentCreate(_AgentFields):
         """Require ``endpoint_url`` for every adapter except ``prompt``."""
         if self.endpoint_url is None and self.adapter != "prompt":
             raise ValueError("endpoint_url is required")
+        if self.endpoint_url is not None and self.adapter != "prompt":
+            check_agent_endpoint_syntax(self.endpoint_url)
         return self
 
 
@@ -79,6 +82,13 @@ class AgentUpdate(RequestModel):
     adapter_secrets: dict[str, str] | None = Field(default=None, exclude=True, repr=False)
 
     _speech = field_validator("adapter_config")(_check_speech_override)
+
+    @model_validator(mode="after")
+    def _endpoint_syntax(self) -> AgentUpdate:
+        """A prompt agent's endpoint is server-assigned, so only other adapters are checked."""
+        if self.endpoint_url is not None and self.adapter != "prompt":
+            check_agent_endpoint_syntax(self.endpoint_url, allow_prompt=True)
+        return self
 
 
 class AgentOut(_AgentFields):

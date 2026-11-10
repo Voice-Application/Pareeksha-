@@ -16,6 +16,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pareeksha.api.auth import ReadKey, WriteKey
+from pareeksha.api.body_limit import body_capped_route
 from pareeksha.api.crud import flush, get_or_404, paginate
 from pareeksha.api.deps import AUTH_ERRORS, Db, Pagination, binary_response, errors
 from pareeksha.api.errors import ApiError
@@ -27,7 +28,13 @@ from pareeksha.db.models import (
     DialectSamples,
     NoiseProfiles,
 )
-from pareeksha.dialect.manifest import collect_clips, open_zip, parse_manifest
+from pareeksha.dialect.manifest import (
+    MAX_MANIFEST_BYTES,
+    MAX_ZIP_BYTES,
+    collect_clips,
+    open_zip,
+    parse_manifest,
+)
 from pareeksha.dialect.pipeline import engine_provider
 from pareeksha.dialect.report import render_html
 from pareeksha.events.schemas import DialectClipRequested, make_envelope
@@ -47,7 +54,13 @@ from pareeksha.schemas.dialect import (
     TopError,
 )
 
-router = APIRouter(tags=["dialect"], responses=AUTH_ERRORS)
+router = APIRouter(
+    tags=["dialect"],
+    responses=AUTH_ERRORS,
+    route_class=body_capped_route(
+        MAX_MANIFEST_BYTES + MAX_ZIP_BYTES, "Upload is larger than 202 MB", slack=1024 * 1024
+    ),
+)
 
 _DUPLICATE = "A dataset with this name already exists"
 META = "_meta"
@@ -115,9 +128,12 @@ async def upload_dialect_samples(
     session: Db,
 ) -> SamplesUploadResult:
     await get_or_404(session, DialectDatasets, dataset_id, key.project_id, "Dataset")
-    rows = parse_manifest(await manifest.read())
-    archive = open_zip(await clips.read())
-    accepted, rejected = collect_clips(rows, archive)
+    rows = parse_manifest(await manifest.read(MAX_MANIFEST_BYTES + 1))
+    archive = open_zip(clips.file)  # spooled upload, read member by member, not loaded whole
+    try:
+        accepted, rejected = collect_clips(rows, archive)
+    finally:
+        archive.close()
     folder = data_dir() / "dialect" / str(dataset_id)
     folder.mkdir(parents=True, exist_ok=True)
     for clip in accepted:

@@ -23,6 +23,7 @@ from pareeksha.integrations.base import TestResult
 from pareeksha.integrations.crypto import SecretBox, SecretDecryptError
 from pareeksha.integrations.delivery import DeliveryRecord, IntegrationRecord
 from pareeksha.integrations.dispatch import NothingToReplay, redeliver
+from pareeksha.integrations.redact import redact_text
 from pareeksha.integrations.registry import get_registry
 from pareeksha.integrations.sql_store import PsycopgDeliveryStore
 from pareeksha.schemas.common import Page
@@ -235,7 +236,7 @@ def _delivery_out(row: IntegrationDeliveries | DeliveryRecord) -> DeliveryOut:
         http_status=row.http_status,
         external_id=row.external_id,
         attempts=row.attempts,
-        response_excerpt=row.response_excerpt,
+        response_excerpt=redact_text(row.response_excerpt) if row.response_excerpt else None,
         created_at=row.created_at,
     )
 

@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import asyncio
 import base64
 import hashlib
 import hmac
 import secrets
+import weakref
 
 _N, _R, _P = 2**15, 8, 1
 _MAXMEM = 128 * 1024 * 1024  # scrypt needs ~128*n*r = 32 MiB; OpenSSL's default cap is 32 MiB
@@ -36,3 +38,30 @@ def verify_password(password: str, stored: str) -> bool:
     except ValueError:
         return False
     return hmac.compare_digest(actual, expected)
+
+
+#: Concurrent scrypt runs (about 32 MiB each) per process. More requests wait their turn instead
+#: of each allocating, so a burst of logins cannot exhaust memory or the thread pool.
+MAX_CONCURRENT_HASHES = 4
+_slots: weakref.WeakKeyDictionary[asyncio.AbstractEventLoop, asyncio.Semaphore] = (
+    weakref.WeakKeyDictionary()
+)
+
+
+def _slot() -> asyncio.Semaphore:
+    loop = asyncio.get_running_loop()
+    if loop not in _slots:
+        _slots[loop] = asyncio.Semaphore(MAX_CONCURRENT_HASHES)
+    return _slots[loop]
+
+
+async def hash_password_async(password: str) -> str:
+    """``hash_password`` off the event loop, at most ``MAX_CONCURRENT_HASHES`` at a time."""
+    async with _slot():
+        return await asyncio.to_thread(hash_password, password)
+
+
+async def verify_password_async(password: str, stored: str) -> bool:
+    """``verify_password`` off the event loop, at most ``MAX_CONCURRENT_HASHES`` at a time."""
+    async with _slot():
+        return await asyncio.to_thread(verify_password, password, stored)

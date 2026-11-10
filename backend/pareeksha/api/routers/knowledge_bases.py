@@ -7,15 +7,16 @@ import hashlib
 import weakref
 from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import Annotated, Any, Literal, ParamSpec, TypeVar
+from typing import Annotated, Literal, ParamSpec, TypeVar
 from uuid import UUID
 
-from fastapi import APIRouter, File, Form, Query, Request, Response, UploadFile
-from fastapi.routing import APIRoute
+from fastapi import APIRouter, File, Form, Query, Response, UploadFile
 from sqlalchemy import func, select
 
 from pareeksha.agent_llm.url_guard import allow_private_urls, check_base_url
 from pareeksha.api.auth import ReadKey, WriteKey
+from pareeksha.api.body_limit import MULTIPART_SLACK as MULTIPART_SLACK
+from pareeksha.api.body_limit import body_capped_route
 from pareeksha.api.crud import flush, get_or_404, paginate
 from pareeksha.api.deps import AUTH_ERRORS, Blobs, Db, Pagination, errors
 from pareeksha.api.errors import ApiError
@@ -61,34 +62,7 @@ from pareeksha.schemas.rag import (
 )
 from pareeksha.schemas.scenarios import DraftAccepted
 
-#: Room for the multipart envelope around a file of ``MAX_UPLOAD_BYTES``.
-MULTIPART_SLACK = 1024 * 1024
-
-
-class _BodyCappedRoute(APIRoute):
-    """Refuse an oversized body by its Content-Length before the multipart form is parsed (and
-    spooled to disk). ``# ponytail: a chunked body without Content-Length is only bounded by the
-    proxy in front; add a streaming byte counter if the API is exposed directly``"""
-
-    def get_route_handler(self) -> Callable[[Request], Any]:
-        handler = super().get_route_handler()
-
-        async def capped(request: Request) -> Any:
-            try:
-                length = int(request.headers.get("content-length") or 0)
-            except ValueError:
-                length = 0
-            if length > MAX_UPLOAD_BYTES + MULTIPART_SLACK:
-                raise ApiError(
-                    413,
-                    "file_too_large",
-                    "File is larger than 10 MB",
-                    {"max_bytes": MAX_UPLOAD_BYTES},
-                )
-            return await handler(request)
-
-        return capped
-
+_BodyCappedRoute = body_capped_route(MAX_UPLOAD_BYTES, "File is larger than 10 MB")
 
 router = APIRouter(tags=["knowledge-bases"], responses=AUTH_ERRORS, route_class=_BodyCappedRoute)
 
