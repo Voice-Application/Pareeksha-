@@ -15,8 +15,9 @@ Pareeksha is the WebSocket **client**; your bot is the **server**. One socket pe
   `{"type":"transcript","role":"agent","text":"..."}` (what you are about to say),
   `{"type":"tool_call","name":"record_promise_to_pay","arguments":{},"result":{}}`,
   `{"type":"call_end","reason":"completed"}`.
+- The bot may also send `{"type":"stop"}` to end the call. Unknown extra fields are ignored.
 - The bot normally speaks first. Either side may close the socket.
-- `GET /health` over plain HTTP on the same port is used by the "Test connection" button if it answers 200 (optional).
+- The endpoint may be `ws://`, `wss://`, `http://` or `https://`. It is resolved right before each connection; link-local and cloud-metadata addresses are always refused, and private addresses (localhost, `host.docker.internal`) are allowed unless `AGENT_ALLOW_PRIVATE_ENDPOINTS=false`.
 
 Full spec: `docs/06-api-spec.md` section 7.
 
@@ -79,7 +80,7 @@ curl -s -X POST -H "Authorization: Bearer $PAREEKSHA_API_KEY" http://localhost:$
 # {"ok":true,"first_audio_ms":...,"protocol":"pareeksha-audio-v1","glass_box_messages_seen":true}
 ```
 
-An `ok:false` answer carries `error` (`timeout`, `connect_failed`, ...) and `detail`.
+The check sends one second of silence and waits up to 10 s for the first agent audio. An `ok:false` answer carries `error` (`connect_failed`, `timeout`, `closed`, `protocol_error`, `adapter_unavailable`) and `detail`. Only the `audio_v1` and `pipecat` adapters ship; `livekit` and `vapi` are not built.
 
 ## Report tool calls after the call
 
@@ -90,7 +91,7 @@ curl -s -X PUT -H "Authorization: Bearer $PAREEKSHA_API_KEY" -H "Content-Type: a
 # {"call_id":"..."}  (202)
 ```
 
-The call id is in the `start` frame of a simulated call. Each PUT replaces the previous report; a completed call is re-evaluated. A glass-box agent's simulated call answers `409` (its live trace wins). Python SDK: `Pareeksha.report_tool_calls(call_id, [...])`.
+The call id is in the `start` frame of a simulated call. Each PUT replaces the previous report; a completed call is re-evaluated. A glass-box agent's simulated call answers `409` (its live trace wins). At most 200 tool calls per report; `at_ms` defaults to 0. Python SDK: `Pareeksha.report_tool_calls(call_id, [...])`.
 
 ## Tips
 
